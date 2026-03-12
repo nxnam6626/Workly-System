@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -25,32 +24,36 @@ enum StatusUser {
 }
 
 model User {
-  userId          String   @id @default(uuid())
-  email           String   @unique
-  password        String
-  role            Role
-  status          StatusUser
+  userId   String     @id @default(uuid())
+  email    String     @unique
+  password String
+  role     Role
+  status   StatusUser
 
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
   lastLogin       DateTime?
   phoneNumber     String?
   avatar          String?
-  isEmailVerified Boolean  @default(false)
-  updatedAt       DateTime @updatedAt
+  isEmailVerified Boolean   @default(false)
+  updatedAt       DateTime  @updatedAt
   refreshToken    String?
 
-  admin           Admin?
-  candidate       Candidate?
-  recruiter       Recruiter?
+  admin     Admin?
+  candidate Candidate?
+  recruiter Recruiter?
+
+
 }
 
 model Admin {
-  adminId     String @id @default(uuid())
-  adminLevel  Int
-  lastAction  String?
+  adminId    String  @id @default(uuid())
+  adminLevel Int
+  lastAction String?
 
-  userId      String  @unique
-  user        User    @relation(fields: [userId], references: [userId])
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+
+  jobPostings JobPosting[]
 }
 
 model Candidate {
@@ -62,25 +65,67 @@ model Candidate {
   gpa         Float?
   cvUrl       String?
 
-  userId      String  @unique
-  user        User    @relation(fields: [userId], references: [userId])
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
 
-  skills      Skill[]
+  skills Skill[]
 }
 
 model Skill {
-  skillId     String @id @default(uuid())
-  skillName   String
+  skillId   String @id @default(uuid())
+  skillName String
 
   candidateId String
   candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
 }
 
 model Recruiter {
-  recruiterId String @id @default(uuid())
+  recruiterId String  @id @default(uuid())
   bio         String?
   position    String?
 
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [userId])
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+
+  jobPostings JobPosting[]
+}
+
+model Company {
+  companyId   String  @id @default(uuid())
+  companyName String
+  address     String?
+  description String?
+
+  jobPostings JobPosting[]
+}
+
+model JobPosting {
+  jobPostingId       String    @id @default(uuid())
+  companyId          String    
+  title              String    
+  description        String   
+  requirements       String?   
+  benefits           String?   
+  salaryMin          Decimal? @db.Decimal(19, 0)
+  salaryMax          Decimal?   @db.Decimal(19, 0)
+  currency           String?   
+  jobType            String?   
+  locationCity       String?   
+  deadline           DateTime? 
+  status             Int?      @default(1) 
+  postType           Int?      
+  isVerified         Boolean?  @default(false) 
+  originalUrl        String?   
+  aiReliabilityScore Float?    
+  createdAt          DateTime  @default(now()) 
+  updatedAt          DateTime  @updatedAt 
+
+  //relation
+  recruiterId        String    
+  recruiter          Recruiter @relation(fields: [recruiterId], references: [recruiterId])
+
+  adminId            String    @map("ApprovedBy") 
+  admin              Admin     @relation(fields: [adminId], references: [adminId])
+
+ company Company @relation(fields: [companyId], references: [companyId])
 }
