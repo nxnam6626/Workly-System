@@ -17,6 +17,8 @@ interface AuthState {
   register: (data: any) => Promise<void>;
   logout: (localOnly?: boolean) => Promise<void>;
   checkAuth: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (data: any) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -87,6 +89,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isAuthenticated: false,
       isLoading: false,
     });
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      await api.post('/auth/forgot-password', { email });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  resetPassword: async (data) => {
+    try {
+      await api.post('/auth/reset-password', data);
+    } catch (error) {
+      throw error;
+    }
   },
 
   checkAuth: async () => {
