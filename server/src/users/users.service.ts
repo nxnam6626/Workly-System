@@ -8,11 +8,17 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import type { Role, StatusUser } from '../../generated/prisma';
+import type { Role, StatusUser } from '../generated/prisma';
+import { MailService } from '../mail/mail.service';
+import { SearchService } from '../search/search.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+    private searchService: SearchService,
+  ) {}
 
   /** Tạo user (dùng cho đăng ký hoặc admin tạo). passwordAlreadyHashed = true khi gọi từ Auth (đã hash). */
   async create(
@@ -29,7 +35,7 @@ export class UsersService {
         ? data.password
         : await bcrypt.hash(data.password, 10);
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           email: data.email,
@@ -55,6 +61,15 @@ export class UsersService {
 
       return { message: 'Tạo user thành công', userId: newUser.userId };
     });
+
+    let displayName = data.email.split('@')[0];
+    if ('fullName' in data && data.fullName) displayName = data.fullName;
+
+    // Fire and forget integration events
+    this.mailService.sendWelcomeEmail(data.email, displayName).catch(console.error);
+    this.searchService.indexUser({ id: result.userId, email: data.email, role: data.role }).catch(console.error);
+
+    return result;
   }
 
   /** Đăng ký (gọi từ Auth sau khi đã hash mật khẩu). */

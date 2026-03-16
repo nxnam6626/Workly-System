@@ -8,6 +8,11 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { RedisService } from '../redis/redis.service';
+import { MailService } from '../mail/mail.service';
+import * as crypto from 'crypto';
 
 export interface JwtPayload {
   sub: string;
@@ -21,7 +26,9 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+    private redisService: RedisService,
+    private mailService: MailService,
+  ) { }
 
   /** Mã hóa mật khẩu (dùng cho đăng ký / đổi mật khẩu). */
   async hashPassword(plainPassword: string): Promise<string> {
@@ -63,6 +70,8 @@ export class AuthService {
     await this.usersService.updateLastLogin(user.userId);
     const tokens = await this.issueTokens(user.userId, user.email, user.role);
     await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+    await this.redisService.set(`refresh_token:${user.userId}`, tokens.refreshToken, 604800); // 7 days
+
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -77,9 +86,10 @@ export class AuthService {
     };
   }
 
-  /** Đăng xuất: xóa refresh token trong DB. */
+  /** Đăng xuất: xóa refresh token trong DB và Redis. */
   async logout(userId: string) {
     await this.usersService.setRefreshToken(userId, null);
+    await this.redisService.del(`refresh_token:${userId}`);
     return { message: 'Đã đăng xuất.' };
   }
 
@@ -100,11 +110,18 @@ export class AuthService {
     if (payload.type !== 'refresh')
       throw new UnauthorizedException('Token không phải refresh token.');
     const user = await this.usersService.findOne(payload.sub);
-    const stored = await this.usersService.findByEmail(user.email);
-    if (!stored?.refreshToken || stored.refreshToken !== refreshToken)
+
+    let storedToken = await this.redisService.get(`refresh_token:${user.userId}`);
+    if (!storedToken) {
+      const stored = await this.usersService.findByEmail(user.email);
+      storedToken = stored?.refreshToken || null;
+    }
+
+    if (!storedToken || storedToken !== refreshToken)
       throw new UnauthorizedException('Refresh token đã bị thu hồi.');
     const tokens = await this.issueTokens(user.userId, user.email, user.role);
     await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+    await this.redisService.set(`refresh_token:${user.userId}`, tokens.refreshToken, 604800);
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -128,6 +145,50 @@ export class AuthService {
       throw new UnauthorizedException('Token không phải access token.');
     const user = await this.usersService.findOne(payload.sub);
     return { valid: true, user };
+  }
+
+  /** Quên mật khẩu: Tạo OTP 6 số lưu vào Redis và gửi mail. */
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const user = await this.usersService.findByEmail(dto.email);
+    // Luôn trả về thành công chung chung để tránh lộ email
+    if (!user) return { message: 'Nếu email tồn tại, một mã xác nhận đã được gửi!' };
+
+    // Tạo OTP 6 chữ số
+    const token = crypto.randomInt(100000, 999999).toString();
+    const redisKey = `reset_token:${dto.email}`;
+
+    // Lưu vào Redis (15 phút = 900 giây)
+    await this.redisService.set(redisKey, token, 900);
+
+    // Gửi email
+    await this.mailService.sendPasswordResetEmail(dto.email, token);
+
+    return { message: 'Nếu email tồn tại, một mã xác nhận đã được gửi!' };
+  }
+
+  /** Đặt lại mật khẩu: Trùng khớp OTP, đổi mật khẩu và xóa token / phiên cũ. */
+  async resetPassword(dto: ResetPasswordDto) {
+    const redisKey = `reset_token:${dto.email}`;
+    const storedToken = await this.redisService.get(redisKey);
+
+    if (!storedToken || storedToken !== dto.token) {
+      throw new BadRequestException('Mã xác nhận không hợp lệ hoặc đã hết hạn.');
+    }
+
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new BadRequestException('Lỗi tài khoản không tồn tại.');
+
+    // Cập nhật mật khẩu mới thông qua usersService.update
+    await this.usersService.update(user.userId, { password: dto.newPassword });
+
+    // Hủy OTP trên Redis
+    await this.redisService.del(redisKey);
+
+    // Thu hồi toàn bộ Refresh Token cũ trong DB & Redis để bảo mật session
+    await this.usersService.setRefreshToken(user.userId, null);
+    await this.redisService.del(`refresh_token:${user.userId}`);
+
+    return { message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.' };
   }
 
   private async issueTokens(

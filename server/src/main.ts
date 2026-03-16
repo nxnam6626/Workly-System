@@ -10,16 +10,28 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }),
   );
 
+  app.enableCors({
+    origin: ['http://localhost:3000', process.env.FRONTEND_URL || ''], 
+    credentials: true,
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Workly API')
     .setDescription('API cho hệ thống Workly')
     .setVersion('1.0')
     .addTag('auth', 'Xác thực: đăng ký, đăng nhập, token')
     .addTag('users', 'Quản lý người dùng')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+
+  await app.listen(port);
 }
-bootstrap();
+
+bootstrap().catch((err) => {
+  console.error('❌ Application failed to start', err);
+  process.exit(1);
+});

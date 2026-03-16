@@ -5,7 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { Role, StatusUser } from '../../../generated/prisma';
+import { Role, StatusUser } from '../../generated/prisma';
 
 export class UpdateUserDto {
   @IsOptional()

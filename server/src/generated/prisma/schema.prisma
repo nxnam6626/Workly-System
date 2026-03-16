@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum StatusUser {
+  ACTIVE
+  LOCKED
+}
+
+model User {
+  userId   String     @id @default(uuid())
+  email    String     @unique
+  password String
+  role     Role
+  status   StatusUser
+
+  createdAt       DateTime  @default(now())
+  lastLogin       DateTime?
+  phoneNumber     String?
+  avatar          String?
+  isEmailVerified Boolean   @default(false)
+  updatedAt       DateTime  @updatedAt
+  refreshToken    String?
+
+  admin     Admin?
+  candidate Candidate?
+  recruiter Recruiter?
+}
+
+model Admin {
+  adminId    String  @id @default(uuid())
+  adminLevel Int
+  lastAction String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+}
+
+model Candidate {
+  candidateId String  @id @default(uuid())
+  fullName    String
+  phone       String
+  university  String?
+  major       String?
+  gpa         Float?
+  cvUrl       String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+
+  skills Skill[]
+}
+
+model Skill {
+  skillId   String @id @default(uuid())
+  skillName String
+
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
+}
+
+model Recruiter {
+  recruiterId String  @id @default(uuid())
+  bio         String?
+  position    String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId])
+}
