@@ -166,6 +166,126 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.CrawlConfigScalarFieldEnum = {
+  crawlConfigId: 'crawlConfigId',
+  titleSelector: 'titleSelector',
+  salarySelector: 'salarySelector',
+  descriptionSelector: 'descriptionSelector',
+  schedule: 'schedule',
+  renderJs: 'renderJs'
+};
+
+exports.Prisma.CrawlSourceScalarFieldEnum = {
+  crawlSourceId: 'crawlSourceId',
+  sourceName: 'sourceName',
+  baseUrl: 'baseUrl',
+  isActive: 'isActive',
+  lastCrawlAt: 'lastCrawlAt',
+  adminId: 'adminId',
+  crawlConfigId: 'crawlConfigId'
+};
+
+exports.Prisma.CrawlLogScalarFieldEnum = {
+  crawlLogId: 'crawlLogId',
+  status: 'status',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  itemsProcessed: 'itemsProcessed',
+  errorMessage: 'errorMessage',
+  crawlSourceId: 'crawlSourceId'
+};
+
+exports.Prisma.FilterRuleScalarFieldEnum = {
+  filterRuleId: 'filterRuleId',
+  keyword: 'keyword',
+  minReliabilityScore: 'minReliabilityScore',
+  action: 'action',
+  adminId: 'adminId',
+  crawlSourceId: 'crawlSourceId'
+};
+
+exports.Prisma.CompanyScalarFieldEnum = {
+  companyId: 'companyId',
+  companyName: 'companyName',
+  taxCode: 'taxCode',
+  isRegistered: 'isRegistered',
+  verifyStatus: 'verifyStatus',
+  logo: 'logo',
+  banner: 'banner',
+  address: 'address',
+  description: 'description',
+  websiteUrl: 'websiteUrl',
+  companySize: 'companySize',
+  businessLicenseUrl: 'businessLicenseUrl',
+  adminId: 'adminId',
+  recruiterId: 'recruiterId'
+};
+
+exports.Prisma.JobPostingScalarFieldEnum = {
+  jobPostingId: 'jobPostingId',
+  title: 'title',
+  description: 'description',
+  requirements: 'requirements',
+  benefits: 'benefits',
+  salaryMin: 'salaryMin',
+  salaryMax: 'salaryMax',
+  currency: 'currency',
+  jobType: 'jobType',
+  locationCity: 'locationCity',
+  deadline: 'deadline',
+  status: 'status',
+  postType: 'postType',
+  isVerified: 'isVerified',
+  originalUrl: 'originalUrl',
+  aiReliabilityScore: 'aiReliabilityScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  approvedBy: 'approvedBy',
+  recruiterId: 'recruiterId',
+  companyId: 'companyId',
+  crawlSourceId: 'crawlSourceId'
+};
+
+exports.Prisma.CVScalarFieldEnum = {
+  cvId: 'cvId',
+  cvTitle: 'cvTitle',
+  fileUrl: 'fileUrl',
+  isMain: 'isMain',
+  createdAt: 'createdAt',
+  candidateId: 'candidateId'
+};
+
+exports.Prisma.ApplicationScalarFieldEnum = {
+  applicationId: 'applicationId',
+  applyDate: 'applyDate',
+  appStatus: 'appStatus',
+  cvSnapshotUrl: 'cvSnapshotUrl',
+  coverLetter: 'coverLetter',
+  feedback: 'feedback',
+  candidateId: 'candidateId',
+  jobPostingId: 'jobPostingId',
+  cvId: 'cvId'
+};
+
+exports.Prisma.ConversationScalarFieldEnum = {
+  conversationId: 'conversationId',
+  candidateId: 'candidateId',
+  recruiterId: 'recruiterId',
+  lastMessage: 'lastMessage',
+  isRead: 'isRead',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+};
+
+exports.Prisma.MessageScalarFieldEnum = {
+  messageId: 'messageId',
+  content: 'content',
+  sentAt: 'sentAt',
+  isRead: 'isRead',
+  conversationId: 'conversationId',
+  senderId: 'senderId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -191,12 +311,53 @@ exports.StatusUser = exports.$Enums.StatusUser = {
   LOCKED: 'LOCKED'
 };
 
+exports.CrawlStatus = exports.$Enums.CrawlStatus = {
+  RUNNING: 'RUNNING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED'
+};
+
+exports.FilterAction = exports.$Enums.FilterAction = {
+  EXCLUDE: 'EXCLUDE',
+  INCLUDE: 'INCLUDE'
+};
+
+exports.JobType = exports.$Enums.JobType = {
+  FULLTIME: 'FULLTIME',
+  PARTTIME: 'PARTTIME',
+  INTERNSHIP: 'INTERNSHIP',
+  CONTRACT: 'CONTRACT',
+  REMOTE: 'REMOTE'
+};
+
+exports.PostType = exports.$Enums.PostType = {
+  CRAWLED: 'CRAWLED',
+  MANUAL: 'MANUAL'
+};
+
+exports.AppStatus = exports.$Enums.AppStatus = {
+  PENDING: 'PENDING',
+  REVIEWED: 'REVIEWED',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Admin: 'Admin',
   Candidate: 'Candidate',
   Skill: 'Skill',
-  Recruiter: 'Recruiter'
+  Recruiter: 'Recruiter',
+  CrawlConfig: 'CrawlConfig',
+  CrawlSource: 'CrawlSource',
+  CrawlLog: 'CrawlLog',
+  FilterRule: 'FilterRule',
+  Company: 'Company',
+  JobPosting: 'JobPosting',
+  CV: 'CV',
+  Application: 'Application',
+  Conversation: 'Conversation',
+  Message: 'Message'
 };
 
 /**

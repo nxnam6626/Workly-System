@@ -15,7 +15,7 @@ export class SearchService implements OnModuleInit {
   async onModuleInit() {
     try {
       await this.client.ping();
-      console.log('[SearchService] Connected to Elasticsearch');
+
     } catch (e: any) {
       console.warn('[SearchService] Could not connect to Elasticsearch:', e.message);
     }
@@ -34,6 +34,25 @@ export class SearchService implements OnModuleInit {
       console.log(`[SearchService] Indexed user ${user.id}`);
     } catch (e: any) {
       console.error('[SearchService] Error indexing user:', e.message);
+    }
+  }
+
+  async indexJob(job: { id: string; title: string; companyId: string; crawlSourceId?: string; originalUrl?: string; description?: string }) {
+    try {
+      await this.client.index({
+        index: 'jobs',
+        id: job.id,
+        document: {
+          title: job.title,
+          description: job.description,
+          companyId: job.companyId,
+          crawlSourceId: job.crawlSourceId,
+          originalUrl: job.originalUrl,
+        },
+      });
+      console.log(`[SearchService] Indexed job ${job.id}`);
+    } catch (e: any) {
+      console.error('[SearchService] Error indexing job:', e.message);
     }
   }
 }

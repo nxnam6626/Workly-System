@@ -132,7 +132,7 @@ export class AuthService {
   /** Kiểm tra access token và trả về payload (user info). */
   async validateToken(accessToken: string) {
     if (!accessToken)
-      throw new BadRequestException('Access token không được để trống.');
+      throw new UnauthorizedException('Access token không được để trống.');
     let payload: JwtPayload;
     try {
       payload = this.jwtService.verify<JwtPayload>(accessToken, {

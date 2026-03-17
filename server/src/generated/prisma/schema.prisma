@@ -24,6 +24,37 @@ enum StatusUser {
   LOCKED
 }
 
+enum CrawlStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum FilterAction {
+  EXCLUDE
+  INCLUDE
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  INTERNSHIP
+  CONTRACT
+  REMOTE
+}
+
+enum PostType {
+  CRAWLED
+  MANUAL
+}
+
+enum AppStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
 model User {
   userId   String     @id @default(uuid())
   email    String     @unique
@@ -51,6 +82,10 @@ model Admin {
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])
+
+  crawlSources CrawlSource[]
+  filterRules  FilterRule[]
+  companies    Company[]
 }
 
 model Candidate {
@@ -65,7 +100,10 @@ model Candidate {
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])
 
-  skills Skill[]
+  skills        Skill[]
+  cvs           CV[]
+  applications  Application[]
+  conversations Conversation[]
 }
 
 model Skill {
@@ -83,4 +121,169 @@ model Recruiter {
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])
+
+  jobPostings   JobPosting[]
+  companies     Company[]
+  conversations Conversation[]
+}
+
+model CrawlConfig {
+  crawlConfigId       String  @id @default(uuid())
+  titleSelector       String
+  salarySelector      String?
+  descriptionSelector String
+  schedule            String
+  renderJs            Boolean @default(false)
+
+  crawlSource CrawlSource?
+}
+
+model CrawlSource {
+  crawlSourceId String    @id @default(uuid())
+  sourceName    String
+  baseUrl       String
+  isActive      Boolean   @default(true)
+  lastCrawlAt   DateTime?
+
+  adminId       String
+  admin         Admin       @relation(fields: [adminId], references: [adminId])
+  crawlConfigId String      @unique
+  crawlConfig   CrawlConfig @relation(fields: [crawlConfigId], references: [crawlConfigId])
+
+  crawlLogs   CrawlLog[]
+  filterRules FilterRule[]
+  jobPostings JobPosting[]
+}
+
+model CrawlLog {
+  crawlLogId     String      @id @default(uuid())
+  status         CrawlStatus
+  startTime      DateTime    @default(now())
+  endTime        DateTime?
+  itemsProcessed Int?
+  errorMessage   String?
+
+  crawlSourceId String
+  crawlSource   CrawlSource @relation(fields: [crawlSourceId], references: [crawlSourceId])
+}
+
+model FilterRule {
+  filterRuleId        String       @id @default(uuid())
+  keyword             String
+  minReliabilityScore Float?
+  action              FilterAction
+
+  adminId       String
+  admin         Admin       @relation(fields: [adminId], references: [adminId])
+  crawlSourceId String
+  crawlSource   CrawlSource @relation(fields: [crawlSourceId], references: [crawlSourceId])
+}
+
+model Company {
+  companyId          String  @id @default(uuid())
+  companyName        String
+  taxCode            String? @unique
+  isRegistered       Boolean @default(false)
+  verifyStatus       Int     @default(0)
+  logo               String?
+  banner             String?
+  address            String?
+  description        String?
+  websiteUrl         String?
+  companySize        Int?
+  businessLicenseUrl String?
+
+  adminId     String?
+  admin       Admin?     @relation(fields: [adminId], references: [adminId])
+  recruiterId String?
+  recruiter   Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
+
+  jobPostings JobPosting[]
+}
+
+model JobPosting {
+  jobPostingId       String    @id @default(uuid())
+  title              String
+  description        String?
+  requirements       String?
+  benefits           String?
+  salaryMin          Decimal?  @db.Decimal(19, 0)
+  salaryMax          Decimal?  @db.Decimal(19, 0)
+  currency           String?   @default("VND")
+  jobType            JobType?
+  locationCity       String?
+  deadline           DateTime?
+  status             Int       @default(1)
+  postType           PostType  @default(CRAWLED)
+  isVerified         Boolean   @default(false)
+  originalUrl        String?
+  aiReliabilityScore Float?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  approvedBy         String?
+
+  recruiterId   String?
+  recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId])
+  companyId     String
+  company       Company      @relation(fields: [companyId], references: [companyId])
+  crawlSourceId String?
+  crawlSource   CrawlSource? @relation(fields: [crawlSourceId], references: [crawlSourceId])
+
+  applications Application[]
+
+  @@unique([originalUrl, crawlSourceId])
+}
+
+model CV {
+  cvId      String   @id @default(uuid())
+  cvTitle   String
+  fileUrl   String
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
+
+  applications Application[]
+}
+
+model Application {
+  applicationId String    @id @default(uuid())
+  applyDate     DateTime  @default(now())
+  appStatus     AppStatus @default(PENDING)
+  cvSnapshotUrl String
+  coverLetter   String?
+  feedback      String?
+
+  candidateId  String
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
+  jobPostingId String
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
+  cvId         String
+  cv           CV         @relation(fields: [cvId], references: [cvId])
+}
+
+model Conversation {
+  conversationId String    @id @default(uuid())
+  candidateId    String
+  candidate      Candidate @relation(fields: [candidateId], references: [candidateId])
+  recruiterId    String
+  recruiter      Recruiter @relation(fields: [recruiterId], references: [recruiterId])
+  lastMessage    String?
+  isRead         Boolean   @default(false)
+  updatedAt      DateTime  @updatedAt
+  userId         String?
+
+  messages Message[]
+}
+
+model Message {
+  messageId String   @id @default(uuid())
+  content   String
+  sentAt    DateTime @default(now())
+  isRead    Boolean  @default(false)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
+  senderId       String
 }

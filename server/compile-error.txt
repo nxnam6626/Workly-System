@@ -1,0 +1,3 @@
+﻿src/crawl-source/crawl-source.service.ts(34,7): error TS2322: Type '{ sourceName: string; baseUrl: string; isActive: boolean; adminId: string; crawlConfig: { create: { titleSelector: string; salarySelector: string | undefined; descriptionSelector: string; schedule: string; renderJs: boolean; }; }; }' is not assignable to type '(Without<CrawlSourceCreateInput, CrawlSourceUncheckedCreateInput> & CrawlSourceUncheckedCreateInput) | (Without<...> & CrawlSourceCreateInput)'.
+  Types of property 'crawlConfig' are incompatible.
+    Type '{ create: { titleSelector: string; salarySelector: string | undefined; descriptionSelector: string; schedule: string; renderJs: boolean; }; }' is not assignable to type 'undefined'.
