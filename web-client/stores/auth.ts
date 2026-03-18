@@ -5,6 +5,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  role?: "CANDIDATE" | "RECRUITER" | "ADMIN";
 }
 
 interface AuthState {
@@ -13,7 +14,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setTokens: (accessToken: string) => void;
-  login: (credentials: any) => Promise<void>;
+  login: (credentials: any) => Promise<User>;
   register: (data: any) => Promise<void>;
   logout: (localOnly?: boolean) => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -47,6 +48,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+
+      return user;
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -108,22 +111,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkAuth: async () => {
+    set({ isLoading: true }); // Block renders until auth is resolved
     const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
     
     if (!refreshToken) {
-       set({ isLoading: false, isAuthenticated: false });
-       return;
+      set({ isLoading: false, isAuthenticated: false });
+      return;
     }
     
     try {
-      const { data } = await api.get('/auth/validate');
+      // Dùng refreshToken để lấy accessToken mới, đồng thời lấy thông tin user
+      const { data } = await api.post('/auth/refresh', { refreshToken });
+      const { accessToken, refreshToken: newRefreshToken } = data;
+
+      if (newRefreshToken && typeof window !== 'undefined') {
+        localStorage.setItem('refreshToken', newRefreshToken);
+      }
+
+      // Dùng accessToken mới để lấy thông tin user (bao gồm role)
+      const { data: validateData } = await api.get('/auth/validate', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      console.log('[checkAuth] user from validate:', validateData.user);
+
       set({
-        user: data.user,
+        accessToken,
+        user: validateData.user,
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error) {
-      set({ isLoading: false, isAuthenticated: false });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('refreshToken');
+      }
+      set({ isLoading: false, isAuthenticated: false, user: null, accessToken: null });
     }
   }
 }));

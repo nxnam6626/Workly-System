@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
 import { Mail, Lock, User, Loader2, Briefcase, CheckCircle2, Sparkles, AlertCircle } from "lucide-react";
+import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -20,7 +21,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/");
+      router.push(getDashboardByRole("CANDIDATE"));
     }
   }, [isAuthenticated, router]);
 
@@ -36,7 +37,7 @@ export default function RegisterPage() {
 
     try {
       await register({ fullName, email, password, role: "CANDIDATE" });
-      router.push("/");
+      router.push(getDashboardByRole("CANDIDATE"));
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
