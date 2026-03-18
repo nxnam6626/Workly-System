@@ -18,7 +18,8 @@ export interface JSearchResponse {
 export class RapidJobService {
   private readonly logger = new Logger(RapidJobService.name);
   private readonly jsearchUrl = 'https://jsearch.p.rapidapi.com/search';
-  private readonly workdayUrl = 'https://workday-jobs-api.p.rapidapi.com/active-ats-7d';
+  private readonly linkedinUrl = 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-24h';
+  private readonly jpfUrl = 'https://job-posting-feed-api.p.rapidapi.com/active-ats-6m';
 
   constructor(
     private readonly httpService: HttpService,
@@ -26,7 +27,7 @@ export class RapidJobService {
   ) {}
 
   /**
-   * [SOURCE: JSearch] Gọi API lấy danh sách job.
+   * [SOURCE: JSearch] Gọi JSearch API để lấy danh sách job.
    */
   fetchJSearchJobs(
     query: string,
@@ -60,17 +61,26 @@ export class RapidJobService {
   }
 
   /**
-   * [SOURCE: Workday] Gọi API lấy danh sách job từ Workday ATS.
+   * [SOURCE: LinkedIn] Gọi API lấy danh sách job mới trong 24h.
    */
-  fetchWorkdayJobs(title: string, location: string = 'Vietnam'): Observable<any> {
+  fetchLinkedInJobs(
+    title: string = 'intern',
+    location: string = 'Vietnam',
+    limit: number = 10,
+  ): Observable<any[]> {
     const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
-    const apiHost = this.configService.get<string>('WORKDAY_API_HOST') || 'workday-jobs-api.p.rapidapi.com';
+    const apiHost =
+      this.configService.get<string>('LINKEDIN_API_HOST') ||
+      'linkedin-job-search-api.p.rapidapi.com';
 
     return this.httpService
-      .get(this.workdayUrl, {
+      .get(this.linkedinUrl, {
         params: {
-          title_filter: title,
+          limit: String(limit),
+          offset: '0',
+          title_filter: `"${title}"`,
           location_filter: `"${location}"`,
+          description_type: 'text',
         },
         headers: {
           'X-RapidAPI-Key': apiKey,
@@ -80,12 +90,39 @@ export class RapidJobService {
       })
       .pipe(
         map((response: AxiosResponse) => response.data),
-        catchError((error: AxiosError) => this.handleError(error, 'Workday')),
+        catchError((error: AxiosError) => this.handleError(error, 'LinkedIn')),
       );
   }
 
   /**
-   * [MAPPING: JSearch] Chuyển đổi sang JobDto.
+   * [SOURCE: Job Posting Feed] Gọi API lấy danh sách job từ ATS Feed (6 tháng).
+   */
+  fetchJobPostingFeed(limit: number = 10): Observable<any[]> {
+    const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
+    const apiHost =
+      this.configService.get<string>('JOB_POSTING_FEED_HOST') ||
+      'job-posting-feed-api.p.rapidapi.com';
+
+    return this.httpService
+      .get(this.jpfUrl, {
+        params: {
+          limit: String(limit),
+          description_type: 'text',
+        },
+        headers: {
+          'X-RapidAPI-Key': apiKey,
+          'X-RapidAPI-Host': apiHost,
+          'Content-Type': 'application/json',
+        },
+      })
+      .pipe(
+        map((response: AxiosResponse) => response.data),
+        catchError((error: AxiosError) => this.handleError(error, 'JPF')),
+      );
+  }
+
+  /**
+   * Chuyển đổi dữ liệu thô từ JSearch sang JobDto.
    */
   mapJSearchToJob(apiData: any): JobDto {
     return {
@@ -98,15 +135,28 @@ export class RapidJobService {
   }
 
   /**
-   * [MAPPING: Workday] Chuyển đổi sang JobDto.
+   * Chuyển đổi dữ liệu thô từ LinkedIn sang JobDto.
    */
-  mapWorkdayToJob(apiData: any): JobDto {
+  mapLinkedInToJob(apiData: any): JobDto {
     return {
       title: apiData.title,
-      companyName: apiData.company_name || 'Workday Partner',
-      description: apiData.description_text || apiData.description_html || 'No description provided',
+      companyName: apiData.company_name || 'LinkedIn Partner',
+      description: apiData.description_text || 'No description provided',
       applyUrl: apiData.url,
-      salary: 'Thỏa thuận', // Workday API thường không trả về lương trực tiếp trong list
+      salary: 'Thỏa thuận',
+    };
+  }
+
+  /**
+   * Chuyển đổi dữ liệu thô từ Job Posting Feed sang JobDto.
+   */
+  mapJPFToJob(apiData: any): JobDto {
+    return {
+      title: apiData.title,
+      companyName: apiData.company_name || 'ATS Partner',
+      description: apiData.description_text || 'No description provided',
+      applyUrl: apiData.url,
+      salary: 'Thỏa thuận',
     };
   }
 
@@ -117,16 +167,21 @@ export class RapidJobService {
     const period = apiData.job_salary_period;
 
     if (!min && !max) return 'Thỏa thuận';
-    const salaryStr = min && max && min !== max 
-      ? `${min.toLocaleString()} - ${max.toLocaleString()}` 
-      : (min || max).toLocaleString();
+    const salaryStr =
+      min && max && min !== max
+        ? `${min.toLocaleString()} - ${max.toLocaleString()}`
+        : (min || max).toLocaleString();
     return `${salaryStr} ${currency}${period ? `/${period.toLowerCase()}` : ''}`;
   }
 
-  private handleError(error: AxiosError, source: string): Observable<never> {
+  private handleError(error: AxiosError, source: string = 'API'): Observable<never> {
     const status = error.response?.status;
     const message = (error.response?.data as any)?.message ?? error.message;
-    this.logger.error(`${source} API call failed [HTTP ${status ?? 'N/A'}]: ${message}`);
-    return throwError(() => new Error(`Failed to fetch jobs from ${source}: ${message}`));
+    this.logger.error(
+      `${source} API call failed [HTTP ${status ?? 'N/A'}]: ${message}`,
+    );
+    return throwError(
+      () => new Error(`Failed to fetch jobs from ${source}: ${message}`),
+    );
   }
 }
