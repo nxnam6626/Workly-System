@@ -3,13 +3,13 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import type { Role, StatusUser } from '../generated/prisma';
-import { MailService } from '../mail/mail.service';
+import type { Role, StatusUser } from '../../generated/prisma';
+import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
 
 @Injectable()

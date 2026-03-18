@@ -10,8 +10,8 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RedisService } from '../redis/redis.service';
-import { MailService } from '../mail/mail.service';
+import { RedisService } from '../../redis/redis.service';
+import { MailService } from '../../mail/mail.service';
 import * as crypto from 'crypto';
 
 export interface JwtPayload {

@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { FilterAction } from '../../generated/prisma';
+import { FilterAction } from '../../../../generated/prisma';
 
 export class CreateFilterRuleDto {
   @ApiProperty({ description: 'Keyword to filter jobs' })

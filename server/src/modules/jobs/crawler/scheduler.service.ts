@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { CrawlerService } from './crawler.service';
-import { SearchService } from '../search/search.service';
+import { SearchService } from '../../search/search.service';
 
 @Injectable()
 export class SchedulerService implements OnModuleInit {

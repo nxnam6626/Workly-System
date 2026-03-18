@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { RapidJobService } from './rapid-job.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { SearchService } from '../search/search.service';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { SearchService } from '../../search/search.service';
 import { lastValueFrom } from 'rxjs';
 import { JobDto } from './dto/job.dto';
 

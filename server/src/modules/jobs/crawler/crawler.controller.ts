@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CrawlerService, CrawlPreviewRequest } from './crawler.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { IsString, IsUrl, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
 export class TestCrawlDto implements CrawlPreviewRequest {
