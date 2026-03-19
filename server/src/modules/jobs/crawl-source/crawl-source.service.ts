@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import { CreateCrawlSourceDto } from './dto/create-crawl-source.dto';
 import { UpdateCrawlSourceDto } from './dto/update-crawl-source.dto';
 

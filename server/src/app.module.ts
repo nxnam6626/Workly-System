@@ -13,7 +13,7 @@ import { CrawlerModule } from './modules/jobs/crawler/crawler.module';
 import { FilterRuleModule } from './modules/jobs/filter-rule/filter-rule.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RapidJobModule } from './modules/jobs/rapid-job/rapid-job.module';
-import { JobPostingsModule } from './job-postings/job-postings.module';
+import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.module';
 
 @Module({
   imports: [

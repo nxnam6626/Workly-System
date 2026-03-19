@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import { CreateFilterRuleDto } from './dto/create-filter-rule.dto';
 import { UpdateFilterRuleDto } from './dto/update-filter-rule.dto';
 
