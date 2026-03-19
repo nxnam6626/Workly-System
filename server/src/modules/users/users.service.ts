@@ -115,6 +115,7 @@ export class UsersService {
   }
 
   async findOne(userId: string) {
+    if (!userId) throw new NotFoundException('ID user không hợp lệ.');
     const user = await this.prisma.user.findUnique({
       where: { userId },
       select: {
@@ -137,6 +138,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
+    if (!email) return null;
     return this.prisma.user.findUnique({
       where: { email },
       include: { candidate: true, recruiter: true },

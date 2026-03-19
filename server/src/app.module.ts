@@ -13,13 +13,14 @@ import { CrawlerModule } from './modules/jobs/crawler/crawler.module';
 import { FilterRuleModule } from './modules/jobs/filter-rule/filter-rule.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RapidJobModule } from './modules/jobs/rapid-job/rapid-job.module';
+import { JobPostingsModule } from './job-postings/job-postings.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     UsersModule,
-    AuthModule,
+    AuthModule, JobPostingsModule,
     RedisModule,
     MailModule,
     SearchModule,
@@ -32,4 +33,4 @@ import { RapidJobModule } from './modules/jobs/rapid-job/rapid-job.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

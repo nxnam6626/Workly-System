@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -123,9 +122,11 @@ model Recruiter {
   user   User   @relation(fields: [userId], references: [userId])
 
   jobPostings   JobPosting[]
-  companies     Company[]
+  companyId     String?
+  company       Company?     @relation(fields: [companyId], references: [companyId])
   conversations Conversation[]
 }
+
 
 model CrawlConfig {
   crawlConfigId       String  @id @default(uuid())
@@ -194,12 +195,12 @@ model Company {
   businessLicenseUrl String?
 
   adminId     String?
-  admin       Admin?     @relation(fields: [adminId], references: [adminId])
-  recruiterId String?
-  recruiter   Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
-
+  admin       Admin?      @relation(fields: [adminId], references: [adminId])
+  recruiters  Recruiter[]
   jobPostings JobPosting[]
 }
+
+
 
 model JobPosting {
   jobPostingId       String    @id @default(uuid())
@@ -211,15 +212,17 @@ model JobPosting {
   salaryMax          Decimal?  @db.Decimal(19, 0)
   currency           String?   @default("VND")
   jobType            JobType?
+  experience         String?
+  vacancies          Int       @default(1)
   locationCity       String?
-  deadline           DateTime?
+  deadline           DateTime? @db.Timestamp
   status             Int       @default(1)
   postType           PostType  @default(CRAWLED)
   isVerified         Boolean   @default(false)
   originalUrl        String?
   aiReliabilityScore Float?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime  @default(now()) @db.Timestamp
+  updatedAt          DateTime  @updatedAt @db.Timestamp
   approvedBy         String?
 
   recruiterId   String?
