@@ -26,7 +26,7 @@ export class SearchService implements OnModuleInit {
       await this.client.index({
         index: 'users',
         id: user.id,
-        document: {
+        body: {
           email: user.email,
           roles: user.roles,
         },
@@ -42,7 +42,7 @@ export class SearchService implements OnModuleInit {
       await this.client.index({
         index: 'jobs',
         id: job.id,
-        document: {
+        body: {
           title: job.title,
           description: job.description,
           companyId: job.companyId,

@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -37,7 +38,10 @@ export default function RegisterPage() {
 
     try {
       await register({ fullName, email, password, role: "CANDIDATE" });
-      router.push(getDashboardByRole("CANDIDATE"));
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push(getDashboardByRole("CANDIDATE"));
+      }, 2500); // Redirect after 2.5 seconds
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
@@ -123,6 +127,13 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {isSuccess && (
+            <div className="mb-6 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
+              <span>Đăng ký tài khoản thành công! Đang chuyển hướng bạn đến bảng điều khiển...</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Họ và tên</label>
@@ -202,7 +213,7 @@ export default function RegisterPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Đang đăng ký...
+                    {isSuccess ? "Đang chuyển hướng..." : "Đang đăng ký..."}
                   </>
                 ) : (
                   "Đăng ký"
@@ -217,16 +228,15 @@ export default function RegisterPage() {
             </p>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-slate-200">
-            <p className="text-center text-sm text-slate-600">
-              Bạn đã có tài khoản?{" "}
-              <Link href="/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
-                Đăng nhập ngay
-              </Link>
-            </p>
-          </div>
+          <p className="text-center text-sm text-slate-600 pt-8">
+            Bạn đã có tài khoản?{" "}
+            <Link href="/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
+              Đăng nhập ngay
+            </Link>
+          </p>
         </div>
       </div>
     </div>
+
   );
 }

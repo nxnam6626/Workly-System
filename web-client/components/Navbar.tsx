@@ -55,11 +55,11 @@ export function Navbar() {
             >
               Đăng nhập
             </Link>
-            
+
             <div className="hidden sm:block w-[1px] h-6 bg-slate-300 mx-1"></div>
-            
+
             <Link
-              href="/recruiter"
+              href="/recruiter/login"
               className="hidden md:flex px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 transition-colors shadow-sm items-center justify-center tracking-wide"
             >
               NHÀ TUYỂN DỤNG

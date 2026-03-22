@@ -8,6 +8,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { LinkedinStrategy } from './strategies/linkedin.strategy';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { RolesGuard } from './guards/roles.guard';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, GoogleStrategy, LinkedinStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

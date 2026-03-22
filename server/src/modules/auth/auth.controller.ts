@@ -5,7 +5,11 @@ import {
   Get,
   UseGuards,
   Headers,
+  Req,
+  Res,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -73,5 +77,41 @@ export class AuthController {
   @ApiOperation({ summary: 'Xác nhận đặt lại mật khẩu bằng mã OTP' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
+  }
+
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Chuyển hướng đăng nhập bằng Google' })
+  async googleAuth(@Req() req: Request) {
+    // Redirects to Google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Xử lý callback từ Google' })
+  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.oauthLogin(req.user);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+  }
+
+  @Public()
+  @Get('linkedin')
+  @UseGuards(AuthGuard('linkedin'))
+  @ApiOperation({ summary: 'Chuyển hướng đăng nhập bằng LinkedIn' })
+  async linkedinAuth(@Req() req: Request) {
+    // Redirects to LinkedIn
+  }
+
+  @Public()
+  @Get('linkedin/callback')
+  @UseGuards(AuthGuard('linkedin'))
+  @ApiOperation({ summary: 'Xử lý callback từ LinkedIn' })
+  async linkedinAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.oauthLogin(req.user);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
   }
 }

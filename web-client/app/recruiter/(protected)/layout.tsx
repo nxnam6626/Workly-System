@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/auth';
-import { getDashboardByRole, UserRole } from '@/lib/roleRedirect';
 import {
   ChevronLeft,
   ChevronRight,
@@ -20,7 +19,7 @@ import {
 const navItems = [
   {
     label: 'Bảng Điều Khiển',
-    href: '/recruiter',
+    href: '/recruiter/dashboard',
     icon: LayoutDashboard,
   },
   {
@@ -44,12 +43,19 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        router.push('/recruiter/login');
+        // Include callbackUrl so after login they return to the page they were on
+        const callbackUrl = encodeURIComponent(pathname);
+        router.push(`/recruiter/login?callbackUrl=${callbackUrl}`);
       } else if (!user?.roles?.includes('RECRUITER')) {
-        router.push(getDashboardByRole(user?.roles?.[0] as UserRole));
+        // Wrong role: send back to recruiter login, NOT to getDashboardByRole
+        // (getDashboardByRole defaults to "/" for undefined/unknown roles which
+        //  causes the recruiter to be thrown into the candidate homepage)
+        router.push('/recruiter/login');
+      } else if (pathname === '/recruiter') {
+        router.push('/recruiter/dashboard');
       }
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, isLoading, user, router, pathname]);
 
   if (isLoading) {
     return (

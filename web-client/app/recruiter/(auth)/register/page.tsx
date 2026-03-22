@@ -28,6 +28,7 @@ export default function EmployerRegisterPage() {
   const [taxCode, setTaxCode] = useState("");
   
   const [error, setError] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -57,7 +58,10 @@ export default function EmployerRegisterPage() {
           location,
           taxCode
       });
-      router.push(getDashboardByRole("RECRUITER"));
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push(getDashboardByRole("RECRUITER"));
+      }, 2500);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
@@ -83,7 +87,7 @@ export default function EmployerRegisterPage() {
         
         <div className="relative z-10 flex flex-col justify-between h-full p-12 lg:p-16">
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-12 inline-flex">
+            <Link href="/recruiter/dashboard" className="flex items-center gap-2 mb-12 inline-flex">
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
                 <Building2 className="w-6 h-6" />
               </div>
@@ -149,6 +153,13 @@ export default function EmployerRegisterPage() {
             <div className="mb-8 p-4 bg-red-50 flex items-start gap-3 border border-red-200 rounded-xl text-red-700 text-sm">
               <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
               <span>{error}</span>
+            </div>
+          )}
+
+          {isSuccess && (
+            <div className="mb-8 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
+              <span>Đăng ký doanh nghiệp thành công! Đang chuyển hướng bạn đến bảng điều khiển...</span>
             </div>
           )}
 
@@ -272,7 +283,7 @@ export default function EmployerRegisterPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    Đang đăng ký...
+                    {isSuccess ? "Đang chuyển hướng..." : "Đang đăng ký..."}
                   </>
                 ) : "ĐĂNG KÝ MỞ TÀI KHOẢN"}
               </button>

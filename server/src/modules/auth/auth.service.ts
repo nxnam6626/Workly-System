@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -47,14 +48,32 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
+    if (!user.password) return null; // Protect against social login accounts without passwords
     const isMatch = await this.comparePassword(password, user.password);
     if (!isMatch) return null;
     const { password: _, refreshToken: __, ...result } = user;
     return result;
   }
 
-  /** Đăng ký: hash mật khẩu rồi gọi UsersService.create. */
+  /** Đăng ký: Kiểm tra email, xác thực mật khẩu (nếu đã tồn tại), hash mật khẩu (nếu mới) rồi gọi UsersService. */
   async register(dto: RegisterDto) {
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      if (!existingUser.password) {
+        throw new BadRequestException('Email này được đăng ký qua Google/LinkedIn. Vui lòng đăng nhập qua đó.');
+      }
+      const isMatch = await this.comparePassword(dto.password, existingUser.password);
+      if (!isMatch) {
+        throw new ConflictException('Email đã tồn tại. Vui lòng nhập đúng mật khẩu nếu bạn muốn đăng ký thêm vai trò cho tài khoản này.');
+      }
+      const hasRole = existingUser.userRoles.some((ur: any) => ur.role.roleName === dto.role);
+      if (hasRole) {
+        throw new ConflictException(`Bạn đã đăng ký với vai trò ${dto.role} rồi. Vui lòng đăng nhập.`);
+      }
+      
+      return this.usersService.addRoleToUser(existingUser.userId, dto);
+    }
+
     const hashedPassword = await this.hashPassword(dto.password);
     return this.usersService.create(
       { ...dto, password: hashedPassword },
@@ -85,6 +104,29 @@ export class AuthService {
         recruiter: user.recruiter,
       },
     };
+  }
+
+  /** Đăng nhập hoặc đăng ký bằng OAuth: sinh token từ Auth provider profile. */
+  async oauthLogin(profile: any) {
+    const user = await this.usersService.findOrCreateOAuthUser({
+      email: profile.email,
+      provider: profile.provider,
+      providerId: profile.providerId,
+      fullName: profile.fullName || 'Người dùng mới',
+      avatar: profile.avatar,
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Không thể xác thực người dùng qua OAuth.');
+    }
+
+    await this.usersService.updateLastLogin(user.userId);
+    const roles = user.userRoles.map((ur: any) => ur.role.roleName);
+    const tokens = await this.issueTokens(user.userId, user.email, roles);
+    await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
+    await this.redisService.set(`refresh_token:${user.userId}`, tokens.refreshToken, 604800); // 7 days
+
+    return tokens;
   }
 
   /** Đăng xuất: xóa refresh token trong DB và Redis. */

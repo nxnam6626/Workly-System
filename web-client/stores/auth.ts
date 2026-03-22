@@ -20,6 +20,7 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (data: any) => Promise<void>;
+  setOAuthTokens: (accessToken: string, refreshToken: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -27,7 +28,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   isAuthenticated: false,
   isLoading: true,
-  
+
   setTokens: (accessToken: string) => {
     set({ accessToken, isAuthenticated: true });
   },
@@ -37,11 +38,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await api.post('/auth/login', credentials);
       const { accessToken, refreshToken, user } = data;
-      
+
       if (typeof window !== 'undefined') {
         localStorage.setItem('refreshToken', refreshToken);
       }
-      
+
       set({
         accessToken,
         user,
@@ -60,13 +61,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       await api.post('/auth/register', userData);
-      
+
       // Auto-login after successful registration
       await get().login({
         email: userData.email,
         password: userData.password
       });
-      
+
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -81,11 +82,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Ignore remote logout errors
       }
     }
-    
+
     if (typeof window !== 'undefined') {
       localStorage.removeItem('refreshToken');
     }
-    
+
     set({
       user: null,
       accessToken: null,
@@ -113,12 +114,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   checkAuth: async () => {
     set({ isLoading: true }); // Block renders until auth is resolved
     const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
-    
+
     if (!refreshToken) {
       set({ isLoading: false, isAuthenticated: false });
       return;
     }
-    
+
     try {
       // Dùng refreshToken để lấy accessToken mới, đồng thời lấy thông tin user
       const { data } = await api.post('/auth/refresh', { refreshToken });
@@ -146,6 +147,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.removeItem('refreshToken');
       }
       set({ isLoading: false, isAuthenticated: false, user: null, accessToken: null });
+    }
+  },
+
+  setOAuthTokens: async (accessToken: string, refreshToken: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
+
+    try {
+      const { data: validateData } = await api.get('/auth/validate', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      set({
+        accessToken,
+        user: validateData.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (err) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('refreshToken');
+      }
+      set({ isLoading: false, isAuthenticated: false, user: null, accessToken: null });
+      throw err;
     }
   }
 }));

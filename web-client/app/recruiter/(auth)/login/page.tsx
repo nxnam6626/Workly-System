@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth";
 import { Mail, Lock, Loader2, ArrowRight, Building2, Sparkles } from "lucide-react";
-import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function EmployerLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuthStore();
 
   const [email, setEmail] = useState("");
@@ -18,16 +18,20 @@ export default function EmployerLoginPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Where to redirect after successful login (supports returning to the
+  // page a recruiter was on before their session expired)
+  const callbackUrl = searchParams.get("callbackUrl") || "/recruiter/dashboard";
+
   useEffect(() => {
     if (isAuthenticated && user && user.roles) {
       if (user.roles.includes("RECRUITER")) {
-        router.push(getDashboardByRole("RECRUITER"));
+        router.push(callbackUrl);
       } else if (user.roles.includes("CANDIDATE")) {
-        // If they are a candidate trying to access employer login, guide them back
+        // Candidate trying to use the employer portal — send to candidate login
         router.push("/login");
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, callbackUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +41,15 @@ export default function EmployerLoginPage() {
     try {
       const loggedInUser = await login({ email, password });
       if (loggedInUser.roles?.includes("RECRUITER")) {
-        router.push(getDashboardByRole("RECRUITER"));
+        // Respect callbackUrl so the recruiter returns to the page
+        // they were on before their session expired
+        router.push(callbackUrl);
       } else if (loggedInUser.roles?.includes("CANDIDATE")) {
         setError("Tài khoản của bạn không có quyền truy cập cổng Nhà tuyển dụng. Vui lòng đăng nhập tại trang dành cho Ứng viên.");
         setIsSubmitting(false);
       } else {
-        router.push(getDashboardByRole(loggedInUser.roles?.[0]));
+        // Unknown role — stay in recruiter context and show dashboard
+        router.push("/recruiter/dashboard");
       }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
@@ -51,29 +58,17 @@ export default function EmployerLoginPage() {
   };
 
   if (authLoading && !isAuthenticated) {
-    return null; 
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row font-sans">
       {/* Left Column: Branding & Value Props */}
       <div className="hidden md:flex md:w-5/12 lg:w-1/2 bg-slate-50 relative overflow-hidden flex-col">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/recruiter-hero-bg-light.png"
-            alt="Tuyển dụng thông minh"
-            fill
-            className="object-cover opacity-90"
-            priority
-          />
-          {/* Light overlay to ensure text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/50 to-white/10" />
-        </div>
-        
+
         {/* Content Overlay */}
-        <div className="relative z-10 flex flex-col justify-end h-full p-12 lg:p-20 pb-24">
-          <Link href="/" className="flex items-center gap-2 mb-8 inline-flex">
+        <div className="relative z-10 flex flex-col justify-center h-full p-12 lg:p-20 pb-24">
+          <Link href="/recruiter/dashboard" className="flex items-center gap-2 mb-8 inline-flex">
             <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
               <Building2 className="w-6 h-6" />
             </div>

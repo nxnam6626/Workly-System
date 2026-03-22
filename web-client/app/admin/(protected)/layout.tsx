@@ -60,9 +60,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push('/admin/login');
       } else if (!user?.roles?.includes('ADMIN')) {
         router.push(getDashboardByRole(user?.roles?.[0] as UserRole));
+      } else if (pathname === '/admin') {
+        router.push('/admin/dashboard');
       }
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, isLoading, user, router, pathname]);
 
   if (isLoading) {
     return (
