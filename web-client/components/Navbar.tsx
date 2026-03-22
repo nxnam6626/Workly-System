@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import { Sparkles, User, LogOut } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
@@ -40,18 +42,27 @@ export function Navbar() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/register"
+              className="hidden sm:flex px-4 py-2 rounded-lg text-sm font-medium text-blue-600 bg-white border border-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              Đăng ký
+            </Link>
             <Link
               href="/login"
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors hidden sm:block"
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
             >
               Đăng nhập
             </Link>
+            
+            <div className="hidden sm:block w-[1px] h-6 bg-slate-300 mx-1"></div>
+            
             <Link
-              href="/register"
-              className="px-5 py-2.5 rounded-full text-sm font-semibold bg-[#FF6B2C] text-white hover:bg-[#e85a1f] transition-colors shadow-sm"
+              href="/recruiter"
+              className="hidden md:flex px-4 py-2 rounded-lg text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 transition-colors shadow-sm items-center justify-center tracking-wide"
             >
-              Bắt đầu
+              NHÀ TUYỂN DỤNG
             </Link>
           </div>
         )}

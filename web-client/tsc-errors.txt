@@ -1,0 +1,19 @@
+﻿app/admin/crawl-logs/page.tsx(195,32): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-logs/page.tsx(195,45): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(61,26): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(63,43): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(64,43): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(64,57): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(73,26): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(75,59): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(76,41): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(76,55): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(231,35): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(282,59): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(287,50): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(316,61): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(320,52): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/page.tsx(349,40): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/crawl-sources/SourceFormModal.tsx(131,45): error TS2339: Property 'id' does not exist on type 'CrawlSource'.
+app/admin/jobs/components/JobFilters.tsx(50,53): error TS2322: Type 'string | undefined' is not assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 'number'.

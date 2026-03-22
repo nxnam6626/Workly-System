@@ -12,7 +12,7 @@ export interface CrawlConfig {
 }
 
 export interface CrawlSource {
-  id: number;
+  crawlSourceId: string;
   sourceName: string;
   baseUrl: string;
   isActive: boolean;

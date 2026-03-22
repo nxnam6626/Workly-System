@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col md:flex-row font-sans">
-      {/* Left Column: Branding & Value Props (Hidden on mobile) */}
+      {/* Left Column: Branding & Value Props */}
       <div className="hidden md:flex md:w-5/12 lg:w-1/2 bg-[#F3F5F7] flex-col justify-between p-12 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3" />
@@ -96,13 +96,13 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative z-10 mt-12 text-sm text-slate-500 font-medium">
-          © 2024 Workly. Bệ phóng sự nghiệp.
+          © 2026 Workly – Nền tảng kết nối thực tập sinh.
         </div>
       </div>
 
       {/* Right Column: Registration Form */}
       <div className="w-full md:w-7/12 lg:w-1/2 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-24 xl:px-32 bg-white relative">
-        {/* Mobile Header (Only visible on small screens) */}
+        {/* Mobile Header */}
         <div className="md:hidden flex items-center gap-2 mb-12">
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
             <Sparkles className="w-5 h-5" />
@@ -197,6 +197,7 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                style={{ height: '48px' }}
               >
                 {isSubmitting ? (
                   <>
@@ -208,7 +209,7 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
-            
+
             <p className="text-sm text-slate-500 text-center mt-6">
               Bằng việc đăng ký, bạn đã đồng ý với Workly về{" "}
               <Link href="#" className="font-semibold text-blue-600 hover:text-blue-500">Quy định bảo mật</Link> và{" "}
