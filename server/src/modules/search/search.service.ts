@@ -21,14 +21,14 @@ export class SearchService implements OnModuleInit {
     }
   }
 
-  async indexUser(user: { id: string; email: string; role: string }) {
+  async indexUser(user: { id: string; email: string; roles: string[] }) {
     try {
       await this.client.index({
         index: 'users',
         id: user.id,
         document: {
           email: user.email,
-          role: user.role,
+          roles: user.roles,
         },
       });
       console.log(`[SearchService] Indexed user ${user.id}`);

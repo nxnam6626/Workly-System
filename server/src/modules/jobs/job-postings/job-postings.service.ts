@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '@/prisma/prisma.service';
+import { JobStatus } from '@prisma/client';
+import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 
 @Injectable()
 export class JobPostingsService {
@@ -35,7 +37,7 @@ export class JobPostingsService {
         recruiterId: recruiter.recruiterId,
         companyId: recruiter.companyId,
         postType: 'MANUAL',
-        status: 0,
+        status: 'PENDING',
         isVerified: false,
       },
     });
@@ -80,6 +82,113 @@ export class JobPostingsService {
     });
   }
 
+
+  async findAllAdmin(query: AdminFilterJobPostingDto) {
+    const { status, postType, minAiScore, crawlSourceId, searchTerm, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (status) where.status = status;
+    if (postType) where.postType = postType;
+    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
+    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+    if (searchTerm) {
+      where.OR = [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.jobPosting.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          company: true,
+          recruiter: { include: { user: { select: { email: true } } } },
+          crawlSource: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.jobPosting.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
+  }
+
+  async updateStatus(id: string, status: JobStatus, adminId: string) {
+    const job = await this.findOne(id);
+    
+    return this.prisma.jobPosting.update({
+      where: { jobPostingId: id },
+      data: {
+        status,
+        approvedBy: adminId, // Reuse approvedBy field to track who approved/rejected
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async removeBulk(query: AdminFilterJobPostingDto) {
+    const { status, postType, minAiScore, crawlSourceId, searchTerm } = query;
+    const where: any = {};
+    if (status) where.status = status;
+    if (postType) where.postType = postType;
+    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
+    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+    
+    if (searchTerm && searchTerm.includes(',')) {
+      where.jobPostingId = { in: searchTerm.split(',') };
+    } else if (searchTerm) {
+      where.OR = [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+      ];
+    }
+
+    // Security check: ensure at least one filter is provided to prevent accidental full wipe
+    if (Object.keys(where).length === 0) {
+      throw new ForbiddenException('Vui lòng cung cấp ít nhất một bộ lọc để xóa hàng loạt.');
+    }
+
+    const result = await this.prisma.jobPosting.deleteMany({ where });
+    return { message: `Đã xóa thành công ${result.count} tin tuyển dụng.`, count: result.count };
+  }
+
+  async updateStatusBulk(query: AdminFilterJobPostingDto, status: JobStatus, adminId: string) {
+    const { status: currentStatus, postType, minAiScore, crawlSourceId, searchTerm } = query;
+    const where: any = {};
+    if (currentStatus) where.status = currentStatus;
+    if (postType) where.postType = postType;
+    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
+    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+    
+    // If searchTerm is provided as a comma-separated list of IDs (as the frontend does now)
+    if (searchTerm && searchTerm.includes(',')) {
+      where.jobPostingId = { in: searchTerm.split(',') };
+    } else if (searchTerm) {
+      where.OR = [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (Object.keys(where).length === 0) {
+      throw new ForbiddenException('Vui lòng cung cấp ít nhất một bộ lọc để thao tác hàng loạt.');
+    }
+
+    const result = await this.prisma.jobPosting.updateMany({
+      where,
+      data: {
+        status,
+        approvedBy: adminId,
+        updatedAt: new Date(),
+      },
+    });
+
+    return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
+  }
 
   async remove(id: string) {
     await this.findOne(id);

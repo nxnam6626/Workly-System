@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "StatusUser" AS ENUM ('ACTIVE', 'LOCKED');
+
+-- CreateEnum
 CREATE TYPE "CrawlStatus" AS ENUM ('RUNNING', 'SUCCESS', 'FAILED');
 
 -- CreateEnum
@@ -12,6 +15,88 @@ CREATE TYPE "PostType" AS ENUM ('CRAWLED', 'MANUAL');
 
 -- CreateEnum
 CREATE TYPE "AppStatus" AS ENUM ('PENDING', 'REVIEWED', 'ACCEPTED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "JobStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED');
+
+-- CreateTable
+CREATE TABLE "User" (
+    "userId" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "status" "StatusUser" NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lastLogin" TIMESTAMP(3),
+    "phoneNumber" TEXT,
+    "avatar" TEXT,
+    "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "refreshToken" TEXT,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("userId")
+);
+
+-- CreateTable
+CREATE TABLE "Role" (
+    "roleId" TEXT NOT NULL,
+    "roleName" TEXT NOT NULL,
+
+    CONSTRAINT "Role_pkey" PRIMARY KEY ("roleId")
+);
+
+-- CreateTable
+CREATE TABLE "UserRole" (
+    "userRoleId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "roleId" TEXT NOT NULL,
+    "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UserRole_pkey" PRIMARY KEY ("userRoleId")
+);
+
+-- CreateTable
+CREATE TABLE "Admin" (
+    "adminId" TEXT NOT NULL,
+    "adminLevel" INTEGER NOT NULL,
+    "lastAction" TEXT,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Admin_pkey" PRIMARY KEY ("adminId")
+);
+
+-- CreateTable
+CREATE TABLE "Candidate" (
+    "candidateId" TEXT NOT NULL,
+    "fullName" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "university" TEXT,
+    "major" TEXT,
+    "gpa" DOUBLE PRECISION,
+    "cvUrl" TEXT,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Candidate_pkey" PRIMARY KEY ("candidateId")
+);
+
+-- CreateTable
+CREATE TABLE "Skill" (
+    "skillId" TEXT NOT NULL,
+    "skillName" TEXT NOT NULL,
+    "candidateId" TEXT NOT NULL,
+
+    CONSTRAINT "Skill_pkey" PRIMARY KEY ("skillId")
+);
+
+-- CreateTable
+CREATE TABLE "Recruiter" (
+    "recruiterId" TEXT NOT NULL,
+    "bio" TEXT,
+    "position" TEXT,
+    "userId" TEXT NOT NULL,
+    "companyId" TEXT,
+
+    CONSTRAINT "Recruiter_pkey" PRIMARY KEY ("recruiterId")
+);
 
 -- CreateTable
 CREATE TABLE "CrawlConfig" (
@@ -78,7 +163,6 @@ CREATE TABLE "Company" (
     "companySize" INTEGER,
     "businessLicenseUrl" TEXT,
     "adminId" TEXT,
-    "recruiterId" TEXT,
 
     CONSTRAINT "Company_pkey" PRIMARY KEY ("companyId")
 );
@@ -94,15 +178,17 @@ CREATE TABLE "JobPosting" (
     "salaryMax" DECIMAL(19,0),
     "currency" TEXT DEFAULT 'VND',
     "jobType" "JobType",
+    "experience" TEXT,
+    "vacancies" INTEGER NOT NULL DEFAULT 1,
     "locationCity" TEXT,
-    "deadline" TIMESTAMP(3),
-    "status" INTEGER NOT NULL DEFAULT 1,
+    "deadline" TIMESTAMP,
+    "status" "JobStatus" NOT NULL DEFAULT 'PENDING',
     "postType" "PostType" NOT NULL DEFAULT 'CRAWLED',
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "originalUrl" TEXT,
     "aiReliabilityScore" DOUBLE PRECISION,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
     "approvedBy" TEXT,
     "recruiterId" TEXT,
     "companyId" TEXT NOT NULL,
@@ -164,6 +250,24 @@ CREATE TABLE "Message" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Role_roleName_key" ON "Role"("roleName");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserRole_userId_roleId_key" ON "UserRole"("userId", "roleId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Admin_userId_key" ON "Admin"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Candidate_userId_key" ON "Candidate"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Recruiter_userId_key" ON "Recruiter"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CrawlSource_crawlConfigId_key" ON "CrawlSource"("crawlConfigId");
 
 -- CreateIndex
@@ -171,6 +275,27 @@ CREATE UNIQUE INDEX "Company_taxCode_key" ON "Company"("taxCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "JobPosting_originalUrl_crawlSourceId_key" ON "JobPosting"("originalUrl", "crawlSourceId");
+
+-- AddForeignKey
+ALTER TABLE "UserRole" ADD CONSTRAINT "UserRole_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserRole" ADD CONSTRAINT "UserRole_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("roleId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Admin" ADD CONSTRAINT "Admin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Skill" ADD CONSTRAINT "Skill_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "Candidate"("candidateId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Recruiter" ADD CONSTRAINT "Recruiter_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Recruiter" ADD CONSTRAINT "Recruiter_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("companyId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CrawlSource" ADD CONSTRAINT "CrawlSource_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "Admin"("adminId") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -189,9 +314,6 @@ ALTER TABLE "FilterRule" ADD CONSTRAINT "FilterRule_crawlSourceId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "Company" ADD CONSTRAINT "Company_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "Admin"("adminId") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Company" ADD CONSTRAINT "Company_recruiterId_fkey" FOREIGN KEY ("recruiterId") REFERENCES "Recruiter"("recruiterId") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "JobPosting" ADD CONSTRAINT "JobPosting_recruiterId_fkey" FOREIGN KEY ("recruiterId") REFERENCES "Recruiter"("recruiterId") ON DELETE SET NULL ON UPDATE CASCADE;

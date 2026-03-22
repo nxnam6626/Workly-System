@@ -12,11 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  CANDIDATE
-  RECRUITER
-  ADMIN
-}
+
 
 enum StatusUser {
   ACTIVE
@@ -54,11 +50,17 @@ enum AppStatus {
   REJECTED
 }
 
+enum JobStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
 model User {
   userId   String     @id @default(uuid())
   email    String     @unique
   password String
-  role     Role
   status   StatusUser
 
   createdAt       DateTime  @default(now())
@@ -72,6 +74,27 @@ model User {
   admin     Admin?
   candidate Candidate?
   recruiter Recruiter?
+
+  userRoles UserRole[]
+}
+
+model Role {
+  roleId   String @id @default(uuid())
+  roleName String @unique // e.g., "CANDIDATE", "RECRUITER", "ADMIN"
+
+  userRoles UserRole[]
+}
+
+model UserRole {
+  userRoleId String   @id @default(uuid())
+  userId     String
+  roleId     String
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [userId])
+  role Role @relation(fields: [roleId], references: [roleId])
+
+  @@unique([userId, roleId])
 }
 
 model Admin {
@@ -216,7 +239,7 @@ model JobPosting {
   vacancies          Int       @default(1)
   locationCity       String?
   deadline           DateTime? @db.Timestamp
-  status             Int       @default(1)
+  status             JobStatus @default(PENDING)
   postType           PostType  @default(CRAWLED)
   isVerified         Boolean   @default(false)
   originalUrl        String?

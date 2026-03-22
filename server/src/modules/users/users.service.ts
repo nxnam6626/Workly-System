@@ -8,7 +8,9 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import type { Role, StatusUser } from '../../generated/prisma';
+import { Role } from '../auth/decorators/roles.decorator';
+import type { StatusUser } from '../../generated/prisma';
+
 import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
 
@@ -40,8 +42,22 @@ export class UsersService {
         data: {
           email: data.email,
           password: hashedPassword,
-          role: data.role,
           status: 'ACTIVE',
+        },
+      });
+
+      // Find or connect to the role
+      const roleRecord = await tx.role.upsert({
+        where: { roleName: data.role },
+        update: {},
+        create: { roleName: data.role },
+      });
+
+      // Create UserRole link
+      await tx.userRole.create({
+        data: {
+          userId: newUser.userId,
+          roleId: roleRecord.roleId,
         },
       });
 
@@ -57,6 +73,13 @@ export class UsersService {
         await tx.recruiter.create({
           data: { userId: newUser.userId },
         });
+      } else if (data.role === 'ADMIN') {
+        await tx.admin.create({
+          data: {
+            userId: newUser.userId,
+            adminLevel: 1,
+          },
+        });
       }
 
       return { message: 'Tạo user thành công', userId: newUser.userId };
@@ -67,7 +90,11 @@ export class UsersService {
 
     // Fire and forget integration events
     this.mailService.sendWelcomeEmail(data.email, displayName).catch(console.error);
-    this.searchService.indexUser({ id: result.userId, email: data.email, role: data.role }).catch(console.error);
+    this.searchService.indexUser({ 
+      id: result.userId, 
+      email: data.email, 
+      roles: [data.role as string] 
+    }).catch(console.error);
 
     return result;
   }
@@ -84,8 +111,16 @@ export class UsersService {
     status?: StatusUser;
   }) {
     const { skip = 0, take = 20, role, status } = params ?? {};
-    const where: { role?: Role; status?: StatusUser } = {};
-    if (role) where.role = role;
+    const where: any = {};
+    if (role) {
+      where.userRoles = {
+        some: {
+          role: {
+            roleName: role,
+          },
+        },
+      };
+    }
     if (status) where.status = status;
 
     const [users, total] = await Promise.all([
@@ -97,13 +132,15 @@ export class UsersService {
         select: {
           userId: true,
           email: true,
-          role: true,
           status: true,
           phoneNumber: true,
           avatar: true,
           isEmailVerified: true,
           createdAt: true,
           lastLogin: true,
+          userRoles: {
+            include: { role: true },
+          },
           candidate: { select: { fullName: true, phone: true } },
           recruiter: { select: { position: true, bio: true } },
         },
@@ -121,7 +158,6 @@ export class UsersService {
       select: {
         userId: true,
         email: true,
-        role: true,
         status: true,
         phoneNumber: true,
         avatar: true,
@@ -129,6 +165,9 @@ export class UsersService {
         createdAt: true,
         updatedAt: true,
         lastLogin: true,
+        userRoles: {
+          include: { role: true },
+        },
         candidate: true,
         recruiter: true,
       },
@@ -141,7 +180,13 @@ export class UsersService {
     if (!email) return null;
     return this.prisma.user.findUnique({
       where: { email },
-      include: { candidate: true, recruiter: true },
+      include: {
+        candidate: true,
+        recruiter: true,
+        userRoles: {
+          include: { role: true },
+        },
+      },
     });
   }
 
@@ -155,25 +200,41 @@ export class UsersService {
       if (existing) throw new ConflictException('Email đã tồn tại!');
     }
 
-    const updateData: {
-      email?: string;
-      password?: string;
-      status?: StatusUser;
-      phoneNumber?: string;
-      avatar?: string;
-      role?: Role;
-    } = {
+    const updateData: any = {
       ...(dto.email && { email: dto.email }),
       ...(dto.password && { password: await bcrypt.hash(dto.password, 10) }),
       ...(dto.status && { status: dto.status }),
       ...(dto.phoneNumber !== undefined && { phoneNumber: dto.phoneNumber }),
       ...(dto.avatar !== undefined && { avatar: dto.avatar }),
-      ...(dto.role && { role: dto.role }),
     };
 
-    await this.prisma.user.update({
-      where: { userId },
-      data: updateData,
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { userId },
+        data: updateData,
+      });
+
+      if (dto.role) {
+        const roleRecord = await tx.role.upsert({
+          where: { roleName: dto.role },
+          update: {},
+          create: { roleName: dto.role },
+        });
+
+        await tx.userRole.upsert({
+          where: {
+            userId_roleId: {
+              userId,
+              roleId: roleRecord.roleId,
+            },
+          },
+          update: {},
+          create: {
+            userId,
+            roleId: roleRecord.roleId,
+          },
+        });
+      }
     });
 
     if (dto.fullName) {

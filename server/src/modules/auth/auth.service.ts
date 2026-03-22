@@ -17,7 +17,7 @@ import * as crypto from 'crypto';
 export interface JwtPayload {
   sub: string;
   email: string;
-  role: string;
+  roles: string[];
   type: 'access' | 'refresh';
 }
 
@@ -68,7 +68,8 @@ export class AuthService {
     if (!user)
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng.');
     await this.usersService.updateLastLogin(user.userId);
-    const tokens = await this.issueTokens(user.userId, user.email, user.role);
+    const roles = user.userRoles.map((ur: any) => ur.role.roleName);
+    const tokens = await this.issueTokens(user.userId, user.email, roles);
     await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
     await this.redisService.set(`refresh_token:${user.userId}`, tokens.refreshToken, 604800); // 7 days
 
@@ -79,7 +80,7 @@ export class AuthService {
       user: {
         userId: user.userId,
         email: user.email,
-        role: user.role,
+        roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
       },
@@ -119,7 +120,9 @@ export class AuthService {
 
     if (!storedToken || storedToken !== refreshToken)
       throw new UnauthorizedException('Refresh token đã bị thu hồi.');
-    const tokens = await this.issueTokens(user.userId, user.email, user.role);
+    
+    const roles = user.userRoles.map((ur: any) => ur.role.roleName);
+    const tokens = await this.issueTokens(user.userId, user.email, roles);
     await this.usersService.setRefreshToken(user.userId, tokens.refreshToken);
     await this.redisService.set(`refresh_token:${user.userId}`, tokens.refreshToken, 604800);
     return {
@@ -194,7 +197,7 @@ export class AuthService {
   private async issueTokens(
     userId: string,
     email: string,
-    role: string,
+    roles: string[],
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessSecret = process.env.JWT_ACCESS_SECRET ?? 'access-secret';
     const refreshSecret = process.env.JWT_REFRESH_SECRET ?? 'refresh-secret';
@@ -203,11 +206,11 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, email, role, type: 'access' } as object,
+        { sub: userId, email, roles, type: 'access' } as object,
         { secret: accessSecret, expiresIn: accessExpiresSec },
       ),
       this.jwtService.signAsync(
-        { sub: userId, email, role, type: 'refresh' } as object,
+        { sub: userId, email, roles, type: 'refresh' } as object,
         { secret: refreshSecret, expiresIn: refreshExpiresSec },
       ),
     ]);

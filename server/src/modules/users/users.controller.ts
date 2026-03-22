@@ -12,6 +12,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Role } from '../auth/decorators/roles.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -26,7 +27,7 @@ export class UsersController {
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
-    @Query('role') role?: 'CANDIDATE' | 'RECRUITER' | 'ADMIN',
+    @Query('role') role?: Role,
     @Query('status') status?: 'ACTIVE' | 'LOCKED',
   ) {
     return this.usersService.findAll({

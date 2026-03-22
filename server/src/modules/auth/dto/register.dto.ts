@@ -6,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { Role } from '../../auth/decorators/roles.decorator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com', description: 'Email đăng ký' })

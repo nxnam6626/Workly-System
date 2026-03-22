@@ -1,12 +1,20 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { RapidJobService } from './rapid-job.service';
+import { RapidJobSchedulerService } from './rapid-job-scheduler.service';
 import { lastValueFrom } from 'rxjs';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { Roles } from '@/modules/auth/decorators/roles.decorator';
+import { Role } from '@/modules/auth/decorators/roles.decorator';
 
-@ApiTags('Rapid Job Test')
+@ApiTags('Rapid Job Management')
 @Controller('rapid-job')
 export class RapidJobController {
-    constructor(private readonly rapidJobService: RapidJobService) { }
+    constructor(
+        private readonly rapidJobService: RapidJobService,
+        private readonly rapidJobSchedulerService: RapidJobSchedulerService,
+    ) { }
 
     @Get('search')
     @ApiOperation({ summary: 'Test JSearch API' })
@@ -45,6 +53,20 @@ export class RapidJobController {
         return rawJobs.map((job) => this.rapidJobService.mapLinkedInToJob(job));
     }
 
+    @Get('linkedin-v2')
+    @ApiOperation({ summary: 'Test LinkedIn V2 Job Search API (7-day)' })
+    @ApiQuery({ name: 'q', required: true, example: 'Data Engineer' })
+    @ApiQuery({ name: 'location', required: false, example: 'United States' })
+    async testLinkedInV2(
+        @Query('q') q: string,
+        @Query('location') location: string = 'United States',
+    ) {
+        const rawJobs = await lastValueFrom(
+            this.rapidJobService.fetchLinkedInJobsV2(q, location),
+        );
+        return rawJobs.map((job) => this.rapidJobService.mapLinkedInV2ToJob(job));
+    }
+
     @Get('jpf')
     @ApiOperation({ summary: 'Test Job Posting Feed API' })
     @ApiQuery({ name: 'limit', required: false, example: '10' })
@@ -53,5 +75,45 @@ export class RapidJobController {
             this.rapidJobService.fetchJobPostingFeed(parseInt(limit)),
         );
         return rawJobs.map((job) => this.rapidJobService.mapJPFToJob(job));
+    }
+
+    @Post('crawl/jsearch')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @ApiOperation({ summary: 'Manually trigger JSearch crawl' })
+    async triggerJSearch() {
+        await this.rapidJobSchedulerService.handleJSearchAutoCrawl();
+        return { message: 'JSearch crawl triggered successfully' };
+    }
+
+    @Post('crawl/linkedin')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @ApiOperation({ summary: 'Manually trigger LinkedIn crawl' })
+    async triggerLinkedIn() {
+        await this.rapidJobSchedulerService.handleLinkedInAutoCrawl();
+        return { message: 'LinkedIn crawl triggered successfully' };
+    }
+
+    @Post('crawl/linkedin-v2')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @ApiOperation({ summary: 'Manually trigger LinkedIn V2 crawl' })
+    async triggerLinkedInV2() {
+        await this.rapidJobSchedulerService.handleLinkedInV2AutoCrawl();
+        return { message: 'LinkedIn V2 crawl triggered successfully' };
+    }
+
+    @Post('crawl/jpf')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    @ApiOperation({ summary: 'Manually trigger JPF crawl' })
+    async triggerJPF() {
+        await this.rapidJobSchedulerService.handleJPFAutoCrawl();
+        return { message: 'JPF crawl triggered successfully' };
     }
 }

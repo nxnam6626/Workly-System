@@ -138,7 +138,7 @@ export class SchedulerService implements OnModuleInit {
             aiReliabilityScore: score,
             crawlSourceId: source.crawlSourceId,
             companyId: defaultCompany.companyId,
-            status: 1,
+            status: 'PENDING',
             postType: 'CRAWLED',
           }
         });

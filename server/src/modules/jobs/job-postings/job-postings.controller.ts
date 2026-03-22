@@ -14,7 +14,7 @@ import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Roles } from '@/modules/auth/decorators/roles.decorator';
-import { Role } from '@prisma/client';
+import { Role } from '@/modules/auth/decorators/roles.decorator';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 
 @Controller('job-postings')
