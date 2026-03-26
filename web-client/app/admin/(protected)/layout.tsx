@@ -18,14 +18,11 @@ import {
   Users,
   Briefcase,
   PieChart,
+  Zap,
 } from 'lucide-react';
 
 const navItems = [
-  {
-    label: 'Thống Kê',
-    href: '/admin/dashboard',
-    icon: PieChart,
-  },
+
   {
     label: 'Quản Lý Người Dùng',
     href: '/admin/users',
@@ -37,14 +34,14 @@ const navItems = [
     icon: Briefcase,
   },
   {
-    label: 'Nguồn Cào',
-    href: '/admin/crawl-sources',
-    icon: Globe,
+    label: 'Thu Thập API',
+    href: '/admin/rapid-jobs',
+    icon: Zap,
   },
   {
-    label: 'Lịch Sử Quét',
-    href: '/admin/crawl-logs',
-    icon: ClipboardList,
+    label: 'Thống Kê',
+    href: '/admin/dashboard',
+    icon: PieChart,
   },
 ];
 
@@ -59,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (!isAuthenticated) {
         router.push('/admin/login');
       } else if (!user?.roles?.includes('ADMIN')) {
-        router.push(getDashboardByRole(user?.roles?.[0] as UserRole));
+        router.push('/admin/login');
       } else if (pathname === '/admin') {
         router.push('/admin/dashboard');
       }
@@ -113,11 +110,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${
-                  active
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${active
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                  }`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 <AnimatePresence>
@@ -174,8 +170,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top header */}
         <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <LayoutDashboard className="w-4 h-4" />
-            <span>Crawler Admin</span>
+            <span>Workly Admin</span>
           </div>
           {user && (
             <div className="flex items-center gap-2">

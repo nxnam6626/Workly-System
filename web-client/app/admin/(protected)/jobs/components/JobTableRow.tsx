@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Eye } from 'lucide-react';
-import { JobPosting, JobStatus, PostType } from '@/lib/admin-jobs-service';
+import { JobPosting, JobStatus, PostType } from '@/lib/admin-api';
 
 interface JobTableRowProps {
   job: JobPosting;
@@ -41,11 +41,23 @@ export default function JobTableRow({
         <div className="flex flex-col">
           <span className="text-sm font-bold text-slate-900 line-clamp-1">{job.title}</span>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-slate-500 font-medium">{job.companyName}</span>
+            <span className="text-xs text-slate-500 font-medium">{job.company?.companyName || 'N/A'}</span>
             <span className="text-slate-300">•</span>
-            <span className="text-xs text-slate-400">{job.location}</span>
+            <span className="text-xs text-slate-400">{job.locationCity || 'N/A'}</span>
           </div>
         </div>
+      </td>
+      <td className="px-5 py-4">
+        <div className="text-xs font-bold text-emerald-600">
+          {job.salaryMin || job.salaryMax 
+            ? `${job.salaryMin?.toLocaleString() || '?'} - ${job.salaryMax?.toLocaleString() || '?'} ${job.currency || 'VND'}`
+            : 'Thỏa thuận'}
+        </div>
+      </td>
+      <td className="px-5 py-4">
+        <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+          {job.jobType || 'N/A'}
+        </span>
       </td>
       <td className="px-5 py-4">
         <span
@@ -59,20 +71,6 @@ export default function JobTableRow({
         </span>
       </td>
       <td className="px-5 py-4">
-        <div className="flex items-center gap-2 min-w-[120px]">
-          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden max-w-[80px]">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${job.aiReliabilityScore < 60 ? 'bg-red-500' : 'bg-emerald-500'}`}
-              style={{ width: `${job.aiReliabilityScore}%` }}
-            />
-          </div>
-          <span className={`text-xs font-bold ${job.aiReliabilityScore < 60 ? 'text-red-600' : 'text-emerald-600'}`}>
-            {job.aiReliabilityScore}%
-          </span>
-          {job.aiReliabilityScore < 60 && <ShieldAlert className="w-3.5 h-3.5 text-red-500 animate-pulse" />}
-        </div>
-      </td>
-      <td className="px-5 py-4">
         <span
           className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
             job.status === JobStatus.APPROVED
@@ -84,6 +82,19 @@ export default function JobTableRow({
         >
           {job.status === JobStatus.APPROVED ? 'Đã duyệt' : job.status === JobStatus.REJECTED ? 'Từ chối' : 'Chờ duyệt'}
         </span>
+      </td>
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-2 min-w-[120px]">
+          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden max-w-[80px]">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${job.aiReliabilityScore < 60 ? 'bg-red-500' : 'bg-emerald-500'}`}
+              style={{ width: `${job.aiReliabilityScore}%` }}
+            />
+          </div>
+          <span className={`text-xs font-bold ${job.aiReliabilityScore < 60 ? 'text-red-600' : 'text-emerald-600'}`}>
+            {job.aiReliabilityScore}%
+          </span>
+        </div>
       </td>
       <td className="px-5 py-4 text-right">
         <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

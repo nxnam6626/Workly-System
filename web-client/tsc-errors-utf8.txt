@@ -1,0 +1,54 @@
+﻿
+> web-client@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.4 (Turbopack)
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 6.3s
+  Running TypeScript ...
+node.exe : Failed to compile.
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Fa 
+   iled to compile.:String) [], RemoteExceptio  
+  n
+    + FullyQualifiedErrorId : NativeCommandErro 
+   r
+ 
+
+./app/admin/(protected)/jobs/components/JobFilte
+rs.tsx:50:53
+Type error: Type 'string | undefined' is not 
+assignable to type 'number | undefined'.
+  Type 'string' is not assignable to type 
+'number'.
+
+[0m [90m 48 |[39m       
+[33m<[39m[33mselect[39m
+ [90m 49 |[39m         value[33m=[39m{filter
+s[33m.[39mcrawlSourceId [33m||[39m 
+[32m''[39m}
+[31m[1m>[22m[39m[90m 50 |[39m         
+onChange[33m=[39m{(e) [33m=>[39m 
+setFilters((f) [33m=>[39m ({ 
+[33m...[39mf[33m,[39m 
+crawlSourceId[33m:[39m 
+e[33m.[39mtarget[33m.[39mvalue [33m||[39m 
+undefined }))}
+ [90m    |[39m                                
+                     [31m[1m^[22m[39m
+ [90m 51 |[39m         
+className[33m=[39m[32m"px-3 py-2 text-sm 
+border border-slate-200 rounded-xl 
+focus:outline-none focus:ring-2 
+focus:ring-indigo-500/30 bg-white 
+max-w-[150px]"[39m
+ [90m 52 |[39m       [33m>[39m
+ [90m 53 |[39m         
+[33m<[39m[33moption[39m value[33m=[39m[32
+m""[39m[33m>[39m[33mNguß╗ôn[39m c├áo[33m<
+[39m[33m/[39m[33moption[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and 
+signal: null

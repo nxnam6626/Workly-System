@@ -23,8 +23,8 @@ export default function AdminLoginPage() {
       if (user.roles.includes("ADMIN")) {
         router.push(getDashboardByRole("ADMIN"));
       } else {
-        // Not an admin, kick them out
-        router.push("/");
+        // Not an admin, don't kick them to "/", just show error or let them stay
+        setError("Tài khoản hiện tại không có quyền quản trị. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản cấp cao hơn.");
       }
     }
   }, [isAuthenticated, user, router]);

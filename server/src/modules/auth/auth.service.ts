@@ -189,7 +189,18 @@ export class AuthService {
     if (payload.type !== 'access')
       throw new UnauthorizedException('Token không phải access token.');
     const user = await this.usersService.findOne(payload.sub);
-    return { valid: true, user };
+    const roles = user.userRoles.map((ur: any) => ur.role.roleName);
+    
+    return { 
+      valid: true, 
+      user: {
+        userId: user.userId,
+        email: user.email,
+        roles: roles,
+        candidate: user.candidate,
+        recruiter: user.recruiter,
+      }
+    };
   }
 
   /** Quên mật khẩu: Tạo OTP 6 số lưu vào Redis và gửi mail. */

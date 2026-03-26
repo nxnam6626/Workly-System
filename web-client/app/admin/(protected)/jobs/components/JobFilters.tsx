@@ -1,16 +1,14 @@
 'use client';
 
 import { Search, ShieldCheck } from 'lucide-react';
-import { JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-jobs-service';
-import { CrawlSource } from '@/lib/crawler-admin';
+import { JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-api';
 
 interface JobFiltersProps {
   filters: AdminFilterJobPostingDto;
   setFilters: (update: (prev: AdminFilterJobPostingDto) => AdminFilterJobPostingDto) => void;
-  sources: CrawlSource[];
 }
 
-export default function JobFilters({ filters, setFilters, sources }: JobFiltersProps) {
+export default function JobFilters({ filters, setFilters }: JobFiltersProps) {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[240px] max-w-sm">
@@ -45,18 +43,7 @@ export default function JobFilters({ filters, setFilters, sources }: JobFiltersP
         <option value={PostType.CRAWLED}>Crawler</option>
       </select>
 
-      <select
-        value={filters.crawlSourceId || ''}
-        onChange={(e) => setFilters((f) => ({ ...f, crawlSourceId: e.target.value || undefined }))}
-        className="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white max-w-[150px]"
-      >
-        <option value="">Nguồn cào</option>
-        {sources.map((s, idx) => (
-          <option key={s.crawlSourceId || idx} value={s.crawlSourceId}>
-            {s.sourceName}
-          </option>
-        ))}
-      </select>
+
 
       <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl">
         <ShieldCheck className="w-4 h-4 text-slate-400" />

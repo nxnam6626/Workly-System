@@ -1,2 +1,0 @@
-﻿src/modules/auth/auth.service.ts(66,19): error TS2304: Cannot find name 'ConflictException'.
-src/modules/auth/auth.service.ts(70,19): error TS2304: Cannot find name 'ConflictException'.

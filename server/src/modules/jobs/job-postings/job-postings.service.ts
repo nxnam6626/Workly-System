@@ -18,7 +18,10 @@ export class JobPostingsService {
       throw new NotFoundException('Thông tin nhà tuyển dụng hoặc công ty chưa được thiết lập.');
     }
 
-    const { deadline, salaryMin, salaryMax, ...rest } = createJobPostingDto;
+    const { deadline, salaryMin, salaryMax, ...rest } = createJobPostingDto as any;
+    
+    // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
+    delete rest.crawlSourceId;
 
     // Kiểm tra logic lương
     if (salaryMin !== undefined && salaryMax !== undefined && salaryMin > salaryMax) {
@@ -84,14 +87,14 @@ export class JobPostingsService {
 
 
   async findAllAdmin(query: AdminFilterJobPostingDto) {
-    const { status, postType, minAiScore, crawlSourceId, searchTerm, page = 1, limit = 10 } = query;
+    const { status, postType, minAiScore, searchTerm, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) where.status = status;
     if (postType) where.postType = postType;
     if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
-    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+
     if (searchTerm) {
       where.OR = [
         { title: { contains: searchTerm, mode: 'insensitive' } },
@@ -107,7 +110,6 @@ export class JobPostingsService {
         include: {
           company: true,
           recruiter: { include: { user: { select: { email: true } } } },
-          crawlSource: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -131,12 +133,12 @@ export class JobPostingsService {
   }
 
   async removeBulk(query: AdminFilterJobPostingDto) {
-    const { status, postType, minAiScore, crawlSourceId, searchTerm } = query;
+    const { status, postType, minAiScore, searchTerm } = query;
     const where: any = {};
     if (status) where.status = status;
     if (postType) where.postType = postType;
     if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
-    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+
     
     if (searchTerm && searchTerm.includes(',')) {
       where.jobPostingId = { in: searchTerm.split(',') };
@@ -157,12 +159,12 @@ export class JobPostingsService {
   }
 
   async updateStatusBulk(query: AdminFilterJobPostingDto, status: JobStatus, adminId: string) {
-    const { status: currentStatus, postType, minAiScore, crawlSourceId, searchTerm } = query;
+    const { status: currentStatus, postType, minAiScore, searchTerm } = query;
     const where: any = {};
     if (currentStatus) where.status = currentStatus;
     if (postType) where.postType = postType;
     if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
-    if (crawlSourceId) where.crawlSourceId = crawlSourceId;
+
     
     // If searchTerm is provided as a comma-separated list of IDs (as the frontend does now)
     if (searchTerm && searchTerm.includes(',')) {

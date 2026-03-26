@@ -37,7 +37,7 @@ export class SearchService implements OnModuleInit {
     }
   }
 
-  async indexJob(job: { id: string; title: string; companyId: string; crawlSourceId?: string; originalUrl?: string; description?: string }) {
+  async indexJob(job: { id: string; title: string; companyId: string; originalUrl?: string; description?: string }) {
     try {
       await this.client.index({
         index: 'jobs',
@@ -46,7 +46,6 @@ export class SearchService implements OnModuleInit {
           title: job.title,
           description: job.description,
           companyId: job.companyId,
-          crawlSourceId: job.crawlSourceId,
           originalUrl: job.originalUrl,
         },
       });

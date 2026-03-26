@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import api from '@/lib/api';
 
 interface User {
-  id: string;
+  userId: string;
   email: string;
   name?: string;
   roles?: string[];
+  candidate?: any;
+  recruiter?: any;
 }
 
 interface AuthState {
@@ -41,6 +43,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       if (typeof window !== 'undefined') {
         localStorage.setItem('refreshToken', refreshToken);
+      }
+
+      // Map name for consistency
+      if (user && user.candidate?.fullName) {
+        user.name = user.candidate.fullName;
       }
 
       set({
@@ -135,10 +142,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       console.log('[checkAuth] user from validate:', validateData.user);
+      
+      const user = validateData.user;
+      // Map candidate name if exists
+      if (user && user.candidate?.fullName) {
+        user.name = user.candidate.fullName;
+      }
 
       set({
         accessToken,
-        user: validateData.user,
+        user: user,
         isAuthenticated: true,
         isLoading: false,
       });

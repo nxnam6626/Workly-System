@@ -16,9 +16,7 @@ export class AdminFilterJobPostingDto {
   @Type(() => Number)
   minAiScore?: number;
 
-  @IsOptional()
-  @IsString()
-  crawlSourceId?: string;
+
 
   @IsOptional()
   @IsString()

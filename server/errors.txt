@@ -1,1 +1,0 @@
-﻿src/crawler/scheduler.service.ts(112,21): error TS18047: 'minScore' is possibly 'null'.

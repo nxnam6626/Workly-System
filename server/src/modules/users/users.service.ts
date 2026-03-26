@@ -9,7 +9,7 @@ import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/decorators/roles.decorator';
-import type { StatusUser } from '../../generated/prisma';
+import type { StatusUser } from '@prisma/client';
 
 import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';

@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Briefcase } from 'lucide-react';
-import { JobPosting } from '@/lib/admin-jobs-service';
+import { JobPosting } from '@/lib/admin-api';
 import JobTableRow from './JobTableRow';
 import JobPagination from './JobPagination';
 
@@ -70,9 +70,11 @@ export default function JobTable({
                 />
               </th>
               <th className="px-5 py-4 min-w-[300px]">Thông tin việc làm</th>
+              <th className="px-5 py-4">Mức lương</th>
+              <th className="px-5 py-4">Loại hình</th>
               <th className="px-5 py-4">Phân loại</th>
-              <th className="px-5 py-4">Độ tin cậy AI</th>
               <th className="px-5 py-4">Trạng thái</th>
+              <th className="px-5 py-4">Độ tin cậy AI</th>
               <th className="px-5 py-4 text-right">Thao tác</th>
             </tr>
           </thead>

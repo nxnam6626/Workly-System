@@ -63,6 +63,13 @@ enum JobStatus {
   EXPIRED
 }
 
+enum RawJobStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
 model User {
   userId   String     @id @default(uuid())
   email    String     @unique
@@ -114,8 +121,7 @@ model Admin {
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])
 
-  crawlSources CrawlSource[]
-  filterRules  FilterRule[]
+
   companies    Company[]
 }
 
@@ -160,56 +166,14 @@ model Recruiter {
 }
 
 
-model CrawlConfig {
-  crawlConfigId       String  @id @default(uuid())
-  titleSelector       String
-  salarySelector      String?
-  descriptionSelector String
-  schedule            String
-  renderJs            Boolean @default(false)
-
-  crawlSource CrawlSource?
-}
-
-model CrawlSource {
-  crawlSourceId String    @id @default(uuid())
-  sourceName    String
-  baseUrl       String
-  isActive      Boolean   @default(true)
-  lastCrawlAt   DateTime?
-
-  adminId       String
-  admin         Admin       @relation(fields: [adminId], references: [adminId])
-  crawlConfigId String      @unique
-  crawlConfig   CrawlConfig @relation(fields: [crawlConfigId], references: [crawlConfigId])
-
-  crawlLogs   CrawlLog[]
-  filterRules FilterRule[]
-  jobPostings JobPosting[]
-}
-
 model CrawlLog {
   crawlLogId     String      @id @default(uuid())
+  providerName   String
   status         CrawlStatus
   startTime      DateTime    @default(now())
   endTime        DateTime?
   itemsProcessed Int?
   errorMessage   String?
-
-  crawlSourceId String
-  crawlSource   CrawlSource @relation(fields: [crawlSourceId], references: [crawlSourceId])
-}
-
-model FilterRule {
-  filterRuleId        String       @id @default(uuid())
-  keyword             String
-  minReliabilityScore Float?
-  action              FilterAction
-
-  adminId       String
-  admin         Admin       @relation(fields: [adminId], references: [adminId])
-  crawlSourceId String
-  crawlSource   CrawlSource @relation(fields: [crawlSourceId], references: [crawlSourceId])
 }
 
 model Company {
@@ -234,6 +198,27 @@ model Company {
 
 
 
+model RawJob {
+  rawJobId    String   @id @default(uuid())
+  source      String
+  fingerprint String   @unique
+  rawPayload  Json
+  title       String?
+  companyName String?
+  location    String?
+  originalUrl String?
+  jobType     String?
+  
+  status      RawJobStatus   @default(PENDING)
+  errorMessage String?
+  
+  lastSeenAt  DateTime @default(now()) @db.Timestamp
+  createdAt   DateTime @default(now()) @db.Timestamp
+  updatedAt   DateTime @updatedAt @db.Timestamp
+
+  jobPosting  JobPosting?
+}
+
 model JobPosting {
   jobPostingId       String    @id @default(uuid())
   title              String
@@ -251,22 +236,23 @@ model JobPosting {
   status             JobStatus @default(PENDING)
   postType           PostType  @default(CRAWLED)
   isVerified         Boolean   @default(false)
-  originalUrl        String?
+  originalUrl        String    @unique
   aiReliabilityScore Float?
   createdAt          DateTime  @default(now()) @db.Timestamp
   updatedAt          DateTime  @updatedAt @db.Timestamp
   approvedBy         String?
 
+  rawJobId           String?   @unique
+  rawJob             RawJob?   @relation(fields: [rawJobId], references: [rawJobId])
+
+
   recruiterId   String?
   recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId])
   companyId     String
   company       Company      @relation(fields: [companyId], references: [companyId])
-  crawlSourceId String?
-  crawlSource   CrawlSource? @relation(fields: [crawlSourceId], references: [crawlSourceId])
-
   applications Application[]
 
-  @@unique([originalUrl, crawlSourceId])
+
 }
 
 model CV {

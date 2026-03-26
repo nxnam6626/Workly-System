@@ -3,7 +3,9 @@ import { Cron } from '@nestjs/schedule';
 import { RapidJobService } from './rapid-job.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SearchService } from '../../search/search.service';
+import { LlmExtractionService } from './services/llm-extraction.service';
 import { lastValueFrom } from 'rxjs';
+import { MappedJobData } from './interfaces/rapid-job.interface';
 import { Role } from '@/modules/auth/decorators/roles.decorator';
 import {
   JSEARCH_WEEKLY_SCHEDULE,
@@ -29,6 +31,7 @@ export class RapidJobSchedulerService {
     private readonly rapidJobService: RapidJobService,
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
+    private readonly llmExtractionService: LlmExtractionService,
   ) { }
 
   // =========================================================================
@@ -43,10 +46,7 @@ export class RapidJobSchedulerService {
   async handleJSearchAutoCrawl() {
     const day = new Date().getDay(); // 0=CN … 6=T7
     const plan = JSEARCH_WEEKLY_SCHEDULE[day] ?? JSEARCH_WEEKLY_SCHEDULE[1];
-    this.logger.log(`[JSearch] Ngày ${day} | Chủ đề: ${plan.theme} | ${plan.queries.length} queries`);
-
-    const crawlSourceId = await this.getOrCreateCrawlSourceId();
-    if (!crawlSourceId) return;
+    this.logger.log(`[JSearch] Ngày ${day} | Chủ đề: ${plan.theme} | ${plan.queries.length} truy vấn`);
 
     for (const { query, label } of plan.queries) {
       try {
@@ -60,8 +60,8 @@ export class RapidJobSchedulerService {
         }
         await this.processBatch(
           items,
-          (item) => this.rapidJobService.mapJSearchToJob(item),
-          crawlSourceId,
+          (item) => this.rapidJobService.extractJSearchUrlAndDesc(item),
+          (item, llmData) => this.rapidJobService.mapJSearchToJob(item, llmData),
           `JSearch:${label}`,
           RELIABILITY.JSearch,
         );
@@ -81,14 +81,11 @@ export class RapidJobSchedulerService {
     const title = LINKEDIN_LETSCRAPE_SCHEDULE[day];
 
     if (!title) {
-      this.logger.log(`[LinkedIn Letscrape] Ngày ${day} là Chủ nhật → Skip để tiết kiệm quota`);
+      this.logger.log(`[LinkedIn Letscrape] Ngày ${day} là Chủ nhật → Bỏ qua để tiết kiệm quota`);
       return;
     }
 
-    this.logger.log(`[LinkedIn Letscrape] Ngày ${day} | Title: "${title}"`);
-
-    const crawlSourceId = await this.getOrCreateCrawlSourceId();
-    if (!crawlSourceId) return;
+    this.logger.log(`[LinkedIn Letscrape] Ngày ${day} | Tiêu đề: "${title}"`);
 
     try {
       const items = await lastValueFrom(
@@ -100,8 +97,8 @@ export class RapidJobSchedulerService {
       }
       await this.processBatch(
         items,
-        (item) => this.rapidJobService.mapLinkedInToJob(item),
-        crawlSourceId,
+        (item) => this.rapidJobService.extractLinkedInUrlAndDesc(item),
+        async (item, llmData) => this.rapidJobService.mapLinkedInToJob(item, llmData),
         'LinkedIn Letscrape',
         RELIABILITY.LinkedIn,
       );
@@ -116,10 +113,7 @@ export class RapidJobSchedulerService {
    */
   @Cron('0 8 * * 1')
   async handleLinkedInV2AutoCrawl() {
-    this.logger.log(`[LinkedIn Fantastic] Weekly bulk crawl | Query: "${LINKEDIN_BULK_QUERY}"`);
-
-    const crawlSourceId = await this.getOrCreateCrawlSourceId();
-    if (!crawlSourceId) return;
+    this.logger.log(`[LinkedIn Fantastic] Quét số lượng lớn hàng tuần | Truy vấn: "${LINKEDIN_BULK_QUERY}"`);
 
     try {
       const items = await lastValueFrom(
@@ -131,8 +125,8 @@ export class RapidJobSchedulerService {
       }
       await this.processBatch(
         items,
-        (item) => this.rapidJobService.mapLinkedInV2ToJob(item),
-        crawlSourceId,
+        (item) => this.rapidJobService.extractLinkedInV2UrlAndDesc(item),
+        async (item, llmData) => this.rapidJobService.mapLinkedInV2ToJob(item, llmData),
         'LinkedIn Fantastic',
         RELIABILITY.LinkedInV2,
       );
@@ -147,10 +141,7 @@ export class RapidJobSchedulerService {
    */
   @Cron('0 10 * * 0')
   async handleJPFAutoCrawl() {
-    this.logger.log(`[JPF] Weekly crawl | Filter: "${JPF_TITLE_FILTER.substring(0, 60)}..."`);
-
-    const crawlSourceId = await this.getOrCreateCrawlSourceId();
-    if (!crawlSourceId) return;
+    this.logger.log(`[JPF] Quét hàng tuần | Bộ lọc: "${JPF_TITLE_FILTER.substring(0, 60)}..."`);
 
     try {
       const items = await lastValueFrom(
@@ -162,8 +153,8 @@ export class RapidJobSchedulerService {
       }
       await this.processBatch(
         items,
-        (item) => this.rapidJobService.mapJPFToJob(item),
-        crawlSourceId,
+        (item) => this.rapidJobService.extractJPFUrlAndDesc(item),
+        async (item, llmData) => this.rapidJobService.mapJPFToJob(item, llmData),
         'JPF',
         RELIABILITY.JPF,
       );
@@ -184,103 +175,138 @@ export class RapidJobSchedulerService {
    */
   private async processBatch(
     rawItems: any[],
-    mapper: (item: any) => ReturnType<RapidJobService['mapJSearchToJob']>,
-    crawlSourceId: string,
+    extractor: (item: any) => { originalUrl: string, rawDescription: string },
+    mapper: (item: any, llmData: any) => Promise<MappedJobData>,
     sourceName: string,
     reliabilityScore: number,
   ) {
     let saved = 0;
     let skipped = 0;
 
-    for (const item of rawItems) {
-      try {
-        const mapped = mapper(item);
-        const job = await this.rapidJobService.syncJobToDb(
-          mapped,
-          crawlSourceId,
-          reliabilityScore,
-        );
+    this.logger.log(`\n=== BẮT ĐẦU XỬ LÝ BATCH [${sourceName}] : ${rawItems.length} tin ===`);
 
-        if (job) {
-          // Đồng bộ vào search index (Elasticsearch)
-          await this.searchService.indexJob({
-            id: job.jobPostingId,
-            title: job.title,
-            description: job.description || undefined,
-            companyId: job.companyId,
-            originalUrl: job.originalUrl || undefined,
-          });
-          saved++;
+    // ── Lớp 1: Lấy URL để check trùng hàng loạt ──
+    const extractions = rawItems.map(item => ({ item, ...extractor(item) }));
+    const urls = extractions.map(e => e.originalUrl).filter(Boolean);
+    const existingJobs = await this.prisma.jobPosting.findMany({
+      where: { originalUrl: { in: urls } },
+      select: { originalUrl: true }
+    });
+    const existingSet = new Set(existingJobs.map(j => j.originalUrl));
+
+    // ── Xử lý tuần tự từng tin để log chi tiết ──
+    for (let i = 0; i < extractions.length; i++) {
+        const e = extractions[i];
+        const jobTitle = e.item.job_title || e.item.title || 'Không rõ tiêu đề';
+        this.logger.log(`[Tin ${i+1}/${extractions.length}] : ${jobTitle}`);
+
+        // 1. Kiểm tra trùng
+        if (!e.originalUrl || existingSet.has(e.originalUrl)) {
+            this.logger.log(`   -> [Lớp 1] Bỏ qua: Tin đã tồn tại hoặc thiếu URL.`);
+            skipped++;
+            continue;
         }
-      } catch {
-        skipped++;
-        this.logger.debug(`[${sourceName}] Bỏ qua một item (lỗi hoặc không có URL)`);
-      }
+
+        // 2. Kiểm tra nội dung (Lọc rác)
+        if (!e.rawDescription || e.rawDescription.trim().length < 50) {
+            this.logger.log(`   -> [Lớp 2] Bỏ qua: Nội dung quá ngắn hoặc rác (< 50 ký tự).`);
+            skipped++;
+            continue;
+        }
+
+        // 3. Xử lý AI & Lưu DB
+        try {
+            this.logger.log(`   -> [Lớp 3] Đang gọi AI Gemini để trích xuất...`);
+            const llmData = await this.llmExtractionService.extract(e.rawDescription);
+            
+            if (llmData) {
+                this.logger.log(`   -> [AI] Trích xuất thành công JSON (Lương: ${llmData.salaryMin}-${llmData.salaryMax})`);
+            } else {
+                this.logger.warn(`   -> [AI] Gemini không trích xuất được dữ liệu.`);
+            }
+
+            const mapped = await mapper(e.item, llmData);
+            const job = await this.rapidJobService.syncJobToDb(mapped, reliabilityScore, sourceName);
+
+            if (job) {
+                await this.searchService.indexJob({
+                    id: job.jobPostingId,
+                    title: job.title,
+                    description: job.description || undefined,
+                    companyId: job.companyId,
+                    originalUrl: job.originalUrl || undefined,
+                });
+                saved++;
+                this.logger.log(`   -> [Thành công] Đã lưu mã: ${job.jobPostingId}`);
+            }
+        } catch (err) {
+            skipped++;
+            this.logger.error(`   -> [Lỗi] Không thể xử lý tin này: ${err.message}`);
+        }
     }
 
-    this.logger.log(
-      `[${sourceName}] Đã lưu: ${saved} | Bỏ qua: ${skipped} | Tổng: ${rawItems.length}`,
-    );
+    this.logger.log(`=== KẾT THÚC BATCH : Đã lưu ${saved} | Bỏ qua ${skipped} ===\n`);
   }
 
   // =========================================================================
-  //  SETUP HELPER — Khởi tạo CrawlSource nếu chưa có
+  //  MANUAL SAVE PREVIEW TO DB
   // =========================================================================
 
   /**
-   * Tìm hoặc tạo record CrawlSource "RapidAPI Jobs".
-   * CrawlSource dùng chung cho tất cả 3 API (JSearch / LinkedIn / JPF).
-   * @returns crawlSourceId hoặc null nếu không tìm được admin
+   * Cho phép Admin lưu các job previewed ngay lập tức vào database 
+   * tái sử dụng cơ chế dedup, mapping và elasticsearch indexing chuẩn.
    */
-  private async getOrCreateCrawlSourceId(): Promise<string | null> {
-    // Kiểm tra đã tồn tại chưa
-    const existing = await this.prisma.crawlSource.findFirst({
-      where: { sourceName: 'RapidAPI Jobs' },
-    });
-    if (existing) return existing.crawlSourceId;
+  async savePreviewedBatch(jobs: any[], providerId: string) {
+    const scoreMap: Record<string, number> = {
+      'linkedin': 8,
+      'linkedin-v2': 8,
+      'jsearch': 6,
+      'jpf': 5,
+    };
+    const reliabilityScore = scoreMap[providerId] || 5;
+    let saved = 0;
 
-    // Tìm admin để gán
-    let admin = await this.prisma.admin.findFirst();
-    if (!admin) {
-      const adminUser = await this.prisma.user.findFirst({
-        where: {
-          userRoles: {
-            some: {
-              role: {
-                roleName: Role.ADMIN,
-              },
-            },
-          },
-        },
-      });
-      if (!adminUser) {
-        this.logger.error('[Scheduler] Không tìm thấy ADMIN user để tạo CrawlSource.');
-        return null;
+    // Tạo 1 mock log đệm (tùy chọn nhưng tốt để lưu lịch sử thủ công)
+    const crawlLog = await this.prisma.crawlLog.create({
+      data: {
+        status: 'RUNNING',
+        providerName: providerId,
       }
-      admin = await this.prisma.admin.create({
-        data: { userId: adminUser.userId, adminLevel: 1 },
-      });
+    });
+
+    for (const job of jobs) {
+      try {
+        const savedJob = await this.rapidJobService.syncJobToDb(
+          job, // Tại frontend, job đã ở dạng mapped (MappedJobData)
+          reliabilityScore,
+          providerId,
+        );
+
+        if (savedJob) {
+          await this.searchService.indexJob({
+            id: savedJob.jobPostingId,
+            title: savedJob.title,
+            description: savedJob.description || undefined,
+            companyId: savedJob.companyId,
+            originalUrl: savedJob.originalUrl || undefined,
+          });
+          saved++;
+        }
+      } catch (err) {
+        this.logger.error(`Failed to save preview job: ${err.message}`);
+      }
     }
 
-    // Tạo CrawlConfig + CrawlSource
-    const config = await this.prisma.crawlConfig.create({
+    // Đánh dấu thành công log
+    await this.prisma.crawlLog.update({
+      where: { crawlLogId: crawlLog.crawlLogId },
       data: {
-        titleSelector: 'N/A',
-        descriptionSelector: 'N/A',
-        schedule: '0 */4 * * *',
-      },
+        status: 'SUCCESS',
+        endTime: new Date(),
+        itemsProcessed: saved,
+      }
     });
 
-    const source = await this.prisma.crawlSource.create({
-      data: {
-        sourceName: 'RapidAPI Jobs',
-        baseUrl: 'https://rapidapi.com',
-        adminId: admin.adminId,
-        crawlConfigId: config.crawlConfigId,
-      },
-    });
-
-    this.logger.log(`[Scheduler] Tạo CrawlSource mới: ${source.crawlSourceId}`);
-    return source.crawlSourceId;
+    return { saved, total: jobs.length };
   }
 }

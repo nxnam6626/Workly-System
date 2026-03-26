@@ -9,8 +9,7 @@ import {
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
-import { adminJobsApi, JobPosting, JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-jobs-service';
-import { crawlSourcesApi, CrawlSource } from '@/lib/crawler-admin';
+import { adminJobsApi, JobPosting, JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-api';
 import JobQuickViewModal from './JobQuickViewModal';
 import JobStats from './components/JobStats';
 import JobFilters from './components/JobFilters';
@@ -19,7 +18,6 @@ import BulkActionsBar from './components/BulkActionsBar';
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
-  const [sources, setSources] = useState<CrawlSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -31,7 +29,6 @@ export default function JobsPage() {
     status: JobStatus.PENDING,
     postType: undefined,
     minAiScore: undefined,
-    crawlSourceId: undefined,
     searchTerm: '',
   });
 
@@ -59,22 +56,9 @@ export default function JobsPage() {
     }
   }, [filters, page]);
 
-  const fetchSources = useCallback(async () => {
-    try {
-      const data = await crawlSourcesApi.getAll();
-      setSources(data);
-    } catch (err) {
-      console.error('Failed to fetch sources', err);
-    }
-  }, []);
-
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
-
-  useEffect(() => {
-    fetchSources();
-  }, [fetchSources]);
 
   const handleApprove = async (id: string) => {
     setIsProcessing(id);
@@ -172,7 +156,7 @@ export default function JobsPage() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
         <div className="p-4 border-b border-slate-100 bg-slate-50/30 space-y-4">
-            <JobFilters filters={filters} setFilters={setFilters} sources={sources} />
+            <JobFilters filters={filters} setFilters={setFilters} />
             <BulkActionsBar 
               selectedCount={selectedIds.length}
               onBulkApprove={handleBulkApprove}

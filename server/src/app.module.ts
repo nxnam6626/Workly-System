@@ -8,9 +8,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { MailModule } from './mail/mail.module';
 import { SearchModule } from './modules/search/search.module';
-import { CrawlSourceModule } from './modules/jobs/crawl-source/crawl-source.module';
-import { CrawlerModule } from './modules/jobs/crawler/crawler.module';
-import { FilterRuleModule } from './modules/jobs/filter-rule/filter-rule.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RapidJobModule } from './modules/jobs/rapid-job/rapid-job.module';
 import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.module';
@@ -24,9 +21,6 @@ import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.modu
     RedisModule,
     MailModule,
     SearchModule,
-    CrawlSourceModule,
-    CrawlerModule,
-    FilterRuleModule,
     ScheduleModule.forRoot(),
     RapidJobModule,
   ],

@@ -130,7 +130,7 @@ export default function RegisterPage() {
           {isSuccess && (
             <div className="mb-6 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
-              <span>Đăng ký tài khoản thành công! Đang chuyển hướng bạn đến bảng điều khiển...</span>
+              <span>Đăng ký tài khoản thành công! Đang chuyển hướng đến trang chủ...</span>
             </div>
           )}
 
