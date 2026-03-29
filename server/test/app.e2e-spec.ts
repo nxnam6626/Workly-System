@@ -1,3 +1,9 @@
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Nạp file .env từ thư mục gốc
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
