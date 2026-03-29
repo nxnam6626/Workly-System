@@ -7,6 +7,7 @@ import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { JobAlertsService } from '../../job-alerts/job-alerts.service';
+import { SearchService } from '../../search/search.service';
 
 @Injectable()
 export class JobPostingsService {
@@ -14,6 +15,7 @@ export class JobPostingsService {
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
     private jobAlertsService: JobAlertsService,
+    private searchService: SearchService,
   ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
@@ -57,6 +59,52 @@ export class JobPostingsService {
 
 
   async findAll(query: FilterJobPostingDto) {
+    const { search, location, jobType, page = 1, limit = 10, industry, experience, salaryMin, salaryMax } = query;
+    
+    // Use Elasticsearch for searching and filtering IDs
+    const { ids, total } = await this.searchService.searchJobs({
+      search,
+      location,
+      jobType,
+      industry,
+      experience,
+      salaryMin,
+      salaryMax,
+      page,
+      limit,
+    });
+
+    if (ids.length === 0 && total === 0 && !search) {
+      // Fallback or initial state if ES is empty but we have jobs in DB
+      // This is helpful if sync hasn't run yet
+      return this.findAllPrisma(query);
+    }
+
+    if (ids.length === 0) {
+      return { items: [], total: 0, page, limit };
+    }
+
+    // Fetch full data from Prisma using IDs from ES
+    const items = await this.prisma.jobPosting.findMany({
+      where: {
+        jobPostingId: { in: ids },
+      },
+      include: {
+        company: true,
+        recruiter: true,
+      },
+    });
+
+    // Sort items to match ES order (relevance or custom sort)
+    const sortedItems = ids
+      .map(id => items.find(item => item.jobPostingId === id))
+      .filter(item => !!item);
+
+    return { items: sortedItems, total, page, limit };
+  }
+
+  // Backup method using Prisma directly
+  private async findAllPrisma(query: FilterJobPostingDto) {
     const { search, location, jobType, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -133,14 +181,24 @@ export class JobPostingsService {
 
     const { deadline, ...rest } = updateJobPostingDto;
 
-    return this.prisma.jobPosting.update({
+    const result = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         ...rest,
         ...(deadline && { deadline: new Date(deadline) }),
         updatedAt: new Date(),
       },
+      include: { company: true }
     });
+
+    // Update ES if approved
+    if (result.status === JobStatus.APPROVED) {
+      this.syncJobToES(result);
+    } else {
+      await this.searchService.deleteJob(id);
+    }
+
+    return result;
   }
 
 
@@ -189,6 +247,9 @@ export class JobPostingsService {
 
     if (status === JobStatus.APPROVED) {
       this.triggerJobNotifications(updatedJob);
+      this.syncJobToES(updatedJob);
+    } else {
+      await this.searchService.deleteJob(id);
     }
 
     return updatedJob;
@@ -279,6 +340,15 @@ export class JobPostingsService {
       });
       for (const job of approvedJobs) {
         this.triggerJobNotifications(job);
+        this.syncJobToES(job);
+      }
+    } else {
+      // If bulk reject/expire, remove from ES
+      const jobsToProcess = await this.prisma.jobPosting.findMany({
+        where: { ...where },
+      });
+      for (const job of jobsToProcess) {
+        await this.searchService.deleteJob(job.jobPostingId);
       }
     }
 
@@ -286,10 +356,42 @@ export class JobPostingsService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-
-    return this.prisma.jobPosting.delete({
+    const job = await this.findOne(id);
+    await this.prisma.jobPosting.delete({
       where: { jobPostingId: id },
     });
+    await this.searchService.deleteJob(id);
+    return { success: true };
+  }
+
+  private async syncJobToES(job: any) {
+    await this.searchService.indexJob({
+      id: job.jobPostingId,
+      title: job.title,
+      description: job.description,
+      companyId: job.companyId,
+      companyName: job.company?.companyName || undefined,
+      originalUrl: job.originalUrl,
+      locationCity: job.locationCity,
+      jobType: job.jobType,
+      experience: job.experience,
+      salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,
+      salaryMax: job.salaryMax ? Number(job.salaryMax) : undefined,
+      status: job.status,
+      createdAt: job.createdAt,
+    });
+  }
+
+  async syncAllJobsToES() {
+    const jobs = await this.prisma.jobPosting.findMany({
+      where: { status: JobStatus.APPROVED },
+      include: { company: true }
+    });
+    
+    console.log(`[JobPostingsService] Syncing ${jobs.length} jobs to ES...`);
+    for (const job of jobs) {
+      await this.syncJobToES(job);
+    }
+    return { count: jobs.length };
   }
 }

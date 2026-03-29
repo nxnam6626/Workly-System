@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, Min, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, IsEnum, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { JobType } from '@prisma/client';
 
@@ -14,6 +14,24 @@ export class FilterJobPostingDto {
   @IsOptional()
   @IsEnum(JobType)
   jobType?: JobType;
+
+  @IsOptional()
+  @IsString()
+  industry?: string;
+
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  salaryMin?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  salaryMax?: number;
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))

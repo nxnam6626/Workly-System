@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -54,5 +55,11 @@ export class AdminJobPostingsController {
   @ApiOperation({ summary: 'Duyệt hàng loạt dựa trên bộ lọc' })
   bulkApprove(@Query() query: AdminFilterJobPostingDto, @CurrentUser('userId') adminId: string) {
     return this.jobPostingsService.updateStatusBulk(query, JobStatus.APPROVED, adminId);
+  }
+
+  @Post('sync-elasticsearch')
+  @ApiOperation({ summary: 'Đồng bộ hóa tất cả tin đã duyệt vào Elasticsearch' })
+  syncElasticsearch() {
+    return this.jobPostingsService.syncAllJobsToES();
   }
 }

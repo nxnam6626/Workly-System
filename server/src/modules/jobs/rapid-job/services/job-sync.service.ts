@@ -88,6 +88,7 @@ export class JobSyncService {
           aiReliabilityScore: reliabilityScore,
           isVerified: false,
         },
+        include: { company: true },
       });
     });
   }

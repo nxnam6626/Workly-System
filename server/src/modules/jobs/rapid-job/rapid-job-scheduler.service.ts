@@ -234,7 +234,15 @@ export class RapidJobSchedulerService {
                     title: job.title,
                     description: job.description || undefined,
                     companyId: job.companyId,
+                    companyName: job.company?.companyName || undefined,
                     originalUrl: job.originalUrl || undefined,
+                    locationCity: job.locationCity || undefined,
+                    jobType: job.jobType || undefined,
+                    experience: job.experience || undefined,
+                    salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,
+                    salaryMax: job.salaryMax ? Number(job.salaryMax) : undefined,
+                    status: job.status,
+                    createdAt: job.createdAt,
                 });
                 saved++;
                 this.logger.log(`   -> [Thành công] Đã lưu mã: ${job.jobPostingId}`);
@@ -288,7 +296,15 @@ export class RapidJobSchedulerService {
             title: savedJob.title,
             description: savedJob.description || undefined,
             companyId: savedJob.companyId,
+            companyName: savedJob.company?.companyName || undefined,
             originalUrl: savedJob.originalUrl || undefined,
+            locationCity: savedJob.locationCity || undefined,
+            jobType: savedJob.jobType || undefined,
+            experience: savedJob.experience || undefined,
+            salaryMin: savedJob.salaryMin ? Number(savedJob.salaryMin) : undefined,
+            salaryMax: savedJob.salaryMax ? Number(savedJob.salaryMax) : undefined,
+            status: savedJob.status,
+            createdAt: savedJob.createdAt,
           });
           saved++;
         }
