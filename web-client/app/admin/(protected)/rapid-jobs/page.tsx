@@ -8,6 +8,7 @@ import {
   CalendarDays, Layers, PlusCircle, Calendar as CalendarIcon, 
   ChevronRight, Building2, HelpCircle, DollarSign, Users
 } from 'lucide-react';
+import { StatusBanner } from '@/components/ui/StatusBanner';
 import { rapidJobApi, CrawlLog, crawlLogsApi } from '@/lib/admin-api';
 
 // Schedule constants (copy of server's rapid-job.config.ts, simplified)
@@ -280,42 +281,12 @@ export default function RapidJobsPage() {
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-20 relative px-4 md:px-6">
-      {/* Notification Toast */}
-      <AnimatePresence>
-        {notification && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] min-w-[320px]"
-          >
-            <div className={`p-4 rounded-2xl shadow-2xl flex items-center gap-4 border ${
-              notification.type === 'success' ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'
-            }`}>
-              <div className={`p-2 rounded-xl scale-110 shadow-sm ${
-                notification.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
-              }`}>
-                {notification.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-              </div>
-              <div className="flex-1">
-                <p className={`text-sm font-bold ${
-                  notification.type === 'success' ? 'text-emerald-900' : 'text-red-900'
-                }`}>
-                  {notification.type === 'success' ? 'Thành công' : 'Thất bại'}
-                </p>
-                <p className={`text-xs mt-0.5 ${
-                   notification.type === 'success' ? 'text-emerald-700' : 'text-red-700'
-                }`}>
-                  {notification.message}
-                </p>
-              </div>
-              <button onClick={() => setNotification(null)} className="p-1 hover:bg-black/5 rounded-lg transition-colors">
-                <XCircle className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Notification Banner */}
+      <StatusBanner
+        type={notification?.type as any}
+        message={notification?.message || null}
+        onClose={() => setNotification(null)}
+      />
       {/* 1. Hero Stats Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>

@@ -1,38 +1,189 @@
-import { Users, Search, Filter } from 'lucide-react';
+'use client';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { RefreshCw, ShieldAlert, XCircle } from 'lucide-react';
+import {
+  adminUsersApi,
+  type AdminUser,
+  type AdminUserFilters,
+} from '@/lib/admin-api';
+import UserStats from './components/UserStats';
+import UserFilters from './components/UserFilters';
+import UserTable from './components/UserTable';
+import UserDetailModal from './components/UserDetailModal';
+
+const PAGE_SIZE = 15;
 
 export default function UsersPage() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState<AdminUserFilters>({});
+
+  const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await adminUsersApi.getAll({
+        ...filters,
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      });
+      setUsers(res.data);
+      setTotal(res.total);
+    } catch {
+      setError('Không thể tải danh sách người dùng.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, page]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // When filters change, go back to page 1
+  const handleSetFilters = (f: AdminUserFilters) => {
+    setFilters(f);
+    setPage(1);
+  };
+
+  const handleLock = async (id: string) => {
+    setProcessingId(id);
+    try {
+      await adminUsersApi.lock(id);
+      setUsers((prev) =>
+        prev.map((u) => (u.userId === id ? { ...u, status: 'LOCKED' } : u)),
+      );
+      if (detailUser?.userId === id)
+        setDetailUser((p) => (p ? { ...p, status: 'LOCKED' } : null));
+    } catch {
+      setError('Khóa tài khoản thất bại.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleUnlock = async (id: string) => {
+    setProcessingId(id);
+    try {
+      await adminUsersApi.unlock(id);
+      setUsers((prev) =>
+        prev.map((u) => (u.userId === id ? { ...u, status: 'ACTIVE' } : u)),
+      );
+      if (detailUser?.userId === id)
+        setDetailUser((p) => (p ? { ...p, status: 'ACTIVE' } : null));
+    } catch {
+      setError('Mở khóa tài khoản thất bại.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa tài khoản này? Hành động không thể hoàn tác.')) return;
+    setProcessingId(id);
+    try {
+      await adminUsersApi.remove(id);
+      setUsers((prev) => prev.filter((u) => u.userId !== id));
+      setTotal((t) => t - 1);
+      if (detailUser?.userId === id) setDetailUser(null);
+    } catch {
+      setError('Xóa tài khoản thất bại.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const stats = useMemo(() => ({
+    total,
+    candidates: users.filter((u) =>
+      u.userRoles.some((ur) => ur.role.roleName === 'CANDIDATE'),
+    ).length,
+    recruiters: users.filter((u) =>
+      u.userRoles.some((ur) => ur.role.roleName === 'RECRUITER'),
+    ).length,
+    locked: users.filter((u) => u.status === 'LOCKED').length,
+  }), [users, total]);
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Quản Lý Người Dùng</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Xem chi tiết tài khoản và khóa tài khoản khi cần thiết
+            Xem, lọc, khóa và xóa tài khoản người dùng trong hệ thống
           </p>
         </div>
+        <button
+          onClick={fetchUsers}
+          className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Làm mới
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Tìm user..."
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
-            />
+      {/* Stats */}
+      <UserStats {...stats} />
+
+      {/* Table card */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[560px]">
+        {/* Filters */}
+        <div className="p-4 border-b border-slate-100 bg-slate-50/30">
+          <UserFilters filters={filters} setFilters={handleSetFilters} />
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <ShieldAlert className="w-5 h-5 flex-shrink-0" />
+            <p className="font-medium text-red-800">{error}</p>
+            <button
+              onClick={() => setError('')}
+              className="ml-auto p-1 hover:bg-red-100 rounded-md text-red-400"
+            >
+              <XCircle className="w-4 h-4" />
+            </button>
           </div>
-          <button className="p-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50">
-            <Filter className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <div className="p-12 text-center text-slate-500">
-          <Users className="w-12 h-12 mx-auto text-slate-300 mb-4 opacity-50" />
-          <h3 className="text-lg font-semibold text-slate-700">Danh sách người dùng</h3>
-          <p className="text-sm mt-2">Chức năng này đang được lên kế hoạch phát triển.</p>
-        </div>
+        )}
+
+        {/* Table */}
+        <UserTable
+          users={users}
+          isLoading={isLoading}
+          totalItems={total}
+          page={page}
+          totalPages={totalPages}
+          setPage={setPage}
+          onLock={handleLock}
+          onUnlock={handleUnlock}
+          onDelete={handleDelete}
+          onQuickView={setDetailUser}
+          processingId={processingId}
+        />
       </div>
+
+      {/* Detail modal */}
+      {detailUser && (
+        <UserDetailModal
+          user={detailUser}
+          onClose={() => setDetailUser(null)}
+          onLock={handleLock}
+          onUnlock={handleUnlock}
+          onDelete={handleDelete}
+          isProcessing={processingId === detailUser.userId}
+        />
+      )}
     </div>
   );
 }

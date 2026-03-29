@@ -146,3 +146,54 @@ export const adminJobsApi = {
   bulkApprove: (filters: AdminFilterJobPostingDto): Promise<{ count: number }> =>
     api.patch('/admin/job-postings/bulk-approve', { params: filters }).then((r) => r.data),
 };
+
+// ─── Admin User Management ─────────────────────────────────────────────────────
+
+export type UserStatus = 'ACTIVE' | 'LOCKED';
+
+export interface AdminUser {
+  userId: string;
+  email: string;
+  status: UserStatus;
+  phoneNumber?: string;
+  avatar?: string;
+  isEmailVerified: boolean;
+  createdAt: string;
+  lastLogin?: string;
+  userRoles: { role: { roleName: string } }[];
+  candidate?: { fullName: string; phone: string };
+  recruiter?: { position?: string; bio?: string };
+}
+
+export interface PaginatedUsers {
+  data: AdminUser[];
+  total: number;
+  skip: number;
+  take: number;
+}
+
+export interface AdminUserFilters {
+  skip?: number;
+  take?: number;
+  role?: string;
+  status?: UserStatus;
+  search?: string;
+}
+
+export const adminUsersApi = {
+  getAll: (filters: AdminUserFilters): Promise<PaginatedUsers> =>
+    api.get('/users', { params: filters }).then((r) => r.data),
+
+  getOne: (id: string): Promise<AdminUser> =>
+    api.get(`/users/${id}`).then((r) => r.data),
+
+  lock: (id: string): Promise<{ message: string }> =>
+    api.patch(`/users/${id}/lock`).then((r) => r.data),
+
+  unlock: (id: string): Promise<{ message: string }> =>
+    api.patch(`/users/${id}/unlock`).then((r) => r.data),
+
+  remove: (id: string): Promise<{ message: string }> =>
+    api.delete(`/users/${id}`).then((r) => r.data),
+};
+

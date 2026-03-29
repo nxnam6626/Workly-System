@@ -40,7 +40,7 @@ export default function RegisterPage() {
       await register({ fullName, email, password, role: "CANDIDATE" });
       setIsSuccess(true);
       setTimeout(() => {
-        router.push(getDashboardByRole("CANDIDATE"));
+        router.push("/cv-setup");
       }, 2500); // Redirect after 2.5 seconds
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
@@ -130,7 +130,7 @@ export default function RegisterPage() {
           {isSuccess && (
             <div className="mb-6 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
               <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
-              <span>Đăng ký tài khoản thành công! Đang chuyển hướng đến trang chủ...</span>
+              <span>Đăng ký thành công! Đang chuyển hướng để thiết lập hồ sơ...</span>
             </div>
           )}
 

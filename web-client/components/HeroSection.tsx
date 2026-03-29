@@ -1,50 +1,91 @@
-import { ArrowRight, MapPin, Search } from "lucide-react";
+import { ArrowRight, MapPin, Search, Briefcase, TrendingUp } from "lucide-react";
 
 export function HeroSection() {
-  return (
-    <section className="relative w-full max-w-7xl mx-auto px-6 pt-24 pb-20 flex flex-col items-center text-center">
-      {/* Subtle gradient backgrounds */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-gradient-to-b from-blue-100/50 to-transparent blur-3xl -z-10 rounded-full pointer-events-none" />
+  const trending = ["IT / Phần mềm", "Kinh doanh", "Marketing", "Kế toán", "Bán hàng"];
 
-      {/* Tag */}
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold tracking-wide uppercase mb-8">
-        <span className="w-2 h-2 rounded-full bg-blue-500" />
-        Được tin dùng bởi hơn 50.000+ sinh viên
+  return (
+    <section className="relative w-full overflow-hidden pt-20 pb-32">
+      {/* Dynamic Background */}
+      <div className="absolute top-0 left-0 w-full h-full -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/40 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-indigo-100/40 blur-[100px] rounded-full" />
       </div>
 
-      <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1] max-w-4xl">
-        Tìm kiếm kỳ thực tập <br className="hidden sm:block" /> mơ ước của bạn với <span className="text-blue-600">AI</span>
-      </h1>
-
-      <p className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl leading-relaxed">
-        Đừng nộp đơn mù quáng. Sử dụng công cụ tương thích thông minh của chúng tôi để tìm các vai trò hoàn toàn phù hợp với kỹ năng và mục tiêu nghề nghiệp của bạn.
-      </p>
-
-      {/* Search Bar */}
-      <div className="w-full max-w-3xl bg-white p-2 sm:p-3 rounded-full shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col sm:flex-row items-center gap-2">
-        <div className="flex-1 flex items-center gap-3 px-4 py-2 w-full">
-          <Search className="w-5 h-5 text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Thiết kế sản phẩm, Marketing..."
-            className="w-full bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
-          />
+      <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-blue-50 shadow-sm mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          <span className="text-xs font-bold text-slate-600 tracking-wide uppercase">
+            Hơn 5.000+ tin tuyển dụng mới mỗi ngày
+          </span>
         </div>
 
-        <div className="hidden sm:block w-[1px] h-8 bg-slate-200 mx-1" />
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-[1.15]">
+          Tìm việc làm mơ ước <br className="hidden md:block" /> 
+          cùng với <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Workly AI</span>
+        </h1>
 
-        <div className="flex-1 flex items-center gap-3 px-4 py-2 w-full border-t border-slate-100 sm:border-none pt-4 sm:pt-2">
-          <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Từ xa hoặc New York"
-            className="w-full bg-transparent outline-none text-slate-700 placeholder:text-slate-400"
-          />
+        <p className="text-lg text-slate-500 mb-12 max-w-2xl leading-relaxed">
+          Nền tảng kết nối ứng viên tài năng với những nhà tuyển dụng hàng đầu. 
+          Bắt đầu hành trình sự nghiệp của bạn ngay hôm nay.
+        </p>
+
+        {/* Enhanced Search Bar */}
+        <div className="w-full max-w-5xl bg-white p-2 md:p-4 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col lg:flex-row items-center gap-2 mb-8">
+          <div className="flex-1 flex items-center gap-3 px-4 py-3 w-full group">
+            <Search className="w-5 h-5 text-blue-500 group-focus-within:scale-110 transition-transform" />
+            <input
+              type="text"
+              placeholder="Vị trí tuyển dụng, tên công ty..."
+              className="w-full bg-transparent outline-none text-slate-700 font-medium placeholder:text-slate-400"
+            />
+          </div>
+
+          <div className="hidden lg:block w-px h-10 bg-slate-100" />
+
+          <div className="flex-1 flex items-center gap-3 px-4 py-3 w-full border-t lg:border-none border-slate-50">
+            <MapPin className="w-5 h-5 text-rose-500" />
+            <select className="w-full bg-transparent outline-none text-slate-700 font-medium appearance-none cursor-pointer">
+              <option>Tất cả địa điểm</option>
+              <option>Hà Nội</option>
+              <option>TP. Hồ Chí Minh</option>
+              <option>Đà Nẵng</option>
+              <option>Từ xa (Remote)</option>
+            </select>
+          </div>
+
+          <div className="hidden lg:block w-px h-10 bg-slate-100" />
+
+          <div className="flex-1 flex items-center gap-3 px-4 py-3 w-full border-t lg:border-none border-slate-50">
+            <Briefcase className="w-5 h-5 text-amber-500" />
+            <select className="w-full bg-transparent outline-none text-slate-700 font-medium appearance-none cursor-pointer">
+              <option>Tất cả ngành nghề</option>
+              <option>Công nghệ thông tin</option>
+              <option>Kinh doanh / Bán hàng</option>
+              <option>Marketing</option>
+              <option>Kế toán / Tài chính</option>
+            </select>
+          </div>
+
+          <button className="w-full lg:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-blue-600/20 active:scale-95">
+            Tìm kiếm <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
 
-        <button className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full flex items-center justify-center gap-2 transition-colors mt-2 sm:mt-0 shadow-md shadow-blue-600/20 shrink-0">
-          Tìm kiếm <ArrowRight className="w-4 h-4" />
-        </button>
+        {/* Trending Keywords */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <span className="flex items-center gap-1.5 text-sm font-bold text-slate-400">
+            <TrendingUp className="w-4 h-4" /> Từ khóa phổ biến:
+          </span>
+          {trending.map((item, idx) => (
+            <button key={idx} className="px-4 py-1.5 rounded-full bg-slate-100/50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-sm font-medium transition-colors border border-transparent hover:border-blue-100">
+              {item}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );

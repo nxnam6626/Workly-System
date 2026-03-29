@@ -66,7 +66,6 @@ export class UsersService {
           data: {
             userId: newUser.userId,
             fullName: data.fullName,
-            phone: '',
           },
         });
       } else if (data.role === 'RECRUITER') {
@@ -124,7 +123,6 @@ export class UsersService {
             data: {
               userId,
               fullName: (data as any).fullName || 'Người dùng',
-              phone: '',
             },
           });
         }
@@ -203,7 +201,6 @@ export class UsersService {
           data: {
             userId: newUser.userId,
             fullName: data.fullName,
-            phone: '',
           },
         });
 
@@ -258,8 +255,9 @@ export class UsersService {
     take?: number;
     role?: Role;
     status?: StatusUser;
+    search?: string;
   }) {
-    const { skip = 0, take = 20, role, status } = params ?? {};
+    const { skip = 0, take = 20, role, status, search } = params ?? {};
     const where: any = {};
     if (role) {
       where.userRoles = {
@@ -271,6 +269,7 @@ export class UsersService {
       };
     }
     if (status) where.status = status;
+    if (search) where.email = { contains: search, mode: 'insensitive' };
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -290,7 +289,7 @@ export class UsersService {
           userRoles: {
             include: { role: true },
           },
-          candidate: { select: { fullName: true, phone: true } },
+          candidate: { select: { fullName: true } },
           recruiter: { select: { position: true, bio: true } },
         },
       }),
@@ -406,6 +405,97 @@ export class UsersService {
     await this.findOne(userId);
     await this.prisma.user.delete({ where: { userId } });
     return { message: 'Đã xóa user.' };
+  }
+
+  async lockUser(userId: string) {
+    await this.findOne(userId);
+    await this.prisma.user.update({ where: { userId }, data: { status: 'LOCKED' } });
+    return { message: 'Tài khoản đã bị khóa.' };
+  }
+
+  async unlockUser(userId: string) {
+    await this.findOne(userId);
+    await this.prisma.user.update({ where: { userId }, data: { status: 'ACTIVE' } });
+    return { message: 'Tài khoản đã được mở khóa.' };
+  }
+
+  /** Lấy thông tin user hiện tại (dùng cho /users/me). */
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+      select: {
+        userId: true,
+        email: true,
+        status: true,
+        phoneNumber: true,
+        avatar: true,
+        isEmailVerified: true,
+        createdAt: true,
+        lastLogin: true,
+        provider: true,
+        userRoles: { include: { role: true } },
+        candidate: {
+          include: { skills: true },
+        },
+        recruiter: true,
+      },
+    });
+    if (!user) throw new NotFoundException('Không tìm thấy user.');
+    return user;
+  }
+
+  /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills). */
+  async updateCandidateProfile(
+    userId: string,
+    dto: {
+      fullName: string;
+      phone: string;
+      university?: string;
+      major?: string;
+      gpa?: number;
+      skills?: string[];
+    },
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+      include: { candidate: true },
+    });
+    if (!user || !user.candidate) {
+      throw new NotFoundException('Không tìm thấy hồ sơ ứng viên.');
+    }
+
+    const candidateId = user.candidate.candidateId;
+
+    await this.prisma.$transaction(async (tx) => {
+      // Update Candidate core fields
+      await tx.candidate.update({
+        where: { candidateId },
+        data: {
+          fullName: dto.fullName,
+          university: dto.university ?? null,
+          major: dto.major ?? null,
+          gpa: dto.gpa ?? null,
+        },
+      });
+
+      // Update User.phoneNumber directly
+      await tx.user.update({
+        where: { userId },
+        data: { phoneNumber: dto.phone },
+      });
+
+      // Replace skills atomically
+      if (dto.skills !== undefined) {
+        await tx.skill.deleteMany({ where: { candidateId } });
+        if (dto.skills.length > 0) {
+          await tx.skill.createMany({
+            data: dto.skills.map((skillName) => ({ skillName, candidateId })),
+          });
+        }
+      }
+    });
+
+    return this.getMe(userId);
   }
 
   async setRefreshToken(userId: string, refreshToken: string | null) {

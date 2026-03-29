@@ -99,6 +99,7 @@ export class AuthService {
       user: {
         userId: user.userId,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
@@ -196,6 +197,7 @@ export class AuthService {
       user: {
         userId: user.userId,
         email: user.email,
+        isEmailVerified: user.isEmailVerified,
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
@@ -245,6 +247,66 @@ export class AuthService {
     await this.redisService.del(`refresh_token:${user.userId}`);
 
     return { message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.' };
+  }
+
+  /** Đổi mật khẩu: người dùng đã đăng nhập xác nhận mật khẩu cũ rồi đặt mới. */
+  async changePassword(userId: string, dto: { currentPassword: string; newPassword: string }) {
+    const userWithPwd = await this.usersService.findByEmail(
+      (await this.usersService.findOne(userId)).email,
+    );
+    if (!userWithPwd)
+      throw new UnauthorizedException('Tài khoản không tồn tại.');
+    if (!userWithPwd.password)
+      throw new BadRequestException('Tài khoản này đăng nhập qua mạng xã hội và chưa có mật khẩu. Vui lòng dùng tính năng Quên mật khẩu để thiết lập.');
+
+    const isMatch = await this.comparePassword(dto.currentPassword, userWithPwd.password);
+    if (!isMatch)
+      throw new UnauthorizedException('Mật khẩu hiện tại không đúng.');
+
+    // Pass plain password to usersService.update (it will handle the hashing)
+    await this.usersService.update(userId, { password: dto.newPassword });
+
+    return { message: 'Đổi mật khẩu thành công.' };
+  }
+
+  /** Gửi link/mã xác minh email: Tạo OTP 6 số lưu Redis và gửi mail. */
+  async sendEmailVerification(userId: string) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new BadRequestException('Người dùng không tồn tại.');
+    if (user.isEmailVerified)
+      throw new BadRequestException('Email của bạn đã được xác minh rồi.');
+
+    const token = crypto.randomInt(100000, 999999).toString();
+    const redisKey = `email_verification:${user.email}`;
+
+    // Lưu vào Redis (15 phút)
+    await this.redisService.set(redisKey, token, 900);
+
+    // Gửi mail
+    await this.mailService.sendVerificationEmail(user.email, token);
+
+    return { message: 'Mã xác minh đã được gửi đến email của bạn.' };
+  }
+
+  /** Xác minh email: so khớp OTP từ người dùng. */
+  async verifyEmail(dto: { email: string; token: string }) {
+    const redisKey = `email_verification:${dto.email}`;
+    const storedToken = await this.redisService.get(redisKey);
+
+    if (!storedToken || storedToken !== dto.token) {
+      throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn.');
+    }
+
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new BadRequestException('Tài khoản không tồn tại.');
+
+    // Cập nhật trạng thái xác minh
+    await this.usersService.update(user.userId, { isEmailVerified: true });
+
+    // Hủy OTP trên Redis
+    await this.redisService.del(redisKey);
+
+    return { message: 'Xác minh email thành công!' };
   }
 
   private async issueTokens(

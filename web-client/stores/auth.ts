@@ -5,8 +5,17 @@ interface User {
   userId: string;
   email: string;
   name?: string;
+  avatar?: string;
+  phoneNumber?: string;
+  isEmailVerified?: boolean;
   roles?: string[];
-  candidate?: any;
+  candidate?: {
+    fullName?: string;
+    university?: string;
+    major?: string;
+    gpa?: number;
+    skills?: { skillId: string; skillName: string }[];
+  };
   recruiter?: any;
 }
 
@@ -22,7 +31,11 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (data: any) => Promise<void>;
+  changePassword: (data: any) => Promise<void>;
+  sendVerificationEmail: () => Promise<void>;
+  verifyEmail: (data: { email: string; token: string }) => Promise<void>;
   setOAuthTokens: (accessToken: string, refreshToken: string) => Promise<void>;
+  updateUser: (partial: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -33,6 +46,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setTokens: (accessToken: string) => {
     set({ accessToken, isAuthenticated: true });
+  },
+
+  updateUser: (partial) => {
+    set((state) => ({
+      user: state.user ? { ...state.user, ...partial } : state.user,
+    }));
   },
 
   login: async (credentials) => {
@@ -113,6 +132,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   resetPassword: async (data) => {
     try {
       await api.post('/auth/reset-password', data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  changePassword: async (data: any) => {
+    try {
+      await api.patch('/auth/change-password', data);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  sendVerificationEmail: async () => {
+    try {
+      await api.post('/auth/send-verification-email');
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  verifyEmail: async (data: { email: string; token: string }) => {
+    try {
+      await api.post('/auth/verify-email', data);
+      // Update local state if successful
+      set((state) => ({
+        user: state.user ? { ...state.user, isEmailVerified: true } : state.user,
+      }));
     } catch (error) {
       throw error;
     }

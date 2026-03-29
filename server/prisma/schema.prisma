@@ -128,7 +128,6 @@ model Admin {
 model Candidate {
   candidateId String  @id @default(uuid())
   fullName    String
-  phone       String
   university  String?
   major       String?
   gpa         Float?
@@ -140,6 +139,7 @@ model Candidate {
   skills        Skill[]
   cvs           CV[]
   applications  Application[]
+  savedJobs     SavedJob[]
   conversations Conversation[]
 }
 
@@ -251,8 +251,7 @@ model JobPosting {
   companyId     String
   company       Company      @relation(fields: [companyId], references: [companyId])
   applications Application[]
-
-
+  savedJobs    SavedJob[]
 }
 
 model CV {
@@ -282,6 +281,18 @@ model Application {
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
   cvId         String
   cv           CV         @relation(fields: [cvId], references: [cvId])
+}
+
+model SavedJob {
+  savedJobId String   @id @default(uuid())
+  savedAt    DateTime @default(now())
+
+  candidateId  String
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
+  jobPostingId String
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
+
+  @@unique([candidateId, jobPostingId])
 }
 
 model Conversation {

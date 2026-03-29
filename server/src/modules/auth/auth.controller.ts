@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Get,
+  Patch,
   UseGuards,
   Headers,
   Req,
@@ -17,6 +18,8 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -24,7 +27,7 @@ import { Public } from './decorators/public.decorator';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('register')
@@ -77,6 +80,32 @@ export class AuthController {
   @ApiOperation({ summary: 'Xác nhận đặt lại mật khẩu bằng mã OTP' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Patch('change-password')
+  @ApiOperation({ summary: 'Đổi mật khẩu khi đã đăng nhập' })
+  changePassword(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('send-verification-email')
+  @ApiOperation({ summary: 'Gửi mã xác minh tới email' })
+  sendVerificationEmail(@CurrentUser('userId') userId: string) {
+    return this.authService.sendEmailVerification(userId);
+  }
+
+  @Public()
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Xác minh email với mã OTP' })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto);
   }
 
   @Public()

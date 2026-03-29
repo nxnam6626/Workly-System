@@ -7,11 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
+import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@/modules/auth/guards/optional-jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Roles } from '@/modules/auth/decorators/roles.decorator';
 import { Role } from '@/modules/auth/decorators/roles.decorator';
@@ -32,13 +35,14 @@ export class JobPostingsController {
   }
 
   @Get()
-  findAll() {
-    return this.jobPostingsService.findAll();
+  findAll(@Query() query: FilterJobPostingDto) {
+    return this.jobPostingsService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jobPostingsService.findOne(id);
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(@Param('id') id: string, @CurrentUser('userId') userId?: string) {
+    return this.jobPostingsService.findOne(id, userId);
   }
 
   @Patch(':id')

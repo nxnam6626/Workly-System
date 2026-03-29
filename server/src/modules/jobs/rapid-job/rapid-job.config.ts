@@ -186,14 +186,11 @@ export const INDUSTRY_TAG_MAP: Record<string, string[]> = {
   IT: [
     'frontend', 'backend', 'software', 'developer', 'mobile', 'react', 'flutter',
     'nodejs', 'java', 'python', 'lập trình', 'công nghệ thông tin',
-  ],
-  'IT-Data': [
     'data analyst', 'data science', 'data engineer', 'machine learning', 'ai intern',
   ],
+
   Marketing: [
     'marketing', 'digital marketing', 'brand', 'thị trường', 'tiếp thị',
-  ],
-  'Marketing-Content': [
     'content', 'copywriter', 'writer', 'seo', 'sem', 'social media',
   ],
   Finance: [

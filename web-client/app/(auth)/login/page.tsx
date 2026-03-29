@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth";
 import { Mail, Lock, Loader2, ArrowRight, Sparkles, Briefcase } from "lucide-react";
@@ -11,6 +11,8 @@ import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
   const { login, isAuthenticated, isLoading: authLoading, user } = useAuthStore();
 
   const [email, setEmail] = useState("");
@@ -20,18 +22,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && user && user.roles) {
-      if (user.roles.includes("CANDIDATE")) {
+      if (returnUrl) {
+        router.push(returnUrl);
+      } else if (user.roles.includes("CANDIDATE")) {
         router.push("/");
       } else if (user.roles.includes("RECRUITER")) {
-        // If they are an employer trying to access candidate login, maybe don't redirect automatically
-        // but since they are already authenticated, we could redirect to employer dashboard
-        // However, the rule is "separate worlds", so staying here with an error is better if they just logged in.
-        // But for an existing session, maybe redirecting is fine? 
-        // Let's stick to the "two worlds" and guide them.
         router.push("/recruiter/login");
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +39,9 @@ export default function LoginPage() {
 
     try {
       const loggedInUser = await login({ email, password });
-      if (loggedInUser.roles?.includes("CANDIDATE")) {
+      if (returnUrl) {
+        router.push(returnUrl);
+      } else if (loggedInUser.roles?.includes("CANDIDATE")) {
         router.push("/");
       } else if (loggedInUser.roles?.includes("RECRUITER")) {
         setError("Tài khoản của bạn là tài khoản Nhà tuyển dụng. Vui lòng đăng nhập tại trang dành cho Nhà tuyển dụng.");
@@ -189,7 +190,7 @@ export default function LoginPage() {
 
           {/* Social Logins */}
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <a 
+            <a
               href="http://localhost:3001/auth/google"
               className="flex items-center justify-center gap-2 py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-semibold text-slate-700 shadow-sm group"
             >
@@ -201,7 +202,7 @@ export default function LoginPage() {
               </svg>
               Google
             </a>
-            <a 
+            <a
               href="http://localhost:3001/auth/linkedin"
               className="flex items-center justify-center gap-2 py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-semibold text-slate-700 shadow-sm group"
             >

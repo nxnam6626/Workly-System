@@ -4,6 +4,7 @@ import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import { JobStatus } from '@prisma/client';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
+import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 
 @Injectable()
 export class JobPostingsService {
@@ -48,25 +49,76 @@ export class JobPostingsService {
 
 
 
-  async findAll() {
-    return this.prisma.jobPosting.findMany({
-      include: {
-        company: true,
-        recruiter: true,
-      },
 
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(query: FilterJobPostingDto) {
+    const { search, location, jobType, page = 1, limit = 10 } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = { status: 'APPROVED' };
+    if (location) where.locationCity = location;
+    if (jobType) where.jobType = jobType;
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { company: { companyName: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.jobPosting.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          company: true,
+          recruiter: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.jobPosting.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string) {
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: id },
       include: { company: true, recruiter: true },
     });
 
     if (!job) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
-    return job;
+
+    let hasApplied = false;
+    let isSaved = false;
+
+    if (userId) {
+      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      if (candidate) {
+        // Check Application
+        const application = await this.prisma.application.findFirst({
+          where: {
+            jobPostingId: id,
+            candidateId: candidate.candidateId,
+          },
+        });
+        hasApplied = !!application;
+
+        // Check Saved
+        const saved = await this.prisma.savedJob.findUnique({
+          where: {
+            candidateId_jobPostingId: {
+              candidateId: candidate.candidateId,
+              jobPostingId: id,
+            },
+          },
+        });
+        isSaved = !!saved;
+      }
+    }
+
+    return { ...job, hasApplied, isSaved };
   }
 
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
