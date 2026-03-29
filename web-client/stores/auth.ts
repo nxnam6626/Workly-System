@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { useFavoriteStore } from './favorites';
 
 interface User {
   userId: string;
@@ -109,9 +110,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
 
+    // Clear favorites on logout
     if (typeof window !== 'undefined') {
       localStorage.removeItem('refreshToken');
     }
+
+    useFavoriteStore.getState().clearFavorites();
 
     set({
       user: null,
