@@ -92,6 +92,8 @@ model User {
   recruiter Recruiter?
 
   userRoles UserRole[]
+  notifications Notification[]
+  jobAlerts    JobAlert[]
 }
 
 model Role {
@@ -318,4 +320,24 @@ model Message {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
   senderId       String
+}
+
+model Notification {
+  notificationId String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [userId])
+  title          String
+  content        String
+  type           String   // e.g., "JOB_ALERT", "APPLICATION_UPDATE", "SYSTEM"
+  isRead         Boolean  @default(false)
+  metadata       Json?    // For linking to jobs: { jobId: "..." }
+  createdAt      DateTime @default(now())
+}
+
+model JobAlert {
+  jobAlertId String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [userId])
+  keywords   String
+  createdAt  DateTime @default(now())
 }

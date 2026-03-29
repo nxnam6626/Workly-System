@@ -5,10 +5,16 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { JobStatus } from '@prisma/client';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
+import { NotificationsService } from '../../notifications/notifications.service';
+import { JobAlertsService } from '../../job-alerts/job-alerts.service';
 
 @Injectable()
 export class JobPostingsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+    private jobAlertsService: JobAlertsService,
+  ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
@@ -170,18 +176,43 @@ export class JobPostingsService {
 
     return { items, total, page, limit };
   }
-
   async updateStatus(id: string, status: JobStatus, adminId: string) {
-    const job = await this.findOne(id);
-    
-    return this.prisma.jobPosting.update({
+    const updatedJob = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         status,
         approvedBy: adminId, // Reuse approvedBy field to track who approved/rejected
         updatedAt: new Date(),
       },
+      include: { company: true },
     });
+
+    if (status === JobStatus.APPROVED) {
+      this.triggerJobNotifications(updatedJob);
+    }
+
+    return updatedJob;
+  }
+
+  private async triggerJobNotifications(job: any) {
+    try {
+      const alerts = await this.jobAlertsService.findAllAlerts();
+      const matchedAlerts = alerts.filter(alert => 
+        job.title.toLowerCase().includes(alert.keywords.toLowerCase())
+      );
+
+      for (const alert of matchedAlerts) {
+        await this.notificationsService.create({
+          userId: alert.userId,
+          title: 'Việc làm mới theo từ khóa của bạn',
+          content: `Có 1 việc làm mới theo từ khóa tìm kiếm ${alert.keywords}. Vào xem ngay`,
+          type: 'JOB_ALERT',
+          metadata: { jobPostingId: job.jobPostingId },
+        });
+      }
+    } catch (error) {
+      console.error('Error triggering notifications:', error);
+    }
   }
 
   async removeBulk(query: AdminFilterJobPostingDto) {
@@ -240,6 +271,16 @@ export class JobPostingsService {
         updatedAt: new Date(),
       },
     });
+
+    if (status === JobStatus.APPROVED) {
+      // For bulk, we need to fetch the actual jobs to match keywords
+      const approvedJobs = await this.prisma.jobPosting.findMany({
+        where: { ...where, status: JobStatus.APPROVED },
+      });
+      for (const job of approvedJobs) {
+        this.triggerJobNotifications(job);
+      }
+    }
 
     return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
   }

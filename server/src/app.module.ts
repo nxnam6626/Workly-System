@@ -16,6 +16,8 @@ import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.modu
 import { CompaniesModule } from './modules/companies/companies.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { JobAlertsModule } from './modules/job-alerts/job-alerts.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
     CompaniesModule,
     ApplicationsModule,
     FavoritesModule,
+    NotificationsModule,
+    JobAlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
