@@ -26,8 +26,6 @@ export default function LoginPage() {
         router.push(returnUrl);
       } else if (user.roles.includes("CANDIDATE")) {
         router.push("/");
-      } else if (user.roles.includes("RECRUITER")) {
-        router.push("/recruiter/login");
       }
     }
   }, [isAuthenticated, user, router, returnUrl]);
