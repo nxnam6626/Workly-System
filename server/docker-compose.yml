@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Cấu hình Redis
+  redis:
+    image: redis:7-alpine
+    container_name: workly_redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Cấu hình Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: workly_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Tắt xác thực user/pass để code local cho nhanh
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m # Giới hạn RAM tối đa 512MB để tránh treo máy
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+
+# Khai báo volume để dữ liệu không bị mất khi tắt Docker
+volumes:
+  redis_data:
+  es_data:
