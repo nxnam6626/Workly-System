@@ -11,6 +11,7 @@ import UserStats from './components/UserStats';
 import UserFilters from './components/UserFilters';
 import UserTable from './components/UserTable';
 import UserDetailModal from './components/UserDetailModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 const PAGE_SIZE = 15;
 
@@ -25,6 +26,8 @@ export default function UsersPage() {
 
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -88,18 +91,23 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc muốn xóa tài khoản này? Hành động không thể hoàn tác.')) return;
-    setProcessingId(id);
+  const requestDelete = (id: string) => {
+    setDeleteUserId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteUserId) return;
+    setIsDeleting(true);
     try {
-      await adminUsersApi.remove(id);
-      setUsers((prev) => prev.filter((u) => u.userId !== id));
+      await adminUsersApi.remove(deleteUserId);
+      setUsers((prev) => prev.filter((u) => u.userId !== deleteUserId));
       setTotal((t) => t - 1);
-      if (detailUser?.userId === id) setDetailUser(null);
+      if (detailUser?.userId === deleteUserId) setDetailUser(null);
+      setDeleteUserId(null);
     } catch {
       setError('Xóa tài khoản thất bại.');
     } finally {
-      setProcessingId(null);
+      setIsDeleting(false);
     }
   };
 
@@ -167,7 +175,7 @@ export default function UsersPage() {
           setPage={setPage}
           onLock={handleLock}
           onUnlock={handleUnlock}
-          onDelete={handleDelete}
+          onDelete={requestDelete}
           onQuickView={setDetailUser}
           processingId={processingId}
         />
@@ -180,10 +188,20 @@ export default function UsersPage() {
           onClose={() => setDetailUser(null)}
           onLock={handleLock}
           onUnlock={handleUnlock}
-          onDelete={handleDelete}
+          onDelete={requestDelete}
           isProcessing={processingId === detailUser.userId}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteUserId}
+        title="Xóa tài khoản"
+        message="Bạn có chắc muốn xóa tài khoản này? Hành động không thể hoàn tác và mọi dữ liệu liên quan sẽ bị xóa."
+        confirmLabel="Xóa tài khoản"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteUserId(null)}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

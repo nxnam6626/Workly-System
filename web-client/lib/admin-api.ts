@@ -197,3 +197,17 @@ export const adminUsersApi = {
     api.delete(`/users/${id}`).then((r) => r.data),
 };
 
+// ─── Admin Dashboard ──────────────────────────────────────────────────────────
+
+export interface DashboardStats {
+  totalUsers: number;
+  totalJobs: number;
+  pendingJobs: number;
+  crawlCount: number;
+  approvalRate: number;
+}
+
+export const adminDashboardApi = {
+  getStats: (): Promise<DashboardStats> =>
+    api.get('/admin/dashboard/stats').then((r) => r.data),
+};

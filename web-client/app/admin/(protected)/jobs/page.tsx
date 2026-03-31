@@ -15,6 +15,7 @@ import JobStats from './components/JobStats';
 import JobFilters from './components/JobFilters';
 import JobTable from './components/JobTable';
 import BulkActionsBar from './components/BulkActionsBar';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export default function JobsPage() {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
@@ -39,6 +40,7 @@ export default function JobsPage() {
   const [quickViewJob, setQuickViewJob] = useState<JobPosting | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchJobs = useCallback(async () => {
     setIsLoading(true);
@@ -100,8 +102,12 @@ export default function JobsPage() {
     }
   };
 
+  const requestBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setIsDeleteModalOpen(true);
+  };
+
   const handleBulkDelete = async () => {
-    if (!confirm(`Bạn có chắc muốn xóa ${selectedIds.length} tin đã chọn?`)) return;
     setIsBulkProcessing(true);
     try {
        await adminJobsApi.bulkDelete({ searchTerm: selectedIds.join(',') });
@@ -160,7 +166,7 @@ export default function JobsPage() {
             <BulkActionsBar 
               selectedCount={selectedIds.length}
               onBulkApprove={handleBulkApprove}
-              onBulkDelete={handleBulkDelete}
+              onBulkDelete={requestBulkDelete}
               onClearSelection={() => setSelectedIds([])}
               isProcessing={isBulkProcessing}
             />
@@ -202,6 +208,16 @@ export default function JobsPage() {
             isProcessing={isProcessing === quickViewJob.jobPostingId}
         />
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Xóa hàng loạt"
+        message={`Bạn có chắc muốn xóa ${selectedIds.length} tin đã chọn? Hành động này không thể hoàn tác.`}
+        confirmLabel="Xóa các tin"
+        onConfirm={handleBulkDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        isLoading={isBulkProcessing}
+      />
     </div>
   );
 }

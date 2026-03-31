@@ -4,9 +4,11 @@ import { RapidJobService } from './rapid-job.service';
 import { JSearchResponse, MappedJobData } from './interfaces/rapid-job.interface';
 import { RapidJobSchedulerService } from './rapid-job-scheduler.service';
 import { lastValueFrom } from 'rxjs';
-import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/auth/guards/roles.guard';
-import { Role, Roles } from '@/modules/auth/decorators/roles.decorator';
+// import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+// import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Role, Roles } from '../../auth/decorators/roles.decorator';
 
 @ApiTags('Rapid Job Management')
 @Controller('rapid-job')

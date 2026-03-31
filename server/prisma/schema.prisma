@@ -92,6 +92,7 @@ model User {
   recruiter Recruiter?
 
   userRoles UserRole[]
+  notifications Notification[]
 }
 
 model Role {
@@ -111,6 +112,18 @@ model UserRole {
   role Role @relation(fields: [roleId], references: [roleId])
 
   @@unique([userId, roleId])
+}
+
+model Notification {
+  notificationId String   @id @default(uuid())
+  title          String
+  message        String
+  type           String   @default("info") // 'success', 'info', 'warning', 'error'
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  userId         String
+  user           User     @relation(fields: [userId], references: [userId])
 }
 
 model Admin {
@@ -155,6 +168,7 @@ model Recruiter {
   recruiterId String  @id @default(uuid())
   bio         String?
   position    String?
+  savedCandidateIds String[] // Array to store favorite candidate IDs
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])

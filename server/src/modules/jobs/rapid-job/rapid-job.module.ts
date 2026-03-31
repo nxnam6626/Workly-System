@@ -5,7 +5,7 @@ import { RapidJobService } from './rapid-job.service';
 import { RapidJobController } from './rapid-job.controller';
 import { AdminCrawlLogsController } from './admin-crawl-logs.controller';
 import { RapidJobSchedulerService } from './rapid-job-scheduler.service';
-import { PrismaModule } from '@/prisma/prisma.module';
+import { PrismaModule } from '../../../prisma/prisma.module';
 import { SearchModule } from '../../search/search.module';
 
 // Providers

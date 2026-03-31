@@ -52,10 +52,7 @@ export default function UserDetailModal({
     d ? new Date(d).toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
   const handleDelete = () => {
-    if (confirm(`Bạn có chắc muốn xóa tài khoản "${user.email}"? Hành động này không thể hoàn tác.`)) {
-      onDelete(user.userId);
-      onClose();
-    }
+    onDelete(user.userId);
   };
 
   return (

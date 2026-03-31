@@ -20,6 +20,7 @@ import {
   PieChart,
   Zap,
 } from 'lucide-react';
+import { NotificationMenu } from '@/components/NotificationMenu';
 
 const navItems = [
 
@@ -172,14 +173,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2 text-slate-500 text-sm">
             <span>Workly Admin</span>
           </div>
+
           {user && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
-                {(user.name || user.email).charAt(0).toUpperCase()}
+            <div className="flex items-center gap-4">
+              <NotificationMenu />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm text-slate-700 font-medium hidden sm:block">
+                  {user.name || user.email}
+                </span>
               </div>
-              <span className="text-sm text-slate-700 font-medium hidden sm:block">
-                {user.name || user.email}
-              </span>
             </div>
           )}
         </header>

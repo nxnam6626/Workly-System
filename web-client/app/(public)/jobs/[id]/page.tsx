@@ -28,7 +28,9 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import axios from "axios";
+import api from "@/lib/api";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { formatSalary, timeAgo } from "@/lib/utils";
 import { JOB_TYPE_LABEL } from "@/lib/constants";
 import { JobCard, Job } from "@/components/JobCard";
@@ -93,13 +95,11 @@ export default function JobDetailsPage() {
       return;
     }
     try {
-      const { data } = await axios.post(`http://localhost:3001/favorites/toggle/${id}`, {}, {
-        withCredentials: true
-      });
+      const { data } = await api.post(`/favorites/toggle/${id}`);
       setJob(prev => prev ? { ...prev, isSaved: data.saved } : null);
     } catch (error: any) {
       console.error("Save error:", error);
-      alert(error.response?.data?.message || "Vui lòng đăng nhập để lưu việc làm!");
+      toast.error(error.response?.data?.message || "Vui lòng đăng nhập để lưu việc làm!");
     }
   };
 

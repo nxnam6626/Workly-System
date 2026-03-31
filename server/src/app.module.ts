@@ -16,6 +16,10 @@ import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.modu
 import { CompaniesModule } from './modules/companies/companies.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { CandidatesModule } from './modules/candidates/candidates.module';
+import { MessagesModule } from './modules/messages/messages.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -36,6 +40,10 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
     CompaniesModule,
     ApplicationsModule,
     FavoritesModule,
+    CandidatesModule,
+    MessagesModule,
+    AdminModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

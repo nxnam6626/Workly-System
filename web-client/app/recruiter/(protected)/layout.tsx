@@ -14,24 +14,26 @@ import {
   LayoutDashboard,
   Briefcase,
   PlusCircle,
+  Building,
+  Users,
+  Heart,
+  MessageSquare,
+  FileText
 } from 'lucide-react';
+import { NotificationMenu } from '@/components/NotificationMenu';
+import { useMessageStore } from '@/stores/message';
+import { useSocketStore } from '@/stores/socket';
+import toast from 'react-hot-toast';
 
 const navItems = [
-  {
-    label: 'Bảng Điều Khiển',
-    href: '/recruiter/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    label: 'Đăng Tin Tuyển Dụng',
-    href: '/recruiter/post-job',
-    icon: PlusCircle,
-  },
-  {
-    label: 'Quản Lý Công Việc',
-    href: '/recruiter/jobs', // Placeholder
-    icon: Briefcase,
-  },
+  { label: 'Bảng Điều Khiển', href: '/recruiter/dashboard', icon: LayoutDashboard },
+  { label: 'Công Ty', href: '/recruiter/company', icon: Building },
+  { label: 'Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
+  { label: 'Đăng Tin', href: '/recruiter/post-job', icon: PlusCircle },
+  { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
+  { label: 'Tìm Ứng Viên', href: '/recruiter/candidates', icon: Users },
+  { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },
+  { label: 'Nhắn Tin', href: '/recruiter/messages', icon: MessageSquare },
 ];
 
 export default function RecruiterLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +41,8 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
+  const { socket } = useSocketStore();
+  const { unreadCount, fetchUnreadCount, incrementUnread } = useMessageStore();
 
   useEffect(() => {
     if (!isLoading) {
@@ -54,8 +58,40 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
       } else if (pathname === '/recruiter') {
         router.push('/recruiter/dashboard');
       }
+
+      if (isAuthenticated && user?.roles?.includes('RECRUITER')) {
+         fetchUnreadCount();
+      }
     }
-  }, [isAuthenticated, isLoading, user, router, pathname]);
+  }, [isAuthenticated, isLoading, user, router, pathname, fetchUnreadCount]);
+
+  useEffect(() => {
+    if (!socket || !user) return;
+    const handleNewMessage = (msg: any) => {
+      if (msg.senderId === user.userId) return;
+      
+      if (!pathname.startsWith('/recruiter/messages')) {
+        incrementUnread();
+        toast.custom((t) => (
+          <div onClick={() => { toast.dismiss(t.id); router.push('/recruiter/messages'); }} className="cursor-pointer bg-white border border-slate-100 rounded-xl shadow-lg p-4 flex gap-3 items-center hover:bg-slate-50 transition-colors w-80 animate-in slide-in-from-right-2">
+             <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-5 h-5" />
+             </div>
+             <div>
+                <p className="font-bold text-slate-800 text-sm">Tin nhắn mới</p>
+                <p className="text-xs text-slate-500 line-clamp-1">{msg.content || 'Bạn có thông báo tin nhắn mới'}</p>
+             </div>
+          </div>
+        ), { duration: 4000, position: 'bottom-right' });
+      } else {
+        setTimeout(() => fetchUnreadCount(), 1000);
+      }
+    };
+    socket.on('newMessage', handleNewMessage);
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+    };
+  }, [socket, user, pathname, router, incrementUnread]);
 
   if (isLoading) {
     return (
@@ -108,7 +144,14 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <Icon className="w-5 h-5 shrink-0" />
+                <div className="relative flex items-center justify-center">
+                  <Icon className="w-5 h-5 shrink-0" />
+                  {label === 'Nhắn Tin' && unreadCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-slate-900 shadow-sm leading-none">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
                 <AnimatePresence>
                   {!collapsed && (
                     <motion.span
@@ -163,14 +206,18 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
             <LayoutDashboard className="w-4 h-4" />
             <span>Recruiter Dashboard</span>
           </div>
+
           {user && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
-                {(user.name || user.email).charAt(0).toUpperCase()}
+            <div className="flex items-center gap-4">
+              <NotificationMenu />
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+                <span className="text-sm text-slate-700 font-medium hidden sm:block">
+                  {user.name || user.email}
+                </span>
               </div>
-              <span className="text-sm text-slate-700 font-medium hidden sm:block">
-                {user.name || user.email}
-              </span>
             </div>
           )}
         </header>

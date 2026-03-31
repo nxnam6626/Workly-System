@@ -13,12 +13,12 @@ import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
-import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '@/modules/auth/guards/optional-jwt-auth.guard';
-import { RolesGuard } from '@/modules/auth/guards/roles.guard';
-import { Roles } from '@/modules/auth/decorators/roles.decorator';
-import { Role } from '@/modules/auth/decorators/roles.decorator';
-import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../auth/guards/optional-jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { Role } from '../../auth/decorators/roles.decorator';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Controller('job-postings')
 export class JobPostingsController {
@@ -32,6 +32,13 @@ export class JobPostingsController {
     @CurrentUser('userId') userId: string,
   ) {
     return this.jobPostingsService.create(createJobPostingDto, userId);
+  }
+
+  @Get('my-jobs')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  findMyJobs(@CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.findMyJobs(userId);
   }
 
   @Get()
