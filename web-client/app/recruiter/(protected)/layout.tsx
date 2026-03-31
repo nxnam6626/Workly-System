@@ -133,7 +133,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
         <nav className="flex-1 px-2 py-4 space-y-1">
           {navItems.map(({ label, href, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
+            const active = pathname === href || (pathname.startsWith(href + '/') && (href !== '/recruiter/candidates' || !pathname.startsWith('/recruiter/candidates/saved')));
             return (
               <Link
                 key={href}

@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { useSocketStore } from '@/stores/socket';
+import api from '@/lib/api';
 import { 
   Briefcase, 
   Users, 
@@ -9,25 +12,83 @@ import {
   PlusCircle,
   FileText,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { timeAgo } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function RecruiterDashboard() {
   const { user } = useAuthStore();
+  const { socket } = useSocketStore();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await api.get('/recruiters/dashboard');
+        setData(res.data);
+      } catch (err) {
+        toast.error('Không thể tải dữ liệu bảng điều khiển.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleJdViewed = (payload: any) => {
+      setData((prev: any) => {
+        if (!prev || !prev.stats) return prev;
+        return {
+          ...prev,
+          stats: {
+            ...prev.stats,
+            totalJDViews: (prev.stats.totalJDViews || 0) + 1
+          }
+        };
+      });
+    };
+
+    socket.on('jdViewUpdated', handleJdViewed);
+
+    return () => {
+      socket.off('jdViewUpdated', handleJdViewed);
+    };
+  }, [socket]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center flex-col items-center min-h-[50vh] gap-4">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">Đang tải bảng điều khiển...</p>
+      </div>
+    );
+  }
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'APPROVED': return { label: 'Đang mở', className: 'bg-emerald-50 text-emerald-700' };
+      case 'PENDING': return { label: 'Chờ duyệt', className: 'bg-amber-50 text-amber-700' };
+      case 'REJECTED': return { label: 'Bị từ chối', className: 'bg-red-50 text-red-700' };
+      case 'CLOSED': return { label: 'Đã đóng', className: 'bg-slate-100 text-slate-600' };
+      default: return { label: status, className: 'bg-slate-100 text-slate-600' };
+    }
+  };
+
+  const { stats: apiStats, recentJobs } = data || { stats: {}, recentJobs: [] };
 
   const stats = [
-    { label: 'Tin Tuyển Dụng Đang Mở', value: '12', icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Tổng Số Ứng Viên', value: '148', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Tin Nhắn Mới', value: '5', icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Lượt Xem Hồ Sơ', value: '1,204', icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
-  ];
-
-  const recentJobs = [
-    { id: 1, title: 'Senior Frontend Engineer (React)', applicants: 24, status: 'Đang mở', date: '2 ngày trước' },
-    { id: 2, title: 'Backend Developer (Node.js)', applicants: 15, status: 'Đang mở', date: '5 ngày trước' },
-    { id: 3, title: 'UI/UX Designer', applicants: 8, status: 'Đã đóng', date: '1 tuần trước' },
+    { label: 'Tin Tuyển Dụng Đang Mở', value: apiStats.activeJobsCount || 0, icon: Briefcase, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Tổng Số Ứng Viên', value: apiStats.totalApplicantsCount || 0, icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Tin Nhắn Chưa Đọc', value: apiStats.newMessagesCount || 0, icon: MessageSquare, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Lượt Xem JD', value: apiStats.totalJDViews || 0, icon: TrendingUp, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
 
   return (
@@ -59,17 +120,14 @@ export default function RecruiterDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm"
+            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
                 <stat.icon className="w-6 h-6" />
               </div>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                +12%
-              </span>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+            <p className="text-3xl font-bold text-slate-900 mb-1">{stat.value.toLocaleString()}</p>
             <p className="text-sm font-medium text-slate-500">{stat.label}</p>
           </motion.div>
         ))}
@@ -78,16 +136,16 @@ export default function RecruiterDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Jobs Table */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <h3 className="font-bold text-slate-900">Tin tuyển dụng gần đây</h3>
-            <Link href="/recruiter/jobs" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-              Xem tất cả
+            <Link href="/recruiter/jobs" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg flex items-center transition-colors">
+              Xem tất cả <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <tr className="bg-white text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
                   <th className="px-6 py-4">Vị trí</th>
                   <th className="px-6 py-4">Ứng viên</th>
                   <th className="px-6 py-4">Trạng thái</th>
@@ -95,24 +153,28 @@ export default function RecruiterDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {recentJobs.map((job) => (
+                {recentJobs.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                      Chưa có tin tuyển dụng nào.
+                    </td>
+                  </tr>
+                ) : recentJobs.map((job: any) => (
                   <tr key={job.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-slate-900">{job.title}</p>
-                      <p className="text-xs text-slate-500">{job.date}</p>
+                      <p className="font-semibold text-slate-900 line-clamp-1 max-w-[200px]">{job.title}</p>
+                      <p className="text-xs text-slate-500">{timeAgo(job.date)}</p>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-700">{job.applicants}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
-                        job.status === 'Đang mở' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {job.status}
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${getStatusConfig(job.status).className}`}>
+                        {getStatusConfig(job.status).label}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all">
+                      <Link href={`/jobs/${job.id}`} className="inline-block p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all">
                         <ChevronRight className="w-5 h-5" />
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}

@@ -2,17 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Search, Download, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
-import api from '@/lib/api';
+import { FileText, Search, Download, CheckCircle, XCircle, Clock, Eye, Calendar } from 'lucide-react';
+import api, { getFileUrl } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
+import { InterviewScheduleModal } from './InterviewScheduleModal';
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
+  const [selectedApp, setSelectedApp] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -43,13 +47,23 @@ export default function ApplicationsPage() {
     }
   };
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: string, interviewDetails?: any) => {
     try {
-      await api.patch(`/applications/${id}/status`, { status });
+      if (interviewDetails) {
+        setIsSubmitting(true);
+      }
+      await api.patch(`/applications/${id}/status`, { status, ...interviewDetails });
       setApplications(applications.map(app => app.applicationId === id ? { ...app, appStatus: status } : app));
+      toast.success(status === 'INTERVIEWING' ? 'Đã hẹn lịch phỏng vấn!' : 'Cập nhật trạng thái thành công');
+      setIsModalOpen(false);
+      setSelectedApp(null);
     } catch (error) {
       console.error(error);
       toast.error('Cập nhật trạng thái thất bại');
+    } finally {
+      if (interviewDetails) {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -58,6 +72,7 @@ export default function ApplicationsPage() {
       case 'ACCEPTED': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
       case 'REJECTED': return 'bg-red-100 text-red-700 border-red-200';
       case 'REVIEWED': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'INTERVIEWING': return 'bg-purple-100 text-purple-700 border-purple-200';
       default: return 'bg-amber-100 text-amber-700 border-amber-200';
     }
   };
@@ -67,6 +82,7 @@ export default function ApplicationsPage() {
       case 'ACCEPTED': return 'Đã Tuyển';
       case 'REJECTED': return 'Từ Chối';
       case 'REVIEWED': return 'Đã Xem';
+      case 'INTERVIEWING': return 'Đang Phỏng Vấn';
       default: return 'Chờ Duyệt';
     }
   };
@@ -129,6 +145,12 @@ export default function ApplicationsPage() {
                   <p className="text-slate-400 text-xs flex items-center gap-1.5 mt-1">
                      <Clock className="w-3.5 h-3.5" />
                      {new Date(app.applyDate).toLocaleDateString('vi-VN')}
+                     {app.desiredLocation && (
+                       <>
+                         <span className="mx-1">•</span>
+                         <span className="text-blue-600 font-medium whitespace-nowrap">Nơi làm việc: {app.desiredLocation}</span>
+                       </>
+                     )}
                   </p>
                 </div>
               </div>
@@ -141,8 +163,9 @@ export default function ApplicationsPage() {
                  <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
 
                  <a 
-                   href={app.cvSnapshotUrl} 
+                   href={getFileUrl(app.cvSnapshotUrl)} 
                    target="_blank" 
+                   rel="noopener noreferrer"
                    className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                  >
                    <Eye className="w-4 h-4" /> Xem CV
@@ -150,10 +173,28 @@ export default function ApplicationsPage() {
 
                  {app.appStatus === 'PENDING' && (
                    <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                     <button onClick={() => updateStatus(app.applicationId, 'ACCEPTED')} title="Duyệt" className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 flex items-center justify-center transition-colors">
-                       <CheckCircle className="w-5 h-5" />
+                     <button onClick={() => { setSelectedApp(app); setIsModalOpen(true); }} title="Hẹn phỏng vấn" className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 flex items-center justify-center transition-colors">
+                       <Clock className="w-5 h-5" />
                      </button>
                      <button onClick={() => updateStatus(app.applicationId, 'REJECTED')} title="Từ chối" className="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 flex items-center justify-center transition-colors">
+                       <XCircle className="w-5 h-5" />
+                     </button>
+                   </div>
+                 )}
+
+                 {app.appStatus === 'INTERVIEWING' && (
+                   <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                     <button 
+                       onClick={() => { setSelectedApp(app); setIsModalOpen(true); }} 
+                       title="Dời Lịch" 
+                       className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 flex items-center justify-center transition-colors"
+                     >
+                       <Calendar className="w-5 h-5" />
+                     </button>
+                     <button onClick={() => updateStatus(app.applicationId, 'ACCEPTED')} title="Đã Tuyển" className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 flex items-center justify-center transition-colors">
+                       <CheckCircle className="w-5 h-5" />
+                     </button>
+                     <button onClick={() => updateStatus(app.applicationId, 'REJECTED')} title="Từ Chối" className="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 flex items-center justify-center transition-colors">
                        <XCircle className="w-5 h-5" />
                      </button>
                    </div>
@@ -163,6 +204,23 @@ export default function ApplicationsPage() {
           ))}
         </div>
       </div>
+
+      <InterviewScheduleModal
+        isOpen={isModalOpen}
+        candidateName={selectedApp?.candidate?.fullName || ''}
+        isSubmitting={isSubmitting}
+        initialData={selectedApp?.interviewDate ? {
+          date: new Date(selectedApp.interviewDate).toISOString().split('T')[0],
+          time: selectedApp.interviewTime || '',
+          location: selectedApp.interviewLocation || ''
+        } : undefined}
+        onClose={() => { setIsModalOpen(false); setSelectedApp(null); }}
+        onSubmit={(date, time, location) => {
+          if (selectedApp) {
+            updateStatus(selectedApp.applicationId, 'INTERVIEWING', { interviewDate: date, interviewTime: time, interviewLocation: location });
+          }
+        }}
+      />
     </motion.div>
   );
 }

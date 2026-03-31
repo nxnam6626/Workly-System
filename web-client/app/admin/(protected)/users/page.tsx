@@ -27,7 +27,9 @@ export default function UsersPage() {
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [lockUserId, setLockUserId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLocking, setIsLocking] = useState(false);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -59,18 +61,26 @@ export default function UsersPage() {
     setPage(1);
   };
 
-  const handleLock = async (id: string) => {
-    setProcessingId(id);
+  const requestLock = (id: string) => {
+    setLockUserId(id);
+  };
+
+  const executeLock = async () => {
+    if (!lockUserId) return;
+    setIsLocking(true);
+    setProcessingId(lockUserId);
     try {
-      await adminUsersApi.lock(id);
+      await adminUsersApi.lock(lockUserId);
       setUsers((prev) =>
-        prev.map((u) => (u.userId === id ? { ...u, status: 'LOCKED' } : u)),
+        prev.map((u) => (u.userId === lockUserId ? { ...u, status: 'LOCKED' } : u)),
       );
-      if (detailUser?.userId === id)
+      if (detailUser?.userId === lockUserId)
         setDetailUser((p) => (p ? { ...p, status: 'LOCKED' } : null));
+      setLockUserId(null);
     } catch {
       setError('Khóa tài khoản thất bại.');
     } finally {
+      setIsLocking(false);
       setProcessingId(null);
     }
   };
@@ -108,6 +118,19 @@ export default function UsersPage() {
       setError('Xóa tài khoản thất bại.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleRoleChange = async (id: string, newRole: string) => {
+    setProcessingId(id);
+    try {
+      const updatedUser = await adminUsersApi.updateRole(id, newRole);
+      setUsers((prev) => prev.map((u) => (u.userId === id ? updatedUser : u)));
+      if (detailUser?.userId === id) setDetailUser(updatedUser);
+    } catch {
+      setError('Đổi vai trò thất bại.');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -173,7 +196,7 @@ export default function UsersPage() {
           page={page}
           totalPages={totalPages}
           setPage={setPage}
-          onLock={handleLock}
+          onLock={requestLock}
           onUnlock={handleUnlock}
           onDelete={requestDelete}
           onQuickView={setDetailUser}
@@ -186,9 +209,10 @@ export default function UsersPage() {
         <UserDetailModal
           user={detailUser}
           onClose={() => setDetailUser(null)}
-          onLock={handleLock}
+          onLock={requestLock}
           onUnlock={handleUnlock}
           onDelete={requestDelete}
+          onRoleChange={handleRoleChange}
           isProcessing={processingId === detailUser.userId}
         />
       )}
@@ -201,6 +225,16 @@ export default function UsersPage() {
         onConfirm={executeDelete}
         onCancel={() => setDeleteUserId(null)}
         isLoading={isDeleting}
+      />
+
+      <ConfirmModal
+        isOpen={!!lockUserId}
+        title="Khóa tài khoản"
+        message="Bạn có chắc muốn khóa tài khoản này? Người dùng sẽ bị đăng xuất và không thể đăng nhập lại cho đến khi được mở khóa."
+        confirmLabel="Khóa tài khoản"
+        onConfirm={executeLock}
+        onCancel={() => setLockUserId(null)}
+        isLoading={isLocking}
       />
     </div>
   );

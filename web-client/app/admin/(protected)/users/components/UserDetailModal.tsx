@@ -15,6 +15,8 @@ import {
   Briefcase,
   BadgeCheck,
 } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface UserDetailModalProps {
   user: AdminUser;
@@ -22,6 +24,7 @@ interface UserDetailModalProps {
   onLock: (id: string) => void;
   onUnlock: (id: string) => void;
   onDelete: (id: string) => void;
+  onRoleChange: (id: string, role: string) => void;
   isProcessing: boolean;
 }
 
@@ -43,8 +46,11 @@ export default function UserDetailModal({
   onLock,
   onUnlock,
   onDelete,
+  onRoleChange,
   isProcessing,
 }: UserDetailModalProps) {
+  const [roleToChange, setRoleToChange] = useState<string | null>(null);
+
   const displayName = user.candidate?.fullName ?? user.recruiter?.position ?? user.email.split('@')[0];
   const roles = user.userRoles.map((ur) => ur.role.roleName);
 
@@ -111,6 +117,25 @@ export default function UserDetailModal({
                   {ROLE_LABELS[r] ?? r}
                 </span>
               ))}
+            </div>
+
+            <div className="mt-4">
+              <select
+                className="text-sm border border-slate-200 w-full rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setRoleToChange(e.target.value);
+                    e.target.value = "";
+                  }
+                }}
+                disabled={isProcessing || user.status === 'LOCKED'}
+                value=""
+              >
+                <option value="" disabled>-- Cấp quyền mới cho tài khoản --</option>
+                {!roles.includes('CANDIDATE') && <option value="CANDIDATE">Ứng viên</option>}
+                {!roles.includes('RECRUITER') && <option value="RECRUITER">Nhà tuyển dụng</option>}
+                {!roles.includes('ADMIN') && <option value="ADMIN">Quản trị viên</option>}
+              </select>
             </div>
           </div>
 
@@ -204,6 +229,19 @@ export default function UserDetailModal({
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!roleToChange}
+        title="Thay đổi vai trò"
+        message={`Bạn có chắc muốn cấp quyền: ${roleToChange ? ROLE_LABELS[roleToChange] : ''} cho người dùng này? Các quyền cũ (ngoại trừ ứng viên cơ bản) sẽ bị ghi đè.`}
+        confirmLabel="Xác nhận"
+        onConfirm={() => {
+          if (roleToChange) onRoleChange(user.userId, roleToChange);
+          setRoleToChange(null);
+        }}
+        onCancel={() => setRoleToChange(null)}
+        isLoading={isProcessing}
+      />
     </div>
   );
 }

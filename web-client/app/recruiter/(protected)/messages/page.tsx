@@ -19,6 +19,18 @@ export default function MessagesPage() {
   const [search, setSearch] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const getOnlineStatusText = (usr: any) => {
+    if (!usr) return '';
+    if (usr.isOnline) return 'Đang hoạt động';
+    if (!usr.lastActive) return 'Ngoại tuyến';
+    const mins = Math.max(0, Math.floor((Date.now() - new Date(usr.lastActive).getTime()) / 60000));
+    if (mins < 1) return 'Vừa truy cập';
+    if (mins < 60) return `Hoạt động ${mins} phút trước`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `Hoạt động ${hours} giờ trước`;
+    return `Hoạt động ${Math.floor(hours / 24)} ngày trước`;
+  };
+
   useEffect(() => {
     fetchConversations();
   }, []);
@@ -64,7 +76,9 @@ export default function MessagesPage() {
           return prev;
         }
         const updated = [...prev];
-        const [moved] = updated.splice(index, 1);
+        const moved = { ...updated[index] };
+        updated.splice(index, 1);
+        
         moved.lastMessage = msg.content;
         moved.updatedAt = msg.sentAt;
         if (msg.senderId !== user?.userId && activeChat?.conversationId !== msg.conversationId) {
@@ -75,9 +89,23 @@ export default function MessagesPage() {
       });
     };
 
+    const handleUserStatusChanged = (status: { userId: string; isOnline: boolean; lastActive?: string }) => {
+      setConversations(prev => prev.map(c => {
+        if (c.candidate?.user?.userId === status.userId) {
+          return { ...c, candidate: { ...c.candidate, user: { ...c.candidate.user, isOnline: status.isOnline, lastActive: status.lastActive } } };
+        }
+        return c;
+      }));
+      if (activeChat?.candidate?.user?.userId === status.userId) {
+        setActiveChat((prev: any) => prev ? { ...prev, candidate: { ...prev.candidate, user: { ...prev.candidate!.user, isOnline: status.isOnline, lastActive: status.lastActive } } as any } : prev);
+      }
+    };
+
     socket.on('newMessage', handleNewMessage);
+    socket.on('userStatusChanged', handleUserStatusChanged);
     return () => {
       socket.off('newMessage', handleNewMessage);
+      socket.off('userStatusChanged', handleUserStatusChanged);
     };
   }, [socket, activeChat, user?.userId]);
 
@@ -191,7 +219,9 @@ export default function MessagesPage() {
                       {name.charAt(0)}
                     </div>
                   )}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                  {conv.candidate?.user?.isOnline && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-0.5">
@@ -224,8 +254,9 @@ export default function MessagesPage() {
                   </div>
                   <div>
                     <h2 className="font-semibold text-slate-800">{activeChat.candidate?.fullName || 'Người dùng'}</h2>
-                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Đang hoạt động
+                    <p className={`text-xs font-medium flex items-center gap-1 ${activeChat.candidate?.user?.isOnline ? 'text-emerald-600' : 'text-slate-500'}`}>
+                      {activeChat.candidate?.user?.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>}
+                      {getOnlineStatusText(activeChat.candidate?.user)}
                     </p>
                   </div>
                 </div>

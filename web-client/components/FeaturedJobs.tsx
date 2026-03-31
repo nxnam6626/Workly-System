@@ -92,11 +92,11 @@ export function FeaturedJobs() {
             
             {/* Details */}
             <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-2 text-slate-500">
-                <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-3.5 h-3.5 text-blue-500" />
+              <div className="flex items-center gap-2 text-emerald-600">
+                <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">{job.salary}</span>
+                <span className="text-[13px] font-bold">{job.salary}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-500">
                 <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center">

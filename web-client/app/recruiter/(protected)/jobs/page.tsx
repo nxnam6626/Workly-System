@@ -25,7 +25,7 @@ export default function JobsManagementPage() {
   useEffect(() => {
     if (!socket) return;
     const handleNotification = (msg: any) => {
-      if (msg.title?.includes('Tin tuyển dụng')) {
+      if (msg.title?.includes('Tin tuyển dụng') || msg.title?.includes('Hồ sơ')) {
         fetchJobs();
       }
     };

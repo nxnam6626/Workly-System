@@ -20,6 +20,9 @@ import {
 import axios from "axios";
 import Link from "next/link";
 import { formatSalary, timeAgo } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth";
+import { useSocketStore } from "@/stores/socket";
+import { getFileUrl } from "@/lib/api";
 
 interface AppliedJob {
   applicationId: string;
@@ -27,6 +30,9 @@ interface AppliedJob {
   applyDate: string;
   appStatus: string;
   cvSnapshotUrl: string;
+  interviewDate?: string;
+  interviewTime?: string;
+  interviewLocation?: string;
   jobPosting: {
     title: string;
     salaryMin: number;
@@ -53,22 +59,36 @@ export default function AppliedJobsPage() {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const { accessToken } = useAuthStore();
+  const { socket } = useSocketStore();
+
+  const fetchAppliedJobs = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:3001/applications/me", {
+        withCredentials: true
+      });
+      setApplications(data);
+    } catch (error) {
+      console.error("Error fetching applied jobs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchAppliedJobs = async () => {
-      try {
-        const { data } = await axios.get("http://localhost:3001/applications/me", {
-          withCredentials: true
-        });
-        setApplications(data);
-      } catch (error) {
-        console.error("Error fetching applied jobs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchAppliedJobs();
-  }, []);
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleNotification = (msg: any) => {
+      fetchAppliedJobs();
+    };
+    socket.on('notification', handleNotification);
+    return () => {
+      socket.off('notification', handleNotification);
+    };
+  }, [socket]);
 
   const filteredApps = applications.filter(app => 
     app.jobPosting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -190,8 +210,8 @@ export default function AppliedJobsPage() {
 
                              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500">
                                 <div className="flex items-center gap-1.5">
-                                   <DollarSign className="w-3.5 h-3.5 text-blue-600" />
-                                   <span className="font-bold text-slate-800">
+                                   <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                                   <span className="font-bold text-emerald-600 text-[13px]">
                                       {formatSalary(app.jobPosting.salaryMin, app.jobPosting.salaryMax, app.jobPosting.currency)}
                                    </span>
                                 </div>
@@ -205,6 +225,25 @@ export default function AppliedJobsPage() {
                                 </div>
                              </div>
 
+                             {app.appStatus === 'INTERVIEWING' && (
+                                <div className="p-3 bg-purple-50 rounded-xl border border-purple-100 flex items-start gap-3 mt-2">
+                                   <div className="w-8 h-8 rounded-full bg-white text-purple-600 flex items-center justify-center shrink-0 shadow-sm">
+                                      <Calendar className="w-4 h-4" />
+                                   </div>
+                                   <div>
+                                      <p className="text-sm font-bold text-slate-800">Lịch phỏng vấn sắp tới</p>
+                                      <p className="text-xs text-slate-600 mt-1">
+                                         Thời gian: <span className="font-semibold text-slate-800">{app.interviewTime} ngày {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : ''}</span>
+                                      </p>
+                                      {app.interviewLocation && (
+                                         <p className="text-xs text-slate-600 mt-0.5">
+                                            Địa điểm/Link: <span className="font-semibold text-slate-800">{app.interviewLocation}</span>
+                                         </p>
+                                      )}
+                                   </div>
+                                </div>
+                             )}
+
                              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50">
                                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold ${status.bg} ${status.color}`}>
                                    <div className={`w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]`} />
@@ -213,9 +252,9 @@ export default function AppliedJobsPage() {
                                 
                                 <div className="flex items-center gap-3">
                                    <a 
-                                     href={app.cvSnapshotUrl} 
+                                     href={getFileUrl(app.cvSnapshotUrl)} 
                                      target="_blank" 
-                                     rel="noreferrer"
+                                     rel="noopener noreferrer"
                                      className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1"
                                    >
                                       Xem CV <ExternalLink className="w-3 h-3" />

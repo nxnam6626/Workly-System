@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock } from 'lucide-react';
+import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
+import { LOCATIONS } from '@/lib/constants';
 
 const defaultForm = {
   title: '',
@@ -26,7 +27,21 @@ export default function PostJobPage() {
   const router = useRouter();
   const [formData, setFormData] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const { accessToken } = useAuthStore();
+
+  const allLocations = ["Làm việc từ xa (Remote)", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", ...LOCATIONS.filter((l: string) => !['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].includes(l))];
+  const selectedLocations = formData.locationCity.split(',').map(s => s.trim()).filter(Boolean);
+
+  const handleLocationToggle = (loc: string) => {
+    let updated = [...selectedLocations];
+    if (updated.includes(loc)) {
+      updated = updated.filter(l => l !== loc);
+    } else {
+      updated.push(loc);
+    }
+    setFormData(prev => ({ ...prev, locationCity: updated.join(', ') }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -37,7 +52,7 @@ export default function PostJobPage() {
     e.preventDefault();
     if (!accessToken) return;
     setSaving(true);
-    
+
     try {
       const payload = {
         ...formData,
@@ -113,15 +128,46 @@ export default function PostJobPage() {
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-slate-400" /> Địa điểm khu vực
               </label>
-              <input
-                type="text"
-                name="locationCity"
-                value={formData.locationCity}
-                onChange={handleChange}
-                required
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
-                placeholder="VD: Hà Nội, Hồ Chí Minh"
-              />
+              <div className="relative">
+                <div
+                  className="w-full min-h-[44px] px-4 py-2 rounded-xl border border-slate-200 cursor-pointer flex flex-wrap gap-2 items-center bg-white transition-all duration-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500 relative pr-10"
+                  onClick={() => setLocationMenuOpen(!locationMenuOpen)}
+                >
+                  {selectedLocations.length === 0 ? (
+                    <span className="text-slate-400">VD: Hà Nội, Hồ Chí Minh...</span>
+                  ) : (
+                    selectedLocations.map(loc => (
+                      <span key={loc} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 flex items-center gap-1">
+                        {loc}
+                      </span>
+                    ))
+                  )}
+                  <ChevronDown className={`w-5 h-5 text-slate-400 absolute right-3 transition-transform ${locationMenuOpen ? 'rotate-180' : ''}`} />
+                </div>
+
+                {locationMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setLocationMenuOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto z-20 p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+                      {allLocations.map(loc => (
+                        <label key={loc} className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                            checked={selectedLocations.includes(loc)}
+                            onChange={() => handleLocationToggle(loc)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <span className="text-sm text-slate-700 font-medium group-hover:text-indigo-700">{loc}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -178,7 +224,7 @@ export default function PostJobPage() {
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Users className="w-4 h-4 text-slate-400" /> Yêu cầu kinh nghiệm

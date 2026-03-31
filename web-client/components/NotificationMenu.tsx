@@ -7,11 +7,13 @@ import api from '@/lib/api';
 import { useSocketStore } from '@/stores/socket';
 import { useAuthStore } from '@/stores/auth';
 import { timeAgo } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 export function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   
   const { socket, isConnected } = useSocketStore();
@@ -103,6 +105,16 @@ export function NotificationMenu() {
     }
   };
 
+  const handleNotificationClick = (notif: any) => {
+     if (!notif.isRead) {
+        markAsRead(notif.notificationId);
+     }
+     if (notif.link) {
+        router.push(notif.link);
+        setIsOpen(false);
+     }
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
        case 'success': return <CheckCircle className="w-5 h-5 text-emerald-500" />;
@@ -157,7 +169,7 @@ export function NotificationMenu() {
                   {notifications.map((notif) => (
                     <div 
                       key={notif.notificationId} 
-                      onClick={() => !notif.isRead && markAsRead(notif.notificationId)}
+                      onClick={() => handleNotificationClick(notif)}
                       className={`p-4 flex gap-3 transition-colors cursor-pointer hover:bg-slate-50 ${!notif.isRead ? 'bg-indigo-50/30' : ''}`}
                     >
                       <div className="flex-shrink-0 mt-1">

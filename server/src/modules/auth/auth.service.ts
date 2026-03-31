@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -48,6 +49,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
+    if (user.status === 'LOCKED') throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
     if (!user.password) return null; // Protect against social login accounts without passwords
     const isMatch = await this.comparePassword(password, user.password);
     if (!isMatch) return null;
@@ -121,6 +123,10 @@ export class AuthService {
       throw new UnauthorizedException('Không thể xác thực người dùng qua OAuth.');
     }
 
+    if (user.status === 'LOCKED') {
+      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+    }
+
     await this.usersService.updateLastLogin(user.userId);
     const roles = user.userRoles.map((ur: any) => ur.role.roleName);
     const tokens = await this.issueTokens(user.userId, user.email, roles);
@@ -154,6 +160,10 @@ export class AuthService {
     if (payload.type !== 'refresh')
       throw new UnauthorizedException('Token không phải refresh token.');
     const user = await this.usersService.findOne(payload.sub);
+    
+    if (user.status === 'LOCKED') {
+      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+    }
 
     let storedToken = await this.redisService.get(`refresh_token:${user.userId}`);
     if (!storedToken) {

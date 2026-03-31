@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { MessagesService } from './messages.service';
 import { JwtPayload } from '../auth/auth.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @WebSocketGateway({
   cors: {
@@ -21,9 +22,12 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   @WebSocketServer()
   server: Server;
 
+  private activeUsers = new Map<string, number>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly messagesService: MessagesService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -38,17 +42,52 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
           secret: process.env.JWT_ACCESS_SECRET ?? 'access-secret'
       });
       const userId = payload.sub;
+      client.data.userId = userId;
       
       client.join(`user_${userId}`);
       console.log(`Client connected: ${client.id}, joined room: user_${userId}`);
+
+      const count = this.activeUsers.get(userId) || 0;
+      this.activeUsers.set(userId, count + 1);
+
+      if (count === 0) {
+         try {
+            await this.prismaService.user.update({
+               where: { userId },
+               data: { isOnline: true },
+            });
+            this.server.emit('userStatusChanged', { userId, isOnline: true });
+         } catch (e) {
+            console.error('Failed to update online status:', e);
+         }
+      }
     } catch (error) {
       console.error('Socket connection error:', error.message);
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
+    
+    const userId = client.data?.userId;
+    if (!userId) return;
+
+    const count = this.activeUsers.get(userId) || 1;
+    this.activeUsers.set(userId, Math.max(0, count - 1));
+
+    if (count - 1 === 0) {
+       try {
+          const lastActive = new Date();
+          await this.prismaService.user.update({
+             where: { userId },
+             data: { isOnline: false, lastActive },
+          });
+          this.server.emit('userStatusChanged', { userId, isOnline: false, lastActive });
+       } catch (e) {
+          console.error('Failed to update offline status:', e);
+       }
+    }
   }
 
   @SubscribeMessage('sendMessage')

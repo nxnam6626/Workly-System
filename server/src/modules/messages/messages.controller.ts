@@ -9,6 +9,19 @@ import { Roles, Role } from '../auth/decorators/roles.decorator';
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
+  @Get('debug')
+  async debugCounts() {
+    const msgs = await this.messagesService.prisma.message.findMany();
+    const counts: Record<string, number> = {};
+    msgs.forEach(m => {
+      counts[m.content] = (counts[m.content] || 0) + 1;
+    });
+    return {
+      totalMessages: msgs.length,
+      duplicates: Object.entries(counts).filter(([k,v]) => v > 1).map(([k,v]) => ({ [k]: v }))
+    };
+  }
+
   @Get('conversations')
   getConversations(@Req() req) {
     return this.messagesService.getConversations(req.user.userId);

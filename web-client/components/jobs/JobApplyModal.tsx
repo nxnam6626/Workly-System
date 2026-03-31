@@ -21,10 +21,11 @@ interface JobApplyModalProps {
   jobTitle: string;
   companyName: string;
   jobPostingId: string;
+  jobLocationCity?: string;
   onSuccess?: () => void;
 }
 
-export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPostingId, onSuccess }: JobApplyModalProps) {
+export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPostingId, jobLocationCity, onSuccess }: JobApplyModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,6 +37,19 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
     agree: false,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Parse available locations from the job
+  const availableLocations = React.useMemo(() => {
+    if (!jobLocationCity) return [];
+    return jobLocationCity.split(',').map(s => s.trim()).filter(Boolean);
+  }, [jobLocationCity]);
+
+  // Auto-select if there's only one location available
+  React.useEffect(() => {
+    if (isOpen && availableLocations.length > 0 && !formData.location) {
+        setFormData(prev => ({ ...prev, location: availableLocations[0] }));
+    }
+  }, [isOpen, availableLocations]);
 
   if (!isOpen) return null;
 
@@ -207,9 +221,17 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
                   >
                      <option value="">Chọn địa điểm bạn muốn làm việc</option>
-                     <option value="HN">Hà Nội</option>
-                     <option value="HCM">Hồ Chí Minh</option>
-                     <option value="DN">Đà Nẵng</option>
+                     {availableLocations.length > 0 ? (
+                       availableLocations.map((loc, idx) => (
+                         <option key={idx} value={loc}>{loc}</option>
+                       ))
+                     ) : (
+                       <>
+                         <option value="Hà Nội">Hà Nội</option>
+                         <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                         <option value="Đà Nẵng">Đà Nẵng</option>
+                       </>
+                     )}
                   </select>
                   <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                </div>
