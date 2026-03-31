@@ -7,13 +7,18 @@ import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { MessagesGateway } from '../../messages/messages.gateway';
 import { NotificationsService } from '../../notifications/notifications.service';
+import { JobAlertsService } from '../../job-alerts/job-alerts.service';
+import { SearchService } from '../../search/search.service';
 
 @Injectable()
 export class JobPostingsService {
   constructor(
-     private prisma: PrismaService,
-     private messagesGateway: MessagesGateway,
-     private notificationsService: NotificationsService
+
+    private prisma: PrismaService,
+    private messagesGateway: MessagesGateway,
+    private notificationsService: NotificationsService,
+    private jobAlertsService: JobAlertsService,
+    private searchService: SearchService,
   ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
@@ -26,7 +31,7 @@ export class JobPostingsService {
     }
 
     const { deadline, salaryMin, salaryMax, ...rest } = createJobPostingDto as any;
-    
+
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
 
@@ -60,6 +65,52 @@ export class JobPostingsService {
 
 
   async findAll(query: FilterJobPostingDto) {
+    const { search, location, jobType, page = 1, limit = 10, industry, experience, salaryMin, salaryMax } = query;
+
+    // Use Elasticsearch for searching and filtering IDs
+    const { ids, total } = await this.searchService.searchJobs({
+      search,
+      location,
+      jobType,
+      industry,
+      experience,
+      salaryMin,
+      salaryMax,
+      page,
+      limit,
+    });
+
+    if (ids.length === 0 && total === 0 && !search) {
+      // Fallback or initial state if ES is empty but we have jobs in DB
+      // This is helpful if sync hasn't run yet
+      return this.findAllPrisma(query);
+    }
+
+    if (ids.length === 0) {
+      return { items: [], total: 0, page, limit };
+    }
+
+    // Fetch full data from Prisma using IDs from ES
+    const items = await this.prisma.jobPosting.findMany({
+      where: {
+        jobPostingId: { in: ids },
+      },
+      include: {
+        company: true,
+        recruiter: true,
+      },
+    });
+
+    // Sort items to match ES order (relevance or custom sort)
+    const sortedItems = ids
+      .map(id => items.find(item => item.jobPostingId === id))
+      .filter(item => !!item);
+
+    return { items: sortedItems, total, page, limit };
+  }
+
+  // Backup method using Prisma directly
+  private async findAllPrisma(query: FilterJobPostingDto) {
     const { search, location, jobType, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -153,14 +204,24 @@ export class JobPostingsService {
 
     const { deadline, ...rest } = updateJobPostingDto;
 
-    return this.prisma.jobPosting.update({
+    const result = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         ...rest,
         ...(deadline && { deadline: new Date(deadline) }),
         updatedAt: new Date(),
       },
+      include: { company: true }
     });
+
+    // Update ES if approved
+    if (result.status === JobStatus.APPROVED) {
+      this.syncJobToES(result);
+    } else {
+      await this.searchService.deleteJob(id);
+    }
+
+    return result;
   }
 
 
@@ -196,30 +257,41 @@ export class JobPostingsService {
 
     return { items, total, page, limit };
   }
-
   async updateStatus(id: string, status: JobStatus, adminId: string) {
     const job = await this.findOne(id);
-    
+
     const updated = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         status,
-        approvedBy: adminId, // Reuse approvedBy field to track who approved/rejected
+        approvedBy: adminId,
         updatedAt: new Date(),
       },
-      include: { recruiter: true }
+      include: {
+        recruiter: true,
+        company: true,
+      },
     });
 
-    if (status === JobStatus.APPROVED && updated.recruiter?.userId) {
-       const title = 'Tin tuyển dụng được duyệt';
-       const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-       const type = 'success';
-       
-       await this.notificationsService.create(updated.recruiter.userId, title, message, type);
+    if (status === JobStatus.APPROVED) {
+      // Notify recruiter
+      if (updated.recruiter?.userId) {
+        const title = 'Tin tuyển dụng được duyệt';
+        const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+        const type = 'success';
 
-       this.messagesGateway.server
+        await this.notificationsService.create(updated.recruiter.userId, title, message, type);
+
+        this.messagesGateway.server
           .to(`user_${updated.recruiter.userId}`)
           .emit('notification', { title, message, type });
+      }
+
+      // Trigger Job Alerts and ES Sync
+      this.triggerJobNotifications(updated);
+      this.syncJobToES(updated);
+    } else {
+      await this.searchService.deleteJob(id);
     }
 
     return updated;
@@ -232,7 +304,7 @@ export class JobPostingsService {
     if (postType) where.postType = postType;
     if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
 
-    
+
     if (searchTerm && searchTerm.includes(',')) {
       where.jobPostingId = { in: searchTerm.split(',') };
     } else if (searchTerm) {
@@ -258,7 +330,7 @@ export class JobPostingsService {
     if (postType) where.postType = postType;
     if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
 
-    
+
     // If searchTerm is provided as a comma-separated list of IDs (as the frontend does now)
     if (searchTerm && searchTerm.includes(',')) {
       where.jobPostingId = { in: searchTerm.split(',') };
@@ -275,8 +347,8 @@ export class JobPostingsService {
 
     // Find all affected jobs before update to send notifications
     const jobsToUpdate = await this.prisma.jobPosting.findMany({
-       where,
-       include: { recruiter: true }
+      where,
+      include: { recruiter: true }
     });
 
     const result = await this.prisma.jobPosting.updateMany({
@@ -289,30 +361,101 @@ export class JobPostingsService {
     });
 
     if (status === JobStatus.APPROVED) {
-        // use a simple for loop to wait for db inserts
-        for (const job of jobsToUpdate) {
-            if (job.recruiter?.userId) {
-                const title = 'Tin tuyển dụng được duyệt';
-                const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-                const type = 'success';
-                
-                await this.notificationsService.create(job.recruiter.userId, title, message, type);
+      // use a simple for loop to wait for db inserts
+      for (const job of jobsToUpdate) {
+        if (job.recruiter?.userId) {
+          const title = 'Tin tuyển dụng được duyệt';
+          const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+          const type = 'success';
 
-                this.messagesGateway.server
-                    .to(`user_${job.recruiter.userId}`)
-                    .emit('notification', { title, message, type });
-            }
+          await this.notificationsService.create(job.recruiter.userId, title, message, type);
+
+          this.messagesGateway.server
+            .to(`user_${job.recruiter.userId}`)
+            .emit('notification', { title, message, type });
         }
+      }
+    }
+
+    if (status === JobStatus.APPROVED) {
+      // For bulk, we need to fetch the actual jobs to match keywords
+      const approvedJobs = await this.prisma.jobPosting.findMany({
+        where: { ...where, status: JobStatus.APPROVED },
+      });
+      for (const job of approvedJobs) {
+        this.triggerJobNotifications(job);
+        this.syncJobToES(job);
+      }
+    } else {
+      // If bulk reject/expire, remove from ES
+      const jobsToProcess = await this.prisma.jobPosting.findMany({
+        where: { ...where },
+      });
+      for (const job of jobsToProcess) {
+        await this.searchService.deleteJob(job.jobPostingId);
+      }
     }
 
     return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
   }
 
   async remove(id: string) {
-    await this.findOne(id);
-
-    return this.prisma.jobPosting.delete({
+    const job = await this.findOne(id);
+    await this.prisma.jobPosting.delete({
       where: { jobPostingId: id },
     });
+    await this.searchService.deleteJob(id);
+    return { success: true };
+  }
+
+  private async triggerJobNotifications(job: any) {
+    try {
+      const alerts = await this.jobAlertsService.findAllAlerts();
+      const matchedAlerts = alerts.filter(alert =>
+        job.title.toLowerCase().includes(alert.keywords.toLowerCase())
+      );
+
+      for (const alert of matchedAlerts) {
+        await this.notificationsService.create(
+          alert.userId,
+          'Việc làm mới theo từ khóa của bạn',
+          `Có 1 việc làm mới theo từ khóa tìm kiếm "${alert.keywords}". Vào xem ngay`,
+          'info'
+        );
+      }
+    } catch (error) {
+      console.error('Error triggering notifications:', error);
+    }
+  }
+
+  private async syncJobToES(job: any) {
+    await this.searchService.indexJob({
+      id: job.jobPostingId,
+      title: job.title,
+      description: job.description,
+      companyId: job.companyId,
+      companyName: job.company?.companyName || undefined,
+      originalUrl: job.originalUrl,
+      locationCity: job.locationCity,
+      jobType: job.jobType,
+      experience: job.experience,
+      salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,
+      salaryMax: job.salaryMax ? Number(job.salaryMax) : undefined,
+      createdAt: job.createdAt,
+      status: job.status,
+    });
+  }
+
+  async syncAllJobsToES() {
+    const jobs = await this.prisma.jobPosting.findMany({
+      where: { status: JobStatus.APPROVED },
+      include: { company: true }
+    });
+
+    console.log(`[JobPostingsService] Syncing ${jobs.length} jobs to ES...`);
+    for (const job of jobs) {
+      await this.syncJobToES(job);
+    }
+    return { count: jobs.length };
   }
 }

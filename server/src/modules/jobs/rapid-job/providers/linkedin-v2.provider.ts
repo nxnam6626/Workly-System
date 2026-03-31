@@ -18,16 +18,16 @@ export class LinkedInV2Provider extends BaseProvider {
     super(LinkedInV2Provider.name);
   }
 
-  fetchJobs(params: { title?: string; location?: string; limit?: number }): Observable<any[]> {
+  fetchJobs(): Observable<any[]> {
     const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
     const apiHost = this.configService.get<string>('LINKEDINV2_API_HOST') || 'linkedin-jobs-api2.p.rapidapi.com';
 
     return this.httpService
       .get(this.url, {
         params: {
-          title_filter: `"${params.title || 'Data Engineer'}"`,
-          location_filter: `"${params.location || 'United States'}"`,
-          limit: String(params.limit || 10),
+          title_filter: 'intern OR internship OR "thực tập sinh" OR trainee OR fresher',
+          location_filter: "Vietnam",
+          limit: '100',
         },
         headers: {
           'X-RapidAPI-Key': apiKey,
@@ -52,34 +52,48 @@ export class LinkedInV2Provider extends BaseProvider {
     const title = apiData.title ?? 'Untitled';
     const descText = apiData.description_text || apiData.description || '';
 
-    const requirements = this.extractSection(descText, ['Qualifications', 'Key Skills', 'Requirements', 'About the Role']);
-    const benefits = this.extractSection(descText, ['Why Join', 'Benefits', 'What We Offer', 'WHAT ARE THE GAINS']);
-    const location = apiData.location || 'Việt Nam';
+    const requirements = this.extractSection(descText, ['Qualifications', 'Key Skills', 'Requirements', 'About the Role']) || llm?.requirements || null;
+    const benefits = this.extractSection(descText, ['Why Join', 'Benefits', 'What We Offer', 'WHAT ARE THE GAINS']) || llm?.benefits || null;
+
+    let sMin = null;
+    let sMax = null;
+    let curr = 'VND';
+
+    if (apiData.salary_raw && apiData.salary_raw.value) {
+      const val = apiData.salary_raw.value;
+      sMin = val.minValue || val.value || null;
+      sMax = val.maxValue || val.value || null;
+      curr = apiData.salary_raw.currency || 'VND';
+    }
+
+    const location = apiData.locations_derived?.[0] ||
+      apiData.locations_raw?.[0]?.address?.addressLocality ||
+      'Việt Nam';
 
     return {
       jobData: {
         title,
         description: descText,
-        requirements: requirements || null,
-        benefits: benefits || null,
+        requirements: requirements,
+        benefits: benefits,
         originalUrl: apiData.url || apiData.job_url || '',
         locationCity: location,
-        salaryMin: null,
-        salaryMax: null,
+        salaryMin: llm?.salaryMin ?? null,
+        salaryMax: llm?.salaryMax ?? null,
         currency: 'VND',
         jobType: this.parseJobType(apiData.employment_type?.[0]),
-        experience: apiData.seniority || null,
-        deadline: null,
-        vacancies: apiData.vacancies ? Number(apiData.vacancies) : 1,
+        experience: apiData.seniority || llm?.experience || null,
+        deadline: llm?.deadline ? new Date(llm.deadline) : null,
+        vacancies: apiData.vacancies ? Number(apiData.vacancies) : (llm?.vacancies ?? 1),
       },
       companyData: {
-        companyName: apiData.company_name || apiData.company || 'LinkedIn Partner',
-        logo: apiData.company_logo || apiData.logo_url || null,
-        banner: null,
-        websiteUrl: apiData.linkedin_org_url || null,
-        description: null,
-        address: null,
-        companySize: null,
+        companyName: apiData.organization || 'LinkedIn Partner',
+        logo: apiData.organization_logo || null,
+        banner: apiData.linkedin_org_slogan || null,
+        websiteUrl: apiData.linkedin_org_url || apiData.organization_url,
+        description: apiData.linkedin_org_description || llm?.companyDescription || null,
+        address: apiData.linkedin_org_headquarters || null,
+        companySize: (apiData.linkedin_org_size ? this.parseCompanySize(apiData.linkedin_org_size) : null) || llm?.companySize || null,
       },
     };
   }

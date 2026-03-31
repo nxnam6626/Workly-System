@@ -161,21 +161,9 @@ export const LINKEDIN_LETSCRAPE_SCHEDULE: Record<number, string | null> = {
 
 // ─── LinkedIn Fantastic (5 req/tháng) ────────────────────────────────────────
 // Chỉ chạy 1 lần vào Thứ 2 đầu tuần
-export const LINKEDIN_BULK_QUERY = 'Internship | "Thực tập"';
+export const LINKEDIN_BULK_QUERY = 'intern OR internship OR "thực tập sinh" OR trainee OR fresher';
 export const LINKEDIN_BULK_LIMIT = 100;
 
-// ─── Job Posting Feed - Advanced Title Filter (1 req/tuần, Chủ Nhật) ─────────
-//
-//  JPF hỗ trợ boolean syntax: & (AND), | (OR), " " (phrase)
-//  Tập trung vào các ngành kỹ thuật / dịch vụ / giáo dục vì:
-//   - Ít cạnh tranh từ JSearch (JSearch đã cover IT/Marketing tốt hơn)
-//   - Tin thường đăng lâu hơn (14+ ngày) → JPF weekly là phù hợp
-
-export const JPF_TITLE_FILTER =
-  '(Intern | Internship | "Thực tập") & ' +
-  '(Mechanical | Electrical | Automation | "Civil Engineering" | "QC" | "QA" | ' +
-  '"Hotel" | "Tour Guide" | "Event Coordinator" | "F&B" | "Travel Consultant" | ' +
-  '"Teaching Assistant" | "Tutor" | "Educational Consultant" | "Translator" | "Interpreter")';
 
 // ─── Industry Tagging Map ────────────────────────────────────────────────────
 //

@@ -84,11 +84,12 @@ model User {
 
   userRoles UserRole[]
   notifications Notification[]
+  jobAlerts JobAlert[]
 }
 
 model Role {
   roleId   String @id @default(uuid())
-  roleName String @unique // e.g., "CANDIDATE", "RECRUITER", "ADMIN"
+  roleName String @unique
 
   userRoles UserRole[]
 }
@@ -109,12 +110,21 @@ model Notification {
   notificationId String   @id @default(uuid())
   title          String
   message        String
-  type           String   @default("info") // 'success', 'info', 'warning', 'error'
+  type           String   @default("info")
   isRead         Boolean  @default(false)
+  metadata       Json?
   createdAt      DateTime @default(now())
 
   userId         String
   user           User     @relation(fields: [userId], references: [userId])
+}
+
+model JobAlert {
+  jobAlertId String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [userId])
+  keywords   String
+  createdAt  DateTime @default(now())
 }
 
 model Admin {
@@ -159,7 +169,7 @@ model Recruiter {
   recruiterId String  @id @default(uuid())
   bio         String?
   position    String?
-  savedCandidateIds String[] // Array to store favorite candidate IDs
+  savedCandidateIds String[]
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [userId])
@@ -201,8 +211,6 @@ model Company {
   jobPostings JobPosting[]
 }
 
-
-
 model RawJob {
   rawJobId    String   @id @default(uuid())
   source      String
@@ -213,14 +221,11 @@ model RawJob {
   location    String?
   originalUrl String?
   jobType     String?
-  
   status      RawJobStatus   @default(PENDING)
   errorMessage String?
-  
   lastSeenAt  DateTime @default(now()) @db.Timestamp
   createdAt   DateTime @default(now()) @db.Timestamp
   updatedAt   DateTime @updatedAt @db.Timestamp
-  
   jobPosting  JobPosting?
 }
 
@@ -246,11 +251,8 @@ model JobPosting {
   createdAt          DateTime  @default(now()) @db.Timestamp
   updatedAt          DateTime  @updatedAt @db.Timestamp
   approvedBy         String?
-
   rawJobId           String?   @unique
   rawJob             RawJob?   @relation(fields: [rawJobId], references: [rawJobId])
-
-
   recruiterId   String?
   recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId])
   companyId     String
@@ -265,10 +267,8 @@ model CV {
   fileUrl   String
   isMain    Boolean  @default(false)
   createdAt DateTime @default(now())
-
   candidateId String
   candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
-
   applications Application[]
 }
 
@@ -279,7 +279,6 @@ model Application {
   cvSnapshotUrl String
   coverLetter   String?
   feedback      String?
-
   candidateId  String
   candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
   jobPostingId String
@@ -291,12 +290,10 @@ model Application {
 model SavedJob {
   savedJobId String   @id @default(uuid())
   savedAt    DateTime @default(now())
-
   candidateId  String
   candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
   jobPostingId String
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
-
   @@unique([candidateId, jobPostingId])
 }
 
@@ -310,7 +307,6 @@ model Conversation {
   isRead         Boolean   @default(false)
   updatedAt      DateTime  @updatedAt
   userId         String?
-
   messages Message[]
 }
 
@@ -319,7 +315,6 @@ model Message {
   content   String
   sentAt    DateTime @default(now())
   isRead    Boolean  @default(false)
-
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
   senderId       String

@@ -5,9 +5,10 @@ import { AdminJobPostingsController } from './admin-job-postings.controller';
 import { PrismaModule } from '../../../prisma/prisma.module';
 import { MessagesModule } from '../../messages/messages.module';
 import { NotificationsModule } from '../../notifications/notifications.module';
+import { JobAlertsModule } from '../../job-alerts/job-alerts.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule, NotificationsModule],
+  imports: [PrismaModule, MessagesModule, NotificationsModule, JobAlertsModule],
   controllers: [JobPostingsController, AdminJobPostingsController],
   providers: [JobPostingsService],
 })

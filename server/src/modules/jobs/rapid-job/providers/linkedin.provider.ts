@@ -18,17 +18,20 @@ export class LinkedInProvider extends BaseProvider {
     super(LinkedInProvider.name);
   }
 
-  fetchJobs(params: { title?: string; location?: string; limit?: number }): Observable<any[]> {
+  fetchJobs(params: { title?: string }): Observable<any[]> {
     const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
     const apiHost = this.configService.get<string>('LINKEDIN_API_HOST') || 'linkedin-job-search-api.p.rapidapi.com';
+
+    const internKeywords = params.title || 'intern OR internship OR "thực tập sinh" OR trainee OR fresher';
+    const location = 'Vietnam';
 
     return this.httpService
       .get(this.url, {
         params: {
-          limit: String(params.limit || 10),
+          limit: String(10),
           offset: '0',
-          title_filter: `"${params.title || 'intern'}"`,
-          location_filter: `"${params.location || 'Vietnam'}"`,
+          title_filter: internKeywords,
+          location_filter: location,
           description_type: 'text',
         },
         headers: {
@@ -54,6 +57,10 @@ export class LinkedInProvider extends BaseProvider {
     const title = apiData.title ?? 'Untitled';
     const descText = apiData.description_text || '';
 
+    const requirements = this.extractSection(descText, ['Qualifications', 'Key Skills', 'Requirements', 'About the Role']) || llm?.requirements || null;
+
+    const benefits = this.extractSection(descText, ['Why Join', 'Benefits', 'What We Offer', 'WHAT ARE THE GAINS']) || llm?.benefits || null;
+
     let sMin = null;
     let sMax = null;
     let curr = 'VND';
@@ -62,40 +69,39 @@ export class LinkedInProvider extends BaseProvider {
       const val = apiData.salary_raw.value;
       sMin = val.minValue || val.value || null;
       sMax = val.maxValue || val.value || null;
-      curr = apiData.salary_raw.currency || 'USD';
+      curr = apiData.salary_raw.currency || 'VND';
     }
 
     const location = apiData.locations_derived?.[0] ||
       apiData.locations_raw?.[0]?.address?.addressLocality ||
       'Việt Nam';
 
-    const requirements = this.extractSection(descText, ['Qualifications', 'Key Skills', 'Requirements', 'About the Role']);
-    const benefits = this.extractSection(descText, ['Why Join', 'Benefits', 'What We Offer', 'WHAT ARE THE GAINS']);
+
 
     return {
       jobData: {
         title,
         description: descText,
-        requirements: requirements || null,
-        benefits: benefits || null,
+        requirements: requirements,
+        benefits: benefits,
         originalUrl: apiData.url || '',
         locationCity: location,
-        salaryMin: sMin ? Number(sMin) : null,
-        salaryMax: sMax ? Number(sMax) : null,
+        salaryMin: sMin ? Number(sMin) : (llm?.salaryMin ?? null),
+        salaryMax: sMax ? Number(sMax) : (llm?.salaryMax ?? null),
         currency: curr,
         jobType: this.parseJobType(apiData.employment_type?.[0]),
-        experience: apiData.seniority || null,
-        deadline: null,
-        vacancies: apiData.vacancies ? Number(apiData.vacancies) : 1,
+        experience: apiData.seniority || llm?.experience || null,
+        deadline: llm?.deadline ? new Date(llm.deadline) : null,
+        vacancies: apiData.vacancies ? Number(apiData.vacancies) : (llm?.vacancies ?? 1),
       },
       companyData: {
         companyName: apiData.organization || 'LinkedIn Partner',
         logo: apiData.organization_logo || null,
-        banner: null,
-        websiteUrl: apiData.linkedin_org_url || null,
-        description: apiData.linkedin_org_description || apiData.linkedin_org_slogan || null,
+        banner: apiData.linkedin_org_slogan || null,
+        websiteUrl: apiData.linkedin_org_url || apiData.organization_url,
+        description: apiData.linkedin_org_description || llm?.companyDescription || null,
         address: apiData.linkedin_org_headquarters || null,
-        companySize: this.parseCompanySize(apiData.linkedin_org_size),
+        companySize: (apiData.linkedin_org_size ? this.parseCompanySize(apiData.linkedin_org_size) : null) || llm?.companySize || null,
       },
     };
   }

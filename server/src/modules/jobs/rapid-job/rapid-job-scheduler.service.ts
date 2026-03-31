@@ -6,13 +6,10 @@ import { SearchService } from '../../search/search.service';
 import { LlmExtractionService } from './services/llm-extraction.service';
 import { lastValueFrom } from 'rxjs';
 import { MappedJobData } from './interfaces/rapid-job.interface';
-import { Role } from '@/modules/auth/decorators/roles.decorator';
+import { Role } from '../../auth/decorators/roles.decorator';
 import {
   JSEARCH_WEEKLY_SCHEDULE,
   LINKEDIN_LETSCRAPE_SCHEDULE,
-  LINKEDIN_BULK_QUERY,
-  LINKEDIN_BULK_LIMIT,
-  JPF_TITLE_FILTER,
 } from './rapid-job.config';
 
 // ─── Độ tin cậy theo nguồn (aiReliabilityScore) ─────────────────────────────
@@ -51,7 +48,7 @@ export class RapidJobSchedulerService {
     for (const { query, label } of plan.queries) {
       try {
         const response = await lastValueFrom(
-          this.rapidJobService.fetchJSearchJobs(query, 1, 'vn', 'today'),
+          this.rapidJobService.fetchJSearchJobs(query),
         );
         const items = response?.data ?? [];
         if (!items.length) {
@@ -89,7 +86,7 @@ export class RapidJobSchedulerService {
 
     try {
       const items = await lastValueFrom(
-        this.rapidJobService.fetchLinkedInJobs(title, 'Vietnam', 10),
+        this.rapidJobService.fetchLinkedInJobs(title),
       );
       if (!items?.length) {
         this.logger.debug(`[LinkedIn Letscrape] Không có kết quả`);
@@ -113,11 +110,11 @@ export class RapidJobSchedulerService {
    */
   @Cron('0 8 * * 1')
   async handleLinkedInV2AutoCrawl() {
-    this.logger.log(`[LinkedIn Fantastic] Quét số lượng lớn hàng tuần | Truy vấn: "${LINKEDIN_BULK_QUERY}"`);
+    this.logger.log(`[LinkedIn Fantastic] Quét số lượng lớn hàng tuần | Bộ lọc: intern/internship/thực tập @ Vietnam`);
 
     try {
       const items = await lastValueFrom(
-        this.rapidJobService.fetchLinkedInJobsV2(LINKEDIN_BULK_QUERY, 'Vietnam', LINKEDIN_BULK_LIMIT),
+        this.rapidJobService.fetchLinkedInJobsV2(),
       );
       if (!items?.length) {
         this.logger.debug(`[LinkedIn Fantastic] Không có kết quả`);
@@ -141,11 +138,11 @@ export class RapidJobSchedulerService {
    */
   @Cron('0 10 * * 0')
   async handleJPFAutoCrawl() {
-    this.logger.log(`[JPF] Quét hàng tuần | Bộ lọc: "${JPF_TITLE_FILTER.substring(0, 60)}..."`);
+    this.logger.log(`[JPF] Quét hàng tuần | Bộ lọc: AI Intern filter @ Vietnam`);
 
     try {
       const items = await lastValueFrom(
-        this.rapidJobService.fetchJobPostingFeed(500, JPF_TITLE_FILTER),
+        this.rapidJobService.fetchJobPostingFeed(),
       );
       if (!items?.length) {
         this.logger.debug('[JPF] Không có kết quả');
@@ -196,53 +193,61 @@ export class RapidJobSchedulerService {
 
     // ── Xử lý tuần tự từng tin để log chi tiết ──
     for (let i = 0; i < extractions.length; i++) {
-        const e = extractions[i];
-        const jobTitle = e.item.job_title || e.item.title || 'Không rõ tiêu đề';
-        this.logger.log(`[Tin ${i+1}/${extractions.length}] : ${jobTitle}`);
+      const e = extractions[i];
+      const jobTitle = e.item.job_title || e.item.title || 'Không rõ tiêu đề';
+      this.logger.log(`[Tin ${i + 1}/${extractions.length}] : ${jobTitle}`);
 
-        // 1. Kiểm tra trùng
-        if (!e.originalUrl || existingSet.has(e.originalUrl)) {
-            this.logger.log(`   -> [Lớp 1] Bỏ qua: Tin đã tồn tại hoặc thiếu URL.`);
-            skipped++;
-            continue;
+      // 1. Kiểm tra trùng
+      if (!e.originalUrl || existingSet.has(e.originalUrl)) {
+        this.logger.log(`   -> [Lớp 1] Bỏ qua: Tin đã tồn tại hoặc thiếu URL.`);
+        skipped++;
+        continue;
+      }
+
+      // 2. Kiểm tra nội dung (Lọc rác)
+      if (!e.rawDescription || e.rawDescription.trim().length < 50) {
+        this.logger.log(`   -> [Lớp 2] Bỏ qua: Nội dung quá ngắn hoặc rác (< 50 ký tự).`);
+        skipped++;
+        continue;
+      }
+
+      // 3. Xử lý AI & Lưu DB
+      try {
+        this.logger.log(`   -> [Lớp 3] Đang gọi AI Gemini để trích xuất...`);
+        const llmData = await this.llmExtractionService.extract(e.rawDescription);
+
+        if (llmData) {
+          this.logger.log(`   -> [AI] Trích xuất thành công JSON (Lương: ${llmData.salaryMin}-${llmData.salaryMax})`);
+        } else {
+          this.logger.warn(`   -> [AI] Gemini không trích xuất được dữ liệu.`);
         }
 
-        // 2. Kiểm tra nội dung (Lọc rác)
-        if (!e.rawDescription || e.rawDescription.trim().length < 50) {
-            this.logger.log(`   -> [Lớp 2] Bỏ qua: Nội dung quá ngắn hoặc rác (< 50 ký tự).`);
-            skipped++;
-            continue;
+        const mapped = await mapper(e.item, llmData);
+        const job = await this.rapidJobService.syncJobToDb(mapped, reliabilityScore, sourceName);
+
+        if (job) {
+          await this.searchService.indexJob({
+            id: job.jobPostingId,
+            title: job.title,
+            description: job.description || undefined,
+            companyId: job.companyId,
+            companyName: job.company?.companyName || undefined,
+            originalUrl: job.originalUrl || undefined,
+            locationCity: job.locationCity || undefined,
+            jobType: job.jobType || undefined,
+            experience: job.experience || undefined,
+            salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,
+            salaryMax: job.salaryMax ? Number(job.salaryMax) : undefined,
+            status: job.status,
+            createdAt: job.createdAt,
+          });
+          saved++;
+          this.logger.log(`   -> [Thành công] Đã lưu mã: ${job.jobPostingId}`);
         }
-
-        // 3. Xử lý AI & Lưu DB
-        try {
-            this.logger.log(`   -> [Lớp 3] Đang gọi AI Gemini để trích xuất...`);
-            const llmData = await this.llmExtractionService.extract(e.rawDescription);
-            
-            if (llmData) {
-                this.logger.log(`   -> [AI] Trích xuất thành công JSON (Lương: ${llmData.salaryMin}-${llmData.salaryMax})`);
-            } else {
-                this.logger.warn(`   -> [AI] Gemini không trích xuất được dữ liệu.`);
-            }
-
-            const mapped = await mapper(e.item, llmData);
-            const job = await this.rapidJobService.syncJobToDb(mapped, reliabilityScore, sourceName);
-
-            if (job) {
-                await this.searchService.indexJob({
-                    id: job.jobPostingId,
-                    title: job.title,
-                    description: job.description || undefined,
-                    companyId: job.companyId,
-                    originalUrl: job.originalUrl || undefined,
-                });
-                saved++;
-                this.logger.log(`   -> [Thành công] Đã lưu mã: ${job.jobPostingId}`);
-            }
-        } catch (err) {
-            skipped++;
-            this.logger.error(`   -> [Lỗi] Không thể xử lý tin này: ${err.message}`);
-        }
+      } catch (err) {
+        skipped++;
+        this.logger.error(`   -> [Lỗi] Không thể xử lý tin này: ${err.message}`);
+      }
     }
 
     this.logger.log(`=== KẾT THÚC BATCH : Đã lưu ${saved} | Bỏ qua ${skipped} ===\n`);
@@ -288,7 +293,15 @@ export class RapidJobSchedulerService {
             title: savedJob.title,
             description: savedJob.description || undefined,
             companyId: savedJob.companyId,
+            companyName: savedJob.company?.companyName || undefined,
             originalUrl: savedJob.originalUrl || undefined,
+            locationCity: savedJob.locationCity || undefined,
+            jobType: savedJob.jobType || undefined,
+            experience: savedJob.experience || undefined,
+            salaryMin: savedJob.salaryMin ? Number(savedJob.salaryMin) : undefined,
+            salaryMax: savedJob.salaryMax ? Number(savedJob.salaryMax) : undefined,
+            status: savedJob.status,
+            createdAt: savedJob.createdAt,
           });
           saved++;
         }
