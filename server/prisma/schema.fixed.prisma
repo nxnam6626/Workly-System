@@ -1,11 +1,19 @@
+﻿// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:postgres123@localhost:5432/workly"
 }
+
+
 
 enum AuthProvider {
   LOCAL
@@ -43,7 +51,6 @@ enum PostType {
 enum AppStatus {
   PENDING
   REVIEWED
-  INTERVIEWING
   ACCEPTED
   REJECTED
 }
@@ -79,21 +86,17 @@ model User {
   updatedAt       DateTime  @updatedAt
   refreshToken    String?
 
-  isOnline        Boolean   @default(false)
-  lastActive      DateTime?
-
   admin     Admin?
   candidate Candidate?
   recruiter Recruiter?
 
   userRoles UserRole[]
   notifications Notification[]
-  jobAlerts JobAlert[]
 }
 
 model Role {
   roleId   String @id @default(uuid())
-  roleName String @unique
+  roleName String @unique // e.g., "CANDIDATE", "RECRUITER", "ADMIN"
 
   userRoles UserRole[]
 }
@@ -104,8 +107,8 @@ model UserRole {
   roleId     String
   assignedAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [userId])
+  role Role @relation(fields: [roleId], references: [roleId])
 
   @@unique([userId, roleId])
 }
@@ -115,21 +118,11 @@ model Notification {
   title          String
   message        String
   type           String   @default("info") // 'success', 'info', 'warning', 'error'
-  link           String?  // Optional link to navigate to when clicked
   isRead         Boolean  @default(false)
-  metadata       Json?
   createdAt      DateTime @default(now())
 
   userId         String
-  user           User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-}
-
-model JobAlert {
-  jobAlertId String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [userId])
-  keywords   String
-  createdAt  DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [userId])
 }
 
 model Admin {
@@ -138,7 +131,7 @@ model Admin {
   lastAction String?
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [userId])
 
 
   companies    Company[]
@@ -153,7 +146,7 @@ model Candidate {
   cvUrl       String?
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [userId])
 
   skills        Skill[]
   cvs           CV[]
@@ -167,21 +160,21 @@ model Skill {
   skillName String
 
   candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
 }
 
 model Recruiter {
   recruiterId String  @id @default(uuid())
   bio         String?
   position    String?
-  savedCandidateIds String[]
+  savedCandidateIds String[] // Array to store favorite candidate IDs
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [userId])
 
   jobPostings   JobPosting[]
   companyId     String?
-  company       Company?     @relation(fields: [companyId], references: [companyId], onDelete: SetNull)
+  company       Company?     @relation(fields: [companyId], references: [companyId])
   conversations Conversation[]
 }
 
@@ -211,10 +204,12 @@ model Company {
   businessLicenseUrl String?
 
   adminId     String?
-  admin       Admin?      @relation(fields: [adminId], references: [adminId], onDelete: SetNull)
+  admin       Admin?      @relation(fields: [adminId], references: [adminId])
   recruiters  Recruiter[]
   jobPostings JobPosting[]
 }
+
+
 
 model RawJob {
   rawJobId    String   @id @default(uuid())
@@ -226,11 +221,14 @@ model RawJob {
   location    String?
   originalUrl String?
   jobType     String?
+  
   status      RawJobStatus   @default(PENDING)
   errorMessage String?
+  
   lastSeenAt  DateTime @default(now()) @db.Timestamp
   createdAt   DateTime @default(now()) @db.Timestamp
   updatedAt   DateTime @updatedAt @db.Timestamp
+  
   jobPosting  JobPosting?
 }
 
@@ -256,16 +254,15 @@ model JobPosting {
   createdAt          DateTime  @default(now()) @db.Timestamp
   updatedAt          DateTime  @updatedAt @db.Timestamp
   approvedBy         String?
-  viewCount          Int       @default(0)
 
   rawJobId           String?   @unique
-  rawJob             RawJob?   @relation(fields: [rawJobId], references: [rawJobId], onDelete: SetNull)
+  rawJob             RawJob?   @relation(fields: [rawJobId], references: [rawJobId])
 
 
   recruiterId   String?
-  recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId], onDelete: SetNull)
+  recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId])
   companyId     String
-  company       Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  company       Company      @relation(fields: [companyId], references: [companyId])
   applications Application[]
   savedJobs    SavedJob[]
 }
@@ -276,8 +273,9 @@ model CV {
   fileUrl   String
   isMain    Boolean  @default(false)
   createdAt DateTime @default(now())
+
   candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate   Candidate @relation(fields: [candidateId], references: [candidateId])
 
   applications Application[]
 }
@@ -289,26 +287,23 @@ model Application {
   cvSnapshotUrl String
   coverLetter   String?
   feedback      String?
-  interviewDate     DateTime?
-  interviewTime     String?
-  interviewLocation String?
-  desiredLocation   String?
 
   candidateId  String
-  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
   jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
   cvId         String
-  cv           CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
+  cv           CV         @relation(fields: [cvId], references: [cvId])
 }
 
 model SavedJob {
   savedJobId String   @id @default(uuid())
   savedAt    DateTime @default(now())
+
   candidateId  String
-  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId])
   jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
 
   @@unique([candidateId, jobPostingId])
 }
@@ -316,13 +311,14 @@ model SavedJob {
 model Conversation {
   conversationId String    @id @default(uuid())
   candidateId    String
-  candidate      Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate      Candidate @relation(fields: [candidateId], references: [candidateId])
   recruiterId    String
-  recruiter      Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  recruiter      Recruiter @relation(fields: [recruiterId], references: [recruiterId])
   lastMessage    String?
   isRead         Boolean   @default(false)
   updatedAt      DateTime  @updatedAt
   userId         String?
+
   messages Message[]
 }
 
@@ -331,7 +327,8 @@ model Message {
   content   String
   sentAt    DateTime @default(now())
   isRead    Boolean  @default(false)
+
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId])
   senderId       String
 }

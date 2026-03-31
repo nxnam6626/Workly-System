@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -66,5 +67,11 @@ export class AdminJobPostingsController {
   @ApiOperation({ summary: 'Từ chối hàng loạt dựa trên ID' })
   bulkReject(@Body('ids') ids: string[], @CurrentUser('userId') adminId: string) {
     return this.jobPostingsService.updateStatusBulk(ids, JobStatus.REJECTED, adminId);
+  }
+
+  @Post('sync-elasticsearch')
+  @ApiOperation({ summary: 'Đồng bộ hóa tất cả tin đã duyệt vào Elasticsearch' })
+  syncElasticsearch() {
+    return this.jobPostingsService.syncAllJobsToES();
   }
 }

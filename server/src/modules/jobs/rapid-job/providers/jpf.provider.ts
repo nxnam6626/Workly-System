@@ -18,17 +18,18 @@ export class JPFProvider extends BaseProvider {
     super(JPFProvider.name);
   }
 
-  fetchJobs(params: { limit?: number; titleFilter?: string }): Observable<any[]> {
+  fetchJobs(): Observable<any[]> {
     const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
     const apiHost = this.configService.get<string>('JOB_POSTING_FEED_HOST') || 'job-posting-feed-api.p.rapidapi.com';
 
     const queryParams: Record<string, string> = {
-      limit: String(params.limit || 10),
       description_type: 'text',
+      location_filter: 'Vietnam',                // API yêu cầu tên đầy đủ, không dùng 'VN'
+      include_ai: 'true',                        // Bắt buộc để các AI filter hoạt động
+      ai_employment_type_filter: 'INTERN',       // AI phân loại đúng loại hình thực tập
+      ai_experience_level_filter: '0-2',         // Thực tập sinh thường ở nhóm 0-2 năm
+      advanced_title_filter: "Intern:* | 'Thực tập'", // Bao phủ tiếng Anh và tiếng Việt
     };
-    if (params.titleFilter) {
-      queryParams['advanced_title_filter'] = params.titleFilter;
-    }
 
     return this.httpService
       .get(this.url, {
@@ -40,7 +41,7 @@ export class JPFProvider extends BaseProvider {
         },
       })
       .pipe(
-        map((response: AxiosResponse) => response.data),
+        map((response: AxiosResponse) => Array.isArray(response.data) ? response.data : []),
         catchError((error: AxiosError) => this.handleError(error, 'JPF')),
       );
   }
@@ -59,26 +60,26 @@ export class JPFProvider extends BaseProvider {
       jobData: {
         title,
         description: apiData.description_text || apiData.description || '',
-        requirements: null,
-        benefits: null,
+        requirements: llm?.requirements || null,
+        benefits: llm?.benefits || null,
         originalUrl: apiData.url || apiData.apply_url || '',
-        locationCity: apiData.location || apiData.city || 'Việt Nam',
-        salaryMin: null,
-        salaryMax: null,
+        locationCity: apiData.cities_derived?.[0] || apiData.locations_derived?.[0] || 'Việt Nam',
+        salaryMin: llm?.salaryMin ?? null,
+        salaryMax: llm?.salaryMax ?? null,
         currency: 'VND',
         jobType: this.parseJobType(apiData.employment_type),
-        experience: null,
-        deadline: null,
-        vacancies: apiData.vacancies ? Number(apiData.vacancies) : 1,
+        experience: llm?.experience || 'No experience required',
+        deadline: llm?.deadline ? new Date(llm.deadline) : null,
+        vacancies: apiData.vacancies ? Number(apiData.vacancies) : (llm?.vacancies ?? 1),
       },
       companyData: {
-        companyName: apiData.company_name || apiData.company || 'ATS Partner',
-        logo: apiData.company_logo || null,
+        companyName: apiData.organization || apiData.company_name || 'Công ty ẩn danh',
+        logo: apiData.organization_logo || apiData.company_logo || null,
         banner: null,
-        websiteUrl: apiData.company_url || null,
-        description: null,
-        address: null,
-        companySize: null,
+        websiteUrl: apiData.organization_url || apiData.company_url || null,
+        description: llm?.companyDescription || null,
+        address: apiData.locations_raw?.[0]?.address?.streetAddress || null,
+        companySize: llm?.companySize || null,
       },
     };
   }

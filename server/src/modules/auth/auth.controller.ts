@@ -123,7 +123,7 @@ export class AuthController {
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+    res.redirect(`${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
   }
 
   @Public()
@@ -141,6 +141,6 @@ export class AuthController {
   async linkedinAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+    res.redirect(`${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
   }
 }

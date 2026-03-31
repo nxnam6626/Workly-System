@@ -21,10 +21,10 @@ export const EXPERIENCE_LEVELS = [
 ];
 
 export const SALARY_RANGES = [
-  { label: "Dưới 10 triệu", min: 0, max: 10 },
-  { label: "10 - 20 triệu", min: 10, max: 20 },
-  { label: "20 - 40 triệu", min: 20, max: 40 },
-  { label: "Trên 40 triệu", min: 40, max: 999 },
+  { label: "Thỏa thuận", min: 0, max: 0 },
+  { label: "Dưới 1 triệu", min: 0, max: 1 },
+  { label: "1 - 3 triệu", min: 1, max: 3 },
+  { label: "3 - 5 triệu", min: 3, max: 5 },
 ];
 
 export const HOT_KEYWORDS = [

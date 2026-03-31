@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { SlidersHorizontal, Filter, Search } from "lucide-react";
+import { SlidersHorizontal, Filter, Search, BellRing, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { JobCard, Job } from "@/components/JobCard";
@@ -28,6 +28,8 @@ function JobSearchContent() {
   const [total, setTotal] = useState(0);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [isSavingAlert, setIsSavingAlert] = useState(false);
+  const [alertSaved, setAlertSaved] = useState(false);
   const LIMIT = 12;
 
   const fetchJobs = useCallback(
@@ -84,6 +86,23 @@ function JobSearchContent() {
     });
   };
 
+  const handleSaveAlert = async () => {
+    if (!searchQuery) return;
+    setIsSavingAlert(true);
+    try {
+      await axios.post("http://localhost:3001/job-alerts", 
+        { keywords: searchQuery },
+        { withCredentials: true }
+      );
+      setAlertSaved(true);
+      setTimeout(() => setAlertSaved(false), 3000);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingAlert(false);
+    }
+  };
+
   const totalPages = Math.ceil(total / LIMIT);
 
   return (
@@ -138,7 +157,23 @@ function JobSearchContent() {
                     </>
                   )}
                 </h2>
-                <p className="text-gray-500 text-sm mt-0.5">Cập nhật mới nhất hôm nay</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-gray-500 text-sm">Cập nhật mới nhất hôm nay</p>
+                  {searchQuery && (
+                    <button
+                      onClick={handleSaveAlert}
+                      disabled={isSavingAlert || alertSaved}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
+                        alertSaved 
+                          ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
+                          : "bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white"
+                      }`}
+                    >
+                      {alertSaved ? <Check className="w-3 h-3" /> : <BellRing className="w-3 h-3" />}
+                      {alertSaved ? "Đã lưu nhận thông báo" : "Nhận thông báo việc làm mới cho từ khóa này"}
+                    </button>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => setMobileFilterOpen(true)}

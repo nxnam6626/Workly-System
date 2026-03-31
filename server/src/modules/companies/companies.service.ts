@@ -44,7 +44,7 @@ export class CompaniesService {
   async getMyCompany(userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({ where: { userId }, include: { company: true } });
     if (!recruiter || !recruiter.company) {
-      throw new NotFoundException('Recruiter does not belong to any company');
+      return {};
     }
     return recruiter.company;
   }

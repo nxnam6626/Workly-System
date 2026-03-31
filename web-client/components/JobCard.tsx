@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, MapPin, Briefcase, Send, DollarSign } from "lucide-react";
 import { formatSalary } from "@/lib/utils";
-import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { useFavoriteStore } from "@/stores/favorites";
 
 export interface Job {
   jobPostingId: string;
@@ -30,16 +30,11 @@ interface JobCardProps {
   onSave?: (id: string, newSavedStatus: boolean) => void;
 }
 
-export function JobCard({ job, saved: propSaved, onSave }: JobCardProps) {
+export function JobCard({ job }: JobCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
-  const [isSaved, setIsSaved] = useState(propSaved ?? job.isSaved ?? false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Sync internal state with prop if it changes
-  useEffect(() => {
-    if (propSaved !== undefined) setIsSaved(propSaved);
-  }, [propSaved]);
+  const { favoriteIds, toggleFavorite } = useFavoriteStore();
+  const isSaved = favoriteIds.has(job.jobPostingId);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,23 +43,10 @@ export function JobCard({ job, saved: propSaved, onSave }: JobCardProps) {
       return;
     }
 
-    if (isSubmitting) return;
-
-    // Optimistic UI update
-    const previousState = isSaved;
-    setIsSaved(!previousState);
-    setIsSubmitting(true);
-
     try {
-      const { data } = await api.post(`/favorites/toggle/${job.jobPostingId}`);
-      const newStatus = data.saved ?? !previousState;
-      setIsSaved(newStatus);
-      if (onSave) onSave(job.jobPostingId, newStatus);
+      await toggleFavorite(job);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
-      setIsSaved(previousState); // Revert on failure
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -100,7 +82,6 @@ export function JobCard({ job, saved: propSaved, onSave }: JobCardProps) {
 
           <button
             onClick={handleToggleFavorite}
-            disabled={isSubmitting}
             className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm border border-slate-50 hover:scale-110 active:scale-95 ${isSaved ? "text-red-500 border-red-50" : "text-slate-300 hover:text-red-400"
               }`}
           >
