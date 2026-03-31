@@ -32,20 +32,20 @@ export class RapidJobService {
   //  API FETCHERS (Delegated to Providers)
   // =========================================================================
 
-  fetchJSearchJobs(query: string, page: number = 1, country: string = 'vn', datePosted: string = 'today'): Observable<JSearchResponse> {
-    return this.jsearchProvider.fetchJobs({ query, page, country, datePosted });
+  fetchJSearchJobs(query: string): Observable<JSearchResponse> {
+    return this.jsearchProvider.fetchJobs({ query });
   }
 
-  fetchLinkedInJobs(title: string = 'intern', location: string = 'Vietnam', limit: number = 10): Observable<any[]> {
-    return this.linkedinProvider.fetchJobs({ title, location, limit });
+  fetchLinkedInJobs(title: string): Observable<any[]> {
+    return this.linkedinProvider.fetchJobs({ title });
   }
 
-  fetchLinkedInJobsV2(title: string = 'Data Engineer', location: string = 'United States', limit: number = 10): Observable<any[]> {
-    return this.linkedinV2Provider.fetchJobs({ title, location, limit });
+  fetchLinkedInJobsV2(): Observable<any[]> {
+    return this.linkedinV2Provider.fetchJobs();
   }
 
-  fetchJobPostingFeed(limit: number = 10, titleFilter?: string): Observable<any[]> {
-    return this.jpfProvider.fetchJobs({ limit, titleFilter });
+  fetchJobPostingFeed(): Observable<any[]> {
+    return this.jpfProvider.fetchJobs();
   }
 
   // =========================================================================

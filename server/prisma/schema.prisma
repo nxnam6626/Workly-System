@@ -40,8 +40,6 @@ enum JobType {
   FULLTIME
   PARTTIME
   INTERNSHIP
-  CONTRACT
-  REMOTE
 }
 
 enum PostType {

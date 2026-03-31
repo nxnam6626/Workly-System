@@ -58,7 +58,7 @@ async function main() {
 
   // 3. Create Jobs
   let jobCount = 0;
-  const jobTypes = [JobType.FULLTIME, JobType.PARTTIME, JobType.INTERNSHIP, JobType.REMOTE];
+  const jobTypes = [JobType.FULLTIME, JobType.PARTTIME, JobType.INTERNSHIP];
 
   for (let i = 0; i < 50; i++) {
     const company = randomElement(createdCompanies);

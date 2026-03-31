@@ -6,7 +6,6 @@ import { catchError, map } from 'rxjs/operators';
 import { AxiosResponse, AxiosError } from 'axios';
 import { BaseProvider } from './base.provider';
 import { JSearchResponse, MappedJobData } from '../interfaces/rapid-job.interface';
-import { JobType } from '@prisma/client';
 
 @Injectable()
 export class JSearchProvider extends BaseProvider {
@@ -19,16 +18,16 @@ export class JSearchProvider extends BaseProvider {
     super(JSearchProvider.name);
   }
 
-  fetchJobs(params: { query: string; page?: number; country?: string; datePosted?: string }): Observable<JSearchResponse> {
+  fetchJobs(params: { query: string }): Observable<JSearchResponse> {
     const apiKey = this.configService.get<string>('RAPIDAPI_KEY');
     const apiHost = this.configService.get<string>('JSEARCH_API_HOST') || 'jsearch.p.rapidapi.com';
 
     const queryParams = {
       query: params.query,
-      page: String(params.page || 1),
+      page: String(1),
       num_pages: '1',
-      country: params.country || 'vn',
-      date_posted: params.datePosted || 'today',
+      country: 'vn',
+      date_posted: 'today',
     };
 
     this.logger.debug(`[JSearch] Đang tải dữ liệu với tham số: ${JSON.stringify(queryParams)}`);
@@ -66,12 +65,12 @@ export class JSearchProvider extends BaseProvider {
     const { originalUrl, rawDescription } = this.extractUrlAndDesc(apiData);
 
     // ── 2. Description ───────────────────────────────────────────────────────
-    let fullDescription = llm?.description || rawDescription || 'Không có mô tả chi tiết.';
+    let fullDescription = rawDescription || llm?.description || 'Không có mô tả chi tiết.';
 
     // ── 3. Requirements ──────────────────────────────────────────────────────
     let requirements: string | null = (highlights.Qualifications as string[] | undefined)
       ?.map((q) => `• ${q}`).join('\n') || null;
-    
+
     // Priority: API Array > LLM
     if (!requirements) requirements = llm?.requirements ?? null;
 
@@ -85,26 +84,23 @@ export class JSearchProvider extends BaseProvider {
     if (Array.isArray(apiData.job_benefits)) apiData.job_benefits.forEach((b: string) => benefitsList.add(formatBenefit(b)));
 
     // Priority: API Arrays > LLM
-    let benefits: string | null = benefitsList.size > 0 
+    let benefits: string | null = benefitsList.size > 0
       ? Array.from(benefitsList).map((b) => `• ${b}`).join('\n')
       : null;
-      
+
     if (!benefits) benefits = llm?.benefits ?? null;
 
     // ── 5. Salary & Currency ─────────────────────────────────────────────────
     let currency = apiData.job_salary_currency || 'VND';
-    // Allow foreign currency if provided, otherwise default to VND (or USD if explicitly US/Global)
-    if (currency === 'None' || !currency) {
-      if (apiData.job_country?.toUpperCase() === 'US') currency = 'USD';
-      else currency = 'VND';
+
+    let salaryMin = apiData.job_min_salary ? Number(apiData.job_min_salary) : llm?.salaryMin ?? null;
+    let salaryMax = apiData.job_max_salary ? Number(apiData.job_max_salary) : llm?.salaryMax ?? null;
+
+    if (!salaryMin && !salaryMax && apiData.job_salary) {
+      salaryMin = Number(apiData.job_salary);
+      salaryMax = Number(apiData.job_salary);
     }
 
-    const salaryMin = apiData.job_min_salary != null
-      ? Number(apiData.job_min_salary)
-      : (llm?.salaryMin ?? null);
-    const salaryMax = apiData.job_max_salary != null
-      ? Number(apiData.job_max_salary)
-      : (llm?.salaryMax ?? null);
 
     // ── 6. JobType ───────────────────────────────────────────────────────────
     let rawJobType = apiData.job_employment_type;
@@ -112,9 +108,6 @@ export class JSearchProvider extends BaseProvider {
       rawJobType = apiData.job_employment_types[0];
     }
     let jobType = this.parseJobType(rawJobType);
-    if (apiData.job_is_remote === true || (apiData.job_city && String(apiData.job_city).toLowerCase().includes('remote'))) {
-      jobType = JobType.REMOTE;
-    }
 
     // ── 7. Experience ────────────────────────────────────────────────────────
     let experience: string | null = null;
@@ -130,12 +123,26 @@ export class JSearchProvider extends BaseProvider {
     // Priority: API Experience Obj > LLM
     if (!experience) experience = llm?.experience ?? null;
 
+
+
     // ── 8. Deadline ──────────────────────────────────────────────────────────
     let deadline: Date | null = null;
+
+    // Ưu tiên 1: Lấy từ chuỗi datetime (ISO String)
     if (apiData.job_offer_expiration_datetime_utc) {
       const d = new Date(apiData.job_offer_expiration_datetime_utc);
       if (!isNaN(d.getTime())) deadline = d;
     }
+
+    // Ưu tiên 2: Nếu ưu tiên 1 thất bại, thử lấy từ timestamp
+    if (!deadline && apiData.job_offer_expiration_timestamp) {
+      // Lưu ý: JSearch thường trả về Unix timestamp tính bằng GIÂY.
+      // JavaScript cần MILIGIAY, nên ta nhân với 1000.
+      const d = new Date(apiData.job_offer_expiration_timestamp * 1000);
+      if (!isNaN(d.getTime())) deadline = d;
+    }
+
+    // Ưu tiên 3: Nếu API hoàn toàn không có, dùng AI (LLM) để đoán
     if (!deadline && llm?.deadline) {
       const d = new Date(llm.deadline);
       if (!isNaN(d.getTime())) deadline = d;
@@ -145,16 +152,7 @@ export class JSearchProvider extends BaseProvider {
     const cleanLocation = (loc: string) => loc ? loc.split('•')[0].trim() : '';
     const locationParts = [apiData.job_city, apiData.job_state, apiData.job_country].filter(Boolean);
     let locationCity = apiData.job_city || cleanLocation(apiData.job_location) || (locationParts.length > 0 ? locationParts[0] : 'Việt Nam');
-    
-    // Force location to Vietnam if job type is INTERN (as per requirement)
-    if (jobType === JobType.INTERNSHIP || apiData.job_employment_type === 'INTERN') {
-      locationCity = 'Việt Nam';
-    }
-
     let fullAddress = locationParts.join(', ') || locationCity;
-    if (!fullAddress || fullAddress === 'Việt Nam') {
-      fullAddress = cleanLocation(apiData.job_location) || 'Việt Nam';
-    }
 
     // ── 10. Vacancies ────────────────────────────────────────────────────────
     const vacancies = apiData.job_vacancies ? Number(apiData.job_vacancies) : (llm?.vacancies ?? 1);
@@ -180,7 +178,7 @@ export class JSearchProvider extends BaseProvider {
         logo: apiData.employer_logo || null,
         banner: null,
         websiteUrl: apiData.employer_website || null,
-        description: llm?.companyDescription || (apiData.employer_company_type ? `Loại hình công ty: ${apiData.employer_company_type}` : null),
+        description: (apiData.employer_company_type ? `Loại hình công ty: ${apiData.employer_company_type}` : null) || llm?.companyDescription || null,
         address: fullAddress,
         companySize: llm?.companySize || null,
       },
