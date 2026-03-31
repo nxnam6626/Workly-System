@@ -6,7 +6,7 @@ import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
-import api from '@/lib/api';
+import api, { getFileUrl } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function CandidatesPage() {
@@ -210,9 +210,15 @@ export default function CandidatesPage() {
               </div>
 
               <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                <button className="flex-1 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 font-medium text-sm transition-colors flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                  <Briefcase className="w-4 h-4" /> Xem CV
-                </button>
+                {candidate.cvs && candidate.cvs[0] ? (
+                  <a href={getFileUrl(candidate.cvs[0].fileUrl)} target="_blank" rel="noopener noreferrer" className="flex-1 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 font-medium text-sm transition-colors flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <Briefcase className="w-4 h-4" /> Xem CV
+                  </a>
+                ) : (
+                  <button disabled className="flex-1 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-not-allowed" onClick={(e) => e.stopPropagation()}>
+                    <Briefcase className="w-4 h-4" /> Không CV
+                  </button>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

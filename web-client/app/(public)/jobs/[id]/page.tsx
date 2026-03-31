@@ -70,7 +70,24 @@ export default function JobDetailsPage() {
   const fetchJobDetails = useCallback(async () => {
     setLoading(true);
     try {
+      let trackView = true;
+      if (typeof window !== 'undefined') {
+        try {
+          const viewedStr = sessionStorage.getItem('viewedJobs') || '[]';
+          const viewedJobs = Array.isArray(JSON.parse(viewedStr)) ? JSON.parse(viewedStr) : [];
+          if (viewedJobs.includes(id)) {
+            trackView = false;
+          } else {
+            viewedJobs.push(id);
+            sessionStorage.setItem('viewedJobs', JSON.stringify(viewedJobs));
+          }
+        } catch (e) {
+          console.error("Session storage error:", e);
+        }
+      }
+
       const { data } = await axios.get(`http://localhost:3001/job-postings/${id}`, {
+        params: { trackView },
         withCredentials: true,
       });
       setJob(data as JobDetails);
@@ -160,12 +177,12 @@ export default function JobDetailsPage() {
                  
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="flex items-start gap-4">
-                       <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                       <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
                           <DollarSign className="w-6 h-6" />
                        </div>
                        <div>
                           <p className="text-xs font-medium text-slate-500 mb-1">Mức lương</p>
-                          <p className="text-sm font-bold text-slate-900">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</p>
+                          <p className="text-[17px] font-bold text-emerald-600">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</p>
                        </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -503,6 +520,7 @@ export default function JobDetailsPage() {
         jobTitle={job.title}
         companyName={job.company?.companyName}
         jobPostingId={job.jobPostingId}
+        jobLocationCity={job.locationCity || ''}
         onSuccess={() => setJob(prev => prev ? { ...prev, hasApplied: true } : null)}
       />
     </div>

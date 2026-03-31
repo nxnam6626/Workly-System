@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class MessagesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(public prisma: PrismaService) {}
 
   async getConversations(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -30,13 +30,13 @@ export class MessagesService {
           select: {
             candidateId: true,
             fullName: true,
-            user: { select: { avatar: true, userId: true } },
+            user: { select: { avatar: true, userId: true, isOnline: true, lastActive: true } },
           },
         },
         recruiter: {
           select: {
             recruiterId: true,
-            user: { select: { avatar: true, userId: true } },
+            user: { select: { avatar: true, userId: true, isOnline: true, lastActive: true } },
             company: { select: { companyName: true } },
           },
         },
