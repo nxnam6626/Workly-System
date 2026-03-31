@@ -1,12 +1,10 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = "postgresql://postgres:postgres123@localhost:5432/workly"
 }
-
 enum AuthProvider {
   LOCAL
   GOOGLE

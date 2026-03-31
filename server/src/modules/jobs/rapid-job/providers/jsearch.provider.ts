@@ -112,9 +112,6 @@ export class JSearchProvider extends BaseProvider {
       rawJobType = apiData.job_employment_types[0];
     }
     let jobType = this.parseJobType(rawJobType);
-    if (apiData.job_is_remote === true || (apiData.job_city && String(apiData.job_city).toLowerCase().includes('remote'))) {
-      jobType = JobType.REMOTE;
-    }
 
     // ── 7. Experience ────────────────────────────────────────────────────────
     let experience: string | null = null;

@@ -32,8 +32,6 @@ export abstract class BaseProvider {
     const t = String(rawType).toUpperCase().replace(/[^A-Z]/g, '');
     if (t.includes('INTERN')) return JobType.INTERNSHIP;
     if (t.includes('PARTTIME')) return JobType.PARTTIME;
-    if (t.includes('CONTRACT')) return JobType.CONTRACT;
-    if (t.includes('REMOTE')) return JobType.REMOTE;
     if (t.includes('FULLTIME')) return JobType.FULLTIME;
     return null;
   }
