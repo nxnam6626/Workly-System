@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '../../../../prisma/prisma.service';
 import { MappedJobData } from '../interfaces/rapid-job.interface';
 import { JobStatus, PostType } from '@prisma/client';
 

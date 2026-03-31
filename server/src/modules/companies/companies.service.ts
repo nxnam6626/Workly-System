@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { FilterCompanyDto } from './dto/filter-company.dto';
 
 @Injectable()
@@ -39,5 +39,40 @@ export class CompaniesService {
     }
 
     return company;
+  }
+
+  async getMyCompany(userId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId }, include: { company: true } });
+    if (!recruiter || !recruiter.company) {
+      throw new NotFoundException('Recruiter does not belong to any company');
+    }
+    return recruiter.company;
+  }
+
+  async updateMyCompany(userId: string, updateData: any) {
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter) {
+      throw new NotFoundException('Recruiter not found');
+    }
+
+    if (!recruiter.companyId) {
+      // Create a new company
+      const newCompany = await this.prisma.company.create({
+        data: updateData
+      });
+
+      // Connect it manually to avoid nested syntax errors
+      await this.prisma.recruiter.update({
+        where: { recruiterId: recruiter.recruiterId },
+        data: { companyId: newCompany.companyId }
+      });
+
+      return newCompany;
+    }
+
+    return this.prisma.company.update({
+      where: { companyId: recruiter.companyId },
+      data: updateData,
+    });
   }
 }

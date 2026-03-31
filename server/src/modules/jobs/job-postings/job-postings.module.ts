@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { JobPostingsController } from './job-postings.controller';
 import { AdminJobPostingsController } from './admin-job-postings.controller';
-import { PrismaModule } from '@/prisma/prisma.module';
+import { PrismaModule } from '../../../prisma/prisma.module';
+import { MessagesModule } from '../../messages/messages.module';
+import { NotificationsModule } from '../../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, MessagesModule, NotificationsModule],
   controllers: [JobPostingsController, AdminJobPostingsController],
   providers: [JobPostingsService],
 })

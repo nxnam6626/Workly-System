@@ -7,6 +7,7 @@ import {
   UseGuards,
   Get,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -53,5 +54,20 @@ export class ApplicationsController {
   @Get('job/:id')
   async findByJob(@Param('id') id: string) {
     return this.applicationsService.findAllByJob(id);
+  }
+
+  @Get('recruiter')
+  @UseGuards(JwtAuthGuard)
+  async findAllForRecruiter(@CurrentUser('userId') userId: string) {
+    return this.applicationsService.findAllForRecruiter(userId);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard)
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: any,
+  ) {
+    return this.applicationsService.updateStatus(id, status);
   }
 }

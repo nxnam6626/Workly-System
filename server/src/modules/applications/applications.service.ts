@@ -1,10 +1,16 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
+import { MessagesGateway } from '../messages/messages.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private messagesGateway: MessagesGateway,
+    private notificationsService: NotificationsService
+  ) {}
 
   async create(createApplicationDto: CreateApplicationDto, file?: any, userId?: string) {
     const { jobPostingId, fullName, email, phone, coverLetter } = createApplicationDto;
@@ -96,7 +102,7 @@ export class ApplicationsService {
       if (existingApp) throw new ConflictException('Bạn đã nộp đơn cho công việc này rồi!');
 
       // 5. Create Application
-      return tx.application.create({
+      const application = await tx.application.create({
         data: {
           candidateId,
           jobPostingId,
@@ -106,10 +112,25 @@ export class ApplicationsService {
           appStatus: 'PENDING',
         },
         include: {
-          jobPosting: { select: { title: true } },
+          jobPosting: { include: { recruiter: true } },
           candidate: { select: { fullName: true } },
         }
       });
+
+      // 6. Send Notification
+      if (application.jobPosting.recruiter?.userId) {
+         const recruiterId = application.jobPosting.recruiter.userId;
+         const title = 'Hồ sơ ứng viên mới';
+         const message = `Ứng viên ${application.candidate.fullName} vừa nộp hồ sơ cho vị trí "${application.jobPosting.title}".`;
+         
+         await this.notificationsService.create(recruiterId, title, message, 'info');
+
+         this.messagesGateway.server
+            .to(`user_${recruiterId}`)
+            .emit('notification', { title, message, type: 'info' });
+      }
+
+      return application;
     });
   }
 
@@ -139,5 +160,33 @@ export class ApplicationsService {
     });
     if (!candidate) return [];
     return this.findAllByCandidate(candidate.candidateId);
+  }
+
+  async findAllForRecruiter(userId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter) {
+      throw new NotFoundException('Recruiter not found');
+    }
+
+    return this.prisma.application.findMany({
+      where: {
+        jobPosting: {
+          recruiterId: recruiter.recruiterId,
+        },
+      },
+      include: {
+        candidate: { include: { user: true, skills: true } },
+        jobPosting: { select: { title: true, company: true } },
+        cv: true,
+      },
+      orderBy: { applyDate: 'desc' },
+    });
+  }
+
+  async updateStatus(applicationId: string, status: any) {
+    return this.prisma.application.update({
+      where: { applicationId },
+      data: { appStatus: status },
+    });
   }
 }

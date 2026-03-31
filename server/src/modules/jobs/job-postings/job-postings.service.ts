@@ -1,14 +1,20 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { JobStatus } from '@prisma/client';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
+import { MessagesGateway } from '../../messages/messages.gateway';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 @Injectable()
 export class JobPostingsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+     private prisma: PrismaService,
+     private messagesGateway: MessagesGateway,
+     private notificationsService: NotificationsService
+  ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
@@ -34,6 +40,8 @@ export class JobPostingsService {
       throw new ForbiddenException('Ngày hết hạn không thể là một ngày trong quá khứ.');
     }
 
+    const originalUrl = 'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
+
     return this.prisma.jobPosting.create({
       data: {
         ...rest,
@@ -43,6 +51,7 @@ export class JobPostingsService {
         postType: 'MANUAL',
         status: 'PENDING',
         isVerified: false,
+        originalUrl: originalUrl,
       },
     });
   }
@@ -80,6 +89,23 @@ export class JobPostingsService {
     ]);
 
     return { items, total, page, limit };
+  }
+
+  async findMyJobs(userId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter) {
+      throw new NotFoundException('Recruiter not found');
+    }
+
+    return this.prisma.jobPosting.findMany({
+      where: { recruiterId: recruiter.recruiterId },
+      include: {
+        applications: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findOne(id: string, userId?: string) {
@@ -174,14 +200,29 @@ export class JobPostingsService {
   async updateStatus(id: string, status: JobStatus, adminId: string) {
     const job = await this.findOne(id);
     
-    return this.prisma.jobPosting.update({
+    const updated = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         status,
         approvedBy: adminId, // Reuse approvedBy field to track who approved/rejected
         updatedAt: new Date(),
       },
+      include: { recruiter: true }
     });
+
+    if (status === JobStatus.APPROVED && updated.recruiter?.userId) {
+       const title = 'Tin tuyển dụng được duyệt';
+       const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+       const type = 'success';
+       
+       await this.notificationsService.create(updated.recruiter.userId, title, message, type);
+
+       this.messagesGateway.server
+          .to(`user_${updated.recruiter.userId}`)
+          .emit('notification', { title, message, type });
+    }
+
+    return updated;
   }
 
   async removeBulk(query: AdminFilterJobPostingDto) {
@@ -232,6 +273,12 @@ export class JobPostingsService {
       throw new ForbiddenException('Vui lòng cung cấp ít nhất một bộ lọc để thao tác hàng loạt.');
     }
 
+    // Find all affected jobs before update to send notifications
+    const jobsToUpdate = await this.prisma.jobPosting.findMany({
+       where,
+       include: { recruiter: true }
+    });
+
     const result = await this.prisma.jobPosting.updateMany({
       where,
       data: {
@@ -240,6 +287,23 @@ export class JobPostingsService {
         updatedAt: new Date(),
       },
     });
+
+    if (status === JobStatus.APPROVED) {
+        // use a simple for loop to wait for db inserts
+        for (const job of jobsToUpdate) {
+            if (job.recruiter?.userId) {
+                const title = 'Tin tuyển dụng được duyệt';
+                const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+                const type = 'success';
+                
+                await this.notificationsService.create(job.recruiter.userId, title, message, type);
+
+                this.messagesGateway.server
+                    .to(`user_${job.recruiter.userId}`)
+                    .emit('notification', { title, message, type });
+            }
+        }
+    }
 
     return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
   }

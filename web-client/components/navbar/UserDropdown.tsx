@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, User, LogOut, ChevronDown, Bell, Briefcase, UserCheck } from 'lucide-react';
+import { Sparkles, User, LogOut, ChevronDown, Bell, Briefcase, UserCheck, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 
 export function UserDropdown() {
@@ -78,6 +78,16 @@ export function UserDropdown() {
             >
               <Sparkles className="w-5 h-5 text-blue-500" />
               Tạo CV
+            </Link>
+
+            {/* Tin nhắn */}
+            <Link
+              href="/profile/messages"
+              onClick={() => setDropdownOpen(false)}
+              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+            >
+              <MessageSquare className="w-5 h-5 text-blue-500" />
+              Tin nhắn
             </Link>
 
             {/* Quản lý việc làm - Collapsible */}

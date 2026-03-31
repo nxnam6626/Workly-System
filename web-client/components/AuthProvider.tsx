@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/auth";
+import { useSocketStore } from "@/stores/socket";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { connect, disconnect } = useSocketStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     checkAuth().finally(() => setMounted(true));
   }, [checkAuth]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      connect();
+    } else {
+      disconnect();
+    }
+  }, [isAuthenticated, connect, disconnect]);
 
   if (!mounted) {
     return (

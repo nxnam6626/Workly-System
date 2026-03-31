@@ -2,6 +2,7 @@
 
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Eye } from 'lucide-react';
 import { JobPosting, JobStatus, PostType } from '@/lib/admin-api';
+import toast from 'react-hot-toast';
 
 interface JobTableRowProps {
   job: JobPosting;
@@ -105,7 +106,13 @@ export default function JobTableRow({
           >
             <Eye className="w-4 h-4" />
           </button>
-          <div className="w-px h-4 bg-slate-200 mx-1" />
+          <button
+            onClick={() => toast("Tính năng hiệu chỉnh dữ liệu tự động từ crawler đang được phát triển")}
+            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+            title="Hiệu chỉnh dữ liệu crawler"
+          >
+            <ShieldAlert className="w-4 h-4" />
+          </button>
           <button
             onClick={() => onApprove(job.jobPostingId)}
             disabled={isProcessing || job.status === JobStatus.APPROVED}

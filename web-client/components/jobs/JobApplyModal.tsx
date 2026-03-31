@@ -12,8 +12,8 @@ import {
   AlertCircle 
 } from "lucide-react";
 import Link from "next/link";
-
 import axios from "axios";
+import toast from "react-hot-toast";
 
 interface JobApplyModalProps {
   isOpen: boolean;
@@ -48,7 +48,7 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      alert("Vui lòng tải lên CV của bạn!");
+      toast.error("Vui lòng tải lên CV của bạn!");
       return;
     }
 
@@ -70,12 +70,12 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
         withCredentials: true,
       });
 
-      alert("Ứng tuyển thành công!");
+      toast.success("Ứng tuyển thành công!");
       if (onSuccess) onSuccess();
       onClose();
     } catch (error: any) {
       console.error("Apply error:", error);
-      alert(error.response?.data?.message || "Đã có lỗi xảy ra khi ứng tuyển!");
+      toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi ứng tuyển!");
     } finally {
       setLoading(false);
     }

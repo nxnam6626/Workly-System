@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description: "Hệ thống theo dõi và ứng tuyển công việc tiên tiến",
 };
 
+import { NotificationListener } from "@/components/NotificationListener";
+import { Toaster } from 'react-hot-toast';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,6 +23,8 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300`}>
         <AuthProvider>
           {children}
+          <NotificationListener />
+          <Toaster position="top-right" />
         </AuthProvider>
       </body>
     </html>
