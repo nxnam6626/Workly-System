@@ -46,6 +46,8 @@ interface JobDetails extends Job {
   updatedAt: string;
   hasApplied: boolean;
   isSaved: boolean;
+  postType: 'CRAWLED' | 'MANUAL';
+  originalUrl?: string;
   company: {
     companyId: string;
     companyName: string;
@@ -70,12 +72,10 @@ export default function JobDetailsPage() {
   const fetchJobDetails = useCallback(async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`http://localhost:3001/job-postings/${id}`, {
-        withCredentials: true,
-      });
+      const { data } = await api.get(`/job-postings/${id}`);
       setJob(data as JobDetails);
       
-      const resRelated = await axios.get(`http://localhost:3001/job-postings`, {
+      const resRelated = await api.get(`/job-postings`, {
         params: {
           limit: 3,
           location: data.locationCity || undefined,
@@ -104,6 +104,11 @@ export default function JobDetailsPage() {
   };
 
   const handleApply = () => {
+    if (job?.postType === 'CRAWLED' && job?.originalUrl) {
+      window.open(job.originalUrl, '_blank');
+      return;
+    }
+
     if (!isAuthenticated) {
       router.push(`/login?returnUrl=/jobs/${id}`);
     } else {
@@ -206,7 +211,15 @@ export default function JobDetailsPage() {
                          onClick={handleApply}
                          className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
                       >
-                         <Send className="w-4 h-4" /> Ứng tuyển ngay
+                         {job.postType === 'CRAWLED' ? (
+                           <>
+                             <ExternalLink className="w-4 h-4" /> Xem tin gốc
+                           </>
+                         ) : (
+                           <>
+                             <Send className="w-4 h-4" /> Ứng tuyển ngay
+                           </>
+                         )}
                       </button>
                     )}
                      <button 
@@ -281,7 +294,15 @@ export default function JobDetailsPage() {
                                  onClick={handleApply}
                                  className="px-10 py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
                               >
-                                 <Send className="w-4 h-4" /> Ứng tuyển ngay
+                                 {job.postType === 'CRAWLED' ? (
+                                   <>
+                                     <ExternalLink className="w-4 h-4" /> Xem tin gốc
+                                   </>
+                                 ) : (
+                                   <>
+                                     <Send className="w-4 h-4" /> Ứng tuyển ngay
+                                   </>
+                                 )}
                               </button>
                            )}
                            <button 

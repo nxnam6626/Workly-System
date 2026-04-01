@@ -15,6 +15,12 @@ export class JobSyncService {
   ) {
     const { jobData, companyData } = mappedData;
 
+    // Ensure JobType is valid based on user instruction: Default to INTERNSHIP for any unknown value
+    const validJobTypes = ['FULLTIME', 'PARTTIME', 'INTERNSHIP'];
+    if (!jobData.jobType || !validJobTypes.includes(jobData.jobType as string)) {
+      (jobData as any).jobType = 'INTERNSHIP';
+    }
+
     if (!jobData.originalUrl) {
       this.logger.debug(`[syncJobToDb] Bỏ qua "${jobData.title}" — không có originalUrl`);
       return null;

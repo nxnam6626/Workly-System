@@ -42,8 +42,12 @@ export class JobPostingsController {
   }
 
   @Get()
-  findAll(@Query() query: FilterJobPostingDto) {
-    return this.jobPostingsService.findAll(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query() query: FilterJobPostingDto,
+    @CurrentUser('userId') userId?: string,
+  ) {
+    return this.jobPostingsService.findAll(query, userId);
   }
 
   @Get(':id')

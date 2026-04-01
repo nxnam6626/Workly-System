@@ -22,6 +22,9 @@ export interface Job {
   isVerified: boolean;
   deadline?: string | null;
   isSaved?: boolean;
+  postType: 'CRAWLED' | 'MANUAL';
+  originalUrl?: string;
+  hasApplied?: boolean;
 }
 
 interface JobCardProps {
@@ -38,6 +41,7 @@ export function JobCard({ job }: JobCardProps) {
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!isAuthenticated) {
       router.push("/login");
       return;
@@ -47,6 +51,16 @@ export function JobCard({ job }: JobCardProps) {
       await toggleFavorite(job);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
+    }
+  };
+
+  const handleApply = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (job.postType === 'CRAWLED' && job.originalUrl) {
+      window.open(job.originalUrl, '_blank');
+    } else {
+      router.push(`/jobs/${job.jobPostingId}`);
     }
   };
 
@@ -103,10 +117,23 @@ export function JobCard({ job }: JobCardProps) {
           </div>
         </div>
 
-        <button className=" w-3/4 py-2 mx-auto bg-[#1e5aff] text-[13px] text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200/40 active:scale-[0.98] flex items-center justify-center gap-2">
-          <Send className="w-3.5 h-3.5" />
-          Ứng tuyển ngay
-        </button>
+        {job.hasApplied ? (
+          <button
+            disabled
+            className="w-3/4 py-2 mx-auto bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Send className="w-3.5 h-3.5 opacity-40" />
+            Đã ứng tuyển
+          </button>
+        ) : (
+          <button
+            onClick={handleApply}
+            className="w-3/4 py-2 mx-auto bg-[#1e5aff] text-[13px] text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200/40 active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <Send className="w-3.5 h-3.5" />
+            Ứng tuyển ngay
+          </button>
+        )}
       </div>
     </Link>
   );

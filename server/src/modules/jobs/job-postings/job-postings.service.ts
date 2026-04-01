@@ -64,7 +64,7 @@ export class JobPostingsService {
 
 
 
-  async findAll(query: FilterJobPostingDto) {
+  async findAll(query: FilterJobPostingDto, userId?: string) {
     const { search, location, jobType, page = 1, limit = 10, industry, experience, salaryMin, salaryMax } = query;
 
     // Use Elasticsearch for searching and filtering IDs
@@ -83,7 +83,7 @@ export class JobPostingsService {
     if (ids.length === 0 && total === 0 && !search) {
       // Fallback or initial state if ES is empty but we have jobs in DB
       // This is helpful if sync hasn't run yet
-      return this.findAllPrisma(query);
+      return this.findAllPrisma(query, userId);
     }
 
     if (ids.length === 0) {
@@ -102,15 +102,34 @@ export class JobPostingsService {
     });
 
     // Sort items to match ES order (relevance or custom sort)
-    const sortedItems = ids
+    let sortedItems = ids
       .map(id => items.find(item => item.jobPostingId === id))
-      .filter(item => !!item);
+      .filter(item => !!item) as any[];
+
+    // Add hasApplied status if userId is provided
+    if (userId) {
+      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      if (candidate) {
+        const applications = await this.prisma.application.findMany({
+          where: {
+            candidateId: candidate.candidateId,
+            jobPostingId: { in: ids },
+          },
+          select: { jobPostingId: true },
+        });
+        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
+        sortedItems = sortedItems.map(item => ({
+          ...item,
+          hasApplied: appliedJobIds.has(item.jobPostingId),
+        }));
+      }
+    }
 
     return { items: sortedItems, total, page, limit };
   }
 
   // Backup method using Prisma directly
-  private async findAllPrisma(query: FilterJobPostingDto) {
+  private async findAllPrisma(query: FilterJobPostingDto, userId?: string) {
     const { search, location, jobType, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -125,7 +144,7 @@ export class JobPostingsService {
       ];
     }
 
-    const [items, total] = await Promise.all([
+    let [items, total] = await Promise.all([
       this.prisma.jobPosting.findMany({
         where,
         skip,
@@ -137,7 +156,27 @@ export class JobPostingsService {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.jobPosting.count({ where }),
-    ]);
+    ]) as [any[], number];
+
+    // Add hasApplied status if userId is provided
+    if (userId) {
+      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      if (candidate) {
+        const jobPostingIds = items.map(item => item.jobPostingId);
+        const applications = await this.prisma.application.findMany({
+          where: {
+            candidateId: candidate.candidateId,
+            jobPostingId: { in: jobPostingIds },
+          },
+          select: { jobPostingId: true },
+        });
+        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
+        items = items.map(item => ({
+          ...item,
+          hasApplied: appliedJobIds.has(item.jobPostingId),
+        }));
+      }
+    }
 
     return { items, total, page, limit };
   }

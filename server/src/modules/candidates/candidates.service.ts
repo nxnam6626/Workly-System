@@ -108,4 +108,15 @@ export class CandidatesService {
       include: { user: { select: { email: true, phoneNumber: true, avatar: true } }, skills: true, cvs: true },
     });
   }
+
+  async findByUserId(userId: string) {
+    return this.prisma.candidate.findUnique({
+      where: { userId },
+      include: {
+        user: { select: { email: true, phoneNumber: true, avatar: true } },
+        skills: true,
+        cvs: { orderBy: { createdAt: 'desc' } }
+      },
+    });
+  }
 }

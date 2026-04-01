@@ -18,8 +18,11 @@ import {
   Filter
 } from "lucide-react";
 import axios from "axios";
+import api from "@/lib/api";
 import Link from "next/link";
 import { formatSalary, timeAgo } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth";
+import toast from "react-hot-toast";
 
 interface AppliedJob {
   applicationId: string;
@@ -51,24 +54,43 @@ const STATUS_MAP: Record<string, { label: string, color: string, bg: string }> =
 
 export default function AppliedJobsPage() {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuthStore();
 
   useEffect(() => {
-    const fetchAppliedJobs = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3001/applications/me", {
-          withCredentials: true
-        });
-        setApplications(data);
+        const [appRes, profileRes] = await Promise.all([
+          api.get("/applications/me"),
+          api.get("/candidates/me")
+        ]);
+        setApplications(appRes.data);
+        setProfile(profileRes.data);
       } catch (error) {
-        console.error("Error fetching applied jobs:", error);
+        console.error("Error fetching applied jobs data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchAppliedJobs();
+    fetchData();
   }, []);
+
+  const handleCancelApplication = async (applicationId: string) => {
+    if (!window.confirm("Bạn có chắc chắn muốn hủy đơn ứng tuyển này? Hành động này không thể hoàn tác.")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/applications/${applicationId}`);
+      setApplications(prev => prev.filter(app => app.applicationId !== applicationId));
+      toast.success("Đã hủy ứng tuyển thành công.");
+    } catch (error: any) {
+      console.error("Error canceling application:", error);
+      toast.error(error.response?.data?.message || "Không thể hủy đơn ứng tuyển. Vui lòng thử lại sau.");
+    }
+  };
 
   const filteredApps = applications.filter(app => 
     app.jobPosting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,12 +140,16 @@ export default function AppliedJobsPage() {
              <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-50 bg-gradient-to-br from-blue-600/5 to-indigo-600/5">
                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-100">
-                         N
+                      <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-100 overflow-hidden">
+                         {user?.avatar ? (
+                           <img src={user.avatar} alt={profile?.fullName || "Candidate"} className="w-full h-full object-cover" />
+                         ) : (
+                           (profile?.fullName || user?.email || "C").charAt(0).toUpperCase()
+                         )}
                       </div>
-                      <div>
-                         <p className="text-sm font-bold text-slate-900">Nguyễn Xuân Nam</p>
-                         <p className="text-xs text-slate-500">Mã: #123456</p>
+                      <div className="min-w-0">
+                         <p className="text-sm font-bold text-slate-900 truncate">{profile?.fullName || "Người dùng Workly"}</p>
+                         <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                       </div>
                    </div>
                 </div>
@@ -221,9 +247,14 @@ export default function AppliedJobsPage() {
                                       Xem CV <ExternalLink className="w-3 h-3" />
                                    </a>
                                    <div className="w-[1px] h-3 bg-slate-200" />
-                                   <button className="p-1 px-2 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors">
-                                      Hủy ứng tuyển
-                                   </button>
+                                   {app.appStatus === 'PENDING' && (
+                                     <button 
+                                       onClick={() => handleCancelApplication(app.applicationId)}
+                                       className="p-1 px-2 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors"
+                                     >
+                                        Hủy ứng tuyển
+                                     </button>
+                                   )}
                                 </div>
                              </div>
                           </div>

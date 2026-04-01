@@ -80,20 +80,30 @@ export class ApplicationsService {
         }
       }
 
-      // 3. Handle CV File
-      let cvId: string;
-      const cvTitle = file ? file.originalname : `${fullName}_CV`;
-      const fileUrl = file ? `/uploads/cvs/${file.filename}` : '/uploads/cvs/default.pdf';
+      // 3. Handle CV File or Existing CV
+      let cvId: string | undefined = createApplicationDto.cvId;
+      let fileUrl: string;
 
-      const newCV = await tx.cV.create({
-        data: {
-          cvTitle,
-          fileUrl,
-          candidateId,
-          isMain: true,
-        },
-      });
-      cvId = newCV.cvId;
+      if (cvId) {
+        const existingCv = await tx.cV.findUnique({ where: { cvId } });
+        if (!existingCv) throw new NotFoundException('Không tìm thấy CV được chọn!');
+        fileUrl = existingCv.fileUrl;
+      } else if (file) {
+        const cvTitle = file.originalname;
+        fileUrl = `/uploads/cvs/${file.filename}`;
+
+        const newCV = await tx.cV.create({
+          data: {
+            cvTitle,
+            fileUrl,
+            candidateId,
+            isMain: false, // Uploaded during application is not necessarily main
+          },
+        });
+        cvId = newCV.cvId;
+      } else {
+        throw new NotFoundException('Vui lòng tải lên CV hoặc chọn CV có sẵn!');
+      }
 
       // 4. Check for existing application
       const existingApp = await tx.application.findFirst({
@@ -187,6 +197,37 @@ export class ApplicationsService {
     return this.prisma.application.update({
       where: { applicationId },
       data: { appStatus: status },
+    });
+  }
+
+  async remove(applicationId: string, userId: string) {
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException('Thông tin ứng viên không tồn tại.');
+    }
+
+    const application = await this.prisma.application.findUnique({
+      where: { applicationId },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Không tìm thấy đơn ứng tuyển.');
+    }
+
+    if (application.candidateId !== candidate.candidateId) {
+      throw new ConflictException('Bạn không có quyền hủy đơn ứng tuyển này.');
+    }
+
+    // Only allow canceling if still pending
+    if (application.appStatus !== 'PENDING') {
+      throw new ConflictException('Bạn chỉ có thể hủy đơn ứng tuyển khi hồ sơ còn đang chờ duyệt.');
+    }
+
+    return this.prisma.application.delete({
+      where: { applicationId },
     });
   }
 }

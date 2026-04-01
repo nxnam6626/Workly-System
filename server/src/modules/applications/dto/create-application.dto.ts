@@ -24,4 +24,8 @@ export class CreateApplicationDto {
   @IsString()
   @IsOptional()
   location?: string;
+
+  @IsString()
+  @IsOptional()
+  cvId?: string;
 }

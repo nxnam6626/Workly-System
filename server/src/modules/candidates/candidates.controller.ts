@@ -13,6 +13,12 @@ export class CandidatesController {
     return this.candidatesService.create(createCandidateDto);
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@CurrentUser('userId') userId: string) {
+    return this.candidatesService.findByUserId(userId);
+  }
+
   @Get('saved')
   @UseGuards(JwtAuthGuard)
   getSavedCandidates(@CurrentUser('userId') userId: string) {

@@ -8,6 +8,7 @@ import {
   Get,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -69,5 +70,14 @@ export class ApplicationsController {
     @Body('status') status: any,
   ) {
     return this.applicationsService.updateStatus(id, status);
+  }
+  
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.applicationsService.remove(id, userId);
   }
 }
