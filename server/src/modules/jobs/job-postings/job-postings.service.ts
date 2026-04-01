@@ -445,7 +445,6 @@ export class JobPostingsService {
             }
         }
       }
-    }
 
     if (status === JobStatus.APPROVED) {
       // For bulk, we need to fetch the actual jobs to match keywords

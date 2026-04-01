@@ -13,7 +13,7 @@ export class ApplicationsService {
   ) {}
 
   async create(createApplicationDto: CreateApplicationDto, file?: any, userId?: string) {
-    const { jobPostingId, fullName, email, phone, coverLetter, location } = createApplicationDto;
+    const { jobPostingId, fullName, email, phone, coverLetter } = createApplicationDto;
 
     // 1. Verify job posting exists
     const job = await this.prisma.jobPosting.findUnique({
@@ -120,7 +120,6 @@ export class ApplicationsService {
           cvSnapshotUrl: fileUrl,
           coverLetter,
           appStatus: 'PENDING',
-          desiredLocation: location,
         },
         include: {
           jobPosting: { include: { recruiter: true } },

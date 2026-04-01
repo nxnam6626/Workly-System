@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum AuthProvider {
@@ -292,7 +291,6 @@ model Application {
   interviewDate     DateTime?
   interviewTime     String?
   interviewLocation String?
-  desiredLocation   String?
 
   candidateId  String
   candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
