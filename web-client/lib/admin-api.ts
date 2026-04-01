@@ -122,6 +122,13 @@ export interface AdminFilterJobPostingDto {
   searchTerm?: string;
 }
 
+export interface AdminJobStats {
+  totalPending: number;
+  totalApproved: number;
+  totalRejected: number;
+  totalCrawled: number;
+}
+
 export interface PaginatedJobPostings {
   items: JobPosting[];
   total: number;
@@ -131,8 +138,17 @@ export interface PaginatedJobPostings {
 }
 
 export const adminJobsApi = {
-  getAll: (filters: AdminFilterJobPostingDto, page = 1, limit = 10): Promise<PaginatedJobPostings> =>
-    api.get('/admin/job-postings', { params: { ...filters, page, limit } }).then((r) => r.data),
+  getAll: (
+    filters: AdminFilterJobPostingDto,
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedJobPostings> =>
+    api
+      .get(`/admin/job-postings`, { params: { ...filters, page, limit } })
+      .then((r) => r.data),
+
+  getStats: (): Promise<AdminJobStats> =>
+    api.get(`/admin/job-postings/stats`).then((r) => r.data),
 
   approve: (id: string): Promise<JobPosting> =>
     api.patch(`/admin/job-postings/${id}/approve`).then((r) => r.data),
@@ -140,11 +156,11 @@ export const adminJobsApi = {
   reject: (id: string): Promise<JobPosting> =>
     api.patch(`/admin/job-postings/${id}/reject`).then((r) => r.data),
 
-  bulkDelete: (filters: AdminFilterJobPostingDto): Promise<{ count: number }> =>
-    api.delete('/admin/job-postings/bulk', { params: filters }).then((r) => r.data),
-    
-  bulkApprove: (filters: AdminFilterJobPostingDto): Promise<{ count: number }> =>
-    api.patch('/admin/job-postings/bulk-approve', { params: filters }).then((r) => r.data),
+  bulkApprove: (ids: string[]): Promise<{ count: number }> =>
+    api.patch('/admin/job-postings/bulk-approve', { ids }).then((r) => r.data),
+
+  bulkReject: (ids: string[]): Promise<{ count: number }> =>
+    api.patch('/admin/job-postings/bulk-reject', { ids }).then((r) => r.data),
 };
 
 // ─── Admin User Management ─────────────────────────────────────────────────────
@@ -195,6 +211,9 @@ export const adminUsersApi = {
 
   remove: (id: string): Promise<{ message: string }> =>
     api.delete(`/users/${id}`).then((r) => r.data),
+
+  updateRole: (id: string, role: string): Promise<AdminUser> =>
+    api.patch(`/users/${id}`, { role }).then((r) => r.data),
 };
 
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────

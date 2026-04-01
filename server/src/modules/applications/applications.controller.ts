@@ -66,10 +66,14 @@ export class ApplicationsController {
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
   async updateStatus(
+    @CurrentUser('userId') userId: string,
     @Param('id') id: string,
     @Body('status') status: any,
+    @Body('interviewDate') interviewDate?: string,
+    @Body('interviewTime') interviewTime?: string,
+    @Body('interviewLocation') interviewLocation?: string,
   ) {
-    return this.applicationsService.updateStatus(id, status);
+    return this.applicationsService.updateStatus(id, userId, status, interviewDate, interviewTime, interviewLocation);
   }
   
   @Delete(':id')

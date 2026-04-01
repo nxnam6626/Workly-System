@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
@@ -13,6 +14,7 @@ import type { StatusUser } from '@prisma/client';
 
 import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
+import { MessagesGateway } from '../messages/messages.gateway';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +22,7 @@ export class UsersService {
     private prisma: PrismaService,
     private mailService: MailService,
     private searchService: SearchService,
+    private moduleRef: ModuleRef,
   ) {}
 
   /** Tạo user (dùng cho đăng ký hoặc admin tạo). passwordAlreadyHashed = true khi gọi từ Auth (đã hash). */
@@ -46,29 +49,37 @@ export class UsersService {
         },
       });
 
-      // Find or connect to the role
-      const roleRecord = await tx.role.upsert({
+      // Find or connect to the primary requested role
+      const primaryRoleRecord = await tx.role.upsert({
         where: { roleName: data.role },
         update: {},
         create: { roleName: data.role },
       });
-
-      // Create UserRole link
       await tx.userRole.create({
+        data: { userId: newUser.userId, roleId: primaryRoleRecord.roleId },
+      });
+
+      // Always grant CANDIDATE role as baseline (if not already requested)
+      if (data.role !== 'CANDIDATE') {
+        const candidateRoleRecord = await tx.role.upsert({
+          where: { roleName: 'CANDIDATE' },
+          update: {},
+          create: { roleName: 'CANDIDATE' },
+        });
+        await tx.userRole.create({
+          data: { userId: newUser.userId, roleId: candidateRoleRecord.roleId },
+        });
+      }
+
+      // Always create a Candidate profile for the user
+      await tx.candidate.create({
         data: {
           userId: newUser.userId,
-          roleId: roleRecord.roleId,
+          fullName: 'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
         },
       });
 
-      if (data.role === 'CANDIDATE') {
-        await tx.candidate.create({
-          data: {
-            userId: newUser.userId,
-            fullName: data.fullName,
-          },
-        });
-      } else if (data.role === 'RECRUITER') {
+      if (data.role === 'RECRUITER') {
         await tx.recruiter.create({
           data: { userId: newUser.userId },
         });
@@ -363,25 +374,45 @@ export class UsersService {
       });
 
       if (dto.role) {
+        // Delete all existing roles for this user
+        await tx.userRole.deleteMany({
+           where: { userId }
+        });
+
+        // Always re-grant CANDIDATE base role
+        if (dto.role !== 'CANDIDATE') {
+          const candRole = await tx.role.upsert({
+            where: { roleName: 'CANDIDATE' },
+            update: {},
+            create: { roleName: 'CANDIDATE' },
+          });
+          await tx.userRole.create({
+            data: { userId, roleId: candRole.roleId },
+          });
+        }
+
+        // Add the new primary role
         const roleRecord = await tx.role.upsert({
           where: { roleName: dto.role },
           update: {},
           create: { roleName: dto.role },
         });
 
-        await tx.userRole.upsert({
-          where: {
-            userId_roleId: {
-              userId,
-              roleId: roleRecord.roleId,
-            },
-          },
-          update: {},
-          create: {
+        await tx.userRole.create({
+          data: {
             userId,
             roleId: roleRecord.roleId,
           },
         });
+        
+        // Ensure profile exists for the new role if Admin/Recruiter
+        if (dto.role === 'RECRUITER') {
+          const ext = await tx.recruiter.findUnique({ where: { userId } });
+          if (!ext) await tx.recruiter.create({ data: { userId } });
+        } else if (dto.role === 'ADMIN') {
+           const ext = await tx.admin.findUnique({ where: { userId } });
+           if (!ext) await tx.admin.create({ data: { userId, adminLevel: 1 } });
+        }
       }
     });
 
@@ -410,6 +441,16 @@ export class UsersService {
   async lockUser(userId: string) {
     await this.findOne(userId);
     await this.prisma.user.update({ where: { userId }, data: { status: 'LOCKED' } });
+
+    try {
+      const gateway = this.moduleRef.get(MessagesGateway, { strict: false });
+      if (gateway) {
+        gateway.server.to(`user_${userId}`).emit('accountLocked');
+      }
+    } catch (error: any) {
+       console.error('Could not get MessagesGateway:', error.message);
+    }
+    
     return { message: 'Tài khoản đã bị khóa.' };
   }
 

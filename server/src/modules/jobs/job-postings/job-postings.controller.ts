@@ -52,8 +52,13 @@ export class JobPostingsController {
 
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
-  findOne(@Param('id') id: string, @CurrentUser('userId') userId?: string) {
-    return this.jobPostingsService.findOne(id, userId);
+  findOne(
+    @Param('id') id: string, 
+    @CurrentUser('userId') userId?: string,
+    @Query('trackView') trackView?: string
+  ) {
+    const shouldTrack = trackView !== 'false';
+    return this.jobPostingsService.findOne(id, userId, shouldTrack);
   }
 
   @Patch(':id')

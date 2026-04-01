@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Heart, MapPin, Briefcase, Send } from "lucide-react";
+import { Heart, MapPin, Briefcase, Send, DollarSign } from "lucide-react";
 import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useFavoriteStore } from "@/stores/favorites";
@@ -109,9 +109,9 @@ export function JobCard({ job }: JobCardProps) {
             <MapPin className="w-3.5 h-3.5 opacity-60" />
             <span className="text-[13px] font-medium truncate">{job.locationCity || "Toàn quốc"}</span>
           </div>
-          <div className="flex items-center gap-2 text-[#64748b]">
-            <Briefcase className="w-3.5 h-3.5 opacity-60" />
-            <span className="text-[13px] font-medium">
+          <div className="flex items-center gap-2 text-emerald-600 mt-1.5 mb-1.5">
+            <DollarSign className="w-4 h-4" />
+            <span className="text-[13px] font-bold">
               {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
             </span>
           </div>

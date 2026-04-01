@@ -6,7 +6,7 @@ import { CheckCircle2, Trash2, XCircle, Loader2 } from 'lucide-react';
 interface BulkActionsBarProps {
   selectedCount: number;
   onBulkApprove: () => void;
-  onBulkDelete: () => void;
+  onBulkReject: () => void;
   onClearSelection: () => void;
   isProcessing: boolean;
 }
@@ -14,7 +14,7 @@ interface BulkActionsBarProps {
 export default function BulkActionsBar({
   selectedCount,
   onBulkApprove,
-  onBulkDelete,
+  onBulkReject,
   onClearSelection,
   isProcessing,
 }: BulkActionsBarProps) {
@@ -41,12 +41,12 @@ export default function BulkActionsBar({
               Duyệt tất cả
             </button>
             <button
-              onClick={onBulkDelete}
+              onClick={onBulkReject}
               disabled={isProcessing}
-              className="px-4 py-1.5 bg-red-500 text-white rounded-lg text-xs font-bold hover:bg-red-400 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-4 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-400 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-              Xóa đã chọn
+              {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+              Từ chối đã chọn
             </button>
             <button onClick={onClearSelection} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
               <XCircle className="w-4 h-4" />

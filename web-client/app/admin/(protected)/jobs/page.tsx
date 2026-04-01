@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  RefreshCw, 
+import {
+  RefreshCw,
   Clock,
   ShieldAlert,
   Briefcase,
@@ -16,12 +16,16 @@ import JobFilters from './components/JobFilters';
 import JobTable from './components/JobTable';
 import BulkActionsBar from './components/BulkActionsBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useSocketStore } from '@/stores/socket';
+import toast from 'react-hot-toast';
 
 export default function JobsPage() {
+  const { socket } = useSocketStore();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [globalStats, setGlobalStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Pagination & Filters
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -35,21 +39,25 @@ export default function JobsPage() {
 
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  
+
   // Modals & States
   const [quickViewJob, setQuickViewJob] = useState<JobPosting | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
   const fetchJobs = useCallback(async () => {
     setIsLoading(true);
     setError('');
     try {
-      const data = await adminJobsApi.getAll(filters, page, 10);
+      const [data, statsData] = await Promise.all([
+        adminJobsApi.getAll(filters, page, 10),
+        adminJobsApi.getStats()
+      ]);
       setJobs(data.items);
       setTotalPages(data.totalPages);
       setTotalItems(data.total);
+      setGlobalStats(statsData);
     } catch (err) {
       setError('Không thể tải danh sách tin tuyển dụng.');
       console.error(err);
@@ -61,6 +69,31 @@ export default function JobsPage() {
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewJob = (job: JobPosting) => {
+      // Tự động làm mới danh sách nếu đang ở trang 1
+      if (page === 1) {
+        fetchJobs();
+      } else {
+        setTotalItems(prev => prev + 1);
+      }
+    };
+
+    const handleAdminJobUpdated = () => {
+      fetchJobs();
+    };
+
+    socket.on('newJobPosting', handleNewJob);
+    socket.on('adminJobUpdated', handleAdminJobUpdated);
+
+    return () => {
+      socket.off('newJobPosting', handleNewJob);
+      socket.off('adminJobUpdated', handleAdminJobUpdated);
+    };
+  }, [socket, fetchJobs, page]);
 
   const handleApprove = async (id: string) => {
     setIsProcessing(id);
@@ -92,31 +125,34 @@ export default function JobsPage() {
     if (selectedIds.length === 0) return;
     setIsBulkProcessing(true);
     try {
-       await adminJobsApi.bulkApprove({ searchTerm: selectedIds.join(',') });
-       fetchJobs();
-       setSelectedIds([]);
+      await adminJobsApi.bulkApprove(selectedIds);
+      fetchJobs();
+      setSelectedIds([]);
+      toast.success(`Duyệt thành công ${selectedIds.length} tin.`);
     } catch {
-       setError('Duyệt hàng loạt thất bại.');
+      setError('Duyệt hàng loạt thất bại.');
     } finally {
-       setIsBulkProcessing(false);
+      setIsBulkProcessing(false);
     }
   };
 
-  const requestBulkDelete = () => {
+  const requestBulkReject = () => {
     if (selectedIds.length === 0) return;
-    setIsDeleteModalOpen(true);
+    setIsRejectModalOpen(true);
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkReject = async () => {
     setIsBulkProcessing(true);
     try {
-       await adminJobsApi.bulkDelete({ searchTerm: selectedIds.join(',') });
-       fetchJobs();
-       setSelectedIds([]);
+      await adminJobsApi.bulkReject(selectedIds);
+      fetchJobs();
+      setSelectedIds([]);
+      toast.success(`Từ chối thành công ${selectedIds.length} tin.`);
     } catch {
-       setError('Xóa hàng loạt thất bại.');
+      setError('Từ chối hàng loạt thất bại.');
     } finally {
-       setIsBulkProcessing(false);
+      setIsBulkProcessing(false);
+      setIsRejectModalOpen(false);
     }
   };
 
@@ -133,11 +169,12 @@ export default function JobsPage() {
   };
 
   const statsItems = useMemo(() => [
-    { label: 'Chờ duyệt', value: totalItems, color: 'bg-amber-50 text-amber-600', icon: Clock },
+    { label: 'Chờ duyệt', value: globalStats?.totalPending || 0, color: 'bg-amber-50 text-amber-600', icon: Clock },
+    { label: 'Đã Duyệt', value: globalStats?.totalApproved || 0, color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle2 },
+    { label: 'Đã Từ chối', value: globalStats?.totalRejected || 0, color: 'bg-rose-50 text-rose-600', icon: XCircle },
     { label: 'Điểm AI thấp', value: jobs.filter(j => j.aiReliabilityScore < 60).length, color: 'bg-red-50 text-red-600', icon: ShieldAlert },
-    { label: 'Tin từ Crawler', value: jobs.filter(j => j.postType === PostType.CRAWLED).length, color: 'bg-indigo-50 text-indigo-600', icon: Briefcase },
-    { label: 'Đã chọn', value: selectedIds.length, color: 'bg-slate-100 text-slate-600', icon: CheckCircle2 },
-  ], [totalItems, jobs, selectedIds.length]);
+    // { label: 'Tin từ Crawler', value: globalStats?.totalCrawled || 0, color: 'bg-indigo-50 text-indigo-600', icon: Briefcase },
+  ], [globalStats, jobs]);
 
   return (
     <div className="space-y-6">
@@ -149,7 +186,7 @@ export default function JobsPage() {
             Duyệt tin mới, quản lý AI Score và xử lý hàng loạt dữ liệu crawler
           </p>
         </div>
-        <button 
+        <button
           onClick={fetchJobs}
           className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
         >
@@ -162,27 +199,27 @@ export default function JobsPage() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
         <div className="p-4 border-b border-slate-100 bg-slate-50/30 space-y-4">
-            <JobFilters filters={filters} setFilters={setFilters} />
-            <BulkActionsBar 
-              selectedCount={selectedIds.length}
-              onBulkApprove={handleBulkApprove}
-              onBulkDelete={requestBulkDelete}
-              onClearSelection={() => setSelectedIds([])}
-              isProcessing={isBulkProcessing}
-            />
+          <JobFilters filters={filters} setFilters={setFilters} />
+          <BulkActionsBar
+            selectedCount={selectedIds.length}
+            onBulkApprove={handleBulkApprove}
+            onBulkReject={requestBulkReject}
+            onClearSelection={() => setSelectedIds([])}
+            isProcessing={isBulkProcessing}
+          />
         </div>
 
         {error && (
-            <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                <ShieldAlert className="w-5 h-5 flex-shrink-0" />
-                <p className="font-medium text-red-800">{error}</p>
-                <button onClick={() => setError('')} className="ml-auto p-1 hover:bg-red-100 rounded-md text-red-400">
-                    <XCircle className="w-4 h-4" />
-                </button>
-            </div>
+          <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <ShieldAlert className="w-5 h-5 flex-shrink-0" />
+            <p className="font-medium text-red-800">{error}</p>
+            <button onClick={() => setError('')} className="ml-auto p-1 hover:bg-red-100 rounded-md text-red-400">
+              <XCircle className="w-4 h-4" />
+            </button>
+          </div>
         )}
 
-        <JobTable 
+        <JobTable
           jobs={jobs}
           selectedIds={selectedIds}
           toggleSelect={toggleSelect}
@@ -200,22 +237,22 @@ export default function JobsPage() {
       </div>
 
       {quickViewJob && (
-        <JobQuickViewModal 
-            job={quickViewJob}
-            onClose={() => setQuickViewJob(null)}
-            onApprove={handleApprove}
-            onReject={handleReject}
-            isProcessing={isProcessing === quickViewJob.jobPostingId}
+        <JobQuickViewModal
+          job={quickViewJob}
+          onClose={() => setQuickViewJob(null)}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          isProcessing={isProcessing === quickViewJob.jobPostingId}
         />
       )}
 
       <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        title="Xóa hàng loạt"
-        message={`Bạn có chắc muốn xóa ${selectedIds.length} tin đã chọn? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xóa các tin"
-        onConfirm={handleBulkDelete}
-        onCancel={() => setIsDeleteModalOpen(false)}
+        isOpen={isRejectModalOpen}
+        title="Từ chối hàng loạt"
+        message={`Bạn có chắc muốn từ chối ${selectedIds.length} tin đã chọn? Hành động này sẽ thay đổi trạng thái của các tin và gửi thông báo cho nhà tuyển dụng.`}
+        confirmLabel="Từ chối các tin"
+        onConfirm={handleBulkReject}
+        onCancel={() => setIsRejectModalOpen(false)}
         isLoading={isBulkProcessing}
       />
     </div>

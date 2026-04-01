@@ -24,6 +24,7 @@ export class JobPostingsService {
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
+      include: { company: true }
     });
 
     if (!recruiter || !recruiter.companyId) {
@@ -47,9 +48,11 @@ export class JobPostingsService {
 
     const originalUrl = 'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-    return this.prisma.jobPosting.create({
+    const job = await this.prisma.jobPosting.create({
       data: {
         ...rest,
+        salaryMin: salaryMin || null,
+        salaryMax: salaryMax || null,
         deadline: deadline ? new Date(deadline) : null,
         recruiterId: recruiter.recruiterId,
         companyId: recruiter.companyId,
@@ -58,7 +61,28 @@ export class JobPostingsService {
         isVerified: false,
         originalUrl: originalUrl,
       },
+      include: { company: true, recruiter: { include: { user: { select: { email: true } } } } }
     });
+
+    // Notify ALL admins about the new job posting
+    const admins = await this.prisma.user.findMany({
+      where: {
+        userRoles: { some: { role: { roleName: 'ADMIN' } } }
+      }
+    });
+
+    if (admins.length > 0) {
+      const title = 'Tin tuyển dụng mới cần duyệt';
+      const message = `Nhà tuyển dụng ${recruiter.company?.companyName || 'mới'} vừa đăng tin "${job.title}". Vui lòng kiểm tra và phê duyệt.`;
+      
+      for (const admin of admins) {
+        await this.notificationsService.create(admin.userId, title, message, 'info', '/admin/jobs');
+        this.messagesGateway.server.to(`user_${admin.userId}`).emit('notification', { title, message, type: 'info', link: '/admin/jobs' });
+        this.messagesGateway.server.to(`user_${admin.userId}`).emit('newJobPosting', job);
+      }
+    }
+
+    return job;
   }
 
 
@@ -198,13 +222,26 @@ export class JobPostingsService {
     });
   }
 
-  async findOne(id: string, userId?: string) {
+  async findOne(id: string, userId?: string, trackView: boolean = true) {
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: id },
       include: { company: true, recruiter: true },
     });
 
     if (!job) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
+
+    // Increment view count asynchronously only if trackView is true
+    if (trackView) {
+      this.prisma.jobPosting.update({
+      where: { jobPostingId: id },
+      data: { viewCount: { increment: 1 } },
+      select: { jobPostingId: true } // Minimal return
+    }).then(() => {
+      if (job.recruiter?.userId) {
+        this.messagesGateway.server.to(`user_${job.recruiter.userId}`).emit('jdViewUpdated', { jobPostingId: id });
+      }
+    }).catch(console.error);
+    }
 
     let hasApplied = false;
     let isSaved = false;
@@ -263,6 +300,15 @@ export class JobPostingsService {
     return result;
   }
 
+  async getAdminStats() {
+    const [totalPending, totalApproved, totalRejected, totalCrawled] = await Promise.all([
+      this.prisma.jobPosting.count({ where: { status: 'PENDING' } }),
+      this.prisma.jobPosting.count({ where: { status: 'APPROVED' } }),
+      this.prisma.jobPosting.count({ where: { status: 'REJECTED' } }),
+      this.prisma.jobPosting.count({ where: { postType: 'CRAWLED' } }),
+    ]);
+    return { totalPending, totalApproved, totalRejected, totalCrawled };
+  }
 
   async findAllAdmin(query: AdminFilterJobPostingDto) {
     const { status, postType, minAiScore, searchTerm, page = 1, limit = 10 } = query;
@@ -312,77 +358,52 @@ export class JobPostingsService {
       },
     });
 
-    if (status === JobStatus.APPROVED) {
-      // Notify recruiter
-      if (updated.recruiter?.userId) {
-        const title = 'Tin tuyển dụng được duyệt';
-        const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-        const type = 'success';
+    if (updated.recruiter?.userId) {
+       let title = '';
+       let message = '';
+       let type = 'info';
 
-        await this.notificationsService.create(updated.recruiter.userId, title, message, type);
+       if (status === JobStatus.APPROVED) {
+         title = 'Tin tuyển dụng được duyệt';
+         message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+         type = 'success';
+       } else if (status === JobStatus.REJECTED) {
+         title = 'Tin tuyển dụng bị từ chối';
+         message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
+         type = 'error';
+       }
 
-        this.messagesGateway.server
-          .to(`user_${updated.recruiter.userId}`)
-          .emit('notification', { title, message, type });
-      }
-
-      // Trigger Job Alerts and ES Sync
-      this.triggerJobNotifications(updated);
-      this.syncJobToES(updated);
-    } else {
-      await this.searchService.deleteJob(id);
+       if (title) {
+         await this.notificationsService.create(updated.recruiter.userId, title, message, type, '/recruiter/jobs');
+         this.messagesGateway.server
+            .to(`user_${updated.recruiter.userId}`)
+            .emit('notification', { title, message, type, link: '/recruiter/jobs' });
+       }
     }
+
+    this.messagesGateway.server.emit('adminJobUpdated');
 
     return updated;
   }
 
-  async removeBulk(query: AdminFilterJobPostingDto) {
-    const { status, postType, minAiScore, searchTerm } = query;
-    const where: any = {};
-    if (status) where.status = status;
-    if (postType) where.postType = postType;
-    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
-
-
-    if (searchTerm && searchTerm.includes(',')) {
-      where.jobPostingId = { in: searchTerm.split(',') };
-    } else if (searchTerm) {
-      where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
-      ];
+  async removeBulk(ids: string[]) {
+    if (!ids || ids.length === 0) {
+      throw new ForbiddenException('Vui lòng cung cấp danh sách ID để xóa hàng loạt.');
     }
 
-    // Security check: ensure at least one filter is provided to prevent accidental full wipe
-    if (Object.keys(where).length === 0) {
-      throw new ForbiddenException('Vui lòng cung cấp ít nhất một bộ lọc để xóa hàng loạt.');
-    }
-
-    const result = await this.prisma.jobPosting.deleteMany({ where });
+    const result = await this.prisma.jobPosting.deleteMany({
+      where: { jobPostingId: { in: ids } }
+    });
+    this.messagesGateway.server.emit('adminJobUpdated');
     return { message: `Đã xóa thành công ${result.count} tin tuyển dụng.`, count: result.count };
   }
 
-  async updateStatusBulk(query: AdminFilterJobPostingDto, status: JobStatus, adminId: string) {
-    const { status: currentStatus, postType, minAiScore, searchTerm } = query;
-    const where: any = {};
-    if (currentStatus) where.status = currentStatus;
-    if (postType) where.postType = postType;
-    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
-
-
-    // If searchTerm is provided as a comma-separated list of IDs (as the frontend does now)
-    if (searchTerm && searchTerm.includes(',')) {
-      where.jobPostingId = { in: searchTerm.split(',') };
-    } else if (searchTerm) {
-      where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
-      ];
+  async updateStatusBulk(ids: string[], status: JobStatus, adminId: string) {
+    if (!ids || ids.length === 0) {
+      throw new ForbiddenException('Vui lòng cung cấp danh sách ID để thao tác hàng loạt.');
     }
 
-    if (Object.keys(where).length === 0) {
-      throw new ForbiddenException('Vui lòng cung cấp ít nhất một bộ lọc để thao tác hàng loạt.');
-    }
+    const where = { jobPostingId: { in: ids } };
 
     // Find all affected jobs before update to send notifications
     const jobsToUpdate = await this.prisma.jobPosting.findMany({
@@ -399,19 +420,29 @@ export class JobPostingsService {
       },
     });
 
-    if (status === JobStatus.APPROVED) {
-      // use a simple for loop to wait for db inserts
-      for (const job of jobsToUpdate) {
+    // Notifications for Bulk Update
+    for (const job of jobsToUpdate) {
         if (job.recruiter?.userId) {
-          const title = 'Tin tuyển dụng được duyệt';
-          const message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-          const type = 'success';
+            let title = '';
+            let message = '';
+            let type = 'info';
 
-          await this.notificationsService.create(job.recruiter.userId, title, message, type);
+            if (status === JobStatus.APPROVED) {
+                title = 'Tin tuyển dụng được duyệt';
+                message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+                type = 'success';
+            } else if (status === JobStatus.REJECTED) {
+                title = 'Tin tuyển dụng bị từ chối';
+                message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
+                type = 'error';
+            }
 
-          this.messagesGateway.server
-            .to(`user_${job.recruiter.userId}`)
-            .emit('notification', { title, message, type });
+            if (title) {
+                await this.notificationsService.create(job.recruiter.userId, title, message, type, '/recruiter/jobs');
+                this.messagesGateway.server
+                    .to(`user_${job.recruiter.userId}`)
+                    .emit('notification', { title, message, type, link: '/recruiter/jobs' });
+            }
         }
       }
     }
@@ -434,6 +465,8 @@ export class JobPostingsService {
         await this.searchService.deleteJob(job.jobPostingId);
       }
     }
+
+    this.messagesGateway.server.emit('adminJobUpdated');
 
     return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
   }

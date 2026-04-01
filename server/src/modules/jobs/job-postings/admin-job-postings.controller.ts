@@ -33,6 +33,12 @@ export class AdminJobPostingsController {
     return this.jobPostingsService.findAllAdmin(query);
   }
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Lấy thống kê tổng quan tin tuyển dụng' })
+  getStats() {
+    return this.jobPostingsService.getAdminStats();
+  }
+
   @Patch(':id/approve')
   @ApiOperation({ summary: 'Duyệt một tin tuyển dụng' })
   approve(@Param('id') id: string, @CurrentUser('userId') adminId: string) {
@@ -46,15 +52,21 @@ export class AdminJobPostingsController {
   }
 
   @Delete('bulk')
-  @ApiOperation({ summary: 'Xóa hàng loạt dựa trên bộ lọc' })
-  removeBulk(@Query() query: AdminFilterJobPostingDto) {
-    return this.jobPostingsService.removeBulk(query);
+  @ApiOperation({ summary: 'Xóa hàng loạt dựa trên ID' })
+  removeBulk(@Body('ids') ids: string[]) {
+    return this.jobPostingsService.removeBulk(ids);
   }
 
   @Patch('bulk-approve')
-  @ApiOperation({ summary: 'Duyệt hàng loạt dựa trên bộ lọc' })
-  bulkApprove(@Query() query: AdminFilterJobPostingDto, @CurrentUser('userId') adminId: string) {
-    return this.jobPostingsService.updateStatusBulk(query, JobStatus.APPROVED, adminId);
+  @ApiOperation({ summary: 'Duyệt hàng loạt dựa trên ID' })
+  bulkApprove(@Body('ids') ids: string[], @CurrentUser('userId') adminId: string) {
+    return this.jobPostingsService.updateStatusBulk(ids, JobStatus.APPROVED, adminId);
+  }
+
+  @Patch('bulk-reject')
+  @ApiOperation({ summary: 'Từ chối hàng loạt dựa trên ID' })
+  bulkReject(@Body('ids') ids: string[], @CurrentUser('userId') adminId: string) {
+    return this.jobPostingsService.updateStatusBulk(ids, JobStatus.REJECTED, adminId);
   }
 
   @Post('sync-elasticsearch')
