@@ -13,7 +13,7 @@ import {
   Briefcase
 } from "lucide-react";
 import Link from "next/link";
-import axios from "axios";
+
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -48,7 +48,6 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
     fullName: "",
     email: "",
     phone: "",
-    location: "",
     coverLetter: "",
     agree: false,
   });
@@ -127,7 +126,6 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
       data.append("fullName", formData.fullName);
       data.append("email", formData.email);
       data.append("phone", formData.phone);
-      data.append("location", formData.location);
       data.append("coverLetter", formData.coverLetter);
 
       if (useExistingCv) {
@@ -345,32 +343,7 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
                   </div>
                 </div>
 
-                {/* Section 2: Preferred Location */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-900">Địa điểm làm việc mong muốn <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select
-                      required
-                      className="w-full appearance-none px-4 py-3 bg-white border border-slate-200 rounded-md text-sm text-slate-500 focus:border-blue-600 focus:ring-0 outline-none transition-all pr-10 cursor-pointer"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    >
-                      <option value="">Chọn địa điểm bạn muốn làm việc</option>
-                      {availableLocations.length > 0 ? (
-                        availableLocations.map((loc, idx) => (
-                          <option key={idx} value={loc}>{loc}</option>
-                        ))
-                      ) : (
-                        <>
-                          <option value="Hà Nội">Hà Nội</option>
-                          <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                          <option value="Đà Nẵng">Đà Nẵng</option>
-                        </>
-                      )}
-                    </select>
-                    <ChevronDown className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
+
 
                 {/* Section 3: Cover Letter */}
                 <div className="space-y-2">

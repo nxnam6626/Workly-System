@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
    MapPin,
    Briefcase,
@@ -27,7 +28,7 @@ import {
    Zap,
    ShieldAlert,
 } from "lucide-react";
-import axios from "axios";
+
 import api from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -36,6 +37,7 @@ import { JOB_TYPE_LABEL } from "@/lib/constants";
 import { JobCard, Job } from "@/components/JobCard";
 import { JobApplyModal } from "@/components/jobs/JobApplyModal";
 import { useAuthStore } from "@/stores/auth";
+import { useFavoriteStore } from "@/stores/favorites";
 
 interface JobDetails extends Job {
    companyId: string;
@@ -68,6 +70,10 @@ export default function JobDetailsPage() {
    const [loading, setLoading] = useState(true);
    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
    const { isAuthenticated } = useAuthStore();
+   const { favoriteIds, toggleFavorite, isInitialized, fetchFavorites } = useFavoriteStore();
+
+   // Sync with global favorites
+   const isSaved = job ? favoriteIds.has(job.jobPostingId) : false;
 
    const fetchJobDetails = useCallback(async () => {
       setLoading(true);
@@ -88,11 +94,11 @@ export default function JobDetailsPage() {
             }
          }
 
-         const { data } = await axios.get(`http://localhost:3001/job-postings/${id}`, {
+         const { data } = await api.get(`/job-postings/${id}`, {
             params: { trackView },
-            withCredentials: true,
          });
          setJob(data as JobDetails);
+
 
          const resRelated = await api.get(`/job-postings`, {
             params: {
@@ -113,12 +119,13 @@ export default function JobDetailsPage() {
          router.push(`/login?returnUrl=/jobs/${id}`);
          return;
       }
+      if (!job) return;
+
       try {
-         const { data } = await api.post(`/favorites/toggle/${id}`);
-         setJob(prev => prev ? { ...prev, isSaved: data.saved } : null);
+         await toggleFavorite(job);
       } catch (error: any) {
          console.error("Save error:", error);
-         toast.error(error.response?.data?.message || "Vui lòng đăng nhập để lưu việc làm!");
+         toast.error(error.message || "Đã có lỗi xảy ra khi lưu việc làm!");
       }
    };
 
@@ -134,6 +141,13 @@ export default function JobDetailsPage() {
          setIsApplyModalOpen(true);
       }
    };
+
+
+   useEffect(() => {
+      if (isAuthenticated && !isInitialized) {
+         fetchFavorites();
+      }
+   }, [isAuthenticated, isInitialized, fetchFavorites]);
 
    useEffect(() => {
       if (id) fetchJobDetails();
@@ -241,12 +255,29 @@ export default function JobDetailsPage() {
                               )}
                            </button>
                         )}
-                        <button
+                        <motion.button
                            onClick={handleToggleSave}
-                           className={`flex-none px-6 py-3 border rounded-md font-bold transition-all flex items-center justify-center gap-2 ${job.isSaved ? 'bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50'}`}
+                           whileTap={{ scale: 0.95 }}
+                           whileHover={{ scale: 1.02 }}
+                           className={`flex-none px-8 py-3 border rounded-xl font-bold transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${isSaved
+                              ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm shadow-blue-100'
+                              : 'bg-white border-slate-200 text-slate-600 hover:border-blue-400 hover:text-blue-600 shadow-sm hover:shadow-md'
+                              }`}
                         >
-                           <Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`} /> {job.isSaved ? 'Đã lưu' : 'Lưu tin'}
-                        </button>
+                           <AnimatePresence mode="wait">
+                              <motion.div
+                                 key={isSaved ? 'saved' : 'unsaved'}
+                                 initial={{ y: 5, opacity: 0 }}
+                                 animate={{ y: 0, opacity: 1 }}
+                                 exit={{ y: -5, opacity: 0 }}
+                                 transition={{ duration: 0.15 }}
+                                 className="flex items-center gap-2"
+                              >
+                                 <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current scale-110' : 'group-hover:scale-110 transition-transform'}`} />
+                                 <span>{isSaved ? 'Đã lưu' : 'Lưu tin'}</span>
+                              </motion.div>
+                           </AnimatePresence>
+                        </motion.button>
                      </div>
                   </div>
 
@@ -294,45 +325,6 @@ export default function JobDetailsPage() {
                               <p>{job.company?.address}</p>
                            </div>
                         </section>
-
-                        <section>
-                           <h3 className="text-md font-bold text-slate-800 mb-4">Cách thức ứng tuyển</h3>
-                           <div className="text-slate-600 text-sm ml-4 border-l-2 border-slate-50 pl-6 mb-8">
-                              Ứng viên nộp hồ sơ trực tuyến bằng cách nhấn <b>Ứng tuyển</b> ngay dưới đây.
-                           </div>
-                           <div className="flex gap-4">
-                              {job.hasApplied ? (
-                                 <button
-                                    disabled
-                                    className="px-10 py-3 bg-slate-100 text-slate-400 font-bold rounded-md flex items-center justify-center gap-2 border border-slate-200 cursor-not-allowed"
-                                 >
-                                    <CheckCircle2 className="w-4 h-4 text-green-500" /> Đã ứng tuyển
-                                 </button>
-                              ) : (
-                                 <button
-                                    onClick={handleApply}
-                                    className="px-10 py-3 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
-                                 >
-                                    {job.postType === 'CRAWLED' ? (
-                                       <>
-                                          <ExternalLink className="w-4 h-4" /> Xem tin gốc
-                                       </>
-                                    ) : (
-                                       <>
-                                          <Send className="w-4 h-4" /> Ứng tuyển ngay
-                                       </>
-                                    )}
-                                 </button>
-                              )}
-                              <button
-                                 onClick={handleToggleSave}
-                                 className={`px-6 py-3 border rounded-md font-bold transition-all flex items-center justify-center gap-2 ${job.isSaved ? 'bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-blue-600 text-blue-600 hover:bg-blue-50'}`}
-                              >
-                                 <Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current' : ''}`} /> {job.isSaved ? 'Đã lưu' : 'Lưu tin'}
-                              </button>
-                           </div>
-                           <p className="text-[10px] text-slate-400 mt-4 italic">Hạn nộp hồ sơ: {job.deadline ? new Date(job.deadline).toLocaleDateString('vi-VN') : 'Đang cập nhật'}</p>
-                        </section>
                      </div>
                   </div>
 
@@ -342,54 +334,6 @@ export default function JobDetailsPage() {
                      <p className="text-xs text-blue-700">
                         Báo cáo tin tuyển dụng: Nếu bạn thấy rằng tin tuyển dụng này không đúng hoặc có dấu hiệu lừa đảo, <Link href="#" className="underline font-bold">hãy phản ánh với chúng tôi.</Link>
                      </p>
-                  </div>
-
-                  {/* CV Banner */}
-                  <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-8 flex items-center justify-between text-white overflow-hidden relative group">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 scale-150 transition-transform group-hover:scale-[2]" />
-                     <div className="relative z-10 flex gap-6 items-center">
-                        <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/20">
-                           <GraduationCap className="w-8 h-8" />
-                        </div>
-                        <div>
-                           <h4 className="text-xl font-bold mb-1 leading-tight text-white">Số lượng NTD tìm kiếm ứng viên của bạn</h4>
-                           <p className="text-sm text-blue-100/80 mb-4 max-w-md">Lên khoảng 13% trong tuần gần đây. Tạo mới CV ngay để không bỏ lỡ cơ hội!</p>
-                           <button className="px-6 py-2 bg-blue-400 text-white font-bold rounded text-sm hover:bg-blue-300 transition-all flex items-center gap-2">
-                              Tạo CV ngay <ChevronRight className="w-4 h-4" />
-                           </button>
-                        </div>
-                     </div>
-                     <div className="hidden lg:block relative z-10">
-                        <div className="flex flex-col items-center">
-                           <Zap className="w-10 h-10 text-yellow-400 mb-2" />
-                           <span className="text-2xl font-black">13%</span>
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* Feedback Block */}
-                  <div className="bg-white rounded-lg p-8 border border-slate-100 shadow-sm text-center">
-                     <h4 className="font-bold text-slate-800 mb-8">Bạn thấy độ tin cậy và rõ ràng của tin tuyển dụng này thế nào?</h4>
-                     <div className="flex justify-center gap-8 md:gap-12 flex-wrap">
-                        <div className="flex flex-col items-center gap-3 group cursor-pointer">
-                           <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-50 group-hover:text-red-500 transition-all border border-slate-100">
-                              <Frown className="w-6 h-6" />
-                           </div>
-                           <span className="text-[10px] text-slate-400 font-medium">Không đáng tin</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-3 group cursor-pointer">
-                           <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-orange-50 group-hover:text-orange-500 transition-all border border-slate-100">
-                              <Meh className="w-6 h-6" />
-                           </div>
-                           <span className="text-[10px] text-slate-400 font-medium">Bình thường</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-3 group cursor-pointer">
-                           <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all border border-slate-100">
-                              <Smile className="w-6 h-6" />
-                           </div>
-                           <span className="text-[10px] text-slate-400 font-medium">Rất tin cậy</span>
-                        </div>
-                     </div>
                   </div>
 
                </div>

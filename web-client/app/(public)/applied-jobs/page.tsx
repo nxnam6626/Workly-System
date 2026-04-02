@@ -17,13 +17,14 @@ import {
   ExternalLink,
   Filter
 } from "lucide-react";
-import axios from "axios";
+
 import api from "@/lib/api";
 import Link from "next/link";
 import { formatSalary, timeAgo } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useSocketStore } from "@/stores/socket";
 import { getFileUrl } from "@/lib/api";
+import toast from "react-hot-toast";
 
 interface AppliedJob {
   applicationId: string;
@@ -61,7 +62,7 @@ export default function AppliedJobsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { accessToken } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
   const { socket } = useSocketStore();
 
   const fetchData = async () => {
@@ -86,7 +87,7 @@ export default function AppliedJobsPage() {
   useEffect(() => {
     if (!socket) return;
     const handleNotification = (msg: any) => {
-      fetchAppliedJobs();
+      fetchData();
     };
     socket.on('notification', handleNotification);
     return () => {

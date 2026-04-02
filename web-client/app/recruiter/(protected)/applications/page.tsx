@@ -145,10 +145,10 @@ export default function ApplicationsPage() {
                   <p className="text-slate-400 text-xs flex items-center gap-1.5 mt-1">
                      <Clock className="w-3.5 h-3.5" />
                      {new Date(app.applyDate).toLocaleDateString('vi-VN')}
-                     {app.desiredLocation && (
+                     {app.applyDate && (
                        <>
                          <span className="mx-1">•</span>
-                         <span className="text-blue-600 font-medium whitespace-nowrap">Nơi làm việc: {app.desiredLocation}</span>
+                         <span className="text-slate-400 font-medium whitespace-nowrap">Ngày nộp: {new Date(app.applyDate).toLocaleDateString('vi-VN')}</span>
                        </>
                      )}
                   </p>

@@ -381,6 +381,12 @@ export class JobPostingsService {
        }
     }
 
+    if (status === JobStatus.APPROVED) {
+      this.syncJobToES(updated);
+    } else {
+      await this.searchService.deleteJob(id);
+    }
+
     this.messagesGateway.server.emit('adminJobUpdated');
 
     return updated;

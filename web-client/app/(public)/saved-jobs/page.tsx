@@ -131,20 +131,15 @@ export default function SavedJobsPage() {
           <div className="lg:col-span-3">
              {filteredJobs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredJobs.map((job) => (
+                  {filteredJobs.map((job: any) => (
                     <JobCard 
                       key={job.jobPostingId} 
-                      job={{
-                        ...job,
-                        jobType: "Full-time",
-                        experience: "Chưa cập nhật",
-                        createdAt: job.createdAt,
-                        isVerified: true
-                      } as Job} 
+                      job={job as Job} 
                       saved={true}
                       onSave={handleUnsave}
                     />
                   ))}
+
                 </div>
              ) : (
                 <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-20 text-center space-y-6">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Search, Building2 } from "lucide-react";
-import axios from "axios";
+import api from "@/lib/api";
 import { CompanyCard } from "@/components/CompanyCard";
 import { Pagination } from "@/components/Pagination";
 
@@ -18,13 +18,14 @@ export default function CompanySearchPage() {
     async (p = page) => {
       setLoading(true);
       try {
-        const { data } = await axios.get("http://localhost:3001/companies", {
+        const { data } = await api.get("/companies", {
           params: {
             search: searchQuery || undefined,
             page: p,
             limit: LIMIT,
           },
         });
+
         setCompanies(data.items || []);
         setTotal(data.total || 0);
       } catch (error) {
