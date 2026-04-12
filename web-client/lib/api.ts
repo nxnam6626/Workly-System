@@ -85,9 +85,9 @@ api.interceptors.response.use(
 
         useAuthStore.getState().setTokens(newAccessToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        
+
         processQueue(null, newAccessToken);
-        
+
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (err) {

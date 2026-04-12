@@ -234,7 +234,7 @@ export default function AccountSettingsPage() {
               <div className="flex items-center gap-4">
                  <div className="relative group w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center overflow-hidden border-4 border-white shadow-md">
                     {user.avatar ? (
-                      <Image src={user.avatar} alt={user.fullName || 'User'} width={64} height={64} className="object-cover" />
+                      <Image src={user.avatar} alt={user.name || 'User'} width={64} height={64} className="object-cover" />
                     ) : (
                       <User className="w-8 h-8 text-blue-500" />
                     )}
@@ -260,7 +260,7 @@ export default function AccountSettingsPage() {
                     )}
                  </div>
                  <div className="space-y-0.5">
-                    <h3 className="font-black text-slate-900 leading-tight">{user.fullName}</h3>
+                    <h3 className="font-black text-slate-900 leading-tight">{user.name}</h3>
                     <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Candidate Member</p>
                  </div>
               </div>
@@ -268,7 +268,7 @@ export default function AccountSettingsPage() {
               <div className="space-y-3">
                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                     <Smartphone className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm font-bold text-slate-600">{user.phone || "Chưa cập nhật SĐT"}</span>
+                    <span className="text-sm font-bold text-slate-600">{user.phoneNumber || "Chưa cập nhật SĐT"}</span>
                  </div>
                  <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
