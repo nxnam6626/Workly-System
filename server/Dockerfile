@@ -1,5 +1,5 @@
-# Use official Node.js image as the base
-FROM node:22-bookworm-slim AS builder
+# 1. Đổi thành bản Full ở Stage Build
+FROM node:22 AS builder
 
 WORKDIR /app
 
@@ -13,8 +13,8 @@ RUN npx prisma generate
 COPY . .
 RUN npm run build
 
-# Production image
-FROM node:22-bookworm-slim
+# 2. Đổi thành bản Full ở Stage Production
+FROM node:22
 
 WORKDIR /app
 
