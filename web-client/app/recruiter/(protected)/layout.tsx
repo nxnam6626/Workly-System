@@ -17,9 +17,10 @@ import {
   PlusCircle,
   Building,
   Users,
-  Heart,
   MessageSquare,
-  FileText
+  FileText,
+  Wallet,
+  Heart
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
@@ -30,7 +31,8 @@ const navItems = [
   { label: 'Bảng Điều Khiển', href: '/recruiter/dashboard', icon: LayoutDashboard },
   { label: 'Công Ty', href: '/recruiter/company', icon: Building },
   { label: 'Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
-  { label: 'Đăng Tin', href: '/recruiter/post-job', icon: PlusCircle },
+  { label: 'Yêu Cầu Tuyển Dụng', href: '/recruiter/post-job', icon: PlusCircle },
+  { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
   { label: 'Tìm Ứng Viên', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },

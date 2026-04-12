@@ -8,6 +8,7 @@ import { useSocketStore } from '@/stores/socket';
 import { useAuthStore } from '@/stores/auth';
 import { timeAgo } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,6 +48,19 @@ export function NotificationMenu() {
            createdAt: new Date().toISOString()
         }, ...prev]);
       }
+      
+      // Popup realtime notification
+      toast.custom((t: any) => (
+        <div onClick={() => { toast.dismiss(t.id); if (data.link) router.push(data.link); }} className="cursor-pointer bg-white border border-slate-100 rounded-xl shadow-lg p-4 flex gap-3 items-center hover:bg-slate-50 transition-colors w-80 animate-in slide-in-from-right-2">
+           <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+              <Bell className="w-5 h-5" />
+           </div>
+           <div>
+              <p className="font-bold text-slate-800 text-sm">{data.title || 'Thông báo mới'}</p>
+              <p className="text-xs text-slate-500 line-clamp-1">{data.message}</p>
+           </div>
+        </div>
+      ), { duration: 4000, position: 'bottom-right' });
     };
 
     socket.on('notification', handleNewNotification);

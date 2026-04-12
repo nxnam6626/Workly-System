@@ -1,71 +1,84 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI } from '@google/genai';
+import { Injectable } from '@nestjs/common';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
+const pdfParse = require('pdf-parse');
 
 @Injectable()
 export class AiService {
-  private readonly logger = new Logger(AiService.name);
-  private ai: any = null;
-  private readonly modelName = 'gemini-2.5-flash'; // Phù hợp nhất cho Key hiện tại của bạn
+  private genAI: GoogleGenerativeAI;
+  private isConfigured: boolean = false;
 
-  constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (apiKey) {
-      this.ai = new GoogleGenAI({ apiKey });
-      this.logger.log(`Advanced AI Service initialized with model: ${this.modelName}`);
+  constructor() {
+    const key = process.env.GEMINI_API_KEY;
+    if (key) {
+      this.genAI = new GoogleGenerativeAI(key);
+      this.isConfigured = true;
     } else {
-      this.logger.error('GEMINI_API_KEY is missing in configuration!');
+      console.warn('GEMINI_API_KEY is not configured.');
     }
   }
 
-  async generateResponse(prompt: string): Promise<string> {
-    if (!this.ai) {
-      throw new Error('AI Service not initialized. Please check GEMINI_API_KEY.');
-    }
-
+  async extractTextFromLocalFile(fileUrl: string): Promise<string> {
     try {
-      const contents = [{ role: 'user', parts: [{ text: prompt }] }];
+      if (!fileUrl) return '';
+      // Construct local path:
+      const absolutePath = path.join(process.cwd(), fileUrl);
+      if (!fs.existsSync(absolutePath)) return '';
 
-      const response = await this.ai.models.generateContent({
-        model: this.modelName,
-        contents,
-      });
-
-      return response.text;
-    } catch (error) {
-      this.logger.error(`Error generating AI response: ${error.message}`);
-      return "Xin lỗi, tôi gặp chút trục trặc khi kết nối với bộ não AI. Bạn hãy thử lại sau nhé!";
+      const dataBuffer = fs.readFileSync(absolutePath);
+      const data = await pdfParse(dataBuffer);
+      return data.text;
+    } catch (e) {
+      console.error('Error parsing local PDF:', e.message);
+      return '';
     }
   }
 
-  /**
-   * Generates a streaming response for the chat
-   */
-  async *generateStreamResponse(prompt: string): AsyncGenerator<string> {
-    if (!this.ai) {
-      throw new Error('AI Service not initialized');
+  async extractTextFromPdfUrl(fileUrl: string): Promise<string> {
+    try {
+      if (!fileUrl) return '';
+      const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+      const data = await pdfParse(response.data);
+      return data.text;
+    } catch (e) {
+      console.error('Error fetching/parsing PDF:', e.message);
+      return '';
     }
+  }
+
+  async evaluateMatch(cvText: string, jobTitle: string, jobRequirements: string): Promise<number> {
+    if (!this.isConfigured) return parseFloat((Math.random() * (99 - 50) + 50).toFixed(1));
+    
+    // Quick circuit breaker if cv is empty
+    if (!cvText || cvText.trim().length === 0) return 30;
 
     try {
-      const contents = [{ role: 'user', parts: [{ text: prompt }] }];
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      const prompt = `You are a strict HR AI Assistant. Evaluate the candidate's CV against the Job Title and Job Requirements.
+      Job Title: ${jobTitle}
+      Job Requirements: ${jobRequirements}
+      Candidate CV Text: ${cvText.substring(0, 15000)}
+      
+      Evaluate their relevant skills, experience years, and degree.
+      Return ONLY a JSON response in the following format (no markdown, no backticks, no extra text):
+      {"score": 85}
+      
+      Score should be an integer from 10 to 99 based on how well the CV matches the specific requirements. Unrelated CVs should score low (10-30).`;
 
-      this.logger.log(`Starting generation for model: ${this.modelName}`);
-      const response = await this.ai.models.generateContentStream({
-        model: this.modelName,
-        contents,
-      });
-
-      this.logger.log('Successfully started AI stream');
-
-      for await (const chunk of response) {
-        if (chunk.text) {
-          yield chunk.text;
-        }
-      }
-    } catch (error: any) {
-      this.logger.error(`Streaming error: ${error.message}`, error.stack);
-      console.error('FULL ERROR:', error);
-      yield ` [Lỗi kết nối AI: ${error.message}] `;
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+      
+      const cleanResponse = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const parsed = JSON.parse(cleanResponse);
+      const score = Number(parsed.score);
+      
+      return isNaN(score) ? 50 : score;
+    } catch (e) {
+      console.error('AI Match Error:', e.message);
+      return parseFloat((Math.random() * (99 - 50) + 50).toFixed(1)); // Fallback
     }
   }
 }

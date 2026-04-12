@@ -6,6 +6,61 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  LINKEDIN
+}
+
+enum StatusUser {
+  ACTIVE
+  LOCKED
+}
+
+enum CrawlStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum FilterAction {
+  EXCLUDE
+  INCLUDE
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  INTERNSHIP
+}
+
+enum PostType {
+  CRAWLED
+  MANUAL
+}
+
+enum AppStatus {
+  PENDING
+  REVIEWED
+  INTERVIEWING
+  ACCEPTED
+  REJECTED
+}
+
+enum JobStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum RawJobStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
 model User {
   userId          String         @id @default(uuid())
   email           String         @unique
@@ -119,6 +174,36 @@ model Recruiter {
   userId            String           @unique
   companyId         String?
   savedCandidateIds String[]
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  jobPostings   JobPosting[]
+  companyId     String?
+  company       Company?     @relation(fields: [companyId], references: [companyId], onDelete: SetNull)
+  conversations Conversation[]
+  wallet        Wallet?
+}
+
+model Wallet {
+  walletId    String @id @default(uuid())
+  balance     Float  @default(0)
+  recruiterId String @unique
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  transactionId String @id @default(uuid())
+  amount        Float
+  type          String // 'TOPUP' or 'PAYMENT'
+  status        String @default("SUCCESS") // 'PENDING', 'SUCCESS', 'CANCELLED'
+  orderCode     Int?   @unique
+  description   String?
+  createdAt     DateTime @default(now())
+  
+  walletId      String
+  wallet        Wallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
   conversations     Conversation[]
   jobPostings       JobPosting[]
   company           Company?         @relation(fields: [companyId], references: [companyId])
@@ -222,15 +307,16 @@ model CV {
 }
 
 model Application {
-  applicationId     String     @id @default(uuid())
-  applyDate         DateTime   @default(now())
-  appStatus         AppStatus  @default(PENDING)
-  cvSnapshotUrl     String?
-  coverLetter       String?
-  feedback          String?
-  candidateId       String
-  jobPostingId      String
-  cvId              String
+  applicationId String    @id @default(uuid())
+  applyDate     DateTime  @default(now())
+  appStatus     AppStatus @default(PENDING)
+  cvSnapshotUrl String
+  coverLetter   String?
+  feedback      String?
+  
+  aiMatchScore  Float?
+  isUnlocked    Boolean   @default(false)
+
   interviewDate     DateTime?
   interviewLocation String?
   interviewTime     String?

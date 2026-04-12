@@ -498,4 +498,36 @@ export class CandidatesService {
       where: { cvId },
     });
   }
+
+  async getRecommendedJobs(userId: string) {
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+      include: { skills: true }
+    });
+    if (!candidate) return [];
+
+    const keywords: string[] = [];
+    if (candidate.major) keywords.push(candidate.major);
+    candidate.skills.forEach(s => keywords.push(s.skillName));
+
+    if (keywords.length === 0) return []; // Cannot recommend without data
+
+    // Multiple OR conditions for Prisma
+    const orConditions = keywords.map(kw => ({
+      OR: [
+        { title: { contains: kw, mode: 'insensitive' as any } },
+        { requirements: { contains: kw, mode: 'insensitive' as any } }
+      ]
+    }));
+
+    return this.prisma.jobPosting.findMany({
+      where: {
+        status: 'APPROVED',
+        OR: orConditions
+      },
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: { company: true },
+    });
+  }
 }

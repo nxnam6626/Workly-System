@@ -82,7 +82,7 @@ export default function JobsManagementPage() {
           href="/recruiter/post-job"
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm active:scale-95"
         >
-          <Plus className="w-5 h-5" /> Đăng Tin Mới
+          <Plus className="w-5 h-5" /> Gửi Yêu Cầu Mới
         </Link>
       </div>
 
@@ -130,16 +130,9 @@ export default function JobsManagementPage() {
                   <td className="px-6 py-4 text-slate-400">{new Date(job.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link 
-                        href={`/recruiter/jobs/${job.jobPostingId}/matches`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        Gợi ý AI
-                      </Link>
-                      <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                      <Link href={`/recruiter/jobs/${job.jobPostingId}`} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                         <Edit className="w-4 h-4" />
-                      </button>
+                      </Link>
                       <button onClick={() => setDeleteId(job.jobPostingId)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
