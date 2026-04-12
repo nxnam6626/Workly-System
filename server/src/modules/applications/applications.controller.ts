@@ -83,6 +83,7 @@ export class ApplicationsController {
     @Param('id') id: string,
   ) {
     return this.applicationsService.unlockApplication(id, userId);
+  }
   
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

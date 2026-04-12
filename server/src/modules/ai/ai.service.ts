@@ -81,4 +81,33 @@ export class AiService {
       return parseFloat((Math.random() * (99 - 50) + 50).toFixed(1)); // Fallback
     }
   }
+
+  async generateResponse(message: string): Promise<string> {
+    if (!this.isConfigured) return "AI is not configured.";
+    try {
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const result = await model.generateContent(message);
+      return result.response.text();
+    } catch (e) {
+      console.error('generateResponse error:', e);
+      return 'Error generating response';
+    }
+  }
+
+  async *generateStreamResponse(message: string): AsyncGenerator<string, void, unknown> {
+    if (!this.isConfigured) {
+      yield "AI is not configured.";
+      return;
+    }
+    try {
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const result = await model.generateContentStream(message);
+      for await (const chunk of result.stream) {
+        yield chunk.text();
+      }
+    } catch (e) {
+      console.error('generateStreamResponse error:', e);
+      yield 'Error generating stream response';
+    }
+  }
 }

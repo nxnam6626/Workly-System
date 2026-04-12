@@ -6,61 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum AuthProvider {
-  LOCAL
-  GOOGLE
-  LINKEDIN
-}
-
-enum StatusUser {
-  ACTIVE
-  LOCKED
-}
-
-enum CrawlStatus {
-  RUNNING
-  SUCCESS
-  FAILED
-}
-
-enum FilterAction {
-  EXCLUDE
-  INCLUDE
-}
-
-enum JobType {
-  FULLTIME
-  PARTTIME
-  INTERNSHIP
-}
-
-enum PostType {
-  CRAWLED
-  MANUAL
-}
-
-enum AppStatus {
-  PENDING
-  REVIEWED
-  INTERVIEWING
-  ACCEPTED
-  REJECTED
-}
-
-enum JobStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  EXPIRED
-}
-
-enum RawJobStatus {
-  PENDING
-  PROCESSED
-  FAILED
-  IGNORED
-}
-
 model User {
   userId          String         @id @default(uuid())
   email           String         @unique
@@ -104,14 +49,14 @@ model UserRole {
 
 model Notification {
   notificationId String   @id @default(uuid())
-  userId         String
   title          String
+  message        String
   type           String   @default("info")
   isRead         Boolean  @default(false)
-  metadata       Json?
   createdAt      DateTime @default(now())
-  message        String
+  userId         String
   link           String?
+  metadata       Json?
   user           User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
@@ -144,17 +89,17 @@ model Candidate {
   cvs           CV[]
   user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
   conversations Conversation[]
+  projects      Project[]
   savedJobs     SavedJob[]
   skills        Skill[]
-  projects      Project[]
 }
 
 model Skill {
-  skillId     String    @id @default(uuid())
+  skillId     String     @id @default(uuid())
   skillName   String
-  level       SkillLevel @default(BEGINNER)
   candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  level       SkillLevel @default(BEGINNER)
+  candidate   Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
 model Project {
@@ -174,41 +119,32 @@ model Recruiter {
   userId            String           @unique
   companyId         String?
   savedCandidateIds String[]
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-
-  jobPostings   JobPosting[]
-  companyId     String?
-  company       Company?     @relation(fields: [companyId], references: [companyId], onDelete: SetNull)
-  conversations Conversation[]
-  wallet        Wallet?
-}
-
-model Wallet {
-  walletId    String @id @default(uuid())
-  balance     Float  @default(0)
-  recruiterId String @unique
-  recruiter   Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-  transactions Transaction[]
-}
-
-model Transaction {
-  transactionId String @id @default(uuid())
-  amount        Float
-  type          String // 'TOPUP' or 'PAYMENT'
-  status        String @default("SUCCESS") // 'PENDING', 'SUCCESS', 'CANCELLED'
-  orderCode     Int?   @unique
-  description   String?
-  createdAt     DateTime @default(now())
-  
-  walletId      String
-  wallet        Wallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
   conversations     Conversation[]
   jobPostings       JobPosting[]
   company           Company?         @relation(fields: [companyId], references: [companyId])
   user              User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  wallet            RecruiterWallet?
+  recruiterWallet   RecruiterWallet?
+  wallet            Wallet?
+}
+
+model Wallet {
+  walletId     String        @id @default(uuid())
+  balance      Float         @default(0)
+  recruiterId  String        @unique
+  transactions Transaction[]
+  recruiter    Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+}
+
+model Transaction {
+  transactionId String   @id @default(uuid())
+  amount        Float
+  type          String
+  description   String?
+  createdAt     DateTime @default(now())
+  walletId      String
+  orderCode     Int?     @unique
+  status        String   @default("SUCCESS")
+  wallet        Wallet   @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
 }
 
 model CrawlLog {
@@ -299,27 +235,28 @@ model CV {
   isMain           Boolean           @default(false)
   createdAt        DateTime          @default(now())
   candidateId      String
-  parsedData       Json?
   fileHash         String?
+  parsedData       Json?
   applications     Application[]
   candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
 }
 
 model Application {
-  applicationId String    @id @default(uuid())
-  applyDate     DateTime  @default(now())
-  appStatus     AppStatus @default(PENDING)
-  cvSnapshotUrl String
-  coverLetter   String?
-  feedback      String?
-  
-  aiMatchScore  Float?
-  isUnlocked    Boolean   @default(false)
-
+  applicationId     String     @id @default(uuid())
+  applyDate         DateTime   @default(now())
+  appStatus         AppStatus  @default(PENDING)
+  cvSnapshotUrl     String
+  coverLetter       String?
+  feedback          String?
+  candidateId       String
+  jobPostingId      String
+  cvId              String
   interviewDate     DateTime?
   interviewLocation String?
   interviewTime     String?
+  aiMatchScore      Float?
+  isUnlocked        Boolean    @default(false)
   candidate         Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   cv                CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
   jobPosting        JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)

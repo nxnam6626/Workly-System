@@ -45,7 +45,7 @@
     "@types/pg": "^8.20.0",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
-    "bullmq": "^5.72.1",
+    "bullmq": "^5.73.4",
     "cache-manager": "^7.2.8",
     "cache-manager-ioredis-yet": "^2.1.2",
     "cheerio": "^1.2.0",
