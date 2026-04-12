@@ -34,13 +34,13 @@ export function MatchingSection() {
       setLoading(true);
       try {
         if (isCandidate) {
-          const res = await api.get("/job-postings/matching");
+          const res = await api.get("/candidates/recommended-jobs");
           const mapped: MatchItem[] = res.data.slice(0, 4).map((j: any) => ({
             id: j.jobPostingId,
             title: j.title,
             subtitle: j.company.companyName,
-            score: j.score,
-            tags: j.matchedSkills || [],
+            score: j.score || 95, // Default score if not provided by simple search
+            tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
             type: "JOB",
             raw: j
           }));

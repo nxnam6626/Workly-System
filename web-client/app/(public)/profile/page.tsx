@@ -33,7 +33,6 @@ import { useAuthStore } from "@/stores/auth";
 import { JobCard, type Job } from "@/components/JobCard";
 import { CVReviewModal } from "@/components/candidates/CVReviewModal";
 import toast from "react-hot-toast";
-import api from "@/lib/api";
 
 export default function ProfileDashboard() {
   const router = useRouter();
