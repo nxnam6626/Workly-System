@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Search, MoreVertical, Edit, Trash2, Sparkles } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -130,6 +130,13 @@ export default function JobsManagementPage() {
                   <td className="px-6 py-4 text-slate-400">{new Date(job.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Link 
+                        href={`/recruiter/jobs/${job.jobPostingId}/matches`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Gợi ý AI
+                      </Link>
                       <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>

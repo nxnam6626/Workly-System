@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/auth';
+import api from '@/lib/api';
 import {
   ChevronLeft,
   ChevronRight,
@@ -36,13 +37,32 @@ const navItems = [
   { label: 'Nhắn Tin', href: '/recruiter/messages', icon: MessageSquare },
 ];
 
+interface Wallet {
+  balance: number;
+}
+
 export default function RecruiterLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const { socket } = useSocketStore();
   const { unreadCount, fetchUnreadCount, incrementUnread } = useMessageStore();
+
+  useEffect(() => {
+    if (isAuthenticated && user?.roles?.includes('RECRUITER')) {
+      const fetchWallet = async () => {
+        try {
+          const response = await api.get('/recruiters/wallet');
+          setWallet(response.data);
+        } catch (error) {
+          console.error('Error fetching wallet:', error);
+        }
+      };
+      fetchWallet();
+    }
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -208,7 +228,18 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
           </div>
 
           {user && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
+              {wallet && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-amber-700 shadow-sm">
+                  <div className="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center text-[10px] text-white font-black">
+                    $
+                  </div>
+                  <span className="text-sm font-bold">{wallet.balance} Credits</span>
+                  <button className="ml-1 text-[10px] bg-white px-2 py-0.5 rounded-full border border-amber-300 hover:bg-amber-100 transition-colors uppercase font-black">
+                    Nạp
+                  </button>
+                </div>
+              )}
               <NotificationMenu />
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">

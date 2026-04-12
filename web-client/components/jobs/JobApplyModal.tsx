@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   X,
   Upload,
@@ -10,12 +10,24 @@ import {
   Leaf,
   Pencil,
   AlertCircle,
-  Briefcase
+  Briefcase,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
-
-import api from "@/lib/api";
 import toast from "react-hot-toast";
+import api from "@/lib/api";
+import { profileApi } from "@/lib/profile-api";
+import { useAuthStore } from "@/stores/auth";
+import { CVReviewModal } from "../candidates/CVReviewModal";
+
+interface UserCV {
+  cvId: string;
+  cvTitle: string;
+  fileUrl: string;
+  isMain: boolean;
+  createdAt: string;
+  parsedData?: any;
+}
 
 interface JobApplyModalProps {
   isOpen: boolean;
@@ -27,24 +39,31 @@ interface JobApplyModalProps {
   onSuccess?: () => void;
 }
 
-interface UserCV {
-  cvId: string;
-  cvTitle: string;
-  fileUrl: string;
-  isMain: boolean;
-  createdAt: string;
-}
-
 export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPostingId, onSuccess }: JobApplyModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
   const [fetchingProfile, setFetchingProfile] = useState(false);
   const [userCVs, setUserCVs] = useState<UserCV[]>([]);
   const [useExistingCv, setUseExistingCv] = useState(true);
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Review Modal State
+  const [reviewModal, setReviewModal] = useState<{
+    isOpen: boolean;
+    initialData: any;
+    fileUrl: string;
+    cvTitle: string;
+  }>({
+    isOpen: false,
+    initialData: null,
+    fileUrl: "",
+    cvTitle: "",
+  });
+
   const [formData, setFormData] = useState({
+// ... (rest of the state)
     fullName: "",
     email: "",
     phone: "",
@@ -54,55 +73,103 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const { isAuthenticated } = useAuthStore();
+
   // Fetch profile and CVs
-  React.useEffect(() => {
-    if (isOpen) {
-      const fetchProfile = async () => {
-        setFetchingProfile(true);
-        try {
-          // Using standard api instance
-          const response = await api.get("/candidates/me");
-
-          if (response.data) {
-            const profile = response.data;
-            setFormData(prev => ({
-              ...prev,
-              fullName: profile.fullName || "",
-              email: profile.user?.email || "",
-              phone: profile.user?.phoneNumber || "",
-            }));
-
-            if (profile.cvs && profile.cvs.length > 0) {
-              setUserCVs(profile.cvs);
-              // Auto select main CV
-              const mainCv = profile.cvs.find((cv: UserCV) => cv.isMain);
-              if (mainCv) {
-                setSelectedCvId(mainCv.cvId);
-              } else {
-                setSelectedCvId(profile.cvs[0].cvId);
-              }
-              setUseExistingCv(true);
-            } else {
-              setUseExistingCv(false);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-          setUseExistingCv(false);
-        } finally {
-          setFetchingProfile(false);
-        }
-      };
-
-      fetchProfile();
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchUserCVs();
     }
-  }, [isOpen]);
+  }, [isOpen, isAuthenticated]);
 
-  if (!isOpen) return null;
+  const fetchUserCVs = async () => {
+    setFetchingProfile(true);
+    try {
+      const profile = await profileApi.getMe();
+      if (profile.candidate?.cvs) {
+        setUserCVs(profile.candidate.cvs);
+        
+        // Chọn CV mặc định nếu có
+        const mainCv = profile.candidate.cvs.find(cv => cv.isMain);
+        if (mainCv) {
+          setSelectedCvId(mainCv.cvId);
+          setUseExistingCv(true);
+        } else if (profile.candidate.cvs.length > 0) {
+          setSelectedCvId(profile.candidate.cvs[0].cvId);
+          setUseExistingCv(true);
+        } else {
+          setUseExistingCv(false);
+        }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Tự động điền thông tin cá nhân
+        setFormData(prev => ({
+          ...prev,
+          fullName: profile.candidate?.fullName || prev.fullName,
+          email: profile.email || prev.email,
+          phone: profile.phoneNumber || prev.phone,
+        }));
+      } else {
+        setUseExistingCv(false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile in modal:", error);
+      setUseExistingCv(false);
+    } finally {
+      setFetchingProfile(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+
+      // Tự động bóc tách CV khi upload mới
+      setIsParsing(true);
+      const toastId = toast.loading("Đang bóc tách dữ liệu CV bằng AI...");
+      
+      try {
+        const data = new FormData();
+        data.append("file", selectedFile);
+        
+        const response = await api.post("/candidates/cv/extract", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const { extractedData, fileUrl, cvTitle } = response.data;
+        
+        toast.success("Bóc tách thành công! Vui lòng kiểm tra lại thông tin.", { id: toastId });
+        
+        setReviewModal({
+          isOpen: true,
+          initialData: extractedData,
+          fileUrl,
+          cvTitle,
+        });
+
+      } catch (error: any) {
+        toast.error("Không thể bóc tách CV. Bạn vẫn có thể nộp file thô.", { id: toastId });
+        console.error("Parse error:", error);
+      } finally {
+        setIsParsing(false);
+      }
+    }
+  };
+
+  const handleReviewSuccess = (savedCv: any) => {
+    // Sau khi bóc tách và confirm thành công, thêm vào danh sách và chọn nó
+    setUserCVs(prev => [savedCv, ...prev]);
+    setSelectedCvId(savedCv.cvId);
+    setUseExistingCv(true);
+    
+    // Autofill form data from parsed result
+    if (savedCv.parsedData) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: savedCv.parsedData.fullName || prev.fullName,
+        email: savedCv.parsedData.email || prev.email,
+        phone: savedCv.parsedData.phone || prev.phone,
+      }));
     }
   };
 
@@ -270,29 +337,39 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
                       </div>
                     ) : (
                       <div className="flex flex-col items-center text-center space-y-3">
-                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-400 shadow-sm">
-                          <Upload className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">
-                            {file ? file.name : "Tải lên CV từ máy tính, chọn hoặc kéo thả"}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-1">Hỗ trợ định dạng .doc, .docx, pdf có kích thước dưới 5MB</p>
-                        </div>
-                        <input
-                          type="file"
-                          className="hidden"
-                          ref={fileInputRef}
-                          onChange={handleFileChange}
-                          accept=".doc,.docx,.pdf"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="px-8 py-2 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100"
-                        >
-                          Chọn CV mới
-                        </button>
+                        {isParsing ? (
+                          <div className="flex flex-col items-center py-6">
+                            <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4" />
+                            <p className="text-sm font-bold text-blue-600 uppercase tracking-wider">Đang phân tích CV bằng AI...</p>
+                            <p className="text-xs text-slate-400 mt-1">Vui lòng chờ trong giây lát</p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-400 shadow-sm">
+                              <Upload className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-800">
+                                {file ? file.name : "Tải lên CV từ máy tính, chọn hoặc kéo thả"}
+                              </p>
+                              <p className="text-xs text-slate-400 mt-1">Hỗ trợ định dạng .doc, .docx, pdf có kích thước dưới 5MB</p>
+                            </div>
+                            <input
+                              type="file"
+                              className="hidden"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                              accept=".doc,.docx,.pdf"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="px-8 py-2 bg-blue-600 text-white text-sm font-bold rounded hover:bg-blue-700 transition-colors shadow-lg shadow-blue-100"
+                            >
+                              Chọn CV mới
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>

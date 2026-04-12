@@ -4,13 +4,16 @@ import { RecruitersController } from './recruiters.controller';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { UnlockService } from './unlock.service';
+import { MatchingService } from '../search/matching.service';
 
 import { MessagesModule } from '../messages/messages.module';
+import { SearchModule } from '../search/search.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule],
+  imports: [PrismaModule, MessagesModule, SearchModule],
   controllers: [RecruitersController],
-  providers: [RecruitersService, JwtAuthGuard, RolesGuard],
+  providers: [RecruitersService, JwtAuthGuard, RolesGuard, UnlockService, MatchingService],
   exports: [RecruitersService],
 })
 export class RecruitersModule {}

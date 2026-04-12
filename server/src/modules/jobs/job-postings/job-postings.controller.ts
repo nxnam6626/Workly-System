@@ -41,6 +41,12 @@ export class JobPostingsController {
     return this.jobPostingsService.findMyJobs(userId);
   }
 
+  @Get('matching')
+  @UseGuards(JwtAuthGuard)
+  getMatchingJobs(@CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.getRecommendations(userId);
+  }
+
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   findAll(

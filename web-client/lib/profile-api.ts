@@ -18,6 +18,15 @@ export interface CandidateProfile {
     gpa?: number;
     cvUrl?: string;
     skills: { skillId: string; skillName: string }[];
+    cvs: {
+      cvId: string;
+      cvTitle: string;
+      fileUrl: string;
+      isMain: boolean;
+      createdAt: string;
+      parsedData: any;
+    }[];
+    applications: any[];
   };
 }
 
@@ -44,4 +53,29 @@ export const profileApi = {
 
   changePassword: (dto: ChangePasswordDto): Promise<{ message: string }> =>
     api.patch('/auth/change-password', dto).then((r) => r.data),
+
+  setMainCv: (cvId: string): Promise<any> =>
+    api.patch(`/candidates/cv/${cvId}/set-main`),
+
+  deleteCv: (cvId: string): Promise<any> =>
+    api.delete(`/candidates/cv/${cvId}`),
+
+  updateCv: (cvId: string, data: any): Promise<any> =>
+    api.patch(`/candidates/cv/${cvId}`, data),
+
+  extractCv: (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/candidates/cv/extract', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+
+  updateAvatar: (file: File): Promise<{ avatarUrl: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.patch('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
 };

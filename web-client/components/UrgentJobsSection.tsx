@@ -11,7 +11,7 @@ export function UrgentJobsSection() {
   const [activeTab, setActiveTab] = useState("Tất cả");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const locations = ["Tất cả", "TP.HCM", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Bình Dương"];
 
   useEffect(() => {
@@ -49,8 +49,8 @@ export function UrgentJobsSection() {
           </div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Việc làm tuyển gấp</h2>
         </div>
-        <Link 
-          href="/jobs?filter=urgent" 
+        <Link
+          href="/jobs?filter=urgent"
           className="text-blue-600 font-bold text-sm flex items-center gap-1 hover:underline"
         >
           Xem thêm <ChevronRight className="w-4 h-4" />
@@ -63,11 +63,10 @@ export function UrgentJobsSection() {
           <button
             key={loc}
             onClick={() => setActiveTab(loc)}
-            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
-              activeTab === loc 
-                ? "bg-blue-600 text-white shadow-md shadow-blue-200" 
+            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === loc
+                ? "bg-blue-600 text-white shadow-md shadow-blue-200"
                 : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-100"
-            }`}
+              }`}
           >
             {loc}
           </button>

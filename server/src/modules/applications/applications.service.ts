@@ -87,7 +87,7 @@ export class ApplicationsService {
       if (cvId) {
         const existingCv = await tx.cV.findUnique({ where: { cvId } });
         if (!existingCv) throw new NotFoundException('Không tìm thấy CV được chọn!');
-        fileUrl = existingCv.fileUrl;
+        fileUrl = existingCv.fileUrl || ""; // Allow empty if virtual CV
       } else if (file) {
         const cvTitle = file.originalname;
         fileUrl = `/uploads/cvs/${file.filename}`;

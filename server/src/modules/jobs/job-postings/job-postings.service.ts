@@ -9,6 +9,9 @@ import { MessagesGateway } from '../../messages/messages.gateway';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { JobAlertsService } from '../../job-alerts/job-alerts.service';
 import { SearchService } from '../../search/search.service';
+import { MatchingService } from '../../search/matching.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class JobPostingsService {
@@ -19,6 +22,8 @@ export class JobPostingsService {
     private notificationsService: NotificationsService,
     private jobAlertsService: JobAlertsService,
     private searchService: SearchService,
+    private matchingService: MatchingService,
+    @InjectQueue('matching') private matchingQueue: Queue,
   ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
@@ -31,7 +36,7 @@ export class JobPostingsService {
       throw new NotFoundException('Thông tin nhà tuyển dụng hoặc công ty chưa được thiết lập.');
     }
 
-    const { deadline, salaryMin, salaryMax, ...rest } = createJobPostingDto as any;
+    const { deadline, salaryMin, salaryMax, hardSkills, softSkills, minExperienceYears, ...rest } = createJobPostingDto as any;
 
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
@@ -60,9 +65,18 @@ export class JobPostingsService {
         status: 'PENDING',
         isVerified: false,
         originalUrl: originalUrl,
+        structuredRequirements: {
+          hardSkills: hardSkills || [],
+          softSkills: softSkills || [],
+          minExperienceYears: minExperienceYears || 0,
+          vacancies: createJobPostingDto.vacancies || 1,
+        },
       },
       include: { company: true, recruiter: { include: { user: { select: { email: true } } } } }
     });
+
+    // Tự động chạy Matching Engine
+    await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
     // Notify ALL admins about the new job posting
     const admins = await this.prisma.user.findMany({
@@ -534,5 +548,9 @@ export class JobPostingsService {
       await this.syncJobToES(job);
     }
     return { count: jobs.length };
+  }
+
+  async getRecommendations(userId: string) {
+    return this.matchingService.runMatchingForCandidate(userId);
   }
 }

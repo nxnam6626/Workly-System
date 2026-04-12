@@ -11,7 +11,7 @@ export function getDashboardByRole(role?: UserRole | string): string {
     case "RECRUITER":
       return "/recruiter/dashboard";
     case "CANDIDATE":
-      return "/cv-setup";
+      return "/onboarding/import-cv";
     default:
       return "/";
   }
