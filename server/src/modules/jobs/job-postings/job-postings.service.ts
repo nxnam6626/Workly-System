@@ -9,6 +9,9 @@ import { MessagesGateway } from '../../messages/messages.gateway';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { JobAlertsService } from '../../job-alerts/job-alerts.service';
 import { SearchService } from '../../search/search.service';
+import { MatchingService } from '../../search/matching.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class JobPostingsService {
@@ -19,6 +22,8 @@ export class JobPostingsService {
     private notificationsService: NotificationsService,
     private jobAlertsService: JobAlertsService,
     private searchService: SearchService,
+    private matchingService: MatchingService,
+    @InjectQueue('matching') private matchingQueue: Queue,
   ) { }
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
@@ -31,7 +36,7 @@ export class JobPostingsService {
       throw new NotFoundException('Thông tin nhà tuyển dụng hoặc công ty chưa được thiết lập.');
     }
 
-    const { deadline, salaryMin, salaryMax, ...rest } = createJobPostingDto as any;
+    const { deadline, salaryMin, salaryMax, hardSkills, softSkills, minExperienceYears, ...rest } = createJobPostingDto as any;
 
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
@@ -78,6 +83,12 @@ export class JobPostingsService {
         isVerified: finalStatus === 'APPROVED',
         aiReliabilityScore,
         originalUrl: originalUrl,
+        structuredRequirements: {
+          hardSkills: hardSkills || [],
+          softSkills: softSkills || [],
+          minExperienceYears: minExperienceYears || 0,
+          vacancies: createJobPostingDto.vacancies || 1,
+        },
       },
       include: { company: true, recruiter: { include: { user: { select: { email: true } } } } }
     });
@@ -87,6 +98,8 @@ export class JobPostingsService {
         await this.syncJobToES(job);
       } catch (e) { console.error('ES Sync failed automatically', e); }
     }
+    // Tự động chạy Matching Engine
+    await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
     // Notify ALL admins about the new job posting
     const admins = await this.prisma.user.findMany({
@@ -112,7 +125,7 @@ export class JobPostingsService {
 
 
 
-  async findAll(query: FilterJobPostingDto) {
+  async findAll(query: FilterJobPostingDto, userId?: string) {
     const { search, location, jobType, page = 1, limit = 10, industry, experience, salaryMin, salaryMax } = query;
 
     // Use Elasticsearch for searching and filtering IDs
@@ -131,7 +144,7 @@ export class JobPostingsService {
     if (ids.length === 0 && total === 0 && !search) {
       // Fallback or initial state if ES is empty but we have jobs in DB
       // This is helpful if sync hasn't run yet
-      return this.findAllPrisma(query);
+      return this.findAllPrisma(query, userId);
     }
 
     if (ids.length === 0) {
@@ -150,15 +163,34 @@ export class JobPostingsService {
     });
 
     // Sort items to match ES order (relevance or custom sort)
-    const sortedItems = ids
+    let sortedItems = ids
       .map(id => items.find(item => item.jobPostingId === id))
-      .filter(item => !!item);
+      .filter(item => !!item) as any[];
+
+    // Add hasApplied status if userId is provided
+    if (userId) {
+      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      if (candidate) {
+        const applications = await this.prisma.application.findMany({
+          where: {
+            candidateId: candidate.candidateId,
+            jobPostingId: { in: ids },
+          },
+          select: { jobPostingId: true },
+        });
+        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
+        sortedItems = sortedItems.map(item => ({
+          ...item,
+          hasApplied: appliedJobIds.has(item.jobPostingId),
+        }));
+      }
+    }
 
     return { items: sortedItems, total, page, limit };
   }
 
   // Backup method using Prisma directly
-  private async findAllPrisma(query: FilterJobPostingDto) {
+  private async findAllPrisma(query: FilterJobPostingDto, userId?: string) {
     const { search, location, jobType, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
@@ -173,7 +205,7 @@ export class JobPostingsService {
       ];
     }
 
-    const [items, total] = await Promise.all([
+    let [items, total] = await Promise.all([
       this.prisma.jobPosting.findMany({
         where,
         skip,
@@ -185,7 +217,27 @@ export class JobPostingsService {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.jobPosting.count({ where }),
-    ]);
+    ]) as [any[], number];
+
+    // Add hasApplied status if userId is provided
+    if (userId) {
+      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      if (candidate) {
+        const jobPostingIds = items.map(item => item.jobPostingId);
+        const applications = await this.prisma.application.findMany({
+          where: {
+            candidateId: candidate.candidateId,
+            jobPostingId: { in: jobPostingIds },
+          },
+          select: { jobPostingId: true },
+        });
+        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
+        items = items.map(item => ({
+          ...item,
+          hasApplied: appliedJobIds.has(item.jobPostingId),
+        }));
+      }
+    }
 
     return { items, total, page, limit };
   }
@@ -387,6 +439,12 @@ export class JobPostingsService {
        }
     }
 
+    if (status === JobStatus.APPROVED) {
+      this.syncJobToES(updated);
+    } else {
+      await this.searchService.deleteJob(id);
+    }
+
     this.messagesGateway.server.emit('adminJobUpdated');
 
     return updated;
@@ -533,5 +591,9 @@ export class JobPostingsService {
       await this.syncJobToES(job);
     }
     return { count: jobs.length };
+  }
+
+  async getRecommendations(userId: string) {
+    return this.matchingService.runMatchingForCandidate(userId);
   }
 }

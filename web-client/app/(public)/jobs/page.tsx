@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { SlidersHorizontal, Filter, Search, BellRing, Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import axios from "axios";
+
+import api from "@/lib/api";
 import { JobCard, Job } from "@/components/JobCard";
 import { JobSearchHero } from "@/components/jobs/JobSearchHero";
 import { JobFilterSidebar } from "@/components/jobs/JobFilterSidebar";
@@ -36,7 +37,7 @@ function JobSearchContent() {
     async (p = page) => {
       setLoading(true);
       try {
-        const { data } = await axios.get("http://localhost:3001/job-postings", {
+        const { data } = await api.get("/job-postings", {
           params: {
             search: searchQuery || undefined,
             location: locationParam || undefined,
@@ -90,11 +91,9 @@ function JobSearchContent() {
     if (!searchQuery) return;
     setIsSavingAlert(true);
     try {
-      await axios.post("http://localhost:3001/job-alerts", 
-        { keywords: searchQuery },
-        { withCredentials: true }
-      );
+      await api.post("/job-alerts", { keywords: searchQuery });
       setAlertSaved(true);
+
       setTimeout(() => setAlertSaved(false), 3000);
     } catch (e) {
       console.error(e);

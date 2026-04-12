@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { MessagesService } from './messages.service';
-import { JwtPayload } from '../auth/auth.service';
+import { JwtPayload } from '../auth/token.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @WebSocketGateway({

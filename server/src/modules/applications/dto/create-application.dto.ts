@@ -23,5 +23,5 @@ export class CreateApplicationDto {
 
   @IsString()
   @IsOptional()
-  location?: string;
+  cvId?: string;
 }

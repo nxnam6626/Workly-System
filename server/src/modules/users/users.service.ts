@@ -15,6 +15,7 @@ import type { StatusUser } from '@prisma/client';
 import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
 import { MessagesGateway } from '../messages/messages.gateway';
+import { SupabaseService } from '../../common/supabase/supabase.service';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,12 @@ export class UsersService {
     private mailService: MailService,
     private searchService: SearchService,
     private moduleRef: ModuleRef,
+    private readonly supabaseService: SupabaseService,
   ) {}
+
+  // ==========================================
+  // INGESTION & OAUTH (Nhóm Khởi tạo & OAuth)
+  // ==========================================
 
   /** Tạo user (dùng cho đăng ký hoặc admin tạo). passwordAlreadyHashed = true khi gọi từ Auth (đã hash). */
   async create(
@@ -109,69 +115,9 @@ export class UsersService {
     return result;
   }
 
-  /** Thêm vai trò mới cho user đã tồn tại (Multi-role). */
-  async addRoleToUser(userId: string, data: RegisterDto) {
-    const result = await this.prisma.$transaction(async (tx) => {
-      // Find or connect to the role
-      const roleRecord = await tx.role.upsert({
-        where: { roleName: data.role },
-        update: {},
-        create: { roleName: data.role },
-      });
-
-      // Create UserRole link
-      await tx.userRole.create({
-        data: {
-          userId,
-          roleId: roleRecord.roleId,
-        },
-      });
-
-      if (data.role === 'CANDIDATE') {
-        const existingCandidate = await tx.candidate.findUnique({ where: { userId } });
-        if (!existingCandidate) {
-          await tx.candidate.create({
-            data: {
-              userId,
-              fullName: (data as any).fullName || 'Người dùng',
-            },
-          });
-        }
-      } else if (data.role === 'RECRUITER') {
-        const existingRecruiter = await tx.recruiter.findUnique({ where: { userId } });
-        if (!existingRecruiter) {
-          await tx.recruiter.create({
-            data: { userId },
-          });
-        }
-      } else if (data.role === 'ADMIN') {
-        const existingAdmin = await tx.admin.findUnique({ where: { userId } });
-        if (!existingAdmin) {
-          await tx.admin.create({
-            data: {
-              userId,
-              adminLevel: 1,
-            },
-          });
-        }
-      }
-
-      return { message: 'Đăng ký thêm vai trò thành công', userId };
-    });
-
-    try {
-      const user = await this.findOne(userId);
-      const roles = user.userRoles.map((ur: any) => ur.role.roleName);
-      await this.searchService.indexUser({ 
-        id: user.userId, 
-        email: user.email, 
-        roles 
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
-    return result;
+  /** Đăng ký (gọi từ Auth sau khi đã hash mật khẩu). */
+  async register(data: RegisterDto) {
+    return this.create(data, { passwordAlreadyHashed: true });
   }
 
   /** Xử lý login từ OAuth (Google/LinkedIn): Tìm User bằng Email hoặc tạo mới Role CANDIDATE. */
@@ -256,10 +202,9 @@ export class UsersService {
     return user;
   }
 
-  /** Đăng ký (gọi từ Auth sau khi đã hash mật khẩu). */
-  async register(data: RegisterDto) {
-    return this.create(data, { passwordAlreadyHashed: true });
-  }
+  // ==========================================
+  // DATA RETRIEVAL (Nhóm Truy vấn dữ liệu)
+  // ==========================================
 
   async findAll(params?: {
     skip?: number;
@@ -349,6 +294,61 @@ export class UsersService {
     });
   }
 
+  async findOneWithPassword(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { userId },
+      include: {
+        candidate: true,
+        recruiter: true,
+        userRoles: {
+          include: { role: true },
+        },
+      },
+    });
+  }
+
+  /** Lấy thông tin user hiện tại (dùng cho /users/me). */
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+      select: {
+        userId: true,
+        email: true,
+        status: true,
+        phoneNumber: true,
+        avatar: true,
+        isEmailVerified: true,
+        createdAt: true,
+        lastLogin: true,
+        provider: true,
+        userRoles: { include: { role: true } },
+        candidate: {
+          include: { 
+            skills: true,
+            cvs: {
+              select: {
+                cvId: true,
+                cvTitle: true,
+                fileUrl: true,
+                isMain: true,
+                createdAt: true,
+                parsedData: true,
+              },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+        recruiter: true,
+      },
+    });
+    if (!user) throw new NotFoundException('Không tìm thấy user.');
+    return user;
+  }
+
+  // ==========================================
+  // UPDATE & ROLES (Nhóm Cập nhật & Vai trò)
+  // ==========================================
+
   async update(userId: string, dto: UpdateUserDto) {
     await this.findOne(userId);
 
@@ -432,57 +432,102 @@ export class UsersService {
     return this.findOne(userId);
   }
 
-  async remove(userId: string) {
-    await this.findOne(userId);
-    await this.prisma.user.delete({ where: { userId } });
-    return { message: 'Đã xóa user.' };
+  /** Cập nhật ảnh đại diện của user. */
+  async updateAvatar(userId: string, file: Express.Multer.File) {
+    const user = await this.prisma.user.findUnique({ where: { userId } });
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng.');
+
+    // 1. Upload ảnh mới lên Supabase
+    const fileExt = file.originalname.split('.').pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const path = `avatars/${userId}/${fileName}`;
+    
+    const avatarUrl = await this.supabaseService.uploadFile(file.buffer, path, file.mimetype);
+
+    // 2. Cập nhật URL vào DB
+    await this.prisma.user.update({
+      where: { userId },
+      data: { avatar: avatarUrl },
+    });
+
+    // 3. Dọn dẹp ảnh cũ nếu có trên Supabase
+    if (user.avatar) {
+      const oldPath = this.supabaseService.extractPathFromUrl(user.avatar);
+      if (oldPath) {
+        try {
+          await this.supabaseService.deleteFile(oldPath);
+        } catch (e) {
+          console.error('[UsersService] Failed to delete old avatar:', e);
+        }
+      }
+    }
+
+    return { avatarUrl };
   }
 
-  async lockUser(userId: string) {
-    await this.findOne(userId);
-    await this.prisma.user.update({ where: { userId }, data: { status: 'LOCKED' } });
+  /** Thêm vai trò mới cho user đã tồn tại (Multi-role). */
+  async addRoleToUser(userId: string, data: RegisterDto) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Find or connect to the role
+      const roleRecord = await tx.role.upsert({
+        where: { roleName: data.role },
+        update: {},
+        create: { roleName: data.role },
+      });
+
+      // Create UserRole link
+      await tx.userRole.create({
+        data: {
+          userId,
+          roleId: roleRecord.roleId,
+        },
+      });
+
+      if (data.role === 'CANDIDATE') {
+        const existingCandidate = await tx.candidate.findUnique({ where: { userId } });
+        if (!existingCandidate) {
+          await tx.candidate.create({
+            data: {
+              userId,
+              fullName: (data as any).fullName || 'Người dùng',
+            },
+          });
+        }
+      } else if (data.role === 'RECRUITER') {
+        const existingRecruiter = await tx.recruiter.findUnique({ where: { userId } });
+        if (!existingRecruiter) {
+          await tx.recruiter.create({
+            data: { userId },
+          });
+        }
+      } else if (data.role === 'ADMIN') {
+        const existingAdmin = await tx.admin.findUnique({ where: { userId } });
+        if (!existingAdmin) {
+          await tx.admin.create({
+            data: {
+              userId,
+              adminLevel: 1,
+            },
+          });
+        }
+      }
+
+      return { message: 'Đăng ký thêm vai trò thành công', userId };
+    });
 
     try {
-      const gateway = this.moduleRef.get(MessagesGateway, { strict: false });
-      if (gateway) {
-        gateway.server.to(`user_${userId}`).emit('accountLocked');
-      }
-    } catch (error: any) {
-       console.error('Could not get MessagesGateway:', error.message);
+      const user = await this.findOne(userId);
+      const roles = user.userRoles.map((ur: any) => ur.role.roleName);
+      await this.searchService.indexUser({ 
+        id: user.userId, 
+        email: user.email, 
+        roles 
+      });
+    } catch (error) {
+      console.error(error);
     }
-    
-    return { message: 'Tài khoản đã bị khóa.' };
-  }
 
-  async unlockUser(userId: string) {
-    await this.findOne(userId);
-    await this.prisma.user.update({ where: { userId }, data: { status: 'ACTIVE' } });
-    return { message: 'Tài khoản đã được mở khóa.' };
-  }
-
-  /** Lấy thông tin user hiện tại (dùng cho /users/me). */
-  async getMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-      select: {
-        userId: true,
-        email: true,
-        status: true,
-        phoneNumber: true,
-        avatar: true,
-        isEmailVerified: true,
-        createdAt: true,
-        lastLogin: true,
-        provider: true,
-        userRoles: { include: { role: true } },
-        candidate: {
-          include: { skills: true },
-        },
-        recruiter: true,
-      },
-    });
-    if (!user) throw new NotFoundException('Không tìm thấy user.');
-    return user;
+    return result;
   }
 
   /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills). */
@@ -538,6 +583,42 @@ export class UsersService {
 
     return this.getMe(userId);
   }
+
+  // ==========================================
+  // ADMIN & MODERATION (Nhóm Quản trị & Xóa)
+  // ==========================================
+
+  async lockUser(userId: string) {
+    await this.findOne(userId);
+    await this.prisma.user.update({ where: { userId }, data: { status: 'LOCKED' } });
+
+    try {
+      const gateway = this.moduleRef.get(MessagesGateway, { strict: false });
+      if (gateway) {
+        gateway.server.to(`user_${userId}`).emit('accountLocked');
+      }
+    } catch (error: any) {
+       console.error('Could not get MessagesGateway:', error.message);
+    }
+    
+    return { message: 'Tài khoản đã bị khóa.' };
+  }
+
+  async unlockUser(userId: string) {
+    await this.findOne(userId);
+    await this.prisma.user.update({ where: { userId }, data: { status: 'ACTIVE' } });
+    return { message: 'Tài khoản đã được mở khóa.' };
+  }
+
+  async remove(userId: string) {
+    await this.findOne(userId);
+    await this.prisma.user.delete({ where: { userId } });
+    return { message: 'Đã xóa user.' };
+  }
+
+  // ==========================================
+  // SECURITY UTILS (Nhóm Tiện ích bảo mật)
+  // ==========================================
 
   async setRefreshToken(userId: string, refreshToken: string | null) {
     return this.prisma.user.update({

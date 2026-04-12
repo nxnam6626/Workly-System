@@ -1,15 +1,21 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { UsersModule } from '../users/users.module';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
-import { RolesGuard } from './guards/roles.guard';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
+import { SecurityService } from './security.service';
+import { UsersModule } from '../users/users.module';
+
+// Strategies
+import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { LinkedinStrategy } from './strategies/linkedin.strategy';
+
+// Guards
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -22,8 +28,17 @@ import { LinkedinStrategy } from './strategies/linkedin.strategy';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, GoogleStrategy, LinkedinStrategy],
+  providers: [
+    AuthService,
+    TokenService,
+    SecurityService,
+    JwtStrategy,
+    GoogleStrategy,
+    LinkedinStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+  ],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, TokenService, SecurityService, JwtModule],
 })
-export class AuthModule {}
+export class AuthModule { }

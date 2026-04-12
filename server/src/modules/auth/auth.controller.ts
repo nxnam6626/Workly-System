@@ -13,6 +13,8 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Response, Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
+import { SecurityService } from './security.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -27,7 +29,15 @@ import { Public } from './decorators/public.decorator';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
+    private readonly securityService: SecurityService,
+  ) { }
+
+  // ==========================================
+  // CORE AUTHENTICATION (Xác thực chính)
+  // ==========================================
 
   @Public()
   @Post('register')
@@ -43,6 +53,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @ApiOperation({ summary: 'Đăng nhập truyền thống' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
@@ -50,63 +61,30 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post('logout')
+  @ApiOperation({ summary: 'Đăng xuất khỏi hệ thống' })
   logout(@CurrentUser('userId') userId: string) {
     return this.authService.logout(userId);
   }
 
   @Public()
   @Post('refresh')
+  @ApiOperation({ summary: 'Làm mới Access Token' })
   refresh(@Body() dto: RefreshTokenDto) {
-    return this.authService.refreshTokens(dto.refreshToken);
+    return this.tokenService.refreshTokens(dto.refreshToken);
   }
 
   /** Kiểm tra token: gửi Bearer token trong header Authorization. */
   @Public()
   @Get('validate')
+  @ApiOperation({ summary: 'Kiểm tra tính hợp lệ của Token' })
   validate(@Headers('authorization') authorization: string | undefined) {
     const token = authorization?.replace(/^Bearer\s+/i, '').trim() ?? '';
-    return this.authService.validateToken(token);
+    return this.tokenService.validateToken(token);
   }
 
-  @Public()
-  @Post('forgot-password')
-  @ApiOperation({ summary: 'Yêu cầu đặt lại mật khẩu' })
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto);
-  }
-
-  @Public()
-  @Post('reset-password')
-  @ApiOperation({ summary: 'Xác nhận đặt lại mật khẩu bằng mã OTP' })
-  resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Patch('change-password')
-  @ApiOperation({ summary: 'Đổi mật khẩu khi đã đăng nhập' })
-  changePassword(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: ChangePasswordDto,
-  ) {
-    return this.authService.changePassword(userId, dto);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Post('send-verification-email')
-  @ApiOperation({ summary: 'Gửi mã xác minh tới email' })
-  sendVerificationEmail(@CurrentUser('userId') userId: string) {
-    return this.authService.sendEmailVerification(userId);
-  }
-
-  @Public()
-  @Post('verify-email')
-  @ApiOperation({ summary: 'Xác minh email với mã OTP' })
-  verifyEmail(@Body() dto: VerifyEmailDto) {
-    return this.authService.verifyEmail(dto);
-  }
+  // ==========================================
+  // SOCIAL AUTHENTICATION (Mạng xã hội)
+  // ==========================================
 
   @Public()
   @Get('google')
@@ -142,5 +120,53 @@ export class AuthController {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(`${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+  }
+
+  // ==========================================
+  // PASSWORD MANAGEMENT (Quản lý Mật khẩu)
+  // ==========================================
+
+  @Public()
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Yêu cầu đặt lại mật khẩu' })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.securityService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Xác nhận đặt lại mật khẩu bằng mã OTP' })
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.securityService.resetPassword(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Patch('change-password')
+  @ApiOperation({ summary: 'Đổi mật khẩu khi đã đăng nhập' })
+  changePassword(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.securityService.changePassword(userId, dto.currentPassword, dto.newPassword);
+  }
+
+  // ==========================================
+  // EMAIL VERIFICATION (Xác minh Email)
+  // ==========================================
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('send-verification-email')
+  @ApiOperation({ summary: 'Gửi mã xác minh tới email' })
+  sendVerificationEmail(@CurrentUser('userId') userId: string) {
+    return this.securityService.sendEmailVerification(userId);
+  }
+
+  @Public()
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Xác minh email với mã OTP' })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.securityService.verifyEmail(dto);
   }
 }

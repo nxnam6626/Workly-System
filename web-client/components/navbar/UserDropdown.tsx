@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, User, LogOut, ChevronDown, Bell, Briefcase, UserCheck, MessageSquare } from 'lucide-react';
+import { Sparkles, User, LogOut, ChevronDown, Bell, Briefcase, UserCheck, MessageSquare, FileText } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 
 export function UserDropdown() {
@@ -72,12 +72,22 @@ export function UserDropdown() {
 
             {/* Tạo CV */}
             <Link
-              href="/cv-setup"
+              href="/cv-builder"
               onClick={() => setDropdownOpen(false)}
               className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
             >
               <Sparkles className="w-5 h-5 text-blue-500" />
               Tạo CV
+            </Link>
+
+            {/* Quản lý CV */}
+            <Link
+              href="/profile/cv-management"
+              onClick={() => setDropdownOpen(false)}
+              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+            >
+              <FileText className="w-5 h-5 text-blue-500" />
+              Quản lý CV
             </Link>
 
             {/* Tin nhắn */}
@@ -160,7 +170,7 @@ export function UserDropdown() {
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Email chưa xác minh" />
                 )}
               </Link>
-              
+
               {!user?.isEmailVerified && (
                 <Link
                   href={`/verify-email?email=${user?.email}`}

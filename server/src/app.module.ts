@@ -11,7 +11,6 @@ import { RedisModule } from './redis/redis.module';
 import { MailModule } from './mail/mail.module';
 import { SearchModule } from './modules/search/search.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { RapidJobModule } from './modules/jobs/rapid-job/rapid-job.module';
 import { JobPostingsModule } from './modules/jobs/job-postings/job-postings.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
@@ -21,6 +20,9 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RecruitersModule } from './modules/recruiters/recruiters.module';
+import { AiModule } from './modules/ai/ai.module';
+import { BullModule } from '@nestjs/bullmq';
+import { SupabaseModule } from './common/supabase/supabase.module';
 
 import { WalletsModule } from './modules/wallets/wallets.module';
 import { AiModule } from './modules/ai/ai.module';
@@ -32,6 +34,11 @@ import { AiModule } from './modules/ai/ai.module';
       serveRoot: '/uploads',
     }),
     ConfigModule.forRoot({ isGlobal: true }),
+    BullModule.forRoot({
+      connection: {
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+      },
+    }),
     PrismaModule,
     UsersModule,
     AuthModule,
@@ -40,7 +47,6 @@ import { AiModule } from './modules/ai/ai.module';
     MailModule,
     SearchModule,
     ScheduleModule.forRoot(),
-    RapidJobModule,
     CompaniesModule,
     ApplicationsModule,
     FavoritesModule,
@@ -51,6 +57,8 @@ import { AiModule } from './modules/ai/ai.module';
     NotificationsModule,
     RecruitersModule,
     WalletsModule,
+    AiModule,
+    SupabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

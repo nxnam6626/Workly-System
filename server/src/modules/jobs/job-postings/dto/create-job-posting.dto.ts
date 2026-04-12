@@ -55,4 +55,14 @@ export class CreateJobPostingDto {
   @IsNumber()
   @IsOptional()
   deadline?: number;
+
+  @IsOptional()
+  hardSkills?: string[];
+
+  @IsOptional()
+  softSkills?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  minExperienceYears?: number;
 }

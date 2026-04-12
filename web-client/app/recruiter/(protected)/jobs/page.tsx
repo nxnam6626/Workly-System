@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Search, MoreVertical, Edit, Trash2, Sparkles } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';

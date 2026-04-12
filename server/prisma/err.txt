@@ -1,9 +1,0 @@
-
-Invalid `this.prisma.jobPosting.create()` invocation in
-D:\University_Archive\KLTNandTTDN\KLTN\Workly-System\server\src\modules\jobs\job-postings\job-postings.service.ts:79:50
-
-  76 const deadline = new Date();
-  77 deadline.setDate(deadline.getDate() + Math.floor(Math.random() * 30));
-  78 
-→ 79 const job = await this.prisma.jobPosting.create(
-The column `(not available)` does not exist in the current database.

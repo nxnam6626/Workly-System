@@ -59,7 +59,7 @@ export function HeroSearch() {
       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl -z-1" />
       <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/3 w-80 h-80 bg-indigo-100/30 rounded-full blur-3xl -z-1" />
 
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -67,24 +67,24 @@ export function HeroSearch() {
       >
         {/* Eyebrow and Headline */}
         <div className="space-y-4 max-w-3xl">
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold tracking-wide uppercase border border-blue-100/50"
           >
             <Star className="w-3 h-3 fill-blue-600" />
             Nền tảng tìm việc hàng đầu Việt Nam
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             variants={itemVariants}
             className="text-4xl md:text-5xl lg:text-6xl font-black text-[#1e293b] leading-[1.1] tracking-tight"
           >
-            Khám phá 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 px-2 underline decoration-blue-200/50">100,000+</span> 
+            Khám phá
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 px-2 underline decoration-blue-200/50">100,000+</span>
             cơ hội nghề nghiệp mơ ước
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             variants={itemVariants}
             className="text-slate-500 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed"
           >
@@ -93,7 +93,7 @@ export function HeroSearch() {
         </div>
 
         {/* Enhanced Search Bar */}
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="w-full max-w-5xl bg-white p-2 rounded-2xl md:rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-blue-50/50 flex flex-col md:flex-row items-stretch md:items-center gap-1.5"
         >
@@ -116,7 +116,7 @@ export function HeroSearch() {
           <div className="flex-1 group flex items-center gap-3 px-5 py-3.5 md:py-0 hover:bg-slate-50/80 transition-all">
             <Briefcase className="w-5 h-5 text-slate-400 shrink-0" />
             <div className="flex-1 min-w-0">
-              <select 
+              <select
                 className="w-full bg-transparent outline-none text-slate-700 font-bold appearance-none cursor-pointer text-[15px] pr-4 line-clamp-1"
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
@@ -135,7 +135,7 @@ export function HeroSearch() {
           <div className="flex-1 group flex items-center gap-3 px-5 py-3.5 md:py-0 hover:bg-slate-50/80 transition-all md:mr-1">
             <MapPin className="w-5 h-5 text-rose-400 shrink-0" />
             <div className="flex-1 min-w-0">
-              <select 
+              <select
                 className="w-full bg-transparent outline-none text-slate-700 font-bold appearance-none cursor-pointer text-[15px] pr-4"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -148,18 +148,18 @@ export function HeroSearch() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={handleSearch}
             className="whitespace-nowrap px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl md:rounded-full flex items-center justify-center gap-2.5 transition-all active:scale-[0.97] shadow-lg shadow-blue-200"
           >
-            <Search className="w-5 h-5 stroke-[3px]" /> 
+            <Search className="w-5 h-5 stroke-[3px]" />
             <span>Tìm việc</span>
           </button>
         </motion.div>
 
         {/* Quick Tags and Stats */}
         <div className="w-full max-w-4xl space-y-8">
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="flex flex-wrap items-center justify-center gap-3"
           >
@@ -176,7 +176,7 @@ export function HeroSearch() {
             ))}
           </motion.div>
 
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="pt-4 flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500"
           >

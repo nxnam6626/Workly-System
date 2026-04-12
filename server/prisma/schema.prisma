@@ -62,38 +62,32 @@ enum RawJobStatus {
 }
 
 model User {
-  userId   String     @id @default(uuid())
-  email    String     @unique
-  password String?
-  status   StatusUser
-
-  provider      AuthProvider @default(LOCAL)
-  providerId    String?
-
-  createdAt       DateTime  @default(now())
+  userId          String         @id @default(uuid())
+  email           String         @unique
+  password        String?
+  status          StatusUser
+  createdAt       DateTime       @default(now())
   lastLogin       DateTime?
   phoneNumber     String?
   avatar          String?
-  isEmailVerified Boolean   @default(false)
-  updatedAt       DateTime  @updatedAt
+  isEmailVerified Boolean        @default(false)
+  updatedAt       DateTime       @updatedAt
   refreshToken    String?
-
-  isOnline        Boolean   @default(false)
+  provider        AuthProvider   @default(LOCAL)
+  providerId      String?
+  isOnline        Boolean        @default(false)
   lastActive      DateTime?
-
-  admin     Admin?
-  candidate Candidate?
-  recruiter Recruiter?
-
-  userRoles UserRole[]
-  notifications Notification[]
-  jobAlerts JobAlert[]
+  admin           Admin?
+  candidate       Candidate?
+  jobAlerts       JobAlert[]
+  notifications   Notification[]
+  recruiter       Recruiter?
+  userRoles       UserRole[]
 }
 
 model Role {
-  roleId   String @id @default(uuid())
-  roleName String @unique
-
+  roleId    String     @id @default(uuid())
+  roleName  String     @unique
   userRoles UserRole[]
 }
 
@@ -102,77 +96,83 @@ model UserRole {
   userId     String
   roleId     String
   assignedAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@unique([userId, roleId])
 }
 
 model Notification {
   notificationId String   @id @default(uuid())
+  userId         String
   title          String
-  message        String
-  type           String   @default("info") // 'success', 'info', 'warning', 'error'
-  link           String?  // Optional link to navigate to when clicked
+  type           String   @default("info")
   isRead         Boolean  @default(false)
   metadata       Json?
   createdAt      DateTime @default(now())
-
-  userId         String
+  message        String
+  link           String?
   user           User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model JobAlert {
   jobAlertId String   @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [userId])
   keywords   String
   createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [userId])
 }
 
 model Admin {
-  adminId    String  @id @default(uuid())
+  adminId    String    @id @default(uuid())
   adminLevel Int
   lastAction String?
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-
-
-  companies    Company[]
+  userId     String    @unique
+  user       User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  companies  Company[]
 }
 
 model Candidate {
-  candidateId String  @id @default(uuid())
-  fullName    String
-  university  String?
-  major       String?
-  gpa         Float?
-  cvUrl       String?
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-
-  skills        Skill[]
-  cvs           CV[]
+  candidateId   String         @id @default(uuid())
+  fullName      String
+  university    String?
+  major         String?
+  gpa           Float?
+  cvUrl         String?
+  userId        String         @unique
   applications  Application[]
-  savedJobs     SavedJob[]
+  cvs           CV[]
+  user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
   conversations Conversation[]
+  savedJobs     SavedJob[]
+  skills        Skill[]
+  projects      Project[]
 }
 
 model Skill {
-  skillId   String @id @default(uuid())
-  skillName String
+  skillId     String    @id @default(uuid())
+  skillName   String
+  level       SkillLevel @default(BEGINNER)
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
 
+model Project {
+  projectId   String    @id @default(uuid())
+  projectName String
+  description String?
+  role        String?
+  technology  String?
   candidateId String
   candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
 model Recruiter {
-  recruiterId String  @id @default(uuid())
-  bio         String?
-  position    String?
+  recruiterId       String           @id @default(uuid())
+  bio               String?
+  position          String?
+  userId            String           @unique
+  companyId         String?
   savedCandidateIds String[]
 
   userId String @unique
@@ -204,25 +204,29 @@ model Transaction {
   
   walletId      String
   wallet        Wallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
+  conversations     Conversation[]
+  jobPostings       JobPosting[]
+  company           Company?         @relation(fields: [companyId], references: [companyId])
+  user              User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  wallet            RecruiterWallet?
 }
-
 
 model CrawlLog {
   crawlLogId     String      @id @default(uuid())
-  providerName   String
   status         CrawlStatus
   startTime      DateTime    @default(now())
   endTime        DateTime?
   itemsProcessed Int?
   errorMessage   String?
+  providerName   String
 }
 
 model Company {
-  companyId          String  @id @default(uuid())
+  companyId          String       @id @default(uuid())
   companyName        String
-  taxCode            String? @unique
-  isRegistered       Boolean @default(false)
-  verifyStatus       Int     @default(0)
+  taxCode            String?      @unique
+  isRegistered       Boolean      @default(false)
+  verifyStatus       Int          @default(0)
   logo               String?
   banner             String?
   address            String?
@@ -230,77 +234,76 @@ model Company {
   websiteUrl         String?
   companySize        Int?
   businessLicenseUrl String?
-
-  adminId     String?
-  admin       Admin?      @relation(fields: [adminId], references: [adminId], onDelete: SetNull)
-  recruiters  Recruiter[]
-  jobPostings JobPosting[]
+  adminId            String?
+  admin              Admin?       @relation(fields: [adminId], references: [adminId])
+  jobPostings        JobPosting[]
+  recruiters         Recruiter[]
 }
 
 model RawJob {
-  rawJobId    String   @id @default(uuid())
-  source      String
-  fingerprint String   @unique
-  rawPayload  Json
-  title       String?
-  companyName String?
-  location    String?
-  originalUrl String?
-  jobType     String?
-  status      RawJobStatus   @default(PENDING)
+  rawJobId     String       @id @default(uuid())
+  source       String
+  fingerprint  String       @unique
+  rawPayload   Json
+  title        String?
+  companyName  String?
+  location     String?
+  originalUrl  String?
+  jobType      String?
+  status       RawJobStatus @default(PENDING)
   errorMessage String?
-  lastSeenAt  DateTime @default(now()) @db.Timestamp
-  createdAt   DateTime @default(now()) @db.Timestamp
-  updatedAt   DateTime @updatedAt @db.Timestamp
-  jobPosting  JobPosting?
+  lastSeenAt   DateTime     @default(now()) @db.Timestamp(6)
+  createdAt    DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime     @updatedAt @db.Timestamp(6)
+  jobPosting   JobPosting?
 }
 
 model JobPosting {
-  jobPostingId       String    @id @default(uuid())
-  title              String
-  description        String?
-  requirements       String?
-  benefits           String?
-  salaryMin          Decimal?  @db.Decimal(19, 0)
-  salaryMax          Decimal?  @db.Decimal(19, 0)
-  currency           String?   @default("VND")
-  jobType            JobType?
-  experience         String?
-  vacancies          Int       @default(1)
-  locationCity       String?
-  deadline           DateTime? @db.Timestamp
-  status             JobStatus @default(PENDING)
-  postType           PostType  @default(CRAWLED)
-  isVerified         Boolean   @default(false)
-  originalUrl        String    @unique
-  aiReliabilityScore Float?
-  createdAt          DateTime  @default(now()) @db.Timestamp
-  updatedAt          DateTime  @updatedAt @db.Timestamp
-  approvedBy         String?
-  viewCount          Int       @default(0)
-
-  rawJobId           String?   @unique
-  rawJob             RawJob?   @relation(fields: [rawJobId], references: [rawJobId], onDelete: SetNull)
-
-
-  recruiterId   String?
-  recruiter     Recruiter?   @relation(fields: [recruiterId], references: [recruiterId], onDelete: SetNull)
-  companyId     String
-  company       Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  applications Application[]
-  savedJobs    SavedJob[]
+  jobPostingId           String        @id @default(uuid())
+  title                  String
+  description            String?
+  requirements           String?
+  benefits               String?
+  salaryMin              Decimal?      @db.Decimal(19, 0)
+  salaryMax              Decimal?      @db.Decimal(19, 0)
+  currency               String?       @default("VND")
+  jobType                JobType?
+  experience             String?
+  vacancies              Int           @default(1)
+  locationCity           String?
+  deadline               DateTime?     @db.Timestamp(6)
+  status                 JobStatus     @default(PENDING)
+  postType               PostType      @default(CRAWLED)
+  isVerified             Boolean       @default(false)
+  originalUrl            String        @unique
+  aiReliabilityScore     Float?
+  createdAt              DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime      @updatedAt @db.Timestamp(6)
+  approvedBy             String?
+  recruiterId            String?
+  companyId              String
+  rawJobId               String?       @unique
+  viewCount              Int           @default(0)
+  structuredRequirements Json?
+  applications           Application[]
+  company                Company       @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  rawJob                 RawJob?       @relation(fields: [rawJobId], references: [rawJobId])
+  recruiter              Recruiter?    @relation(fields: [recruiterId], references: [recruiterId])
+  savedJobs              SavedJob[]
 }
 
 model CV {
-  cvId      String   @id @default(uuid())
-  cvTitle   String
-  fileUrl   String
-  isMain    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  candidateId String
-  candidate   Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-
-  applications Application[]
+  cvId             String            @id @default(uuid())
+  cvTitle          String
+  fileUrl          String?
+  isMain           Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  candidateId      String
+  parsedData       Json?
+  fileHash         String?
+  applications     Application[]
+  candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidateUnlocks CandidateUnlock[]
 }
 
 model Application {
@@ -315,24 +318,19 @@ model Application {
   isUnlocked    Boolean   @default(false)
 
   interviewDate     DateTime?
-  interviewTime     String?
   interviewLocation String?
-  desiredLocation   String?
-
-  candidateId  String
-  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-  jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
-  cvId         String
-  cv           CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
+  interviewTime     String?
+  candidate         Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  cv                CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
+  jobPosting        JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
 }
 
 model SavedJob {
-  savedJobId String   @id @default(uuid())
-  savedAt    DateTime @default(now())
+  savedJobId   String     @id @default(uuid())
+  savedAt      DateTime   @default(now())
   candidateId  String
-  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   jobPostingId String
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
 
   @@unique([candidateId, jobPostingId])
@@ -341,22 +339,104 @@ model SavedJob {
 model Conversation {
   conversationId String    @id @default(uuid())
   candidateId    String
-  candidate      Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   recruiterId    String
-  recruiter      Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
   lastMessage    String?
   isRead         Boolean   @default(false)
   updatedAt      DateTime  @updatedAt
   userId         String?
-  messages Message[]
+  candidate      Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  recruiter      Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  messages       Message[]
 }
 
 model Message {
-  messageId String   @id @default(uuid())
-  content   String
-  sentAt    DateTime @default(now())
-  isRead    Boolean  @default(false)
+  messageId      String       @id @default(uuid())
+  content        String
+  sentAt         DateTime     @default(now())
+  isRead         Boolean      @default(false)
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
   senderId       String
+  conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
+}
+
+model RecruiterWallet {
+  walletId    String    @id @default(uuid())
+  recruiterId String    @unique
+  balance     Int       @default(0)
+  updatedAt   DateTime  @updatedAt
+  recruiter   Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+}
+
+model CandidateUnlock {
+  unlockId     String   @id @default(uuid())
+  recruiterId  String
+  candidateId  String
+  jobPostingId String
+  unlockedAt   DateTime @default(now())
+  creditSpent  Int      @default(1)
+  cvId         String
+  cv           CV       @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
+
+  @@unique([recruiterId, candidateId, jobPostingId])
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  LINKEDIN
+}
+
+enum StatusUser {
+  ACTIVE
+  LOCKED
+}
+
+enum CrawlStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum FilterAction {
+  EXCLUDE
+  INCLUDE
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  INTERNSHIP
+}
+
+enum PostType {
+  CRAWLED
+  MANUAL
+}
+
+enum AppStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+  INTERVIEWING
+}
+
+enum JobStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum RawJobStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
 }

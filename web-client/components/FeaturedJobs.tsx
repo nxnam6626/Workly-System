@@ -1,61 +1,36 @@
-import { ChevronRight, CheckCircle2, Flame, Sparkles, MapPin, DollarSign, Clock } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import api from "@/lib/api";
+import { JobCard, Job } from "@/components/JobCard";
+import { JobCardSkeleton } from "@/components/jobs/JobCardSkeleton";
 
 export function FeaturedJobs() {
-  const jobs = [
-    {
-      id: 1,
-      title: "Senior Product Designer",
-      company: "Spotify",
-      location: "Hà Nội",
-      salary: "20 - 35 triệu",
-      type: "Toàn thời gian",
-      time: "2 giờ trước",
-      badge: "Hot",
-      badgeColor: "bg-rose-50 text-rose-600",
-      icon: <Flame className="w-3 h-3" />,
-      logo: "bg-green-500",
-    },
-    {
-      id: 2,
-      title: "Fullstack Developer (NodeJS/React)",
-      company: "VNG Corporation",
-      location: "TP. HCM",
-      salary: "15 - 25 triệu",
-      type: "Tại chỗ",
-      time: "5 giờ trước",
-      badge: "Premium",
-      badgeColor: "bg-blue-50 text-blue-600",
-      icon: <Sparkles className="w-3 h-3" />,
-      logo: "bg-blue-500",
-    },
-    {
-      id: 3,
-      title: "Marketing Growth Specialist",
-      company: "Shopee",
-      location: "Đà Nẵng",
-      salary: "12 - 18 triệu",
-      type: "Từ xa",
-      time: "1 ngày trước",
-      badge: "Mới",
-      badgeColor: "bg-emerald-50 text-emerald-600",
-      icon: <CheckCircle2 className="w-3 h-3" />,
-      logo: "bg-orange-600",
-    },
-    {
-      id: 4,
-      title: "Kỹ Sư Cầu Nối (Bridge SE)",
-      company: "FPT Software",
-      location: "Hà Nội",
-      salary: "Cạnh tranh",
-      type: "Toàn thời gian",
-      time: "3 giờ trước",
-      badge: "Hot",
-      badgeColor: "bg-rose-50 text-rose-600",
-      icon: <Flame className="w-3 h-3" />,
-      logo: "bg-orange-500",
-    },
-  ];
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get("/job-postings", {
+          params: {
+            limit: 4,
+            page: 1,
+          },
+        });
+        setJobs(data.items || []);
+      } catch (error) {
+        console.error("Failed to fetch featured jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
 
   return (
     <section className="w-full max-w-7xl mx-auto px-6 py-20 pb-24">
@@ -70,54 +45,19 @@ export function FeaturedJobs() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {jobs.map((job) => (
-          <div key={job.id} className="bg-white border border-slate-100 rounded-3xl p-5 flex flex-col hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-100 transition-all duration-300 group cursor-pointer relative overflow-hidden">
-            {/* Top Row: Logo & Badge */}
-            <div className="flex justify-between items-start mb-6">
-              <div className={`w-12 h-12 ${job.logo} rounded-2xl shadow-sm flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform`}>
-                {job.company.charAt(0)}
-              </div>
-              <span className={`px-2.5 py-1 ${job.badgeColor} text-[10px] font-bold rounded-lg flex items-center gap-1 uppercase tracking-wider`}>
-                {job.icon} {job.badge}
-              </span>
-            </div>
-
-            {/* Title & Company */}
-            <div className="mb-6 flex-1">
-              <h3 className="text-base font-bold text-slate-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors uppercase leading-snug">
-                {job.title}
-              </h3>
-              <p className="text-sm font-semibold text-slate-500">{job.company}</p>
-            </div>
-            
-            {/* Details */}
-            <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-2 text-emerald-600">
-                <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                </div>
-                <span className="text-[13px] font-bold">{job.salary}</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-500">
-                <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                </div>
-                <span className="text-xs font-medium">{job.location} • {job.type}</span>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-slate-400">
-                <Clock className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-medium">{job.time}</span>
-              </div>
-              <button className="text-xs font-bold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                Ứng tuyển ngay
-              </button>
-            </div>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <JobCardSkeleton key={i} />
+          ))
+        ) : jobs.length > 0 ? (
+          jobs.map((job) => (
+            <JobCard key={job.jobPostingId} job={job} />
+          ))
+        ) : (
+          <div className="col-span-full py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+            <p className="text-slate-500 font-medium font-sans">Hiện tại chưa có công việc nổi bật nào.</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Trust Banner (Tiny) */}
@@ -138,3 +78,4 @@ export function FeaturedJobs() {
     </section>
   );
 }
+

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 import { NotificationListener } from "@/components/NotificationListener";
 import { Toaster } from 'react-hot-toast';
+import AiChatBox from "@/components/AiChatBox";
 
 export default function RootLayout({
   children,
@@ -25,6 +26,7 @@ export default function RootLayout({
           {children}
           <NotificationListener />
           <Toaster position="top-right" />
+          <AiChatBox />
         </AuthProvider>
       </body>
     </html>

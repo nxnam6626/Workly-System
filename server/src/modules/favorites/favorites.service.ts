@@ -67,6 +67,24 @@ export class FavoritesService {
       orderBy: { savedAt: 'desc' },
     });
 
-    return savedJobs.map(sj => sj.jobPosting);
+    // Extract jobPostingIds to check applications in bulk
+    const jobPostingIds = savedJobs.map(sj => sj.jobPostingId);
+    
+    // Check which of these jobs have already been applied for
+    const applications = await this.prisma.application.findMany({
+      where: {
+        candidateId: candidate.candidateId,
+        jobPostingId: { in: jobPostingIds },
+      },
+      select: { jobPostingId: true },
+    });
+    
+    const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
+
+    return savedJobs.map(sj => ({
+      ...sj.jobPosting,
+      hasApplied: appliedJobIds.has(sj.jobPostingId),
+    }));
   }
 }
+

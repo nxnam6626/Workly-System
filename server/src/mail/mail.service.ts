@@ -1,18 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private resend: Resend;
+  private transporter: nodemailer.Transporter;
 
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST || 'smtp.gmail.com',
+      port: Number(process.env.MAIL_PORT) || 587,
+      secure: false, // upgrade later with STARTTLS
+      auth: {
+        user: process.env.MAIL_USER,
+        // Sanitize password by removing all whitespace (common when copy-pasting App Passwords)
+        pass: process.env.MAIL_PASS?.replace(/\s/g, ''),
+      },
+    });
+
+    // Tự động kiểm tra kết nối ngay khi Server khởi động
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('[MailService] ❌ Nodemailer connection failed:', error.message);
+        console.warn('[MailService] ⚠️ Vui lòng kiểm tra MAIL_USER và MAIL_PASS trong file .env');
+      } else {
+        console.log('[MailService] ✅ Nodemailer is ready to take our messages');
+      }
+    });
   }
 
   async sendWelcomeEmail(email: string, name: string) {
     try {
-      await this.resend.emails.send({
-        from: 'Workly <onboarding@resend.dev>', // resend.dev is allowed for testing
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
         to: email,
         subject: 'Welcome to Workly!',
         html: `<p>Hi ${name || 'there'},</p><p>Welcome to Workly! We are excited to have you on board.</p>`,
@@ -25,19 +44,13 @@ export class MailService {
 
   async sendPasswordResetEmail(email: string, token: string) {
     try {
-      // Capture the error object returned by Resend
-      const { data, error } = await this.resend.emails.send({
-        from: 'Workly <onboarding@resend.dev>',
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
         to: email,
         subject: 'Khôi phục mật khẩu Workly',
         html: `<p>Mã xác nhận để đổi mật khẩu của bạn là: <strong>${token}</strong></p><p>Mã này sẽ hết hạn trong vòng 15 phút.</p>`,
       });
-
-      if (error) {
-        console.error('[MailService] Resend API Error:', error);
-        return;
-      }
-      console.log(`[MailService] Password reset email sent to ${email}. ID: ${data?.id}`);
+      console.log(`[MailService] Password reset email sent to ${email}`);
     } catch (error) {
       console.error('[MailService] Error sending password reset email:', error);
     }
@@ -46,9 +59,10 @@ export class MailService {
   async sendVerificationEmail(email: string, token: string) {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const verificationLink = `${frontendUrl}/verify-email?email=${email}`;
-      const { data, error } = await this.resend.emails.send({
-        from: 'Workly <onboarding@resend.dev>',
+      const verificationLink = `${frontendUrl}/verify-email?email=${email}&token=${token}`;
+      
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
         to: email,
         subject: 'Xác minh Email cho tài khoản Workly',
         html: `
@@ -67,12 +81,7 @@ export class MailService {
           </div>
         `,
       });
-
-      if (error) {
-        console.error('[MailService] Resend API Error:', error);
-        return;
-      }
-      console.log(`[MailService] Verification email sent to ${email}. ID: ${data?.id}`);
+      console.log(`[MailService] Verification email sent to ${email}`);
     } catch (error) {
       console.error('[MailService] Error sending verification email:', error);
     }

@@ -18,7 +18,7 @@ export class ApplicationsService {
   ) {}
 
   async create(createApplicationDto: CreateApplicationDto, file?: any, userId?: string) {
-    const { jobPostingId, fullName, email, phone, coverLetter, location } = createApplicationDto;
+    const { jobPostingId, fullName, email, phone, coverLetter } = createApplicationDto;
 
     // 1. Verify job posting exists
     const job = await this.prisma.jobPosting.findUnique({
@@ -85,20 +85,30 @@ export class ApplicationsService {
         }
       }
 
-      // 3. Handle CV File
-      let cvId: string;
-      const cvTitle = file ? file.originalname : `${fullName}_CV`;
-      const fileUrl = file ? `/uploads/cvs/${file.filename}` : '/uploads/cvs/default.pdf';
+      // 3. Handle CV File or Existing CV
+      let cvId: string | undefined = createApplicationDto.cvId;
+      let fileUrl: string;
 
-      const newCV = await tx.cV.create({
-        data: {
-          cvTitle,
-          fileUrl,
-          candidateId,
-          isMain: true,
-        },
-      });
-      cvId = newCV.cvId;
+      if (cvId) {
+        const existingCv = await tx.cV.findUnique({ where: { cvId } });
+        if (!existingCv) throw new NotFoundException('Không tìm thấy CV được chọn!');
+        fileUrl = existingCv.fileUrl || ""; // Allow empty if virtual CV
+      } else if (file) {
+        const cvTitle = file.originalname;
+        fileUrl = `/uploads/cvs/${file.filename}`;
+
+        const newCV = await tx.cV.create({
+          data: {
+            cvTitle,
+            fileUrl,
+            candidateId,
+            isMain: false, // Uploaded during application is not necessarily main
+          },
+        });
+        cvId = newCV.cvId;
+      } else {
+        throw new NotFoundException('Vui lòng tải lên CV hoặc chọn CV có sẵn!');
+      }
 
       // 4. Check for existing application
       const existingApp = await tx.application.findFirst({

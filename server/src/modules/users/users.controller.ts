@@ -9,7 +9,12 @@ import {
   Query,
   ParseUUIDPipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,6 +34,28 @@ export class UsersController {
   @Get('me')
   getMe(@CurrentUser('userId') userId: string) {
     return this.usersService.getMe(userId);
+  }
+
+  /** Cập nhật ảnh đại diện. */
+  @Patch('me/avatar')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: memoryStorage(),
+  }))
+  updateAvatar(
+    @CurrentUser('userId') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Vui lòng tải lên tệp ảnh.');
+    }
+    return this.usersService.updateAvatar(userId, file);
+  }
+
+  @Get('test-me-debug')
+  async testMeDebug() {
+    const firstUser = await this.usersService['prisma'].user.findFirst();
+    if (!firstUser) return 'No user';
+    return this.usersService.getMe(firstUser.userId);
   }
 
   /** Cập nhật hồ sơ ứng viên (dành cho CANDIDATE). */

@@ -40,7 +40,7 @@ export default function RegisterPage() {
       await register({ fullName, email, password, role: "CANDIDATE" });
       setIsSuccess(true);
       setTimeout(() => {
-        router.push("/cv-setup");
+        router.push("/onboarding/import-cv");
       }, 2500); // Redirect after 2.5 seconds
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");

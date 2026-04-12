@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown } from 'lucide-react';
+import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown, Plus, X as CloseIcon } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -21,6 +21,9 @@ const defaultForm = {
   vacancies: 1,
   locationCity: '',
   deadline: '',
+  hardSkills: [] as string[],
+  softSkills: [] as string[],
+  minExperienceYears: 0,
 };
 
 export default function PostJobPage() {
@@ -28,6 +31,8 @@ export default function PostJobPage() {
   const [formData, setFormData] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
+  const [hardSkillInput, setHardSkillInput] = useState('');
+  const [softSkillInput, setSoftSkillInput] = useState('');
   const { accessToken } = useAuthStore();
 
   const allLocations = ["Làm việc từ xa (Remote)", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", ...LOCATIONS.filter((l: string) => !['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].includes(l))];
@@ -45,12 +50,45 @@ export default function PostJobPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: name === 'minExperienceYears' ? Number(value) : value }));
+  };
+
+  const addHardSkill = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && hardSkillInput.trim()) {
+      e.preventDefault();
+      if (!formData.hardSkills.includes(hardSkillInput.trim())) {
+        setFormData(prev => ({ ...prev, hardSkills: [...prev.hardSkills, hardSkillInput.trim()] }));
+      }
+      setHardSkillInput('');
+    }
+  };
+
+  const addSoftSkill = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && softSkillInput.trim()) {
+      e.preventDefault();
+      if (!formData.softSkills.includes(softSkillInput.trim())) {
+        setFormData(prev => ({ ...prev, softSkills: [...prev.softSkills, softSkillInput.trim()] }));
+      }
+      setSoftSkillInput('');
+    }
+  };
+
+  const removeSkill = (type: 'hard' | 'soft', skill: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [type === 'hard' ? 'hardSkills' : 'softSkills']: prev[type === 'hard' ? 'hardSkills' : 'softSkills'].filter(s => s !== skill)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accessToken) return;
+    
+    if (formData.hardSkills.length === 0) {
+      toast.error('Vui lòng nhập ít nhất một kỹ năng chuyên môn để Matching Engine hoạt động!');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -227,7 +265,7 @@ export default function PostJobPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Users className="w-4 h-4 text-slate-400" /> Yêu cầu kinh nghiệm
+                <Clock className="w-4 h-4 text-slate-400" /> Yêu cầu kinh nghiệm (Text)
               </label>
               <input
                 type="text"
@@ -237,6 +275,68 @@ export default function PostJobPage() {
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
                 placeholder="VD: 1 - 2 năm"
               />
+            </div>
+          </div>
+
+          {/* Matching Engine Configuration */}
+          <div className="space-y-4 pt-6 border-t border-slate-100">
+            <h3 className="text-lg font-bold text-indigo-700 flex items-center gap-2">
+              <Users className="w-5 h-5" /> Matching Engine Configuration
+            </h3>
+            <p className="text-sm text-slate-500">Các thông tin dưới đây dùng để thuật toán tự động tìm ứng viên phù hợp nhất.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Kỹ năng chuyên môn (Hard Skills) <span className="text-red-500">*</span></label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.hardSkills.map(skill => (
+                    <span key={skill} className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded flex items-center gap-1">
+                      {skill}
+                      <button type="button" onClick={() => removeSkill('hard', skill)} className="hover:text-red-500">×</button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={hardSkillInput}
+                  onChange={(e) => setHardSkillInput(e.target.value)}
+                  onKeyDown={addHardSkill}
+                  placeholder="Gõ kỹ năng và nhấn Enter..."
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Kỹ năng mềm (Soft Skills)</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.softSkills.map(skill => (
+                    <span key={skill} className="px-2 py-1 bg-teal-100 text-teal-700 text-xs font-bold rounded flex items-center gap-1">
+                      {skill}
+                      <button type="button" onClick={() => removeSkill('soft', skill)} className="hover:text-red-500">×</button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={softSkillInput}
+                  onChange={(e) => setSoftSkillInput(e.target.value)}
+                  onKeyDown={addSoftSkill}
+                  placeholder="Gõ kỹ năng mềm và nhấn Enter..."
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Số năm kinh nghiệm tối thiểu</label>
+                <input
+                  type="number"
+                  name="minExperienceYears"
+                  value={formData.minExperienceYears}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
             </div>
           </div>
 
