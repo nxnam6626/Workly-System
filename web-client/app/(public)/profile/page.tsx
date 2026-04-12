@@ -33,7 +33,6 @@ import { useAuthStore } from "@/stores/auth";
 import { JobCard, type Job } from "@/components/JobCard";
 import { CVReviewModal } from "@/components/candidates/CVReviewModal";
 import toast from "react-hot-toast";
-import api from "@/lib/api";
 
 export default function ProfileDashboard() {
   const router = useRouter();
@@ -83,8 +82,13 @@ export default function ProfileDashboard() {
   const fetchMatchingJobs = async () => {
     setLoadingMatching(true);
     try {
-      const res = await api.get("/job-postings/matching");
-      setMatchingJobs(res.data.slice(0, 4)); // Only top 4 for dashboard
+      const res = await api.get("/candidates/recommended-jobs");
+      const mapped = res.data.slice(0, 4).map((j: any) => ({
+        ...j,
+        score: j.score || 95,
+        matchedSkills: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : [])
+      }));
+      setMatchingJobs(mapped);
     } catch (err) {
       console.error("Failed to load matching jobs", err);
     } finally {
