@@ -25,7 +25,6 @@ import { BullModule } from '@nestjs/bullmq';
 import { SupabaseModule } from './common/supabase/supabase.module';
 
 import { WalletsModule } from './modules/wallets/wallets.module';
-import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -57,7 +56,6 @@ import { AiModule } from './modules/ai/ai.module';
     NotificationsModule,
     RecruitersModule,
     WalletsModule,
-    AiModule,
     SupabaseModule,
   ],
   controllers: [AppController],

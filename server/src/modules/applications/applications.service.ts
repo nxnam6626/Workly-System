@@ -136,7 +136,6 @@ export class ApplicationsService {
           cvSnapshotUrl: fileUrl,
           coverLetter,
           appStatus: 'PENDING',
-          desiredLocation: location,
           aiMatchScore,
           isUnlocked: false,
         },
@@ -384,6 +383,19 @@ export class ApplicationsService {
     return this.prisma.application.update({
       where: { applicationId },
       data: { isUnlocked: true },
+    });
+  }
+
+  async remove(applicationId: string, candidateUserId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { applicationId },
+      include: { candidate: true },
+    });
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.candidate?.userId !== candidateUserId) throw new ConflictException('Unauthorized to delete this application');
+
+    return this.prisma.application.delete({
+       where: { applicationId },
     });
   }
 }
