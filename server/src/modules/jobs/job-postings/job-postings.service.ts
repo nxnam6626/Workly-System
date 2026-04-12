@@ -48,6 +48,23 @@ export class JobPostingsService {
 
     const originalUrl = 'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
 
+    // MOCK: Automatic Content Moderation (Auto-Approve Criteria)
+    const blacklist = ['cá cược', 'đánh bạc', 'lừa đảo', 'việc nhẹ lương cao', 'đa cấp'];
+    const contentToCheck = `${createJobPostingDto.title} ${createJobPostingDto.description} ${createJobPostingDto.requirements || ''}`.toLowerCase();
+    
+    const containsBadWords = blacklist.some(word => contentToCheck.includes(word));
+    // Tạo điểm ngẫu nhiên mô phỏng AI (Nội dung xấu -> Thấp, Tốt -> Ngẫu nhiên 70-99)
+    const aiReliabilityScore = containsBadWords ? 40 : parseFloat((Math.random() * (99 - 70) + 70).toFixed(1));
+    
+    // Auto-approve criteria:
+    let finalStatus: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING';
+    
+    if (containsBadWords) {
+       finalStatus = 'REJECTED';
+    } else if (aiReliabilityScore >= 85) {
+       finalStatus = 'APPROVED'; // Tự động duyệt nếu AI đánh giá cao
+    }
+
     const job = await this.prisma.jobPosting.create({
       data: {
         ...rest,
@@ -57,12 +74,19 @@ export class JobPostingsService {
         recruiterId: recruiter.recruiterId,
         companyId: recruiter.companyId,
         postType: 'MANUAL',
-        status: 'PENDING',
-        isVerified: false,
+        status: finalStatus,
+        isVerified: finalStatus === 'APPROVED',
+        aiReliabilityScore,
         originalUrl: originalUrl,
       },
       include: { company: true, recruiter: { include: { user: { select: { email: true } } } } }
     });
+
+    if (finalStatus === 'APPROVED') {
+      try {
+        await this.syncJobToES(job);
+      } catch (e) { console.error('ES Sync failed automatically', e); }
+    }
 
     // Notify ALL admins about the new job posting
     const admins = await this.prisma.user.findMany({
@@ -233,6 +257,27 @@ export class JobPostingsService {
     }
 
     return { ...job, hasApplied, isSaved };
+  }
+
+  async getSuggestedCandidates(jobId: string) {
+    const job = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId: jobId },
+      select: { title: true, requirements: true }
+    });
+    if (!job) return [];
+    
+    const searchTerms = job.title?.split(' ').filter(word => word.length > 2) || [];
+    
+    // Very rudimentary text search for candidates. We search for candidates whose skills match the job title keywords.
+    const orConditions = searchTerms.map(term => ({
+      skills: { some: { skillName: { contains: term, mode: 'insensitive' as any } } }
+    }));
+    
+    return this.prisma.candidate.findMany({
+      where: searchTerms.length > 0 ? { OR: orConditions } : {},
+      take: 10,
+      include: { user: { select: { email: true, phoneNumber: true, avatar: true } }, skills: true, cvs: true }
+    });
   }
 
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
@@ -406,8 +451,6 @@ export class JobPostingsService {
             }
         }
       }
-    }
-
     if (status === JobStatus.APPROVED) {
       // For bulk, we need to fetch the actual jobs to match keywords
       const approvedJobs = await this.prisma.jobPosting.findMany({

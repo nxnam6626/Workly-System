@@ -25,6 +25,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
+import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { JobCard, type Job } from "@/components/JobCard";
 
@@ -34,6 +35,8 @@ export default function ProfileDashboard() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [isOpenToWork, setIsOpenToWork] = useState(true);
+  const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
 
   // Auth guard and fetch profile
   useEffect(() => {
@@ -47,6 +50,12 @@ export default function ProfileDashboard() {
         .then((data) => setProfile(data))
         .catch((err) => console.error("Failed to load profile", err))
         .finally(() => setLoadingProfile(false));
+        
+      setLoadingJobs(true);
+      api.get('/candidates/recommended-jobs')
+        .then((res: any) => setRecommendedJobs(res.data || []))
+        .catch((err: any) => console.error("Failed to load recommended jobs", err))
+        .finally(() => setLoadingJobs(false));
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -285,30 +294,19 @@ export default function ProfileDashboard() {
             CỘT PHẢI (RIGHT SIDEBAR)
             ======================= */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          <h3 className="text-lg font-bold text-slate-900 mb-1">Việc làm phù hợp với bạn</h3>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Việc làm gợi ý cho bạn</h3>
+          <p className="text-slate-500 text-[13px] mb-4">Các công việc phù hợp với kỹ năng của bạn</p>
 
           <div className="space-y-4">
-            {[
-              { title: "Junior Backend Developer", company: "Techcombank", location: "Hà Nội, Việt Nam", salaryMin: 15000000, salaryMax: 25000000, logo: null },
-              { title: "Frontend Engineer Intern", company: "Shopee", location: "TP. Hồ Chí Minh, Việt Nam", salaryMin: 10000000, salaryMax: 18000000, logo: null },
-              { title: "Data Science Intern", company: "Zalo", location: "Đà Nẵng, Việt Nam", salaryMin: 12000000, salaryMax: 20000000, logo: null },
-              { title: "Product Management Intern", company: "Grab", location: "TP. Hồ Chí Minh, Việt Nam", salaryMin: 18000000, salaryMax: 30000000, logo: null },
-            ].map((mock, idx) => {
-              const job: Job = {
-                jobPostingId: `mock-${idx}`,
-                title: mock.title,
-                company: { companyName: mock.company, logo: mock.logo },
-                locationCity: mock.location,
-                salaryMin: mock.salaryMin,
-                salaryMax: mock.salaryMax,
-                currency: "VND",
-                jobType: "Full-time",
-                experience: "Junior",
-                createdAt: new Date().toISOString(),
-                isVerified: true
-              };
-              return <JobCard key={idx} job={job} />;
-            })}
+            {loadingJobs ? (
+              <div className="text-center py-4 text-sm text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2"/> Đang phân tích gợi ý...</div>
+            ) : recommendedJobs.length === 0 ? (
+              <div className="text-center py-4 text-sm text-slate-500">Chưa có công việc nào khớp với kỹ năng của bạn. Hãy cập nhật kỹ năng profile nhé!</div>
+            ) : (
+              recommendedJobs.map((job) => (
+                <JobCard key={job.jobPostingId} job={job} />
+              ))
+            )}
           </div>
         </div>
       </div>

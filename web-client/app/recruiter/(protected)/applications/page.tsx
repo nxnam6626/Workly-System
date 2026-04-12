@@ -12,6 +12,8 @@ import { InterviewScheduleModal } from './InterviewScheduleModal';
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterTab, setFilterTab] = useState('ALL');
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
   const [selectedApp, setSelectedApp] = useState<any>(null);
@@ -67,6 +69,19 @@ export default function ApplicationsPage() {
     }
   };
 
+  const handleUnlock = async (id: string) => {
+    try {
+       const toastId = toast.loading('Đang xử lý mở khóa...');
+       const { data } = await api.post(`/applications/${id}/unlock`);
+       // Refresh list after unlock
+       await fetchApplications();
+       toast.success('Mở khóa ứng viên thành công!', { id: toastId });
+    } catch (error: any) {
+       console.error(error);
+       toast.error(error.response?.data?.message || 'Không thể mở khóa ứng viên');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACCEPTED': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
@@ -86,6 +101,21 @@ export default function ApplicationsPage() {
       default: return 'Chờ Duyệt';
     }
   };
+
+  const filteredApps = applications.filter(app => {
+    const term = search.toLowerCase();
+    const candidateName = app.candidate?.fullName?.toLowerCase() || '';
+    const jobTitle = app.jobPosting?.title?.toLowerCase() || '';
+    const matchesSearch = !search || candidateName.includes(term) || jobTitle.includes(term);
+    
+    if (!matchesSearch) return false;
+    if (filterTab === 'ALL') return true;
+    if (filterTab === 'SUITABLE') return app.aiMatchScore >= 70;
+    if (filterTab === 'UNLOCKED') return app.isUnlocked;
+    if (filterTab === 'PENDING') return app.appStatus === 'PENDING';
+    if (filterTab === 'ACCEPTED') return app.appStatus === 'ACCEPTED';
+    return true;
+  });
 
   return (
     <motion.div
@@ -111,13 +141,17 @@ export default function ApplicationsPage() {
             <input 
               type="text" 
               placeholder="Tìm theo tên ứng viên hoặc vị trí..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 bg-white rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm shadow-sm"
             />
           </div>
-          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-             <button className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 whitespace-nowrap">Tất Cả</button>
-             <button className="px-4 py-2 rounded-lg bg-amber-50 border border-amber-200 text-sm font-medium text-amber-700 hover:bg-amber-100 whitespace-nowrap">Chờ Duyệt</button>
-             <button className="px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-sm font-medium text-emerald-700 hover:bg-emerald-100 whitespace-nowrap">Đã Tuyển</button>
+          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+             <button onClick={() => setFilterTab('ALL')} className={`px-4 py-2 rounded-lg border text-sm font-medium whitespace-nowrap transition-colors ${filterTab === 'ALL' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Tất Cả</button>
+             <button onClick={() => setFilterTab('SUITABLE')} className={`px-4 py-2 rounded-lg border text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${filterTab === 'SUITABLE' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200' : 'bg-indigo-50 border-indigo-100 text-indigo-700 hover:bg-indigo-100'}`}>Phù Hợp Nhất</button>
+             <button onClick={() => setFilterTab('UNLOCKED')} className={`px-4 py-2 rounded-lg border text-sm font-medium whitespace-nowrap transition-colors ${filterTab === 'UNLOCKED' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-200' : 'bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100'}`}>Đã Mở Khoá</button>
+             <button onClick={() => setFilterTab('PENDING')} className={`px-4 py-2 rounded-lg border text-sm font-medium whitespace-nowrap transition-colors ${filterTab === 'PENDING' ? 'bg-amber-500 text-white border-amber-500 shadow-sm shadow-amber-200' : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'}`}>Chờ Duyệt</button>
+             <button onClick={() => setFilterTab('ACCEPTED')} className={`px-4 py-2 rounded-lg border text-sm font-medium whitespace-nowrap transition-colors ${filterTab === 'ACCEPTED' ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'}`}>Đã Tuyển</button>
           </div>
         </div>
         
@@ -126,7 +160,9 @@ export default function ApplicationsPage() {
              <div className="p-8 text-center text-slate-400">Đang tải hồ sơ...</div>
           ) : applications.length === 0 ? (
             <div className="p-8 text-center text-slate-400">Chưa có đơn ứng tuyển nào.</div>
-          ) : applications.map((app) => (
+          ) : filteredApps.length === 0 ? (
+            <div className="p-8 text-center text-slate-400">Không có hồ sơ nào phù hợp với bộ lọc này.</div>
+          ) : filteredApps.map((app) => (
             <div key={app.applicationId} className="p-6 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group">
               
               <div className="flex gap-4 items-start flex-1 min-w-0">
@@ -142,34 +178,50 @@ export default function ApplicationsPage() {
                   <p className="text-slate-500 text-sm flexitems-center gap-2">
                     <span className="font-medium text-slate-700">Ứng tuyển: </span> {app.jobPosting?.title}
                   </p>
-                  <p className="text-slate-400 text-xs flex items-center gap-1.5 mt-1">
-                     <Clock className="w-3.5 h-3.5" />
-                     {new Date(app.applyDate).toLocaleDateString('vi-VN')}
-                     {app.desiredLocation && (
-                       <>
-                         <span className="mx-1">•</span>
-                         <span className="text-blue-600 font-medium whitespace-nowrap">Nơi làm việc: {app.desiredLocation}</span>
-                       </>
+                  <div className="flex items-center gap-2 mt-1">
+                     <p className="text-slate-400 text-xs flex items-center gap-1.5">
+                       <Clock className="w-3.5 h-3.5" />
+                       {new Date(app.applyDate).toLocaleDateString('vi-VN')}
+                       {app.desiredLocation && (
+                         <>
+                           <span className="mx-1">•</span>
+                           <span className="text-blue-600 font-medium whitespace-nowrap">Nơi làm việc: {app.desiredLocation}</span>
+                         </>
+                       )}
+                     </p>
+                     {app.aiMatchScore != null && (
+                       <span className="px-2 py-0.5 ml-2 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded text-xs font-semibold">
+                         AI Match: {app.aiMatchScore}%
+                       </span>
                      )}
-                  </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
                  <span className={`px-3 py-1.5 rounded-lg border text-sm font-medium ${getStatusColor(app.appStatus)}`}>
                     {getStatusLabel(app.appStatus)}
                  </span>
                  
                  <div className="h-8 w-px bg-slate-200 hidden md:block mx-1"></div>
 
-                 <a 
-                   href={getFileUrl(app.cvSnapshotUrl)} 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
-                 >
-                   <Eye className="w-4 h-4" /> Xem CV
-                 </a>
+                 {app.isUnlocked ? (
+                   <a 
+                     href={getFileUrl(app.cvSnapshotUrl)} 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                   >
+                     <Eye className="w-4 h-4" /> Xem CV
+                   </a>
+                 ) : (
+                   <button 
+                     onClick={() => handleUnlock(app.applicationId)}
+                     className="flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer shadow-sm"
+                   >
+                     Mở Khóa (50 xu)
+                   </button>
+                 )}
 
                  {app.appStatus === 'PENDING' && (
                    <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">

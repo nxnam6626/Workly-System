@@ -19,6 +19,12 @@ export class CandidatesController {
     return this.candidatesService.getSavedCandidates(userId);
   }
 
+  @Get('recommended-jobs')
+  @UseGuards(JwtAuthGuard)
+  getRecommendedJobs(@CurrentUser('userId') userId: string) {
+    return this.candidatesService.getRecommendedJobs(userId);
+  }
+
   @Get()
   findAll(@Query() query: any) {
     return this.candidatesService.findAll(query);

@@ -63,11 +63,11 @@ export default function PostJobPage() {
       };
 
       await api.post('/job-postings', payload);
-      toast.success('Đăng tin tuyển dụng thành công!');
+      toast.success('Gửi yêu cầu tuyển dụng thành công! Vui lòng chờ Admin duyệt.');
       router.push('/recruiter/jobs');
     } catch (error: any) {
       console.error('Error posting job:', error);
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi đăng tin!');
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu!');
     } finally {
       setSaving(false);
     }
@@ -83,9 +83,9 @@ export default function PostJobPage() {
       <div className="border-b border-indigo-100 pb-5">
         <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
           <Briefcase className="h-8 w-8 text-indigo-600" />
-          Đăng Tin Tuyển Dụng
+          Gửi Yêu Cầu Tuyển Dụng
         </h1>
-        <p className="text-slate-500 mt-2 text-lg">Điền thông tin chi tiết để thu hút ứng viên tốt nhất.</p>
+        <p className="text-slate-500 mt-2 text-lg">Điền thông tin chi tiết và gửi yêu cầu để Admin phê duyệt trước khi tin được hiển thị.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 space-y-8">
@@ -286,7 +286,7 @@ export default function PostJobPage() {
             className="h-11 px-8 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {saving ? 'Đang Đăng...' : 'Đăng Tin Ngay'}
+            {saving ? 'Đang Gửi...' : 'Gửi Yêu Cầu'}
           </button>
         </div>
       </form>

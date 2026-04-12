@@ -4,12 +4,17 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { MessagesGateway } from '../messages/messages.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
 
+import { WalletsService } from '../wallets/wallets.service';
+import { AiService } from '../ai/ai.service'; // Added AiService
+
 @Injectable()
 export class ApplicationsService {
   constructor(
     private prisma: PrismaService,
     private messagesGateway: MessagesGateway,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private walletsService: WalletsService,
+    private aiService: AiService // Added injection
   ) {}
 
   async create(createApplicationDto: CreateApplicationDto, file?: any, userId?: string) {
@@ -102,6 +107,17 @@ export class ApplicationsService {
       if (existingApp) throw new ConflictException('Bạn đã nộp đơn cho công việc này rồi!');
 
       // 5. Create Application
+      // 5. Compute AI Match Score
+      let cvText = '';
+      if (fileUrl.startsWith('/uploads/')) {
+        cvText = await this.aiService.extractTextFromLocalFile(fileUrl);
+      } else {
+        cvText = await this.aiService.extractTextFromPdfUrl(fileUrl);
+      }
+      
+      const jobRequirements = job.requirements ? String(job.requirements) : '';
+      const aiMatchScore = await this.aiService.evaluateMatch(cvText, job.title, jobRequirements);
+
       const application = await tx.application.create({
         data: {
           candidateId,
@@ -111,6 +127,8 @@ export class ApplicationsService {
           coverLetter,
           appStatus: 'PENDING',
           desiredLocation: location,
+          aiMatchScore,
+          isUnlocked: false,
         },
         include: {
           jobPosting: { include: { recruiter: true } },
@@ -169,7 +187,7 @@ export class ApplicationsService {
       throw new NotFoundException('Recruiter not found');
     }
 
-    return this.prisma.application.findMany({
+    const applications = await this.prisma.application.findMany({
       where: {
         jobPosting: {
           recruiterId: recruiter.recruiterId,
@@ -180,7 +198,31 @@ export class ApplicationsService {
         jobPosting: { select: { title: true, company: true } },
         cv: true,
       },
-      orderBy: { applyDate: 'desc' },
+      orderBy: { aiMatchScore: 'desc' }, // Order by AI Score primarily for recruiter
+    });
+
+    return applications.map(app => {
+      // Obfuscate candidate details if not unlocked
+      if (!app.isUnlocked) {
+        return {
+          ...app,
+          candidate: {
+            ...app.candidate,
+            fullName: '*** Ứng viên ẩn ***',
+            user: {
+              ...app.candidate.user,
+              email: '***@***.***',
+              phoneNumber: '***',
+            }
+          },
+          cv: {
+            ...app.cv,
+            fileUrl: '',
+          },
+          cvSnapshotUrl: '',
+        };
+      }
+      return app;
     });
   }
 
@@ -309,5 +351,29 @@ export class ApplicationsService {
     }
 
     return application;
+  }
+
+  async unlockApplication(applicationId: string, recruiterUserId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId: recruiterUserId },
+    });
+
+    if (!recruiter) throw new NotFoundException('Recruiter not found');
+
+    const application = await this.prisma.application.findUnique({
+      where: { applicationId },
+      include: { candidate: true },
+    });
+
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.isUnlocked) return application;
+
+    const UNLOCK_COST = 50; // VD: 50 credits/coins
+    await this.walletsService.deduct(recruiter.recruiterId, UNLOCK_COST, `Mở khóa ứng viên: ${application.candidate?.fullName}`);
+
+    return this.prisma.application.update({
+      where: { applicationId },
+      data: { isUnlocked: true },
+    });
   }
 }

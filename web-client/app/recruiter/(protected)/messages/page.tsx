@@ -31,8 +31,12 @@ export default function MessagesPage() {
     return `Hoạt động ${Math.floor(hours / 24)} ngày trước`;
   };
 
+  const [, setTick] = useState(0);
+
   useEffect(() => {
     fetchConversations();
+    const interval = setInterval(() => setTick(t => t + 1), 60000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

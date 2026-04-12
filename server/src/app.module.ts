@@ -22,6 +22,9 @@ import { AdminModule } from './modules/admin/admin.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RecruitersModule } from './modules/recruiters/recruiters.module';
 
+import { WalletsModule } from './modules/wallets/wallets.module';
+import { AiModule } from './modules/ai/ai.module';
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -41,11 +44,13 @@ import { RecruitersModule } from './modules/recruiters/recruiters.module';
     CompaniesModule,
     ApplicationsModule,
     FavoritesModule,
+    AiModule,
     CandidatesModule,
     MessagesModule,
     AdminModule,
     NotificationsModule,
     RecruitersModule,
+    WalletsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
