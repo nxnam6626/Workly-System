@@ -86,4 +86,31 @@ export class MailService {
       console.error('[MailService] Error sending verification email:', error);
     }
   }
+
+  async sendJobInvitation(email: string, candidateName: string, companyName: string, messageContent: string) {
+    try {
+      await this.transporter.sendMail({
+        from: `"Workly - ${companyName}" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: `[Workly] Lời mời cơ hội việc làm từ ${companyName}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155; line-height: 1.6;">
+            <p>Chào <strong>${candidateName}</strong>,</p>
+            <p>Nhà tuyển dụng <strong>${companyName}</strong> đã xem qua hồ sơ của bạn trên hệ thống Workly và rất ấn tượng. Họ đã gửi một thông điệp dành cho bạn:</p>
+            <div style="background: #f1f5f9; padding: 15px 20px; border-left: 4px solid #2563eb; border-radius: 8px; margin: 20px 0; font-style: italic;">
+              "${messageContent}"
+            </div>
+            <p>Vui lòng đăng nhập vào hệ thống Workly để phản hồi lại nhà tuyển dụng qua hệ thống nhắn tin nội bộ.</p>
+            <div style="margin: 30px 0;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/candidate/messages" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Xem tin nhắn</a>
+            </div>
+            <p style="font-size: 14px; color: #64748b;">Trân trọng,<br>Đội ngũ Workly</p>
+          </div>
+        `,
+      });
+      console.log(`[MailService] Job invitation email sent to ${email}`);
+    } catch (error) {
+      console.error('[MailService] Error sending job invitation email:', error);
+    }
+  }
 }

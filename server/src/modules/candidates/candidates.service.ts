@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../../prisma/prisma.service';
 import { CvParsingService } from './cv-parsing.service';
 import { SupabaseService } from '../../common/supabase/supabase.service';
+import { MatchingService } from '../search/matching.service';
 import * as crypto from 'crypto';
 import { extname } from 'path';
 
@@ -11,6 +12,7 @@ export class CandidatesService {
     private readonly prisma: PrismaService,
     private readonly cvParsingService: CvParsingService,
     private readonly supabaseService: SupabaseService,
+    private readonly matchingService: MatchingService,
   ) { }
 
   async findAll(query: any) {
@@ -500,34 +502,6 @@ export class CandidatesService {
   }
 
   async getRecommendedJobs(userId: string) {
-    const candidate = await this.prisma.candidate.findUnique({
-      where: { userId },
-      include: { skills: true }
-    });
-    if (!candidate) return [];
-
-    const keywords: string[] = [];
-    if (candidate.major) keywords.push(candidate.major);
-    candidate.skills.forEach(s => keywords.push(s.skillName));
-
-    if (keywords.length === 0) return []; // Cannot recommend without data
-
-    // Multiple OR conditions for Prisma
-    const orConditions = keywords.map(kw => ({
-      OR: [
-        { title: { contains: kw, mode: 'insensitive' as any } },
-        { requirements: { contains: kw, mode: 'insensitive' as any } }
-      ]
-    }));
-
-    return this.prisma.jobPosting.findMany({
-      where: {
-        status: 'APPROVED',
-        OR: orConditions
-      },
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-      include: { company: true },
-    });
+    return this.matchingService.runMatchingForCandidate(userId);
   }
 }

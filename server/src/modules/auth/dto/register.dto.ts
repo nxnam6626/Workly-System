@@ -33,4 +33,19 @@ export class RegisterDto {
   })
   @IsEnum(Role, { message: 'Vai trò không hợp lệ' })
   role: Role;
+
+  @ApiProperty({ required: false })
+  companyName?: string;
+
+  @ApiProperty({ required: false })
+  phone?: string;
+
+  @ApiProperty({ required: false })
+  location?: string;
+
+  @ApiProperty({ required: false })
+  taxCode?: string;
+
+  @ApiProperty({ required: false })
+  verifyStatus?: number;
 }

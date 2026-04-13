@@ -8,8 +8,11 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 
-export default function JobDetailsPage({ params }: { params: { id: string } }) {
+export default function JobDetailsPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const [job, setJob] = useState<any>(null);
   const [suggestedCandidates, setSuggestedCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,19 +20,21 @@ export default function JobDetailsPage({ params }: { params: { id: string } }) {
   const { accessToken } = useAuthStore();
 
   useEffect(() => {
-    fetchJobDetails();
-  }, [accessToken, params.id]);
+    if (id) {
+      fetchJobDetails();
+    }
+  }, [accessToken, id]);
 
   const fetchJobDetails = async () => {
-    if (!accessToken) return;
+    if (!accessToken || !id) return;
     try {
       // 1. Fetch Job
-      const { data: jobData } = await api.get(`/job-postings/${params.id}`);
+      const { data: jobData } = await api.get(`/job-postings/${id}`);
       setJob(jobData);
 
       // 2. Fetch Suggested Candidates
       setLoadingCandidates(true);
-      const { data: candidatesData } = await api.get(`/job-postings/${params.id}/suggested-candidates`);
+      const { data: candidatesData } = await api.get(`/job-postings/${id}/suggested-candidates`);
       setSuggestedCandidates(candidatesData || []);
     } catch (error) {
       console.error('Error fetching job details:', error);

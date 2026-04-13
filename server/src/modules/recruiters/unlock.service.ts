@@ -1,41 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { WalletsService } from '../wallets/wallets.service';
 
 @Injectable()
 export class UnlockService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(UnlockService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly walletsService: WalletsService
+  ) {}
 
   async getWallet(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-      include: { wallet: true },
-    });
-
-    if (!recruiter) throw new NotFoundException('Không tìm thấy nhà tuyển dụng.');
-
-    // Nếu chưa có ví, tạo mới (mặc định 0 credit hoặc tặng 5 credit dùng thử)
-    if (!recruiter.wallet) {
-      return this.prisma.recruiterWallet.create({
-        data: {
-          recruiterId: recruiter.recruiterId,
-          balance: 5, // Tặng 5 credit dùng thử
-        },
-      });
-    }
-
-    return recruiter.wallet;
+    // Return Wallet through WalletsService instead of RecruiterWallet
+    return this.walletsService.getBalance(userId);
   }
 
   async unlockCandidate(userId: string, candidateId: string, jobPostingId: string, cvId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { wallet: true },
     });
 
     if (!recruiter) throw new NotFoundException('Không tìm thấy nhà tuyển dụng.');
-    if (!recruiter.wallet || recruiter.wallet.balance < 1) {
-      throw new BadRequestException('Số dư Credit không đủ. Vui lòng nạp thêm.');
-    }
 
     // Kiểm tra xem đã mở khóa chưa cho Job này
     const existingUnlock = await this.prisma.candidateUnlock.findUnique({
@@ -52,27 +38,28 @@ export class UnlockService {
       return { message: 'Ứng viên này đã được mở khóa cho vị trí này.', status: 'ALREADY_UNLOCKED' };
     }
 
-    // Thực hiện trừ tiền và lưu lịch sử (Transaction)
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Trừ 1 Credit
-      await tx.recruiterWallet.update({
-        where: { recruiterId: recruiter.recruiterId },
-        data: { balance: { decrement: 1 } },
-      });
+    const unLockCost = 50;
 
-      // 2. Tạo bản ghi Unlock
-      const unlock = await tx.candidateUnlock.create({
-        data: {
-          recruiterId: recruiter.recruiterId,
-          candidateId,
-          jobPostingId,
-          cvId,
-          creditSpent: 1,
-        },
-      });
+    // Lấy wallet và tự động văng lỗi nếu balance < unLockCost
+    try {
+      await this.walletsService.deduct(recruiter.recruiterId, unLockCost, `Mở khóa ứng viên #${candidateId.slice(0, 8)} cho job #${jobPostingId.slice(0, 8)}`);
+    } catch(error) {
+       this.logger.error("Unlock deduct error", error);
+       throw new BadRequestException('Số dư xu không đủ (Cần 50 xu). Vui lòng nạp thêm.');
+    }
 
-      return unlock;
+    // Tạo bản ghi Unlock
+    const unlock = await this.prisma.candidateUnlock.create({
+      data: {
+        recruiterId: recruiter.recruiterId,
+        candidateId,
+        jobPostingId,
+        cvId,
+        creditSpent: unLockCost,
+      },
     });
+
+    return unlock;
   }
 
   async getUnlockedCandidates(userId: string) {

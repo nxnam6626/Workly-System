@@ -26,6 +26,8 @@ export default function EmployerRegisterPage() {
   const [fullName, setFullName] = useState("");
   const [location, setLocation] = useState("");
   const [taxCode, setTaxCode] = useState("");
+  const [verifyStatus, setVerifyStatus] = useState(0); // 0: unverified, 1: verified
+  const [verifying, setVerifying] = useState(false);
   
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
@@ -43,6 +45,10 @@ export default function EmployerRegisterPage() {
 
     if (!email || !password || !companyName || !phone || !fullName || !location) {
         return setError("Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
+    }
+
+    if (taxCode && verifyStatus !== 1) {
+        return setError("Vui lòng xác thực mã số thuế trước khi đăng ký.");
     }
 
     setIsSubmitting(true);
@@ -65,6 +71,45 @@ export default function EmployerRegisterPage() {
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
+    }
+  };
+
+  const removeDiacritics = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  };
+
+  const handleVerifyTaxCode = async () => {
+    if (!taxCode) return;
+    if (!companyName) {
+      setError("Vui lòng nhập Tên công ty trước khi xác thực mã số thuế.");
+      return;
+    }
+    
+    setVerifying(true);
+    setError("");
+    try {
+      const res = await fetch(`https://api.vietqr.io/v2/business/${taxCode}`);
+      const data = await res.json();
+      if (data.code === '00' && data.data) {
+        const apiName = removeDiacritics(data.data.name);
+        const apiShort = removeDiacritics(data.data.shortName || "");
+        const inputName = removeDiacritics(companyName);
+        
+        if (apiName.includes(inputName) || inputName.includes(apiName) || (apiShort && (apiShort.includes(inputName) || inputName.includes(apiShort)))) {
+           setVerifyStatus(1);
+        } else {
+           setVerifyStatus(-1);
+           setError(`Tên công ty không khớp với mã số thuế. Tên đăng ký: ${data.data.name}`);
+        }
+      } else {
+        setVerifyStatus(-1);
+        setError('Mã số thuế không tồn tại hoặc sai!');
+      }
+    } catch (e) {
+      setVerifyStatus(-1);
+      setError('Lỗi khi tra cứu mã số thuế');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -204,7 +249,7 @@ export default function EmployerRegisterPage() {
                   <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                 </div>
                 <input
-                  type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required
+                  type="text" value={companyName} onChange={(e) => { setCompanyName(e.target.value); setVerifyStatus(0); }} required
                   placeholder="Nhập tên công ty của bạn..."
                   className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
                 />
@@ -261,16 +306,30 @@ export default function EmployerRegisterPage() {
                 </div>
 
                 <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mã số thuế</label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                    <input
-                    type="text" value={taxCode} onChange={(e) => setTaxCode(e.target.value)}
-                    placeholder="Nhập mã số thuế (không bắt buộc)"
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                    />
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between items-center">
+                  <span>Mã số thuế</span>
+                  {verifyStatus === 1 && <span className="text-xs text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực</span>}
+                  {verifyStatus === -1 && <span className="text-xs text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Thông tin không hợp lệ</span>}
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative group flex-1">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                      type="text" value={taxCode} onChange={(e) => { setTaxCode(e.target.value); setVerifyStatus(0); }}
+                      placeholder="Nhập mã số thuế (không bắt buộc)"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                      />
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={handleVerifyTaxCode}
+                    disabled={verifying || !taxCode}
+                    className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors whitespace-nowrap disabled:opacity-50 border border-slate-200"
+                  >
+                    {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kiểm tra'}
+                  </button>
                 </div>
                 </div>
             </div>

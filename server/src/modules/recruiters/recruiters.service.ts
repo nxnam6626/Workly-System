@@ -51,9 +51,17 @@ export class RecruitersService {
         }),
         this.prisma.cV.findUnique({
           where: { cvId: targetCvId },
-          select: { parsedData: true }
+          select: { parsedData: true, fileUrl: true }
         })
       ]);
+
+      let backendCvUrl = cv?.fileUrl;
+      // Convert internal path to full URL if needed (same logic as used in other areas)
+      if (backendCvUrl && !backendCvUrl.startsWith('http') && !backendCvUrl.startsWith('/api/')) {
+        backendCvUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/uploads/${backendCvUrl}`;
+      } else if (backendCvUrl && backendCvUrl.startsWith('/uploads/')) {
+        backendCvUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api${backendCvUrl}`;
+      }
 
       return {
         ...m,
@@ -62,6 +70,7 @@ export class RecruitersService {
         email: isUnlocked ? candidate?.user?.email : '****@***.com',
         phone: isUnlocked ? candidate?.user?.phoneNumber : '****-***-***',
         isUnlocked,
+        cvUrl: isUnlocked ? backendCvUrl : null,
         // Bổ sung thông tin từ CV (đã bóc tách) để hiển thị kỹ năng
         skills: (cv?.parsedData as any)?.skills || [],
       };
