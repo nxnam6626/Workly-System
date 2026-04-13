@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 
-export const API_BASE_URL = 'http://localhost:3001';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -72,7 +72,7 @@ api.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post('http://localhost:3001/auth/refresh', {
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
           refreshToken,
         });
 

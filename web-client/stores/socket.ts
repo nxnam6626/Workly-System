@@ -19,7 +19,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     
     if (get().socket?.connected || get().socket) return;
 
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3001';
+    const socketUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace('/api', '');
     
     const socket = io(socketUrl, {
       auth: {
