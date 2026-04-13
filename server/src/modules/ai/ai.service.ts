@@ -3,7 +3,17 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
-const pdfParse = require('pdf-parse');
+import PDFParser from 'pdf2json';
+
+/** Bóc text từ buffer PDF dùng pdf2json (pure JS, không cần native binding) */
+function parsePdfBuffer(buffer: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const parser = new PDFParser();
+    parser.on('pdfParser_dataError', (err: any) => reject(new Error(err.parserError)));
+    parser.on('pdfParser_dataReady', () => resolve((parser as any).getRawTextContent()));
+    parser.parseBuffer(buffer);
+  });
+}
 
 @Injectable()
 export class AiService {
@@ -23,13 +33,11 @@ export class AiService {
   async extractTextFromLocalFile(fileUrl: string): Promise<string> {
     try {
       if (!fileUrl) return '';
-      // Construct local path:
       const absolutePath = path.join(process.cwd(), fileUrl);
       if (!fs.existsSync(absolutePath)) return '';
 
       const dataBuffer = fs.readFileSync(absolutePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text;
+      return await parsePdfBuffer(dataBuffer);
     } catch (e) {
       console.error('Error parsing local PDF:', e.message);
       return '';
@@ -40,8 +48,7 @@ export class AiService {
     try {
       if (!fileUrl) return '';
       const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-      const data = await pdfParse(response.data);
-      return data.text;
+      return await parsePdfBuffer(Buffer.from(response.data));
     } catch (e) {
       console.error('Error fetching/parsing PDF:', e.message);
       return '';

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, SchemaType, GenerativeModel } from '@google/generative-ai';
 import { CvParsedData } from './interfaces/cv-parsing.interface';
+import PDFParser from 'pdf2json';
 
 const CV_EXTRACTION_PROMPT = (rawText: string) => `
 Bạn là một chuyên gia nhân sự (HR) cấp cao và chuyên gia bóc tách dữ liệu hồ sơ (CV Parsing).
@@ -118,15 +119,21 @@ export class CvParsingService {
   }
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
-    try {
-      const { PDFParse } = require('pdf-parse');
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
-      return result.text;
-    } catch (error) {
-      this.logger.error(`Lỗi khi trích xuất text từ PDF: ${error.message}`);
-      throw error;
-    }
+    return new Promise((resolve, reject) => {
+      const pdfParser = new PDFParser();
+
+      pdfParser.on('pdfParser_dataError', (errData: any) => {
+        this.logger.error(`Lỗi khi parse PDF: ${errData.parserError}`);
+        reject(new Error(errData.parserError));
+      });
+
+      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+        const text = (pdfParser as any).getRawTextContent();
+        resolve(text);
+      });
+
+      pdfParser.parseBuffer(buffer);
+    });
   }
 
   async parseCv(rawText: string): Promise<CvParsedData | null> {
