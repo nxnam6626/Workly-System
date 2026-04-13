@@ -7,7 +7,10 @@ export class ResetPasswordDto {
   @IsNotEmpty({ message: 'Email không được để trống' })
   email: string;
 
-  @ApiProperty({ example: '123456', description: 'Mã xác nhận (OTP) được gửi qua email' })
+  @ApiProperty({
+    example: '123456',
+    description: 'Mã xác nhận (OTP) được gửi qua email',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Mã xác nhận không được để trống' })
   token: string;

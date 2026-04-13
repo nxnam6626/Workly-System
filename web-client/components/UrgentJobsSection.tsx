@@ -21,6 +21,7 @@ export function UrgentJobsSection() {
         const params: any = {
           limit: 6,
           page: 1,
+          jobTier: "URGENT",
         };
 
         if (activeTab !== "Tất cả") {

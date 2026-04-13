@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, FileUp, Sparkles, ArrowRight, CornerDownRight } from "lucide-react";
 import toast from "react-hot-toast";
-import api from "@/lib/axios";
+import api from "@/lib/api";
 
 export default function ImportCvPage() {
   const router = useRouter();

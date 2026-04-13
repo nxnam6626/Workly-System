@@ -14,4 +14,19 @@ export class AdminController {
   getDashboardStats() {
     return this.adminService.getDashboardStats();
   }
+
+  @Get('revenue/stats')
+  getRevenueStats() {
+    return this.adminService.getRevenueStats();
+  }
+
+  @Get('recruiters/violations')
+  getViolatingRecruiters() {
+    return this.adminService.getViolatingRecruiters();
+  }
+
+  @Get('violations/latest')
+  getLatestViolations() {
+    return this.adminService.getLatestViolations();
+  }
 }

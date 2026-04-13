@@ -23,14 +23,18 @@ describe('Companies (e2e)', () => {
   const TEST_EMAILS = ['rec_comp_e2e@test.com'];
 
   const cleanup = async () => {
-    const users = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } } });
+    const users = await prisma.user.findMany({
+      where: { email: { in: TEST_EMAILS } },
+    });
     if (!users.length) return;
-    const userIds = users.map(u => u.userId);
+    const userIds = users.map((u) => u.userId);
 
     await prisma.userRole.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.recruiter.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { email: { in: TEST_EMAILS } } });
-    await prisma.company.deleteMany({ where: { companyName: { startsWith: 'Company E2E Corp' } } });
+    await prisma.company.deleteMany({
+      where: { companyName: { startsWith: 'Company E2E Corp' } },
+    });
   };
 
   beforeAll(async () => {
@@ -47,7 +51,11 @@ describe('Companies (e2e)', () => {
 
     await cleanup();
 
-    const roleRec = await prisma.role.upsert({ where: { roleName: 'RECRUITER' }, update: {}, create: { roleName: 'RECRUITER' } });
+    const roleRec = await prisma.role.upsert({
+      where: { roleName: 'RECRUITER' },
+      update: {},
+      create: { roleName: 'RECRUITER' },
+    });
 
     const taxCode = 'TAX-E2E-' + Date.now();
     testCompanyName = 'Company E2E Corp ' + Date.now();
@@ -56,8 +64,8 @@ describe('Companies (e2e)', () => {
         companyName: testCompanyName,
         address: 'Hanoi',
         description: 'Testing Company',
-        taxCode: taxCode
-      }
+        taxCode: taxCode,
+      },
     });
     companyId = company.companyId;
 
@@ -67,12 +75,20 @@ describe('Companies (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         recruiter: { create: { bio: 'Test HR', companyId } },
-        userRoles: { create: { roleId: roleRec.roleId } }
+        userRoles: { create: { roleId: roleRec.roleId } },
       },
-      include: { recruiter: true }
+      include: { recruiter: true },
     });
     recUserId = recUser.userId;
-    recruiterToken = jwtService.sign({ sub: recUser.userId, email: recUser.email, roles: ['RECRUITER'], type: 'access' }, { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' });
+    recruiterToken = jwtService.sign(
+      {
+        sub: recUser.userId,
+        email: recUser.email,
+        roles: ['RECRUITER'],
+        type: 'access',
+      },
+      { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' },
+    );
   });
 
   afterAll(async () => {

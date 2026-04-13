@@ -17,14 +17,17 @@ export class SearchService implements OnModuleInit {
       await this.client.ping();
       await this.ensureIndexExists();
     } catch (e: any) {
-      console.warn('[SearchService] Could not connect to Elasticsearch:', e.message);
+      console.warn(
+        '[SearchService] Could not connect to Elasticsearch:',
+        e.message,
+      );
     }
   }
 
   private async ensureIndexExists() {
     const index = 'jobs';
     const exists = await this.client.indices.exists({ index });
-    
+
     if (!exists.body) {
       console.log(`[SearchService] Creating index "${index}"...`);
       await this.client.indices.create({
@@ -43,7 +46,9 @@ export class SearchService implements OnModuleInit {
               salaryMin: { type: 'integer' },
               salaryMax: { type: 'integer' },
               createdAt: { type: 'date' },
+              refreshedAt: { type: 'date' },
               companyId: { type: 'keyword' },
+              jobTier: { type: 'keyword' },
               originalUrl: { type: 'keyword' },
             },
           },
@@ -78,11 +83,11 @@ export class SearchService implements OnModuleInit {
     }
   }
 
-  async indexJob(job: { 
-    id: string; 
-    title: string; 
-    companyId: string; 
-    originalUrl?: string; 
+  async indexJob(job: {
+    id: string;
+    title: string;
+    companyId: string;
+    originalUrl?: string;
     description?: string;
     locationCity?: string;
     jobType?: string;
@@ -93,6 +98,8 @@ export class SearchService implements OnModuleInit {
     status?: string;
     companyName?: string;
     createdAt?: Date | string;
+    refreshedAt?: Date | string;
+    jobTier?: string;
   }) {
     try {
       await this.client.index({
@@ -112,6 +119,8 @@ export class SearchService implements OnModuleInit {
           industry: job.industry,
           status: job.status,
           createdAt: job.createdAt || new Date(),
+          refreshedAt: job.refreshedAt || new Date(),
+          jobTier: job.jobTier || 'BASIC',
         },
       });
       console.log(`[SearchService] Indexed job ${job.id}`);
@@ -138,6 +147,7 @@ export class SearchService implements OnModuleInit {
   async searchJobs(params: {
     search?: string;
     location?: string;
+    jobTier?: string;
     jobType?: string;
     industry?: string;
     experience?: string;
@@ -146,16 +156,17 @@ export class SearchService implements OnModuleInit {
     page?: number;
     limit?: number;
   }) {
-    const { 
-      search, 
-      location, 
-      jobType, 
-      industry, 
-      experience, 
-      salaryMin, 
-      salaryMax, 
-      page = 1, 
-      limit = 10 
+    const {
+      search,
+      location,
+      jobTier,
+      jobType,
+      industry,
+      experience,
+      salaryMin,
+      salaryMax,
+      page = 1,
+      limit = 10,
     } = params;
 
     const skip = (page - 1) * limit;
@@ -170,13 +181,17 @@ export class SearchService implements OnModuleInit {
           fields: ['title^3', 'companyName^2', 'description', 'locationCity'],
           fuzziness: 'AUTO',
           operator: 'or',
-          minimum_should_match: '70%'
-        }
+          minimum_should_match: '70%',
+        },
       });
     }
 
     if (location) {
       filter.push({ match: { locationCity: location } });
+    }
+
+    if (jobTier) {
+      filter.push({ match: { jobTier: jobTier } });
     }
 
     if (jobType) {
@@ -192,14 +207,16 @@ export class SearchService implements OnModuleInit {
     }
 
     // Salary range filter
-    const isValidSalaryMin = salaryMin !== undefined && salaryMin !== null && !isNaN(salaryMin);
-    const isValidSalaryMax = salaryMax !== undefined && salaryMax !== null && !isNaN(salaryMax);
+    const isValidSalaryMin =
+      salaryMin !== undefined && salaryMin !== null && !isNaN(salaryMin);
+    const isValidSalaryMax =
+      salaryMax !== undefined && salaryMax !== null && !isNaN(salaryMax);
 
     if (isValidSalaryMin || isValidSalaryMax) {
       const range: any = {};
       if (isValidSalaryMin) range.gte = salaryMin;
       if (isValidSalaryMax) range.lte = salaryMax;
-      
+
       if (Object.keys(range).length > 0) {
         filter.push({ range: { salaryMax: range } });
       }
@@ -217,14 +234,15 @@ export class SearchService implements OnModuleInit {
               filter,
             },
           },
-          sort: search ? [{ _score: 'desc' }] : [{ createdAt: 'desc' }],
+          sort: search ? [{ _score: 'desc' }, { jobTier: 'desc' }, { refreshedAt: 'desc' }] : [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
         },
       };
 
       const result = await this.client.search(queryParams);
 
       const hits = result.body.hits;
-      const total = typeof hits.total === 'number' ? hits.total : hits.total.value;
+      const total =
+        typeof hits.total === 'number' ? hits.total : hits.total.value;
       const ids = hits.hits.map((hit: any) => hit._id);
 
       return { ids, total };

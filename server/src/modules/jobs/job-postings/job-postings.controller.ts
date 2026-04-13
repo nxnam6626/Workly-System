@@ -22,7 +22,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Controller('job-postings')
 export class JobPostingsController {
-  constructor(private readonly jobPostingsService: JobPostingsService) { }
+  constructor(private readonly jobPostingsService: JobPostingsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -41,11 +41,17 @@ export class JobPostingsController {
     return this.jobPostingsService.findMyJobs(userId);
   }
 
+  @Get('resync-es')
+  async resyncES() {
+    await this.jobPostingsService.syncAllJobsToES();
+    return { message: 'Đồng bộ lại toàn bộ dữ liệu Job sang Elasticsearch thành công' };
+  }
+
   @Get(':id/suggested-candidates')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
-  getSuggestedCandidates(@Param('id') id: string) {
-    return this.jobPostingsService.getSuggestedCandidates(id);
+  getSuggestedCandidates(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.getSuggestedCandidates(id, userId);
   }
 
   @Get()
@@ -60,9 +66,9 @@ export class JobPostingsController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   findOne(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @CurrentUser('userId') userId?: string,
-    @Query('trackView') trackView?: string
+    @Query('trackView') trackView?: string,
   ) {
     const shouldTrack = trackView !== 'false';
     return this.jobPostingsService.findOne(id, userId, shouldTrack);

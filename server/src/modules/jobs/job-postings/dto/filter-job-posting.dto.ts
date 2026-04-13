@@ -1,6 +1,13 @@
-import { IsOptional, IsString, IsInt, Min, IsEnum, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  IsEnum,
+  IsNumber,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
-import { JobType } from '@prisma/client';
+import { JobType, JobTier } from '@prisma/client';
 
 export class FilterJobPostingDto {
   @IsOptional()
@@ -14,6 +21,10 @@ export class FilterJobPostingDto {
   @IsOptional()
   @IsEnum(JobType)
   jobType?: JobType;
+
+  @IsOptional()
+  @IsEnum(JobTier)
+  jobTier?: JobTier;
 
   @IsOptional()
   @IsString()

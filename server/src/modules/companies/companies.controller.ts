@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Query, Patch, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Patch,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { FilterCompanyDto } from './dto/filter-company.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,7 +24,10 @@ export class CompaniesController {
 
   @Patch('my-company')
   @UseGuards(JwtAuthGuard)
-  updateMyCompany(@CurrentUser('userId') userId: string, @Body() updateData: any) {
+  updateMyCompany(
+    @CurrentUser('userId') userId: string,
+    @Body() updateData: any,
+  ) {
     return this.companiesService.updateMyCompany(userId, updateData);
   }
 

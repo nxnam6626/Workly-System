@@ -6,7 +6,7 @@ import { MailService } from '../../mail/mail.service';
 export class MessagesService {
   constructor(
     public prisma: PrismaService,
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
   ) {}
 
   async getConversations(userId: string) {
@@ -34,13 +34,27 @@ export class MessagesService {
           select: {
             candidateId: true,
             fullName: true,
-            user: { select: { avatar: true, userId: true, isOnline: true, lastActive: true } },
+            user: {
+              select: {
+                avatar: true,
+                userId: true,
+                isOnline: true,
+                lastActive: true,
+              },
+            },
           },
         },
         recruiter: {
           select: {
             recruiterId: true,
-            user: { select: { avatar: true, userId: true, isOnline: true, lastActive: true } },
+            user: {
+              select: {
+                avatar: true,
+                userId: true,
+                isOnline: true,
+                lastActive: true,
+              },
+            },
             company: { select: { companyName: true } },
           },
         },
@@ -96,7 +110,11 @@ export class MessagesService {
     return message;
   }
 
-  async broadcastMessage(recruiterUserId: string, candidateIds: string[], content: string) {
+  async broadcastMessage(
+    recruiterUserId: string,
+    candidateIds: string[],
+    content: string,
+  ) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId: recruiterUserId },
       include: { company: true },
@@ -105,27 +123,35 @@ export class MessagesService {
       throw new NotFoundException('Recruiter not found');
     }
 
-    const companyName = recruiter.company?.companyName || 'Nhà Tuyển Dụng trên Workly';
+    const companyName =
+      recruiter.company?.companyName || 'Nhà Tuyển Dụng trên Workly';
 
     const results: any[] = [];
     for (const candidateId of candidateIds) {
-      const conv = await this.createConversation(candidateId, recruiter.recruiterId);
-      const msg = await this.sendMessage(recruiterUserId, conv.conversationId, content);
+      const conv = await this.createConversation(
+        candidateId,
+        recruiter.recruiterId,
+      );
+      const msg = await this.sendMessage(
+        recruiterUserId,
+        conv.conversationId,
+        content,
+      );
       results.push(msg);
 
       // Gửi email tự động
       try {
         const candidateDetails = await this.prisma.candidate.findUnique({
           where: { candidateId },
-          include: { user: true }
+          include: { user: true },
         });
         if (candidateDetails && candidateDetails.user.email) {
-            await this.mailService.sendJobInvitation(
-                candidateDetails.user.email,
-                candidateDetails.fullName,
-                companyName,
-                content
-            );
+          await this.mailService.sendJobInvitation(
+            candidateDetails.user.email,
+            candidateDetails.fullName,
+            companyName,
+            content,
+          );
         }
       } catch (err) {
         console.error('Failed to send auto-email in broadcastMessage:', err);
@@ -157,26 +183,28 @@ export class MessagesService {
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
-          select: { senderId: true }
-        }
-      }
+          select: { senderId: true },
+        },
+      },
     });
 
-    const count = conversations.filter(c => c.messages.length > 0 && c.messages[0].senderId !== userId).length;
+    const count = conversations.filter(
+      (c) => c.messages.length > 0 && c.messages[0].senderId !== userId,
+    ).length;
     return { unreadCount: count };
   }
 
   async markAsRead(conversationId: string, userId: string) {
     await this.prisma.conversation.update({
       where: { conversationId },
-      data: { isRead: true }
+      data: { isRead: true },
     });
-    
+
     await this.prisma.message.updateMany({
       where: { conversationId, isRead: false },
-      data: { isRead: true }
+      data: { isRead: true },
     });
-    
+
     return { success: true };
   }
 }

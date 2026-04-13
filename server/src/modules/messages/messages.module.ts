@@ -12,4 +12,4 @@ import { MailModule } from '../../mail/mail.module';
   providers: [MessagesService, MessagesGateway],
   exports: [MessagesService, MessagesGateway],
 })
-export class MessagesModule { }
+export class MessagesModule {}

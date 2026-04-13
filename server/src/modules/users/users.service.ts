@@ -81,28 +81,33 @@ export class UsersService {
       await tx.candidate.create({
         data: {
           userId: newUser.userId,
-          fullName: 'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
+          fullName:
+            'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
         },
       });
 
       if (data.role === 'RECRUITER') {
-        let companyId = null;
+        let companyId: string | null = null;
         if ('companyName' in data && data.companyName) {
-           const newCompany = await tx.company.create({
-              data: {
-                 companyName: data.companyName,
-                 taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
-                 address: 'location' in data && data.location ? data.location : null,
-                 verifyStatus: 'verifyStatus' in data && data.verifyStatus ? data.verifyStatus : 0
-              }
-           });
-           companyId = newCompany.companyId;
+          const newCompany = await tx.company.create({
+            data: {
+              companyName: data.companyName,
+              taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
+              address:
+                'location' in data && data.location ? data.location : null,
+              verifyStatus:
+                'verifyStatus' in data && data.verifyStatus
+                  ? data.verifyStatus
+                  : 0,
+            },
+          });
+          companyId = newCompany.companyId;
         }
 
         await tx.recruiter.create({
-          data: { 
+          data: {
             userId: newUser.userId,
-            ...(companyId ? { companyId } : {})
+            ...(companyId ? { companyId } : {}),
           },
         });
       } else if (data.role === 'ADMIN') {
@@ -121,12 +126,16 @@ export class UsersService {
     if ('fullName' in data && data.fullName) displayName = data.fullName;
 
     // Fire and forget integration events
-    this.mailService.sendWelcomeEmail(data.email, displayName).catch(console.error);
-    this.searchService.indexUser({ 
-      id: result.userId, 
-      email: data.email, 
-      roles: [data.role as string] 
-    }).catch(console.error);
+    this.mailService
+      .sendWelcomeEmail(data.email, displayName)
+      .catch(console.error);
+    this.searchService
+      .indexUser({
+        id: result.userId,
+        email: data.email,
+        roles: [data.role as string],
+      })
+      .catch(console.error);
 
     return result;
   }
@@ -137,7 +146,13 @@ export class UsersService {
   }
 
   /** Xử lý login từ OAuth (Google/LinkedIn): Tìm User bằng Email hoặc tạo mới Role CANDIDATE. */
-  async findOrCreateOAuthUser(data: { email: string; provider: any; providerId: string; fullName: string; avatar?: string }) {
+  async findOrCreateOAuthUser(data: {
+    email: string;
+    provider: any;
+    providerId: string;
+    fullName: string;
+    avatar?: string;
+  }) {
     let user = await this.findByEmail(data.email);
     if (!user) {
       // Create new CANDIDATE user without password
@@ -188,19 +203,23 @@ export class UsersService {
       });
 
       // Fire and forget integration events
-      this.mailService.sendWelcomeEmail(data.email, data.fullName).catch(console.error);
+      this.mailService
+        .sendWelcomeEmail(data.email, data.fullName)
+        .catch(console.error);
       if (user) {
-        this.searchService.indexUser({ 
-          id: user.userId, 
-          email: data.email, 
-          roles: ['CANDIDATE'] 
-        }).catch(console.error);
+        this.searchService
+          .indexUser({
+            id: user.userId,
+            email: data.email,
+            roles: ['CANDIDATE'],
+          })
+          .catch(console.error);
       }
     } else {
       // If user exists but no provider, update the provider
       const anyUser = user as any;
       if (!anyUser.provider || anyUser.provider === 'LOCAL') {
-        user = await this.prisma.user.update({
+        user = (await this.prisma.user.update({
           where: { userId: user.userId },
           data: {
             provider: data.provider,
@@ -212,7 +231,7 @@ export class UsersService {
             recruiter: true,
             userRoles: { include: { role: true } },
           },
-        }) as any;
+        })) as any;
       }
     }
     return user;
@@ -262,7 +281,7 @@ export class UsersService {
             include: { role: true },
           },
           candidate: { select: { fullName: true } },
-          recruiter: { select: { position: true, bio: true } },
+          recruiter: { select: { position: true, bio: true, violationCount: true } },
         },
       }),
       this.prisma.user.count({ where }),
@@ -339,7 +358,7 @@ export class UsersService {
         provider: true,
         userRoles: { include: { role: true } },
         candidate: {
-          include: { 
+          include: {
             skills: true,
             cvs: {
               select: {
@@ -392,7 +411,7 @@ export class UsersService {
       if (dto.role) {
         // Delete all existing roles for this user
         await tx.userRole.deleteMany({
-           where: { userId }
+          where: { userId },
         });
 
         // Always re-grant CANDIDATE base role
@@ -420,14 +439,14 @@ export class UsersService {
             roleId: roleRecord.roleId,
           },
         });
-        
+
         // Ensure profile exists for the new role if Admin/Recruiter
         if (dto.role === 'RECRUITER') {
           const ext = await tx.recruiter.findUnique({ where: { userId } });
           if (!ext) await tx.recruiter.create({ data: { userId } });
         } else if (dto.role === 'ADMIN') {
-           const ext = await tx.admin.findUnique({ where: { userId } });
-           if (!ext) await tx.admin.create({ data: { userId, adminLevel: 1 } });
+          const ext = await tx.admin.findUnique({ where: { userId } });
+          if (!ext) await tx.admin.create({ data: { userId, adminLevel: 1 } });
         }
       }
     });
@@ -457,8 +476,12 @@ export class UsersService {
     const fileExt = file.originalname.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
     const path = `avatars/${userId}/${fileName}`;
-    
-    const avatarUrl = await this.supabaseService.uploadFile(file.buffer, path, file.mimetype);
+
+    const avatarUrl = await this.supabaseService.uploadFile(
+      file.buffer,
+      path,
+      file.mimetype,
+    );
 
     // 2. Cập nhật URL vào DB
     await this.prisma.user.update({
@@ -500,7 +523,9 @@ export class UsersService {
       });
 
       if (data.role === 'CANDIDATE') {
-        const existingCandidate = await tx.candidate.findUnique({ where: { userId } });
+        const existingCandidate = await tx.candidate.findUnique({
+          where: { userId },
+        });
         if (!existingCandidate) {
           await tx.candidate.create({
             data: {
@@ -510,25 +535,32 @@ export class UsersService {
           });
         }
       } else if (data.role === 'RECRUITER') {
-        const existingRecruiter = await tx.recruiter.findUnique({ where: { userId } });
+        const existingRecruiter = await tx.recruiter.findUnique({
+          where: { userId },
+        });
         if (!existingRecruiter) {
-          let companyId = null;
+          let companyId: string | null = null;
           if ('companyName' in data && data.companyName) {
-             const newCompany = await tx.company.create({
-                data: {
-                   companyName: data.companyName,
-                   taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
-                   address: 'location' in data && data.location ? data.location : null,
-                   verifyStatus: 'verifyStatus' in data && data.verifyStatus ? data.verifyStatus : 0
-                }
-             });
-             companyId = newCompany.companyId;
+            const newCompany = await tx.company.create({
+              data: {
+                companyName: data.companyName,
+                taxCode:
+                  'taxCode' in data && data.taxCode ? data.taxCode : null,
+                address:
+                  'location' in data && data.location ? data.location : null,
+                verifyStatus:
+                  'verifyStatus' in data && data.verifyStatus
+                    ? data.verifyStatus
+                    : 0,
+              },
+            });
+            companyId = newCompany.companyId;
           }
 
           await tx.recruiter.create({
-            data: { 
+            data: {
               userId,
-              ...(companyId ? { companyId } : {})
+              ...(companyId ? { companyId } : {}),
             },
           });
         }
@@ -550,10 +582,10 @@ export class UsersService {
     try {
       const user = await this.findOne(userId);
       const roles = user.userRoles.map((ur: any) => ur.role.roleName);
-      await this.searchService.indexUser({ 
-        id: user.userId, 
-        email: user.email, 
-        roles 
+      await this.searchService.indexUser({
+        id: user.userId,
+        email: user.email,
+        roles,
       });
     } catch (error) {
       console.error(error);
@@ -622,7 +654,10 @@ export class UsersService {
 
   async lockUser(userId: string) {
     await this.findOne(userId);
-    await this.prisma.user.update({ where: { userId }, data: { status: 'LOCKED' } });
+    await this.prisma.user.update({
+      where: { userId },
+      data: { status: 'LOCKED' },
+    });
 
     try {
       const gateway = this.moduleRef.get(MessagesGateway, { strict: false });
@@ -630,16 +665,31 @@ export class UsersService {
         gateway.server.to(`user_${userId}`).emit('accountLocked');
       }
     } catch (error: any) {
-       console.error('Could not get MessagesGateway:', error.message);
+      console.error('Could not get MessagesGateway:', error.message);
     }
-    
+
     return { message: 'Tài khoản đã bị khóa.' };
   }
 
   async unlockUser(userId: string) {
     await this.findOne(userId);
-    await this.prisma.user.update({ where: { userId }, data: { status: 'ACTIVE' } });
+    await this.prisma.user.update({
+      where: { userId },
+      data: { status: 'ACTIVE' },
+    });
     return { message: 'Tài khoản đã được mở khóa.' };
+  }
+
+  async resetViolationCount(userId: string) {
+    const user = await this.findOne(userId);
+    if (!user.recruiter) {
+      throw new NotFoundException('Người dùng này không phải là nhà tuyển dụng.');
+    }
+    await this.prisma.recruiter.update({
+      where: { userId },
+      data: { violationCount: 0 },
+    });
+    return { message: 'Đã đặt lại số lần vi phạm về 0.' };
   }
 
   async remove(userId: string) {

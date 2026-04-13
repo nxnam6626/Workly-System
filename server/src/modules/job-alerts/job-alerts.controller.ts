@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { JobAlertsService } from './job-alerts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -19,13 +27,19 @@ export class JobAlertsController {
 
   @Post()
   @ApiOperation({ summary: 'Lưu một từ khóa tìm việc mới' })
-  async create(@CurrentUser('userId') userId: string, @Body('keywords') keywords: string) {
+  async create(
+    @CurrentUser('userId') userId: string,
+    @Body('keywords') keywords: string,
+  ) {
     return this.jobAlertsService.create(userId, keywords);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa một từ khóa đã lưu' })
-  async remove(@Param('id') jobAlertId: string, @CurrentUser('userId') userId: string) {
+  async remove(
+    @Param('id') jobAlertId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
     return this.jobAlertsService.remove(jobAlertId, userId);
   }
 }

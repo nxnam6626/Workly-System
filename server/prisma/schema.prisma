@@ -28,6 +28,7 @@ model User {
   notifications   Notification[]
   recruiter       Recruiter?
   userRoles       UserRole[]
+  supportRequests SupportRequest[]
 }
 
 model Role {
@@ -113,38 +114,34 @@ model Project {
 }
 
 model Recruiter {
-  recruiterId       String           @id @default(uuid())
-  bio               String?
-  position          String?
-  userId            String           @unique
-  companyId         String?
-  savedCandidateIds String[]
-  conversations     Conversation[]
-  jobPostings       JobPosting[]
-  company           Company?         @relation(fields: [companyId], references: [companyId])
-  user              User             @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  recruiterWallet   RecruiterWallet?
-  wallet            Wallet?
-}
-
-model Wallet {
-  walletId     String        @id @default(uuid())
-  balance      Float         @default(0)
-  recruiterId  String        @unique
-  transactions Transaction[]
-  recruiter    Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  recruiterId           String                 @id @default(uuid())
+  bio                   String?
+  position              String?
+  userId                String                 @unique
+  companyId             String?
+  savedCandidateIds     String[]
+  violationCount        Int                    @default(0)
+  conversations         Conversation[]
+  jobPostings           JobPosting[]
+  company               Company?               @relation(fields: [companyId], references: [companyId])
+  user                  User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  recruiterWallet       RecruiterWallet?
+  recruiterSubscription RecruiterSubscription?
+  updatedAt             DateTime               @default(now()) @updatedAt
+  createdAt             DateTime               @default(now())
 }
 
 model Transaction {
-  transactionId String   @id @default(uuid())
-  amount        Float
-  type          String
+  transactionId String          @id @default(uuid())
+  amount        Int
+  realMoney     Float?
+  type          TransactionType
   description   String?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime        @default(now())
   walletId      String
-  orderCode     Int?     @unique
-  status        String   @default("SUCCESS")
-  wallet        Wallet   @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
+  orderCode     Int?            @unique
+  status        String          @default("SUCCESS")
+  wallet        RecruiterWallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
 }
 
 model CrawlLog {
@@ -210,10 +207,12 @@ model JobPosting {
   deadline               DateTime?     @db.Timestamp(6)
   status                 JobStatus     @default(PENDING)
   postType               PostType      @default(CRAWLED)
+  jobTier                JobTier       @default(BASIC)
   isVerified             Boolean       @default(false)
   originalUrl            String        @unique
   aiReliabilityScore     Float?
   createdAt              DateTime      @default(now()) @db.Timestamp(6)
+  refreshedAt            DateTime      @default(now()) @db.Timestamp(6)
   updatedAt              DateTime      @updatedAt @db.Timestamp(6)
   approvedBy             String?
   recruiterId            String?
@@ -297,11 +296,14 @@ model Message {
 }
 
 model RecruiterWallet {
-  walletId    String    @id @default(uuid())
-  recruiterId String    @unique
-  balance     Int       @default(0)
-  updatedAt   DateTime  @updatedAt
-  recruiter   Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  walletId        String        @id @default(uuid())
+  recruiterId     String        @unique
+  balance         Int           @default(0)
+  cvUnlockQuota   Int           @default(0)
+  cvUnlockQuotaMax Int          @default(0)
+  updatedAt       DateTime      @updatedAt
+  recruiter       Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  transactions    Transaction[]
 }
 
 model CandidateUnlock {
@@ -376,4 +378,58 @@ enum SkillLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+}
+
+model RecruiterSubscription {
+  subscriptionId  String    @id @default(uuid())
+  recruiterId     String    @unique
+  planType        PlanType
+  maxBasicPosts   Int       @default(0)
+  usedBasicPosts  Int       @default(0)
+  maxVipPosts     Int       @default(0)
+  usedVipPosts    Int       @default(0)
+  maxUrgentPosts  Int       @default(0)
+  usedUrgentPosts Int       @default(0)
+  expiryDate      DateTime
+  canViewAIReport Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  recruiter       Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+}
+
+enum PlanType {
+  LITE
+  GROWTH
+}
+
+enum JobTier {
+  BASIC
+  PROFESSIONAL
+  URGENT
+}
+
+enum TransactionType {
+  DEPOSIT
+  BUY_PACKAGE
+  POST_JOB
+  OPEN_CV
+}
+
+model SupportRequest {
+  requestId String        @id @default(uuid())
+  name      String?
+  email     String
+  subject   String
+  message   String
+  status    SupportStatus @default(OPEN)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [userId], onDelete: SetNull)
+}
+
+enum SupportStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
 }

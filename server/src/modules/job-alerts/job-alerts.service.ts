@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -14,7 +18,7 @@ export class JobAlertsService {
 
   async create(userId: string, keywords: string): Promise<any> {
     const trimmedKeywords = keywords.trim().toLowerCase();
-    
+
     // Check if alert with same keywords already exists for this user
     const existing = await (this.prisma as any).jobAlert.findFirst({
       where: {
@@ -51,7 +55,7 @@ export class JobAlertsService {
       where: { jobAlertId },
     });
   }
-  
+
   async findAllAlerts(): Promise<any[]> {
     return (this.prisma as any).jobAlert.findMany();
   }

@@ -17,7 +17,7 @@ export class AuthService {
     private usersService: UsersService,
     private tokenService: TokenService,
     private securityService: SecurityService,
-  ) { }
+  ) {}
 
   // ==========================================
   // CORE AUTHENTICATION (Xác thực chính)
@@ -28,21 +28,34 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       if (!existingUser.password) {
-        throw new BadRequestException('Email này được đăng ký qua Google/LinkedIn. Vui lòng đăng nhập qua đó.');
+        throw new BadRequestException(
+          'Email này được đăng ký qua Google/LinkedIn. Vui lòng đăng nhập qua đó.',
+        );
       }
-      const isMatch = await this.securityService.comparePassword(dto.password, existingUser.password);
+      const isMatch = await this.securityService.comparePassword(
+        dto.password,
+        existingUser.password,
+      );
       if (!isMatch) {
-        throw new ConflictException('Email đã tồn tại. Vui lòng nhập đúng mật khẩu nếu bạn muốn đăng ký thêm vai trò cho tài khoản này.');
+        throw new ConflictException(
+          'Email đã tồn tại. Vui lòng nhập đúng mật khẩu nếu bạn muốn đăng ký thêm vai trò cho tài khoản này.',
+        );
       }
-      const hasRole = existingUser.userRoles.some((ur: any) => ur.role.roleName === dto.role);
+      const hasRole = existingUser.userRoles.some(
+        (ur: any) => ur.role.roleName === dto.role,
+      );
       if (hasRole) {
-        throw new ConflictException(`Bạn đã đăng ký với vai trò ${dto.role} rồi. Vui lòng đăng nhập.`);
+        throw new ConflictException(
+          `Bạn đã đăng ký với vai trò ${dto.role} rồi. Vui lòng đăng nhập.`,
+        );
       }
 
       return this.usersService.addRoleToUser(existingUser.userId, dto);
     }
 
-    const hashedPassword = await this.securityService.hashPassword(dto.password);
+    const hashedPassword = await this.securityService.hashPassword(
+      dto.password,
+    );
     return this.usersService.create(
       { ...dto, password: hashedPassword },
       { passwordAlreadyHashed: true },
@@ -57,7 +70,11 @@ export class AuthService {
 
     await this.usersService.updateLastLogin(user.userId);
     const roles = user.userRoles.map((ur: any) => ur.role.roleName);
-    const tokens = await this.tokenService.issueTokens(user.userId, user.email, roles);
+    const tokens = await this.tokenService.issueTokens(
+      user.userId,
+      user.email,
+      roles,
+    );
 
     return {
       ...tokens,
@@ -84,11 +101,15 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Không thể xác thực người dùng qua OAuth.');
+      throw new UnauthorizedException(
+        'Không thể xác thực người dùng qua OAuth.',
+      );
     }
 
     if (user.status === 'LOCKED') {
-      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.',
+      );
     }
 
     await this.usersService.updateLastLogin(user.userId);
@@ -106,14 +127,19 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) return null;
-    if (user.status === 'LOCKED') throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+    if (user.status === 'LOCKED')
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.',
+      );
     if (!user.password) return null; // Protect against social login accounts without passwords
-    
-    const isMatch = await this.securityService.comparePassword(password, user.password);
+
+    const isMatch = await this.securityService.comparePassword(
+      password,
+      user.password,
+    );
     if (!isMatch) return null;
-    
+
     const { password: _, refreshToken: __, ...result } = user;
     return result;
   }
 }
-

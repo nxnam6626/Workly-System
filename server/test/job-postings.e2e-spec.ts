@@ -26,18 +26,20 @@ describe('JobPostings (e2e)', () => {
 
   // Hàm dọn dẹp dữ liệu theo thứ tự ưu tiên để tránh lỗi khóa ngoại
   const cleanup = async () => {
-    const users = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } } });
+    const users = await prisma.user.findMany({
+      where: { email: { in: TEST_EMAILS } },
+    });
     if (!users.length) return;
-    const userIds = users.map(u => u.userId);
+    const userIds = users.map((u) => u.userId);
 
     // Xóa JobPosting
     await prisma.jobPosting.deleteMany({
-      where: { recruiter: { userId: { in: userIds } } }
+      where: { recruiter: { userId: { in: userIds } } },
     });
 
     // Xóa UserRoles
     await prisma.userRole.deleteMany({
-      where: { userId: { in: userIds } }
+      where: { userId: { in: userIds } },
     });
 
     // Xóa Admin và Recruiter
@@ -48,7 +50,9 @@ describe('JobPostings (e2e)', () => {
     await prisma.user.deleteMany({ where: { email: { in: TEST_EMAILS } } });
 
     // Xóa Company
-    await prisma.company.deleteMany({ where: { companyName: 'E2E Test Corp' } });
+    await prisma.company.deleteMany({
+      where: { companyName: 'E2E Test Corp' },
+    });
   };
 
   beforeAll(async () => {
@@ -90,7 +94,7 @@ describe('JobPostings (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         admin: { create: { adminLevel: 1 } },
-        userRoles: { create: { roleId: roleAdmin.roleId } }
+        userRoles: { create: { roleId: roleAdmin.roleId } },
       },
       include: { admin: true },
     });
@@ -102,13 +106,21 @@ describe('JobPostings (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         recruiter: { create: { bio: 'Test HR', companyId: companyId } },
-        userRoles: { create: { roleId: roleRec.roleId } }
+        userRoles: { create: { roleId: roleRec.roleId } },
       },
       include: { recruiter: true },
     });
     recruiterId = recruiter.recruiter!.recruiterId;
 
-    recruiterToken = jwtService.sign({ sub: recruiter.userId, email: recruiter.email, roles: ['RECRUITER'], type: 'access' }, { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' });
+    recruiterToken = jwtService.sign(
+      {
+        sub: recruiter.userId,
+        email: recruiter.email,
+        roles: ['RECRUITER'],
+        type: 'access',
+      },
+      { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' },
+    );
   });
 
   afterAll(async () => {
@@ -135,9 +147,9 @@ describe('JobPostings (e2e)', () => {
       .post('/job-postings')
       .set('Authorization', `Bearer ${recruiterToken}`)
       .send(payload);
-    
+
     console.log('POST /job-postings response:', response.body);
-    
+
     expect(response.status).toBe(201);
 
     expect(response.body).toHaveProperty('jobPostingId');

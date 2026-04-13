@@ -25,6 +25,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useSocketStore } from "@/stores/socket";
 import { getFileUrl } from "@/lib/api";
 import toast from "react-hot-toast";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 interface AppliedJob {
   applicationId: string;
@@ -64,6 +65,7 @@ export default function AppliedJobsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { accessToken, user } = useAuthStore();
   const { socket } = useSocketStore();
+  const confirm = useConfirm();
 
   const fetchData = async () => {
     try {
@@ -96,17 +98,22 @@ export default function AppliedJobsPage() {
   }, [socket]);
 
   const handleCancelApplication = async (applicationId: string) => {
-    if (!window.confirm("Bạn có chắc chắn muốn hủy đơn ứng tuyển này? Hành động này không thể hoàn tác.")) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'Hủy đơn ứng tuyển?',
+      message: 'Bạn có chắc chắn muốn hủy đơn ứng tuyển này? Hành động này không thể hoàn tác.',
+      confirmText: 'Hủy ứng tuyển',
+      cancelText: 'Giữ lại',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await api.delete(`/applications/${applicationId}`);
       setApplications(prev => prev.filter(app => app.applicationId !== applicationId));
-      toast.success("Đã hủy ứng tuyển thành công.");
+      toast.success('Đã hủy ứng tuyển thành công.');
     } catch (error: any) {
-      console.error("Error canceling application:", error);
-      toast.error(error.response?.data?.message || "Không thể hủy đơn ứng tuyển. Vui lòng thử lại sau.");
+      console.error('Error canceling application:', error);
+      toast.error(error.response?.data?.message || 'Không thể hủy đơn ứng tuyển. Vui lòng thử lại sau.');
     }
   };
 

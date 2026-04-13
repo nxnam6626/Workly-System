@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 export class MatchingService {
   private readonly logger = new Logger(MatchingService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async runMatchingForJob(jobId: string) {
     this.logger.log(`Bắt đầu chạy Matching cho Job ID: ${jobId}`);
@@ -19,17 +19,22 @@ export class MatchingService {
       this.logger.warn(`Job không tồn tại hoặc không có yêu cầu cấu trúc.`);
       return [];
     }
+    
+    if (job.status === 'REJECTED') {
+      this.logger.warn(`Job bị từ chối, không trả về gợi ý.`);
+      return [];
+    }
 
     const reqs = job.structuredRequirements as any;
     const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
 
     // Lấy tất cả CV đã được bóc tách và ở trạng thái PUBLISHED
-    const allCvs = await this.prisma.cV.findMany({
+    const allCvs = (await this.prisma.cV.findMany({
       where: {
         parsedData: { not: Prisma.JsonNull },
       },
       select: { candidateId: true, parsedData: true, cvId: true },
-    }) as any[];
+    })) as any[];
 
     const matches = allCvs.map((cv) => {
       const parsedData = cv.parsedData as any;
@@ -41,19 +46,21 @@ export class MatchingService {
         cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        })
+        }),
       );
-      const hardScore = hardSkills.length > 0 ? (matchedHard.length / hardSkills.length) : 1;
+      const hardScore =
+        hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
 
       const matchedSoft = softSkills.filter((s: string) =>
         cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        })
+        }),
       );
-      const softScore = softSkills.length > 0 ? (matchedSoft.length / softSkills.length) : 1;
+      const softScore =
+        softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
 
-      const skillScore = (hardScore * 0.8) + (softScore * 0.2);
+      const skillScore = hardScore * 0.8 + softScore * 0.2;
 
       // 2. Tính điểm Kinh nghiệm (30%)
       let expScore = 1;
@@ -62,7 +69,7 @@ export class MatchingService {
       }
 
       // 3. Điểm tổng hợp
-      const finalScore = (skillScore * 0.6) + (expScore * 0.4);
+      const finalScore = skillScore * 0.6 + expScore * 0.4;
 
       return {
         candidateId: cv.candidateId,
@@ -89,7 +96,9 @@ export class MatchingService {
       .sort((a, b) => b.score - a.score)
       .slice(0, (job.vacancies || 1) * 5);
 
-    this.logger.log(`Đã tìm thấy ${topMatches.length} ứng viên duy nhất phù hợp cho Job ${jobId}`);
+    this.logger.log(
+      `Đã tìm thấy ${topMatches.length} ứng viên duy nhất phù hợp cho Job ${jobId}`,
+    );
     return topMatches;
   }
 
@@ -101,18 +110,20 @@ export class MatchingService {
       include: {
         cvs: {
           where: { parsedData: { not: Prisma.JsonNull } },
-          orderBy: { createdAt: 'desc' }
-        }
-      }
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
 
     if (!candidate || candidate.cvs.length === 0) {
-      this.logger.warn(`Candidate không tồn tại hoặc không có CV đã phân tích.`);
+      this.logger.warn(
+        `Candidate không tồn tại hoặc không có CV đã phân tích.`,
+      );
       return [];
     }
 
     // Chọn CV chính hoặc CV mới nhất
-    const mainCv = candidate.cvs.find(cv => cv.isMain) || candidate.cvs[0];
+    const mainCv = candidate.cvs.find((cv) => cv.isMain) || candidate.cvs[0];
     const parsedData = mainCv.parsedData as any;
     const cvSkills = parsedData.skills || [];
     const cvExp = parsedData.totalYearsExp || 0;
@@ -121,9 +132,9 @@ export class MatchingService {
     const allJobs = await this.prisma.jobPosting.findMany({
       where: {
         status: 'APPROVED',
-        structuredRequirements: { not: Prisma.JsonNull }
+        structuredRequirements: { not: Prisma.JsonNull },
       },
-      include: { company: true }
+      include: { company: true },
     });
 
     const matches = allJobs.map((job) => {
@@ -135,19 +146,21 @@ export class MatchingService {
         cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        })
+        }),
       );
-      const hardScore = hardSkills.length > 0 ? (matchedHard.length / hardSkills.length) : 1;
+      const hardScore =
+        hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
 
       const matchedSoft = softSkills.filter((s: string) =>
         cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        })
+        }),
       );
-      const softScore = softSkills.length > 0 ? (matchedSoft.length / softSkills.length) : 1;
+      const softScore =
+        softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
 
-      const skillScore = (hardScore * 0.8) + (softScore * 0.2);
+      const skillScore = hardScore * 0.8 + softScore * 0.2;
 
       // 2. Tính điểm Kinh nghiệm (30%)
       let expScore = 1;
@@ -156,7 +169,7 @@ export class MatchingService {
       }
 
       // 3. Điểm tổng hợp
-      let finalScore = (skillScore * 0.6) + (expScore * 0.4);
+      let finalScore = skillScore * 0.6 + expScore * 0.4;
 
       // 4. Cộng thêm độ tin cậy nếu công ty đã xác thực MST (+15% điểm tin cậy)
       if (job.company && job.company.verifyStatus === 1) {

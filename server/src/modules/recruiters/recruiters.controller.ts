@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { UnlockService } from './unlock.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -12,7 +20,7 @@ export class RecruitersController {
   constructor(
     private readonly recruitersService: RecruitersService,
     private readonly unlockService: UnlockService,
-  ) { }
+  ) {}
 
   @Get('dashboard')
   @Roles(Role.RECRUITER)
@@ -41,11 +49,16 @@ export class RecruitersController {
   @Post('unlock')
   @Roles(Role.RECRUITER)
   unlockCandidate(
-    @Req() req: any, 
+    @Req() req: any,
     @Body('candidateId') candidateId: string,
     @Body('jobPostingId') jobPostingId: string,
-    @Body('cvId') cvId: string
+    @Body('cvId') cvId: string,
   ) {
-    return this.unlockService.unlockCandidate(req.user.userId, candidateId, jobPostingId, cvId);
+    return this.unlockService.unlockCandidate(
+      req.user.userId,
+      candidateId,
+      jobPostingId,
+      cvId,
+    );
   }
 }

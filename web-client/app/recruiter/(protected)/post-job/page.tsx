@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown, Plus, X as CloseIcon } from 'lucide-react';
+import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown, Plus, Crown, X as CloseIcon } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -24,6 +24,7 @@ const defaultForm = {
   hardSkills: [] as string[],
   softSkills: [] as string[],
   minExperienceYears: 0,
+  jobTier: 'BASIC',
 };
 
 function PostJobForm() {
@@ -61,6 +62,7 @@ function PostJobForm() {
             hardSkills: data.structuredRequirements?.hardSkills || [],
             softSkills: data.structuredRequirements?.softSkills || [],
             minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
+            jobTier: data.jobTier || 'BASIC',
           });
         } catch (error) {
           console.error('Lỗi khi tải thông tin công việc:', error);
@@ -212,6 +214,22 @@ function PostJobForm() {
                 <option value="INTERNSHIP">Thực tập (Internship)</option>
                 <option value="CONTRACT">Hợp đồng (Contract)</option>
                 <option value="REMOTE">Làm việc từ xa (Remote)</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-500" /> Gói Hiển Thị Nhắm Mục Tiêu
+              </label>
+              <select
+                name="jobTier"
+                value={formData.jobTier}
+                onChange={handleChange}
+                className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white transition-all duration-200"
+              >
+                <option value="BASIC">Thường - BASIC (100 xu)</option>
+                <option value="PROFESSIONAL">⭐️ Nổi bật - VIP PROFESSIONAL (250 xu)</option>
+                <option value="URGENT">🔥 Tuyển gấp - URGENT (450 xu)</option>
               </select>
             </div>
 

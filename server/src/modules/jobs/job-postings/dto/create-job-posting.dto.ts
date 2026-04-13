@@ -65,4 +65,8 @@ export class CreateJobPostingDto {
   @IsOptional()
   @IsNumber()
   minExperienceYears?: number;
+
+  @IsOptional()
+  @IsEnum(['BASIC', 'PROFESSIONAL', 'URGENT'])
+  jobTier?: any;
 }

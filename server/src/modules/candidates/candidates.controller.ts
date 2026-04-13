@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { CandidatesService } from './candidates.service';
@@ -7,15 +20,15 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('candidates')
 export class CandidatesController {
-  constructor(
-    private readonly candidatesService: CandidatesService,
-  ) { }
+  constructor(private readonly candidatesService: CandidatesService) {}
 
   @Post('cv/upload')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file', {
-    storage: memoryStorage(),
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
   async uploadCv(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser('userId') userId: string,
@@ -38,9 +51,11 @@ export class CandidatesController {
 
   @Post('cv/extract')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file', {
-    storage: memoryStorage(),
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
   async extractCv(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser('userId') userId: string,
@@ -53,20 +68,27 @@ export class CandidatesController {
     const cv = await this.candidatesService.uploadCvOnly(userId, file);
 
     try {
-      const result = await this.candidatesService.analyzeCv(userId, cv.cvId) as any;
+      const result = (await this.candidatesService.analyzeCv(
+        userId,
+        cv.cvId,
+      )) as any;
 
       if (!result || !result.parsedData) {
         await this.candidatesService.deleteCv(userId, cv.cvId);
-        throw new BadRequestException('AI không thể bóc tách dữ liệu từ CV này. Vui lòng tải lên tệp khác hoặc thử lại.');
+        throw new BadRequestException(
+          'AI không thể bóc tách dữ liệu từ CV này. Vui lòng tải lên tệp khác hoặc thử lại.',
+        );
       }
 
       return result;
     } catch (error) {
       // Dọn dẹp nếu có lỗi bất kỳ (AI timeout, lỗi mạng, v.v.)
       await this.candidatesService.deleteCv(userId, cv.cvId);
-      
+
       if (error instanceof BadRequestException) throw error;
-      throw new BadRequestException('Quá trình phân tích CV gặp lỗi. Vui lòng thử lại.');
+      throw new BadRequestException(
+        'Quá trình phân tích CV gặp lỗi. Vui lòng thử lại.',
+      );
     }
   }
 
@@ -128,13 +150,15 @@ export class CandidatesController {
   }
 
   @Get()
-  findAll(@Query() query: any) {
-    return this.candidatesService.findAll(query);
+  @UseGuards(JwtAuthGuard)
+  findAll(@Query() query: any, @CurrentUser('userId') userId: string) {
+    return this.candidatesService.findAll(query, userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.candidatesService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.candidatesService.findOne(id, userId);
   }
 
   @Post(':id/save')

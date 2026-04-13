@@ -9,6 +9,6 @@ import { WalletsModule } from '../wallets/wallets.module';
 @Module({
   imports: [PrismaModule, MessagesModule, NotificationsModule, WalletsModule],
   controllers: [ApplicationsController],
-  providers: [ApplicationsService]
+  providers: [ApplicationsService],
 })
 export class ApplicationsModule {}

@@ -189,9 +189,11 @@ export default function MatchingJobsPage() {
                       <div className="grow space-y-4">
                         <div className="flex justify-between items-start gap-4">
                           <div>
-                            <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer capitalize">
-                              {job.title}
-                            </h3>
+                            <Link href={`/jobs/${job.jobPostingId}`}>
+                              <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer capitalize">
+                                {job.title}
+                              </h3>
+                            </Link>
                             <p className="text-sm font-bold text-slate-500">{job.company.companyName}</p>
                           </div>
                           <div className="hidden md:flex flex-col items-end">
@@ -229,12 +231,20 @@ export default function MatchingJobsPage() {
 
                         <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
                           <p className="text-[10px] font-bold text-slate-400">Ứng tuyển để mở khóa mức độ tương thích chi tiết</p>
-                          <Link 
-                            href={`/jobs/${job.jobPostingId}`}
-                            className="inline-flex items-center gap-2 px-6 py-2 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
-                          >
-                            Chi tiết <ArrowRight className="w-3 h-3" />
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Link 
+                              href={`/jobs/${job.jobPostingId}`}
+                              className="inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                            >
+                              Chi tiết
+                            </Link>
+                            <Link 
+                              href={`/jobs/${job.jobPostingId}`}
+                              className="inline-flex items-center justify-center gap-1.5 px-5 py-2 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
+                            >
+                              Ứng tuyển <ArrowRight className="w-3 h-3" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -254,7 +254,7 @@ export default function RecruiterDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/jobs/${job.id}`} className="inline-block p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all">
+                      <Link href={`/recruiter/jobs/${job.id}`} className="inline-block p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all">
                         <ChevronRight className="w-5 h-5" />
                       </Link>
                     </td>

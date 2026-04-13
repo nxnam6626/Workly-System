@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, CheckCircle, User, Star, Briefcase, Mail, MessageCircle } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useWalletStore } from '@/stores/wallet';
 
 interface MatchedCandidatesModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const deductBalance = useWalletStore((state) => state.deductBalance);
 
   useEffect(() => {
     if (isOpen && jobId) {
@@ -45,6 +47,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
         cvId,
       });
       toast.success('Mở khóa thành công (-50 xu)');
+      deductBalance(50);
       // Làm mới danh sách để tải dữ liệu đã giải mã
       await fetchMatches();
     } catch (error: any) {

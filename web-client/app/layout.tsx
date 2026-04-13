@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 import { NotificationListener } from "@/components/NotificationListener";
 import { Toaster } from 'react-hot-toast';
 import AiChatBox from "@/components/AiChatBox";
+import { ConfirmProvider } from "@/components/ConfirmDialog";
 
 export default function RootLayout({
   children,
@@ -23,10 +24,12 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body className={`${inter.className} antialiased min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300`}>
         <AuthProvider>
-          {children}
-          <NotificationListener />
-          <Toaster position="top-right" />
-          <AiChatBox />
+          <ConfirmProvider>
+            {children}
+            <NotificationListener />
+            <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+            <AiChatBox />
+          </ConfirmProvider>
         </AuthProvider>
       </body>
     </html>

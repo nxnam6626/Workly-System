@@ -18,7 +18,9 @@ import { PrismaService } from '../../prisma/prisma.service';
     origin: '*',
   },
 })
-export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class MessagesGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -32,34 +34,38 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.split(' ')[1];
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.split(' ')[1];
       if (!token) {
         client.disconnect();
         return;
       }
-      
+
       const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: process.env.JWT_ACCESS_SECRET ?? 'access-secret'
+        secret: process.env.JWT_ACCESS_SECRET ?? 'access-secret',
       });
       const userId = payload.sub;
       client.data.userId = userId;
-      
+
       client.join(`user_${userId}`);
-      console.log(`Client connected: ${client.id}, joined room: user_${userId}`);
+      console.log(
+        `Client connected: ${client.id}, joined room: user_${userId}`,
+      );
 
       const count = this.activeUsers.get(userId) || 0;
       this.activeUsers.set(userId, count + 1);
 
       if (count === 0) {
-         try {
-            await this.prismaService.user.update({
-               where: { userId },
-               data: { isOnline: true },
-            });
-            this.server.emit('userStatusChanged', { userId, isOnline: true });
-         } catch (e) {
-            console.error('Failed to update online status:', e);
-         }
+        try {
+          await this.prismaService.user.update({
+            where: { userId },
+            data: { isOnline: true },
+          });
+          this.server.emit('userStatusChanged', { userId, isOnline: true });
+        } catch (e) {
+          console.error('Failed to update online status:', e);
+        }
       }
     } catch (error) {
       console.error('Socket connection error:', error.message);
@@ -69,7 +75,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   async handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    
+
     const userId = client.data?.userId;
     if (!userId) return;
 
@@ -77,45 +83,57 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     this.activeUsers.set(userId, Math.max(0, count - 1));
 
     if (count - 1 === 0) {
-       try {
-          const lastActive = new Date();
-          await this.prismaService.user.update({
-             where: { userId },
-             data: { isOnline: false, lastActive },
-          });
-          this.server.emit('userStatusChanged', { userId, isOnline: false, lastActive });
-       } catch (e) {
-          console.error('Failed to update offline status:', e);
-       }
+      try {
+        const lastActive = new Date();
+        await this.prismaService.user.update({
+          where: { userId },
+          data: { isOnline: false, lastActive },
+        });
+        this.server.emit('userStatusChanged', {
+          userId,
+          isOnline: false,
+          lastActive,
+        });
+      } catch (e) {
+        console.error('Failed to update offline status:', e);
+      }
     }
   }
 
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; content: string; receiverUserId: string }
+    @MessageBody()
+    data: { conversationId: string; content: string; receiverUserId: string },
   ) {
     try {
-      const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.split(' ')[1];
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.split(' ')[1];
       if (!token) return;
 
       const payload = this.jwtService.verify<JwtPayload>(token, {
-          secret: process.env.JWT_ACCESS_SECRET ?? 'access-secret'
+        secret: process.env.JWT_ACCESS_SECRET ?? 'access-secret',
       });
       const senderId = payload.sub;
 
-      const message = await this.messagesService.sendMessage(senderId, data.conversationId, data.content);
+      const message = await this.messagesService.sendMessage(
+        senderId,
+        data.conversationId,
+        data.content,
+      );
 
       // Emit to sender to confirm
       this.server.to(`user_${senderId}`).emit('newMessage', message);
 
       // Emit to receiver
       if (data.receiverUserId) {
-         this.server.to(`user_${data.receiverUserId}`).emit('newMessage', message);
+        this.server
+          .to(`user_${data.receiverUserId}`)
+          .emit('newMessage', message);
       }
-      
     } catch (error) {
-       console.error('Error handling sendMessage:', error);
+      console.error('Error handling sendMessage:', error);
     }
   }
 }

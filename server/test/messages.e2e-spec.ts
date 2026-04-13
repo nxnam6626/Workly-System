@@ -22,31 +22,41 @@ describe('Messages (e2e)', () => {
   let candidate1Token: string;
   let conversationId: string;
 
-  const TEST_EMAILS = ['rec_msg@test.com', 'cand1_msg@test.com', 'cand2_msg@test.com'];
+  const TEST_EMAILS = [
+    'rec_msg@test.com',
+    'cand1_msg@test.com',
+    'cand2_msg@test.com',
+  ];
 
   const cleanup = async () => {
-    const users = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } } });
+    const users = await prisma.user.findMany({
+      where: { email: { in: TEST_EMAILS } },
+    });
     if (!users.length) return;
-    const userIds = users.map(u => u.userId);
-    
+    const userIds = users.map((u) => u.userId);
+
     // Xóa Messages
     await prisma.message.deleteMany({
-      where: { senderId: { in: userIds } }
+      where: { senderId: { in: userIds } },
     });
-    
+
     // Tìm và xóa Conversations
-    const recruiters = await prisma.recruiter.findMany({ where: { userId: { in: userIds } } });
-    const candidates = await prisma.candidate.findMany({ where: { userId: { in: userIds } } });
-    
+    const recruiters = await prisma.recruiter.findMany({
+      where: { userId: { in: userIds } },
+    });
+    const candidates = await prisma.candidate.findMany({
+      where: { userId: { in: userIds } },
+    });
+
     if (recruiters.length > 0 || candidates.length > 0) {
-        await prisma.conversation.deleteMany({
-            where: {
-                OR: [
-                    ...recruiters.map(r => ({ recruiterId: r.recruiterId })),
-                    ...candidates.map(c => ({ candidateId: c.candidateId }))
-                ]
-            }
-        });
+      await prisma.conversation.deleteMany({
+        where: {
+          OR: [
+            ...recruiters.map((r) => ({ recruiterId: r.recruiterId })),
+            ...candidates.map((c) => ({ candidateId: c.candidateId })),
+          ],
+        },
+      });
     }
 
     // Xóa Recruiter/Candidate & Users
@@ -89,12 +99,17 @@ describe('Messages (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         recruiter: { create: { bio: 'Test HR' } },
-        userRoles: { create: { roleId: roleRec.roleId } }
+        userRoles: { create: { roleId: roleRec.roleId } },
       },
       include: { recruiter: true },
     });
     recruiterUserId = recUser.userId;
-    recruiterToken = jwtService.sign({ sub: recUser.userId, email: recUser.email, roles: ['RECRUITER'], type: 'access' });
+    recruiterToken = jwtService.sign({
+      sub: recUser.userId,
+      email: recUser.email,
+      roles: ['RECRUITER'],
+      type: 'access',
+    });
 
     // Create Candidate 1
     const cand1User = await prisma.user.create({
@@ -103,12 +118,17 @@ describe('Messages (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         candidate: { create: { fullName: 'Cand 1' } },
-        userRoles: { create: { roleId: roleCand.roleId } }
+        userRoles: { create: { roleId: roleCand.roleId } },
       },
       include: { candidate: true },
     });
     candidate1UserId = cand1User.userId;
-    candidate1Token = jwtService.sign({ sub: cand1User.userId, email: cand1User.email, roles: ['CANDIDATE'], type: 'access' });
+    candidate1Token = jwtService.sign({
+      sub: cand1User.userId,
+      email: cand1User.email,
+      roles: ['CANDIDATE'],
+      type: 'access',
+    });
 
     // Create Candidate 2
     const cand2User = await prisma.user.create({
@@ -117,7 +137,7 @@ describe('Messages (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         candidate: { create: { fullName: 'Cand 2' } },
-        userRoles: { create: { roleId: roleCand.roleId } }
+        userRoles: { create: { roleId: roleCand.roleId } },
       },
       include: { candidate: true },
     });
@@ -133,7 +153,7 @@ describe('Messages (e2e)', () => {
   it('/messages/broadcast (POST) - Success', async () => {
     const [c1, c2] = await Promise.all([
       prisma.candidate.findFirst({ where: { userId: candidate1UserId } }),
-      prisma.candidate.findFirst({ where: { userId: candidate2UserId } })
+      prisma.candidate.findFirst({ where: { userId: candidate2UserId } }),
     ]);
 
     const response = await request(app.getHttpServer())
@@ -144,7 +164,7 @@ describe('Messages (e2e)', () => {
         content: 'Broadcast test message',
       })
       .expect(201);
-      
+
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBe(2);
   });
@@ -158,7 +178,7 @@ describe('Messages (e2e)', () => {
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
     expect(response.body[0].lastMessage).toBe('Broadcast test message');
-    
+
     conversationId = response.body[0].conversationId;
   });
 

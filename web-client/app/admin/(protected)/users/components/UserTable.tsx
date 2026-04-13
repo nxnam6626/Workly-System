@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Loader2,
   Users,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface UserTableProps {
@@ -78,7 +79,7 @@ export default function UserTable({
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              {['Người dùng', 'Vai trò', 'Trạng thái', 'Email xác thực', 'Đăng nhập cuối', 'Hành động'].map(
+              {['Người dùng', 'Vai trò', 'Trạng thái', 'Vi phạm', 'Email xác thực', 'Đăng nhập cuối', 'Hành động'].map(
                 (h) => (
                   <th
                     key={h}
@@ -144,6 +145,17 @@ export default function UserTable({
                         <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
                         Bị khóa
                       </span>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {u.recruiter ? (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${u.recruiter.violationCount >= 3 ? 'bg-rose-100 text-rose-700' : u.recruiter.violationCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                        <AlertTriangle className="w-3 h-3" />
+                        {u.recruiter.violationCount || 0}/3
+                      </span>
+                    ) : (
+                      <span className="text-slate-200 text-[10px]">N/A</span>
                     )}
                   </td>
 

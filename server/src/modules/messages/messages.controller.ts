@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -13,12 +22,14 @@ export class MessagesController {
   async debugCounts() {
     const msgs = await this.messagesService.prisma.message.findMany();
     const counts: Record<string, number> = {};
-    msgs.forEach(m => {
+    msgs.forEach((m) => {
       counts[m.content] = (counts[m.content] || 0) + 1;
     });
     return {
       totalMessages: msgs.length,
-      duplicates: Object.entries(counts).filter(([k,v]) => v > 1).map(([k,v]) => ({ [k]: v }))
+      duplicates: Object.entries(counts)
+        .filter(([k, v]) => v > 1)
+        .map(([k, v]) => ({ [k]: v })),
     };
   }
 
@@ -44,7 +55,14 @@ export class MessagesController {
 
   @Post('broadcast')
   @Roles(Role.RECRUITER)
-  broadcastMessage(@Req() req, @Body() body: { candidateIds: string[]; content: string }) {
-    return this.messagesService.broadcastMessage(req.user.userId, body.candidateIds, body.content);
+  broadcastMessage(
+    @Req() req,
+    @Body() body: { candidateIds: string[]; content: string },
+  ) {
+    return this.messagesService.broadcastMessage(
+      req.user.userId,
+      body.candidateIds,
+      body.content,
+    );
   }
 }

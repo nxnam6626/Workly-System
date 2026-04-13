@@ -3,9 +3,15 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async create(userId: string, title: string, message: string, type: string = 'info', link?: string) {
+  async create(
+    userId: string,
+    title: string,
+    message: string,
+    type: string = 'info',
+    link?: string,
+  ) {
     return this.prisma.notification.create({
       data: {
         userId,
@@ -27,7 +33,7 @@ export class NotificationsService {
 
   async getUnreadCount(userId: string) {
     return this.prisma.notification.count({
-      where: { userId, isRead: false }
+      where: { userId, isRead: false },
     });
   }
 

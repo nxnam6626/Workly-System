@@ -16,6 +16,7 @@ import JobFilters from './components/JobFilters';
 import JobTable from './components/JobTable';
 import BulkActionsBar from './components/BulkActionsBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useConfirm } from '@/components/ConfirmDialog';
 import { useSocketStore } from '@/stores/socket';
 import toast from 'react-hot-toast';
 
@@ -44,7 +45,7 @@ export default function JobsPage() {
   const [quickViewJob, setQuickViewJob] = useState<JobPosting | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const confirm = useConfirm();
 
   const fetchJobs = useCallback(async () => {
     setIsLoading(true);
@@ -136,12 +137,15 @@ export default function JobsPage() {
     }
   };
 
-  const requestBulkReject = () => {
+  const requestBulkReject = async () => {
     if (selectedIds.length === 0) return;
-    setIsRejectModalOpen(true);
-  };
-
-  const handleBulkReject = async () => {
+    const ok = await confirm({
+      title: 'Từ chối hàng loạt?',
+      message: `Bạn có chắc muốn từ chối ${selectedIds.length} tin đã chọn? Hành động này sẽ thay đổi trạng thái và gửi thông báo cho nhà tuyển dụng.`,
+      confirmText: 'Từ chối tất cả',
+      variant: 'danger',
+    });
+    if (!ok) return;
     setIsBulkProcessing(true);
     try {
       await adminJobsApi.bulkReject(selectedIds);
@@ -152,7 +156,6 @@ export default function JobsPage() {
       setError('Từ chối hàng loạt thất bại.');
     } finally {
       setIsBulkProcessing(false);
-      setIsRejectModalOpen(false);
     }
   };
 
@@ -245,16 +248,6 @@ export default function JobsPage() {
           isProcessing={isProcessing === quickViewJob.jobPostingId}
         />
       )}
-
-      <ConfirmModal
-        isOpen={isRejectModalOpen}
-        title="Từ chối hàng loạt"
-        message={`Bạn có chắc muốn từ chối ${selectedIds.length} tin đã chọn? Hành động này sẽ thay đổi trạng thái của các tin và gửi thông báo cho nhà tuyển dụng.`}
-        confirmLabel="Từ chối các tin"
-        onConfirm={handleBulkReject}
-        onCancel={() => setIsRejectModalOpen(false)}
-        isLoading={isBulkProcessing}
-      />
     </div>
   );
 }

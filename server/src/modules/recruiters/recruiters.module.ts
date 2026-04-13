@@ -14,7 +14,13 @@ import { WalletsModule } from '../wallets/wallets.module';
 @Module({
   imports: [PrismaModule, MessagesModule, SearchModule, WalletsModule],
   controllers: [RecruitersController],
-  providers: [RecruitersService, JwtAuthGuard, RolesGuard, UnlockService, MatchingService],
+  providers: [
+    RecruitersService,
+    JwtAuthGuard,
+    RolesGuard,
+    UnlockService,
+    MatchingService,
+  ],
   exports: [RecruitersService, UnlockService],
 })
 export class RecruitersModule {}

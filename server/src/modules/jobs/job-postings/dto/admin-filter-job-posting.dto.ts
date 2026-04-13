@@ -16,8 +16,6 @@ export class AdminFilterJobPostingDto {
   @Type(() => Number)
   minAiScore?: number;
 
-
-
   @IsOptional()
   @IsString()
   searchTerm?: string;

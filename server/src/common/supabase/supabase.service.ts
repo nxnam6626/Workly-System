@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleInit, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
@@ -12,17 +18,24 @@ export class SupabaseService implements OnModuleInit {
 
   onModuleInit() {
     // Ưu tiên sử dụng bộ biến NEXT_PUBLIC mà người dùng cung cấp để đồng nhất
-    const supabaseUrl = this.configService.get<string>('NEXT_PUBLIC_SUPABASE_URL') || 
-                        this.configService.get<string>('SUPABASE_URL');
-    
-    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') || 
-                        this.configService.get<string>('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY') || 
-                        this.configService.get<string>('SUPABASE_URL'); // Fallback if someone used SUPABASE_URL for the key
-    
-    this.bucketName = this.configService.get<string>('SUPABASE_CV_BUCKET') || 'cvs';
+    const supabaseUrl =
+      this.configService.get<string>('NEXT_PUBLIC_SUPABASE_URL') ||
+      this.configService.get<string>('SUPABASE_URL');
+
+    const supabaseKey =
+      this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY') ||
+      this.configService.get<string>(
+        'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY',
+      ) ||
+      this.configService.get<string>('SUPABASE_URL'); // Fallback if someone used SUPABASE_URL for the key
+
+    this.bucketName =
+      this.configService.get<string>('SUPABASE_CV_BUCKET') || 'cvs';
 
     if (!supabaseUrl || !supabaseKey) {
-      this.logger.error('Supabase credentials missing in .env (NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL)');
+      this.logger.error(
+        'Supabase credentials missing in .env (NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL)',
+      );
       return;
     }
 
@@ -31,10 +44,16 @@ export class SupabaseService implements OnModuleInit {
         persistSession: false,
       },
     });
-    this.logger.log(`Supabase client initialized with endpoint: ${supabaseUrl}`);
+    this.logger.log(
+      `Supabase client initialized with endpoint: ${supabaseUrl}`,
+    );
   }
 
-  async uploadFile(buffer: Buffer, path: string, mimetype: string): Promise<string> {
+  async uploadFile(
+    buffer: Buffer,
+    path: string,
+    mimetype: string,
+  ): Promise<string> {
     const { data, error } = await this.supabase.storage
       .from(this.bucketName)
       .upload(path, buffer, {
@@ -71,7 +90,9 @@ export class SupabaseService implements OnModuleInit {
       .download(path);
 
     if (error) {
-      this.logger.error(`Error downloading file from Supabase: ${error.message}`);
+      this.logger.error(
+        `Error downloading file from Supabase: ${error.message}`,
+      );
       this.handleError(error);
     }
 
@@ -96,7 +117,10 @@ export class SupabaseService implements OnModuleInit {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
 
     if (error && error.status) {
-      const parsedStatus = typeof error.status === 'string' ? parseInt(error.status, 10) : error.status;
+      const parsedStatus =
+        typeof error.status === 'string'
+          ? parseInt(error.status, 10)
+          : error.status;
       if (!isNaN(parsedStatus) && typeof parsedStatus === 'number') {
         status = parsedStatus;
       }

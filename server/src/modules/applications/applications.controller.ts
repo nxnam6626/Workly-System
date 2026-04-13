@@ -36,7 +36,8 @@ export class ApplicationsController {
       storage: diskStorage({
         destination: './uploads/cvs',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
         },
@@ -73,7 +74,14 @@ export class ApplicationsController {
     @Body('interviewTime') interviewTime?: string,
     @Body('interviewLocation') interviewLocation?: string,
   ) {
-    return this.applicationsService.updateStatus(id, userId, status, interviewDate, interviewTime, interviewLocation);
+    return this.applicationsService.updateStatus(
+      id,
+      userId,
+      status,
+      interviewDate,
+      interviewTime,
+      interviewLocation,
+    );
   }
 
   @Post(':id/unlock')
@@ -84,13 +92,10 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.unlockApplication(id, userId);
   }
-  
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async remove(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  async remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.applicationsService.remove(id, userId);
   }
 }
