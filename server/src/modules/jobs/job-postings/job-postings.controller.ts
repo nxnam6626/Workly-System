@@ -41,10 +41,11 @@ export class JobPostingsController {
     return this.jobPostingsService.findMyJobs(userId);
   }
 
-  @Get('matching')
-  @UseGuards(JwtAuthGuard)
-  getMatchingJobs(@CurrentUser('userId') userId: string) {
-    return this.jobPostingsService.getRecommendations(userId);
+  @Get(':id/suggested-candidates')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  getSuggestedCandidates(@Param('id') id: string) {
+    return this.jobPostingsService.getSuggestedCandidates(id);
   }
 
   @Get()

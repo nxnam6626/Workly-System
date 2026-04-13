@@ -8,6 +8,7 @@ import { Mail, Lock, Loader2, ArrowRight, Sparkles, Briefcase } from "lucide-rea
 import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -189,7 +190,7 @@ export default function LoginPage() {
           {/* Social Logins */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <a
-              href="http://localhost:3001/auth/google"
+              href={`${API_BASE_URL}/auth/google`}
               className="flex items-center justify-center gap-2 py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-semibold text-slate-700 shadow-sm group"
             >
               <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
@@ -201,7 +202,7 @@ export default function LoginPage() {
               Google
             </a>
             <a
-              href="http://localhost:3001/auth/linkedin"
+              href={`${API_BASE_URL}/auth/linkedin`}
               className="flex items-center justify-center gap-2 py-3 px-4 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-semibold text-slate-700 shadow-sm group"
             >
               <svg className="w-5 h-5 text-[#0077B5] group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">

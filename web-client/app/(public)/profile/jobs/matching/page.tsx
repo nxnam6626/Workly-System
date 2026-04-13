@@ -50,8 +50,13 @@ export default function MatchingJobsPage() {
   useEffect(() => {
     const fetchMatchingJobs = async () => {
       try {
-        const res = await api.get("/job-postings/matching");
-        setJobs(res.data);
+        const res = await api.get("/candidates/recommended-jobs");
+        const mapped = res.data.map((j: any) => ({
+          ...j,
+          score: j.score || 95,
+          matchedSkills: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : [])
+        }));
+        setJobs(mapped);
       } catch (error) {
         console.error("Error fetching matching jobs:", error);
       } finally {

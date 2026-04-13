@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_BASE_URL } from '@/lib/api';
 import { 
   MessageSquare, 
   X, 
@@ -67,7 +68,7 @@ export default function AiChatBox() {
     const aiMessageId = (Date.now() + 1).toString();
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/ai/chat-stream?message=${encodeURIComponent(currentInput)}`);
+      const response = await fetch(`${API_BASE_URL}/ai/chat-stream?message=${encodeURIComponent(currentInput)}`);
       
       if (!response.ok) throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
       const reader = response.body?.getReader();

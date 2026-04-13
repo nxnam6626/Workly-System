@@ -75,6 +75,15 @@ export class ApplicationsController {
   ) {
     return this.applicationsService.updateStatus(id, userId, status, interviewDate, interviewTime, interviewLocation);
   }
+
+  @Post(':id/unlock')
+  @UseGuards(JwtAuthGuard)
+  async unlockApplication(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.applicationsService.unlockApplication(id, userId);
+  }
   
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

@@ -86,8 +86,24 @@ export class UsersService {
       });
 
       if (data.role === 'RECRUITER') {
+        let companyId = null;
+        if ('companyName' in data && data.companyName) {
+           const newCompany = await tx.company.create({
+              data: {
+                 companyName: data.companyName,
+                 taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
+                 address: 'location' in data && data.location ? data.location : null,
+                 verifyStatus: 'verifyStatus' in data && data.verifyStatus ? data.verifyStatus : 0
+              }
+           });
+           companyId = newCompany.companyId;
+        }
+
         await tx.recruiter.create({
-          data: { userId: newUser.userId },
+          data: { 
+            userId: newUser.userId,
+            ...(companyId ? { companyId } : {})
+          },
         });
       } else if (data.role === 'ADMIN') {
         await tx.admin.create({
@@ -496,8 +512,24 @@ export class UsersService {
       } else if (data.role === 'RECRUITER') {
         const existingRecruiter = await tx.recruiter.findUnique({ where: { userId } });
         if (!existingRecruiter) {
+          let companyId = null;
+          if ('companyName' in data && data.companyName) {
+             const newCompany = await tx.company.create({
+                data: {
+                   companyName: data.companyName,
+                   taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
+                   address: 'location' in data && data.location ? data.location : null,
+                   verifyStatus: 'verifyStatus' in data && data.verifyStatus ? data.verifyStatus : 0
+                }
+             });
+             companyId = newCompany.companyId;
+          }
+
           await tx.recruiter.create({
-            data: { userId },
+            data: { 
+              userId,
+              ...(companyId ? { companyId } : {})
+            },
           });
         }
       } else if (data.role === 'ADMIN') {

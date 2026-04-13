@@ -59,7 +59,7 @@ export default function JobsPage() {
       setTotalItems(data.total);
       setGlobalStats(statsData);
     } catch (err) {
-      setError('Không thể tải danh sách tin tuyển dụng.');
+      setError('Không thể tải danh sách yêu cầu tuyển dụng.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -181,9 +181,9 @@ export default function JobsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kiểm Duyệt Tin Tuyển Dụng</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Kiểm Duyệt Yêu Cầu Tuyển Dụng</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Duyệt tin mới, quản lý AI Score và xử lý hàng loạt dữ liệu crawler
+            Duyệt yêu cầu đăng tin mới, quản lý AI Score và xử lý hàng loạt dữ liệu crawler
           </p>
         </div>
         <button

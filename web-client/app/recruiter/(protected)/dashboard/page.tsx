@@ -19,25 +19,92 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { timeAgo } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { Wallet, CreditCard } from 'lucide-react';
+
+const TopUpModal = ({ isOpen, onClose, onTopUp, isSubmitting }: any) => {
+  const [amount, setAmount] = useState(100);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-sm p-6 overflow-hidden">
+        <h3 className="text-xl font-bold text-slate-800 mb-4 pb-4 border-b border-slate-100 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-indigo-600" />
+          Nạp tiền vào ví
+        </h3>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold text-slate-700 block mb-2">Số Xu cần nạp</label>
+            <input 
+              type="number" 
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              min="10"
+            />
+          </div>
+          <p className="text-xs text-slate-500">1 xu = 1,000 VNĐ. Tiền sẽ được quy đổi tự động (Mock Demo).</p>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button 
+              type="button" 
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-semibold transition-colors"
+            >
+              Hủy
+            </button>
+            <button 
+              type="button" 
+              onClick={() => onTopUp(amount)}
+              disabled={isSubmitting || amount < 10}
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 disabled:bg-indigo-400"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              Xác Nhận Nạp
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function RecruiterDashboard() {
   const { user } = useAuthStore();
   const { socket } = useSocketStore();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [walletInfo, setWalletInfo] = useState<any>(null);
+  const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+  const [isToppingUp, setIsToppingUp] = useState(false);
+
+  const fetchDashboard = async () => {
+    try {
+      const res = await api.get('/recruiters/dashboard');
+      setData(res.data);
+    } catch (err) {
+      toast.error('Không thể tải dữ liệu bảng điều khiển.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchWallet = async () => {
+    try {
+      const res = await api.get('/wallets/balance');
+      setWalletInfo(res.data);
+    } catch (err) {
+      console.error('Lỗi tải ví:', err);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await api.get('/recruiters/dashboard');
-        setData(res.data);
-      } catch (err) {
-        toast.error('Không thể tải dữ liệu bảng điều khiển.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboard();
+    fetchWallet();
   }, []);
 
   useEffect(() => {
@@ -62,6 +129,21 @@ export default function RecruiterDashboard() {
       socket.off('jdViewUpdated', handleJdViewed);
     };
   }, [socket]);
+
+  const handleTopUp = async (amount: number) => {
+    setIsToppingUp(true);
+    try {
+      const { data } = await api.post('/wallets/top-up', { amount });
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        toast.success(`Đã yêu cầu nạp ${amount} xu!`);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Nạp tiền thất bại!');
+      setIsToppingUp(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -196,6 +278,28 @@ export default function RecruiterDashboard() {
             </button>
           </div>
 
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+               <Wallet className="w-24 h-24 text-indigo-600" />
+            </div>
+            <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+               <Wallet className="w-5 h-5 text-indigo-600" /> Ví Nội Bộ
+            </h3>
+            <p className="text-slate-500 text-sm mb-4">Dùng để mở khóa thông tin ứng viên tiềm năng.</p>
+            <div className="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100 flex items-end justify-between">
+               <div>
+                 <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Số dư khả dụng</p>
+                 <p className="text-2xl font-black text-indigo-700">{walletInfo?.balance || 0} Xu</p>
+               </div>
+            </div>
+            <Link 
+              href="/recruiter/wallet"
+              className="w-full py-2.5 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition-colors inline-block text-center"
+            >
+               Quản lý Ví
+            </Link>
+          </div>
+
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-4">Tài nguyên</h3>
             <ul className="space-y-3">
@@ -218,6 +322,12 @@ export default function RecruiterDashboard() {
           </div>
         </div>
       </div>
+      <TopUpModal 
+        isOpen={isTopUpOpen} 
+        onClose={() => setIsTopUpOpen(false)} 
+        onTopUp={handleTopUp} 
+        isSubmitting={isToppingUp} 
+      />
     </div>
   );
 }

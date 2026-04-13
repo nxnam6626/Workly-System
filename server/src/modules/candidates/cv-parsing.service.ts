@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, SchemaType, GenerativeModel } from '@google/generative-ai';
 import { CvParsedData } from './interfaces/cv-parsing.interface';
+import * as path from 'path';
 
 const CV_EXTRACTION_PROMPT = (rawText: string) => `
 Bạn là một chuyên gia nhân sự (HR) cấp cao và chuyên gia bóc tách dữ liệu hồ sơ (CV Parsing).
@@ -32,20 +33,20 @@ const CV_SCHEMA = {
     fullName: { type: SchemaType.STRING, description: "Họ và tên đầy đủ của ứng viên." },
     email: { type: SchemaType.STRING, description: "Địa chỉ email liên hệ." },
     phone: { type: SchemaType.STRING, description: "Số điện thoại liên hệ." },
-    skills: { 
-      type: SchemaType.ARRAY, 
-      items: { 
+    skills: {
+      type: SchemaType.ARRAY,
+      items: {
         type: SchemaType.OBJECT,
         properties: {
           skillName: { type: SchemaType.STRING, description: "Tên kỹ năng." },
-          level: { 
-            type: SchemaType.STRING, 
-            description: "Mức độ thành thạo: BEGINNER, INTERMEDIATE, hoặc ADVANCED." 
+          level: {
+            type: SchemaType.STRING,
+            description: "Mức độ thành thạo: BEGINNER, INTERMEDIATE, hoặc ADVANCED."
           }
         },
         required: ["skillName", "level"]
       },
-      description: "Danh sách các kỹ năng kèm theo mức độ thành thạo." 
+      description: "Danh sách các kỹ năng kèm theo mức độ thành thạo."
     },
     experience: {
       type: SchemaType.ARRAY,
@@ -119,27 +120,71 @@ export class CvParsingService {
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
     try {
-      const { PDFParse } = require('pdf-parse');
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
-      return result.text;
+      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+      const standardFontDataUrl = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts').replace(/\\/g, '/') + '/';
+
+      const data = new Uint8Array(buffer);
+      const pdf = await pdfjsLib.getDocument({
+        data: data,
+        standardFontDataUrl: standardFontDataUrl,
+      }).promise;
+
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        fullText += pageText + ' \n';
+      }
+      return fullText;
     } catch (error) {
-      this.logger.error(`Lỗi khi trích xuất text từ PDF: ${error.message}`);
-      throw error;
+      this.logger.error(`Lỗi khi parse PDF bằng pdfjs: ${error.message}`);
+      throw new Error(`Failed to parse PDF using pdfjs: ${error.message}`);
     }
   }
 
-  async parseCv(rawText: string): Promise<CvParsedData | null> {
+  async parseCv(rawText: string, retryCount = 0): Promise<CvParsedData | null> {
     if (!this.model || !rawText) return null;
 
+    let targetModel = this.model;
+    // Fallback to older stable model on higher retries if demand is too high
+    if (retryCount >= 2 && this.genAI) {
+      targetModel = this.genAI.getGenerativeModel(
+        {
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: CV_SCHEMA as any,
+          },
+        }
+      );
+      this.logger.warn(`Switching to fallback model (gemini-1.5-flash) for retry ${retryCount}`);
+    }
+
     try {
-      const result = await this.model.generateContent(CV_EXTRACTION_PROMPT(rawText));
+      const result = await targetModel.generateContent(CV_EXTRACTION_PROMPT(rawText));
       const response = await result.response;
-      const text = response.text();
+      let text = response.text();
+
+      // Cleanup markdown artifacts just in case
+      if (text.startsWith('```json')) {
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      }
+
       return JSON.parse(text) as CvParsedData;
     } catch (error) {
+      const isOverloaded = error.status === 503 || error.message?.includes('503') || error.message?.includes('high demand') || error.message?.includes('429');
+
+      if (isOverloaded && retryCount < 3) {
+        const waitTime = (retryCount + 1) * 2000; // 2s, 4s, 6s
+        this.logger.warn(`API is experiencing high demand (${error.message}). Retrying in ${waitTime}ms... (Attempt ${retryCount + 1}/3)`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        return this.parseCv(rawText, retryCount + 1);
+      }
+
       this.logger.error(`Lỗi khi gọi Gemini AI để parse CV: ${error.message}`);
       return null;
     }
   }
 }
+

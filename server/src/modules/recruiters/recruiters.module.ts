@@ -9,11 +9,12 @@ import { MatchingService } from '../search/matching.service';
 
 import { MessagesModule } from '../messages/messages.module';
 import { SearchModule } from '../search/search.module';
+import { WalletsModule } from '../wallets/wallets.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule, SearchModule],
+  imports: [PrismaModule, MessagesModule, SearchModule, WalletsModule],
   controllers: [RecruitersController],
   providers: [RecruitersService, JwtAuthGuard, RolesGuard, UnlockService, MatchingService],
-  exports: [RecruitersService],
+  exports: [RecruitersService, UnlockService],
 })
 export class RecruitersModule {}

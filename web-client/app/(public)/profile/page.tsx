@@ -28,11 +28,11 @@ import {
   Camera,
 } from "lucide-react";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
+import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { JobCard, type Job } from "@/components/JobCard";
 import { CVReviewModal } from "@/components/candidates/CVReviewModal";
 import toast from "react-hot-toast";
-import api from "@/lib/api";
 
 export default function ProfileDashboard() {
   const router = useRouter();
@@ -40,6 +40,8 @@ export default function ProfileDashboard() {
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [isOpenToWork, setIsOpenToWork] = useState(true);
+  const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
   const [matchingJobs, setMatchingJobs] = useState<any[]>([]);
   const [loadingMatching, setLoadingMatching] = useState(false);
   const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false);
@@ -51,8 +53,17 @@ export default function ProfileDashboard() {
       return;
     }
     if (isAuthenticated) {
-      fetchProfile();
-      fetchMatchingJobs();
+      profileApi
+        .getMe()
+        .then((data) => setProfile(data))
+        .catch((err) => console.error("Failed to load profile", err))
+        .finally(() => setLoadingProfile(false));
+        
+      setLoadingJobs(true);
+      api.get('/candidates/recommended-jobs')
+        .then((res: any) => setRecommendedJobs(res.data || []))
+        .catch((err: any) => console.error("Failed to load recommended jobs", err))
+        .finally(() => setLoadingJobs(false));
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -71,8 +82,13 @@ export default function ProfileDashboard() {
   const fetchMatchingJobs = async () => {
     setLoadingMatching(true);
     try {
-      const res = await api.get("/job-postings/matching");
-      setMatchingJobs(res.data.slice(0, 4)); // Only top 4 for dashboard
+      const res = await api.get("/candidates/recommended-jobs");
+      const mapped = res.data.slice(0, 4).map((j: any) => ({
+        ...j,
+        score: j.score || 95,
+        matchedSkills: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : [])
+      }));
+      setMatchingJobs(mapped);
     } catch (err) {
       console.error("Failed to load matching jobs", err);
     } finally {
@@ -489,25 +505,18 @@ export default function ProfileDashboard() {
             CỘT PHẢI (RIGHT SIDEBAR)
             ======================= */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900">Việc làm phù hợp</h3>
-            <Link href="/profile/jobs/matching" className="text-xs font-bold text-blue-600 hover:underline">Tất cả</Link>
-          </div>
+          <h3 className="text-lg font-bold text-slate-900 mb-1">Việc làm gợi ý cho bạn</h3>
+          <p className="text-slate-500 text-[13px] mb-4">Các công việc phù hợp với kỹ năng của bạn</p>
 
           <div className="space-y-4">
-            {loadingMatching ? (
-              [1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-2xl h-32 animate-pulse border border-slate-100" />
-              ))
-            ) : matchingJobs.length > 0 ? (
-              matchingJobs.map((job) => (
+            {loadingJobs ? (
+              <div className="text-center py-4 text-sm text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2"/> Đang phân tích gợi ý...</div>
+            ) : recommendedJobs.length === 0 ? (
+              <div className="text-center py-4 text-sm text-slate-500">Chưa có công việc nào khớp với kỹ năng của bạn. Hãy cập nhật kỹ năng profile nhé!</div>
+            ) : (
+              recommendedJobs.map((job) => (
                 <JobCard key={job.jobPostingId} job={job} />
               ))
-            ) : (
-              <div className="bg-white rounded-2xl p-6 text-center border border-dashed border-slate-200">
-                <Bot className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-                <p className="text-xs text-slate-400 font-medium">Cập nhật CV để nhận gợi ý từ AI</p>
-              </div>
             )}
           </div>
         </div>

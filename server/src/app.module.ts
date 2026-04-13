@@ -24,6 +24,8 @@ import { AiModule } from './modules/ai/ai.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SupabaseModule } from './common/supabase/supabase.module';
 
+import { WalletsModule } from './modules/wallets/wallets.module';
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -47,12 +49,13 @@ import { SupabaseModule } from './common/supabase/supabase.module';
     CompaniesModule,
     ApplicationsModule,
     FavoritesModule,
+    AiModule,
     CandidatesModule,
     MessagesModule,
     AdminModule,
     NotificationsModule,
     RecruitersModule,
-    AiModule,
+    WalletsModule,
     SupabaseModule,
   ],
   controllers: [AppController],

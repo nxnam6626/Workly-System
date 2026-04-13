@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { PrismaService } from '../../prisma/prisma.service';
 import { CvParsingService } from './cv-parsing.service';
 import { SupabaseService } from '../../common/supabase/supabase.service';
+import { MatchingService } from '../search/matching.service';
 import * as crypto from 'crypto';
 import { extname } from 'path';
 
@@ -11,6 +12,7 @@ export class CandidatesService {
     private readonly prisma: PrismaService,
     private readonly cvParsingService: CvParsingService,
     private readonly supabaseService: SupabaseService,
+    private readonly matchingService: MatchingService,
   ) { }
 
   async findAll(query: any) {
@@ -497,5 +499,9 @@ export class CandidatesService {
     return this.prisma.cV.delete({
       where: { cvId },
     });
+  }
+
+  async getRecommendedJobs(userId: string) {
+    return this.matchingService.runMatchingForCandidate(userId);
   }
 }
