@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
    MapPin,
@@ -59,6 +59,7 @@ interface JobDetails extends Job {
       description: string | null;
       companySize: number | null;
       websiteUrl: string | null;
+      verifyStatus?: number;
    };
 }
 
@@ -69,7 +70,7 @@ export default function JobDetailsPage() {
    const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
    const [loading, setLoading] = useState(true);
    const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-   const { isAuthenticated } = useAuthStore();
+   const { isAuthenticated, user } = useAuthStore();
    const { favoriteIds, toggleFavorite, isInitialized, fetchFavorites } = useFavoriteStore();
 
    // Sync with global favorites
@@ -129,7 +130,7 @@ export default function JobDetailsPage() {
       }
    };
 
-   const handleApply = () => {
+   const handleApply = useCallback(() => {
       if (job?.postType === 'CRAWLED' && job?.originalUrl) {
          window.open(job.originalUrl, '_blank');
          return;
@@ -137,11 +138,19 @@ export default function JobDetailsPage() {
 
       if (!isAuthenticated) {
          router.push(`/login?returnUrl=/jobs/${id}`);
-      } else {
-         setIsApplyModalOpen(true);
+         return;
       }
-   };
+      if (user?.role !== 'CANDIDATE') return toast.error('Chỉ ứng viên mới có thể ứng tuyển!');
+      setIsApplyModalOpen(true);
+   }, [job, isAuthenticated, router, id, user?.role]);
 
+   const searchParams = useSearchParams();
+
+   useEffect(() => {
+      if (searchParams.get("apply") === "true" && job && !loading && !job.hasApplied) {
+         handleApply();
+      }
+   }, [searchParams, job, loading, handleApply]);
 
    useEffect(() => {
       if (isAuthenticated && !isInitialized) {
@@ -299,23 +308,26 @@ export default function JobDetailsPage() {
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Mô tả công việc</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6">
-                              {job.description}
-                           </div>
+                           <div 
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
+                              dangerouslySetInnerHTML={{ __html: job.description || '' }} 
+                           />
                         </section>
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Yêu cầu ứng viên</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6">
-                              {job.requirements}
-                           </div>
+                           <div 
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
+                              dangerouslySetInnerHTML={{ __html: job.requirements || '' }} 
+                           />
                         </section>
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Quyền lợi</h3>
-                           <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6">
-                              {job.benefits}
-                           </div>
+                           <div 
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
+                              dangerouslySetInnerHTML={{ __html: job.benefits || '' }} 
+                           />
                         </section>
 
                         <section>
@@ -350,8 +362,11 @@ export default function JobDetailsPage() {
                            <Building2 className="w-10 h-10 text-slate-200" />
                         )}
                      </div>
-                     <h3 className="font-bold text-slate-800 mb-6 uppercase text-sm leading-snug">
+                     <h3 className="font-bold text-slate-800 mb-6 uppercase text-sm leading-snug flex items-center justify-center gap-2">
                         {job.company?.companyName}
+                        {(job.company?.verifyStatus === 1 || job.isVerified) && (
+                           <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" title="Công ty đã được xác thực" />
+                        )}
                      </h3>
                      <div className="space-y-4 text-left">
                         <div className="flex items-start gap-4">

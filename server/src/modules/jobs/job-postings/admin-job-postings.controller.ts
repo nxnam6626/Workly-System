@@ -25,10 +25,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 @Roles(Role.ADMIN)
 @Controller('admin/job-postings')
 export class AdminJobPostingsController {
-  constructor(private readonly jobPostingsService: JobPostingsService) { }
+  constructor(private readonly jobPostingsService: JobPostingsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách tin tuyển dụng với bộ lọc dành cho Admin' })
+  @ApiOperation({
+    summary: 'Lấy danh sách tin tuyển dụng với bộ lọc dành cho Admin',
+  })
   findAll(@Query() query: AdminFilterJobPostingDto) {
     return this.jobPostingsService.findAllAdmin(query);
   }
@@ -42,13 +44,21 @@ export class AdminJobPostingsController {
   @Patch(':id/approve')
   @ApiOperation({ summary: 'Duyệt một tin tuyển dụng' })
   approve(@Param('id') id: string, @CurrentUser('userId') adminId: string) {
-    return this.jobPostingsService.updateStatus(id, JobStatus.APPROVED, adminId);
+    return this.jobPostingsService.updateStatus(
+      id,
+      JobStatus.APPROVED,
+      adminId,
+    );
   }
 
   @Patch(':id/reject')
   @ApiOperation({ summary: 'Từ chối một tin tuyển dụng' })
   reject(@Param('id') id: string, @CurrentUser('userId') adminId: string) {
-    return this.jobPostingsService.updateStatus(id, JobStatus.REJECTED, adminId);
+    return this.jobPostingsService.updateStatus(
+      id,
+      JobStatus.REJECTED,
+      adminId,
+    );
   }
 
   @Delete('bulk')
@@ -59,18 +69,34 @@ export class AdminJobPostingsController {
 
   @Patch('bulk-approve')
   @ApiOperation({ summary: 'Duyệt hàng loạt dựa trên ID' })
-  bulkApprove(@Body('ids') ids: string[], @CurrentUser('userId') adminId: string) {
-    return this.jobPostingsService.updateStatusBulk(ids, JobStatus.APPROVED, adminId);
+  bulkApprove(
+    @Body('ids') ids: string[],
+    @CurrentUser('userId') adminId: string,
+  ) {
+    return this.jobPostingsService.updateStatusBulk(
+      ids,
+      JobStatus.APPROVED,
+      adminId,
+    );
   }
 
   @Patch('bulk-reject')
   @ApiOperation({ summary: 'Từ chối hàng loạt dựa trên ID' })
-  bulkReject(@Body('ids') ids: string[], @CurrentUser('userId') adminId: string) {
-    return this.jobPostingsService.updateStatusBulk(ids, JobStatus.REJECTED, adminId);
+  bulkReject(
+    @Body('ids') ids: string[],
+    @CurrentUser('userId') adminId: string,
+  ) {
+    return this.jobPostingsService.updateStatusBulk(
+      ids,
+      JobStatus.REJECTED,
+      adminId,
+    );
   }
 
   @Post('sync-elasticsearch')
-  @ApiOperation({ summary: 'Đồng bộ hóa tất cả tin đã duyệt vào Elasticsearch' })
+  @ApiOperation({
+    summary: 'Đồng bộ hóa tất cả tin đã duyệt vào Elasticsearch',
+  })
   syncElasticsearch() {
     return this.jobPostingsService.syncAllJobsToES();
   }

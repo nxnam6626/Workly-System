@@ -6,7 +6,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) { }
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   async getNotifications(@CurrentUser('userId') userId: string) {
@@ -22,7 +22,7 @@ export class NotificationsController {
   @Patch('read/:id')
   async markAsRead(
     @Param('id') notificationId: string,
-    @CurrentUser('userId') userId: string
+    @CurrentUser('userId') userId: string,
   ) {
     return this.notificationsService.markAsRead(notificationId, userId);
   }

@@ -27,23 +27,25 @@ describe('Applications (e2e)', () => {
   const TEST_EMAILS = ['cand_app_e2e@test.com', 'rec_app_e2e@test.com'];
 
   const cleanup = async () => {
-    const users = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } } });
+    const users = await prisma.user.findMany({
+      where: { email: { in: TEST_EMAILS } },
+    });
     if (!users.length) return;
-    const userIds = users.map(u => u.userId);
+    const userIds = users.map((u) => u.userId);
 
     // Xóa Applications
     await prisma.application.deleteMany({
-      where: { candidate: { userId: { in: userIds } } }
+      where: { candidate: { userId: { in: userIds } } },
     });
 
     // Xóa CV
     await prisma.cV.deleteMany({
-      where: { candidate: { userId: { in: userIds } } }
+      where: { candidate: { userId: { in: userIds } } },
     });
 
     // Xóa JobPosting
     await prisma.jobPosting.deleteMany({
-      where: { recruiter: { userId: { in: userIds } } }
+      where: { recruiter: { userId: { in: userIds } } },
     });
 
     // Xóa UserRoles
@@ -74,10 +76,20 @@ describe('Applications (e2e)', () => {
 
     await cleanup();
 
-    const roleCand = await prisma.role.upsert({ where: { roleName: 'CANDIDATE' }, update: {}, create: { roleName: 'CANDIDATE' } });
-    const roleRec = await prisma.role.upsert({ where: { roleName: 'RECRUITER' }, update: {}, create: { roleName: 'RECRUITER' } });
+    const roleCand = await prisma.role.upsert({
+      where: { roleName: 'CANDIDATE' },
+      update: {},
+      create: { roleName: 'CANDIDATE' },
+    });
+    const roleRec = await prisma.role.upsert({
+      where: { roleName: 'RECRUITER' },
+      update: {},
+      create: { roleName: 'RECRUITER' },
+    });
 
-    const company = await prisma.company.create({ data: { companyName: 'App E2E Corp' } });
+    const company = await prisma.company.create({
+      data: { companyName: 'App E2E Corp' },
+    });
     companyId = company.companyId;
 
     const candUser = await prisma.user.create({
@@ -86,19 +98,24 @@ describe('Applications (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         candidate: { create: { fullName: 'Test Cand App E2E' } },
-        userRoles: { create: { roleId: roleCand.roleId } }
+        userRoles: { create: { roleId: roleCand.roleId } },
       },
       include: { candidate: true },
     });
     candUserId = candUser.userId;
-    candToken = jwtService.sign({ sub: candUser.userId, email: candUser.email, roles: ['CANDIDATE'], type: 'access' });
+    candToken = jwtService.sign({
+      sub: candUser.userId,
+      email: candUser.email,
+      roles: ['CANDIDATE'],
+      type: 'access',
+    });
 
     const cv = await prisma.cV.create({
       data: {
         cvTitle: 'My CV',
         fileUrl: '/uploads/cvs/test.pdf',
-        candidateId: candUser.candidate!.candidateId
-      }
+        candidateId: candUser.candidate!.candidateId,
+      },
     });
     cvId = cv.cvId;
 
@@ -108,12 +125,20 @@ describe('Applications (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         recruiter: { create: { bio: 'Test HR', companyId } },
-        userRoles: { create: { roleId: roleRec.roleId } }
+        userRoles: { create: { roleId: roleRec.roleId } },
       },
-      include: { recruiter: true }
+      include: { recruiter: true },
     });
     recUserId = recUser.userId;
-    recruiterToken = jwtService.sign({ sub: recUser.userId, email: recUser.email, roles: ['RECRUITER'], type: 'access' }, { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' });
+    recruiterToken = jwtService.sign(
+      {
+        sub: recUser.userId,
+        email: recUser.email,
+        roles: ['RECRUITER'],
+        type: 'access',
+      },
+      { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' },
+    );
 
     const job = await prisma.jobPosting.create({
       data: {
@@ -122,8 +147,8 @@ describe('Applications (e2e)', () => {
         recruiterId: recUser.recruiter!.recruiterId,
         postType: 'MANUAL',
         originalUrl: 'app-e2e-' + Date.now(),
-        status: 'APPROVED'
-      }
+        status: 'APPROVED',
+      },
     });
     testJobId = job.jobPostingId;
   });
@@ -136,7 +161,9 @@ describe('Applications (e2e)', () => {
 
   // Chú ý: API tạo application dùng UploadedFile, fake FormData trong e2e phức tạp, chúng ta sẽ test tạo bằng DB và test các API GET/PATCH
   beforeAll(async () => {
-    const candidate = await prisma.candidate.findUnique({ where: { userId: candUserId } });
+    const candidate = await prisma.candidate.findUnique({
+      where: { userId: candUserId },
+    });
     const application = await prisma.application.create({
       data: {
         jobPostingId: testJobId,
@@ -144,8 +171,8 @@ describe('Applications (e2e)', () => {
         cvId: cvId,
         cvSnapshotUrl: '/uploads/cvs/test.pdf',
         coverLetter: 'Hello HR',
-        appStatus: 'PENDING'
-      }
+        appStatus: 'PENDING',
+      },
     });
     applicationId = application.applicationId;
   });

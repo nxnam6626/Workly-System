@@ -42,7 +42,10 @@ export class CompaniesService {
   }
 
   async getMyCompany(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId }, include: { company: true } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+      include: { company: true },
+    });
     if (!recruiter || !recruiter.company) {
       return {};
     }
@@ -50,7 +53,9 @@ export class CompaniesService {
   }
 
   async updateMyCompany(userId: string, updateData: any) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
     if (!recruiter) {
       throw new NotFoundException('Recruiter not found');
     }
@@ -58,13 +63,13 @@ export class CompaniesService {
     if (!recruiter.companyId) {
       // Create a new company
       const newCompany = await this.prisma.company.create({
-        data: updateData
+        data: updateData,
       });
 
       // Connect it manually to avoid nested syntax errors
       await this.prisma.recruiter.update({
         where: { recruiterId: recruiter.recruiterId },
-        data: { companyId: newCompany.companyId }
+        data: { companyId: newCompany.companyId },
       });
 
       return newCompany;

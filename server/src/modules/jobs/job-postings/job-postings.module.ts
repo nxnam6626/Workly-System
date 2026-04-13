@@ -6,10 +6,12 @@ import { PrismaModule } from '../../../prisma/prisma.module';
 import { MessagesModule } from '../../messages/messages.module';
 import { NotificationsModule } from '../../notifications/notifications.module';
 import { JobAlertsModule } from '../../job-alerts/job-alerts.module';
+import { AiModule } from '../../ai/ai.module';
+import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule, NotificationsModule, JobAlertsModule],
+  imports: [PrismaModule, MessagesModule, NotificationsModule, JobAlertsModule, AiModule, SubscriptionsModule],
   controllers: [JobPostingsController, AdminJobPostingsController],
   providers: [JobPostingsService],
 })
-export class JobPostingsModule { }
+export class JobPostingsModule {}

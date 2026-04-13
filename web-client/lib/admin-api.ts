@@ -63,6 +63,7 @@ export interface JobPosting {
   createdAt: string;
   updatedAt: string;
   companyId: string;
+  approvedBy?: string | null;
   company?: Company;
   recruiter?: Recruiter;
 }
@@ -178,7 +179,7 @@ export interface AdminUser {
   lastLogin?: string;
   userRoles: { role: { roleName: string } }[];
   candidate?: { fullName: string; phone: string };
-  recruiter?: { position?: string; bio?: string };
+  recruiter?: { position?: string; bio?: string; violationCount: number };
 }
 
 export interface PaginatedUsers {
@@ -212,6 +213,9 @@ export const adminUsersApi = {
   remove: (id: string): Promise<{ message: string }> =>
     api.delete(`/users/${id}`).then((r) => r.data),
 
+  resetViolations: (id: string): Promise<{ message: string }> =>
+    api.patch(`/users/${id}/reset-violations`).then((r) => r.data),
+
   updateRole: (id: string, role: string): Promise<AdminUser> =>
     api.patch(`/users/${id}`, { role }).then((r) => r.data),
 };
@@ -224,9 +228,80 @@ export interface DashboardStats {
   pendingJobs: number;
   crawlCount: number;
   approvalRate: number;
+  totalApproved?: number;
+  totalRejected?: number;
+}
+
+export interface RevenueStats {
+  totalDepositVnd: number;
+  totalDepositXu: number;
+  depositCount: number;
+  totalSpendingRevenue: number;
+  packageSpend: number;
+  packageCount: number;
+  postJobSpend: number;
+  postJobCount: number;
+  openCvSpend: number;
+  openCvCount: number;
+  dailyRevenue: Record<string, number>;
+  topSpenders: { companyName: string; balance: number; recruiterId: string; spentAmount: number }[];
+}
+
+export interface LatestViolation {
+  recruiterId: string;
+  companyName: string;
+  email: string;
+  avatar?: string;
+  violationCount: number;
+  status: string;
+  updatedAt: string;
+}
+
+export interface ViolatingRecruiter {
+  recruiterId: string;
+  companyName: string;
+  email: string;
+  violationCount: number;
+  status: string;
 }
 
 export const adminDashboardApi = {
   getStats: (): Promise<DashboardStats> =>
     api.get('/admin/dashboard/stats').then((r) => r.data),
+
+  getRevenueStats: (): Promise<RevenueStats> =>
+    api.get('/admin/revenue/stats').then((r) => r.data),
+
+  getViolatingRecruiters: (): Promise<ViolatingRecruiter[]> =>
+    api.get('/admin/recruiters/violations').then((r) => r.data),
+
+  getLatestViolations: (): Promise<LatestViolation[]> =>
+    api.get('/admin/violations/latest').then((r) => r.data),
+};
+
+// ─── Admin Support Management ──────────────────────────────────────────────────
+
+export interface SupportRequest {
+  requestId: string;
+  name?: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    userId: string;
+    email: string;
+    status: string;
+    userRoles: { role: { roleName: string } }[];
+  } | null;
+}
+
+export const adminSupportApi = {
+  getAll: (): Promise<SupportRequest[]> =>
+    api.get('/support').then((r) => r.data),
+
+  updateStatus: (id: string, status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED'): Promise<SupportRequest> =>
+    api.patch(`/support/${id}/status`, { status }).then((r) => r.data),
 };

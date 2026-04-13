@@ -14,6 +14,8 @@ import {
   UserCircle2,
   Briefcase,
   BadgeCheck,
+  AlertTriangle,
+  RotateCcw,
 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -25,6 +27,7 @@ interface UserDetailModalProps {
   onUnlock: (id: string) => void;
   onDelete: (id: string) => void;
   onRoleChange: (id: string, role: string) => void;
+  onResetViolations: (id: string) => void;
   isProcessing: boolean;
 }
 
@@ -47,6 +50,7 @@ export default function UserDetailModal({
   onUnlock,
   onDelete,
   onRoleChange,
+  onResetViolations,
   isProcessing,
 }: UserDetailModalProps) {
   const [roleToChange, setRoleToChange] = useState<string | null>(null);
@@ -176,9 +180,30 @@ export default function UserDetailModal({
                 </div>
               )}
               {user.recruiter?.bio && (
-                <p className="text-sm text-slate-600 bg-slate-50 rounded-xl p-3 leading-relaxed">
+                 <p className="text-sm text-slate-600 bg-slate-50 rounded-xl p-3 leading-relaxed">
                   {user.recruiter.bio}
                 </p>
+              )}
+              {user.recruiter && (
+                <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="flex items-center gap-2 text-sm">
+                    <AlertTriangle className={`w-4 h-4 ${user.recruiter.violationCount >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
+                    <span className="font-medium text-slate-700">Số lần vi phạm:</span>
+                    <span className={`font-bold ${user.recruiter.violationCount >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
+                      {user.recruiter.violationCount}/3
+                    </span>
+                  </div>
+                  {user.recruiter.violationCount > 0 && (
+                    <button
+                      onClick={() => onResetViolations(user.userId)}
+                      disabled={isProcessing}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Khôi phục
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}

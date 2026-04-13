@@ -23,9 +23,11 @@ describe('Candidates (e2e)', () => {
   const TEST_EMAILS = ['cand_e2e@test.com', 'rec_cand_e2e@test.com'];
 
   const cleanup = async () => {
-    const users = await prisma.user.findMany({ where: { email: { in: TEST_EMAILS } } });
+    const users = await prisma.user.findMany({
+      where: { email: { in: TEST_EMAILS } },
+    });
     if (!users.length) return;
-    const userIds = users.map(u => u.userId);
+    const userIds = users.map((u) => u.userId);
 
     await prisma.userRole.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.candidate.deleteMany({ where: { userId: { in: userIds } } });
@@ -65,13 +67,21 @@ describe('Candidates (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         candidate: { create: { fullName: 'Test Candidate E2E' } },
-        userRoles: { create: { roleId: roleCand.roleId } }
+        userRoles: { create: { roleId: roleCand.roleId } },
       },
       include: { candidate: true },
     });
     candUserId = candUser.userId;
     candidateId = candUser.candidate!.candidateId;
-    candToken = jwtService.sign({ sub: candUser.userId, email: candUser.email, roles: ['CANDIDATE'], type: 'access' }, { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' });
+    candToken = jwtService.sign(
+      {
+        sub: candUser.userId,
+        email: candUser.email,
+        roles: ['CANDIDATE'],
+        type: 'access',
+      },
+      { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' },
+    );
 
     // Create Recruiter (To test saved candidates)
     const recUser = await prisma.user.create({
@@ -80,11 +90,19 @@ describe('Candidates (e2e)', () => {
         password: '123',
         status: 'ACTIVE',
         recruiter: { create: { bio: 'Test HR', savedCandidateIds: [] } },
-        userRoles: { create: { roleId: roleRec.roleId } }
+        userRoles: { create: { roleId: roleRec.roleId } },
       },
-      include: { recruiter: true }
+      include: { recruiter: true },
     });
-    recruiterToken = jwtService.sign({ sub: recUser.userId, email: recUser.email, roles: ['RECRUITER'], type: 'access' }, { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' });
+    recruiterToken = jwtService.sign(
+      {
+        sub: recUser.userId,
+        email: recUser.email,
+        roles: ['RECRUITER'],
+        type: 'access',
+      },
+      { secret: process.env.JWT_ACCESS_SECRET || 'access-secret' },
+    );
   });
 
   afterAll(async () => {

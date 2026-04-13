@@ -9,7 +9,9 @@ export class LinkedinStrategy extends PassportStrategy(Strategy, 'linkedin') {
     super({
       clientID: process.env.LINKEDIN_CLIENT_ID || 'client-id',
       clientSecret: process.env.LINKEDIN_CLIENT_SECRET || 'client-secret',
-      callbackURL: process.env.LINKEDIN_CALLBACK_URL || 'http://localhost:3001/auth/linkedin/callback',
+      callbackURL:
+        process.env.LINKEDIN_CALLBACK_URL ||
+        'http://localhost:3001/auth/linkedin/callback',
       scope: ['openid', 'profile', 'email'],
       userProfileURL: 'https://api.linkedin.com/v2/userinfo',
     } as any);
@@ -33,7 +35,12 @@ export class LinkedinStrategy extends PassportStrategy(Strategy, 'linkedin') {
       });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: (err: any, user: any, info?: any) => void): Promise<any> {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: (err: any, user: any, info?: any) => void,
+  ): Promise<any> {
     // OpenID Connect profile comes in _json with different keys
     const json = profile._json || {};
     const user = {

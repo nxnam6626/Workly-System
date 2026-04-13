@@ -6,13 +6,16 @@ export class RedisService implements OnModuleDestroy {
   private readonly redisClient: Redis;
 
   constructor() {
-    this.redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-      retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
+    this.redisClient = new Redis(
+      process.env.REDIS_URL || 'redis://localhost:6379',
+      {
+        retryStrategy(times) {
+          const delay = Math.min(times * 50, 2000);
+          return delay;
+        },
+        maxRetriesPerRequest: 1,
       },
-      maxRetriesPerRequest: 1,
-    });
+    );
 
     this.redisClient.on('error', (err) => {
       console.warn('[Redis] Connection error:', err.message);

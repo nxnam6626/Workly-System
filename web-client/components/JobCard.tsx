@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Heart, MapPin, Briefcase, Send, DollarSign } from "lucide-react";
+import { Heart, MapPin, Send, DollarSign } from "lucide-react";
 import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useFavoriteStore } from "@/stores/favorites";
@@ -25,6 +23,7 @@ export interface Job {
   postType: 'CRAWLED' | 'MANUAL';
   originalUrl?: string;
   hasApplied?: boolean;
+  jobTier?: 'BASIC' | 'PROFESSIONAL' | 'URGENT';
 }
 
 interface JobCardProps {
@@ -46,7 +45,6 @@ export function JobCard({ job }: JobCardProps) {
       router.push("/login");
       return;
     }
-
     try {
       await toggleFavorite(job);
     } catch (error) {
@@ -64,13 +62,41 @@ export function JobCard({ job }: JobCardProps) {
     }
   };
 
+  const tierBorder =
+    job.jobTier === 'URGENT'
+      ? 'border-[2px] border-red-400'
+      : job.jobTier === 'PROFESSIONAL'
+        ? 'border-[2px] border-amber-400'
+        : 'border border-slate-100';
+
+  const applyBtnClass =
+    job.jobTier === 'URGENT'
+      ? 'bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/30 hover:opacity-90'
+      : job.jobTier === 'PROFESSIONAL'
+        ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30 hover:opacity-90'
+        : 'bg-[#1e5aff] hover:bg-blue-700 shadow-lg shadow-blue-200/40';
+
   return (
-    <Link href={`/jobs/${job.jobPostingId}`} className="group block">
-      <div className="bg-white rounded-2xl border border-slate-100 p-4 flex flex-col hover:shadow-xl transition-all duration-300 relative shadow-md shadow-slate-200/30">
+    <div
+      onClick={() => router.push(`/jobs/${job.jobPostingId}`)}
+      className="group block h-full cursor-pointer"
+    >
+      <div className={`bg-white rounded-2xl p-4 flex flex-col h-full hover:shadow-xl transition-all duration-300 relative shadow-md shadow-slate-200/30 ${tierBorder}`}>
+
+        {/* Tier badges */}
+        {job.jobTier === 'URGENT' && (
+          <div className="absolute -top-3 -right-2 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse z-10">
+            <span>🔥</span>Tuyển Gấp
+          </div>
+        )}
+        {job.jobTier === 'PROFESSIONAL' && (
+          <div className="absolute -top-3 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 z-10">
+            <span>⭐️</span>Nổi Bật
+          </div>
+        )}
 
         {/* Top: Logo, Title & Company */}
         <div className="flex gap-3 mb-3">
-          {/* Logo container */}
           <div className="w-10 h-10 bg-[#eff6ff] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
             {job.company?.logo ? (
               <img
@@ -96,8 +122,7 @@ export function JobCard({ job }: JobCardProps) {
 
           <button
             onClick={handleToggleFavorite}
-            className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm border border-slate-50 hover:scale-110 active:scale-95 ${isSaved ? "text-red-500 border-red-50" : "text-slate-300 hover:text-red-400"
-              }`}
+            className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm border border-slate-50 hover:scale-110 active:scale-95 ${isSaved ? "text-red-500 border-red-50" : "text-slate-300 hover:text-red-400"}`}
           >
             <Heart className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
           </button>
@@ -117,24 +142,27 @@ export function JobCard({ job }: JobCardProps) {
           </div>
         </div>
 
-        {job.hasApplied ? (
-          <button
-            disabled
-            className="w-3/4 py-2 mx-auto bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-          >
-            <Send className="w-3.5 h-3.5 opacity-40" />
-            Đã ứng tuyển
-          </button>
-        ) : (
-          <button
-            onClick={handleApply}
-            className="w-3/4 py-2 mx-auto bg-[#1e5aff] text-[13px] text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200/40 active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            <Send className="w-3.5 h-3.5" />
-            Ứng tuyển ngay
-          </button>
-        )}
+        {/* Bottom: Apply button */}
+        <div className="mt-auto">
+          {job.hasApplied ? (
+            <button
+              disabled
+              className="w-3/4 py-2 mx-auto bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Send className="w-3.5 h-3.5 opacity-40" />
+              Đã ứng tuyển
+            </button>
+          ) : (
+            <button
+              onClick={handleApply}
+              className={`w-3/4 py-2 mx-auto text-[13px] text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${applyBtnClass}`}
+            >
+              <Send className="w-3.5 h-3.5" />
+              Ứng tuyển ngay
+            </button>
+          )}
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }

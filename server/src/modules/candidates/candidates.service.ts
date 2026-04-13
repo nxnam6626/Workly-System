@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CvParsingService } from './cv-parsing.service';
 import { SupabaseService } from '../../common/supabase/supabase.service';
@@ -13,9 +18,9 @@ export class CandidatesService {
     private readonly cvParsingService: CvParsingService,
     private readonly supabaseService: SupabaseService,
     private readonly matchingService: MatchingService,
-  ) { }
+  ) {}
 
-  async findAll(query: any) {
+  async findAll(query: any, recruiterUserId?: string) {
     const { skip = 0, take = 10, search, skills, major } = query;
     const where: any = {};
 
@@ -27,7 +32,7 @@ export class CandidatesService {
     }
     if (skills) {
       where.skills = {
-        some: { skillName: { contains: skills, mode: 'insensitive' } }
+        some: { skillName: { contains: skills, mode: 'insensitive' } },
       };
     }
 
@@ -36,9 +41,9 @@ export class CandidatesService {
         where,
         skip: Number(skip),
         take: Number(take),
-        include: { 
-          user: { select: { email: true, phoneNumber: true, avatar: true } }, 
-          skills: true, 
+        include: {
+          user: { select: { email: true, phoneNumber: true, avatar: true } },
+          skills: true,
           cvs: {
             select: {
               cvId: true,
@@ -47,22 +52,106 @@ export class CandidatesService {
               isMain: true,
               parsedData: true,
               createdAt: true,
-            }
-          } 
+            },
+          },
         },
       }),
       this.prisma.candidate.count({ where }),
     ]);
 
-    return { data, meta: { total, skip: Number(skip), take: Number(take) } };
+    let enrichedData = data as any[];
+
+    if (recruiterUserId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId: recruiterUserId },
+      });
+
+      if (recruiter) {
+        // Fetch unlocked candidate IDs
+        const unlocked = await this.prisma.candidateUnlock.findMany({
+          where: { recruiterId: recruiter.recruiterId },
+          select: { candidateId: true },
+        });
+        const unlockedIds = new Set(unlocked.map(u => u.candidateId));
+
+        // Fetch active jobs for matching
+        const activeJobs = await this.prisma.jobPosting.findMany({
+           where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
+           select: { structuredRequirements: true, title: true }
+        });
+
+        // Enrich data
+        enrichedData = data.map((candidate) => {
+          const isUnlocked = unlockedIds.has(candidate.candidateId);
+          
+          let maxScore = 0;
+          let bestJob = '';
+          
+          // Calculate matching score natively
+          const mainCv = candidate.cvs?.find(c => c.isMain) || candidate.cvs?.[0];
+          if (mainCv && mainCv.parsedData) {
+            const parsedData = mainCv.parsedData as any;
+            const cvSkills = parsedData.skills || [];
+            const cvExp = parsedData.totalYearsExp || 0;
+            
+            for (const job of activeJobs) {
+               if (!job.structuredRequirements) continue;
+               const reqs = job.structuredRequirements as any;
+               const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
+
+               const matchedHard = hardSkills.filter((s: string) =>
+                 cvSkills.some((cs: any) => {
+                   const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+                   return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+                 }),
+               );
+               const hardScore = hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
+
+               const matchedSoft = softSkills.filter((s: string) =>
+                 cvSkills.some((cs: any) => {
+                   const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+                   return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+                 }),
+               );
+               const softScore = softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
+               const skillScore = hardScore * 0.8 + softScore * 0.2;
+
+               const expScore = cvExp >= minExperienceYears ? 1 : cvExp / (minExperienceYears || 1);
+               
+               const totalScore = Math.round((skillScore * 0.7 + expScore * 0.3) * 100);
+               if (totalScore > maxScore) {
+                  maxScore = totalScore;
+                  bestJob = job.title;
+               }
+            }
+          }
+
+          return {
+            ...candidate,
+            fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+            user: {
+              ...candidate.user,
+              avatar: isUnlocked ? candidate.user?.avatar : null,
+              email: isUnlocked ? candidate.user?.email : '****@***.com',
+              phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+            },
+            isUnlocked,
+            matchScore: maxScore,
+            bestMatchJob: bestJob
+          };
+        });
+      }
+    }
+
+    return { data: enrichedData, meta: { total, skip: Number(skip), take: Number(take) } };
   }
 
-  async findOne(candidateId: string) {
+  async findOne(candidateId: string, recruiterUserId?: string) {
     const candidate = await this.prisma.candidate.findUnique({
       where: { candidateId },
-      include: { 
-        user: { select: { email: true, phoneNumber: true, avatar: true } }, 
-        skills: true, 
+      include: {
+        user: { select: { email: true, phoneNumber: true, avatar: true } },
+        skills: true,
         cvs: {
           select: {
             cvId: true,
@@ -71,8 +160,8 @@ export class CandidatesService {
             isMain: true,
             parsedData: true,
             createdAt: true,
-          }
-        } 
+          },
+        },
       },
     });
 
@@ -80,7 +169,34 @@ export class CandidatesService {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
     }
 
-    return candidate;
+    let enrichedCandidate = candidate as any;
+
+    if (recruiterUserId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId: recruiterUserId },
+      });
+
+      if (recruiter) {
+        const unlockedInfo = await this.prisma.candidateUnlock.findFirst({
+          where: { recruiterId: recruiter.recruiterId, candidateId: candidate.candidateId }
+        });
+        const isUnlocked = !!unlockedInfo;
+
+        enrichedCandidate = {
+          ...candidate,
+          fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+          user: {
+            ...candidate.user,
+            avatar: isUnlocked ? candidate.user?.avatar : null,
+            email: isUnlocked ? candidate.user?.email : '****@***.com',
+            phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+          },
+          isUnlocked
+        }
+      }
+    }
+
+    return enrichedCandidate;
   }
 
   async uploadCvOnly(userId: string, file: Express.Multer.File) {
@@ -100,12 +216,20 @@ export class CandidatesService {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const fileName = `cv-extract-${uniqueSuffix}${extname(file.originalname)}`;
     const path = `${userId}/${fileName}`;
-    const fileUrl = await this.supabaseService.uploadFile(buffer, path, file.mimetype);
+    const fileUrl = await this.supabaseService.uploadFile(
+      buffer,
+      path,
+      file.mimetype,
+    );
 
     const cvTitle = file.originalname.split('.')[0];
 
     // Kiểm tra xem đây có phải là CV đầu tiên không
-    const cvCount = candidate ? await this.prisma.cV.count({ where: { candidateId: candidate.candidateId } }) : 0;
+    const cvCount = candidate
+      ? await this.prisma.cV.count({
+          where: { candidateId: candidate.candidateId },
+        })
+      : 0;
     const isMain = cvCount === 0;
 
     // BƯỚC 1: Lưu bản ghi CV vào database trước (Lưu nháp - Trang thái: Uploaded)
@@ -125,14 +249,15 @@ export class CandidatesService {
 
     const cv = await this.prisma.cV.findUnique({
       where: { cvId },
-      select: { cvId: true, candidateId: true, fileUrl: true }
+      select: { cvId: true, candidateId: true, fileUrl: true },
     });
 
     if (!cv || cv.candidateId !== candidate.candidateId) {
       throw new NotFoundException('CV not found or does not belong to user');
     }
 
-    if (!cv.fileUrl) throw new BadRequestException('CV does not have a file URL');
+    if (!cv.fileUrl)
+      throw new BadRequestException('CV does not have a file URL');
 
     try {
       // 2. Tải tệp từ Supabase
@@ -166,9 +291,9 @@ export class CandidatesService {
   }
 
   async update(candidateId: string, updateCandidateDto: any) {
-    const candidate = await this.prisma.candidate.findUnique({ 
+    const candidate = await this.prisma.candidate.findUnique({
       where: { candidateId },
-      include: { user: true } 
+      include: { user: true },
     });
     if (!candidate) {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
@@ -202,7 +327,7 @@ export class CandidatesService {
             data: skills.map((s: any) => ({
               candidateId,
               skillName: typeof s === 'string' ? s : s.skillName,
-              level: typeof s === 'string' ? 'BEGINNER' : (s.level || 'BEGINNER'),
+              level: typeof s === 'string' ? 'BEGINNER' : s.level || 'BEGINNER',
             })),
           });
         }
@@ -229,7 +354,9 @@ export class CandidatesService {
   }
 
   async remove(candidateId: string) {
-    const candidate = await this.prisma.candidate.findUnique({ where: { candidateId } });
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { candidateId },
+    });
     if (!candidate) {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
     }
@@ -240,7 +367,9 @@ export class CandidatesService {
   }
 
   async toggleSave(candidateId: string, userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
     if (!recruiter) {
       throw new NotFoundException('Recruiter not found');
     }
@@ -249,7 +378,7 @@ export class CandidatesService {
     const isSaved = savedCandidateIds.includes(candidateId);
 
     const newSavedCandidateIds = isSaved
-      ? savedCandidateIds.filter(id => id !== candidateId)
+      ? savedCandidateIds.filter((id) => id !== candidateId)
       : [...savedCandidateIds, candidateId];
 
     await this.prisma.recruiter.update({
@@ -261,16 +390,18 @@ export class CandidatesService {
   }
 
   async getSavedCandidates(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
     if (!recruiter) {
       throw new NotFoundException('Recruiter not found');
     }
 
-    return this.prisma.candidate.findMany({
+    const savedCandidates = await this.prisma.candidate.findMany({
       where: { candidateId: { in: recruiter.savedCandidateIds } },
-      include: { 
-        user: { select: { email: true, phoneNumber: true, avatar: true } }, 
-        skills: true, 
+      include: {
+        user: { select: { email: true, phoneNumber: true, avatar: true } },
+        skills: true,
         cvs: {
           select: {
             cvId: true,
@@ -279,25 +410,49 @@ export class CandidatesService {
             isMain: true,
             parsedData: true,
             createdAt: true,
-          }
-        } 
+          },
+        },
       },
+    });
+
+    // Fetch unlocked candidate IDs
+    const unlocked = await this.prisma.candidateUnlock.findMany({
+      where: { recruiterId: recruiter.recruiterId },
+      select: { candidateId: true },
+    });
+    const unlockedIds = new Set(unlocked.map(u => u.candidateId));
+
+    return savedCandidates.map(candidate => {
+      const isUnlocked = unlockedIds.has(candidate.candidateId);
+      return {
+        ...candidate,
+        fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+        user: {
+          ...candidate.user,
+          avatar: isUnlocked ? candidate.user?.avatar : null,
+          email: isUnlocked ? candidate.user?.email : '****@***.com',
+          phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+        },
+        isUnlocked
+      };
     });
   }
 
   async saveCv(userId: string, saveCvDto: any) {
-    let candidate = await this.prisma.candidate.findUnique({ where: { userId } });
-    
+    let candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
     // Auto-create candidate if missing
     if (!candidate) {
       const user = await this.prisma.user.findUnique({ where: { userId } });
       if (!user) throw new NotFoundException('User not found');
-      
+
       candidate = await this.prisma.candidate.create({
         data: {
           userId,
           fullName: user.email.split('@')[0],
-        }
+        },
       });
     }
 
@@ -336,24 +491,26 @@ export class CandidatesService {
     return this.prisma.cV.findFirst({
       where: { candidateId, fileHash },
       select: {
-         cvId: true,
-         cvTitle: true,
-         fileUrl: true,
-         isMain: true,
-         createdAt: true,
-      }
+        cvId: true,
+        cvTitle: true,
+        fileUrl: true,
+        isMain: true,
+        createdAt: true,
+      },
     });
   }
 
   async updateCv(userId: string, cvId: string, updateCvDto: any) {
-    let candidate = await this.prisma.candidate.findUnique({ where: { userId } });
-    
+    let candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
     if (!candidate) {
-       const user = await this.prisma.user.findUnique({ where: { userId } });
-       if (!user) throw new NotFoundException('User not found');
-       candidate = await this.prisma.candidate.create({
-         data: { userId, fullName: user.email.split('@')[0] }
-       });
+      const user = await this.prisma.user.findUnique({ where: { userId } });
+      if (!user) throw new NotFoundException('User not found');
+      candidate = await this.prisma.candidate.create({
+        data: { userId, fullName: user.email.split('@')[0] },
+      });
     }
 
     const cv = await this.prisma.cV.findUnique({ where: { cvId } });
@@ -366,7 +523,11 @@ export class CandidatesService {
     // If isMain is true, unset other main CVs
     if (isMain) {
       await this.prisma.cV.updateMany({
-        where: { candidateId: candidate.candidateId, isMain: true, NOT: { cvId } },
+        where: {
+          candidateId: candidate.candidateId,
+          isMain: true,
+          NOT: { cvId },
+        },
         data: { isMain: false },
       });
     }
@@ -396,7 +557,7 @@ export class CandidatesService {
       include: {
         user: { select: { email: true, phoneNumber: true, avatar: true } },
         skills: true,
-        cvs: { 
+        cvs: {
           select: {
             cvId: true,
             cvTitle: true,
@@ -405,8 +566,8 @@ export class CandidatesService {
             parsedData: true,
             createdAt: true,
           },
-          orderBy: { createdAt: 'desc' } 
-        }
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 
@@ -415,7 +576,7 @@ export class CandidatesService {
       const user = await this.prisma.user.findUnique({ where: { userId } });
       if (!user) return null;
 
-      candidate = await this.prisma.candidate.create({
+      candidate = (await this.prisma.candidate.create({
         data: {
           userId,
           fullName: user.email.split('@')[0],
@@ -423,28 +584,30 @@ export class CandidatesService {
         include: {
           user: { select: { email: true, phoneNumber: true, avatar: true } },
           skills: true,
-          cvs: true
-        }
-      }) as any;
+          cvs: true,
+        },
+      })) as any;
     }
 
     return candidate;
   }
 
   async setMainCv(userId: string, cvId: string) {
-    let candidate = await this.prisma.candidate.findUnique({ where: { userId } });
-    
+    let candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
     if (!candidate) {
       const user = await this.prisma.user.findUnique({ where: { userId } });
       if (!user) throw new NotFoundException('User not found');
       candidate = await this.prisma.candidate.create({
-        data: { userId, fullName: user.email.split('@')[0] }
+        data: { userId, fullName: user.email.split('@')[0] },
       });
     }
 
-    const cv = await this.prisma.cV.findUnique({ 
+    const cv = await this.prisma.cV.findUnique({
       where: { cvId },
-      select: { cvId: true, candidateId: true } 
+      select: { cvId: true, candidateId: true },
     });
     if (!cv || cv.candidateId !== candidate.candidateId) {
       throw new NotFoundException('CV not found or does not belong to user');
@@ -466,19 +629,21 @@ export class CandidatesService {
   }
 
   async deleteCv(userId: string, cvId: string) {
-    let candidate = await this.prisma.candidate.findUnique({ where: { userId } });
-    
+    let candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
     if (!candidate) {
       const user = await this.prisma.user.findUnique({ where: { userId } });
       if (!user) throw new NotFoundException('User not found');
       candidate = await this.prisma.candidate.create({
-        data: { userId, fullName: user.email.split('@')[0] }
+        data: { userId, fullName: user.email.split('@')[0] },
       });
     }
 
-    const cv = await this.prisma.cV.findUnique({ 
+    const cv = await this.prisma.cV.findUnique({
       where: { cvId },
-      select: { cvId: true, candidateId: true, fileUrl: true } 
+      select: { cvId: true, candidateId: true, fileUrl: true },
     });
     if (!cv || cv.candidateId !== candidate.candidateId) {
       throw new NotFoundException('CV not found or does not belong to user');

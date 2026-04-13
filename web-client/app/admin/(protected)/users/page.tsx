@@ -11,7 +11,9 @@ import UserStats from './components/UserStats';
 import UserFilters from './components/UserFilters';
 import UserTable from './components/UserTable';
 import UserDetailModal from './components/UserDetailModal';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { useConfirm } from '@/components/ConfirmDialog';
+import toast from 'react-hot-toast';
+import { useSocketStore } from '@/stores/socket';
 
 const PAGE_SIZE = 15;
 
@@ -26,10 +28,7 @@ export default function UsersPage() {
 
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
-  const [lockUserId, setLockUserId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isLocking, setIsLocking] = useState(false);
+  const confirm = useConfirm();
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -55,32 +54,52 @@ export default function UsersPage() {
     fetchUsers();
   }, [fetchUsers]);
 
+  const { socket } = useSocketStore();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleAccountLocked = (data: any) => {
+      toast.error(`Hệ thống vừa tự động khóa tài khoản vi phạm: ${data.email || 'Ẩn danh'}`);
+      fetchUsers();
+    };
+
+    socket.on('adminAccountLocked', handleAccountLocked);
+
+    const handleUserUpdated = () => {
+      fetchUsers();
+    };
+    socket.on('adminUserUpdated', handleUserUpdated);
+
+    return () => {
+      socket.off('adminAccountLocked', handleAccountLocked);
+      socket.off('adminUserUpdated', handleUserUpdated);
+    };
+  }, [socket, fetchUsers]);
+
   // When filters change, go back to page 1
   const handleSetFilters = (f: AdminUserFilters) => {
     setFilters(f);
     setPage(1);
   };
 
-  const requestLock = (id: string) => {
-    setLockUserId(id);
-  };
-
-  const executeLock = async () => {
-    if (!lockUserId) return;
-    setIsLocking(true);
-    setProcessingId(lockUserId);
+  const requestLock = async (id: string) => {
+    const ok = await confirm({
+      title: 'Khóa tài khoản?',
+      message: 'Người dùng sẽ bị đăng xuất và không thể đăng nhập lại cho đến khi được mở khóa.',
+      confirmText: 'Khóa tài khoản',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setProcessingId(id);
     try {
-      await adminUsersApi.lock(lockUserId);
-      setUsers((prev) =>
-        prev.map((u) => (u.userId === lockUserId ? { ...u, status: 'LOCKED' } : u)),
-      );
-      if (detailUser?.userId === lockUserId)
-        setDetailUser((p) => (p ? { ...p, status: 'LOCKED' } : null));
-      setLockUserId(null);
+      await adminUsersApi.lock(id);
+      setUsers((prev) => prev.map((u) => (u.userId === id ? { ...u, status: 'LOCKED' } : u)));
+      if (detailUser?.userId === id) setDetailUser((p) => (p ? { ...p, status: 'LOCKED' } : null));
+      toast.success('Tài khoản đã bị khóa.');
     } catch {
       setError('Khóa tài khoản thất bại.');
     } finally {
-      setIsLocking(false);
       setProcessingId(null);
     }
   };
@@ -101,23 +120,25 @@ export default function UsersPage() {
     }
   };
 
-  const requestDelete = (id: string) => {
-    setDeleteUserId(id);
-  };
-
-  const executeDelete = async () => {
-    if (!deleteUserId) return;
-    setIsDeleting(true);
+  const requestDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Xóa tài khoản?',
+      message: 'Hành động này không thể hoàn tác. Mọi dữ liệu liên quan sẽ bị xóa vĩnh viễn.',
+      confirmText: 'Xóa tài khoản',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setProcessingId(id);
     try {
-      await adminUsersApi.remove(deleteUserId);
-      setUsers((prev) => prev.filter((u) => u.userId !== deleteUserId));
+      await adminUsersApi.remove(id);
+      setUsers((prev) => prev.filter((u) => u.userId !== id));
       setTotal((t) => t - 1);
-      if (detailUser?.userId === deleteUserId) setDetailUser(null);
-      setDeleteUserId(null);
+      if (detailUser?.userId === id) setDetailUser(null);
+      toast.success('Tài khoản đã được xóa.');
     } catch {
       setError('Xóa tài khoản thất bại.');
     } finally {
-      setIsDeleting(false);
+      setProcessingId(null);
     }
   };
 
@@ -129,6 +150,39 @@ export default function UsersPage() {
       if (detailUser?.userId === id) setDetailUser(updatedUser);
     } catch {
       setError('Đổi vai trò thất bại.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleResetViolations = async (id: string) => {
+    const ok = await confirm({
+      title: 'Khôi phục vi phạm?',
+      message: 'Số lần vi phạm của nhà tuyển dụng này sẽ được đặt về 0. Họ sẽ không bị khóa tự động cho đến khi có vi phạm mới.',
+      confirmText: 'Xác nhận khôi phục',
+      variant: 'info',
+    });
+    if (!ok) return;
+
+    setProcessingId(id);
+    try {
+      await adminUsersApi.resetViolations(id);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === id && u.recruiter
+            ? { ...u, recruiter: { ...u.recruiter, violationCount: 0 } }
+            : u,
+        ),
+      );
+      if (detailUser?.userId === id && detailUser.recruiter) {
+        setDetailUser({
+          ...detailUser,
+          recruiter: { ...detailUser.recruiter, violationCount: 0 },
+        });
+      }
+      toast.success('Đã khôi phục số lần vi phạm về 0.');
+    } catch {
+      setError('Khôi phục vi phạm thất bại.');
     } finally {
       setProcessingId(null);
     }
@@ -213,29 +267,10 @@ export default function UsersPage() {
           onUnlock={handleUnlock}
           onDelete={requestDelete}
           onRoleChange={handleRoleChange}
+          onResetViolations={handleResetViolations}
           isProcessing={processingId === detailUser.userId}
         />
       )}
-
-      <ConfirmModal
-        isOpen={!!deleteUserId}
-        title="Xóa tài khoản"
-        message="Bạn có chắc muốn xóa tài khoản này? Hành động không thể hoàn tác và mọi dữ liệu liên quan sẽ bị xóa."
-        confirmLabel="Xóa tài khoản"
-        onConfirm={executeDelete}
-        onCancel={() => setDeleteUserId(null)}
-        isLoading={isDeleting}
-      />
-
-      <ConfirmModal
-        isOpen={!!lockUserId}
-        title="Khóa tài khoản"
-        message="Bạn có chắc muốn khóa tài khoản này? Người dùng sẽ bị đăng xuất và không thể đăng nhập lại cho đến khi được mở khóa."
-        confirmLabel="Khóa tài khoản"
-        onConfirm={executeLock}
-        onCancel={() => setLockUserId(null)}
-        isLoading={isLocking}
-      />
     </div>
   );
 }

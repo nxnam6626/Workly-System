@@ -38,9 +38,11 @@ export class UsersController {
 
   /** Cập nhật ảnh đại diện. */
   @Patch('me/avatar')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: memoryStorage(),
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
   updateAvatar(
     @CurrentUser('userId') userId: string,
     @UploadedFile() file: Express.Multer.File,
@@ -124,6 +126,13 @@ export class UsersController {
   @Patch(':userId/unlock')
   unlock(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.usersService.unlockUser(userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':userId/reset-violations')
+  resetViolations(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.usersService.resetViolationCount(userId);
   }
 
   @UseGuards(RolesGuard)

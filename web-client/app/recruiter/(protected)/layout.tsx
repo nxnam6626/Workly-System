@@ -25,6 +25,7 @@ import {
 import { NotificationMenu } from '@/components/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
 import { useSocketStore } from '@/stores/socket';
+import { useWalletStore } from '@/stores/wallet';
 import toast from 'react-hot-toast';
 
 const navItems = [
@@ -33,6 +34,7 @@ const navItems = [
   { label: 'Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
   { label: 'Yêu Cầu Tuyển Dụng', href: '/recruiter/post-job', icon: PlusCircle },
   { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
+  { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
   { label: 'Tìm Ứng Viên', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },
@@ -48,23 +50,15 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const { wallet, fetchWallet } = useWalletStore();
   const { socket } = useSocketStore();
   const { unreadCount, fetchUnreadCount, incrementUnread } = useMessageStore();
 
   useEffect(() => {
     if (isAuthenticated && user?.roles?.includes('RECRUITER')) {
-      const fetchWallet = async () => {
-        try {
-          const response = await api.get('/recruiters/wallet');
-          setWallet(response.data);
-        } catch (error) {
-          console.error('Error fetching wallet:', error);
-        }
-      };
       fetchWallet();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, fetchWallet]);
 
   useEffect(() => {
     if (!isLoading) {

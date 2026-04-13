@@ -7,14 +7,17 @@ import * as path from 'path';
 async function parsePdfBuffer(buffer: Buffer): Promise<string> {
   try {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-    const standardFontDataUrl = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts').replace(/\\/g, '/') + '/';
+    const standardFontDataUrl =
+      path
+        .join(process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts')
+        .replace(/\\/g, '/') + '/';
 
     const data = new Uint8Array(buffer);
-    const pdf = await pdfjsLib.getDocument({ 
-      data: data, 
-      standardFontDataUrl: standardFontDataUrl 
+    const pdf = await pdfjsLib.getDocument({
+      data: data,
+      standardFontDataUrl: standardFontDataUrl,
     }).promise;
-    
+
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -60,7 +63,9 @@ export class AiService {
   async extractTextFromPdfUrl(fileUrl: string): Promise<string> {
     try {
       if (!fileUrl) return '';
-      const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+      const response = await axios.get(fileUrl, {
+        responseType: 'arraybuffer',
+      });
       return await parsePdfBuffer(Buffer.from(response.data));
     } catch (e) {
       console.error('Error fetching/parsing PDF:', e.message);
@@ -68,15 +73,22 @@ export class AiService {
     }
   }
 
-  async evaluateMatch(cvText: string, jobTitle: string, jobRequirements: string): Promise<number> {
-    if (!this.isConfigured) return parseFloat((Math.random() * (99 - 50) + 50).toFixed(1));
-    
+  async evaluateMatch(
+    cvText: string,
+    jobTitle: string,
+    jobRequirements: string,
+  ): Promise<number> {
+    if (!this.isConfigured)
+      return parseFloat((Math.random() * (99 - 50) + 50).toFixed(1));
+
     // Quick circuit breaker if cv is empty
     if (!cvText || cvText.trim().length === 0) return 30;
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
+
       const prompt = `You are a strict HR AI Assistant. Evaluate the candidate's CV against the Job Title and Job Requirements.
       Job Title: ${jobTitle}
       Job Requirements: ${jobRequirements}
@@ -90,11 +102,14 @@ export class AiService {
 
       const result = await model.generateContent(prompt);
       const responseText = result.response.text();
-      
-      const cleanResponse = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+
+      const cleanResponse = responseText
+        .replace(/```json/gi, '')
+        .replace(/```/gi, '')
+        .trim();
       const parsed = JSON.parse(cleanResponse);
       const score = Number(parsed.score);
-      
+
       return isNaN(score) ? 50 : score;
     } catch (e) {
       console.error('AI Match Error:', e.message);
@@ -102,10 +117,31 @@ export class AiService {
     }
   }
 
-  async generateResponse(message: string): Promise<string> {
-    if (!this.isConfigured) return "AI is not configured.";
+  async extractFocusSkills(jobTitle: string, jobRequirements: string): Promise<string[]> {
+    if (!this.isConfigured) return [];
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const prompt = `Extract exactly 3 core "Focus Skills" (Kỹ năng trọng tâm) for the following job in Vietnamese. Return ONLY a JSON array of strings. Example: ["ReactJS", "NodeJS", "TypeScript"].
+      Job Title: ${jobTitle}
+      Job Requirements: ${jobRequirements}`;
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+      const cleanResponse = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const parsed = JSON.parse(cleanResponse);
+      if (Array.isArray(parsed)) return parsed.slice(0, 3);
+      return [];
+    } catch (e) {
+      console.error('AI Focus Skills Error:', e.message);
+      return [];
+    }
+  }
+
+  async generateResponse(message: string): Promise<string> {
+    if (!this.isConfigured) return 'AI is not configured.';
+    try {
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
       const result = await model.generateContent(message);
       return result.response.text();
     } catch (e) {
@@ -114,13 +150,17 @@ export class AiService {
     }
   }
 
-  async *generateStreamResponse(message: string): AsyncGenerator<string, void, unknown> {
+  async *generateStreamResponse(
+    message: string,
+  ): AsyncGenerator<string, void, unknown> {
     if (!this.isConfigured) {
-      yield "AI is not configured.";
+      yield 'AI is not configured.';
       return;
     }
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
       const result = await model.generateContentStream(message);
       for await (const chunk of result.stream) {
         yield chunk.text();

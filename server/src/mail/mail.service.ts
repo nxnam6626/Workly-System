@@ -20,10 +20,17 @@ export class MailService {
     // Tự động kiểm tra kết nối ngay khi Server khởi động
     this.transporter.verify((error, success) => {
       if (error) {
-        console.error('[MailService] ❌ Nodemailer connection failed:', error.message);
-        console.warn('[MailService] ⚠️ Vui lòng kiểm tra MAIL_USER và MAIL_PASS trong file .env');
+        console.error(
+          '[MailService] ❌ Nodemailer connection failed:',
+          error.message,
+        );
+        console.warn(
+          '[MailService] ⚠️ Vui lòng kiểm tra MAIL_USER và MAIL_PASS trong file .env',
+        );
       } else {
-        console.log('[MailService] ✅ Nodemailer is ready to take our messages');
+        console.log(
+          '[MailService] ✅ Nodemailer is ready to take our messages',
+        );
       }
     });
   }
@@ -60,7 +67,7 @@ export class MailService {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
       const verificationLink = `${frontendUrl}/verify-email?email=${email}&token=${token}`;
-      
+
       await this.transporter.sendMail({
         from: `"Workly" <${process.env.MAIL_USER}>`,
         to: email,
@@ -87,7 +94,12 @@ export class MailService {
     }
   }
 
-  async sendJobInvitation(email: string, candidateName: string, companyName: string, messageContent: string) {
+  async sendJobInvitation(
+    email: string,
+    candidateName: string,
+    companyName: string,
+    messageContent: string,
+  ) {
     try {
       await this.transporter.sendMail({
         from: `"Workly - ${companyName}" <${process.env.MAIL_USER}>`,

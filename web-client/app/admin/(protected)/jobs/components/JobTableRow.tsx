@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Eye } from 'lucide-react';
-import { JobPosting, JobStatus, PostType } from '@/lib/admin-api';
+import { JobPosting, JobStatus } from '@/lib/admin-api';
 import toast from 'react-hot-toast';
 
 interface JobTableRowProps {
@@ -61,15 +61,19 @@ export default function JobTableRow({
         </span>
       </td>
       <td className="px-5 py-4">
-        <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-            job.postType === PostType.CRAWLED
-              ? 'bg-amber-50 text-amber-600 border border-amber-100'
-              : 'bg-indigo-50 text-indigo-600 border border-indigo-100'
-          }`}
-        >
-          {job.postType === PostType.CRAWLED ? 'Crawler' : 'Manual'}
-        </span>
+        {job.status === 'PENDING' ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-400 border border-slate-200">
+            —
+          </span>
+        ) : job.approvedBy ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100">
+            Manual
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100">
+            Auto
+          </span>
+        )}
       </td>
       <td className="px-5 py-4">
         <span

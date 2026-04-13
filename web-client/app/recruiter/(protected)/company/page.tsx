@@ -12,6 +12,7 @@ const defaultForm = {
   taxCode: '',
   address: '',
   websiteUrl: '',
+  companySize: 0,
   description: '',
   logo: '',
   banner: '',

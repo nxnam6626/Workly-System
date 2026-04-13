@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -12,11 +17,12 @@ import { SearchService } from '../../search/search.service';
 import { MatchingService } from '../../search/matching.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { AiService } from '../../ai/ai.service';
+import { SubscriptionsService } from '../../subscriptions/subscriptions.service';
 
 @Injectable()
 export class JobPostingsService {
   constructor(
-
     private prisma: PrismaService,
     private messagesGateway: MessagesGateway,
     private notificationsService: NotificationsService,
@@ -24,50 +30,86 @@ export class JobPostingsService {
     private searchService: SearchService,
     private matchingService: MatchingService,
     @InjectQueue('matching') private matchingQueue: Queue,
+    private aiService: AiService,
+    private subscriptionsService: SubscriptionsService,
   ) { }
+
+  private readonly VIOLATION_LIMIT = 3;
 
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { company: true }
+      include: { company: true },
     });
 
     if (!recruiter || !recruiter.companyId) {
-      throw new NotFoundException('Thông tin nhà tuyển dụng hoặc công ty chưa được thiết lập.');
+      throw new NotFoundException(
+        'Thông tin nhà tuyển dụng hoặc công ty chưa được thiết lập.',
+      );
     }
 
-    const { deadline, salaryMin, salaryMax, hardSkills, softSkills, minExperienceYears, ...rest } = createJobPostingDto as any;
+    const {
+      deadline,
+      salaryMin,
+      salaryMax,
+      hardSkills,
+      softSkills,
+      minExperienceYears,
+      jobTier,
+      ...rest
+    } = createJobPostingDto as any;
 
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
 
+    const requestedJobTier = jobTier || 'BASIC';
+
+    // TRỪ XU HOẶC CHECK QUOTA GÓI TRƯỚC KHI TẠO JOB
+    await this.subscriptionsService.checkPermissionAndDeduct(userId, requestedJobTier);
+
     // Kiểm tra logic lương
-    if (salaryMin !== undefined && salaryMax !== undefined && salaryMin > salaryMax) {
-      throw new ForbiddenException('Lương tối thiểu không thể lớn hơn lương tối đa.');
+    if (
+      salaryMin !== undefined &&
+      salaryMax !== undefined &&
+      salaryMin > salaryMax
+    ) {
+      throw new ForbiddenException(
+        'Lương tối thiểu không thể lớn hơn lương tối đa.',
+      );
     }
 
     // Kiểm tra logic deadline
     if (deadline && deadline < Date.now()) {
-      throw new ForbiddenException('Ngày hết hạn không thể là một ngày trong quá khứ.');
+      throw new ForbiddenException(
+        'Ngày hết hạn không thể là một ngày trong quá khứ.',
+      );
     }
 
-    const originalUrl = 'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const originalUrl =
+      'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-    // MOCK: Automatic Content Moderation (Auto-Approve Criteria)
-    const blacklist = ['cá cược', 'đánh bạc', 'lừa đảo', 'việc nhẹ lương cao', 'đa cấp'];
-    const contentToCheck = `${createJobPostingDto.title} ${createJobPostingDto.description} ${createJobPostingDto.requirements || ''}`.toLowerCase();
-    
-    const containsBadWords = blacklist.some(word => contentToCheck.includes(word));
+    // Automatic Content Moderation
+    const { containsBadWords, foundWords } = this.validateBlacklist(
+      createJobPostingDto.title,
+      createJobPostingDto.description,
+      createJobPostingDto.requirements,
+      createJobPostingDto.benefits,
+      hardSkills,
+      softSkills,
+    );
+
     // Tạo điểm ngẫu nhiên mô phỏng AI (Nội dung xấu -> Thấp, Tốt -> Ngẫu nhiên 70-99)
-    const aiReliabilityScore = containsBadWords ? 40 : parseFloat((Math.random() * (99 - 70) + 70).toFixed(1));
-    
+    const aiReliabilityScore = containsBadWords
+      ? 40
+      : parseFloat((Math.random() * (99 - 70) + 70).toFixed(1));
+
     // Auto-approve criteria:
-    let finalStatus: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING';
-    
+    let finalStatus: JobStatus = JobStatus.PENDING;
+
     if (containsBadWords) {
-       finalStatus = 'REJECTED';
-    } else if (aiReliabilityScore >= 85) {
-       finalStatus = 'APPROVED'; // Tự động duyệt nếu AI đánh giá cao
+      finalStatus = JobStatus.REJECTED; // Tự động đánh rớt nếu vi phạm
+    } else if (aiReliabilityScore >= 50) {
+      finalStatus = JobStatus.APPROVED; // Tự động duyệt nếu qua mức cơ sở
     }
 
     const job = await this.prisma.jobPosting.create({
@@ -80,6 +122,7 @@ export class JobPostingsService {
         companyId: recruiter.companyId,
         postType: 'MANUAL',
         status: finalStatus,
+        jobTier: requestedJobTier,
         isVerified: finalStatus === 'APPROVED',
         aiReliabilityScore,
         originalUrl: originalUrl,
@@ -90,63 +133,145 @@ export class JobPostingsService {
           vacancies: createJobPostingDto.vacancies || 1,
         },
       },
-      include: { company: true, recruiter: { include: { user: { select: { email: true } } } } }
+      include: {
+        company: true,
+        recruiter: { include: { user: { select: { email: true } } } },
+      },
     });
+
+    // Nếu bị từ chối tự động do blacklist -> Cộng 1 lượt vi phạm
+    if (finalStatus === JobStatus.REJECTED && containsBadWords) {
+      await this.checkAndAutoLockRecruiter(recruiter.recruiterId);
+    }
 
     if (finalStatus === 'APPROVED') {
       try {
         await this.syncJobToES(job);
-      } catch (e) { console.error('ES Sync failed automatically', e); }
+      } catch (e) {
+        console.error('ES Sync failed automatically', e);
+      }
     }
     // Tự động chạy Matching Engine
     await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
     if (finalStatus === 'APPROVED') {
-       let title = 'Tin tuyển dụng được duyệt tự động';
-       let message = `Tin tuyển dụng "${job.title}" của bạn đã được hệ thống AI tự động phê duyệt an toàn.`;
-       await this.notificationsService.create(userId, title, message, 'success', '/recruiter/jobs');
-       this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'success', link: '/recruiter/jobs' });
-       this.messagesGateway.server.emit('adminJobUpdated');
-       this.triggerJobNotifications(job);
+      let title = 'Tin tuyển dụng được duyệt tự động';
+      let message = `Tin tuyển dụng "${job.title}" của bạn đã được hệ thống AI tự động phê duyệt an toàn.`;
+      await this.notificationsService.create(
+        userId,
+        title,
+        message,
+        'success',
+        '/recruiter/jobs',
+      );
+      this.messagesGateway.server
+        .to(`user_${userId}`)
+        .emit('notification', {
+          title,
+          message,
+          type: 'success',
+          link: '/recruiter/jobs',
+        });
+      this.messagesGateway.server.emit('adminJobUpdated');
+      this.triggerJobNotifications(job);
+    } else if (finalStatus === 'REJECTED' && containsBadWords) {
+      let title = 'Tin tuyển dụng bị từ chối tự động';
+      let message = `Tin tuyển dụng "${job.title}" của bạn đã bị từ chối do vi phạm quy định. Từ khóa vi phạm: ${foundWords.join(', ')}.`;
+      await this.notificationsService.create(
+        userId,
+        title,
+        message,
+        'error',
+        '/recruiter/jobs',
+      );
+      this.messagesGateway.server
+        .to(`user_${userId}`)
+        .emit('notification', {
+          title,
+          message,
+          type: 'error',
+          link: '/recruiter/jobs',
+        });
+      this.messagesGateway.server.emit('adminJobUpdated');
     }
     const admins = await this.prisma.user.findMany({
       where: {
-        userRoles: { some: { role: { roleName: 'ADMIN' } } }
-      }
+        userRoles: { some: { role: { roleName: 'ADMIN' } } },
+      },
     });
 
     if (admins.length > 0) {
-      const title = 'Tin tuyển dụng mới cần duyệt';
-      const message = `Nhà tuyển dụng ${recruiter.company?.companyName || 'mới'} vừa đăng tin "${job.title}". Vui lòng kiểm tra và phê duyệt.`;
-      
+      const title = finalStatus === 'REJECTED' && containsBadWords
+        ? 'Tin tuyển dụng vi phạm quy định'
+        : 'Tin tuyển dụng mới cần duyệt';
+
+      const message = finalStatus === JobStatus.REJECTED && containsBadWords
+        ? `Hệ thống vừa từ chối tự động tin tuyển dụng "${job.title}" từ công ty ${recruiter.company?.companyName || 'mới'} do chứa từ khóa vi phạm: ${foundWords.join(', ')}.`
+        : `Nhà tuyển dụng ${recruiter.company?.companyName || 'mới'} vừa đăng tin "${job.title}". Vui lòng kiểm tra và phê duyệt.`;
+
+      const notifyType = finalStatus === 'REJECTED' ? 'error' : 'info';
+
       for (const admin of admins) {
-        await this.notificationsService.create(admin.userId, title, message, 'info', '/admin/jobs');
-        this.messagesGateway.server.to(`user_${admin.userId}`).emit('notification', { title, message, type: 'info', link: '/admin/jobs' });
-        this.messagesGateway.server.to(`user_${admin.userId}`).emit('newJobPosting', job);
+        await this.notificationsService.create(
+          admin.userId,
+          title,
+          message,
+          notifyType,
+          '/admin/jobs',
+        );
+        this.messagesGateway.server
+          .to(`user_${admin.userId}`)
+          .emit('notification', {
+            title,
+            message,
+            type: notifyType,
+            link: '/admin/jobs',
+          });
+        this.messagesGateway.server
+          .to(`user_${admin.userId}`)
+          .emit('newJobPosting', job);
       }
     }
 
     return job;
   }
 
-
-
-
   async findAll(query: FilterJobPostingDto, userId?: string) {
-    const { search, location, jobType, page = 1, limit = 10, industry, experience, salaryMin, salaryMax } = query;
-
-    // Use Elasticsearch for searching and filtering IDs
-    const { ids, total } = await this.searchService.searchJobs({
+    const {
       search,
       location,
       jobType,
+      jobTier,
+      page = 1,
+      limit = 10,
       industry,
       experience,
       salaryMin,
       salaryMax,
-      page,
-      limit,
-    });
+    } = query;
+
+    // Use Elasticsearch for searching and filtering IDs
+    let ids: string[] = [];
+    let total = 0;
+    try {
+      const result = await this.searchService.searchJobs({
+        search,
+        location,
+        jobTier,
+        jobType,
+        industry,
+        experience,
+        salaryMin,
+        salaryMax,
+        page,
+        limit,
+      });
+      ids = result.ids;
+      total = result.total;
+    } catch (error) {
+      console.warn("Elasticsearch/SearchService failed, falling back to Prisma", error?.message);
+      return this.findAllPrisma(query, userId);
+    }
 
     if (ids.length === 0 && total === 0 && !search) {
       // Fallback or initial state if ES is empty but we have jobs in DB
@@ -159,10 +284,11 @@ export class JobPostingsService {
     }
 
     // Fetch full data from Prisma using IDs from ES
+    const whereCondition: any = { jobPostingId: { in: ids } };
+    if (jobTier) whereCondition.jobTier = jobTier;
+
     const items = await this.prisma.jobPosting.findMany({
-      where: {
-        jobPostingId: { in: ids },
-      },
+      where: whereCondition,
       include: {
         company: true,
         recruiter: true,
@@ -171,12 +297,14 @@ export class JobPostingsService {
 
     // Sort items to match ES order (relevance or custom sort)
     let sortedItems = ids
-      .map(id => items.find(item => item.jobPostingId === id))
-      .filter(item => !!item) as any[];
+      .map((id) => items.find((item) => item.jobPostingId === id))
+      .filter((item) => !!item) as any[];
 
     // Add hasApplied status if userId is provided
     if (userId) {
-      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      const candidate = await this.prisma.candidate.findUnique({
+        where: { userId },
+      });
       if (candidate) {
         const applications = await this.prisma.application.findMany({
           where: {
@@ -185,8 +313,8 @@ export class JobPostingsService {
           },
           select: { jobPostingId: true },
         });
-        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
-        sortedItems = sortedItems.map(item => ({
+        const appliedJobIds = new Set(applications.map((a) => a.jobPostingId));
+        sortedItems = sortedItems.map((item) => ({
           ...item,
           hasApplied: appliedJobIds.has(item.jobPostingId),
         }));
@@ -198,12 +326,13 @@ export class JobPostingsService {
 
   // Backup method using Prisma directly
   private async findAllPrisma(query: FilterJobPostingDto, userId?: string) {
-    const { search, location, jobType, page = 1, limit = 10 } = query;
+    const { search, location, jobType, jobTier, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
     const where: any = { status: 'APPROVED' };
     if (location) where.locationCity = location;
     if (jobType) where.jobType = jobType;
+    if (jobTier) where.jobTier = jobTier;
 
     if (search) {
       where.OR = [
@@ -212,7 +341,7 @@ export class JobPostingsService {
       ];
     }
 
-    let [items, total] = await Promise.all([
+    let [items, total] = (await Promise.all([
       this.prisma.jobPosting.findMany({
         where,
         skip,
@@ -221,16 +350,21 @@ export class JobPostingsService {
           company: true,
           recruiter: true,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [
+          { jobTier: 'desc' },
+          { refreshedAt: 'desc' }
+        ],
       }),
       this.prisma.jobPosting.count({ where }),
-    ]) as [any[], number];
+    ])) as [any[], number];
 
     // Add hasApplied status if userId is provided
     if (userId) {
-      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      const candidate = await this.prisma.candidate.findUnique({
+        where: { userId },
+      });
       if (candidate) {
-        const jobPostingIds = items.map(item => item.jobPostingId);
+        const jobPostingIds = items.map((item) => item.jobPostingId);
         const applications = await this.prisma.application.findMany({
           where: {
             candidateId: candidate.candidateId,
@@ -238,8 +372,8 @@ export class JobPostingsService {
           },
           select: { jobPostingId: true },
         });
-        const appliedJobIds = new Set(applications.map(a => a.jobPostingId));
-        items = items.map(item => ({
+        const appliedJobIds = new Set(applications.map((a) => a.jobPostingId));
+        items = items.map((item) => ({
           ...item,
           hasApplied: appliedJobIds.has(item.jobPostingId),
         }));
@@ -262,20 +396,24 @@ export class JobPostingsService {
       include: {
         applications: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { refreshedAt: 'desc' },
     });
 
-    const enrichedJobs = await Promise.all(jobs.map(async (job) => {
-      let matchedCount = 0;
-      if (job.status !== 'REJECTED') {
-         const matches = await this.matchingService.runMatchingForJob(job.jobPostingId);
-         matchedCount = matches.length;
-      }
-      return {
-        ...job,
-        matchedCount,
-      };
-    }));
+    const enrichedJobs = await Promise.all(
+      jobs.map(async (job) => {
+        let matchedCount = 0;
+        if (job.status !== 'REJECTED') {
+          const matches = await this.matchingService.runMatchingForJob(
+            job.jobPostingId,
+          );
+          matchedCount = matches.length;
+        }
+        return {
+          ...job,
+          matchedCount,
+        };
+      }),
+    );
 
     return enrichedJobs;
   }
@@ -288,24 +426,42 @@ export class JobPostingsService {
 
     if (!job) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
 
-    // Increment view count asynchronously only if trackView is true
-    if (trackView) {
-      this.prisma.jobPosting.update({
-      where: { jobPostingId: id },
-      data: { viewCount: { increment: 1 } },
-      select: { jobPostingId: true } // Minimal return
-    }).then(() => {
-      if (job.recruiter?.userId) {
-        this.messagesGateway.server.to(`user_${job.recruiter.userId}`).emit('jdViewUpdated', { jobPostingId: id });
+    let isRecipientCandidate = true;
+    if (userId) {
+      if (job.recruiter?.userId === userId) {
+        isRecipientCandidate = false;
+      } else {
+        // Check if it's a recruiter
+        const isRec = await this.prisma.recruiter.findUnique({ where: { userId } });
+        if (isRec) isRecipientCandidate = false;
       }
-    }).catch(console.error);
+    }
+
+    // Increment view count asynchronously only if trackView is true and the viewer is NOT a recruiter
+    if (trackView && isRecipientCandidate) {
+      this.prisma.jobPosting
+        .update({
+          where: { jobPostingId: id },
+          data: { viewCount: { increment: 1 } },
+          select: { jobPostingId: true }, // Minimal return
+        })
+        .then(() => {
+          if (job.recruiter?.userId) {
+            this.messagesGateway.server
+              .to(`user_${job.recruiter.userId}`)
+              .emit('jdViewUpdated', { jobPostingId: id });
+          }
+        })
+        .catch(console.error);
     }
 
     let hasApplied = false;
     let isSaved = false;
 
     if (userId) {
-      const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
+      const candidate = await this.prisma.candidate.findUnique({
+        where: { userId },
+      });
       if (candidate) {
         // Check Application
         const application = await this.prisma.application.findFirst({
@@ -332,47 +488,59 @@ export class JobPostingsService {
     return { ...job, hasApplied, isSaved };
   }
 
-  async getSuggestedCandidates(jobId: string) {
-    const matches = await this.matchingService.runMatchingForJob(jobId);
-    if (!matches || matches.length === 0) return [];
-    
-    // Fetch full candidate details for the matches
-    const candidateIds = matches.map(m => m.candidateId);
-    const candidates = await this.prisma.candidate.findMany({
-      where: { candidateId: { in: candidateIds } },
-      include: { 
-        user: { select: { email: true, phoneNumber: true, avatar: true } }, 
-        skills: true, 
-        cvs: true 
-      }
-    });
-
-    // Merge match score and matched skills into candidate objects
-    return candidates.map(c => {
-      const matchInfo = matches.find(m => m.candidateId === c.candidateId);
-      return {
-        ...c,
-        aiMatchScore: matchInfo?.score || 0,
-        matchedSkills: matchInfo?.matchedSkills || []
-      };
-    }).sort((a, b) => b.aiMatchScore - a.aiMatchScore);
-  }
-
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
-    // Kiểm tra tồn tại trước khi update
-    await this.findOne(id);
+    // Kiểm tra tồn tại trước khi update (dùng findUnique để không trigger trackView)
+    const existingJob = await this.prisma.jobPosting.findUnique({ where: { jobPostingId: id } });
+    if (!existingJob) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
 
-    const { deadline, ...rest } = updateJobPostingDto;
+    const { deadline, hardSkills, softSkills, minExperienceYears, ...rest } = updateJobPostingDto;
+
+    // Kiểm tra blacklist khi cập nhật
+    const { containsBadWords, foundWords } = this.validateBlacklist(
+      updateJobPostingDto.title || existingJob.title,
+      updateJobPostingDto.description || existingJob.description || '',
+      updateJobPostingDto.requirements || (existingJob.structuredRequirements as any)?.requirements,
+      updateJobPostingDto.benefits || (existingJob.structuredRequirements as any)?.benefits,
+      hardSkills,
+      softSkills,
+    );
+
+    let newStatus: JobStatus = JobStatus.PENDING;
+    if (containsBadWords) {
+      newStatus = JobStatus.REJECTED;
+    }
+
+    const currentStructured = (existingJob.structuredRequirements as any) || {};
 
     const result = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         ...rest,
+        status: newStatus,
         ...(deadline && { deadline: new Date(deadline) }),
+        structuredRequirements: {
+          ...currentStructured,
+          ...(hardSkills !== undefined && { hardSkills }),
+          ...(softSkills !== undefined && { softSkills }),
+          ...(minExperienceYears !== undefined && { minExperienceYears }),
+        },
         updatedAt: new Date(),
       },
-      include: { company: true }
+      include: { company: true, recruiter: true },
     });
+
+    // Nếu cập nhật dẫn đến vi phạm -> Cộng 1 lượt vi phạm
+    if (newStatus === JobStatus.REJECTED && containsBadWords && result.recruiterId) {
+      await this.checkAndAutoLockRecruiter(result.recruiterId);
+      
+      // Thông báo cho nhà tuyển dụng
+      const title = 'Tin tuyển dụng bị từ chối sau khi cập nhật';
+      const message = `Tin tuyển dụng "${result.title}" của bạn đã bị từ chối do chứa từ khóa vi phạm mới: ${foundWords.join(', ')}.`;
+      if (result.recruiter?.userId) {
+        await this.notificationsService.create(result.recruiter.userId, title, message, 'error', '/recruiter/jobs');
+        this.messagesGateway.server.to(`user_${result.recruiter.userId}`).emit('notification', { title, message, type: 'error', link: '/recruiter/jobs' });
+      }
+    }
 
     // Update ES if approved
     if (result.status === JobStatus.APPROVED) {
@@ -385,28 +553,41 @@ export class JobPostingsService {
   }
 
   async getAdminStats() {
-    const [totalPending, totalApproved, totalRejected, totalCrawled] = await Promise.all([
-      this.prisma.jobPosting.count({ where: { status: 'PENDING' } }),
-      this.prisma.jobPosting.count({ where: { status: 'APPROVED' } }),
-      this.prisma.jobPosting.count({ where: { status: 'REJECTED' } }),
-      this.prisma.jobPosting.count({ where: { postType: 'CRAWLED' } }),
-    ]);
+    const [totalPending, totalApproved, totalRejected, totalCrawled] =
+      await Promise.all([
+        this.prisma.jobPosting.count({ where: { status: 'PENDING' } }),
+        this.prisma.jobPosting.count({ where: { status: 'APPROVED' } }),
+        this.prisma.jobPosting.count({ where: { status: 'REJECTED' } }),
+        this.prisma.jobPosting.count({ where: { postType: 'CRAWLED' } }),
+      ]);
     return { totalPending, totalApproved, totalRejected, totalCrawled };
   }
 
   async findAllAdmin(query: AdminFilterJobPostingDto) {
-    const { status, postType, minAiScore, searchTerm, page = 1, limit = 10 } = query;
+    const {
+      status,
+      postType,
+      minAiScore,
+      searchTerm,
+      page = 1,
+      limit = 10,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) where.status = status;
     if (postType) where.postType = postType;
-    if (minAiScore !== undefined) where.aiReliabilityScore = { gte: minAiScore };
+    if (minAiScore !== undefined)
+      where.aiReliabilityScore = { gte: minAiScore };
 
     if (searchTerm) {
       where.OR = [
         { title: { contains: searchTerm, mode: 'insensitive' } },
-        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+        {
+          company: {
+            companyName: { contains: searchTerm, mode: 'insensitive' },
+          },
+        },
       ];
     }
 
@@ -429,7 +610,7 @@ export class JobPostingsService {
   async updateStatus(id: string, status: JobStatus, adminId: string) {
     const job = await this.findOne(id);
 
-    const updated = await this.prisma.jobPosting.update({
+    let updated = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
       data: {
         status,
@@ -442,31 +623,69 @@ export class JobPostingsService {
       },
     });
 
+    if (status === JobStatus.APPROVED) {
+      // AI Feature cho PROFESSIONAL
+      if (updated.jobTier === 'PROFESSIONAL') {
+        const skills = await this.aiService.extractFocusSkills(updated.title, updated.description || '');
+        if (skills.length > 0) {
+          const structured = (updated.structuredRequirements as any) || {};
+          structured.focusSkills = skills;
+          updated = await this.prisma.jobPosting.update({
+            where: { jobPostingId: id },
+            data: { structuredRequirements: structured },
+            include: { recruiter: true, company: true },
+          });
+        }
+      }
+
+      // Feature URGENT
+      if (updated.jobTier === 'URGENT') {
+        this.pushUrgentNotifications(updated);
+      }
+    }
+
     if (updated.recruiter?.userId) {
-       let title = '';
-       let message = '';
-       let type = 'info';
+      let title = '';
+      let message = '';
+      let type = 'info';
 
-       if (status === JobStatus.APPROVED) {
-         title = 'Tin tuyển dụng được duyệt';
-         message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-         type = 'success';
-       } else if (status === JobStatus.REJECTED) {
-         title = 'Tin tuyển dụng bị từ chối';
-         message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
-         type = 'error';
-       }
+      if (status === JobStatus.APPROVED) {
+        title = 'Tin tuyển dụng được duyệt';
+        message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+        type = 'success';
+      } else if (status === JobStatus.REJECTED) {
+        title = 'Tin tuyển dụng bị từ chối';
+        message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
+        type = 'error';
+      }
 
-       if (title) {
-         await this.notificationsService.create(updated.recruiter.userId, title, message, type, '/recruiter/jobs');
-         this.messagesGateway.server
-            .to(`user_${updated.recruiter.userId}`)
-            .emit('notification', { title, message, type, link: '/recruiter/jobs' });
-       }
+      if (title) {
+        await this.notificationsService.create(
+          updated.recruiter.userId,
+          title,
+          message,
+          type,
+          '/recruiter/jobs',
+        );
+        this.messagesGateway.server
+          .to(`user_${updated.recruiter.userId}`)
+          .emit('notification', {
+            title,
+            message,
+            type,
+            link: '/recruiter/jobs',
+          });
+      }
+    }
+
+    // Auto-lock check after reject
+    if (status === JobStatus.REJECTED && updated.recruiterId) {
+      await this.checkAndAutoLockRecruiter(updated.recruiterId);
     }
 
     if (status === JobStatus.APPROVED) {
       this.syncJobToES(updated);
+      await this.matchingQueue.add('match', { jobId: id });
     } else {
       await this.searchService.deleteJob(id);
     }
@@ -478,19 +697,26 @@ export class JobPostingsService {
 
   async removeBulk(ids: string[]) {
     if (!ids || ids.length === 0) {
-      throw new ForbiddenException('Vui lòng cung cấp danh sách ID để xóa hàng loạt.');
+      throw new ForbiddenException(
+        'Vui lòng cung cấp danh sách ID để xóa hàng loạt.',
+      );
     }
 
     const result = await this.prisma.jobPosting.deleteMany({
-      where: { jobPostingId: { in: ids } }
+      where: { jobPostingId: { in: ids } },
     });
     this.messagesGateway.server.emit('adminJobUpdated');
-    return { message: `Đã xóa thành công ${result.count} tin tuyển dụng.`, count: result.count };
+    return {
+      message: `Đã xóa thành công ${result.count} tin tuyển dụng.`,
+      count: result.count,
+    };
   }
 
   async updateStatusBulk(ids: string[], status: JobStatus, adminId: string) {
     if (!ids || ids.length === 0) {
-      throw new ForbiddenException('Vui lòng cung cấp danh sách ID để thao tác hàng loạt.');
+      throw new ForbiddenException(
+        'Vui lòng cung cấp danh sách ID để thao tác hàng loạt.',
+      );
     }
 
     const where = { jobPostingId: { in: ids } };
@@ -498,7 +724,7 @@ export class JobPostingsService {
     // Find all affected jobs before update to send notifications
     const jobsToUpdate = await this.prisma.jobPosting.findMany({
       where,
-      include: { recruiter: true }
+      include: { recruiter: true },
     });
 
     const result = await this.prisma.jobPosting.updateMany({
@@ -512,29 +738,40 @@ export class JobPostingsService {
 
     // Notifications for Bulk Update
     for (const job of jobsToUpdate) {
-        if (job.recruiter?.userId) {
-            let title = '';
-            let message = '';
-            let type = 'info';
+      if (job.recruiter?.userId) {
+        let title = '';
+        let message = '';
+        let type = 'info';
 
-            if (status === JobStatus.APPROVED) {
-                title = 'Tin tuyển dụng được duyệt';
-                message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
-                type = 'success';
-            } else if (status === JobStatus.REJECTED) {
-                title = 'Tin tuyển dụng bị từ chối';
-                message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
-                type = 'error';
-            }
+        if (status === JobStatus.APPROVED) {
+          title = 'Tin tuyển dụng được duyệt';
+          message = `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`;
+          type = 'success';
+        } else if (status === JobStatus.REJECTED) {
+          title = 'Tin tuyển dụng bị từ chối';
+          message = `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
+          type = 'error';
+        }
 
-            if (title) {
-                await this.notificationsService.create(job.recruiter.userId, title, message, type, '/recruiter/jobs');
-                this.messagesGateway.server
-                    .to(`user_${job.recruiter.userId}`)
-                    .emit('notification', { title, message, type, link: '/recruiter/jobs' });
-            }
+        if (title) {
+          await this.notificationsService.create(
+            job.recruiter.userId,
+            title,
+            message,
+            type,
+            '/recruiter/jobs',
+          );
+          this.messagesGateway.server
+            .to(`user_${job.recruiter.userId}`)
+            .emit('notification', {
+              title,
+              message,
+              type,
+              link: '/recruiter/jobs',
+            });
         }
       }
+    }
     if (status === JobStatus.APPROVED) {
       // For bulk, we need to fetch the actual jobs to match keywords
       const approvedJobs = await this.prisma.jobPosting.findMany({
@@ -554,9 +791,84 @@ export class JobPostingsService {
       }
     }
 
+    // Auto-lock check for bulk reject: increment violation for EACH rejected job
+    if (status === JobStatus.REJECTED) {
+      for (const job of jobsToUpdate) {
+        if (job.recruiterId) {
+          await this.checkAndAutoLockRecruiter(job.recruiterId);
+        }
+      }
+    }
+
     this.messagesGateway.server.emit('adminJobUpdated');
 
-    return { message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`, count: result.count };
+    return {
+      message: `Đã cập nhật trạng thái thành công cho ${result.count} tin tuyển dụng.`,
+      count: result.count,
+    };
+  }
+
+  /**
+   * Tăng việt count sau mỗi lần tin bị từ chối bởi Admin.
+   * Nếu vượt ngưỡng (VIOLATION_LIMIT) → khóa tài khoản, gửi thông báo realtime.
+   */
+  private async checkAndAutoLockRecruiter(recruiterId: string): Promise<void> {
+    console.log(`[VIOLATION] Incrementing violation for recruiter: ${recruiterId}`);
+    const updated = await this.prisma.recruiter.update({
+      where: { recruiterId },
+      data: { violationCount: { increment: 1 } },
+      include: { user: true },
+    });
+    console.log(`[VIOLATION] Current count for ${recruiterId}: ${updated.violationCount}`);
+
+    const newCount = updated.violationCount;
+    this.messagesGateway.server.emit('adminUserUpdated', { email: updated.user.email });
+
+    if (newCount < this.VIOLATION_LIMIT) {
+      // Gửi cảnh báo nhưng chưa khóa
+      const remaining = this.VIOLATION_LIMIT - newCount;
+      await this.notificationsService.create(
+        updated.userId,
+        `⚠️ Cảnh báo vi phạm (${newCount}/${this.VIOLATION_LIMIT})`,
+        `Tin tuyển dụng của bạn đã bị từ chối. Bạn còn ${remaining} lần trước khi tài khoản bị khóa vĩnh viễn.`,
+        'warning',
+        '/recruiter/jobs',
+      );
+      this.messagesGateway.server
+        .to(`user_${updated.userId}`)
+        .emit('notification', {
+          title: `⚠️ Cảnh báo vi phạm (${newCount}/${this.VIOLATION_LIMIT})`,
+          message: `Tin tuyển dụng của bạn vừa bị từ chối. Còn ${remaining} lần nữa tài khoản sẽ bị khóa.`,
+          type: 'warning',
+          link: '/recruiter/jobs',
+        });
+      return;
+    }
+
+    // Đạt ngưỡng → khóa tài khoản
+    await this.prisma.user.update({
+      where: { userId: updated.userId },
+      data: { status: 'LOCKED' },
+    });
+
+    // Reset bộ đếm sau khi khóa để admin có thể mở khóa và recruiter có cơ hội xây dựng lại
+    await this.prisma.recruiter.update({
+      where: { recruiterId },
+      data: { violationCount: 0 },
+    });
+
+    // Thông báo khóa + force logout qua socket
+    await this.notificationsService.create(
+      updated.userId,
+      '🔒 Tài khoản bị khóa do vi phạm liên tục',
+      `Tài khoản của bạn đã bị khóa vì đăng lên ${this.VIOLATION_LIMIT} tin vi phạm liên tiếp. Vui lòng liên hệ quản trị viên để kháng cáo.`,
+      'error',
+    );
+    this.messagesGateway.server
+      .to(`user_${updated.userId}`)
+      .emit('accountLocked');
+
+    this.messagesGateway.server.emit('adminAccountLocked', { email: updated.user.email });
   }
 
   async remove(id: string) {
@@ -571,8 +883,8 @@ export class JobPostingsService {
   private async triggerJobNotifications(job: any) {
     try {
       const alerts = await this.jobAlertsService.findAllAlerts();
-      const matchedAlerts = alerts.filter(alert =>
-        job.title.toLowerCase().includes(alert.keywords.toLowerCase())
+      const matchedAlerts = alerts.filter((alert) =>
+        job.title.toLowerCase().includes(alert.keywords.toLowerCase()),
       );
 
       for (const alert of matchedAlerts) {
@@ -580,7 +892,7 @@ export class JobPostingsService {
           alert.userId,
           'Việc làm mới theo từ khóa của bạn',
           `Có 1 việc làm mới theo từ khóa tìm kiếm "${alert.keywords}". Vào xem ngay`,
-          'info'
+          'info',
         );
       }
     } catch (error) {
@@ -602,14 +914,83 @@ export class JobPostingsService {
       salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,
       salaryMax: job.salaryMax ? Number(job.salaryMax) : undefined,
       createdAt: job.createdAt,
+      refreshedAt: job.refreshedAt,
+      jobTier: job.jobTier,
       status: job.status,
     });
+  }
+
+  private async pushUrgentNotifications(job: any) {
+    try {
+      const activeCandidates = await this.prisma.candidate.findMany({
+        take: 10,
+      });
+      for (const c of activeCandidates) {
+        if (c.userId) {
+          await this.notificationsService.create(
+            c.userId,
+            '🔥 Cơ hội việc làm Tuyển Gấp!',
+            `Công ty ${job.company?.companyName || 'đối tác'} đang tuyển gấp vị trí "${job.title}". Hãy apply ngay!`,
+            'info',
+            `/jobs/${job.jobPostingId}`
+          );
+          this.messagesGateway.server
+            .to(`user_${c.userId}`)
+            .emit('notification', {
+              title: '🔥 Cơ hội việc làm Tuyển Gấp!',
+              message: `Công ty ${job.company?.companyName || 'đối tác'} đang tuyển gấp vị trí "${job.title}". Hãy apply ngay!`,
+              type: 'info',
+              link: `/jobs/${job.jobPostingId}`,
+            });
+        }
+      }
+    } catch (e) {
+      console.error('Lỗi khi push urgent notif', e);
+    }
+  }
+
+  @Cron('0 0 * * *')
+  async refreshGrowthJobs() {
+    console.log('[Cron] Checking for GROWTH jobs to refresh...');
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+    const jobs = await this.prisma.jobPosting.findMany({
+      where: {
+        status: JobStatus.APPROVED,
+        refreshedAt: { lte: fortyEightHoursAgo },
+        recruiter: {
+          recruiterSubscription: {
+            planType: 'GROWTH',
+            expiryDate: { gt: new Date() }
+          }
+        }
+      }
+    });
+
+    if (jobs.length > 0) {
+      console.log(`[Cron] Found ${jobs.length} GROWTH jobs to refresh.`);
+      const ids = jobs.map(j => j.jobPostingId);
+
+      await this.prisma.jobPosting.updateMany({
+        where: { jobPostingId: { in: ids } },
+        data: { refreshedAt: new Date() }
+      });
+
+      const updatedJobs = await this.prisma.jobPosting.findMany({
+        where: { jobPostingId: { in: ids } },
+        include: { company: true }
+      });
+
+      for (const j of updatedJobs) {
+        await this.syncJobToES(j);
+      }
+    }
   }
 
   async syncAllJobsToES() {
     const jobs = await this.prisma.jobPosting.findMany({
       where: { status: JobStatus.APPROVED },
-      include: { company: true }
+      include: { company: true },
     });
 
     console.log(`[JobPostingsService] Syncing ${jobs.length} jobs to ES...`);
@@ -619,22 +1000,52 @@ export class JobPostingsService {
     return { count: jobs.length };
   }
 
-  async getSuggestedCandidates(jobId: string) {
+  async getSuggestedCandidates(jobId: string, recruiterIdFromToken?: string) {
+    const job = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId: jobId },
+      select: { status: true },
+    });
+
+    if (job?.status === 'REJECTED') {
+      return [];
+    }
+
     const matches = await this.matchingService.runMatchingForJob(jobId);
-    
-    // Enrich with minimum candidate details for the dashboard
-    const enriched = await Promise.all(matches.map(async (m) => {
-      const candidate = await this.prisma.candidate.findUnique({
-        where: { candidateId: m.candidateId },
-        include: { user: { select: { avatar: true } } }
+
+    // We need recruiterId to check if unlocked
+    let recruiterId: string | null = null;
+    if (recruiterIdFromToken) {
+      const recruiter = await this.prisma.recruiter.findUnique({ where: { userId: recruiterIdFromToken } });
+      if (recruiter) recruiterId = recruiter.recruiterId;
+    }
+
+    // Lấy danh sách đã mở khóa
+    const unlockedIds = new Set();
+    if (recruiterId) {
+      const unlocked = await this.prisma.candidateUnlock.findMany({
+        where: { recruiterId, jobPostingId: jobId },
+        select: { candidateId: true }
       });
-      return {
-        ...m,
-        fullName: candidate?.fullName || 'Ứng viên',
-        major: candidate?.major || '',
-        user: { avatar: candidate?.user?.avatar }
-      };
-    }));
+      unlocked.forEach(u => unlockedIds.add(u.candidateId));
+    }
+
+    // Enrich with minimum candidate details for the dashboard
+    const enriched = await Promise.all(
+      matches.map(async (m) => {
+        const isUnlocked = unlockedIds.has(m.candidateId);
+        const candidate = await this.prisma.candidate.findUnique({
+          where: { candidateId: m.candidateId },
+          include: { user: { select: { avatar: true } } },
+        });
+        return {
+          ...m,
+          fullName: isUnlocked ? (candidate?.fullName || 'Ứng viên') : `Ứng viên #${m.candidateId.slice(0, 4)}`,
+          major: candidate?.major || '',
+          user: { avatar: isUnlocked ? candidate?.user?.avatar : null },
+          isUnlocked,
+        };
+      }),
+    );
 
     // Return top 5 matches
     return enriched.sort((a, b) => b.score - a.score).slice(0, 5);
@@ -642,5 +1053,43 @@ export class JobPostingsService {
 
   async getRecommendations(userId: string) {
     return this.matchingService.runMatchingForCandidate(userId);
+  }
+
+  private validateBlacklist(
+    title: string,
+    description: string,
+    requirements?: string,
+    benefits?: string,
+    hardSkills?: string[],
+    softSkills?: string[],
+  ): { containsBadWords: boolean; foundWords: string[] } {
+    const blacklist = [
+      'cá cược',
+      'đánh bạc',
+      'cờ bạc',
+      'lừa đảo',
+      'việc nhẹ lương cao',
+      'đa cấp',
+    ];
+
+    const contentToCheck = [
+      title,
+      description,
+      requirements || '',
+      benefits || '',
+      ...(hardSkills || []),
+      ...(softSkills || []),
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    const foundBadWords = blacklist.filter((word) =>
+      contentToCheck.includes(word),
+    );
+
+    return {
+      containsBadWords: foundBadWords.length > 0,
+      foundWords: foundBadWords,
+    };
   }
 }

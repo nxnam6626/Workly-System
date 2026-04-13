@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, Param } from '@nestjs/common';
 import { WalletsService } from './wallets.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -27,6 +27,13 @@ export class WalletsController {
   @Roles(Role.RECRUITER)
   async topUp(@Req() req, @Body() body: { amount: number }) {
     return this.walletsService.createPaymentLink(req.user.userId, body.amount);
+  }
+
+  @Post('transactions/:id/resume')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  async resumeTopUp(@Req() req, @Param('id') id: string) {
+    return this.walletsService.resumePaymentLink(req.user.userId, id);
   }
 
   @Post('payos-webhook')

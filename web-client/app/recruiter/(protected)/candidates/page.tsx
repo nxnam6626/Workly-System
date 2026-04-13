@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail, Send, X, CheckSquare, Loader2 } from 'lucide-react';
+import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail, Send, X, CheckSquare, Loader2, Unlock } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -68,7 +68,12 @@ export default function CandidatesPage() {
     }
   };
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (candidate: any) => {
+    if (!candidate.isUnlocked) {
+      toast.error('Vui lòng mở khóa CV để gửi tin nhắn cho ứng viên này.');
+      return;
+    }
+    const id = candidate.candidateId;
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
@@ -157,13 +162,13 @@ export default function CandidatesPage() {
           const isSaved = savedIds.includes(candidate.candidateId);
           return (
             <div key={candidate.candidateId} className={`bg-white rounded-2xl border transition-all duration-300 group overflow-hidden relative cursor-pointer ${isSelected ? 'border-indigo-500 shadow-md ring-2 ring-indigo-500/20 ring-offset-2' : 'border-slate-100 hover:shadow-lg hover:border-indigo-100'}`}>
-              <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); toggleSelect(candidate.candidateId); }}>
+              <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); toggleSelect(candidate); }}>
                 <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white/80 backdrop-blur border-slate-300 text-transparent hover:border-indigo-400'}`}>
                   <CheckSquare className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="p-6 pt-10" onClick={() => toggleSelect(candidate.candidateId)}>
+              <div className="p-6 pt-10" onClick={() => toggleSelect(candidate)}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-inner shadow-indigo-200/50">
                     {candidate.user?.avatar ? (
@@ -184,8 +189,18 @@ export default function CandidatesPage() {
                   </button>
                 </div>
 
-                <h3 className="text-xl font-bold text-slate-800 tracking-tight leading-tight line-clamp-1">{candidate.fullName}</h3>
-                <p className="text-indigo-600 font-medium text-sm mt-1">{candidate.major || 'Software Engineer'}</p>
+                <h3 className="text-xl font-bold text-slate-800 tracking-tight leading-tight line-clamp-1">
+                  {candidate.fullName}
+                  {!candidate.isUnlocked && <span className="ml-2 text-[10px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full inline-block align-middle">Chưa mở</span>}
+                </h3>
+                <p className="text-indigo-600 font-medium text-sm mt-1 mb-2">{candidate.major || 'Software Engineer'}</p>
+                {candidate.matchScore > 0 && (
+                  <div className="inline-flex mt-1">
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md">
+                      Phù hợp {candidate.matchScore}% với {candidate.bestMatchJob}
+                    </span>
+                  </div>
+                )}
 
                 <div className="mt-5 space-y-2.5">
                   <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -210,25 +225,39 @@ export default function CandidatesPage() {
               </div>
 
               <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                {candidate.cvs && candidate.cvs[0] ? (
-                  <a href={getFileUrl(candidate.cvs[0].fileUrl)} target="_blank" rel="noopener noreferrer" className="flex-1 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 font-medium text-sm transition-colors flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Briefcase className="w-4 h-4" /> Xem CV
-                  </a>
+                {candidate.isUnlocked ? (
+                  <>
+                    {candidate.cvs && candidate.cvs[0] ? (
+                      <a href={getFileUrl(candidate.cvs[0].fileUrl)} target="_blank" rel="noopener noreferrer" className="flex-1 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 font-medium text-sm transition-colors flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Briefcase className="w-4 h-4" /> Xem CV
+                      </a>
+                    ) : (
+                      <button disabled className="flex-1 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-not-allowed" onClick={(e) => e.stopPropagation()}>
+                        <Briefcase className="w-4 h-4" /> Không CV
+                      </button>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedIds([candidate.candidateId]);
+                        setIsBroadcastOpen(true);
+                      }}
+                      className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition-colors shadow-sm shadow-indigo-200 mt-auto"
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
+                  </>
                 ) : (
-                  <button disabled className="flex-1 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 font-medium text-sm transition-colors flex items-center justify-center gap-2 cursor-not-allowed" onClick={(e) => e.stopPropagation()}>
-                    <Briefcase className="w-4 h-4" /> Không CV
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast.error('Ứng viên chưa được mở khóa. Hãy dùng tính năng AI Matching trên tin tuyển dụng để mở khóa.');
+                    }}
+                    className="flex-1 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200"
+                  >
+                    <Unlock className="w-4 h-4" /> Đã ẩn thông tin
                   </button>
                 )}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedIds([candidate.candidateId]);
-                    setIsBroadcastOpen(true);
-                  }}
-                  className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition-colors shadow-sm shadow-indigo-200 mt-auto"
-                >
-                  <Mail className="w-4 h-4" />
-                </button>
               </div>
             </div>
           )

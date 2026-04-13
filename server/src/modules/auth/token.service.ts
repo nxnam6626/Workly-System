@@ -21,7 +21,7 @@ export class TokenService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private redisService: RedisService,
-  ) { }
+  ) {}
 
   /** Tạo bộ đôi Access Token và Refresh Token. */
   async issueTokens(
@@ -47,7 +47,11 @@ export class TokenService {
 
     // Save refresh token to DB and Redis for rotation/revocation
     await this.usersService.setRefreshToken(userId, refreshToken);
-    await this.redisService.set(`refresh_token:${userId}`, refreshToken, 604800); // 7 days
+    await this.redisService.set(
+      `refresh_token:${userId}`,
+      refreshToken,
+      604800,
+    ); // 7 days
 
     return { accessToken, refreshToken };
   }
@@ -75,11 +79,15 @@ export class TokenService {
     if (!user) throw new UnauthorizedException('Người dùng không tồn tại.');
 
     if (user.status === 'LOCKED') {
-      throw new ForbiddenException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.',
+      );
     }
 
     // Check if refreshToken matches the one stored in Redis (or DB)
-    let storedToken = await this.redisService.get(`refresh_token:${user.userId}`);
+    let storedToken = await this.redisService.get(
+      `refresh_token:${user.userId}`,
+    );
     if (!storedToken) {
       const dbUser = await this.usersService.findByEmail(user.email);
       storedToken = dbUser?.refreshToken || null;
@@ -127,7 +135,7 @@ export class TokenService {
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
-      }
+      },
     };
   }
 

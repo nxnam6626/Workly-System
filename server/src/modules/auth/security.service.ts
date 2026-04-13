@@ -17,7 +17,7 @@ export class SecurityService {
     private usersService: UsersService,
     private redisService: RedisService,
     private mailService: MailService,
-  ) { }
+  ) {}
 
   // ==========================================
   // PASSWORD MANAGEMENT
@@ -37,12 +37,21 @@ export class SecurityService {
   }
 
   /** Đổi mật khẩu: người dùng đã đăng nhập xác nhận mật khẩu cũ rồi đặt mới. */
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const userWithPwd = await this.usersService.findOneWithPassword(userId);
     if (!userWithPwd || !userWithPwd.password)
-      throw new BadRequestException('Tài khoản này đăng nhập qua mạng xã hội và chưa có mật khẩu. Vui lòng dùng tính năng Quên mật khẩu để thiết lập.');
+      throw new BadRequestException(
+        'Tài khoản này đăng nhập qua mạng xã hội và chưa có mật khẩu. Vui lòng dùng tính năng Quên mật khẩu để thiết lập.',
+      );
 
-    const isMatch = await this.comparePassword(currentPassword, userWithPwd.password);
+    const isMatch = await this.comparePassword(
+      currentPassword,
+      userWithPwd.password,
+    );
     if (!isMatch)
       throw new UnauthorizedException('Mật khẩu hiện tại không đúng.');
 
@@ -55,7 +64,8 @@ export class SecurityService {
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.usersService.findByEmail(dto.email);
     // Luôn trả về thành công chung chung để tránh lộ email
-    if (!user) return { message: 'Nếu email tồn tại, một mã xác nhận đã được gửi!' };
+    if (!user)
+      return { message: 'Nếu email tồn tại, một mã xác nhận đã được gửi!' };
 
     // Tạo OTP 6 chữ số
     const token = crypto.randomInt(100000, 999999).toString();
@@ -76,7 +86,9 @@ export class SecurityService {
     const storedToken = await this.redisService.get(redisKey);
 
     if (!storedToken || storedToken !== dto.token) {
-      throw new BadRequestException('Mã xác nhận không hợp lệ hoặc đã hết hạn.');
+      throw new BadRequestException(
+        'Mã xác nhận không hợp lệ hoặc đã hết hạn.',
+      );
     }
 
     const user = await this.usersService.findByEmail(dto.email);
@@ -118,7 +130,9 @@ export class SecurityService {
     const storedToken = await this.redisService.get(redisKey);
 
     if (!storedToken || storedToken !== dto.token) {
-      throw new BadRequestException('Mã xác minh không hợp lệ hoặc đã hết hạn.');
+      throw new BadRequestException(
+        'Mã xác minh không hợp lệ hoặc đã hết hạn.',
+      );
     }
 
     const user = await this.usersService.findByEmail(dto.email);

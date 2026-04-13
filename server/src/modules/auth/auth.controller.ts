@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response, Request } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { SecurityService } from './security.service';
@@ -33,7 +38,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly securityService: SecurityService,
-  ) { }
+  ) {}
 
   // ==========================================
   // CORE AUTHENTICATION (Xác thực chính)
@@ -101,7 +106,9 @@ export class AuthController {
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+    res.redirect(
+      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`,
+    );
   }
 
   @Public()
@@ -119,7 +126,9 @@ export class AuthController {
   async linkedinAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`);
+    res.redirect(
+      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`,
+    );
   }
 
   // ==========================================
@@ -148,7 +157,11 @@ export class AuthController {
     @CurrentUser('userId') userId: string,
     @Body() dto: ChangePasswordDto,
   ) {
-    return this.securityService.changePassword(userId, dto.currentPassword, dto.newPassword);
+    return this.securityService.changePassword(
+      userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   // ==========================================

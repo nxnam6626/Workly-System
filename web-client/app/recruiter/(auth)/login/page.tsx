@@ -118,10 +118,20 @@ export default function EmployerLoginPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2"
+              className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex flex-col gap-2"
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
-              {error}
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                <span>{error}</span>
+              </div>
+              {error.toLowerCase().includes("khóa") && (
+                <Link
+                  href="/support?subject=Khiếu nại tài khoản bị khóa"
+                  className="mt-1 ml-3.5 inline-flex font-bold underline hover:text-red-700 transition-colors"
+                >
+                  Liên hệ Admin để được hỗ trợ
+                </Link>
+              )}
             </motion.div>
           )}
 

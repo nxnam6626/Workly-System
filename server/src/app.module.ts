@@ -25,6 +25,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { SupabaseModule } from './common/supabase/supabase.module';
 
 import { WalletsModule } from './modules/wallets/wallets.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { SupportModule } from './modules/support/support.module';
 
 @Module({
   imports: [
@@ -57,8 +59,10 @@ import { WalletsModule } from './modules/wallets/wallets.module';
     RecruitersModule,
     WalletsModule,
     SupabaseModule,
+    SubscriptionsModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

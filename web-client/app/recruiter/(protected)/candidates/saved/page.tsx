@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Search, BookmarkMinus, Phone, Mail, FileText, X, Loader2 } from 'lucide-react';
+import { Heart, Search, BookmarkMinus, Phone, Mail, FileText, X, Loader2, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 import api, { getFileUrl } from '@/lib/api';
@@ -135,18 +135,24 @@ export default function SavedCandidatesPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {candidate.cvs && candidate.cvs[0] ? (
-                        <a 
-                          href={getFileUrl(candidate.cvs[0].fileUrl)} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors font-medium text-sm"
-                        >
-                          <FileText className="w-4 h-4" /> Xem CV
-                        </a>
+                      {candidate.isUnlocked ? (
+                        candidate.cvs && candidate.cvs[0] ? (
+                          <a 
+                            href={getFileUrl(candidate.cvs[0].fileUrl)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors font-medium text-sm"
+                          >
+                            <FileText className="w-4 h-4" /> Xem CV
+                          </a>
+                        ) : (
+                          <button disabled className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 font-medium text-sm transition-colors cursor-not-allowed">
+                            <FileText className="w-4 h-4" /> Không có CV
+                          </button>
+                        )
                       ) : (
                         <button disabled className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 text-slate-400 font-medium text-sm transition-colors cursor-not-allowed">
-                          <FileText className="w-4 h-4" /> Không có CV
+                          <Lock className="w-4 h-4" /> Đã ẩn CV
                         </button>
                       )}
                       <button 

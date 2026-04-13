@@ -25,7 +25,7 @@ export class MatchingProcessor extends WorkerHost {
 
     try {
       const topMatches = await this.matchingService.runMatchingForJob(jobId);
-      
+
       if (topMatches.length > 0) {
         // Lưu kết quả hoặc chỉ gửi thông báo
         // Theo yêu cầu: TỰ ĐỘNG gửi Email/Thông báo cho Nhà tuyển dụng
@@ -37,13 +37,13 @@ export class MatchingProcessor extends WorkerHost {
         if (jobPosting && jobPosting.recruiter?.userId) {
           const title = 'Đã tìm thấy ứng viên phù hợp!';
           const message = `Hệ thống đã tìm thấy ${topMatches.length} ứng viên cực kỳ phù hợp với vị trí "${jobPosting.title}" của bạn.`;
-          
+
           await this.notificationsService.create(
             jobPosting.recruiter.userId,
             title,
             message,
             'success',
-            `/recruiter/candidates/matched/${jobId}`
+            `/recruiter/candidates/matched/${jobId}`,
           );
 
           this.messagesGateway.server
