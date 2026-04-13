@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown, Plus, X as CloseIcon } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -26,10 +26,13 @@ const defaultForm = {
   minExperienceYears: 0,
 };
 
-export default function PostJobPage() {
+function PostJobForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editJobId = searchParams.get('jobId');
   const [formData, setFormData] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [loadingData, setLoadingData] = useState(!!editJobId);
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
   const [hardSkillInput, setHardSkillInput] = useState('');
   const [softSkillInput, setSoftSkillInput] = useState('');
@@ -37,6 +40,40 @@ export default function PostJobPage() {
 
   const allLocations = ["Làm việc từ xa (Remote)", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", ...LOCATIONS.filter((l: string) => !['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].includes(l))];
   const selectedLocations = formData.locationCity.split(',').map(s => s.trim()).filter(Boolean);
+
+  useEffect(() => {
+    if (editJobId && accessToken) {
+      const fetchJobDetails = async () => {
+        try {
+          const { data } = await api.get(`/job-postings/${editJobId}`);
+          setFormData({
+            title: data.title || '',
+            description: data.description || '',
+            requirements: data.requirements || '',
+            benefits: data.benefits || '',
+            salaryMin: data.salaryMin ? String(data.salaryMin) : '',
+            salaryMax: data.salaryMax ? String(data.salaryMax) : '',
+            jobType: data.jobType || 'FULLTIME',
+            experience: data.experience || 'Không yêu cầu',
+            vacancies: data.vacancies || 1,
+            locationCity: data.locationCity || '',
+            deadline: data.deadline ? new Date(data.deadline).toISOString().split('T')[0] : '',
+            hardSkills: data.structuredRequirements?.hardSkills || [],
+            softSkills: data.structuredRequirements?.softSkills || [],
+            minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
+          });
+        } catch (error) {
+          console.error('Lỗi khi tải thông tin công việc:', error);
+          toast.error('Không thể tải dữ liệu công việc. Bạn có thể tạo tin mới.');
+        } finally {
+          setLoadingData(false);
+        }
+      };
+      fetchJobDetails();
+    } else {
+      setLoadingData(false);
+    }
+  }, [editJobId, accessToken]);
 
   const handleLocationToggle = (loc: string) => {
     let updated = [...selectedLocations];
@@ -100,16 +137,30 @@ export default function PostJobPage() {
         deadline: formData.deadline ? new Date(formData.deadline).getTime() : null,
       };
 
-      await api.post('/job-postings', payload);
-      toast.success('Gửi yêu cầu tuyển dụng thành công! Vui lòng chờ Admin duyệt.');
+      if (editJobId) {
+        await api.patch(`/job-postings/${editJobId}`, payload);
+        toast.success('Cập nhật thông tin tuyển dụng thành công!');
+      } else {
+        await api.post('/job-postings', payload);
+        toast.success('Gửi yêu cầu tuyển dụng thành công! Vui lòng chờ Admin duyệt.');
+      }
       router.push('/recruiter/jobs');
     } catch (error: any) {
-      console.error('Error posting job:', error);
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu!');
+      console.error('Error saving job:', error);
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu!');
     } finally {
       setSaving(false);
     }
   };
+
+  if (loadingData) {
+    return (
+      <div className="flex justify-center items-center h-[60vh] text-slate-500 flex-col gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        Đang tải thông tin...
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -121,9 +172,11 @@ export default function PostJobPage() {
       <div className="border-b border-indigo-100 pb-5">
         <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
           <Briefcase className="h-8 w-8 text-indigo-600" />
-          Gửi Yêu Cầu Tuyển Dụng
+          {editJobId ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Gửi Yêu Cầu Tuyển Dụng'}
         </h1>
-        <p className="text-slate-500 mt-2 text-lg">Điền thông tin chi tiết và gửi yêu cầu để Admin phê duyệt trước khi tin được hiển thị.</p>
+        <p className="text-slate-500 mt-2 text-lg">
+          {editJobId ? 'Cập nhật lại thông tin tuyển dụng, chức danh và yêu cầu.' : 'Điền thông tin chi tiết và gửi yêu cầu để Admin phê duyệt trước khi tin được hiển thị.'}
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 space-y-8">
@@ -386,10 +439,23 @@ export default function PostJobPage() {
             className="h-11 px-8 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {saving ? 'Đang Gửi...' : 'Gửi Yêu Cầu'}
+            {saving ? 'Đang Lưu...' : (editJobId ? 'Lưu Thay Đổi' : 'Gửi Yêu Cầu')}
           </button>
         </div>
       </form>
     </motion.div>
+  );
+}
+
+export default function PostJobPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-[60vh] text-slate-500 flex-col gap-2">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        Đang tải...
+      </div>
+    }>
+      <PostJobForm />
+    </Suspense>
   );
 }

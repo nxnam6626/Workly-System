@@ -101,7 +101,14 @@ export class JobPostingsService {
     // Tự động chạy Matching Engine
     await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
-    // Notify ALL admins about the new job posting
+    if (finalStatus === 'APPROVED') {
+       let title = 'Tin tuyển dụng được duyệt tự động';
+       let message = `Tin tuyển dụng "${job.title}" của bạn đã được hệ thống AI tự động phê duyệt an toàn.`;
+       await this.notificationsService.create(userId, title, message, 'success', '/recruiter/jobs');
+       this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'success', link: '/recruiter/jobs' });
+       this.messagesGateway.server.emit('adminJobUpdated');
+       this.triggerJobNotifications(job);
+    }
     const admins = await this.prisma.user.findMany({
       where: {
         userRoles: { some: { role: { roleName: 'ADMIN' } } }
@@ -250,13 +257,27 @@ export class JobPostingsService {
       throw new NotFoundException('Recruiter not found');
     }
 
-    return this.prisma.jobPosting.findMany({
+    const jobs = await this.prisma.jobPosting.findMany({
       where: { recruiterId: recruiter.recruiterId },
       include: {
         applications: true,
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    const enrichedJobs = await Promise.all(jobs.map(async (job) => {
+      let matchedCount = 0;
+      if (job.status !== 'REJECTED') {
+         const matches = await this.matchingService.runMatchingForJob(job.jobPostingId);
+         matchedCount = matches.length;
+      }
+      return {
+        ...job,
+        matchedCount,
+      };
+    }));
+
+    return enrichedJobs;
   }
 
   async findOne(id: string, userId?: string, trackView: boolean = true) {
@@ -312,24 +333,29 @@ export class JobPostingsService {
   }
 
   async getSuggestedCandidates(jobId: string) {
-    const job = await this.prisma.jobPosting.findUnique({
-      where: { jobPostingId: jobId },
-      select: { title: true, requirements: true }
+    const matches = await this.matchingService.runMatchingForJob(jobId);
+    if (!matches || matches.length === 0) return [];
+    
+    // Fetch full candidate details for the matches
+    const candidateIds = matches.map(m => m.candidateId);
+    const candidates = await this.prisma.candidate.findMany({
+      where: { candidateId: { in: candidateIds } },
+      include: { 
+        user: { select: { email: true, phoneNumber: true, avatar: true } }, 
+        skills: true, 
+        cvs: true 
+      }
     });
-    if (!job) return [];
-    
-    const searchTerms = job.title?.split(' ').filter(word => word.length > 2) || [];
-    
-    // Very rudimentary text search for candidates. We search for candidates whose skills match the job title keywords.
-    const orConditions = searchTerms.map(term => ({
-      skills: { some: { skillName: { contains: term, mode: 'insensitive' as any } } }
-    }));
-    
-    return this.prisma.candidate.findMany({
-      where: searchTerms.length > 0 ? { OR: orConditions } : {},
-      take: 10,
-      include: { user: { select: { email: true, phoneNumber: true, avatar: true } }, skills: true, cvs: true }
-    });
+
+    // Merge match score and matched skills into candidate objects
+    return candidates.map(c => {
+      const matchInfo = matches.find(m => m.candidateId === c.candidateId);
+      return {
+        ...c,
+        aiMatchScore: matchInfo?.score || 0,
+        matchedSkills: matchInfo?.matchedSkills || []
+      };
+    }).sort((a, b) => b.aiMatchScore - a.aiMatchScore);
   }
 
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
@@ -591,6 +617,27 @@ export class JobPostingsService {
       await this.syncJobToES(job);
     }
     return { count: jobs.length };
+  }
+
+  async getSuggestedCandidates(jobId: string) {
+    const matches = await this.matchingService.runMatchingForJob(jobId);
+    
+    // Enrich with minimum candidate details for the dashboard
+    const enriched = await Promise.all(matches.map(async (m) => {
+      const candidate = await this.prisma.candidate.findUnique({
+        where: { candidateId: m.candidateId },
+        include: { user: { select: { avatar: true } } }
+      });
+      return {
+        ...m,
+        fullName: candidate?.fullName || 'Ứng viên',
+        major: candidate?.major || '',
+        user: { avatar: candidate?.user?.avatar }
+      };
+    }));
+
+    // Return top 5 matches
+    return enriched.sort((a, b) => b.score - a.score).slice(0, 5);
   }
 
   async getRecommendations(userId: string) {

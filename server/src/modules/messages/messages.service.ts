@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../../mail/mail.service';
 
 @Injectable()
 export class MessagesService {
-  constructor(public prisma: PrismaService) {}
+  constructor(
+    public prisma: PrismaService,
+    private readonly mailService: MailService
+  ) {}
 
   async getConversations(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -95,16 +99,37 @@ export class MessagesService {
   async broadcastMessage(recruiterUserId: string, candidateIds: string[], content: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId: recruiterUserId },
+      include: { company: true },
     });
     if (!recruiter) {
       throw new NotFoundException('Recruiter not found');
     }
+
+    const companyName = recruiter.company?.companyName || 'Nhà Tuyển Dụng trên Workly';
 
     const results: any[] = [];
     for (const candidateId of candidateIds) {
       const conv = await this.createConversation(candidateId, recruiter.recruiterId);
       const msg = await this.sendMessage(recruiterUserId, conv.conversationId, content);
       results.push(msg);
+
+      // Gửi email tự động
+      try {
+        const candidateDetails = await this.prisma.candidate.findUnique({
+          where: { candidateId },
+          include: { user: true }
+        });
+        if (candidateDetails && candidateDetails.user.email) {
+            await this.mailService.sendJobInvitation(
+                candidateDetails.user.email,
+                candidateDetails.fullName,
+                companyName,
+                content
+            );
+        }
+      } catch (err) {
+        console.error('Failed to send auto-email in broadcastMessage:', err);
+      }
     }
     return results;
   }

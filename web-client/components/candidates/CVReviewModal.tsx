@@ -16,7 +16,8 @@ import {
   Sparkles,
   ArrowRight,
   ChevronRight,
-  Info
+  Info,
+  Loader2
 } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -39,7 +39,7 @@ export function MatchingSection() {
             id: j.jobPostingId,
             title: j.title,
             subtitle: j.company.companyName,
-            score: j.score || 95, // Default score if not provided by simple search
+            score: j.score || 95, // Default score if not provided
             tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
             type: "JOB",
             raw: j

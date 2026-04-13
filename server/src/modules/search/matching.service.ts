@@ -38,12 +38,18 @@ export class MatchingService {
 
       // 1. Tính điểm Kỹ năng (60%)
       const matchedHard = hardSkills.filter((s: string) =>
-        cvSkills.some((cs: string) => cs.toLowerCase().includes(s.toLowerCase()))
+        cvSkills.some((cs: any) => {
+          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+        })
       );
       const hardScore = hardSkills.length > 0 ? (matchedHard.length / hardSkills.length) : 1;
 
       const matchedSoft = softSkills.filter((s: string) =>
-        cvSkills.some((cs: string) => cs.toLowerCase().includes(s.toLowerCase()))
+        cvSkills.some((cs: any) => {
+          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+        })
       );
       const softScore = softSkills.length > 0 ? (matchedSoft.length / softSkills.length) : 1;
 
@@ -126,12 +132,18 @@ export class MatchingService {
 
       // 1. Tính điểm Kỹ năng (60%)
       const matchedHard = hardSkills.filter((s: string) =>
-        cvSkills.some((cs: string) => cs.toLowerCase().includes(s.toLowerCase()))
+        cvSkills.some((cs: any) => {
+          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+        })
       );
       const hardScore = hardSkills.length > 0 ? (matchedHard.length / hardSkills.length) : 1;
 
       const matchedSoft = softSkills.filter((s: string) =>
-        cvSkills.some((cs: string) => cs.toLowerCase().includes(s.toLowerCase()))
+        cvSkills.some((cs: any) => {
+          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+        })
       );
       const softScore = softSkills.length > 0 ? (matchedSoft.length / softSkills.length) : 1;
 
@@ -144,11 +156,16 @@ export class MatchingService {
       }
 
       // 3. Điểm tổng hợp
-      const finalScore = (skillScore * 0.6) + (expScore * 0.4);
+      let finalScore = (skillScore * 0.6) + (expScore * 0.4);
+
+      // 4. Cộng thêm độ tin cậy nếu công ty đã xác thực MST (+15% điểm tin cậy)
+      if (job.company && job.company.verifyStatus === 1) {
+        finalScore += 0.15;
+      }
 
       return {
         ...job,
-        score: Math.round(finalScore * 100),
+        score: Math.min(Math.round(finalScore * 100), 100),
         matchedSkills: [...matchedHard, ...matchedSoft],
       };
     });

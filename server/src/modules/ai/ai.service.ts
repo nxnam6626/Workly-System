@@ -3,7 +3,30 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
-const pdfParse = require('pdf-parse');
+/** Bóc text từ buffer PDF dùng pdfjs-dist */
+async function parsePdfBuffer(buffer: Buffer): Promise<string> {
+  try {
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+    const standardFontDataUrl = path.join(process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts').replace(/\\/g, '/') + '/';
+
+    const data = new Uint8Array(buffer);
+    const pdf = await pdfjsLib.getDocument({ 
+      data: data, 
+      standardFontDataUrl: standardFontDataUrl 
+    }).promise;
+    
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map((item: any) => item.str).join(' ');
+      fullText += pageText + ' \n';
+    }
+    return fullText;
+  } catch (error) {
+    throw new Error('Failed to parse PDF using pdfjs: ' + error.message);
+  }
+}
 
 @Injectable()
 export class AiService {
@@ -23,13 +46,11 @@ export class AiService {
   async extractTextFromLocalFile(fileUrl: string): Promise<string> {
     try {
       if (!fileUrl) return '';
-      // Construct local path:
       const absolutePath = path.join(process.cwd(), fileUrl);
       if (!fs.existsSync(absolutePath)) return '';
 
       const dataBuffer = fs.readFileSync(absolutePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text;
+      return await parsePdfBuffer(dataBuffer);
     } catch (e) {
       console.error('Error parsing local PDF:', e.message);
       return '';
@@ -40,8 +61,7 @@ export class AiService {
     try {
       if (!fileUrl) return '';
       const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
-      const data = await pdfParse(response.data);
-      return data.text;
+      return await parsePdfBuffer(Buffer.from(response.data));
     } catch (e) {
       console.error('Error fetching/parsing PDF:', e.message);
       return '';
@@ -55,7 +75,7 @@ export class AiService {
     if (!cvText || cvText.trim().length === 0) return 30;
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       
       const prompt = `You are a strict HR AI Assistant. Evaluate the candidate's CV against the Job Title and Job Requirements.
       Job Title: ${jobTitle}
@@ -85,7 +105,7 @@ export class AiService {
   async generateResponse(message: string): Promise<string> {
     if (!this.isConfigured) return "AI is not configured.";
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const result = await model.generateContent(message);
       return result.response.text();
     } catch (e) {
@@ -100,7 +120,7 @@ export class AiService {
       return;
     }
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const result = await model.generateContentStream(message);
       for await (const chunk of result.stream) {
         yield chunk.text();
