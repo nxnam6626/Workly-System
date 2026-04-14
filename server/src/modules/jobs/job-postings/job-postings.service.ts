@@ -36,6 +36,28 @@ export class JobPostingsService {
 
   private readonly VIOLATION_LIMIT = 3;
 
+  private async enrichKeywordsInBackground(jobId: string, title: string, hardSkills: string[]) {
+    try {
+      if (!hardSkills || hardSkills.length === 0) return;
+      const expandedSkills = await this.aiService.expandJobKeywords(title, hardSkills);
+      if (Object.keys(expandedSkills).length > 0) {
+        const job = await this.prisma.jobPosting.findUnique({ where: { jobPostingId: jobId } });
+        if (job && job.structuredRequirements) {
+          const reqs = job.structuredRequirements as any;
+          reqs.expandedSkills = expandedSkills;
+          await this.prisma.jobPosting.update({
+            where: { jobPostingId: jobId },
+            data: { structuredRequirements: reqs }
+          });
+          // Re-trigger matching queue to apply the new enriched keywords
+          await this.matchingQueue.add('match', { jobId });
+        }
+      }
+    } catch (e) {
+      console.error('enrichKeywordsInBackground failed:', e);
+    }
+  }
+
   async create(createJobPostingDto: CreateJobPostingDto, userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
@@ -56,11 +78,22 @@ export class JobPostingsService {
       softSkills,
       minExperienceYears,
       jobTier,
+      branchIds,
       ...rest
     } = createJobPostingDto as any;
 
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
+
+    const baseSlug = createJobPostingDto.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[đĐ]/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+    const randomPart = Math.random().toString(36).substring(2, 7);
+    const generatedSlug = `${baseSlug}-${randomPart}`;
 
     const requestedJobTier = jobTier || 'BASIC';
 
@@ -78,12 +111,6 @@ export class JobPostingsService {
       );
     }
 
-    // Kiểm tra logic deadline
-    if (deadline && deadline < Date.now()) {
-      throw new ForbiddenException(
-        'Ngày hết hạn không thể là một ngày trong quá khứ.',
-      );
-    }
 
     const originalUrl =
       'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -117,7 +144,6 @@ export class JobPostingsService {
         ...rest,
         salaryMin: salaryMin || null,
         salaryMax: salaryMax || null,
-        deadline: deadline ? new Date(deadline) : null,
         recruiterId: recruiter.recruiterId,
         companyId: recruiter.companyId,
         postType: 'MANUAL',
@@ -126,12 +152,16 @@ export class JobPostingsService {
         isVerified: finalStatus === 'APPROVED',
         aiReliabilityScore,
         originalUrl: originalUrl,
+        slug: generatedSlug,
         structuredRequirements: {
           hardSkills: hardSkills || [],
           softSkills: softSkills || [],
           minExperienceYears: minExperienceYears || 0,
           vacancies: createJobPostingDto.vacancies || 1,
         },
+        branches: {
+          connect: createJobPostingDto.branchIds?.map(id => ({ branchId: id })) || []
+        }
       },
       include: {
         company: true,
@@ -153,6 +183,10 @@ export class JobPostingsService {
     }
     // Tự động chạy Matching Engine
     await this.matchingQueue.add('match', { jobId: job.jobPostingId });
+
+    if (requestedJobTier === 'PROFESSIONAL' || requestedJobTier === 'URGENT') {
+      this.enrichKeywordsInBackground(job.jobPostingId, job.title, hardSkills || []);
+    }
 
     if (finalStatus === 'APPROVED') {
       let title = 'Tin tuyển dụng được duyệt tự động';
@@ -292,6 +326,7 @@ export class JobPostingsService {
       include: {
         company: true,
         recruiter: true,
+        branches: true,
       },
     });
 
@@ -349,6 +384,7 @@ export class JobPostingsService {
         include: {
           company: true,
           recruiter: true,
+          branches: true,
         },
         orderBy: [
           { jobTier: 'desc' },
@@ -395,6 +431,7 @@ export class JobPostingsService {
       where: { recruiterId: recruiter.recruiterId },
       include: {
         applications: true,
+        branches: true,
       },
       orderBy: { refreshedAt: 'desc' },
     });
@@ -419,12 +456,14 @@ export class JobPostingsService {
   }
 
   async findOne(id: string, userId?: string, trackView: boolean = true) {
-    const job = await this.prisma.jobPosting.findUnique({
-      where: { jobPostingId: id },
-      include: { company: true, recruiter: true },
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+    const job = await this.prisma.jobPosting.findFirst({
+      where: isUuid ? { jobPostingId: id } : { slug: id },
+      include: { company: true, recruiter: true, branches: true, applications: { select: { applicationId: true } } },
     });
 
-    if (!job) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
+    if (!job) throw new NotFoundException(`Không tìm thấy Job với ID/Slug ${id}`);
 
     let isRecipientCandidate = true;
     if (userId) {
@@ -441,7 +480,7 @@ export class JobPostingsService {
     if (trackView && isRecipientCandidate) {
       this.prisma.jobPosting
         .update({
-          where: { jobPostingId: id },
+          where: { jobPostingId: job.jobPostingId },
           data: { viewCount: { increment: 1 } },
           select: { jobPostingId: true }, // Minimal return
         })
@@ -449,7 +488,7 @@ export class JobPostingsService {
           if (job.recruiter?.userId) {
             this.messagesGateway.server
               .to(`user_${job.recruiter.userId}`)
-              .emit('jdViewUpdated', { jobPostingId: id });
+              .emit('jdViewUpdated', { jobPostingId: job.jobPostingId });
           }
         })
         .catch(console.error);
@@ -457,6 +496,7 @@ export class JobPostingsService {
 
     let hasApplied = false;
     let isSaved = false;
+    let matchScore: number | null = null;
 
     if (userId) {
       const candidate = await this.prisma.candidate.findUnique({
@@ -466,7 +506,7 @@ export class JobPostingsService {
         // Check Application
         const application = await this.prisma.application.findFirst({
           where: {
-            jobPostingId: id,
+            jobPostingId: job.jobPostingId,
             candidateId: candidate.candidateId,
           },
         });
@@ -477,15 +517,27 @@ export class JobPostingsService {
           where: {
             candidateId_jobPostingId: {
               candidateId: candidate.candidateId,
-              jobPostingId: id,
+              jobPostingId: job.jobPostingId,
             },
           },
         });
         isSaved = !!saved;
+        // Check Match Score
+        const match = await this.prisma.jobMatch.findUnique({
+          where: {
+            candidateId_jobPostingId: {
+              candidateId: candidate.candidateId,
+              jobPostingId: job.jobPostingId,
+            }
+          }
+        });
+        if (match) {
+          matchScore = match.score;
+        }
       }
     }
 
-    return { ...job, hasApplied, isSaved };
+    return { ...job, hasApplied, isSaved, matchScore };
   }
 
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
@@ -493,7 +545,7 @@ export class JobPostingsService {
     const existingJob = await this.prisma.jobPosting.findUnique({ where: { jobPostingId: id } });
     if (!existingJob) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
 
-    const { deadline, hardSkills, softSkills, minExperienceYears, ...rest } = updateJobPostingDto;
+    const { branchIds, hardSkills, softSkills, minExperienceYears, ...rest } = updateJobPostingDto;
 
     // Kiểm tra blacklist khi cập nhật
     const { containsBadWords, foundWords } = this.validateBlacklist(
@@ -517,13 +569,13 @@ export class JobPostingsService {
       data: {
         ...rest,
         status: newStatus,
-        ...(deadline && { deadline: new Date(deadline) }),
         structuredRequirements: {
           ...currentStructured,
           ...(hardSkills !== undefined && { hardSkills }),
           ...(softSkills !== undefined && { softSkills }),
           ...(minExperienceYears !== undefined && { minExperienceYears }),
         },
+        ...(branchIds && { branches: { set: branchIds.map((id: string) => ({ branchId: id })) } }),
         updatedAt: new Date(),
       },
       include: { company: true, recruiter: true },
@@ -547,6 +599,10 @@ export class JobPostingsService {
       this.syncJobToES(result);
     } else {
       await this.searchService.deleteJob(id);
+    }
+
+    if ((existingJob.jobTier === 'PROFESSIONAL' || existingJob.jobTier === 'URGENT') && hardSkills !== undefined) {
+      this.enrichKeywordsInBackground(result.jobPostingId, result.title, hardSkills);
     }
 
     return result;

@@ -160,6 +160,64 @@ export class MessagesService {
     return results;
   }
 
+  async sendJobInvitationMessage(
+    recruiterUserId: string,
+    candidateId: string,
+    jobPostingId: string,
+  ) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId: recruiterUserId },
+      include: { company: true },
+    });
+    if (!recruiter) {
+      throw new NotFoundException('Recruiter not found');
+    }
+
+    const job = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId }
+    });
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    const companyName = recruiter.company?.companyName || 'Nhà Tuyển Dụng trên Workly';
+    const link = job.slug ? `http://localhost:3000/jobs/${job.slug}` : `http://localhost:3000/jobs/${job.jobPostingId}`;
+    
+    const content = `Chào bạn, Công ty ${companyName} đang có đợt tuyển dụng vị trí ${job.title}. Qua phân tích hệ thống, chúng tôi nhận thấy hồ sơ của bạn đánh giá rất tiềm năng và phù hợp với vị trí này.
+Chúng tôi muốn mời bạn ứng tuyển. Bạn có thể xem chi tiết công việc tại link sau: ${link}
+Hãy nhấn vào nút Ứng tuyển ngay tại trang chi tiết để chúng tôi nhận được hồ sơ của bạn nhé!`;
+
+    const conv = await this.createConversation(
+      candidateId,
+      recruiter.recruiterId,
+    );
+    const msg = await this.sendMessage(
+      recruiterUserId,
+      conv.conversationId,
+      content,
+    );
+
+    // Gửi email tự động
+    try {
+      const candidateDetails = await this.prisma.candidate.findUnique({
+        where: { candidateId },
+        include: { user: true },
+      });
+      if (candidateDetails && candidateDetails.user.email) {
+        await this.mailService.sendJobInvitation(
+          candidateDetails.user.email,
+          candidateDetails.fullName,
+          companyName,
+          content,
+        );
+      }
+    } catch (err) {
+      console.error('Failed to send auto-email in sendJobInvitationMessage:', err);
+    }
+
+    return msg;
+  }
+
   async getUnreadCount(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { userId },

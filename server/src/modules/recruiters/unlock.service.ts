@@ -73,8 +73,15 @@ export class UnlockService {
         candidateId,
         jobPostingId,
         cvId,
-        creditSpent: finalCost,
+      creditSpent: finalCost,
       },
+    });
+
+
+    // Đồng bộ mở khóa cho Application (nếu có)
+    await this.prisma.application.updateMany({
+      where: { candidateId, jobPostingId },
+      data: { isUnlocked: true },
     });
 
     return unlock;

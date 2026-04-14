@@ -16,6 +16,7 @@ import {
   BadgeCheck,
   AlertTriangle,
   RotateCcw,
+  Shield,
 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -27,6 +28,7 @@ interface UserDetailModalProps {
   onUnlock: (id: string) => void;
   onDelete: (id: string) => void;
   onRoleChange: (id: string, role: string) => void;
+  onUpdatePermissions?: (id: string, permissions: string[]) => void;
   onResetViolations: (id: string) => void;
   isProcessing: boolean;
 }
@@ -50,10 +52,14 @@ export default function UserDetailModal({
   onUnlock,
   onDelete,
   onRoleChange,
+  onUpdatePermissions,
   onResetViolations,
   isProcessing,
 }: UserDetailModalProps) {
   const [roleToChange, setRoleToChange] = useState<string | null>(null);
+  const [editingPermissions, setEditingPermissions] = useState(false);
+  const [tempPermissions, setTempPermissions] = useState<string[]>(user.admin?.permissions || []);
+  const [tempIsSupreme, setTempIsSupreme] = useState(user.admin?.adminLevel === 1);
 
   const displayName = user.candidate?.fullName ?? user.recruiter?.position ?? user.email.split('@')[0];
   const roles = user.userRoles.map((ur) => ur.role.roleName);
@@ -141,6 +147,102 @@ export default function UserDetailModal({
                 {!roles.includes('ADMIN') && <option value="ADMIN">Quản trị viên</option>}
               </select>
             </div>
+
+            {roles.includes('ADMIN') && user.admin && (
+              <div className="mt-5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-bold text-slate-800">Quyền hạn hệ thống</span>
+                  </div>
+                  {user.admin.adminLevel === 1 ? (
+                    <span className="text-[10px] uppercase font-bold text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded-full">Toàn Quyền</span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (editingPermissions && onUpdatePermissions) {
+                          onUpdatePermissions(user.userId, tempIsSupreme ? ['ALL'] : tempPermissions);
+                          setEditingPermissions(false);
+                        } else {
+                          setTempPermissions(user.admin!.permissions || []);
+                          setTempIsSupreme(user.admin!.adminLevel === 1);
+                          setEditingPermissions(true);
+                        }
+                      }}
+                      disabled={isProcessing}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                    >
+                      {editingPermissions ? 'Lưu quyền' : 'Chỉnh sửa'}
+                    </button>
+                  )}
+                </div>
+                
+                {user.admin.adminLevel === 1 && !editingPermissions ? (
+                  <p className="text-xs text-slate-600">Supreme Admin - tài khoản này có đầy đủ các quyền và không bị giới hạn.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {editingPermissions && (
+                      <label className="flex items-start gap-3 cursor-pointer group pb-2 border-b border-slate-100">
+                        <div className="flex items-center h-5 mt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={tempIsSupreme}
+                            onChange={(e) => {
+                              setTempIsSupreme(e.target.checked);
+                              if (e.target.checked) setTempPermissions([]);
+                            }}
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+                          />
+                        </div>
+                        <div>
+                          <p className={`text-sm font-bold ${tempIsSupreme ? 'text-indigo-700' : 'text-slate-800'}`}>Toàn Quyền (Supreme Admin)</p>
+                          <p className="text-xs text-slate-500">Bật tùy chọn này để cấp toàn quyền hệ thống.</p>
+                        </div>
+                      </label>
+                    )}
+
+                    {!tempIsSupreme && [
+                      { id: 'MANAGE_USERS', label: 'Quản lý Người dùng' },
+                      { id: 'MANAGE_JOBS', label: 'Quản lý Việc làm' },
+                      { id: 'MANAGE_BILLING', label: 'Quản lý Doanh thu' },
+                      { id: 'MANAGE_SUPPORT', label: 'Chăm sóc Khách hàng' },
+                    ].map(perm => (
+                      <label key={perm.id} className={`flex items-center gap-2.5 text-sm ${editingPermissions ? 'cursor-pointer' : 'opacity-80'}`}>
+                        <input
+                          type="checkbox"
+                          disabled={!editingPermissions || isProcessing}
+                          checked={tempPermissions.includes(perm.id)}
+                          onChange={(e) => {
+                            let newPerms = [...tempPermissions];
+                            if (e.target.checked) newPerms.push(perm.id);
+                            else newPerms = newPerms.filter(p => p !== perm.id);
+
+                            if (newPerms.length === 4) {
+                              setTempIsSupreme(true);
+                              setTempPermissions([]);
+                            } else {
+                              setTempPermissions(newPerms);
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
+                        />
+                        <span className={tempPermissions.includes(perm.id) ? 'font-medium text-slate-800' : 'text-slate-500'}>{perm.label}</span>
+                      </label>
+                    ))}
+                    {editingPermissions && (
+                      <div className="flex justify-end mt-2">
+                        <button
+                          onClick={() => setEditingPermissions(false)}
+                          className="text-xs font-medium text-slate-500 hover:text-slate-700 mr-3"
+                        >
+                          Hủy
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Contact info */}

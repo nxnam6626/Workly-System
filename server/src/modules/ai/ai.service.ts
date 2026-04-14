@@ -146,6 +146,38 @@ export class AiService {
     }
   }
 
+  async expandJobKeywords(jobTitle: string, hardSkills: string[]): Promise<Record<string, string[]>> {
+    if (!this.isConfigured || hardSkills.length === 0) return {};
+    
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+    
+    for (let i = 0; i < modelsToTry.length; i++) {
+      try {
+        const model = this.genAI.getGenerativeModel({ model: modelsToTry[i] });
+        const prompt = `You are an expert IT Technical Recruiter. Based on the job title "${jobTitle}" and the following required hard skills: ${JSON.stringify(hardSkills)}.
+        For each skill, generate an array of up to 5 strictly related synonyms, exact frameworks, or alternative terms that candidates commonly write in CVs.
+        Return ONLY a JSON object where the keys are the original skills from the list, and the values are arrays of string synonyms.
+        Do not use markdown, backticks or explanations.
+        Example: {"ReactJS": ["React", "React.js", "Redux", "Hooks"], "Node.js": ["Node", "NodeJS", "Express"]}`;
+        
+        const result = await model.generateContent(prompt);
+        let text = result.response.text().trim();
+        text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
+        return JSON.parse(text);
+      } catch (e: any) {
+        if ((e.message?.includes('503') || e.message?.includes('429')) && i < modelsToTry.length - 1) {
+          console.warn(`[AiService] expandJobKeywords error with ${modelsToTry[i]} (${e.message}). Switching to fallback ${modelsToTry[i+1]}...`);
+          // wait 500ms before retrying
+          await new Promise(resolve => setTimeout(resolve, 500));
+          continue;
+        }
+        console.error('AI expandJobKeywords error:', e.message);
+        return {};
+      }
+    }
+    return {};
+  }
+
   async generateResponse(message: string): Promise<string> {
     if (!this.isConfigured) return 'AI is not configured.';
     try {
@@ -330,6 +362,28 @@ export class AiService {
     if (!success) {
       this.logger.error(`Tất cả model AI đều lỗi: ${lastError?.message}`);
       yield "\n[Hệ thống]: Hiện tại máy chủ trí tuệ nhân tạo đang rất bận (Quá tải). Bạn hãy thử lại sau ít phút hoặc nhấn Gửi lại nhé!";
+    
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+    
+    for (let i = 0; i < modelsToTry.length; i++) {
+        try {
+          const model = this.genAI.getGenerativeModel({
+            model: modelsToTry[i],
+          });
+          const result = await model.generateContentStream(message);
+          for await (const chunk of result.stream) {
+            yield chunk.text();
+          }
+          return; // Stream success, exit generator
+        } catch (e: any) {
+          if (e.message?.includes('429') && i < modelsToTry.length - 1) {
+            console.warn(`[AiService] Quota exceeded for ${modelsToTry[i]}. Switching to fallback ${modelsToTry[i+1]}...`);
+            continue; // Fallback to next model
+          }
+          console.error(`[AiService] generateStreamResponse error with ${modelsToTry[i]}:`, e.message);
+          yield 'Hệ thống đánh giá AI đang nhận lượng truy cập quá tải. Vui lòng thử lại sau ít phút!';
+          return;
+        }
     }
   }
 }

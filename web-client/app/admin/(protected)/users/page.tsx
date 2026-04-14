@@ -11,9 +11,12 @@ import UserStats from './components/UserStats';
 import UserFilters from './components/UserFilters';
 import UserTable from './components/UserTable';
 import UserDetailModal from './components/UserDetailModal';
+import CreateAdminModal from './components/CreateAdminModal';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSocketStore } from '@/stores/socket';
+import { useAuthStore } from '@/stores/auth';
 
 const PAGE_SIZE = 15;
 
@@ -21,12 +24,14 @@ export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuthStore();
   const [error, setError] = useState('');
 
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AdminUserFilters>({});
 
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+  const [isCreateAdminOpen, setIsCreateAdminOpen] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const confirm = useConfirm();
 
@@ -155,6 +160,21 @@ export default function UsersPage() {
     }
   };
 
+  const handleUpdatePermissions = async (id: string, permissions: string[]) => {
+    setProcessingId(id);
+    try {
+      await adminUsersApi.updateAdminPermissions(id, permissions);
+      const updatedUser = { ...detailUser!, admin: { ...detailUser!.admin, permissions, adminLevel: detailUser!.admin?.adminLevel || 2 } };
+      setUsers((prev) => prev.map((u) => (u.userId === id ? updatedUser : u)));
+      if (detailUser?.userId === id) setDetailUser(updatedUser);
+      toast.success('Cập nhật quyền thành công.');
+    } catch {
+      setError('Cập nhật quyền thất bại.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const handleResetViolations = async (id: string) => {
     const ok = await confirm({
       title: 'Khôi phục vi phạm?',
@@ -209,13 +229,24 @@ export default function UsersPage() {
             Xem, lọc, khóa và xóa tài khoản người dùng trong hệ thống
           </p>
         </div>
-        <button
-          onClick={fetchUsers}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Làm mới
-        </button>
+        <div className="flex gap-3">
+          {user?.admin?.adminLevel === 1 && (
+            <button
+              onClick={() => setIsCreateAdminOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-transparent bg-indigo-600 rounded-xl text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Tạo Admin
+            </button>
+          )}
+          <button
+            onClick={fetchUsers}
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Làm mới
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -267,10 +298,17 @@ export default function UsersPage() {
           onUnlock={handleUnlock}
           onDelete={requestDelete}
           onRoleChange={handleRoleChange}
+          onUpdatePermissions={handleUpdatePermissions}
           onResetViolations={handleResetViolations}
           isProcessing={processingId === detailUser.userId}
         />
       )}
+      
+      <CreateAdminModal
+        isOpen={isCreateAdminOpen}
+        onClose={() => setIsCreateAdminOpen(false)}
+        onSuccess={fetchUsers}
+      />
     </div>
   );
 }

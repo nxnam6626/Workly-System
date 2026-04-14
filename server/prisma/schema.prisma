@@ -70,12 +70,13 @@ model JobAlert {
 }
 
 model Admin {
-  adminId    String    @id @default(uuid())
-  adminLevel Int
-  lastAction String?
-  userId     String    @unique
-  user       User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  companies  Company[]
+  adminId     String    @id @default(uuid())
+  adminLevel  Int       @default(1)
+  permissions String[]  @default([])
+  lastAction  String?
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  companies   Company[]
 }
 
 model Candidate {
@@ -94,6 +95,7 @@ model Candidate {
   projects      Project[]
   savedJobs     SavedJob[]
   skills        Skill[]
+  jobMatches    JobMatch[]
 }
 
 model Skill {
@@ -158,20 +160,41 @@ model CrawlLog {
 model Company {
   companyId          String       @id @default(uuid())
   companyName        String
+  slug               String?      @unique
   taxCode            String?      @unique
   isRegistered       Boolean      @default(false)
   verifyStatus       Int          @default(0)
   logo               String?
   banner             String?
   address            String?
+  taxAddress         String?
+  status             String?
+  internationalName  String?
+  shortName          String?
+  operatingDate      String?
+  enterpriseType     String?
+  mainIndustry       String?
   description        String?
   websiteUrl         String?
   companySize        Int?
   businessLicenseUrl String?
   adminId            String?
-  admin              Admin?       @relation(fields: [adminId], references: [adminId])
+  admin              Admin?          @relation(fields: [adminId], references: [adminId])
   jobPostings        JobPosting[]
   recruiters         Recruiter[]
+  branches           CompanyBranch[]
+}
+
+model CompanyBranch {
+  branchId     String       @id @default(uuid())
+  name         String
+  address      String
+  latitude     Float?
+  longitude    Float?
+  isVerified   Boolean      @default(false)
+  companyId    String
+  company      Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  jobPostings  JobPosting[] @relation("JobPostingBranches")
 }
 
 model RawJob {
@@ -195,6 +218,7 @@ model RawJob {
 model JobPosting {
   jobPostingId           String        @id @default(uuid())
   title                  String
+  slug                   String?       @unique
   description            String?
   requirements           String?
   benefits               String?
@@ -205,7 +229,6 @@ model JobPosting {
   experience             String?
   vacancies              Int           @default(1)
   locationCity           String?
-  deadline               DateTime?     @db.Timestamp(6)
   status                 JobStatus     @default(PENDING)
   postType               PostType      @default(CRAWLED)
   jobTier                JobTier       @default(BASIC)
@@ -226,6 +249,23 @@ model JobPosting {
   rawJob                 RawJob?       @relation(fields: [rawJobId], references: [rawJobId])
   recruiter              Recruiter?    @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
+  branches               CompanyBranch[] @relation("JobPostingBranches")
+  jobMatches             JobMatch[]
+}
+
+model JobMatch {
+  matchId      String     @id @default(uuid())
+  score        Float
+  matchedSkills String[]
+  candidateId  String
+  jobPostingId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
+
+  @@unique([candidateId, jobPostingId])
 }
 
 model CV {

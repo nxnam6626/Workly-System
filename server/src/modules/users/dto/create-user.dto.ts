@@ -4,6 +4,8 @@ import {
   IsNotEmpty,
   IsString,
   MinLength,
+  IsArray,
+  IsOptional,
 } from 'class-validator';
 import { Role } from '../../auth/decorators/roles.decorator';
 
@@ -20,4 +22,9 @@ export class CreateUserDto {
 
   @IsEnum(Role, { message: 'Vai trò không hợp lệ' })
   role: Role;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  permissions?: string[];
 }

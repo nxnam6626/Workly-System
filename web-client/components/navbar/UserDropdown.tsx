@@ -117,7 +117,7 @@ export function UserDropdown() {
               {jobMenuOpen && (
                 <div className="bg-slate-50/30 animate-in slide-in-from-top-1 duration-300 pb-1">
                   <Link
-                    href="/applied-jobs"
+                    href="/profile/jobs/applied"
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
                   >
@@ -125,7 +125,7 @@ export function UserDropdown() {
                     Việc làm đã ứng tuyển
                   </Link>
                   <Link
-                    href="/saved-jobs"
+                    href="/profile/jobs/saved"
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
                   >

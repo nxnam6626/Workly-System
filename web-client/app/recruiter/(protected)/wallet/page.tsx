@@ -6,9 +6,12 @@ import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useWalletStore } from '@/stores/wallet';
 
 function WalletContent() {
-  const [balance, setBalance] = useState(0);
+  const { wallet: globalWallet, fetchWallet } = useWalletStore();
+  const balance = globalWallet?.balance || 0;
+  
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [cvUnlockQuota, setCvUnlockQuota] = useState(0);
@@ -42,7 +45,8 @@ function WalletContent() {
         api.get('/wallets/transactions'),
         api.get('/subscriptions/current').catch(() => ({ data: null }))
       ]);
-      setBalance(balanceRes.data.balance || 0);
+      await fetchWallet(); // Tự động sync với top navbar
+      
       setCvUnlockQuota(balanceRes.data.cvUnlockQuota || 0);
       setCvUnlockQuotaMax(balanceRes.data.cvUnlockQuotaMax || 0);
       setTransactions(transRes.data || []);

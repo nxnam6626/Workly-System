@@ -89,19 +89,43 @@ export class UsersService {
       if (data.role === 'RECRUITER') {
         let companyId: string | null = null;
         if ('companyName' in data && data.companyName) {
-          const newCompany = await tx.company.create({
-            data: {
-              companyName: data.companyName,
-              taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
-              address:
-                'location' in data && data.location ? data.location : null,
-              verifyStatus:
-                'verifyStatus' in data && data.verifyStatus
-                  ? data.verifyStatus
-                  : 0,
-            },
-          });
-          companyId = newCompany.companyId;
+          let existingCompany: any = null;
+          if ('taxCode' in data && data.taxCode) {
+            existingCompany = await tx.company.findFirst({
+              where: { taxCode: data.taxCode },
+            });
+          }
+          if (existingCompany) {
+            companyId = existingCompany.companyId;
+          } else {
+            let companyDataFromApi: any = null;
+            if ('taxCode' in data && data.taxCode) {
+              try {
+                const res = await fetch(`https://esgoo.net/api-mst/${data.taxCode}.htm`);
+                const apiData = await res.json();
+                if (apiData.error === 0 && apiData.data) {
+                  companyDataFromApi = apiData.data;
+                }
+              } catch (e) {
+                console.error('Failed to fetch tax code data', e);
+              }
+            }
+
+            const newCompany = await tx.company.create({
+              data: {
+                companyName: companyDataFromApi?.ten || data.companyName,
+                taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
+                address: companyDataFromApi?.dc || null,
+                websiteUrl: 'websiteUrl' in data && data.websiteUrl ? data.websiteUrl : null,
+                taxAddress: companyDataFromApi?.dc || null,
+                status: companyDataFromApi?.tinhtrang || null,
+                internationalName: companyDataFromApi?.internationalName || null,
+                shortName: companyDataFromApi?.shortName || null,
+                verifyStatus: companyDataFromApi || ('verifyStatus' in data && data.verifyStatus) ? 1 : 0,
+              },
+            });
+            companyId = newCompany.companyId;
+          }
         }
 
         await tx.recruiter.create({
@@ -111,10 +135,13 @@ export class UsersService {
           },
         });
       } else if (data.role === 'ADMIN') {
+        const permissions = 'permissions' in data ? (data.permissions as string[] | undefined) : [];
+        const isSupreme = permissions?.includes('ALL');
         await tx.admin.create({
           data: {
             userId: newUser.userId,
-            adminLevel: 1,
+            adminLevel: isSupreme ? 1 : 2,
+            permissions: isSupreme ? [] : (permissions || []),
           },
         });
       }
@@ -282,6 +309,7 @@ export class UsersService {
           },
           candidate: { select: { fullName: true } },
           recruiter: { select: { position: true, bio: true, violationCount: true } },
+          admin: { select: { permissions: true, adminLevel: true } },
         },
       }),
       this.prisma.user.count({ where }),
@@ -309,6 +337,7 @@ export class UsersService {
         },
         candidate: true,
         recruiter: true,
+        admin: { select: { permissions: true, adminLevel: true } },
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
@@ -322,6 +351,7 @@ export class UsersService {
       include: {
         candidate: true,
         recruiter: true,
+        admin: { select: { permissions: true, adminLevel: true } },
         userRoles: {
           include: { role: true },
         },
@@ -335,6 +365,7 @@ export class UsersService {
       include: {
         candidate: true,
         recruiter: true,
+        admin: { select: { permissions: true, adminLevel: true } },
         userRoles: {
           include: { role: true },
         },
@@ -374,6 +405,7 @@ export class UsersService {
           },
         },
         recruiter: true,
+        admin: { select: { permissions: true, adminLevel: true } },
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
@@ -541,20 +573,45 @@ export class UsersService {
         if (!existingRecruiter) {
           let companyId: string | null = null;
           if ('companyName' in data && data.companyName) {
-            const newCompany = await tx.company.create({
-              data: {
-                companyName: data.companyName,
-                taxCode:
-                  'taxCode' in data && data.taxCode ? data.taxCode : null,
-                address:
-                  'location' in data && data.location ? data.location : null,
-                verifyStatus:
-                  'verifyStatus' in data && data.verifyStatus
-                    ? data.verifyStatus
-                    : 0,
-              },
-            });
-            companyId = newCompany.companyId;
+            let existingCompany: any = null;
+            if ('taxCode' in data && data.taxCode) {
+              existingCompany = await tx.company.findFirst({
+                where: { taxCode: data.taxCode },
+              });
+            }
+            if (existingCompany) {
+              companyId = existingCompany.companyId;
+            } else {
+              let companyDataFromApi: any = null;
+              if ('taxCode' in data && data.taxCode) {
+                try {
+                  const res = await fetch(`https://esgoo.net/api-mst/${data.taxCode}.htm`);
+                  const apiData = await res.json();
+                  if (apiData.error === 0 && apiData.data) {
+                    companyDataFromApi = apiData.data;
+                  }
+                } catch (e) {
+                  console.error('Failed to fetch tax code data', e);
+                }
+              }
+
+              const newCompany = await tx.company.create({
+                data: {
+                  companyName: companyDataFromApi?.ten || data.companyName,
+                  taxCode:
+                    'taxCode' in data && data.taxCode ? data.taxCode : null,
+                  address:
+                    companyDataFromApi?.dc || null,
+                  websiteUrl: 'websiteUrl' in data && data.websiteUrl ? data.websiteUrl : null,
+                  taxAddress: companyDataFromApi?.dc || null,
+                  status: companyDataFromApi?.tinhtrang || null,
+                  internationalName: companyDataFromApi?.internationalName || null,
+                  shortName: companyDataFromApi?.shortName || null,
+                  verifyStatus: companyDataFromApi || ('verifyStatus' in data && data.verifyStatus) ? 1 : 0,
+                },
+              });
+              companyId = newCompany.companyId;
+            }
           }
 
           await tx.recruiter.create({
@@ -721,6 +778,24 @@ export class UsersService {
       where: { userId },
       data: { lastLogin: new Date() },
     });
+  }
+
+  async updateAdminPermissions(userId: string, permissions: string[]) {
+    const user = await this.findOne(userId);
+    if (!user.admin) {
+      throw new NotFoundException('Người dùng này không phải là quản trị viên.');
+    }
+    const isSupreme = permissions.includes('ALL');
+    
+    await this.prisma.admin.update({
+      where: { userId },
+      data: {
+        adminLevel: isSupreme ? 1 : 2,
+        permissions: isSupreme ? [] : permissions,
+      },
+    });
+    
+    return { message: 'Đã cập nhật quyền hạn quản trị viên.' };
   }
 }
 // Trigger restart 2

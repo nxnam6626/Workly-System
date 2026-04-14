@@ -52,9 +52,8 @@ export class CreateJobPostingDto {
   @IsOptional()
   locationCity?: string;
 
-  @IsNumber()
   @IsOptional()
-  deadline?: number;
+  branchIds?: string[];
 
   @IsOptional()
   hardSkills?: string[];

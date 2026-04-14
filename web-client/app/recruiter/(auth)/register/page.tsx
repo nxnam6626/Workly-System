@@ -3,17 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
-import { Mail, Lock, Loader2, Building2, User, Phone, MapPin, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { Mail, Lock, Loader2, Building2, User, Phone, MapPin, FileText, CheckCircle2, AlertCircle, Globe } from "lucide-react";
 import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
 
-// Placeholder data for provinces
-const PROVINCES = [
-  "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ",
-  "Bình Dương", "Đồng Nai", "Bắc Ninh", "Khánh Hòa", "Quảng Ninh",
-  "Khác"
-];
+
 
 export default function EmployerRegisterPage() {
   const router = useRouter();
@@ -24,7 +19,7 @@ export default function EmployerRegisterPage() {
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
   const [fullName, setFullName] = useState("");
-  const [location, setLocation] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [taxCode, setTaxCode] = useState("");
   const [verifyStatus, setVerifyStatus] = useState(0); // 0: unverified, 1: verified
   const [verifying, setVerifying] = useState(false);
@@ -43,12 +38,12 @@ export default function EmployerRegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password || !companyName || !phone || !fullName || !location) {
+    if (!email || !password || !companyName || !phone || !fullName) {
         return setError("Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
     }
 
-    if (taxCode && verifyStatus !== 1) {
-        return setError("Vui lòng xác thực mã số thuế trước khi đăng ký.");
+    if (!taxCode || verifyStatus !== 1) {
+        return setError("Vui lòng nhập và xác thực mã số thuế trước khi đăng ký.");
     }
 
     setIsSubmitting(true);
@@ -61,7 +56,7 @@ export default function EmployerRegisterPage() {
           role: "RECRUITER",
           companyName,
           phone,
-          location,
+          websiteUrl,
           taxCode
       });
       setIsSuccess(true);
@@ -80,27 +75,16 @@ export default function EmployerRegisterPage() {
 
   const handleVerifyTaxCode = async () => {
     if (!taxCode) return;
-    if (!companyName) {
-      setError("Vui lòng nhập Tên công ty trước khi xác thực mã số thuế.");
-      return;
-    }
     
     setVerifying(true);
     setError("");
+    setCompanyName("");
     try {
       const res = await fetch(`https://api.vietqr.io/v2/business/${taxCode}`);
       const data = await res.json();
       if (data.code === '00' && data.data) {
-        const apiName = removeDiacritics(data.data.name);
-        const apiShort = removeDiacritics(data.data.shortName || "");
-        const inputName = removeDiacritics(companyName);
-        
-        if (apiName.includes(inputName) || inputName.includes(apiName) || (apiShort && (apiShort.includes(inputName) || inputName.includes(apiShort)))) {
-           setVerifyStatus(1);
-        } else {
-           setVerifyStatus(-1);
-           setError(`Tên công ty không khớp với mã số thuế. Tên đăng ký: ${data.data.name}`);
-        }
+        setCompanyName(data.data.name);
+        setVerifyStatus(1);
       } else {
         setVerifyStatus(-1);
         setError('Mã số thuế không tồn tại hoặc sai!');
@@ -241,19 +225,49 @@ export default function EmployerRegisterPage() {
                 </div>
             </div>
 
-            {/* Row 2: Company Name */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tên công ty <span className="text-red-500">*</span></label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+            {/* Row 2: Tax Code & Company Name */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between items-center">
+                    <span>Mã số thuế <span className="text-red-500">*</span></span>
+                    {verifyStatus === 1 && <span className="text-xs text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực</span>}
+                    {verifyStatus === -1 && <span className="text-xs text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Lỗi xác thực</span>}
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative group flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                        </div>
+                        <input
+                        type="text" value={taxCode} onChange={(e) => { setTaxCode(e.target.value); setVerifyStatus(0); setCompanyName(""); }} required
+                        placeholder="Nhập mã số thuế"
+                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                        />
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={handleVerifyTaxCode}
+                      disabled={verifying || !taxCode}
+                      className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors whitespace-nowrap disabled:opacity-50 border border-slate-200"
+                    >
+                      {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kiểm tra'}
+                    </button>
+                  </div>
                 </div>
-                <input
-                  type="text" value={companyName} onChange={(e) => { setCompanyName(e.target.value); setVerifyStatus(0); }} required
-                  placeholder="Nhập tên công ty của bạn..."
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                />
-              </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tên công ty <span className="text-red-500">*</span></label>
+                  <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                      type="text" value={companyName} readOnly required
+                      placeholder="Sẽ được tự động điền sau khi kiểm tra mã số thuế"
+                      className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-500 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm cursor-not-allowed"
+                      />
+                  </div>
+                </div>
             </div>
 
             {/* Row 3: Phone & Contact Person */}
@@ -287,51 +301,19 @@ export default function EmployerRegisterPage() {
                 </div>
             </div>
 
-            {/* Row 4: Location & Tax Code */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tỉnh thành làm việc <span className="text-red-500">*</span></label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                    <select
-                    value={location} onChange={(e) => setLocation(e.target.value)} required
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm appearance-none"
-                    >
-                    <option value="" disabled>Chọn tỉnh thành</option>
-                    {PROVINCES.map(prov => <option key={prov} value={prov}>{prov}</option>)}
-                    </select>
-                </div>
-                </div>
-
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between items-center">
-                  <span>Mã số thuế</span>
-                  {verifyStatus === 1 && <span className="text-xs text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực</span>}
-                  {verifyStatus === -1 && <span className="text-xs text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Thông tin không hợp lệ</span>}
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative group flex-1">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                      </div>
-                      <input
-                      type="text" value={taxCode} onChange={(e) => { setTaxCode(e.target.value); setVerifyStatus(0); }}
-                      placeholder="Nhập mã số thuế (không bắt buộc)"
-                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                      />
+            {/* Row 4: Website URL */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">URL công ty (Website)</label>
+              <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Globe className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
-                  <button 
-                    type="button"
-                    onClick={handleVerifyTaxCode}
-                    disabled={verifying || !taxCode}
-                    className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors whitespace-nowrap disabled:opacity-50 border border-slate-200"
-                  >
-                    {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kiểm tra'}
-                  </button>
-                </div>
-                </div>
+                  <input
+                  type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://yourwebsite.com"
+                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                  />
+              </div>
             </div>
 
             <div className="pt-4">

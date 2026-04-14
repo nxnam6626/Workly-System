@@ -16,8 +16,11 @@ import {
   Phone,
   ExternalLink,
   Loader2,
-  Sparkles
+  Sparkles,
+  Wallet
 } from 'lucide-react';
+import Link from 'next/link';
+import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -39,14 +42,26 @@ export default function JobMatchesPage() {
   const { id: jobId } = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<MatchedCandidate[]>([]);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
+
+  const [wallet, setWallet] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<{ id: string, cvId: string, name: string } | null>(null);
 
   const fetchMatches = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/recruiters/matched/${jobId}`);
-      setCandidates(response.data);
+      const [resCandidates, resWallet, resSub] = await Promise.all([
+        api.get(`/recruiters/matched/${jobId}`),
+        api.get('/wallets/balance').catch(() => ({ data: null })),
+        api.get('/subscriptions/current').catch(() => ({ data: null }))
+      ]);
+      setCandidates(resCandidates.data);
+      if (resWallet.data) setWallet(resWallet.data);
+      if (resSub.data) setSubscription(resSub.data);
     } catch (error) {
       console.error('Error fetching matches:', error);
       toast.error('Không thể tải danh sách ứng viên phù hợp.');
@@ -59,19 +74,36 @@ export default function JobMatchesPage() {
     fetchMatches();
   }, [jobId]);
 
-  const handleUnlock = async (candidateId: string, cvId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn dùng 1 Credit để mở khóa thông tin liên hệ của ứng viên này?')) return;
+  const handleUnlockClick = (candidateId: string, cvId: string, fullName: string) => {
+    setSelectedCandidate({ id: candidateId, cvId, name: fullName });
+    setShowUnlockModal(true);
+  };
+
+  const confirmUnlock = async () => {
+    if (!selectedCandidate) return;
     
-    setUnlockingId(candidateId);
+    setUnlockingId(selectedCandidate.id);
     try {
-      await api.post('/recruiters/unlock', { candidateId, jobPostingId: jobId, cvId });
+      await api.post('/recruiters/unlock', { candidateId: selectedCandidate.id, jobPostingId: jobId, cvId: selectedCandidate.cvId });
       toast.success('Mở khóa thành công!');
-      // Refresh data
-      fetchMatches();
+      setShowUnlockModal(false);
+      fetchMatches(); // refetch both candidates & wallet balance
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Lỗi khi mở khóa.');
     } finally {
       setUnlockingId(null);
+    }
+  };
+
+  const handleContact = async (candidateId: string) => {
+    setInvitingId(candidateId);
+    try {
+      await api.post('/messages/job-invitation', { candidateId, jobPostingId: jobId });
+      toast.success('Đã gửi tin nhắn mời ứng tuyển và email thành công!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Lỗi khi gửi lời mời.');
+    } finally {
+      setInvitingId(null);
     }
   };
 
@@ -153,14 +185,14 @@ export default function JobMatchesPage() {
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kỹ năng phù hợp</p>
                     <div className="flex flex-wrap gap-2">
-                      {candidate.skillsMatch.map(skill => (
+                      {candidate.skillsMatch?.map(skill => (
                         <span key={skill} className="px-2 py-0.5 bg-green-50 text-green-700 text-xs font-medium rounded-md border border-green-100">
                           {skill}
                         </span>
                       ))}
                     </div>
                   </div>
-                  {candidate.missingSkills.length > 0 && (
+                  {candidate.missingSkills?.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kỹ năng còn thiếu</p>
                       <div className="flex flex-wrap gap-2">
@@ -192,8 +224,12 @@ export default function JobMatchesPage() {
                     <button className="w-full py-2 bg-indigo-50 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-100 transition-all flex items-center justify-center gap-2">
                       <ExternalLink className="w-4 h-4" /> Xem chi tiết Profile
                     </button>
-                    <button className="w-full py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all">
-                      Liên hệ ngay
+                    <button 
+                      onClick={() => handleContact(candidate.candidateId)}
+                      disabled={invitingId === candidate.candidateId}
+                      className="w-full py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                    >
+                      {invitingId === candidate.candidateId ? <Loader2 className="w-4 h-4 animate-spin"/> : 'Liên hệ ngay'}
                     </button>
                   </>
                 ) : (
@@ -205,7 +241,7 @@ export default function JobMatchesPage() {
                       <p className="text-xs text-slate-500 px-4">Dùng 1 Credit để xem thông tin liên hệ và Profile chi tiết.</p>
                     </div>
                     <button 
-                      onClick={() => handleUnlock(candidate.candidateId, candidate.cvId)}
+                      onClick={() => handleUnlockClick(candidate.candidateId, candidate.cvId, candidate.fullName)}
                       disabled={unlockingId === candidate.candidateId}
                       className="w-full py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                     >
@@ -214,7 +250,7 @@ export default function JobMatchesPage() {
                       ) : (
                         <Unlock className="w-4 h-4" />
                       )}
-                      Mở khóa (1 Credit)
+                      Mở khóa ({wallet?.cvUnlockQuota > 0 ? '1 Lượt' : (subscription && new Date() <= new Date(subscription.expiryDate) ? '30 Xu' : '50 Xu')})
                     </button>
                   </div>
                 )}
@@ -233,6 +269,17 @@ export default function JobMatchesPage() {
           </div>
         )}
       </div>
+
+      {/* Modal Xác nhận Mở Khóa đã được chuyển sang Component chung */}
+      <UnlockConfirmModal
+        isOpen={showUnlockModal && selectedCandidate !== null}
+        onClose={() => setShowUnlockModal(false)}
+        onConfirm={confirmUnlock}
+        isUnlocking={unlockingId === selectedCandidate?.id}
+        candidateName={selectedCandidate?.name || ''}
+        wallet={wallet}
+        subscription={subscription}
+      />
     </div>
   );
 }

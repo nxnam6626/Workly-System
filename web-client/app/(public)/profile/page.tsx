@@ -243,7 +243,7 @@ export default function ProfileDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100 py-8 px-4 font-sans">
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* =======================
             CỘT TRÁI (LEFT SIDEBAR)
             ======================= */}

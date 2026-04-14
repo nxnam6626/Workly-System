@@ -6,6 +6,7 @@ import { X, Lock, CheckCircle, User, Star, Briefcase, Mail, MessageCircle } from
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
+import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
 
 interface MatchedCandidatesModalProps {
   isOpen: boolean;
@@ -17,13 +18,29 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
-  const deductBalance = useWalletStore((state) => state.deductBalance);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<{ id: string, cvId: string, name: string } | null>(null);
+  
+  const fetchWallet = useWalletStore((state) => state.fetchWallet);
+  const wallet = useWalletStore((state) => state.wallet);
+  const [subscription, setSubscription] = useState<any>(null);
 
   useEffect(() => {
     if (isOpen && jobId) {
       fetchMatches();
+      fetchSubscription();
+      fetchWallet();
     }
   }, [isOpen, jobId]);
+
+  const fetchSubscription = async () => {
+    try {
+      const { data } = await api.get('/subscriptions/current');
+      setSubscription(data);
+    } catch {
+      setSubscription(null);
+    }
+  };
 
   const fetchMatches = async () => {
     setLoading(true);
@@ -38,17 +55,23 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
     }
   };
 
-  const handleUnlock = async (candidateId: string, cvId: string) => {
-    setUnlockingId(candidateId);
+  const handleUnlockClick = (candidateId: string, cvId: string, fullName: string) => {
+    setSelectedCandidate({ id: candidateId, cvId, name: fullName });
+    setShowUnlockModal(true);
+  };
+
+  const confirmUnlock = async () => {
+    if (!selectedCandidate) return;
+    setUnlockingId(selectedCandidate.id);
     try {
       await api.post('/recruiters/unlock', {
-        candidateId,
+        candidateId: selectedCandidate.id,
         jobPostingId: jobId,
-        cvId,
+        cvId: selectedCandidate.cvId,
       });
-      toast.success('Mở khóa thành công (-50 xu)');
-      deductBalance(50);
-      // Làm mới danh sách để tải dữ liệu đã giải mã
+      toast.success('Mở khóa thành công');
+      setShowUnlockModal(false);
+      await fetchWallet();
       await fetchMatches();
     } catch (error: any) {
       console.error('Lỗi khi mở khóa:', error);
@@ -64,9 +87,9 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
     const handleSendMessage = async (candidateId: string) => {
       setMessagingId(candidateId);
       try {
-        await api.post('/messages/broadcast', {
-          candidateIds: [candidateId],
-          content: 'Chào bạn, chúng tôi nhận thấy hồ sơ phần mềm của bạn rất ấn tượng và phù hợp với vị trí chúng tôi đang tuyển dụng. Mong bạn hãy kiểm tra email để xem thông tin chi tiết hoặc phản hồi lại tin nhắn này nhé!'
+        await api.post('/messages/job-invitation', {
+          candidateId: candidateId,
+          jobPostingId: jobId
         });
         toast.success('Đã gửi lời mời đến ứng viên!');
       } catch (error) {
@@ -130,8 +153,8 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
               </div>
             ) : (
               <div className="grid gap-4">
-                {candidates.map((candidate) => (
-                  <div key={candidate.candidateId} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-6">
+                {candidates.map((candidate, idx) => (
+                  <div key={candidate.candidateId || candidate.id || `candidate-${idx}`} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-6">
                     {/* Candidate Info Left */}
                     <div className="flex items-center gap-4 flex-1 overflow-hidden">
                       <div className="w-14 h-14 bg-slate-100 rounded-full flex justify-center items-center overflow-hidden flex-shrink-0">
@@ -203,7 +226,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
                         </>
                       ) : (
                         <button
-                          onClick={() => handleUnlock(candidate.candidateId, candidate.cvId)}
+                          onClick={() => handleUnlockClick(candidate.candidateId, candidate.cvId, candidate.fullName)}
                           disabled={unlockingId === candidate.candidateId}
                           className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-sm font-medium transition-all shadow-sm w-full md:w-auto"
                         >
@@ -212,7 +235,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
                           ) : (
                             <>
                               <Lock className="w-4 h-4" />
-                              Mở khóa (50 Xu)
+                              Mở khóa ({(wallet?.cvUnlockQuota ?? 0) > 0 ? '1 Lượt' : (subscription && new Date() <= new Date(subscription.expiryDate) ? '30 Xu' : '50 Xu')})
                             </>
                           )}
                         </button>
@@ -225,6 +248,16 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
           </div>
         </motion.div>
       </div>
+
+      <UnlockConfirmModal
+        isOpen={showUnlockModal && selectedCandidate !== null}
+        onClose={() => setShowUnlockModal(false)}
+        onConfirm={confirmUnlock}
+        isUnlocking={unlockingId === selectedCandidate?.id}
+        candidateName={selectedCandidate?.name || ''}
+        wallet={wallet}
+        subscription={subscription}
+      />
     </AnimatePresence>
   );
 };

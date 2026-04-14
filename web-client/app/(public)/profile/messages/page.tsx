@@ -257,7 +257,32 @@ export default function CandidateMessagesPage() {
                               ? 'bg-indigo-600 text-white rounded-br-sm shadow-sm shadow-indigo-600/20' 
                               : 'bg-white text-slate-700 border border-slate-100 rounded-bl-sm shadow-sm'
                           }`}>
-                            <p className={`text-[15px] leading-relaxed ${isSender ? 'text-indigo-50' : ''}`}>{msg.content}</p>
+                            <p className={`text-[15px] leading-relaxed whitespace-pre-wrap ${isSender ? 'text-indigo-50' : ''}`}>
+                              {(() => {
+                                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                                const parts = msg.content.split(urlRegex);
+                                return parts.map((part: string, index: number) => {
+                                  if (part.match(urlRegex)) {
+                                    return (
+                                      <a 
+                                        key={index} 
+                                        href={part} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className={`inline-flex items-center gap-1.5 mt-2 mb-1 px-4 py-2 text-sm font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                                           isSender 
+                                             ? 'bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50' 
+                                             : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                        }`}
+                                      >
+                                        Xem chi tiết & Ứng tuyển
+                                      </a>
+                                    );
+                                  }
+                                  return <span key={index}>{part}</span>;
+                                });
+                              })()}
+                            </p>
                           </div>
                           <span className="text-[11px] text-slate-400 mt-1 px-1">{formatTime(msg.sentAt)}</span>
                         </div>

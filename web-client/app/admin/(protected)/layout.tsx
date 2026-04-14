@@ -26,10 +26,10 @@ const navGroups = [
     label: 'Quản lý',
     items: [
       { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard },
-      { label: 'Người Dùng', href: '/admin/users', icon: Users },
-      { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase },
-      { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp },
-      { label: 'Hỗ Trợ', href: '/admin/support', icon: HelpCircle },
+      { label: 'Người Dùng', href: '/admin/users', icon: Users, perm: 'MANAGE_USERS' },
+      { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
+      { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, perm: 'MANAGE_BILLING' },
+      { label: 'Hỗ Trợ', href: '/admin/support', icon: HelpCircle, perm: 'MANAGE_SUPPORT' },
     ],
   },
 ];
@@ -107,8 +107,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </AnimatePresence>
             <div className="space-y-1">
-              {group.items.map(({ label, href, icon: Icon }) => {
+              {group.items.map(({ label, href, icon: Icon, perm }) => {
                 const active = pathname.startsWith(href);
+                // Check permissions
+                if (perm) {
+                  const adminLevel = user?.admin?.adminLevel || 2;
+                  const perms = user?.admin?.permissions || [];
+                  if (adminLevel !== 1 && !perms.includes(perm)) {
+                    return null;
+                  }
+                }
+                
                 return (
                   <Link
                     key={href}
@@ -182,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
 
       {/* Mobile backdrop */}
       {mobileOpen && (
@@ -201,8 +210,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <motion.aside
         animate={{ width: collapsed ? 68 : 240 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="relative hidden lg:flex flex-col bg-slate-900 text-white overflow-hidden shrink-0"
-        style={{ minHeight: '100vh' }}
+        className="sticky top-0 hidden lg:flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen"
       >
         <SidebarContent />
 
@@ -255,7 +263,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {children}
         </main>
       </div>
