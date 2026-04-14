@@ -54,7 +54,6 @@ export interface JobPosting {
   experience?: string;
   vacancies: number;
   locationCity?: string;
-  deadline?: string;
   status: JobStatus;
   postType: PostType;
   isVerified: boolean;
@@ -180,6 +179,7 @@ export interface AdminUser {
   userRoles: { role: { roleName: string } }[];
   candidate?: { fullName: string; phone: string };
   recruiter?: { position?: string; bio?: string; violationCount: number };
+  admin?: { permissions: string[]; adminLevel: number };
 }
 
 export interface PaginatedUsers {
@@ -218,6 +218,12 @@ export const adminUsersApi = {
 
   updateRole: (id: string, role: string): Promise<AdminUser> =>
     api.patch(`/users/${id}`, { role }).then((r) => r.data),
+
+  createAdmin: (data: any): Promise<{ message: string; userId: string }> =>
+    api.post('/users', { ...data, role: 'ADMIN' }).then((r) => r.data),
+
+  updateAdminPermissions: (id: string, permissions: string[]): Promise<{ message: string }> =>
+    api.patch(`/users/${id}/admin-permissions`, { permissions }).then((r) => r.data),
 };
 
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────

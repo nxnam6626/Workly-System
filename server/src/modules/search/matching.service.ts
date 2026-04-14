@@ -42,12 +42,19 @@ export class MatchingService {
       const cvExp = parsedData.totalYearsExp || 0;
 
       // 1. Tính điểm Kỹ năng (60%)
-      const matchedHard = hardSkills.filter((s: string) =>
-        cvSkills.some((cs: any) => {
+      const expandedSkillsMap = typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null ? reqs.expandedSkills : {};
+      
+      const matchedHard = hardSkills.filter((s: string) => {
+        const synonyms = Array.isArray(expandedSkillsMap[s]) ? expandedSkillsMap[s] : [];
+        const searchTerms = [s, ...synonyms].map(t => typeof t === 'string' ? t.toLowerCase() : '');
+
+        return cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        }),
-      );
+          if (!skillStr) return false;
+          const cvs = skillStr.toLowerCase();
+          return searchTerms.some(term => term && cvs.includes(term));
+        });
+      });
       const hardScore =
         hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
 
@@ -97,8 +104,26 @@ export class MatchingService {
       .slice(0, (job.vacancies || 1) * 5);
 
     this.logger.log(
-      `Đã tìm thấy ${topMatches.length} ứng viên duy nhất phù hợp cho Job ${jobId}`,
+      `Đã tìm thấy ${topMatches.length} ứng viên phù hợp cho Job ${jobId}. Đang lưu vào DB...`,
     );
+
+    // Xoá các match cũ của Job này
+    await this.prisma.jobMatch.deleteMany({
+      where: { jobPostingId: jobId }
+    });
+
+    // Thêm các match mới vào DB
+    if (topMatches.length > 0) {
+      await this.prisma.jobMatch.createMany({
+        data: topMatches.map(m => ({
+          jobPostingId: jobId,
+          candidateId: m.candidateId,
+          score: m.score,
+          matchedSkills: m.matchedSkills
+        }))
+      });
+    }
+
     return topMatches;
   }
 
@@ -142,12 +167,19 @@ export class MatchingService {
       const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
 
       // 1. Tính điểm Kỹ năng (60%)
-      const matchedHard = hardSkills.filter((s: string) =>
-        cvSkills.some((cs: any) => {
+      const expandedSkillsMap = typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null ? reqs.expandedSkills : {};
+      
+      const matchedHard = hardSkills.filter((s: string) => {
+        const synonyms = Array.isArray(expandedSkillsMap[s]) ? expandedSkillsMap[s] : [];
+        const searchTerms = [s, ...synonyms].map(t => typeof t === 'string' ? t.toLowerCase() : '');
+
+        return cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        }),
-      );
+          if (!skillStr) return false;
+          const cvs = skillStr.toLowerCase();
+          return searchTerms.some(term => term && cvs.includes(term));
+        });
+      });
       const hardScore =
         hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
 
@@ -184,9 +216,30 @@ export class MatchingService {
     });
 
     // Sắp xếp và lấy Top
-    return matches
+    const topMatches = matches
       .filter((m) => m.score >= 40) // Ngưỡng thấp hơn tí cho ứng viên nhiều lựa chọn
       .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
+      .slice(0, 50); // Giới hạn lưu Top 50 Job cho mỗi Candidate
+
+    this.logger.log(`Đã tìm thấy ${topMatches.length} Jobs phù hợp cho Candidate ${candidate.candidateId}. Đang lưu vào DB...`);
+
+    // Xoá các match cũ của Candidate này
+    await this.prisma.jobMatch.deleteMany({
+      where: { candidateId: candidate.candidateId }
+    });
+
+    // Thêm các match mới vào DB
+    if (topMatches.length > 0) {
+      await this.prisma.jobMatch.createMany({
+        data: topMatches.map(m => ({
+          jobPostingId: m.jobPostingId,
+          candidateId: candidate.candidateId,
+          score: m.score,
+          matchedSkills: m.matchedSkills
+        }))
+      });
+    }
+
+    return topMatches;
   }
 }

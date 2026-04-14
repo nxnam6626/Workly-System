@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -74,7 +75,16 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  async create(
+    @Body() createUserDto: CreateUserDto,
+    @CurrentUser('userId') reqUserId: string
+  ) {
+    if (createUserDto.role === Role.ADMIN) {
+      const currentUser = await this.usersService.findOne(reqUserId);
+      if (currentUser.admin?.adminLevel !== 1) {
+        throw new ForbiddenException('Chỉ Quản trị viên Toàn quyền mới được phép tạo Admin mới.');
+      }
+    }
     return this.usersService.create(createUserDto);
   }
 
@@ -140,5 +150,15 @@ export class UsersController {
   @Delete(':userId')
   remove(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.usersService.remove(userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':userId/admin-permissions')
+  updateAdminPermissions(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body('permissions') permissions: string[],
+  ) {
+    return this.usersService.updateAdminPermissions(userId, permissions || []);
   }
 }

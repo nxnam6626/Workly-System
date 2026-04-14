@@ -18,6 +18,10 @@ interface User {
     skills?: { skillId: string; skillName: string }[];
   };
   recruiter?: any;
+  admin?: {
+    adminLevel: number;
+    permissions: string[];
+  };
 }
 
 interface AuthState {

@@ -13,8 +13,8 @@ const plans = [
     id: 'LITE',
     name: 'Gói LITE',
     icon: <Zap className="w-6 h-6 text-blue-500" />,
-    price: '1.050.000đ',
-    credits: 1050,
+    price: '450.000đ',
+    credits: 450,
     description: 'Phù hợp cho công ty nhỏ, nhu cầu tuyển dụng vừa phải.',
     benefits: [
       'Đăng 3 Tin BASIC',
@@ -29,8 +29,8 @@ const plans = [
     id: 'GROWTH',
     name: 'Gói GROWTH',
     icon: <Crown className="w-6 h-6 text-amber-500" />,
-    price: '2.500.000đ',
-    credits: 2500,
+    price: '2.000.000đ',
+    credits: 2000,
     description: 'Dành cho doanh nghiệp cần đẩy mạnh tuyển dụng nhanh.',
     benefits: [
       'Đăng 5 Tin VIP chuyên nghiệp',
@@ -207,8 +207,8 @@ export default function PlansPage() {
         <p className="text-slate-500 text-center mb-8">Tiết kiệm lớn với các gói mở khóa riêng lẻ (Không cần mua gói tháng)</p>
         
         <div className="grid md:grid-cols-2 gap-6">
-          {[{ id: 'XEM_NHANH', name: 'Gói "Xem Nhanh"', price: 150, quota: 6, subtitle: 'Mua 5 tặng 1' },
-            { id: 'SAN_TAI', name: 'Gói "Săn Tài"', price: 400, quota: 20, subtitle: 'Giá cực hời cho HR' }
+          {[{ id: 'XEM_NHANH', name: 'Gói "Xem Nhanh"', price: '150.000', xuPrice: 150, quota: 6, subtitle: 'Mua 5 tặng 1' },
+            { id: 'SAN_TAI', name: 'Gói "Săn Tài"', price: '400.000', xuPrice: 400, quota: 20, subtitle: 'Giá cực hời cho HR' }
           ].map(pack => (
             <div key={pack.id} className="bg-white border rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg transition-all">
               <div>
@@ -216,7 +216,7 @@ export default function PlansPage() {
                 <p className="text-sm text-green-600 font-medium">{pack.subtitle}</p>
                 <div className="my-4">
                   <span className="text-3xl font-black text-slate-900">{pack.price}</span>
-                  <span className="text-slate-500"> Xu</span>
+                  <span className="text-slate-500 font-medium ml-1">VNĐ</span>
                 </div>
                 <p className="text-slate-600 mb-6 flex items-center gap-2">
                   <Check className="w-5 h-5 text-emerald-500" /> Nhận ngay <strong className="text-slate-900">{pack.quota} lượt</strong> mở CV
@@ -227,7 +227,7 @@ export default function PlansPage() {
                 onClick={async () => {
                   const ok = await confirm({
                     title: `Mua ${pack.name}?`,
-                    message: `Xác nhẫn mua ${pack.name} với giá ${pack.price} xu từ ví của bạn.`,
+                    message: `Xác nhận mua ${pack.name} với giá ${pack.xuPrice} xu (${pack.price} VNĐ) từ ví của bạn.`,
                     confirmText: 'Mua ngay',
                     variant: 'success',
                   });

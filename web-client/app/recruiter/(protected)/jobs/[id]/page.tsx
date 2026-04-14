@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import { formatSalary } from '@/lib/utils';
 
 export default function JobDetailsPage() {
   const params = useParams();
@@ -17,6 +18,8 @@ export default function JobDetailsPage() {
   const [suggestedCandidates, setSuggestedCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [invitingCandidate, setInvitingCandidate] = useState<any>(null);
+  const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
   const { accessToken } = useAuthStore();
 
   useEffect(() => {
@@ -42,6 +45,27 @@ export default function JobDetailsPage() {
     } finally {
       setLoading(false);
       setLoadingCandidates(false);
+    }
+  };
+
+  const handleInviteClick = (e: React.MouseEvent, candidate: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setInvitingCandidate(candidate);
+  };
+
+  const confirmInvite = async () => {
+    if (!invitingCandidate) return;
+    setIsSubmittingInvite(true);
+    try {
+      await api.post('/messages/job-invitation', { candidateId: invitingCandidate.candidateId, jobPostingId: id });
+      toast.success('Đã gửi lời mời ứng tuyển thành công!');
+      setInvitingCandidate(null);
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Có lỗi xảy ra khi gửi lời mời.';
+      toast.error(msg);
+    } finally {
+      setIsSubmittingInvite(false);
     }
   };
 
@@ -118,7 +142,7 @@ export default function JobDetailsPage() {
                 </div>
                 <div>
                   <p className="text-xs text-slate-400 font-medium">Mức lương</p>
-                  <p className="text-sm font-semibold text-slate-700">{job.salaryMin ? job.salaryMin.toLocaleString() : 'Thoả thuận'}</p>
+                  <p className="text-sm font-semibold text-slate-700">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -198,7 +222,11 @@ export default function JobDetailsPage() {
             ) : (
               <div className="space-y-4 relative z-10">
                 {suggestedCandidates.map((candidate) => (
-                  <div key={candidate.candidateId} className="bg-white/10 border border-white/20 hover:bg-white/20 transition-colors p-4 rounded-xl cursor-pointer backdrop-blur-md flex items-center justify-between gap-4">
+                  <Link 
+                    key={candidate.candidateId} 
+                    href={`/recruiter/jobs/${id}/matches`}
+                    className="bg-white/10 border border-white/20 hover:bg-white/20 transition-colors p-4 rounded-xl cursor-pointer backdrop-blur-md flex items-center justify-between gap-4 block"
+                  >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center font-bold text-indigo-600 shrink-0 overflow-hidden">
                         {candidate.user?.avatar ? (
@@ -213,20 +241,61 @@ export default function JobDetailsPage() {
                       </div>
                     </div>
                     
-                    <button className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-indigo-50 transition-colors shrink-0">
+                    <button 
+                      onClick={(e) => handleInviteClick(e, candidate)}
+                      className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-indigo-50 transition-colors shrink-0"
+                    >
                       Mời
                     </button>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
             
-            <button className="w-full mt-6 bg-white/10 hover:bg-white/20 border border-white/30 transition-colors py-2.5 rounded-xl text-sm font-semibold relative z-10 flex items-center justify-center gap-2">
+            <Link 
+              href={`/recruiter/jobs/${id}/matches`}
+              className="w-full mt-6 bg-white/10 hover:bg-white/20 border border-white/30 transition-colors py-2.5 rounded-xl text-sm font-semibold relative z-10 flex items-center justify-center gap-2"
+            >
               Xem tất cả <ArrowLeft className="w-4 h-4 rotate-180" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
+      {/* Modal xác nhận gửi lời mời */}
+      {invitingCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+          >
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Xác nhận gửi lời mời</h3>
+              <p className="text-slate-600">
+                Bạn có chắc chắn muốn gửi thông báo mời ứng viên <strong className="text-indigo-600">{invitingCandidate.fullName}</strong> ứng tuyển vào vị trí này?
+              </p>
+              <div className="flex justify-end gap-3 mt-8">
+                <button
+                  onClick={() => setInvitingCandidate(null)}
+                  disabled={isSubmittingInvite}
+                  className="px-4 py-2 rounded-xl text-slate-600 font-medium hover:bg-slate-100 transition-colors disabled:opacity-50"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  onClick={confirmInvite}
+                  disabled={isSubmittingInvite}
+                  className="px-6 py-2 rounded-xl text-white font-semibold bg-indigo-600 hover:bg-indigo-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isSubmittingInvite ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Xác nhận gửi
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
     </motion.div>
   );
 }

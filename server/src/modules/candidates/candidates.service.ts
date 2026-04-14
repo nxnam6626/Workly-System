@@ -10,6 +10,8 @@ import { SupabaseService } from '../../common/supabase/supabase.service';
 import { MatchingService } from '../search/matching.service';
 import * as crypto from 'crypto';
 import { extname } from 'path';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class CandidatesService {
@@ -18,6 +20,7 @@ export class CandidatesService {
     private readonly cvParsingService: CvParsingService,
     private readonly supabaseService: SupabaseService,
     private readonly matchingService: MatchingService,
+    @InjectQueue('matching') private matchingQueue: Queue,
   ) {}
 
   async findAll(query: any, recruiterUserId?: string) {
@@ -267,11 +270,29 @@ export class CandidatesService {
       const buffer = await this.supabaseService.downloadFile(path);
 
       // 3. Tiến hành bóc tách AI
-      const rawText = await this.cvParsingService.extractTextFromPdf(buffer);
-      const extractedData = await this.cvParsingService.parseCv(rawText);
+      const extractedData = await this.cvParsingService.parseCv(buffer);
 
       if (extractedData) {
-        // 4. Cập nhật dữ liệu bóc tách vào bản ghi
+        // 4. Kiểm tra xem CV này có phải của người dùng đang đăng nhập hay không
+        // Cần thực hiện loose match để tránh lỗi do họ tên thiếu dấu hoặc ghi ngược (John Doe vs Doe John)
+        const cvName = (extractedData.fullName || '').toLowerCase().trim();
+        const accName = (candidate.fullName || '').toLowerCase().trim();
+        
+        let isValidName = false;
+        
+        if (cvName && accName) {
+           const cvTokens = cvName.split(' ');
+           const accTokens = accName.split(' ');
+           
+           // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
+           isValidName = cvTokens.some(token => token.length >= 2 && accTokens.includes(token));
+           
+           if (!isValidName) {
+              throw new BadRequestException('Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.');
+           }
+        }
+        
+        // 5. Cập nhật dữ liệu bóc tách vào bản ghi
         return this.updateCv(userId, cv.cvId, {
           parsedData: extractedData,
         });
@@ -532,7 +553,7 @@ export class CandidatesService {
       });
     }
 
-    return this.prisma.cV.update({
+    const updatedCv = await this.prisma.cV.update({
       where: { cvId },
       data: {
         ...(cvTitle && { cvTitle }),
@@ -549,6 +570,14 @@ export class CandidatesService {
         parsedData: true,
       },
     });
+
+    // Trigger matching for candidate when CV is parsed or set to main
+    if (isMain || parsedData) {
+      await this.matchingQueue.add('match-candidate', { userId });
+      console.log(`[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`);
+    }
+
+    return updatedCv;
   }
 
   async findByUserId(userId: string) {
@@ -613,7 +642,7 @@ export class CandidatesService {
       throw new NotFoundException('CV not found or does not belong to user');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Unset all main CVs
       await tx.cV.updateMany({
         where: { candidateId: candidate.candidateId, isMain: true },
@@ -626,6 +655,12 @@ export class CandidatesService {
         data: { isMain: true },
       });
     });
+
+    // Trigger matching for candidate when CV is set to main
+    await this.matchingQueue.add('match-candidate', { userId });
+    console.log(`[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`);
+
+    return result;
   }
 
   async deleteCv(userId: string, cvId: string) {
@@ -667,6 +702,43 @@ export class CandidatesService {
   }
 
   async getRecommendedJobs(userId: string) {
-    return this.matchingService.runMatchingForCandidate(userId);
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+    if (!candidate) return [];
+
+    let matches = await this.prisma.jobMatch.findMany({
+      where: { candidateId: candidate.candidateId },
+      include: {
+        jobPosting: {
+          include: { company: true, branches: true }
+        }
+      },
+      orderBy: { score: 'desc' },
+      take: 20
+    });
+
+    if (matches.length === 0) {
+      // Triển khai cơ chế Fallback tự động
+      console.log(`[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`);
+      await this.matchingService.runMatchingForCandidate(userId);
+      
+      matches = await this.prisma.jobMatch.findMany({
+        where: { candidateId: candidate.candidateId },
+        include: {
+          jobPosting: {
+            include: { company: true, branches: true }
+          }
+        },
+        orderBy: { score: 'desc' },
+        take: 20
+      });
+    }
+
+    return matches.map(m => ({
+      ...m.jobPosting,
+      score: m.score,
+      matchedSkills: m.matchedSkills
+    }));
   }
 }

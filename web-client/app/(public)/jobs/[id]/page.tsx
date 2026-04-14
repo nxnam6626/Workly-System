@@ -27,8 +27,12 @@ import {
    Smile,
    Zap,
    ShieldAlert,
+   Globe,
+   Target,
 } from "lucide-react";
+import dynamic from 'next/dynamic';
 
+const JobMap = dynamic(() => import('@/components/JobMap'), { ssr: false });
 import api from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -50,6 +54,8 @@ interface JobDetails extends Job {
    isSaved: boolean;
    postType: 'CRAWLED' | 'MANUAL';
    originalUrl?: string;
+   branches?: any[];
+   matchScore?: number | null;
    company: {
       companyId: string;
       companyName: string;
@@ -140,9 +146,9 @@ export default function JobDetailsPage() {
          router.push(`/login?returnUrl=/jobs/${id}`);
          return;
       }
-      if (user?.role !== 'CANDIDATE') return toast.error('Chỉ ứng viên mới có thể ứng tuyển!');
+
       setIsApplyModalOpen(true);
-   }, [job, isAuthenticated, router, id, user?.role]);
+   }, [job, isAuthenticated, router, id]);
 
    const searchParams = useSearchParams();
 
@@ -221,7 +227,7 @@ export default function JobDetailsPage() {
                            </div>
                            <div>
                               <p className="text-xs font-medium text-slate-500 mb-1">Địa điểm</p>
-                              <p className="text-sm font-bold text-slate-900">{job.locationCity}, Hà Nội</p>
+                              <p className="text-sm font-bold text-slate-900">{job.locationCity || 'Xem chi nhánh phía dưới'}</p>
                            </div>
                         </div>
                         <div className="flex items-start gap-4">
@@ -233,12 +239,19 @@ export default function JobDetailsPage() {
                               <p className="text-sm font-bold text-slate-900">{job.experience || 'Không yêu cầu'}</p>
                            </div>
                         </div>
+                        {job.matchScore != null && (
+                           <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 bg-fuchsia-50 text-fuchsia-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                 <Target className="w-6 h-6" />
+                              </div>
+                              <div>
+                                 <p className="text-xs font-medium text-slate-500 mb-1">Độ phù hợp AI</p>
+                                 <p className="text-[17px] font-bold text-fuchsia-600">{job.matchScore}%</p>
+                              </div>
+                           </div>
+                        )}
                      </div>
 
-                     <div className="flex items-center gap-2 text-xs text-slate-400 mb-8 pb-8 border-b border-slate-50">
-                        <Clock className="w-4 h-4" />
-                        <span>Hạn nộp hồ sơ: <b>{job.deadline ? new Date(job.deadline).toLocaleDateString('vi-VN') : 'Đang cập nhật'}</b></span>
-                     </div>
 
                      <div className="flex gap-4">
                         {job.hasApplied ? (
@@ -348,6 +361,28 @@ export default function JobDetailsPage() {
                      </p>
                   </div>
 
+                  {/* Branches & Map */}
+                  {(job.branches && job.branches.length > 0) && (
+                     <div className="bg-white rounded-lg p-6 md:p-8 border border-slate-100 shadow-sm mt-6">
+                        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                           <MapPin className="w-5 h-5 text-blue-600" />
+                           Bản Đồ Chỉ Đường & Các Chi Nhánh
+                        </h3>
+                        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {job.branches.map((b: any) => (
+                                <div key={b.branchId} className="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-3">
+                                    <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="font-bold text-slate-700 text-sm">{b.name}</p>
+                                        <p className="text-xs text-slate-500 mt-1">{b.address}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <JobMap branches={job.branches} />
+                     </div>
+                  )}
+
                </div>
 
                {/* Sidebar Column */}
@@ -365,7 +400,7 @@ export default function JobDetailsPage() {
                      <h3 className="font-bold text-slate-800 mb-6 uppercase text-sm leading-snug flex items-center justify-center gap-2">
                         {job.company?.companyName}
                         {(job.company?.verifyStatus === 1 || job.isVerified) && (
-                           <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" title="Công ty đã được xác thực" />
+                           <span title="Công ty đã được xác thực" className="flex-shrink-0 flex items-center"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></span>
                         )}
                      </h3>
                      <div className="space-y-4 text-left">
@@ -390,7 +425,26 @@ export default function JobDetailsPage() {
                               <p className="font-bold text-slate-700 leading-relaxed">{job.company?.address}</p>
                            </div>
                         </div>
+                        {job.company?.websiteUrl && (
+                           <div className="flex items-start gap-4">
+                              <Globe className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
+                              <div className="text-xs">
+                                 <p className="text-slate-400 mb-0.5 tracking-tight">Website:</p>
+                                 <a href={job.company.websiteUrl.startsWith('http') ? job.company.websiteUrl : `https://${job.company.websiteUrl}`} target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:underline break-all">
+                                    {job.company.websiteUrl.replace(/^https?:\/\//, '')}
+                                 </a>
+                              </div>
+                           </div>
+                        )}
                      </div>
+                     {job.company?.description && (
+                        <div className="mt-6 pt-6 border-t border-slate-100 text-left">
+                           <h4 className="text-sm font-bold text-slate-800 mb-2">Giới thiệu công ty</h4>
+                           <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap line-clamp-5">
+                              {job.company.description}
+                           </p>
+                        </div>
+                     )}
                      <Link href={`/companies/${job.companyId}`} className="text-blue-600 text-xs font-bold mt-6 hover:underline flex items-center gap-1 justify-center transition-all">
                         Xem trang công ty <ExternalLink className="w-3 h-3" />
                      </Link>

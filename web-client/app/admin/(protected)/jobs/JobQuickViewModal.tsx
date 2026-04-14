@@ -152,15 +152,7 @@ export default function JobQuickViewModal({
                 </div>
                 <p className="text-sm font-semibold text-slate-900">{job.jobType || 'N/A'}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <div className="flex items-center gap-2 text-slate-400 mb-1">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Hạn nộp</span>
-                </div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {job.deadline ? new Date(job.deadline).toLocaleDateString('vi-VN') : 'Không có'}
-                </p>
-            </div>
+
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
                 <div className="flex items-center gap-2 text-slate-400 mb-1">
                     <Hash className="w-4 h-4" />

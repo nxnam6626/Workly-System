@@ -219,6 +219,8 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-2xl overflow-hidden flex flex-col">
@@ -253,7 +255,7 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full pt-4">
               <Link
-                href="/applied-jobs"
+                href="/profile/jobs/applied"
                 onClick={onClose}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
               >
