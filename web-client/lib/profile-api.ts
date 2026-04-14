@@ -17,7 +17,8 @@ export interface CandidateProfile {
     major?: string;
     gpa?: number;
     cvUrl?: string;
-    skills: { skillId: string; skillName: string }[];
+    isOpenToWork: boolean;
+    skills: { skillId: string; skillName: string; level: string }[];
     cvs: {
       cvId: string;
       cvTitle: string;
@@ -30,13 +31,19 @@ export interface CandidateProfile {
   };
 }
 
+export interface SkillInput {
+  skillName: string;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+}
+
 export interface UpdateProfileDto {
   fullName: string;
   phone: string;
   university?: string;
   major?: string;
   gpa?: number;
-  skills?: string[];
+  skills?: SkillInput[];
+  isOpenToWork?: boolean;
 }
 
 export interface ChangePasswordDto {
@@ -67,6 +74,14 @@ export const profileApi = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/candidates/cv/extract', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+
+  uploadCvOnly: (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/candidates/cv/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
   },

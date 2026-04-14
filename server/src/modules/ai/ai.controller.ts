@@ -6,13 +6,22 @@ import {
   Query,
   Sse,
   MessageEvent,
+  UseGuards,
 } from '@nestjs/common';
 import { AiService } from './ai.service';
+import { AdminAiService } from './admin-ai.service';
 import { Observable, from, map } from 'rxjs';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('ai')
 export class AiController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly adminAiService: AdminAiService,
+  ) { }
 
   @Post('chat')
   async chat(@Body('message') message: string) {
@@ -21,13 +30,25 @@ export class AiController {
     return { message: response };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Sse('chat-stream')
-  chatStream(@Query('message') message: string): Observable<MessageEvent> {
+  chatStream(
+    @CurrentUser('userId') userId: string,
+    @Query('message') message: string,
+  ): Observable<MessageEvent> {
     console.log(
-      `[AiController] Received stream request for message: ${message}`,
+      `[AiController] Received stream request from user ${userId} for message: ${message}`,
     );
-    return from(this.aiService.generateStreamResponse(message)).pipe(
+    return from(this.aiService.generateStreamResponse(message, userId)).pipe(
       map((text) => ({ data: text }) as MessageEvent),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post('admin/analytics')
+  async getAnalytics(@Body('query') query: string) {
+    if (!query) return { answer: 'Vui lòng nhập câu hỏi phân tích dữ liệu.' };
+    return this.adminAiService.processAnalyticsQuery(query);
   }
 }

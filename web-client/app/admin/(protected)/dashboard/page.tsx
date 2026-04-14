@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Users, Briefcase, Clock, CheckCircle2, XCircle, TrendingUp, ArrowUpRight, Loader2, RefreshCw } from 'lucide-react';
 import { adminDashboardApi, DashboardStats } from '@/lib/admin-api';
-import Link from 'next/link';
-import ViolationsList from './components/ViolationsList';
+import { AdminAnalyticsChat } from '@/components/admin/AdminAnalyticsChat';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -125,79 +125,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Approval rate */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-800">Tỷ Lệ Duyệt</h3>
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-          </div>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-            </div>
-          ) : (
-            <>
-              <div className="flex items-end gap-2 mb-3">
-                <span className="text-4xl font-black text-slate-900">{stats?.approvalRate ?? 0}</span>
-                <span className="text-xl font-bold text-slate-400 mb-1">%</span>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 mb-4">
-                <div
-                  className="bg-emerald-500 h-2.5 rounded-full transition-all duration-700"
-                  style={{ width: `${stats?.approvalRate ?? 0}%` }}
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Đã duyệt', value: stats?.totalApproved ?? 0, color: 'text-emerald-600 bg-emerald-50' },
-                  { label: 'Chờ duyệt', value: stats?.pendingJobs ?? 0, color: 'text-amber-600 bg-amber-50' },
-                  { label: 'Từ chối', value: stats?.totalRejected ?? 0, color: 'text-rose-600 bg-rose-50' },
-                ].map((item) => (
-                  <div key={item.label} className={`rounded-xl p-2 text-center ${item.color}`}>
-                    <p className="text-lg font-black">{item.value}</p>
-                    <p className="text-[10px] font-semibold">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Violations List */}
-        <div className="lg:col-span-1">
-          <ViolationsList />
-        </div>
-
-        {/* Quick actions */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
-          <h3 className="font-bold text-slate-800 mb-4 text-sm">Truy Cập Nhanh</h3>
-          <div className="space-y-2 flex-1 overflow-y-auto">
-            {[
-              { label: 'Duyệt Tin', href: '/admin/jobs', icon: Briefcase, color: 'blue' },
-              { label: 'Người Dùng', href: '/admin/users', icon: Users, color: 'indigo' },
-              { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, color: 'emerald' },
-            ].map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  key={action.href + action.label}
-                  href={action.href}
-                  className="group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
-                >
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <p className="text-xs font-bold text-slate-700">{action.label}</p>
-                </Link>
-              );
-            })}
-          </div>
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <p className="text-[10px] text-slate-400 text-center font-medium">Hệ thống quản trị Workly v1.0</p>
-          </div>
-        </div>
+      <div className="mt-8">
+        <AdminAnalyticsChat />
       </div>
     </div>
   );

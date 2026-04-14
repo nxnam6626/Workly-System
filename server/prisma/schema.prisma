@@ -7,28 +7,28 @@ datasource db {
 }
 
 model User {
-  userId          String         @id @default(uuid())
-  email           String         @unique
+  userId          String           @id @default(uuid())
+  email           String           @unique
   password        String?
   status          StatusUser
-  createdAt       DateTime       @default(now())
+  createdAt       DateTime         @default(now())
   lastLogin       DateTime?
   phoneNumber     String?
   avatar          String?
-  isEmailVerified Boolean        @default(false)
-  updatedAt       DateTime       @updatedAt
+  isEmailVerified Boolean          @default(false)
+  updatedAt       DateTime         @updatedAt
   refreshToken    String?
-  provider        AuthProvider   @default(LOCAL)
+  provider        AuthProvider     @default(LOCAL)
   providerId      String?
-  isOnline        Boolean        @default(false)
+  isOnline        Boolean          @default(false)
   lastActive      DateTime?
   admin           Admin?
   candidate       Candidate?
   jobAlerts       JobAlert[]
   notifications   Notification[]
   recruiter       Recruiter?
-  userRoles       UserRole[]
   supportRequests SupportRequest[]
+  userRoles       UserRole[]
 }
 
 model Role {
@@ -86,6 +86,7 @@ model Candidate {
   gpa           Float?
   cvUrl         String?
   userId        String         @unique
+  isOpenToWork  Boolean        @default(true)
   applications  Application[]
   cvs           CV[]
   user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
@@ -121,14 +122,14 @@ model Recruiter {
   companyId             String?
   savedCandidateIds     String[]
   violationCount        Int                    @default(0)
+  updatedAt             DateTime               @default(now()) @updatedAt
+  createdAt             DateTime               @default(now())
   conversations         Conversation[]
   jobPostings           JobPosting[]
   company               Company?               @relation(fields: [companyId], references: [companyId])
   user                  User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  recruiterWallet       RecruiterWallet?
   recruiterSubscription RecruiterSubscription?
-  updatedAt             DateTime               @default(now()) @updatedAt
-  createdAt             DateTime               @default(now())
+  recruiterWallet       RecruiterWallet?
 }
 
 model Transaction {
@@ -296,14 +297,14 @@ model Message {
 }
 
 model RecruiterWallet {
-  walletId        String        @id @default(uuid())
-  recruiterId     String        @unique
-  balance         Int           @default(0)
-  cvUnlockQuota   Int           @default(0)
-  cvUnlockQuotaMax Int          @default(0)
-  updatedAt       DateTime      @updatedAt
-  recruiter       Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-  transactions    Transaction[]
+  walletId         String        @id @default(uuid())
+  recruiterId      String        @unique
+  balance          Int           @default(0)
+  cvUnlockQuota    Int           @default(0)
+  cvUnlockQuotaMax Int           @default(0)
+  updatedAt        DateTime      @updatedAt
+  recruiter        Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  transactions     Transaction[]
 }
 
 model CandidateUnlock {
@@ -317,6 +318,36 @@ model CandidateUnlock {
   cv           CV       @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
 
   @@unique([recruiterId, candidateId, jobPostingId])
+}
+
+model RecruiterSubscription {
+  subscriptionId  String    @id @default(uuid())
+  recruiterId     String    @unique
+  planType        PlanType
+  maxBasicPosts   Int       @default(0)
+  usedBasicPosts  Int       @default(0)
+  maxVipPosts     Int       @default(0)
+  usedVipPosts    Int       @default(0)
+  maxUrgentPosts  Int       @default(0)
+  usedUrgentPosts Int       @default(0)
+  expiryDate      DateTime
+  canViewAIReport Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  recruiter       Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+}
+
+model SupportRequest {
+  requestId String        @id @default(uuid())
+  name      String?
+  email     String
+  subject   String
+  message   String
+  status    SupportStatus @default(OPEN)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [userId])
 }
 
 enum AuthProvider {
@@ -380,23 +411,6 @@ enum SkillLevel {
   ADVANCED
 }
 
-model RecruiterSubscription {
-  subscriptionId  String    @id @default(uuid())
-  recruiterId     String    @unique
-  planType        PlanType
-  maxBasicPosts   Int       @default(0)
-  usedBasicPosts  Int       @default(0)
-  maxVipPosts     Int       @default(0)
-  usedVipPosts    Int       @default(0)
-  maxUrgentPosts  Int       @default(0)
-  usedUrgentPosts Int       @default(0)
-  expiryDate      DateTime
-  canViewAIReport Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  recruiter       Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-}
-
 enum PlanType {
   LITE
   GROWTH
@@ -413,19 +427,6 @@ enum TransactionType {
   BUY_PACKAGE
   POST_JOB
   OPEN_CV
-}
-
-model SupportRequest {
-  requestId String        @id @default(uuid())
-  name      String?
-  email     String
-  subject   String
-  message   String
-  status    SupportStatus @default(OPEN)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  userId    String?
-  user      User?         @relation(fields: [userId], references: [userId], onDelete: SetNull)
 }
 
 enum SupportStatus {

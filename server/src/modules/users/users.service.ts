@@ -594,7 +594,7 @@ export class UsersService {
     return result;
   }
 
-  /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills). */
+  /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills, isOpenToWork). */
   async updateCandidateProfile(
     userId: string,
     dto: {
@@ -603,7 +603,8 @@ export class UsersService {
       university?: string;
       major?: string;
       gpa?: number;
-      skills?: string[];
+      skills?: { skillName: string; level: string }[];
+      isOpenToWork?: boolean;
     },
   ) {
     const user = await this.prisma.user.findUnique({
@@ -625,6 +626,7 @@ export class UsersService {
           university: dto.university ?? null,
           major: dto.major ?? null,
           gpa: dto.gpa ?? null,
+          ...(dto.isOpenToWork !== undefined && { isOpenToWork: dto.isOpenToWork }),
         },
       });
 
@@ -634,12 +636,16 @@ export class UsersService {
         data: { phoneNumber: dto.phone },
       });
 
-      // Replace skills atomically
+      // Replace skills atomically (now with levels)
       if (dto.skills !== undefined) {
         await tx.skill.deleteMany({ where: { candidateId } });
         if (dto.skills.length > 0) {
           await tx.skill.createMany({
-            data: dto.skills.map((skillName) => ({ skillName, candidateId })),
+            data: dto.skills.map((s) => ({
+              skillName: s.skillName,
+              level: (s.level as any) || 'BEGINNER',
+              candidateId,
+            })),
           });
         }
       }
@@ -647,6 +653,7 @@ export class UsersService {
 
     return this.getMe(userId);
   }
+
 
   // ==========================================
   // ADMIN & MODERATION (Nhóm Quản trị & Xóa)
@@ -716,3 +723,4 @@ export class UsersService {
     });
   }
 }
+// Trigger restart 2
