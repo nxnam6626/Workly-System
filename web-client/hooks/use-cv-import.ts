@@ -41,7 +41,10 @@ export function useCvImport() {
       await profileApi.updateProfile({
         fullName: data.fullName,
         phone: data.phone,
-        skills: data.skills.map((s: any) => s.skillName), // Adapt to how backend expects skills
+        skills: data.skills.map((s: any) => ({
+          skillName: typeof s === 'string' ? s : s.skillName,
+          level: (typeof s === 'string' ? 'BEGINNER' : s.level) || 'BEGINNER',
+        })),
         university: data.education?.[0]?.school,
         major: data.education?.[0]?.major,
         gpa: data.gpa,

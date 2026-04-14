@@ -311,3 +311,17 @@ export const adminSupportApi = {
   updateStatus: (id: string, status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED'): Promise<SupportRequest> =>
     api.patch(`/support/${id}/status`, { status }).then((r) => r.data),
 };
+
+// ─── Admin Analytics AI ───────────────────────────────────────────────────────
+
+export interface AnalyticsResponse {
+  answer: string;
+  sql?: string;
+  data?: any;
+  error?: string;
+}
+
+export const adminAnalyticsApi = {
+  ask: (query: string): Promise<AnalyticsResponse> =>
+    api.post('/ai/admin/analytics', { query }).then((r) => r.data),
+};

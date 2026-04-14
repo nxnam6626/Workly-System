@@ -251,4 +251,66 @@ export class SearchService implements OnModuleInit {
       return { ids: [], total: 0 };
     }
   }
+
+  async searchJobsForRAG(params: {
+    search?: string;
+    location?: string;
+    jobType?: string;
+    limit?: number;
+    expandedKeywords?: string[];
+  }) {
+    const { search, location, jobType, limit = 3, expandedKeywords = [] } = params;
+
+    const query: any = {
+      bool: {
+        must: [{ match: { status: 'APPROVED' } }],
+        should: [],
+        filter: [],
+      },
+    };
+
+    if (location) {
+      query.bool.filter.push({ match: { locationCity: location } });
+    }
+
+    if (jobType) {
+      query.bool.filter.push({ match: { jobType: jobType } });
+    }
+
+    // Combine original search and expanded keywords
+    const allKeywords = [...new Set([search, ...expandedKeywords])].filter(Boolean);
+
+    if (allKeywords.length > 0) {
+      allKeywords.forEach((kw) => {
+        const isOriginal = kw === search;
+        query.bool.should.push({
+          multi_match: {
+            query: kw,
+            fields: ['title^5', 'companyName^2', 'description'],
+            fuzziness: 'AUTO',
+            boost: isOriginal ? 3 : 1, // Boost original query higher
+          },
+        });
+      });
+      query.bool.minimum_should_match = 1;
+    }
+
+    try {
+      const result = await this.client.search({
+        index: 'jobs',
+        size: limit,
+        body: { query },
+      });
+
+      const hits = result.body.hits;
+      return hits.hits.map((hit: any) => ({
+        id: hit._id,
+        ...hit._source,
+        score: hit._score,
+      }));
+    } catch (e: any) {
+      console.error('[SearchService] RAG Search error:', e.message);
+      return [];
+    }
+  }
 }

@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Users, Briefcase, Clock, CheckCircle2, XCircle, TrendingUp, ArrowUpRight, Loader2, RefreshCw } from 'lucide-react';
+import { adminDashboardApi, DashboardStats } from '@/lib/admin-api';
+import { AdminAnalyticsChat } from '@/components/admin/AdminAnalyticsChat';
 import { adminDashboardApi, DashboardStats, RevenueStats } from '@/lib/admin-api';
 import Link from 'next/link';
 import ViolationsList from './components/ViolationsList';
@@ -148,6 +151,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      <div className="mt-8">
+        <AdminAnalyticsChat />
       {/* Metrics Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">

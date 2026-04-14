@@ -178,7 +178,7 @@ export function NotificationsDropdown() {
             {/* Footer */}
             <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex gap-2">
               <Link
-                href="/notifications"
+                href="/profile/notifications"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 py-2.5 flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 shadow-sm transition-all duration-300 active:scale-[0.98]"
               >

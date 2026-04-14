@@ -51,12 +51,7 @@ export default function MatchingJobsPage() {
     const fetchMatchingJobs = async () => {
       try {
         const res = await api.get("/candidates/recommended-jobs");
-        const mapped = res.data.map((j: any) => ({
-          ...j,
-          score: j.score || 95,
-          matchedSkills: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : [])
-        }));
-        setJobs(mapped);
+        setJobs(res.data);
       } catch (error) {
         console.error("Error fetching matching jobs:", error);
       } finally {
@@ -72,10 +67,10 @@ export default function MatchingJobsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f8fafc] pt-32 pb-12 flex flex-col items-center justify-center">
-        <motion.div 
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full mb-4" 
+          className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full mb-4"
         />
         <p className="text-slate-500 font-medium animate-pulse">AI đang tìm kiếm việc làm phù hợp cho bạn...</p>
       </div>
@@ -87,7 +82,7 @@ export default function MatchingJobsPage() {
       <div className="max-w-7xl mx-auto px-4 lg:px-6">
 
         {/* Page Header with AI Glow */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative bg-white rounded-3xl p-8 border border-slate-100 shadow-sm overflow-hidden mb-8"
@@ -102,7 +97,7 @@ export default function MatchingJobsPage() {
               <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-blue-600 underline decoration-blue-200 underline-offset-8">Phù hợp</span> nhất</h1>
               <p className="text-slate-500 max-w-lg">Dựa trên kỹ năng và kinh nghiệm trong CV chính của bạn, chúng tôi đề xuất những cơ hội tốt nhất.</p>
             </div>
-            
+
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center gap-4">
               <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600">
                 <Target className="w-6 h-6" />
@@ -116,7 +111,7 @@ export default function MatchingJobsPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
+
           {/* Sidebar Nav */}
           <aside className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-2">
@@ -232,13 +227,13 @@ export default function MatchingJobsPage() {
                         <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
                           <p className="text-[10px] font-bold text-slate-400">Ứng tuyển để mở khóa mức độ tương thích chi tiết</p>
                           <div className="flex items-center gap-3">
-                            <Link 
+                            <Link
                               href={`/jobs/${job.jobPostingId}`}
                               className="inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition-colors"
                             >
                               Chi tiết
                             </Link>
-                            <Link 
+                            <Link
                               href={`/jobs/${job.jobPostingId}`}
                               className="inline-flex items-center justify-center gap-1.5 px-5 py-2 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
                             >
@@ -251,7 +246,7 @@ export default function MatchingJobsPage() {
                   </motion.div>
                 ))
               ) : (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="bg-white rounded-3xl border border-slate-100 p-20 text-center space-y-6"

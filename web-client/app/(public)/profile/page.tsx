@@ -55,7 +55,12 @@ export default function ProfileDashboard() {
     if (isAuthenticated) {
       profileApi
         .getMe()
-        .then((data) => setProfile(data))
+        .then((data) => {
+          setProfile(data);
+          if (data.candidate && data.candidate.isOpenToWork !== undefined) {
+            setIsOpenToWork(data.candidate.isOpenToWork);
+          }
+        })
         .catch((err) => console.error("Failed to load profile", err))
         .finally(() => setLoadingProfile(false));
         
@@ -72,10 +77,33 @@ export default function ProfileDashboard() {
     try {
       const data = await profileApi.getMe();
       setProfile(data);
+      if (data.candidate && data.candidate.isOpenToWork !== undefined) {
+        setIsOpenToWork(data.candidate.isOpenToWork);
+      }
     } catch (err) {
       console.error("Failed to load profile", err);
     } finally {
       if (!silent) setLoadingProfile(false);
+    }
+  };
+
+  const handleToggleOpenToWork = async () => {
+    const newValue = !isOpenToWork;
+    const toastId = toast.loading("Đang cập nhật trạng thái...");
+    // Optimistic UI update
+    setIsOpenToWork(newValue);
+    try {
+      if (!profile) throw new Error("Profile chưa load");
+      await profileApi.updateProfile({
+        fullName: profile.candidate?.fullName || user?.name || "Người dùng",
+        phone: profile.phoneNumber || "",
+        isOpenToWork: newValue
+      });
+      toast.success(newValue ? "Hồ sơ của bạn đã được hiển thị với Nhà tuyển dụng!" : "Đã tắt. Hồ sơ của bạn đang được ẩn khỏi kết quả tìm kiếm.", { id: toastId });
+    } catch (error: any) {
+      // Revert if error
+      setIsOpenToWork(!newValue);
+      toast.error(error.response?.data?.message || "Lỗi khi cập nhật trạng thái.", { id: toastId });
     }
   };
 
@@ -264,9 +292,16 @@ export default function ProfileDashboard() {
 
             {/* Toggle Open to Work */}
             <div className="mt-6 flex items-center justify-between w-full font-medium text-slate-700 bg-slate-50 px-4 py-3 rounded-xl border border-slate-100">
-              <span className="text-sm">Sẵn sàng làm việc</span>
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-sm font-bold text-slate-800">Sẵn sàng làm việc</span>
+                {isOpenToWork ? (
+                   <span className="text-[11px] text-orange-500 font-semibold bg-orange-50 px-2 py-0.5 rounded">Đang công khai hồ sơ</span>
+                ) : (
+                   <span className="text-[11px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded">Đang tắt tìm việc</span>
+                )}
+              </div>
               <button
-                onClick={() => setIsOpenToWork(!isOpenToWork)}
+                onClick={handleToggleOpenToWork}
                 className={`w-11 h-6 rounded-full transition-colors relative flex items-center ${isOpenToWork ? "bg-orange-500" : "bg-slate-300"
                   }`}
               >
@@ -278,9 +313,9 @@ export default function ProfileDashboard() {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-2 mt-5 w-full">
-              <button className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 text-white text-[13px] font-semibold rounded-xl hover:bg-blue-700 transition shadow-sm">
+              <Link href="/profile/edit" className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 text-white text-[13px] font-semibold rounded-xl hover:bg-blue-700 transition shadow-sm">
                 <Edit className="w-3.5 h-3.5" /> Cập nhật hồ sơ
-              </button>
+              </Link>
 
             </div>
           </div>
@@ -477,11 +512,28 @@ export default function ProfileDashboard() {
             <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 flex flex-col">
               <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3">Kỹ năng</h3>
               <div className="flex flex-wrap gap-2 mt-1">
-                {(profile?.candidate?.skills?.length ? profile.candidate.skills.map(s => s.skillName) : ["ReactJS", "Node.js", "TypeScript", "PostgreSQL", "REST APIs", "AWS", "Git"]).map((skill, idx) => (
-                  <span key={idx} className="px-3 py-1.5 bg-blue-50 text-blue-700 text-[13px] font-medium rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors">
-                    {skill}
-                  </span>
-                ))}
+                {profile?.candidate?.skills?.length ? profile.candidate.skills.map((s, idx) => {
+                  const levelColors: Record<string, string> = {
+                    ADVANCED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    INTERMEDIATE: 'bg-sky-50 text-sky-700 border-sky-200',
+                    BEGINNER: 'bg-amber-50 text-amber-700 border-amber-200',
+                  };
+                  const levelLabels: Record<string, string> = {
+                    ADVANCED: 'Nâng cao',
+                    INTERMEDIATE: 'Trung bình',
+                    BEGINNER: 'Cơ bản',
+                  };
+                  const color = levelColors[s.level] || levelColors.BEGINNER;
+                  const label = levelLabels[s.level] || 'Cơ bản';
+                  return (
+                    <span key={idx} className={`px-3 py-1.5 text-[13px] font-medium rounded-xl border transition-colors ${color}`}>
+                      {s.skillName}
+                      <span className="ml-1.5 text-[10px] font-bold opacity-70">• {label}</span>
+                    </span>
+                  );
+                }) : (
+                  <p className="text-slate-400 text-sm">Chưa có kỹ năng. <Link href="/profile/edit" className="text-blue-600 hover:underline">Thêm ngay</Link></p>
+                )}
               </div>
             </div>
           </div>
