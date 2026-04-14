@@ -129,7 +129,7 @@ export default function JobsManagementPage() {
                 jobs.map((job) => (
                   <tr key={job.jobPostingId} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-slate-800 break-words max-w-xs">
-                      <Link 
+                      <Link
                         href={`/jobs/${job.jobPostingId}`}
                         target="_blank"
                         className="hover:text-indigo-600 transition-colors inline-block"
@@ -139,13 +139,12 @@ export default function JobsManagementPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          job.status === 'APPROVED'
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${job.status === 'APPROVED'
                             ? 'bg-emerald-100 text-emerald-700'
                             : job.status === 'PENDING'
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}
                       >
                         {job.status}
                       </span>
@@ -153,7 +152,7 @@ export default function JobsManagementPage() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1.5">
                         {job.status !== 'REJECTED' && (
-                          <button 
+                          <button
                             onClick={() => setSelectedJobId(job.jobPostingId)}
                             className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-full border border-indigo-100 transition-colors cursor-pointer w-fit"
                           >
@@ -213,10 +212,10 @@ export default function JobsManagementPage() {
       />
 
       {/* Matched Candidates Modal */}
-      <MatchedCandidatesModal 
-        isOpen={!!selectedJobId} 
-        onClose={() => setSelectedJobId(null)} 
-        jobId={selectedJobId || ''} 
+      <MatchedCandidatesModal
+        isOpen={!!selectedJobId}
+        onClose={() => setSelectedJobId(null)}
+        jobId={selectedJobId || ''}
       />
     </motion.div>
   );

@@ -65,4 +65,17 @@ export class MessagesController {
       body.content,
     );
   }
+
+  @Post('job-invitation')
+  @Roles(Role.RECRUITER)
+  sendJobInvitationMessage(
+    @Req() req,
+    @Body() body: { candidateId: string; jobPostingId: string },
+  ) {
+    return this.messagesService.sendJobInvitationMessage(
+      req.user.userId,
+      body.candidateId,
+      body.jobPostingId,
+    );
+  }
 }

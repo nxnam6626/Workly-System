@@ -120,13 +120,12 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   if (!isAuthenticated || !user?.roles?.includes('RECRUITER')) return null;
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 72 : 240 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="relative flex flex-col bg-slate-900 text-white overflow-hidden shrink-0"
-        style={{ minHeight: '100vh' }}
+        className="sticky top-0 flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen"
       >
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
@@ -249,7 +248,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
           )}
         </header>
 
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 overflow-y-auto">
           {children}
         </main>
       </div>

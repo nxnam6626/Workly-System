@@ -8,10 +8,9 @@ import {
 import { CvParsedData } from './interfaces/cv-parsing.interface';
 import * as path from 'path';
 
-const CV_EXTRACTION_PROMPT = (rawText: string) =>
-  `
+const CV_EXTRACTION_PROMPT = `
 Bạn là một chuyên gia nhân sự (HR) cấp cao và chuyên gia bóc tách dữ liệu hồ sơ (CV Parsing).
-Hãy phân tích đoạn văn bản thô từ CV dưới đây và trích xuất thông tin một cách chính xác nhất.
+Hãy phân tích tài liệu CV đính kèm dưới đây và trích xuất thông tin một cách chính xác nhất.
 
 Yêu cầu:
 1. Chỉ trả về dữ liệu thuần túy dưới dạng JSON theo đúng schema.
@@ -27,9 +26,6 @@ Yêu cầu:
    - **Experience**: Chỉ dành cho công việc làm tại các công ty, tổ chức (Work at companies).
    - **Projects**: Dành cho đồ án, dự án cá nhân, dự án tự do (Side projects, academic projects).
 8. **Học vấn**: Trích xuất chi tiết lịch sử học vấn vào mảng 'education'.
-
-Văn bản CV:
-${rawText}
 `.trim();
 
 const CV_SCHEMA = {
@@ -199,22 +195,30 @@ export class CvParsingService {
           .join(' ');
         fullText += pageText + ' \n';
       }
-      return fullText;
+      
+      const cleanText = fullText.trim();
+      this.logger.log(`Extracted raw text length: ${cleanText.length} characters`);
+      
+      if (cleanText.length < 20) {
+        throw new Error('PDF_NO_TEXT');
+      }
+      
+      return cleanText;
     } catch (error) {
       this.logger.error(`Lỗi khi parse PDF bằng pdfjs: ${error.message}`);
       throw new Error(`Failed to parse PDF using pdfjs: ${error.message}`);
     }
   }
 
-  async parseCv(rawText: string, retryCount = 0): Promise<CvParsedData | null> {
-    if (!this.model || !rawText) return null;
+  async parseCv(buffer: Buffer, retryCount = 0): Promise<CvParsedData | null> {
+    if (!this.model || !buffer) return null;
 
     let targetModel = this.model;
     // Fallback to older stable model on higher retries if demand is too high
     if (retryCount >= 2 && this.genAI) {
       targetModel = this.genAI.getGenerativeModel(
         {
-          model: 'gemini-2.5-flash',
+          model: 'gemini-1.5-flash',
           generationConfig: {
             responseMimeType: 'application/json',
             responseSchema: CV_SCHEMA as any,
@@ -223,14 +227,22 @@ export class CvParsingService {
         { apiVersion: 'v1beta' },
       );
       this.logger.warn(
-        `Switching to fallback model (gemini-2.5-flash) for retry ${retryCount}`,
+        `Switching to fallback model (gemini-1.5-flash) for retry ${retryCount}`,
       );
     }
 
     try {
-      const result = await targetModel.generateContent(
-        CV_EXTRACTION_PROMPT(rawText),
-      );
+      const filePart = {
+        inlineData: {
+          data: buffer.toString('base64'),
+          mimeType: 'application/pdf',
+        },
+      };
+
+      const result = await targetModel.generateContent([
+        CV_EXTRACTION_PROMPT,
+        filePart,
+      ]);
       const response = await result.response;
       let text = response.text();
 
@@ -243,7 +255,7 @@ export class CvParsingService {
       }
 
       return JSON.parse(text) as CvParsedData;
-    } catch (error) {
+    } catch (error: any) {
       const isOverloaded =
         error.status === 503 ||
         error.message?.includes('503') ||
@@ -256,7 +268,7 @@ export class CvParsingService {
           `API is experiencing high demand (${error.message}). Retrying in ${waitTime}ms... (Attempt ${retryCount + 1}/3)`,
         );
         await new Promise((resolve) => setTimeout(resolve, waitTime));
-        return this.parseCv(rawText, retryCount + 1);
+        return this.parseCv(buffer, retryCount + 1);
       }
 
       this.logger.error(`Lỗi khi gọi Gemini AI để parse CV: ${error.message}`);

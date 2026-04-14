@@ -135,6 +135,7 @@ export class TokenService {
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
+        admin: user.admin,
       },
     };
   }

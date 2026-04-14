@@ -14,6 +14,7 @@ import { NotificationListener } from "@/components/NotificationListener";
 import { Toaster } from 'react-hot-toast';
 import AiChatBox from "@/components/AiChatBox";
 import { ConfirmProvider } from "@/components/ConfirmDialog";
+import { AlertPopup } from "@/components/ui/AlertPopup";
 
 export default function RootLayout({
   children,
@@ -29,6 +30,7 @@ export default function RootLayout({
             <NotificationListener />
             <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
             <AiChatBox />
+            <AlertPopup />
           </ConfirmProvider>
         </AuthProvider>
       </body>

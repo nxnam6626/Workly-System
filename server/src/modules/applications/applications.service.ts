@@ -131,20 +131,49 @@ export class ApplicationsService {
         throw new ConflictException('Bạn đã nộp đơn cho công việc này rồi!');
 
       // 5. Create Application
-      // 5. Compute AI Match Score
-      let cvText = '';
-      if (fileUrl.startsWith('/uploads/')) {
-        cvText = await this.aiService.extractTextFromLocalFile(fileUrl);
-      } else {
-        cvText = await this.aiService.extractTextFromPdfUrl(fileUrl);
-      }
+      // 5. Check if unlocked in CandidateUnlock table
+      const existingUnlock = await tx.candidateUnlock.findUnique({
+        where: {
+          recruiterId_candidateId_jobPostingId: {
+             recruiterId: job.recruiterId!,
+             candidateId,
+             jobPostingId
+          }
+        }
+      });
+      const isAlreadyUnlocked = !!existingUnlock;
 
-      const jobRequirements = job.requirements ? String(job.requirements) : '';
-      const aiMatchScore = await this.aiService.evaluateMatch(
-        cvText,
-        job.title,
-        jobRequirements,
-      );
+      // Check if candidate already has a match score
+      const existingMatch = await tx.jobMatch.findUnique({
+        where: {
+          candidateId_jobPostingId: { candidateId, jobPostingId }
+        }
+      });
+
+      // 6. Compute AI Match Score with Fallback mechanism
+      let aiMatchScore = existingMatch?.score ?? 0;
+
+      if (aiMatchScore === 0) {
+        try {
+          let cvText = '';
+          if (fileUrl.startsWith('/uploads/')) {
+            cvText = await this.aiService.extractTextFromLocalFile(fileUrl);
+          } else {
+            cvText = await this.aiService.extractTextFromPdfUrl(fileUrl);
+          }
+
+          if (cvText.trim()) {
+             const jobRequirements = job.requirements ? String(job.requirements) : '';
+             aiMatchScore = await this.aiService.evaluateMatch(
+               cvText,
+               job.title,
+               jobRequirements,
+             );
+          }
+        } catch (aiErr) {
+          console.error('Lỗi khi tính điểm Match bằng AI trên tệp CV ứng tuyển. Sử dụng điểm mặc định là 0:', aiErr);
+        }
+      }
 
       const application = await tx.application.create({
         data: {
@@ -155,7 +184,7 @@ export class ApplicationsService {
           coverLetter,
           appStatus: 'PENDING',
           aiMatchScore,
-          isUnlocked: false,
+          isUnlocked: isAlreadyUnlocked,
         },
         include: {
           jobPosting: { include: { recruiter: true } },
@@ -188,6 +217,9 @@ export class ApplicationsService {
       }
 
       return application;
+    }, {
+      maxWait: 5000,
+      timeout: 30000, // 30 seconds to allow slow Gemini API responses
     });
   }
 
@@ -241,11 +273,30 @@ export class ApplicationsService {
       orderBy: { aiMatchScore: 'desc' }, // Order by AI Score primarily for recruiter
     });
 
+    // Fetch all Candidate Unlocks to fix any out-of-sync application unlock logic
+    const unlocks = await this.prisma.candidateUnlock.findMany({
+      where: { recruiterId: recruiter.recruiterId }
+    });
+    const unlockedSet = new Set(unlocks.map(u => `${u.candidateId}_${u.jobPostingId}`));
+
+    // Fetch JobMatches to sync accurate AI Score and retro-active unlock checks
+    const jobMatches = await this.prisma.jobMatch.findMany({
+       where: { jobPosting: { recruiterId: recruiter.recruiterId } }
+    });
+    const matchMap = new Map(jobMatches.map(m => [`${m.candidateId}_${m.jobPostingId}`, m]));
+
     return applications.map((app) => {
+      // Re-validate exactly
+      const matchData = matchMap.get(`${app.candidateId}_${app.jobPostingId}`);
+      const isActuallyUnlocked = app.isUnlocked || unlockedSet.has(`${app.candidateId}_${app.jobPostingId}`);
+      const accurateScore = matchData?.score && matchData.score > 0 ? matchData.score : app.aiMatchScore;
+
       // Obfuscate candidate details if not unlocked
-      if (!app.isUnlocked) {
+      if (!isActuallyUnlocked) {
         return {
           ...app,
+          isUnlocked: false,
+          aiMatchScore: accurateScore,
           candidate: {
             ...app.candidate,
             fullName: '*** Ứng viên ẩn ***',
@@ -262,7 +313,11 @@ export class ApplicationsService {
           cvSnapshotUrl: '',
         };
       }
-      return app;
+      return {
+         ...app,
+         isUnlocked: true,
+         aiMatchScore: accurateScore
+      };
     });
   }
 
@@ -277,7 +332,7 @@ export class ApplicationsService {
     // Kiểm tra xem có phải là dời lịch hay không
     const existingApp = await this.prisma.application.findUnique({
       where: { applicationId },
-      select: { interviewDate: true, appStatus: true },
+      select: { interviewDate: true, appStatus: true, jobPostingId: true },
     });
 
     const isReschedule =
@@ -290,6 +345,16 @@ export class ApplicationsService {
       if (interviewDate) dataToUpdate.interviewDate = new Date(interviewDate);
       if (interviewTime) dataToUpdate.interviewTime = interviewTime;
       if (interviewLocation) dataToUpdate.interviewLocation = interviewLocation;
+    }
+
+    if (status === 'ACCEPTED' && existingApp && existingApp.appStatus !== 'ACCEPTED') {
+      // Decrease vacancies when candidate is accepted
+      await this.prisma.jobPosting.update({
+        where: { jobPostingId: existingApp.jobPostingId },
+        data: {
+          vacancies: { decrement: 1 }
+        }
+      });
     }
 
     const application = await this.prisma.application.update({
@@ -441,6 +506,7 @@ export class ApplicationsService {
       recruiter.recruiterId,
       `Mở khóa ứng viên: ${application.candidate?.fullName}`
     );
+
 
     return this.prisma.application.update({
       where: { applicationId },

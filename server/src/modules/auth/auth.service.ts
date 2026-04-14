@@ -86,6 +86,7 @@ export class AuthService {
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,
+        admin: user.admin,
       },
     };
   }

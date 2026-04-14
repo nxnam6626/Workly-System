@@ -5,6 +5,8 @@ interface Wallet {
   walletId: string;
   recruiterId: string;
   balance: number;
+  cvUnlockQuota: number;
+  cvUnlockQuotaMax: number;
 }
 
 interface WalletState {

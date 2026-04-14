@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Clock, ChevronDown, Plus, Crown, X as CloseIcon } from 'lucide-react';
+import { Briefcase, Loader2, Save, MapPin, DollarSign, Calendar, Users, Info, Clock, ChevronDown, Plus, Crown, X as CloseIcon } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -19,8 +19,7 @@ const defaultForm = {
   jobType: 'FULLTIME',
   experience: 'Không yêu cầu',
   vacancies: 1,
-  locationCity: '',
-  deadline: '',
+  branchIds: [] as string[],
   hardSkills: [] as string[],
   softSkills: [] as string[],
   minExperienceYears: 0,
@@ -39,8 +38,13 @@ function PostJobForm() {
   const [softSkillInput, setSoftSkillInput] = useState('');
   const { accessToken } = useAuthStore();
 
-  const allLocations = ["Làm việc từ xa (Remote)", "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", ...LOCATIONS.filter((l: string) => !['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'].includes(l))];
-  const selectedLocations = formData.locationCity.split(',').map(s => s.trim()).filter(Boolean);
+  const [branches, setBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (accessToken) {
+      api.get('/companies/my-company').then(({ data }) => setBranches(data.branches || []));
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     if (editJobId && accessToken) {
@@ -57,8 +61,7 @@ function PostJobForm() {
             jobType: data.jobType || 'FULLTIME',
             experience: data.experience || 'Không yêu cầu',
             vacancies: data.vacancies || 1,
-            locationCity: data.locationCity || '',
-            deadline: data.deadline ? new Date(data.deadline).toISOString().split('T')[0] : '',
+            branchIds: data.branches?.map((b: any) => b.branchId) || [],
             hardSkills: data.structuredRequirements?.hardSkills || [],
             softSkills: data.structuredRequirements?.softSkills || [],
             minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
@@ -77,14 +80,14 @@ function PostJobForm() {
     }
   }, [editJobId, accessToken]);
 
-  const handleLocationToggle = (loc: string) => {
-    let updated = [...selectedLocations];
-    if (updated.includes(loc)) {
-      updated = updated.filter(l => l !== loc);
+  const handleBranchToggle = (branchId: string) => {
+    let updated = [...formData.branchIds];
+    if (updated.includes(branchId)) {
+      updated = updated.filter(id => id !== branchId);
     } else {
-      updated.push(loc);
+      updated.push(branchId);
     }
-    setFormData(prev => ({ ...prev, locationCity: updated.join(', ') }));
+    setFormData(prev => ({ ...prev, branchIds: updated }));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -122,7 +125,7 @@ function PostJobForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accessToken) return;
-    
+
     if (formData.hardSkills.length === 0) {
       toast.error('Vui lòng nhập ít nhất một kỹ năng chuyên môn để Matching Engine hoạt động!');
       return;
@@ -136,7 +139,6 @@ function PostJobForm() {
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : null,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : null,
         vacancies: Number(formData.vacancies),
-        deadline: formData.deadline ? new Date(formData.deadline).getTime() : null,
       };
 
       if (editJobId) {
@@ -220,6 +222,18 @@ function PostJobForm() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Crown className="w-4 h-4 text-amber-500" /> Gói Hiển Thị Nhắm Mục Tiêu
+                <div className="relative group">
+                  <Info className="w-4 h-4 text-slate-300 hover:text-slate-500 transition-colors cursor-help" />
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-[280px] p-4 bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl pointer-events-none">
+                    <p className="font-bold mb-2 text-white text-sm">Các gói hiển thị:</p>
+                    <ul className="space-y-2">
+                      <li><span className="font-bold text-slate-200">BASIC (100 xu):</span> Hiển thị cơ bản, độ ưu tiên xuất hiện bình thường.</li>
+                      <li><span className="font-bold text-amber-400">VIP (250 xu):</span> Nhãn Nổi bật, ưu tiên hiển thị cao, AI tối ưu từ khóa.</li>
+                      <li><span className="font-bold text-red-400">URGENT (450 xu):</span> Ghim ở top đầu, gửi thông báo đẩy (Push) đến ứng viên.</li>
+                    </ul>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-l-[6px] border-r-[6px] border-t-[6px] border-transparent border-t-slate-900"></div>
+                  </div>
+                </div>
               </label>
               <select
                 name="jobTier"
@@ -228,28 +242,46 @@ function PostJobForm() {
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-white transition-all duration-200"
               >
                 <option value="BASIC">Thường - BASIC (100 xu)</option>
-                <option value="PROFESSIONAL">⭐️ Nổi bật - VIP PROFESSIONAL (250 xu)</option>
-                <option value="URGENT">🔥 Tuyển gấp - URGENT (450 xu)</option>
+                <option value="PROFESSIONAL">Nổi bật - VIP PROFESSIONAL (250 xu)</option>
+                <option value="URGENT">Tuyển gấp - URGENT (450 xu)</option>
               </select>
+              {formData.jobTier === 'BASIC' && (
+                <p className="text-xs text-slate-500 mt-1 italic">
+                  Gói Thường: Tin hiển thị cơ bản, độ ưu tiên xuất hiện bình thường.
+                </p>
+              )}
+              {formData.jobTier === 'PROFESSIONAL' && (
+                <p className="text-xs text-amber-600 mt-1 italic">
+                  Gói VIP: Bổ sung nhãn Nổi bật, ưu tiên hiển thị cao, AI tự động tối ưu hóa từ khóa chuyên sâu.
+                </p>
+              )}
+              {formData.jobTier === 'URGENT' && (
+                <p className="text-xs text-rose-600 mt-1 italic">
+                  Gói Tuyển gấp: Hiệu ứng bắt mắt nhất, ghim ở đầu trang, gửi thông báo đẩy trực tiếp đến ứng viên tiềm năng!
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-slate-400" /> Địa điểm khu vực
+                <MapPin className="w-4 h-4 text-slate-400" /> Chọn chi nhánh làm việc
               </label>
               <div className="relative">
                 <div
                   className="w-full min-h-[44px] px-4 py-2 rounded-xl border border-slate-200 cursor-pointer flex flex-wrap gap-2 items-center bg-white transition-all duration-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500 relative pr-10"
                   onClick={() => setLocationMenuOpen(!locationMenuOpen)}
                 >
-                  {selectedLocations.length === 0 ? (
-                    <span className="text-slate-400">VD: Hà Nội, Hồ Chí Minh...</span>
+                  {formData.branchIds.length === 0 ? (
+                    <span className="text-slate-400">Chọn chi nhánh của bạn...</span>
                   ) : (
-                    selectedLocations.map(loc => (
-                      <span key={loc} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 flex items-center gap-1">
-                        {loc}
-                      </span>
-                    ))
+                    formData.branchIds.map(id => {
+                      const b = branches.find(br => br.branchId === id);
+                      return b ? (
+                        <span key={id} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-md border border-indigo-100 flex items-center gap-1">
+                          {b.name}
+                        </span>
+                      ) : null;
+                    })
                   )}
                   <ChevronDown className={`w-5 h-5 text-slate-400 absolute right-3 transition-transform ${locationMenuOpen ? 'rotate-180' : ''}`} />
                 </div>
@@ -260,17 +292,23 @@ function PostJobForm() {
                       className="fixed inset-0 z-10"
                       onClick={() => setLocationMenuOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto z-20 p-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-                      {allLocations.map(loc => (
-                        <label key={loc} className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto z-20 p-2 grid grid-cols-1 gap-1">
+                      {branches.length === 0 && (
+                        <div className="p-3 text-sm text-slate-500 text-center">Chưa có chi nhánh nào. Hãy cấu hình ở Hồ Sơ Doanh Nghiệp.</div>
+                      )}
+                      {branches.map(branch => (
+                        <label key={branch.branchId} className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors group border-b border-slate-50 last:border-0">
                           <input
                             type="checkbox"
-                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
-                            checked={selectedLocations.includes(loc)}
-                            onChange={() => handleLocationToggle(loc)}
+                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer flex-shrink-0"
+                            checked={formData.branchIds.includes(branch.branchId)}
+                            onChange={() => handleBranchToggle(branch.branchId)}
                             onClick={(e) => e.stopPropagation()}
                           />
-                          <span className="text-sm text-slate-700 font-medium group-hover:text-indigo-700">{loc}</span>
+                          <div className="flex flex-col">
+                            <span className="text-sm text-slate-700 font-bold group-hover:text-indigo-700">{branch.name}</span>
+                            <span className="text-xs text-slate-500 line-clamp-1">{branch.address}</span>
+                          </div>
                         </label>
                       ))}
                     </div>
@@ -323,19 +361,6 @@ function PostJobForm() {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-slate-400" /> Hạn nộp hồ sơ
-              </label>
-              <input
-                type="date"
-                name="deadline"
-                value={formData.deadline}
-                onChange={handleChange}
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-400" /> Yêu cầu kinh nghiệm (Text)
               </label>
               <input
@@ -355,7 +380,7 @@ function PostJobForm() {
               <Users className="w-5 h-5" /> Matching Engine Configuration
             </h3>
             <p className="text-sm text-slate-500">Các thông tin dưới đây dùng để thuật toán tự động tìm ứng viên phù hợp nhất.</p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Kỹ năng chuyên môn (Hard Skills) <span className="text-red-500">*</span></label>

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building, Save, Loader2, MapPin, Globe, Users, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { Building, Save, Loader2, MapPin, Globe, Users, FileText, CheckCircle, AlertCircle, Camera } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
+import CompanyBranches from './CompanyBranches';
 
 const defaultForm = {
   companyName: '',
@@ -17,13 +18,17 @@ const defaultForm = {
   logo: '',
   banner: '',
   verifyStatus: 0,
+  branches: [],
 };
 
 export default function CompanyProfilePage() {
   const [formData, setFormData] = useState(defaultForm);
+  const [initialData, setInitialData] = useState(defaultForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const { accessToken } = useAuthStore();
 
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function CompanyProfilePage() {
     if (!accessToken) return;
     try {
       const { data } = await api.get('/companies/my-company');
-      setFormData({
+      const fetchedData = {
         companyName: data.companyName || '',
         taxCode: data.taxCode || '',
         address: data.address || '',
@@ -44,7 +49,10 @@ export default function CompanyProfilePage() {
         logo: data.logo || '',
         banner: data.banner || '',
         verifyStatus: data.verifyStatus || 0,
-      });
+        branches: data.branches || [],
+      };
+      setFormData(fetchedData);
+      setInitialData(fetchedData);
     } catch (error) {
       console.error('Error fetching company:', error);
     } finally {
@@ -107,6 +115,7 @@ export default function CompanyProfilePage() {
     
     // Clean up empty strings to null to avoid unique constraint violations
     const payload = { ...formData };
+    delete (payload as any).branches; // Do not update branches via this endpoint
     (Object.keys(payload) as Array<keyof typeof payload>).forEach(key => {
       if (payload[key] === '' && key !== 'companyName') (payload as any)[key] = null;
     });
@@ -114,12 +123,67 @@ export default function CompanyProfilePage() {
 
     try {
       await api.patch('/companies/my-company', payload);
+      setInitialData(formData);
       toast.success('Đã cập nhật thông tin thành công!');
     } catch (error) {
       console.error('Error updating company:', error);
       toast.error('Có lỗi xảy ra khi cập nhật!');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn tệp hình ảnh.');
+      return;
+    }
+    setUploadingLogo(true);
+    const toastId = toast.loading('Đang cập nhật Logo...');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const { data } = await api.patch('/companies/my-company/logo', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setFormData(prev => ({ ...prev, logo: data.url }));
+      setInitialData(prev => ({ ...prev, logo: data.url }));
+      toast.success('Cập nhật Logo thành công!', { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error('Cập nhật Logo thất bại', { id: toastId });
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleUploadBanner = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn tệp hình ảnh.');
+      return;
+    }
+    setUploadingBanner(true);
+    const toastId = toast.loading('Đang cập nhật ảnh bìa...');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const { data } = await api.patch('/companies/my-company/banner', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setFormData(prev => ({ ...prev, banner: data.url }));
+      setInitialData(prev => ({ ...prev, banner: data.url }));
+      toast.success('Cập nhật ảnh bìa thành công!', { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error('Cập nhật ảnh bìa thất bại', { id: toastId });
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = '';
     }
   };
 
@@ -130,6 +194,8 @@ export default function CompanyProfilePage() {
       </div>
     );
   }
+
+  const isChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
 
   return (
     <motion.div
@@ -147,15 +213,31 @@ export default function CompanyProfilePage() {
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        {formData.banner ? (
-          <div className="h-48 w-full bg-cover bg-center" style={{ backgroundImage: `url(${formData.banner})` }}></div>
-        ) : (
-          <div className="h-48 w-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-        )}
+        <div className="group relative h-48 w-full">
+          {formData.banner ? (
+            <div className="h-full w-full bg-cover bg-center transition-all group-hover:brightness-75" style={{ backgroundImage: `url(${formData.banner})` }}></div>
+          ) : (
+            <div className="h-full w-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all group-hover:brightness-75"></div>
+          )}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+            <label className="flex items-center gap-2 px-4 py-2 bg-black/50 text-white rounded-xl backdrop-blur-sm cursor-pointer hover:bg-black/70 transition-colors font-medium text-sm">
+              {uploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+              Đổi ảnh bìa
+              <input type="file" accept="image/*" onChange={handleUploadBanner} disabled={uploadingBanner} className="hidden" />
+            </label>
+          </div>
+        </div>
 
         <div className="p-8 relative">
-          <div className={`absolute -top-16 left-8 h-24 w-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center font-bold text-2xl ${formData.logo ? 'bg-white' : 'bg-slate-800 text-white'}`}>
-            {formData.logo ? <img src={formData.logo} className="w-full h-full object-contain rounded-xl" /> : formData.companyName.charAt(0)}
+          <div className={`group absolute -top-16 left-8 h-24 w-24 rounded-2xl border-4 border-white shadow-xl flex items-center justify-center font-bold text-2xl overflow-hidden ${formData.logo ? 'bg-white' : 'bg-slate-800 text-white'}`}>
+            {formData.logo ? <img src={formData.logo} className="w-full h-full object-contain transition-all group-hover:brightness-75" /> : formData.companyName.charAt(0) || 'C'}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 cursor-pointer">
+              <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer text-white">
+                {uploadingLogo ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-6 h-6" />}
+                <span className="text-[10px] uppercase font-bold mt-1">Đổi Logo</span>
+                <input type="file" accept="image/*" onChange={handleUploadLogo} disabled={uploadingLogo} className="hidden" />
+              </label>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-8">
@@ -240,19 +322,7 @@ export default function CompanyProfilePage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-slate-400" /> Quy Mô Nhân Sự
-                </label>
-                <input
-                  type="number"
-                  name="companySize"
-                  value={formData.companySize}
-                  onChange={handleChange}
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
-                  placeholder="Số lượng nhân viên"
-                />
-              </div>
+
             </div>
 
             <div className="space-y-2">
@@ -268,16 +338,21 @@ export default function CompanyProfilePage() {
             </div>
 
             <div className="flex justify-end pt-4 border-t border-slate-100">
-              <button
-                type="submit"
-                disabled={saving}
-                className="h-11 px-6 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
-              >
-                {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                {saving ? 'Đang Lưu...' : 'Lưu Thay Đổi'}
-              </button>
+              {isChanged && (
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="h-11 px-6 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
+                >
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  {saving ? 'Đang Lưu...' : 'Lưu Thay Đổi'}
+                </button>
+              )}
             </div>
           </form>
+
+          {/* Branches Section */}
+          <CompanyBranches initialBranches={formData.branches} onUpdate={fetchCompany} />
         </div>
       </div>
     </motion.div>

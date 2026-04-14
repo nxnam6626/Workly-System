@@ -18,12 +18,13 @@ export interface Job {
   currency: string | null;
   createdAt: string;
   isVerified: boolean;
-  deadline?: string | null;
   isSaved?: boolean;
   postType: 'CRAWLED' | 'MANUAL';
   originalUrl?: string;
   hasApplied?: boolean;
+  slug?: string | null;
   jobTier?: 'BASIC' | 'PROFESSIONAL' | 'URGENT';
+  score?: number;
 }
 
 interface JobCardProps {
@@ -58,7 +59,7 @@ export function JobCard({ job }: JobCardProps) {
     if (job.postType === 'CRAWLED' && job.originalUrl) {
       window.open(job.originalUrl, '_blank');
     } else {
-      router.push(`/jobs/${job.jobPostingId}`);
+      router.push(`/jobs/${job.slug || job.jobPostingId}`);
     }
   };
 
@@ -78,22 +79,29 @@ export function JobCard({ job }: JobCardProps) {
 
   return (
     <div
-      onClick={() => router.push(`/jobs/${job.jobPostingId}`)}
+      onClick={() => router.push(`/jobs/${job.slug || job.jobPostingId}`)}
       className="group block h-full cursor-pointer"
     >
       <div className={`bg-white rounded-2xl p-4 flex flex-col h-full hover:shadow-xl transition-all duration-300 relative shadow-md shadow-slate-200/30 ${tierBorder}`}>
 
-        {/* Tier badges */}
-        {job.jobTier === 'URGENT' && (
-          <div className="absolute -top-3 -right-2 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse z-10">
-            <span>🔥</span>Tuyển Gấp
-          </div>
-        )}
-        {job.jobTier === 'PROFESSIONAL' && (
-          <div className="absolute -top-3 -right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 z-10">
-            <span>⭐️</span>Nổi Bật
-          </div>
-        )}
+        {/* Tier badges & Score */}
+        <div className="absolute -top-3 -right-2 flex flex-col gap-1 z-10 items-end">
+          {job.jobTier === 'URGENT' && (
+            <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse shrink-0">
+              <span>🔥</span>Tuyển Gấp
+            </div>
+          )}
+          {job.jobTier === 'PROFESSIONAL' && (
+            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 shrink-0">
+              <span>⭐️</span>Nổi Bật
+            </div>
+          )}
+          {job.score !== undefined && (
+            <div className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-fuchsia-500/30 flex items-center gap-1 shrink-0">
+              🎯 Phù hợp {job.score}%
+            </div>
+          )}
+        </div>
 
         {/* Top: Logo, Title & Company */}
         <div className="flex gap-3 mb-3">
@@ -143,22 +151,22 @@ export function JobCard({ job }: JobCardProps) {
         </div>
 
         {/* Bottom: Apply button */}
-        <div className="mt-auto">
+        <div className="mt-4 flex justify-end">
           {job.hasApplied ? (
             <button
               disabled
-              className="w-3/4 py-2 mx-auto bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
+              className="px-4 py-2 bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center gap-2 shadow-sm whitespace-nowrap"
             >
               <Send className="w-3.5 h-3.5 opacity-40" />
-              Đã ứng tuyển
+              Đã nộp
             </button>
           ) : (
             <button
               onClick={handleApply}
-              className={`w-3/4 py-2 mx-auto text-[13px] text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${applyBtnClass}`}
+              className={`px-4 py-2 text-[13px] text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center gap-2 whitespace-nowrap overflow-hidden ${applyBtnClass}`}
             >
-              <Send className="w-3.5 h-3.5" />
-              Ứng tuyển ngay
+              <Send className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Ứng tuyển</span>
             </button>
           )}
         </div>

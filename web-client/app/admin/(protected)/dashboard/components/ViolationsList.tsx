@@ -10,7 +10,7 @@ export default function ViolationsList() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    adminDashboardApi.getLatestViolations(5)
+    adminDashboardApi.getLatestViolations()
       .then(setViolations)
       .catch((err) => console.error('Failed to fetch latest violations:', err))
       .finally(() => setIsLoading(false));

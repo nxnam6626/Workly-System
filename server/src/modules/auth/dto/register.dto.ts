@@ -41,7 +41,7 @@ export class RegisterDto {
   phone?: string;
 
   @ApiProperty({ required: false })
-  location?: string;
+  websiteUrl?: string;
 
   @ApiProperty({ required: false })
   taxCode?: string;

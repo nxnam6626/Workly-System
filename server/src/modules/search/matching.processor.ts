@@ -20,11 +20,12 @@ export class MatchingProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { jobId } = job.data;
-    this.logger.log(`Processing matching job for Job ID: ${jobId}`);
-
-    try {
-      const topMatches = await this.matchingService.runMatchingForJob(jobId);
+    const { jobId, userId } = job.data;
+    
+    if (jobId) {
+      this.logger.log(`Processing matching job for Job ID: ${jobId}`);
+      try {
+        const topMatches = await this.matchingService.runMatchingForJob(jobId);
 
       if (topMatches.length > 0) {
         // Lưu kết quả hoặc chỉ gửi thông báo
@@ -57,10 +58,20 @@ export class MatchingProcessor extends WorkerHost {
         }
       }
 
-      return { success: true, count: topMatches.length };
-    } catch (error) {
-      this.logger.error(`Error in MatchingProcessor: ${error.message}`);
-      throw error;
+        return { success: true, count: topMatches.length };
+      } catch (error) {
+        this.logger.error(`Error in MatchingProcessor (Job): ${error.message}`);
+        throw error;
+      }
+    } else if (userId) {
+      this.logger.log(`Processing candidate matching for User ID: ${userId}`);
+      try {
+        const topMatches = await this.matchingService.runMatchingForCandidate(userId);
+        return { success: true, count: topMatches.length };
+      } catch (error) {
+        this.logger.error(`Error in MatchingProcessor (Candidate): ${error.message}`);
+        throw error;
+      }
     }
   }
 }
