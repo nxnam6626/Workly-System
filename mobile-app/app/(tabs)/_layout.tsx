@@ -87,6 +87,7 @@ export default function TabsLayout() {
       {/* Hidden tabs */}
       <Tabs.Screen name="saved" options={{ href: null }} />
       <Tabs.Screen name="applications" options={{ href: null }} />
+      <Tabs.Screen name="support" options={{ href: null }} />
     </Tabs>
   );
 }

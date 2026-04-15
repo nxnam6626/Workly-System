@@ -350,6 +350,35 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cài đặt tài khoản</Text>
+          {!user?.isEmailVerified && (
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push({ pathname: '/(auth)/verify-email', params: { email: profile?.email } })}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: '#fef3c7' }]}>
+                <Ionicons name="shield-outline" size={18} color={COLORS.accent} />
+              </View>
+              <Text style={[styles.menuLabel, { flex: 1 }]}>Xác minh Email</Text>
+              <View style={{ backgroundColor: '#fef3c7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 99 }}>
+                <Text style={{ fontSize: 10, color: '#92400e', fontWeight: '700' }}>Chưa xác thực</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} style={{ marginLeft: 6 }} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(tabs)/notifications')}>
+            <View style={[styles.menuIcon, { backgroundColor: '#eff6ff' }]}>
+              <Ionicons name="notifications-outline" size={18} color={COLORS.primary} />
+            </View>
+            <Text style={styles.menuLabel}>Thông báo</Text>
+            <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/(tabs)/support')}>
+            <View style={[styles.menuIcon, { backgroundColor: '#dcfce7' }]}>
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color={COLORS.success} />
+            </View>
+            <Text style={styles.menuLabel}>Hỗ trợ & Phản hồi</Text>
+            <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <View style={[styles.menuIcon, styles.menuIconDanger]}>
               <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
@@ -359,6 +388,7 @@ export default function ProfileScreen() {
         </View>
 
         <Text style={styles.version}>Workly Mobile v1.0.0</Text>
+
       </ScrollView>
 
       {/* Review CV Modal */}

@@ -3,6 +3,7 @@ services:
     name: workly-backend
     env: docker
     plan: free
+    rootDir: server
     autoDeploy: true
     envVars:
       - key: NODE_ENV

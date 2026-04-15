@@ -1,0 +1,7 @@
+**/.next/
+**/node_modules/
+**/dist/
+**/.expo/
+temp_build/
+.agent/
+.git/
