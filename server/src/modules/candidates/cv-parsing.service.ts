@@ -43,13 +43,17 @@ const CV_SCHEMA = {
         type: SchemaType.OBJECT,
         properties: {
           skillName: { type: SchemaType.STRING, description: 'Tên kỹ năng.' },
+          category: { 
+            type: SchemaType.STRING, 
+            description: 'Nhóm kỹ năng. BẮT BUỘC chọn 1 trong: "Ngôn ngữ", "Frontend", "Backend", "Database", "Mobile", "DevOps & Cloud", "Khác".' 
+          },
           level: {
             type: SchemaType.STRING,
             description:
               'Mức độ thành thạo: BEGINNER, INTERMEDIATE, hoặc ADVANCED.',
           },
         },
-        required: ['skillName', 'level'],
+        required: ['skillName', 'category', 'level'],
       },
       description: 'Danh sách các kỹ năng kèm theo mức độ thành thạo.',
     },
@@ -153,7 +157,9 @@ export class CvParsingService {
   private model: GenerativeModel | null = null;
 
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    require('dotenv').config({ override: true });
+    let apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    if (!apiKey) apiKey = process.env.GEMINI_API_KEY;
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
       this.model = this.genAI.getGenerativeModel(
@@ -173,41 +179,44 @@ export class CvParsingService {
   }
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
-    try {
-      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
-      const standardFontDataUrl =
-        path
-          .join(process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts')
-          .replace(/\\/g, '/') + '/';
+    if (!this.genAI) throw new Error('Gemini API is not configured.');
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+    let lastError: any = null;
 
-      const data = new Uint8Array(buffer);
-      const pdf = await pdfjsLib.getDocument({
-        data: data,
-        standardFontDataUrl: standardFontDataUrl,
-      }).promise;
+    for (const modelName of modelsToTry) {
+      try {
+        const targetModel = this.genAI.getGenerativeModel({ model: modelName });
+        const filePart = {
+          inlineData: {
+            data: buffer.toString('base64'),
+            mimeType: 'application/pdf',
+          },
+        };
 
-      let fullText = '';
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ');
-        fullText += pageText + ' \n';
+        const result = await targetModel.generateContent([
+          'Trích xuất toàn bộ văn bản (text) từ file PDF này một cách rõ ràng và chính xác. Trả về nội dung thuần túy, không thêm lời chào, bình luận hay định dạng markdown không cần thiết.',
+          filePart,
+        ]);
+        const response = await result.response;
+        const cleanText = response.text().trim();
+        
+        this.logger.log(`Extracted raw text using ${modelName}, length: ${cleanText.length} characters`);
+        
+        if (cleanText.length < 20) {
+          throw new Error('PDF_NO_TEXT');
+        }
+        
+        return cleanText;
+      } catch (error: any) {
+        lastError = error;
+        const msg = error.message || '';
+        this.logger.warn(`Model ${modelName} failed (${msg}). Trying next...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      
-      const cleanText = fullText.trim();
-      this.logger.log(`Extracted raw text length: ${cleanText.length} characters`);
-      
-      if (cleanText.length < 20) {
-        throw new Error('PDF_NO_TEXT');
-      }
-      
-      return cleanText;
-    } catch (error) {
-      this.logger.error(`Lỗi khi parse PDF bằng pdfjs: ${error.message}`);
-      throw new Error(`Failed to parse PDF using pdfjs: ${error.message}`);
     }
+    
+    this.logger.error(`Tất cả model Gemini đều lỗi khi extract text từ PDF: ${lastError?.message}`);
+    throw new Error(`Failed to parse PDF using all Gemini models. Lỗi: ${lastError?.message}`);
   }
 
   async parseCv(buffer: Buffer, retryCount = 0): Promise<CvParsedData | null> {

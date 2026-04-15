@@ -14,10 +14,27 @@ import {
   ArrowUpRight,
   Wallet,
   ShieldAlert,
+  Lock,
 } from 'lucide-react';
 import { adminDashboardApi, RevenueStats, ViolatingRecruiter } from '@/lib/admin-api';
 import Link from 'next/link';
 import { useSocketStore } from '@/stores/socket';
+import { useAuthStore } from '@/stores/auth';
+
+function AccessDenied({ perm }: { perm: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-rose-500" />
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-slate-800">Không có quyền truy cập</h2>
+        <p className="text-slate-400 text-sm mt-1">Tài khoản của bạn không có quyền <span className="font-semibold">{perm}</span>.</p>
+        <p className="text-slate-400 text-xs mt-1">Liên hệ Supreme Admin để được cấp thêm quyền.</p>
+      </div>
+    </div>
+  );
+}
 
 function formatVnd(amount: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(amount);
@@ -36,6 +53,11 @@ export default function RevenuePage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   const { socket } = useSocketStore();
+  const { user } = useAuthStore();
+
+  const adminLevel = user?.admin?.adminLevel ?? 2;
+  const perms: string[] = user?.admin?.permissions ?? [];
+  const canAccess = adminLevel === 1 || perms.includes('MANAGE_REVENUE');
 
   const isLoading = isLoadingRevenue || isLoadingViolations;
 
@@ -56,7 +78,9 @@ export default function RevenuePage() {
       .finally(() => setIsLoadingViolations(false));
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    if (canAccess) fetchData(); 
+  }, [canAccess]);
 
   useEffect(() => {
     if (!socket) return;
@@ -136,6 +160,8 @@ export default function RevenuePage() {
   })();
 
   const maxRevenue = Math.max(...chartDays.map((d) => d.value), 1);
+
+  if (!canAccess) return <AccessDenied perm="MANAGE_REVENUE" />;
 
   return (
     <div className="space-y-6">

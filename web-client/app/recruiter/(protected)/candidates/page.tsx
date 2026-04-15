@@ -13,6 +13,9 @@ export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [major, setMajor] = useState('');
+  const [skills, setSkills] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const { accessToken } = useAuthStore();
   const router = useRouter();
 
@@ -23,9 +26,13 @@ export default function CandidatesPage() {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    fetchCandidates();
-    fetchSavedIds();
-  }, [accessToken, search]);
+    // Add debounce for search typing
+    const delayDebounceFn = setTimeout(() => {
+      fetchCandidates();
+      fetchSavedIds();
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [accessToken, search, major, skills]);
 
   const fetchSavedIds = async () => {
     if (!accessToken) return;
@@ -43,7 +50,7 @@ export default function CandidatesPage() {
     if (!accessToken) return;
     try {
       const { data } = await api.get('/candidates', {
-        params: { search }
+        params: { search, major, skills }
       });
       setCandidates(Array.isArray(data.data) ? data.data : []);
     } catch (error) {
@@ -130,20 +137,61 @@ export default function CandidatesPage() {
 
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-2xl font-semibold text-white mb-6">Bạn đang tìm kiếm ai?</h2>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Nhập kỹ năng, chức danh, tên..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-4 h-14 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/15 transition-all text-lg backdrop-blur-sm"
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Nhập tên, từ khóa chung..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-12 pr-4 h-14 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/15 transition-all text-lg backdrop-blur-sm"
+                />
+              </div>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`h-14 px-6 rounded-2xl border transition-all flex items-center gap-2 font-medium 
+                  ${showFilters ? 'bg-indigo-500 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/10 border-white/20 text-slate-200 hover:bg-white/20'}
+                `}
+              >
+                <Filter className="w-5 h-5" /> Lọc chuyên sâu
+              </button>
             </div>
-            <button className="h-14 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all shadow-lg flex items-center justify-center gap-2">
-              <Filter className="w-5 h-5" /> Lọc
-            </button>
+
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="relative">
+                      <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Chuyên ngành (VD: Software Engineer)"
+                        value={major}
+                        onChange={(e) => setMajor(e.target.value)}
+                        className="w-full pl-12 pr-4 h-12 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Kỹ năng cụ thể (VD: React, Node.js)"
+                        value={skills}
+                        onChange={(e) => setSkills(e.target.value)}
+                        className="w-full pl-12 pr-4 h-12 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>

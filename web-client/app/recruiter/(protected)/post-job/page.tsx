@@ -31,6 +31,7 @@ function PostJobForm() {
   const searchParams = useSearchParams();
   const editJobId = searchParams.get('jobId');
   const [formData, setFormData] = useState(defaultForm);
+  const [initialFormData, setInitialFormData] = useState<typeof defaultForm | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingData, setLoadingData] = useState(!!editJobId);
   const [locationMenuOpen, setLocationMenuOpen] = useState(false);
@@ -52,6 +53,22 @@ function PostJobForm() {
         try {
           const { data } = await api.get(`/job-postings/${editJobId}`);
           setFormData({
+            title: data.title || '',
+            description: data.description || '',
+            requirements: data.requirements || '',
+            benefits: data.benefits || '',
+            salaryMin: data.salaryMin ? String(data.salaryMin) : '',
+            salaryMax: data.salaryMax ? String(data.salaryMax) : '',
+            jobType: data.jobType || 'FULLTIME',
+            experience: data.experience || 'Không yêu cầu',
+            vacancies: data.vacancies || 1,
+            branchIds: data.branches?.map((b: any) => b.branchId) || [],
+            hardSkills: data.structuredRequirements?.hardSkills || [],
+            softSkills: data.structuredRequirements?.softSkills || [],
+            minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
+            jobTier: data.jobTier || 'BASIC',
+          });
+          setInitialFormData({
             title: data.title || '',
             description: data.description || '',
             requirements: data.requirements || '',
@@ -121,6 +138,27 @@ function PostJobForm() {
       [type === 'hard' ? 'hardSkills' : 'softSkills']: prev[type === 'hard' ? 'hardSkills' : 'softSkills'].filter(s => s !== skill)
     }));
   };
+
+  // --- Computed flags ---
+  const isFormValid =
+    formData.title.trim().length > 0 &&
+    formData.description.trim().length > 0 &&
+    formData.requirements.trim().length > 0 &&
+    formData.hardSkills.length > 0;
+
+  const hasChanges = !editJobId || !initialFormData || (
+    JSON.stringify({
+      ...formData,
+      hardSkills: [...formData.hardSkills].sort(),
+      softSkills: [...formData.softSkills].sort(),
+      branchIds: [...formData.branchIds].sort(),
+    }) !== JSON.stringify({
+      ...initialFormData,
+      hardSkills: [...initialFormData.hardSkills].sort(),
+      softSkills: [...initialFormData.softSkills].sort(),
+      branchIds: [...initialFormData.branchIds].sort(),
+    })
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,8 +252,6 @@ function PostJobForm() {
                 <option value="FULLTIME">Toàn thời gian (Full-time)</option>
                 <option value="PARTTIME">Bán thời gian (Part-time)</option>
                 <option value="INTERNSHIP">Thực tập (Internship)</option>
-                <option value="CONTRACT">Hợp đồng (Contract)</option>
-                <option value="REMOTE">Làm việc từ xa (Remote)</option>
               </select>
             </div>
 
@@ -475,15 +511,26 @@ function PostJobForm() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-slate-100">
-          <button
-            type="submit"
-            disabled={saving}
-            className="h-11 px-8 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
-          >
-            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {saving ? 'Đang Lưu...' : (editJobId ? 'Lưu Thay Đổi' : 'Gửi Yêu Cầu')}
-          </button>
+        <div className="flex justify-end items-center gap-3 pt-4 border-t border-slate-100">
+          {editJobId && !hasChanges && (
+            <p className="text-sm text-slate-400 italic mr-auto">Thay đổi thông tin để hiện nút lưu</p>
+          )}
+          {!isFormValid && (
+            <p className="text-sm text-amber-600 flex items-center gap-1 mr-auto">
+              <Info className="w-4 h-4" />
+              Cần có: Tiêu đề, Mô tả, Yêu cầu, ít nhất 1 Hard Skill
+            </p>
+          )}
+          {isFormValid && hasChanges && (
+            <button
+              type="submit"
+              disabled={saving}
+              className="h-11 px-8 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-70"
+            >
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              {saving ? 'Đang Lưu...' : (editJobId ? 'Lưu Thay Đổi' : 'Gửi Yêu Cầu')}
+            </button>
+          )}
         </div>
       </form>
     </motion.div>

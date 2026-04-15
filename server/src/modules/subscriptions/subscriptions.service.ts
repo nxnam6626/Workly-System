@@ -31,16 +31,16 @@ export class SubscriptionsService {
     if (planType === PlanType.LITE) {
       cost = 450;
       cashback = 150;
-      updateData.maxBasicPosts = 3;
-      updateData.maxVipPosts = 0;
-      updateData.maxUrgentPosts = 0;
-      updateData.canViewAIReport = false;
+      updateData.maxBasicPosts = 10;
+      updateData.maxVipPosts = 5;
+      updateData.maxUrgentPosts = 2;
+      updateData.canViewAIReport = true;
     } else if (planType === PlanType.GROWTH) {
       cost = 2000;
       cashback = 750;
       updateData.maxBasicPosts = 5;
-      updateData.maxVipPosts = 2;
-      updateData.maxUrgentPosts = 1;
+      updateData.maxVipPosts = 5;
+      updateData.maxUrgentPosts = 2;
       updateData.canViewAIReport = true;
     } else {
       throw new BadRequestException('Gói cước không hợp lệ.');

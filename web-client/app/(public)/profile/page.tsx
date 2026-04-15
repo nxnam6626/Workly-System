@@ -33,10 +33,12 @@ import { useAuthStore } from "@/stores/auth";
 import { JobCard, type Job } from "@/components/JobCard";
 import { CVReviewModal } from "@/components/candidates/CVReviewModal";
 import toast from "react-hot-toast";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 export default function ProfileDashboard() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading, user, updateUser } = useAuthStore();
+  const confirm = useConfirm();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [isOpenToWork, setIsOpenToWork] = useState(true);
@@ -63,7 +65,7 @@ export default function ProfileDashboard() {
         })
         .catch((err) => console.error("Failed to load profile", err))
         .finally(() => setLoadingProfile(false));
-        
+
       setLoadingJobs(true);
       api.get('/candidates/recommended-jobs')
         .then((res: any) => setRecommendedJobs(res.data || []))
@@ -165,13 +167,19 @@ export default function ProfileDashboard() {
   };
 
   const handleDeleteCv = async (cvId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa CV này?")) return;
+    const ok = await confirm({
+      title: 'Xóa CV',
+      message: 'Bạn có chắc chắn muốn xóa CV này? Hành động này không thể hoàn tác.',
+      confirmText: 'Xóa CV',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     const toastId = toast.loading("Đang xóa CV...");
     try {
       await profileApi.deleteCv(cvId);
       toast.success("Đã xóa CV thành công", { id: toastId });
-      fetchProfile(true); // Silent refresh
+      fetchProfile(true);
     } catch (error) {
       toast.error("Lỗi khi xóa CV", { id: toastId });
     }
@@ -206,10 +214,10 @@ export default function ProfileDashboard() {
     const toastId = toast.loading('Đang cập nhật ảnh đại diện...');
     try {
       const { avatarUrl } = await profileApi.updateAvatar(file);
-      
+
       // Update global auth store for consistency across app
       updateUser({ avatar: avatarUrl });
-      
+
       // Update local state for immediate feedback
       if (profile) {
         setProfile({
@@ -217,7 +225,7 @@ export default function ProfileDashboard() {
           avatar: avatarUrl
         });
       }
-      
+
       toast.success('Cập nhật ảnh đại diện thành công!', { id: toastId });
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Lỗi khi cập nhật ảnh.', { id: toastId });
@@ -264,12 +272,12 @@ export default function ProfileDashboard() {
                 ) : (
                   <span className="text-4xl font-bold text-slate-400">{avatarLetter}</span>
                 )}
-                
+
                 {/* Upload Overlay */}
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white pointer-events-auto cursor-pointer">
                   <Camera className="w-6 h-6 mb-1" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">Đổi ảnh</span>
-                  <input 
+                  <input
                     type="file"
                     className="absolute inset-0 opacity-0 cursor-pointer"
                     accept="image/*"
@@ -277,7 +285,7 @@ export default function ProfileDashboard() {
                     disabled={isUpdatingAvatar}
                   />
                 </div>
-                
+
                 {/* Loading State */}
                 {isUpdatingAvatar && (
                   <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
@@ -295,9 +303,9 @@ export default function ProfileDashboard() {
               <div className="flex flex-col items-start gap-1">
                 <span className="text-sm font-bold text-slate-800">Sẵn sàng làm việc</span>
                 {isOpenToWork ? (
-                   <span className="text-[11px] text-orange-500 font-semibold bg-orange-50 px-2 py-0.5 rounded">Đang công khai hồ sơ</span>
+                  <span className="text-[11px] text-orange-500 font-semibold bg-orange-50 px-2 py-0.5 rounded">Đang công khai hồ sơ</span>
                 ) : (
-                   <span className="text-[11px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded">Đang tắt tìm việc</span>
+                  <span className="text-[11px] text-slate-400 font-semibold bg-slate-100 px-2 py-0.5 rounded">Đang tắt tìm việc</span>
                 )}
               </div>
               <button
@@ -471,9 +479,8 @@ export default function ProfileDashboard() {
               />
               <label
                 htmlFor="cv-upload-profile"
-                className={`group cursor-pointer w-full bg-slate-50 hover:bg-blue-50 border-2 border-dashed border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all ${
-                  profile?.candidate?.cvs && profile.candidate.cvs.length > 0 ? 'py-4' : 'py-10'
-                }`}
+                className={`group cursor-pointer w-full bg-slate-50 hover:bg-blue-50 border-2 border-dashed border-slate-200 hover:border-blue-300 text-slate-500 hover:text-blue-600 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all ${profile?.candidate?.cvs && profile.candidate.cvs.length > 0 ? 'py-4' : 'py-10'
+                  }`}
               >
                 {isUploading ? (
                   <div className="flex items-center gap-2 font-bold text-blue-600">
@@ -511,27 +518,46 @@ export default function ProfileDashboard() {
             {/* Skills */}
             <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 flex flex-col">
               <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3">Kỹ năng</h3>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {profile?.candidate?.skills?.length ? profile.candidate.skills.map((s, idx) => {
-                  const levelColors: Record<string, string> = {
-                    ADVANCED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                    INTERMEDIATE: 'bg-sky-50 text-sky-700 border-sky-200',
-                    BEGINNER: 'bg-amber-50 text-amber-700 border-amber-200',
-                  };
-                  const levelLabels: Record<string, string> = {
-                    ADVANCED: 'Nâng cao',
-                    INTERMEDIATE: 'Trung bình',
-                    BEGINNER: 'Cơ bản',
-                  };
-                  const color = levelColors[s.level] || levelColors.BEGINNER;
-                  const label = levelLabels[s.level] || 'Cơ bản';
-                  return (
-                    <span key={idx} className={`px-3 py-1.5 text-[13px] font-medium rounded-xl border transition-colors ${color}`}>
-                      {s.skillName}
-                      <span className="ml-1.5 text-[10px] font-bold opacity-70">• {label}</span>
-                    </span>
-                  );
-                }) : (
+              <div className="space-y-4 w-full mt-1">
+                {profile?.candidate?.skills?.length ? (
+                  Object.entries(
+                    profile.candidate.skills.reduce((acc, s) => {
+                      const category = s.category || 'Khác';
+                      if (!acc[category]) acc[category] = [];
+                      acc[category].push(s);
+                      return acc;
+                    }, {} as Record<string, any[]>)
+                  ).map(([cat, items]) => (
+                    <div key={cat} className="w-full">
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                        {cat}
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {items.map((s, idx) => {
+                          const levelColors: Record<string, string> = {
+                            ADVANCED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            INTERMEDIATE: 'bg-sky-50 text-sky-700 border-sky-200',
+                            BEGINNER: 'bg-amber-50 text-amber-700 border-amber-200',
+                          };
+                          const levelLabels: Record<string, string> = {
+                            ADVANCED: 'Nâng cao',
+                            INTERMEDIATE: 'Trung bình',
+                            BEGINNER: 'Cơ bản',
+                          };
+                          const color = levelColors[s.level] || levelColors.BEGINNER;
+                          const label = levelLabels[s.level] || 'Cơ bản';
+                          return (
+                            <span key={idx} className={`px-3 py-1.5 text-[13px] font-medium rounded-xl border transition-colors ${color}`}>
+                              {s.skillName}
+                              <span className="ml-1.5 text-[10px] font-bold opacity-70">• {label}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))
+                ) : (
                   <p className="text-slate-400 text-sm">Chưa có kỹ năng. <Link href="/profile/edit" className="text-blue-600 hover:underline">Thêm ngay</Link></p>
                 )}
               </div>
@@ -562,7 +588,7 @@ export default function ProfileDashboard() {
 
           <div className="space-y-4">
             {loadingJobs ? (
-              <div className="text-center py-4 text-sm text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2"/> Đang phân tích gợi ý...</div>
+              <div className="text-center py-4 text-sm text-slate-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Đang phân tích gợi ý...</div>
             ) : recommendedJobs.length === 0 ? (
               <div className="text-center py-4 text-sm text-slate-500">Chưa có công việc nào khớp với kỹ năng của bạn. Hãy cập nhật kỹ năng profile nhé!</div>
             ) : (

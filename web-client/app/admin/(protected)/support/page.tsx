@@ -2,9 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { adminSupportApi, SupportRequest, adminUsersApi } from '@/lib/admin-api';
-import { Mail, CheckCircle2, CircleDashed, Filter, CalendarDays, KeySquare, HelpCircle, LockOpen } from 'lucide-react';
+import { Mail, CheckCircle2, CircleDashed, Filter, CalendarDays, KeySquare, HelpCircle, LockOpen, Lock } from 'lucide-react';
 import { useSocketStore } from '@/stores/socket';
+import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
+
+function AccessDenied({ perm }: { perm: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-rose-500" />
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-slate-800">Không có quyền truy cập</h2>
+        <p className="text-slate-400 text-sm mt-1">Tài khoản của bạn không có quyền <span className="font-semibold">{perm}</span>.</p>
+        <p className="text-slate-400 text-xs mt-1">Liên hệ Supreme Admin để được cấp thêm quyền.</p>
+      </div>
+    </div>
+  );
+}
 
 export default function SupportAdminPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
@@ -13,6 +29,11 @@ export default function SupportAdminPage() {
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
   const { socket } = useSocketStore();
+  const { user } = useAuthStore();
+
+  const adminLevel = user?.admin?.adminLevel ?? 2;
+  const perms: string[] = user?.admin?.permissions ?? [];
+  const canAccess = adminLevel === 1 || perms.includes('MANAGE_SUPPORT');
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -27,8 +48,8 @@ export default function SupportAdminPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    if (canAccess) fetchRequests();
+  }, [canAccess]);
 
   useEffect(() => {
     if (!socket) return;
@@ -88,6 +109,8 @@ export default function SupportAdminPage() {
         return null;
     }
   };
+
+  if (!canAccess) return <AccessDenied perm="MANAGE_SUPPORT" />;
 
   return (
     <div className="space-y-6">

@@ -1,33 +1,53 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/auth';
 import {
   RefreshCw,
   Clock,
   ShieldAlert,
-  Briefcase,
   CheckCircle2,
   XCircle,
+  Lock,
 } from 'lucide-react';
-import { adminJobsApi, JobPosting, JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-api';
+import { adminJobsApi, JobPosting, JobStatus, AdminFilterJobPostingDto } from '@/lib/admin-api';
 import JobQuickViewModal from './JobQuickViewModal';
 import JobStats from './components/JobStats';
 import JobFilters from './components/JobFilters';
 import JobTable from './components/JobTable';
 import BulkActionsBar from './components/BulkActionsBar';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { useSocketStore } from '@/stores/socket';
 import toast from 'react-hot-toast';
 
+function AccessDenied() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-rose-500" />
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-slate-800">Không có quyền truy cập</h2>
+        <p className="text-slate-400 text-sm mt-1">Tài khoản của bạn không có quyền <span className="font-semibold">MANAGE_JOBS</span>.</p>
+        <p className="text-slate-400 text-xs mt-1">Liên hệ Supreme Admin để được cấp thêm quyền.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function JobsPage() {
+  const { user } = useAuthStore();
+  const adminLevel = user?.admin?.adminLevel ?? 2;
+  const perms: string[] = user?.admin?.permissions ?? [];
+  const canAccess = adminLevel === 1 || perms.includes('MANAGE_JOBS');
+
   const { socket } = useSocketStore();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [globalStats, setGlobalStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Pagination & Filters
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -38,16 +58,14 @@ export default function JobsPage() {
     searchTerm: '',
   });
 
-  // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  // Modals & States
   const [quickViewJob, setQuickViewJob] = useState<JobPosting | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const confirm = useConfirm();
 
   const fetchJobs = useCallback(async () => {
+    if (!canAccess) return;
     setIsLoading(true);
     setError('');
     try {
@@ -61,40 +79,24 @@ export default function JobsPage() {
       setGlobalStats(statsData);
     } catch (err) {
       setError('Không thể tải danh sách yêu cầu tuyển dụng.');
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [filters, page]);
+  }, [filters, page, canAccess]);
+
+  useEffect(() => { fetchJobs(); }, [fetchJobs]);
 
   useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleNewJob = (job: JobPosting) => {
-      // Tự động làm mới danh sách nếu đang ở trang 1
-      if (page === 1) {
-        fetchJobs();
-      } else {
-        setTotalItems(prev => prev + 1);
-      }
-    };
-
-    const handleAdminJobUpdated = () => {
-      fetchJobs();
-    };
-
+    if (!socket || !canAccess) return;
+    const handleNewJob = () => { if (page === 1) fetchJobs(); else setTotalItems(prev => prev + 1); };
+    const handleAdminJobUpdated = () => { fetchJobs(); };
     socket.on('newJobPosting', handleNewJob);
     socket.on('adminJobUpdated', handleAdminJobUpdated);
-
     return () => {
       socket.off('newJobPosting', handleNewJob);
       socket.off('adminJobUpdated', handleAdminJobUpdated);
     };
-  }, [socket, fetchJobs, page]);
+  }, [socket, fetchJobs, page, canAccess]);
 
   const handleApprove = async (id: string) => {
     setIsProcessing(id);
@@ -102,11 +104,8 @@ export default function JobsPage() {
       await adminJobsApi.approve(id);
       setJobs((prev) => prev.map(j => j.jobPostingId === id ? { ...j, status: JobStatus.APPROVED } : j));
       if (quickViewJob?.jobPostingId === id) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.APPROVED } : null);
-    } catch {
-      setError('Duyệt tin thất bại.');
-    } finally {
-      setIsProcessing(null);
-    }
+    } catch { setError('Duyệt tin thất bại.'); }
+    finally { setIsProcessing(null); }
   };
 
   const handleReject = async (id: string) => {
@@ -115,11 +114,8 @@ export default function JobsPage() {
       await adminJobsApi.reject(id);
       setJobs((prev) => prev.map(j => j.jobPostingId === id ? { ...j, status: JobStatus.REJECTED } : j));
       if (quickViewJob?.jobPostingId === id) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.REJECTED } : null);
-    } catch {
-      setError('Từ chối tin thất bại.');
-    } finally {
-      setIsProcessing(null);
-    }
+    } catch { setError('Từ chối tin thất bại.'); }
+    finally { setIsProcessing(null); }
   };
 
   const handleBulkApprove = async () => {
@@ -130,18 +126,15 @@ export default function JobsPage() {
       fetchJobs();
       setSelectedIds([]);
       toast.success(`Duyệt thành công ${selectedIds.length} tin.`);
-    } catch {
-      setError('Duyệt hàng loạt thất bại.');
-    } finally {
-      setIsBulkProcessing(false);
-    }
+    } catch { setError('Duyệt hàng loạt thất bại.'); }
+    finally { setIsBulkProcessing(false); }
   };
 
   const requestBulkReject = async () => {
     if (selectedIds.length === 0) return;
     const ok = await confirm({
       title: 'Từ chối hàng loạt?',
-      message: `Bạn có chắc muốn từ chối ${selectedIds.length} tin đã chọn? Hành động này sẽ thay đổi trạng thái và gửi thông báo cho nhà tuyển dụng.`,
+      message: `Bạn có chắc muốn từ chối ${selectedIds.length} tin đã chọn?`,
       confirmText: 'Từ chối tất cả',
       variant: 'danger',
     });
@@ -152,19 +145,13 @@ export default function JobsPage() {
       fetchJobs();
       setSelectedIds([]);
       toast.success(`Từ chối thành công ${selectedIds.length} tin.`);
-    } catch {
-      setError('Từ chối hàng loạt thất bại.');
-    } finally {
-      setIsBulkProcessing(false);
-    }
+    } catch { setError('Từ chối hàng loạt thất bại.'); }
+    finally { setIsBulkProcessing(false); }
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === jobs.length && jobs.length > 0) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(jobs.map(j => j.jobPostingId));
-    }
+    if (selectedIds.length === jobs.length && jobs.length > 0) setSelectedIds([]);
+    else setSelectedIds(jobs.map(j => j.jobPostingId));
   };
 
   const toggleSelect = (id: string) => {
@@ -176,17 +163,18 @@ export default function JobsPage() {
     { label: 'Đã Duyệt', value: globalStats?.totalApproved || 0, color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle2 },
     { label: 'Đã Từ chối', value: globalStats?.totalRejected || 0, color: 'bg-rose-50 text-rose-600', icon: XCircle },
     { label: 'Điểm AI thấp', value: jobs.filter(j => j.aiReliabilityScore < 60).length, color: 'bg-red-50 text-red-600', icon: ShieldAlert },
-    // { label: 'Tin từ Crawler', value: globalStats?.totalCrawled || 0, color: 'bg-indigo-50 text-indigo-600', icon: Briefcase },
   ], [globalStats, jobs]);
+
+  // --- PERMISSION GATE ---
+  if (!canAccess) return <AccessDenied />;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Kiểm Duyệt Yêu Cầu Tuyển Dụng</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Duyệt yêu cầu đăng tin mới, quản lý AI Score và xử lý hàng loạt dữ liệu crawler
+            Duyệt yêu cầu đăng tin mới, quản lý AI Score và xử lý hàng loạt
           </p>
         </div>
         <button
@@ -213,7 +201,7 @@ export default function JobsPage() {
         </div>
 
         {error && (
-          <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center gap-3">
             <ShieldAlert className="w-5 h-5 flex-shrink-0" />
             <p className="font-medium text-red-800">{error}</p>
             <button onClick={() => setError('')} className="ml-auto p-1 hover:bg-red-100 rounded-md text-red-400">
