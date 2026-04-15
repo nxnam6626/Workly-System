@@ -9,6 +9,7 @@ import { TopEmployers } from "@/components/TopEmployers";
 import { CareerTools } from "@/components/CareerTools";
 import { CTABanner } from "@/components/CTABanner";
 
+
 export default function Home() {
    return (
       <div className="flex flex-col items-center w-full bg-[#f4f7fa] pb-20">
@@ -32,19 +33,21 @@ export default function Home() {
                <RightHeroWidgets />
             </aside>
          </div>
- 
+
          {/* 3. Matching Jobs Section */}
          <MatchingSection />
- 
+
          {/* 4. Urgent Jobs Section */}
          <UrgentJobsSection />
 
-         {/* 4. Additional Sections */}
+         {/* 5. Recruiter CTA */}
+         <CTABanner />
+
+         {/* 6. Additional Sections */}
          <div className="w-full space-y-20 mt-10">
             <StatsSection />
             <TopEmployers />
             <CareerTools />
-            <CTABanner />
          </div>
       </div>
    );

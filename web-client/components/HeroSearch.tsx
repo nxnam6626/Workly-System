@@ -61,44 +61,53 @@ export function HeroSearch() {
         animate="visible"
         className="max-w-7xl mx-auto flex flex-col items-center gap-8 relative z-10"
       >
-        {/* Compact Search Bar */}
-        <div className="w-full bg-white rounded-xl shadow-jobsgo border border-slate-200/60 flex items-stretch p-1.5 h-16">
-          {/* Keyword */}
-          <div className="flex-[2] flex items-center px-6 gap-3">
-             <span className="text-slate-500 font-bold text-xs whitespace-nowrap uppercase tracking-wider">Từ khóa:</span>
-             <input
-                type="text"
-                placeholder="Việc, công ty, ngành nghề..."
-                className="w-full bg-transparent outline-none text-slate-800 font-bold placeholder:text-slate-400 placeholder:font-normal text-[15px]"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
+        {/* Search Bar Container */}
+        <div className="w-full bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 flex flex-col md:flex-row items-stretch p-2 md:h-20 max-w-5xl">
+          {/* Keyword Field */}
+          <div className="flex-[1.5] flex items-center px-5 gap-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-100">
+             <div className="p-2.5 bg-blue-50 rounded-xl text-mariner">
+                <Search className="w-5 h-5 stroke-[2.5px]" />
+             </div>
+             <div className="flex flex-col flex-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Vị trí tuyển dụng</span>
+                <input
+                  type="text"
+                  placeholder="Nhập tên công việc, vị trí..."
+                  className="w-full bg-transparent outline-none text-slate-800 font-bold placeholder:text-slate-300 placeholder:font-medium text-[15px]"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                />
+             </div>
           </div>
 
-          <div className="w-px h-10 self-center bg-slate-200" />
-
-          {/* Location */}
-          <div className="flex-1 flex items-center px-6 gap-3">
-             <span className="text-slate-500 font-bold text-xs whitespace-nowrap uppercase tracking-wider">Địa điểm:</span>
-             <select
-                className="w-full bg-transparent outline-none text-slate-700 font-bold appearance-none cursor-pointer text-[15px]"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              >
-                <option value="">Tỉnh/thành, quận...</option>
-                {LOCATIONS.map((loc: string) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
+          {/* Location Field */}
+          <div className="flex-1 flex items-center px-5 gap-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-100">
+             <div className="p-2.5 bg-orange-50 rounded-xl text-safety-orange">
+                <MapPin className="w-5 h-5 stroke-[2.5px]" />
+             </div>
+             <div className="flex flex-col flex-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Địa điểm</span>
+                <select
+                  className="w-full bg-transparent outline-none text-slate-800 font-bold appearance-none cursor-pointer text-[15px]"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                >
+                  <option value="">Toàn quốc</option>
+                  {LOCATIONS.map((loc: string) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+             </div>
           </div>
 
+          {/* Search Button */}
           <button
             onClick={handleSearch}
-            className="h-16 px-12 bg-mariner hover:bg-[#0047a5] text-white font-bold rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+            className="md:ml-2 h-14 md:h-auto px-10 bg-mariner hover:bg-[#0047a5] text-white font-black rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-[0.97] flex items-center justify-center gap-3"
           >
-            <Search className="w-5 h-5 stroke-[2.5px]" />
-            <span>TÌM KIẾM</span>
+            <Search className="w-5 h-5 stroke-[3px]" />
+            <span className="tracking-wide">TÌM KIẾM</span>
           </button>
         </div>
       </motion.div>

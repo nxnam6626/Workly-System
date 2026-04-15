@@ -7,7 +7,7 @@ import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '../../../generated/prisma';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { MessagesGateway } from '../../messages/messages.gateway';
@@ -314,7 +314,8 @@ export class JobPostingsService {
     }
 
     if (ids.length === 0) {
-      return { items: [], total: 0, page, limit };
+      // Nếu search bằng ES không ra kết quả, thử fallback về Prisma để đảm bảo không bị trống do chưa sync
+      return this.findAllPrisma(query, userId);
     }
 
     // Fetch full data from Prisma using IDs from ES
@@ -866,7 +867,7 @@ export class JobPostingsService {
 
   /**
    * Tăng việt count sau mỗi lần tin bị từ chối bởi Admin.
-   * Nếu vượt ngưỡng (VIOLATION_LIMIT) → khóa tài khoản, gửi thông báo realtime.
+   * Nếu vượt ngưỡng (VIOLATION_LIMIT) -> khóa tài khoản, gửi thông báo realtime.
    */
   private async checkAndAutoLockRecruiter(recruiterId: string): Promise<void> {
     console.log(`[VIOLATION] Incrementing violation for recruiter: ${recruiterId}`);
@@ -901,7 +902,7 @@ export class JobPostingsService {
       return;
     }
 
-    // Đạt ngưỡng → khóa tài khoản
+    // Đạt ngưỡng -> khóa tài khoản
     await this.prisma.user.update({
       where: { userId: updated.userId },
       data: { status: 'LOCKED' },

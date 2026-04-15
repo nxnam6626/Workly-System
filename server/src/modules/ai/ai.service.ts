@@ -34,7 +34,7 @@ async function parsePdfBuffer(buffer: Buffer): Promise<string> {
   }
 }
 import { SearchService } from '../search/search.service';
-const pdfParse = require('pdf-parse');
+
 
 @Injectable()
 export class AiService {
@@ -370,7 +370,7 @@ export class AiService {
       this.logger.error(`Tất cả model AI đều lỗi: ${lastError?.message}`);
       yield "\n[Hệ thống]: Hiện tại máy chủ trí tuệ nhân tạo đang rất bận (Quá tải). Bạn hãy thử lại sau ít phút hoặc nhấn Gửi lại nhé!";
 
-      const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+      const modelsToTry = ['gemini-2.5-flash'];
 
       for (let i = 0; i < modelsToTry.length; i++) {
         try {

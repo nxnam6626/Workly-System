@@ -27,7 +27,7 @@ export function RightHeroWidgets() {
         {/* Mascot Image */}
         <div className="absolute right-0 bottom-0 w-24 h-24 translate-x-1 translate-y-1 opacity-90 group-hover:scale-110 transition-transform">
            <img 
-            src="file:///C:/Users/XuanNam/.gemini/antigravity/brain/55a3fbb6-6940-4ace-9e05-a3951c8708ed/mascot_cv_creator_1776188845635.png" 
+            src="/assets/mascot-cv-creator.png" 
             alt="Mascot CV" 
             className="w-full h-full object-contain"
           />
@@ -55,7 +55,7 @@ export function RightHeroWidgets() {
         {/* Mascot Image */}
         <div className="absolute right-0 bottom-0 w-24 h-24 translate-x-1 translate-y-1 opacity-90 group-hover:scale-110 transition-transform">
           <img 
-            src="file:///C:/Users/XuanNam/.gemini/antigravity/brain/55a3fbb6-6940-4ace-9e05-a3951c8708ed/mascot_cv_evaluator_1776188859817.png" 
+            src="/assets/mascot-cv-evaluator.png" 
             alt="Mascot AI" 
             className="w-full h-full object-contain"
           />
