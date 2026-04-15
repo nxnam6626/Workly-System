@@ -7,6 +7,7 @@ interface User {
   email: string;
   name?: string;
   avatar?: string;
+  isEmailVerified?: boolean;
   roles?: string[];
   admin?: { adminLevel: number; permissions: string[] };
   candidate?: { fullName?: string };
