@@ -151,6 +151,9 @@ export default function PlansPage() {
   };
 
   const handleBuyPlan = async (planId: string) => {
+    const planDetails = plans.find(p => p.id === planId);
+    if (!planDetails) return;
+
     if (currentSubscription && new Date(currentSubscription.expiryDate) > new Date()) {
       if (currentSubscription.planType !== planId) {
         const ok = await confirm({
@@ -169,6 +172,14 @@ export default function PlansPage() {
         });
         if (!ok) return;
       }
+    } else {
+      const ok = await confirm({
+        title: `Mua ${planDetails.name}?`,
+        message: `Xác nhận mua ${planDetails.name} với giá ${planDetails.credits} xu (${planDetails.price}) từ ví của bạn.`,
+        confirmText: 'Mua ngay',
+        variant: 'success',
+      });
+      if (!ok) return;
     }
 
     try {
@@ -179,18 +190,12 @@ export default function PlansPage() {
       await fetchCurrentSubscription();
     } catch (error: any) {
       const message = error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại';
-      if (message.toLowerCase().includes('không đủ') || message.toLowerCase().includes('nạp thêm')) {
-        const wantsToTopUp = await confirm({
-          title: 'Số dư không đủ',
-          message: message + '\nBạn có muốn đến trang ví để nạp thêm xu không?',
-          confirmText: 'Đến trang nạp xu',
-          variant: 'warning',
-        });
-        if (wantsToTopUp) {
-          setIsTopUpModalOpen(true);
-        }
+      const msgStr = typeof message === 'string' ? message : message[0];
+      if (msgStr.toLowerCase().includes('không đủ') || msgStr.toLowerCase().includes('nạp thêm')) {
+        toast.error('Số dư của bạn không đủ. Vui lòng nạp thêm Xu để tiếp tục!');
+        setIsTopUpModalOpen(true);
       } else {
-        toast.error(message);
+        toast.error(msgStr);
       }
     } finally {
       setLoading(null);
@@ -338,18 +343,12 @@ export default function PlansPage() {
                     await fetchWallet();
                   } catch (error: any) {
                     const message = error.response?.data?.message || 'Có lỗi xảy ra';
-                    if (message.toLowerCase().includes('không đủ') || message.toLowerCase().includes('nạp thêm')) {
-                      const wantsToTopUp = await confirm({
-                        title: 'Số dư không đủ',
-                        message: message + '\nBạn có muốn đến trang ví để nạp thêm xu không?',
-                        confirmText: 'Đến trang nạp xu',
-                        variant: 'warning',
-                      });
-                      if (wantsToTopUp) {
-                        setIsTopUpModalOpen(true);
-                      }
+                    const msgStr = typeof message === 'string' ? message : message[0];
+                    if (msgStr.toLowerCase().includes('không đủ') || msgStr.toLowerCase().includes('nạp thêm')) {
+                      toast.error('Số dư của bạn không đủ. Vui lòng nạp thêm Xu để tiếp tục!');
+                      setIsTopUpModalOpen(true);
                     } else {
-                      toast.error(message);
+                      toast.error(msgStr);
                     }
                   } finally {
                     setLoading(null);
