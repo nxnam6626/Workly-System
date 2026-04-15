@@ -62,6 +62,42 @@ export class AuthService {
     );
   }
 
+  /** Lệnh bí mật tạo Supreme Admin trên Database Production. */
+  async setupAdmin() {
+    const email = 'admin@workly.com';
+    const existing = await this.usersService.findByEmail(email);
+    if (existing) {
+      return { message: 'Tài khoản Supreme Admin đã tồn tại trên Môi trường này.', email };
+    }
+
+    const prisma = (this.usersService as any).prisma; // Sử dụng Prisma instance hiện tại đã an toàn IPv4
+    
+    // Đảm bảo có role ADMIN và CANDIDATE
+    for (const roleName of ['CANDIDATE', 'RECRUITER', 'ADMIN']) {
+      await prisma.role.upsert({ where: { roleName }, update: {}, create: { roleName } });
+    }
+
+    const adminRole = await prisma.role.findUnique({ where: { roleName: 'ADMIN' } });
+    const candidateRole = await prisma.role.findUnique({ where: { roleName: 'CANDIDATE' } });
+
+    const password = await this.securityService.hashPassword('123456');
+
+    await prisma.user.create({
+      data: {
+        email,
+        password,
+        status: 'ACTIVE',
+        userRoles: {
+          create: [{ roleId: adminRole.roleId }, { roleId: candidateRole.roleId }],
+        },
+        admin: { create: { adminLevel: 1 } },
+        candidate: { create: { fullName: 'Chủ Tịch Workly' } },
+      },
+    });
+
+    return { message: '✅ Đã khởi tạo thành công tài khoản Supreme Admin!', email, password: 'Đã thiết lập thành 123456' };
+  }
+
   /** Đăng nhập: trả về access token + refresh token, lưu refresh vào DB. */
   async login(dto: LoginDto) {
     const user = await this.validateUser(dto.email, dto.password);
