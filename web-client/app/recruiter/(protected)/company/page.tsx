@@ -75,27 +75,18 @@ export default function CompanyProfilePage() {
 
   const handleVerifyTaxCode = async () => {
     if (!formData.taxCode) return;
-    if (!formData.companyName) {
-      toast.error('Vui lòng nhập Tên công ty trước khi xác thực mã số thuế.');
-      return;
-    }
     
     setVerifying(true);
     try {
       const res = await fetch(`https://api.vietqr.io/v2/business/${formData.taxCode}`);
       const data = await res.json();
       if (data.code === '00' && data.data) {
-        const apiName = removeDiacritics(data.data.name);
-        const apiShort = removeDiacritics(data.data.shortName || "");
-        const inputName = removeDiacritics(formData.companyName);
-        
-        if (apiName.includes(inputName) || inputName.includes(apiName) || (apiShort && (apiShort.includes(inputName) || inputName.includes(apiShort)))) {
-           toast.success(`Đã xác thực doanh nghiệp: ${data.data.name}`);
-           setFormData(prev => ({ ...prev, verifyStatus: 1 }));
-        } else {
-           toast.error(`Tên công ty không khớp với mã số thuế. Tên đăng ký: ${data.data.name}`);
-           setFormData(prev => ({ ...prev, verifyStatus: -1 }));
-        }
+        toast.success(`Đã tự động điền Tên Công Ty: ${data.data.name}`);
+        setFormData(prev => ({ 
+          ...prev, 
+          companyName: data.data.name,
+          verifyStatus: 1 
+        }));
       } else {
         toast.error('Mã số thuế không tồn tại hoặc sai!');
         setFormData(prev => ({ ...prev, verifyStatus: -1 }));
@@ -250,10 +241,9 @@ export default function CompanyProfilePage() {
                   type="text"
                   name="companyName"
                   value={formData.companyName}
-                  onChange={handleChange}
-                  required
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
-                  placeholder="Ví dụ: Công ty TNHH HKT"
+                  readOnly
+                  placeholder="Sẽ được tự động điền sau khi kiểm tra mã số thuế"
+                  className="w-full h-11 px-4 rounded-xl bg-slate-50 text-slate-500 font-medium border border-slate-200 cursor-not-allowed focus:outline-none transition-all duration-200"
                 />
               </div>
 
