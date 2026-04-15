@@ -92,7 +92,20 @@ export default function PlansPage() {
       await fetchWallet();
       await fetchCurrentSubscription();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+      const message = error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại';
+      if (message.toLowerCase().includes('không đủ') || message.toLowerCase().includes('nạp thêm')) {
+        const wantsToTopUp = await confirm({
+          title: 'Số dư không đủ',
+          message: message + '\nBạn có muốn đến trang ví để nạp thêm xu không?',
+          confirmText: 'Đến trang nạp xu',
+          variant: 'warning',
+        });
+        if (wantsToTopUp) {
+          router.push('/recruiter/wallet');
+        }
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(null);
     }
@@ -238,7 +251,20 @@ export default function PlansPage() {
                     toast.success(`Đăng ký thành công ${pack.name}!`);
                     await fetchWallet();
                   } catch (error: any) {
-                    toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+                    const message = error.response?.data?.message || 'Có lỗi xảy ra';
+                    if (message.toLowerCase().includes('không đủ') || message.toLowerCase().includes('nạp thêm')) {
+                      const wantsToTopUp = await confirm({
+                        title: 'Số dư không đủ',
+                        message: message + '\nBạn có muốn đến trang ví để nạp thêm xu không?',
+                        confirmText: 'Đến trang nạp xu',
+                        variant: 'warning',
+                      });
+                      if (wantsToTopUp) {
+                        router.push('/recruiter/wallet');
+                      }
+                    } else {
+                      toast.error(message);
+                    }
                   } finally {
                     setLoading(null);
                   }
