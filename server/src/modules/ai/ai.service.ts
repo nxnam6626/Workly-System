@@ -148,9 +148,9 @@ export class AiService {
 
   async expandJobKeywords(jobTitle: string, hardSkills: string[]): Promise<Record<string, string[]>> {
     if (!this.isConfigured || hardSkills.length === 0) return {};
-    
+
     const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
-    
+
     for (let i = 0; i < modelsToTry.length; i++) {
       try {
         const model = this.genAI.getGenerativeModel({ model: modelsToTry[i] });
@@ -159,14 +159,14 @@ export class AiService {
         Return ONLY a JSON object where the keys are the original skills from the list, and the values are arrays of string synonyms.
         Do not use markdown, backticks or explanations.
         Example: {"ReactJS": ["React", "React.js", "Redux", "Hooks"], "Node.js": ["Node", "NodeJS", "Express"]}`;
-        
+
         const result = await model.generateContent(prompt);
         let text = result.response.text().trim();
         text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
         return JSON.parse(text);
       } catch (e: any) {
         if ((e.message?.includes('503') || e.message?.includes('429')) && i < modelsToTry.length - 1) {
-          console.warn(`[AiService] expandJobKeywords error with ${modelsToTry[i]} (${e.message}). Switching to fallback ${modelsToTry[i+1]}...`);
+          console.warn(`[AiService] expandJobKeywords error with ${modelsToTry[i]} (${e.message}). Switching to fallback ${modelsToTry[i + 1]}...`);
           // wait 500ms before retrying
           await new Promise(resolve => setTimeout(resolve, 500));
           continue;
@@ -248,9 +248,9 @@ export class AiService {
 
   async expandSearchQuery(message: string): Promise<string[]> {
     if (!this.isConfigured) return [];
-    
-    // Thử với danh sách model ưu tiên
-    const models = ['gemini-flash-latest', 'gemini-2.0-flash'];
+
+    // Thử với danh sách model ưu tiên (Gemini 2.5 Flash là yêu cầu của USER)
+    const models = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash', 'gemini-flash-latest'];
     let lastError: any = null;
 
     for (const modelId of models) {
@@ -271,7 +271,7 @@ export class AiService {
         lastError = error;
         // Nếu lỗi 503 hoặc 429, thử model tiếp theo
         this.logger.warn(`Model ${modelId} lỗi (${error.status || 'unknown'}). Thử model tiếp theo...`);
-        await SLEEP(500);
+        await SLEEP(1000);
       }
     }
 
@@ -288,84 +288,91 @@ export class AiService {
       return;
     }
 
-    const models = ['gemini-flash-latest', 'gemini-2.0-flash'];
+    let ragContext = '';
+
+    try {
+      // 1. Nếu có userId, lấy thông tin CV/Profile từ DB (Pillar: User Context) - CHỈ LÀM 1 LẦN
+      if (context?.userId) {
+        const userContext = await this.getCandidateRagContext(context.userId);
+        if (userContext) {
+          ragContext += userContext;
+        }
+      }
+
+      // 2. Phân tích ý định tìm việc và tìm kiếm dữ liệu thị trường - CHỈ LÀM 1 LẦN
+      const userMessage = message.toLowerCase();
+      const isJobSearch =
+        userMessage.includes('tìm') ||
+        userMessage.includes('việc') ||
+        userMessage.includes('job') ||
+        userMessage.includes('tuyển') ||
+        userMessage.includes('gợi ý');
+
+      if (isJobSearch) {
+        const expandedKeywords = await this.expandSearchQuery(message);
+
+        const jobs = await this.searchService.searchJobsForRAG({
+          search: message,
+          expandedKeywords: expandedKeywords,
+          limit: 3,
+        });
+
+        if (jobs && jobs.length > 0) {
+          ragContext += `\n--- DANH SÁCH VIỆC LÀM PHÙ HỢP CÓ SẴN ---\n${JSON.stringify(jobs)}\n`;
+          yield { type: 'SHOW_JOB_CARDS', payload: jobs };
+        }
+      }
+    } catch (e) {
+      this.logger.error(`Lỗi khi chuẩn bị dữ liệu RAG: ${e.message}`);
+      // Tiếp tục với context trống nếu lỗi
+    }
+
+    const systemPrompt = `Bạn là Workly-AI, một SIÊU CỐ VẤN TUYỂN DỤNG có tâm và chuyên nghiệp.
+        
+    NGỮ CẢNH DỮ LIỆU CỦA ỨNG VIÊN:
+    ${ragContext || 'Chưa có thông tin hồ sơ cụ thể.'}
+
+    NGUYÊN TẮC GIAO TIẾP "PHẢI TUÂN THỦ":
+    1. **NÓI TRỰC TIẾP**: Tuyệt đối KHÔNG dùng "Dựa trên hồ sơ của bạn", "Tôi thấy bạn...", "Với kỹ năng...". Hãy lồng ghép thông tin một cách tự nhiên.
+       - Thay vì: "Dựa trên hồ sơ, bạn có kỹ năng ReactJS."
+       - Hãy nói: "Với kinh nghiệm ReactJS sẵn có, bạn sẽ rất phù hợp với vị trí Senior Frontend tại VNG."
+    2. **ƯU TIÊN HIỆN TẠI**: Nếu thông tin trong chat (VD: "Tôi vừa có bằng TOEIC 800") khác với CV, hãy tin vào lời nói của người dùng và nhắc họ cập nhật CV sau.
+    3. **SÚC TÍCH & ĐẸP**: Trả lời ngắn, chia bullet points, in đậm từ khóa. Tối đa 100-120 từ.
+    4. **TẬP TRUNG**: Chỉ trả lời về sự nghiệp, việc làm. Từ chối các chủ đề khác một cách lịch sự nhưng dứt khoát.
+
+    Câu hỏi từ người dùng: ${message}`;
+
+    const models = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash', 'gemini-flash-latest'];
     let success = false;
     let lastError: any = null;
 
     for (const modelId of models) {
       if (success) break;
-      
+
       try {
         const model = this.genAI.getGenerativeModel({ model: modelId });
-
-        let ragContext = '';
-
-        // 1. Nếu có userId, lấy thông tin CV/Profile từ DB (Pillar: User Context)
-        if (context?.userId) {
-          const userContext = await this.getCandidateRagContext(context.userId);
-          if (userContext) {
-            ragContext += userContext;
-          }
-        }
-
-        // 2. Phân tích ý định tìm việc
-        const userMessage = message.toLowerCase();
-        const isJobSearch =
-          userMessage.includes('tìm') ||
-          userMessage.includes('việc') ||
-          userMessage.includes('job') ||
-          userMessage.includes('tuyển') ||
-          userMessage.includes('gợi ý');
-
-        if (isJobSearch) {
-          const expandedKeywords = await this.expandSearchQuery(message);
-          
-          const jobs = await this.searchService.searchJobsForRAG({
-            search: message,
-            expandedKeywords: expandedKeywords,
-            limit: 3,
-          });
-
-          if (jobs && jobs.length > 0) {
-            ragContext += `\n--- DANH SÁCH VIỆC LÀM PHÙ HỢP (Market Data) ---\n${JSON.stringify(jobs)}\n`;
-            yield { type: 'SHOW_JOB_CARDS', payload: jobs };
-          }
-        }
-
-        const systemPrompt = `Bạn là Workly-AI, SIÊU CỐ VẤN TUYỂN DỤNG chuyên nghiệp.
-        
-        NGỮ CẢNH DỮ LIỆU:
-        ${ragContext || 'Chưa nhận diện được ứng viên/JD cụ thể.'}
-
-        NGUYÊN TẮC VÀNG (MANDATORY):
-        1. **BỎ Filler**: Tuyệt đối không dùng "Dựa trên hồ sơ của bạn", "Với nền tảng là...". Hãy nói trực tiếp như một người cố vấn thực thụ. 
-        2. **Ưu tiên "Hiện tại"**: Nếu thông tin trong chat (VD: TOEIC 800) mâu thuẫn với CV (VD: TOEIC 700), hãy ưu tiên thông tin từ chat và lịch sự nhắc người dùng cập nhật lại CV.
-        3. **Súc tích & Markdown**: Trả lời ngắn, chia bullet points, in đậm từ khóa quan trọng. Tối đa 120 từ.
-        4. **Guardrails**: Từ chối chủ đề ngoài lề (Toán, Thời tiết, Chính trị...) bằng 1 câu ngắn gọn và quay lại ngay chủ đề sự nghiệp.
-
-        Câu hỏi từ người dùng: ${message}`;
-
         const result = await model.generateContentStream(systemPrompt);
+
         for await (const chunk of result.stream) {
           const text = chunk.text();
           if (text) yield text;
         }
-        
+
         success = true; // Đã xong và thành công
       } catch (error: any) {
         lastError = error;
         this.logger.warn(`Model ${modelId} stream error: ${error.message}. Thử model tiếp theo...`);
-        await SLEEP(500);
+        await SLEEP(1000);
       }
     }
 
     if (!success) {
       this.logger.error(`Tất cả model AI đều lỗi: ${lastError?.message}`);
       yield "\n[Hệ thống]: Hiện tại máy chủ trí tuệ nhân tạo đang rất bận (Quá tải). Bạn hãy thử lại sau ít phút hoặc nhấn Gửi lại nhé!";
-    
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
-    
-    for (let i = 0; i < modelsToTry.length; i++) {
+
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+
+      for (let i = 0; i < modelsToTry.length; i++) {
         try {
           const model = this.genAI.getGenerativeModel({
             model: modelsToTry[i],
@@ -377,13 +384,13 @@ export class AiService {
           return; // Stream success, exit generator
         } catch (e: any) {
           if (e.message?.includes('429') && i < modelsToTry.length - 1) {
-            console.warn(`[AiService] Quota exceeded for ${modelsToTry[i]}. Switching to fallback ${modelsToTry[i+1]}...`);
+            console.warn(`[AiService] Quota exceeded for ${modelsToTry[i]}. Switching to fallback ${modelsToTry[i + 1]}...`);
             continue; // Fallback to next model
           }
           console.error(`[AiService] generateStreamResponse error with ${modelsToTry[i]}:`, e.message);
           yield 'Hệ thống đánh giá AI đang nhận lượng truy cập quá tải. Vui lòng thử lại sau ít phút!';
           return;
         }
+      }
     }
   }
-}

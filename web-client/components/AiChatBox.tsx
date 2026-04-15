@@ -93,8 +93,18 @@ export default function AiChatBox() {
         : 'bg-white/90 backdrop-blur-md border border-slate-200 text-slate-800 rounded-tl-none'
         }`}>
         {hasContent && (
-          <div className="text-sm leading-relaxed markdown-content">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <div className="text-[13.5px] leading-relaxed markdown-content">
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({children}) => <p className="mb-2 last:mb-0 leading-6">{children}</p>,
+                ul: ({children}) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                ol: ({children}) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                li: ({children}) => <li className="mb-0">{children}</li>,
+                strong: ({children}) => <strong className="font-bold text-indigo-700/90 dark:text-indigo-300">{children}</strong>,
+                code: ({children}) => <code className="bg-slate-100 px-1 rounded text-pink-600 font-mono text-[12px]">{children}</code>
+              }}
+            >
               {msg.content}
             </ReactMarkdown>
           </div>
@@ -241,20 +251,20 @@ export default function AiChatBox() {
             className="w-[380px] sm:w-[420px] h-[580px] bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-white/50 ring-1 ring-black/5"
           >
             <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 p-5 text-white flex items-center justify-between shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-              <div className="flex items-center gap-3">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
+              <div className="flex items-center gap-3 relative z-10">
                 <div className="w-10 h-10 bg-white/20 rounded-xl backdrop-blur-md flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg tracking-tight">Workly AI</h3>
-                  <div className="flex items-center gap-1.5 opacity-80">
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                    <span className="text-[11px] font-medium uppercase tracking-wider">Trực tuyến (Socket)</span>
+                  <div className="flex items-center gap-1.5 opacity-90">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
+                    <span className="text-[11px] font-semibold uppercase tracking-wider">Đang hoạt động</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 relative z-10">
                 <button
                   onClick={() => {
                     if (confirm('Bạn có muốn xóa toàn bộ lịch sử trò chuyện?')) clearChat();
@@ -273,7 +283,7 @@ export default function AiChatBox() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-slate-50/50">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-slate-50/50 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 transition-colors">
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
@@ -281,7 +291,7 @@ export default function AiChatBox() {
                   animate={{ opacity: 1, x: 0 }}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex gap-2.5 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex gap-3 max-w-[88%] items-start ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                     {renderMessageContent(msg) && (
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white text-blue-600 border border-slate-100'
                         }`}>
@@ -295,7 +305,7 @@ export default function AiChatBox() {
 
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="flex gap-2.5 items-center">
+                  <div className="flex gap-3 items-start">
                     <div className="w-8 h-8 rounded-full bg-white text-blue-600 border border-slate-100 flex items-center justify-center shadow-sm">
                       <Bot className="w-4 h-4" />
                     </div>
@@ -346,8 +356,8 @@ export default function AiChatBox() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Nhập việc làm bạn muốn tìm..."
-                  className="w-full bg-slate-100 border-none rounded-2xl py-3.5 pl-4 pr-14 focus:ring-2 focus:ring-blue-500/30 transition-all text-sm text-slate-800 placeholder:text-slate-400"
+                  placeholder="Hỏi Workly AI về lộ trình, CV hoặc việc làm..."
+                  className="w-full bg-slate-100 border-none rounded-2xl py-3.5 pl-4 pr-14 focus:ring-2 focus:ring-blue-500/30 transition-all text-sm text-slate-800 placeholder:text-slate-400/80"
                   disabled={isTyping}
                 />
                 <button

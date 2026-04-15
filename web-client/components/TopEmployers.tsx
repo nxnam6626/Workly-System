@@ -12,25 +12,25 @@ export function TopEmployers() {
   ];
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-6 py-20">
-      <div className="flex items-center justify-between mb-10">
+    <section className="w-full max-w-7xl mx-auto px-6 py-20 bg-white">
+      <div className="flex items-center justify-between mb-10 border-l-4 border-mariner pl-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Top Nhà Tuyển Dụng</h2>
-          <p className="text-slate-500 mt-2 text-sm md:text-base">Các tập đoàn hàng đầu đang tìm kiếm tài năng như bạn</p>
+          <h2 className="text-3xl font-extrabold text-[#111827] tracking-tight uppercase">Top Nhà Tuyển Dụng</h2>
+          <p className="text-slate-500 mt-1 text-sm md:text-base font-medium">Đối tác chiến lược và các tập đoàn hàng đầu</p>
         </div>
-        <Link href="/companies" className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:underline">
-          Xem tất cả <ChevronRight className="w-4 h-4" />
+        <Link href="/companies" className="text-mariner text-[15px] font-bold flex items-center gap-1 hover:text-primary-hover group">
+          Xem tất cả <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
         {employers.map((emp, index) => (
-          <div key={index} className="bg-white border border-slate-100 rounded-2xl p-6 flex flex-col items-center hover:shadow-lg hover:border-blue-100 transition-all cursor-pointer group">
-            <div className={`w-16 h-16 ${emp.color} rounded-xl mb-4 flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform`}>
+          <div key={index} className="bg-white border border-slate-100 rounded-lg p-6 flex flex-col items-center hover:shadow-jobsgo-hover hover:border-mariner/20 transition-all cursor-pointer group shadow-jobsgo">
+            <div className={`w-16 h-16 ${emp.color} rounded-lg mb-4 flex items-center justify-center text-white shadow-sm group-hover:scale-110 transition-transform`}>
               <Building2 className="w-8 h-8" />
             </div>
             <h3 className="font-bold text-slate-800 text-sm md:text-base text-center truncate w-full">{emp.name}</h3>
-            <span className="mt-2 px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] md:text-xs font-bold rounded-full">
+            <span className="mt-2 text-mariner text-xs font-bold">
               {emp.jobs} việc làm
             </span>
           </div>

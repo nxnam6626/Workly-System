@@ -13,7 +13,7 @@ export function StatsSection() {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
         {stats.map((stat, index) => (
           <div key={index} className="flex flex-col items-center text-center group">
-            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+            <div className="w-12 h-12 rounded-full bg-slate-50 text-mariner flex items-center justify-center mb-4 group-hover:bg-mariner group-hover:text-white transition-all duration-300 border border-slate-100 shadow-sm">
               {stat.icon}
             </div>
             <div className="text-3xl font-bold text-slate-900 mb-1">{stat.value}</div>

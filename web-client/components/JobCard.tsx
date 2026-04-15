@@ -110,41 +110,41 @@ export function JobCard({ job }: JobCardProps) {
               <img
                 src={job.company.logo}
                 alt={job.company.companyName}
-                className="w-full h-full object-contain p-1"
+                className="w-full h-full object-contain p-2"
               />
             ) : (
-              <span className="text-base font-bold text-blue-600">
-                {job.company?.companyName?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "TC"}
+              <span className="text-xl font-bold text-mariner">
+                {job.company?.companyName?.slice(0, 1).toUpperCase() || "J"}
               </span>
             )}
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col justify-center pr-8">
-            <h3 className="font-bold text-[#1e293b] text-[15px] line-clamp-1 group-hover:text-blue-600 transition-colors tracking-tight">
+          <div className="flex-1 min-w-0 pr-6">
+            <h3 className="font-bold text-[#111827] text-[16px] line-clamp-2 group-hover:text-mariner transition-colors leading-snug">
               {job.title}
             </h3>
-            <p className="text-[#64748b] text-[13px] truncate">
+            <p className="text-slate-500 text-[14px] mt-1 line-clamp-1">
               {job.company?.companyName}
             </p>
           </div>
 
           <button
             onClick={handleToggleFavorite}
-            className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm border border-slate-50 hover:scale-110 active:scale-95 ${isSaved ? "text-red-500 border-red-50" : "text-slate-300 hover:text-red-400"}`}
+            className={`absolute top-5 right-5 w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSaved ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}
           >
-            <Heart className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+            <Heart className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
           </button>
         </div>
 
-        {/* Middle: Key details */}
-        <div className="space-y-1 mb-4 ml-0.5">
-          <div className="flex items-center gap-2 text-[#64748b]">
-            <MapPin className="w-3.5 h-3.5 opacity-60" />
-            <span className="text-[13px] font-medium truncate">{job.locationCity || "Toàn quốc"}</span>
+        {/* Middle: Quick Stats */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5">
+          <div className="flex items-center gap-1.5 text-slate-500">
+            <MapPin className="w-4 h-4 text-slate-400" />
+            <span className="text-[14px]">{job.locationCity || "Toàn quốc"}</span>
           </div>
-          <div className="flex items-center gap-2 text-emerald-600 mt-1.5 mb-1.5">
+          <div className="flex items-center gap-1.5 text-safety-orange font-bold">
             <DollarSign className="w-4 h-4" />
-            <span className="text-[13px] font-bold">
+            <span className="text-[14px]">
               {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
             </span>
           </div>
