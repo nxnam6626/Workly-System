@@ -88,10 +88,9 @@ export class AuthService {
         password,
         status: 'ACTIVE',
         userRoles: {
-          create: [{ roleId: adminRole.roleId }, { roleId: candidateRole.roleId }],
+          create: [{ roleId: adminRole.roleId }],
         },
         admin: { create: { adminLevel: 1 } },
-        candidate: { create: { fullName: 'Chủ Tịch Workly' } },
       },
     });
 
