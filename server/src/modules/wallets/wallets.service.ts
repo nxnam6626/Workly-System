@@ -95,8 +95,8 @@ export class WalletsService {
       orderCode,
       amount: amountVND,
       description: `Nap ${targetXu} xu vao vi`,
-      cancelUrl: 'http://localhost:3000/recruiter/wallet?status=CANCEL',
-      returnUrl: 'http://localhost:3000/recruiter/wallet?status=SUCCESS',
+      cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/recruiter/wallet?status=CANCEL`,
+      returnUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/recruiter/wallet?status=SUCCESS`,
       items: [{ name: 'Workly Xu', quantity: targetXu, price: 1000 }],
     };
 
@@ -150,8 +150,8 @@ export class WalletsService {
       orderCode,
       amount: amountVND,
       description: `Nap ${tx.amount} xu vao vi`,
-      cancelUrl: 'http://localhost:3000/recruiter/wallet?status=CANCEL',
-      returnUrl: 'http://localhost:3000/recruiter/wallet?status=SUCCESS',
+      cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/recruiter/wallet?status=CANCEL`,
+      returnUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/recruiter/wallet?status=SUCCESS`,
       items: [{ name: 'Workly Xu', quantity: tx.amount, price: 1000 }],
     };
 
