@@ -2,6 +2,7 @@ services:
   - type: web
     name: workly-backend
     env: docker
+    plan: free
     autoDeploy: true
     envVars:
       - key: NODE_ENV
@@ -18,4 +19,3 @@ services:
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
-
