@@ -24,11 +24,15 @@ import { profileApi, type CandidateProfile } from '@/lib/profile-api';
 import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import { useConfirm } from '@/components/ConfirmDialog';
+import api from '@/lib/api';
+import { CVReviewModal } from '@/components/candidates/CVReviewModal';
 
 export default function CvManagementPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const confirm = useConfirm();
 
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -36,6 +40,13 @@ export default function CvManagementPage() {
   // Stats cho Upload
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+
+  // States cho Smart Upload Modal
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [extractedData, setExtractedData] = useState<any>(null);
+  const [fileUrl, setFileUrl] = useState('');
+  const [cvTitle, setCvTitle] = useState('');
+  const [cvId, setCvId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -74,15 +85,27 @@ export default function CvManagementPage() {
     }
 
     setIsUploading(true);
-    const toastId = toast.loading('Đang tải lên hệ thống...');
+    const toastId = toast.loading('Đang bóc tách CV bằng AI...');
     try {
-      await profileApi.uploadCvOnly(file);
-      toast.success('Đã tải lên CV thành công!', { id: toastId });
-      // Thêm silent fetch để lấy ngay danh sách mới nhất
-      fetchProfile(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await api.post('/candidates/cv/extract', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const { parsedData, fileUrl, cvTitle, cvId } = response.data;
+      setExtractedData(parsedData || {});
+      setFileUrl(fileUrl);
+      setCvTitle(cvTitle);
+      setCvId(cvId);
+
+      // Mở modal xác nhận
+      setIsReviewModalOpen(true);
+      toast.success('Bóc tách thành công!', { id: toastId });
+      
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi tải CV.', { id: toastId });
+      toast.error(error.response?.data?.message || 'Lỗi khi xử lý CV.', { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -115,7 +138,19 @@ export default function CvManagementPage() {
   };
 
   const handleDeleteCv = async (cvId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này? Hãy cân nhắc kỹ.')) return;
+    const cvToDelete = profile?.candidate?.cvs?.find((c) => c.cvId === cvId);
+    if (cvToDelete?.isMain) {
+      toast.error('Không thể xóa CV mặc định. Vui lòng thiết lập một CV khác làm mặc định trước khi xóa tài liệu này.', { duration: 4000 });
+      return;
+    }
+
+    const ok = await confirm({
+      title: 'Xóa tài liệu',
+      message: 'Bạn có chắc chắn muốn xóa CV này? Hành động này không thể hoàn tác.',
+      confirmText: 'Xóa',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
     const toastId = toast.loading('Đang xóa...');
     try {
@@ -165,7 +200,7 @@ export default function CvManagementPage() {
                 <div className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center text-blue-600 shadow-sm">
                   <FileText className="w-4 h-4" />
                 </div>
-                Tài liệu của bạn
+                CV của bạn
               </h1>
               <nav className="hidden md:flex items-center gap-5">
                 <Link
@@ -270,13 +305,12 @@ export default function CvManagementPage() {
                       
                       <button
                         onClick={() => handleDeleteCv(cv.cvId)}
-                        disabled={cv.isMain}
                         className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all shadow-sm ${
                           cv.isMain
-                            ? 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
+                            ? 'bg-red-50/50 text-red-300 border-red-100 hover:bg-red-50 hover:text-red-500'
                             : 'bg-white text-red-500 border-slate-200 hover:bg-red-50 hover:border-red-200'
                         }`}
-                        title={cv.isMain ? "Không thể xoá CV mặc định" : "Xoá tài liệu"}
+                        title="Xoá tài liệu"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -375,6 +409,20 @@ export default function CvManagementPage() {
           </aside>
         </div>
       </main>
+
+      <CVReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        initialData={extractedData}
+        fileUrl={fileUrl}
+        cvTitle={cvTitle}
+        cvId={cvId}
+        onSuccess={() => {
+          setIsReviewModalOpen(false);
+          fetchProfile(true); // Tải lại danh sách CV
+          toast.success("Hồ sơ đã được cập nhật đồng bộ!");
+        }}
+      />
     </div>
   );
 }

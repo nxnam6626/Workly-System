@@ -20,7 +20,8 @@ import {
   MessageSquare,
   FileText,
   Wallet,
-  Heart
+  Heart,
+  Brain
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
@@ -35,6 +36,7 @@ const navItems = [
   { label: 'Yêu Cầu Tuyển Dụng', href: '/recruiter/post-job', icon: PlusCircle },
   { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
   { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
+  { label: 'AI Insights', href: '/recruiter/ai-report', icon: Brain },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
   { label: 'Tìm Ứng Viên', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },

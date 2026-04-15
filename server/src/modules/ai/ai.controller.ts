@@ -34,14 +34,20 @@ export class AiController {
   @Sse('chat-stream')
   chatStream(
     @CurrentUser('userId') userId: string,
+    @CurrentUser('roles') roles: string[],
     @Query('message') message: string,
   ): Observable<MessageEvent> {
-    console.log(
-      `[AiController] Received stream request from user ${userId} for message: ${message}`,
+    const roleList = (roles || []).map((r: any) => (typeof r === 'string' ? r : r?.roleName)).filter(Boolean);
+    return from(this.aiService.generateStreamResponse(message, userId, roleList)).pipe(
+      map((text) => ({ data: typeof text === 'string' ? text.replace(/\n/g, '__NEWLINE__') : text }) as MessageEvent),
     );
-    return from(this.aiService.generateStreamResponse(message, userId)).pipe(
-      map((text) => ({ data: text }) as MessageEvent),
-    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  @Get('recruiter-insights')
+  async getRecruiterInsights(@CurrentUser('userId') userId: string) {
+    return this.aiService.generateRecruiterInsights(userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

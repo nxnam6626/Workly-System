@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MapPin, Plus, Trash2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 interface Branch {
   branchId: string;
@@ -23,6 +24,7 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
   const [newBranchName, setNewBranchName] = useState('');
   const [newBranchAddress, setNewBranchAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const confirm = useConfirm();
   
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +54,13 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
   };
 
   const handleDelete = async (branchId: string) => {
-    if (!confirm('Bạn có chắc muốn xoá chi nhánh này?')) return;
+    const ok = await confirm({
+      title: 'Xoá chi nhánh',
+      message: 'Bạn có chắc muốn xoá chi nhánh này? Hành động này không thể hoàn tác.',
+      confirmText: 'Xoá',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await api.delete(`/companies/my-company/branches/${branchId}`);
       setBranches(branches.filter(b => b.branchId !== branchId));

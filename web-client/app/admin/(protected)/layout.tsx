@@ -25,7 +25,7 @@ const navGroups = [
   {
     label: 'Quản lý',
     items: [
-      { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard, requireLevel1: true },
       { label: 'Người Dùng', href: '/admin/users', icon: Users, perm: 'MANAGE_USERS' },
       { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
       { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, perm: 'MANAGE_BILLING' },
@@ -33,6 +33,7 @@ const navGroups = [
     ],
   },
 ];
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -47,8 +48,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push('/admin/login');
       } else if (!user?.roles?.includes('ADMIN')) {
         router.push('/admin/login');
-      } else if (pathname === '/admin') {
-        router.push('/admin/dashboard');
+      } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
+        const adminLevel = user?.admin?.adminLevel || 2;
+        if (adminLevel === 1) {
+          if (pathname === '/admin') router.push('/admin/dashboard');
+        } else {
+          // Find first permissible page for Level 2 Admin
+          const perms = (user?.admin?.permissions as string[]) || [];
+          let targetPage = '/admin/login'; // Fallback if no permissions
+          
+          if (perms.includes('MANAGE_USERS')) targetPage = '/admin/users';
+          else if (perms.includes('MANAGE_JOBS')) targetPage = '/admin/jobs';
+          else if (perms.includes('MANAGE_BILLING') || perms.includes('MANAGE_REVENUE')) targetPage = '/admin/revenue';
+          else if (perms.includes('MANAGE_SUPPORT')) targetPage = '/admin/support';
+
+          router.push(targetPage);
+        }
       }
     }
   }, [isAuthenticated, isLoading, user, router, pathname]);
@@ -107,16 +122,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               )}
             </AnimatePresence>
             <div className="space-y-1">
-              {group.items.map(({ label, href, icon: Icon, perm }) => {
+              {group.items.map(({ label, href, icon: Icon, perm, requireLevel1 }: any) => {
                 const active = pathname.startsWith(href);
-                // Check permissions
-                if (perm) {
-                  const adminLevel = user?.admin?.adminLevel || 2;
-                  const perms = user?.admin?.permissions || [];
-                  if (adminLevel !== 1 && !perms.includes(perm)) {
-                    return null;
-                  }
-                }
+                const adminLevel = user?.admin?.adminLevel || 2;
+                const perms = user?.admin?.permissions || [];
+                // requireLevel1: chỉ admin cấp 1 (Supreme) mới xem
+                if (requireLevel1 && adminLevel !== 1) return null;
+                // perm: kiểm tra quyền cụ thể
+                if (perm && adminLevel !== 1 && !perms.includes(perm)) return null;
                 
                 return (
                   <Link

@@ -18,8 +18,6 @@ export enum JobType {
   FULLTIME = 'FULLTIME',
   PARTTIME = 'PARTTIME',
   INTERNSHIP = 'INTERNSHIP',
-  CONTRACT = 'CONTRACT',
-  REMOTE = 'REMOTE',
 }
 
 export interface Company {

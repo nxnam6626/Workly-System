@@ -17,10 +17,12 @@ import {
 import { jobAlertsApi, type JobAlert } from '@/lib/job-alerts-api';
 import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthStore();
+  const confirm = useConfirm();
   
   const [alerts, setAlerts] = useState<JobAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +81,14 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAlert = async (id: string, keyword: string) => {
-    if (!confirm(`Bạn muốn hủy nhận thông báo cho từ khoá "${keyword}"?`)) return;
+    const ok = await confirm({
+      title: 'Hủy theo dõi từ khoá',
+      message: `Bạn muốn hủy nhận thông báo cho từ khoá "${keyword}"?`,
+      confirmText: 'Hủy theo dõi',
+      cancelText: 'Giữ lại',
+      variant: 'warning',
+    });
+    if (!ok) return;
 
     const toastId = toast.loading('Đang huỷ...');
     try {

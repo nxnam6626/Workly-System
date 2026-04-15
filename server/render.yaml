@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: workly-backend
+    env: docker
+    region: singapore # Chọn khu vực gần Việt Nam nhất để tối ưu độ trễ
+    plan: starter # Dùng gói starter thay vì free vì free bị tắt sau 15p không hoạt động
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false # Bạn sẽ tự dán DATABASE_URL của Supabase vào UI Render
+      - key: REDIS_URL
+        sync: false # Nếu có dùng Redis thì cấu hình ở trang web Render
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false

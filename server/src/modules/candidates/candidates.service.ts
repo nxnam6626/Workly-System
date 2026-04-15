@@ -25,10 +25,18 @@ export class CandidatesService {
 
   async findAll(query: any, recruiterUserId?: string) {
     const { skip = 0, take = 10, search, skills, major } = query;
-    const where: any = {};
+    const where: any = {
+      user: {
+        status: 'ACTIVE'
+      }
+    };
 
     if (search) {
-      where.fullName = { contains: search, mode: 'insensitive' };
+      where.OR = [
+        { fullName: { contains: search, mode: 'insensitive' } },
+        { major: { contains: search, mode: 'insensitive' } },
+        { skills: { some: { skillName: { contains: search, mode: 'insensitive' } } } },
+      ];
     }
     if (major) {
       where.major = { contains: major, mode: 'insensitive' };
@@ -227,13 +235,9 @@ export class CandidatesService {
 
     const cvTitle = file.originalname.split('.')[0];
 
-    // Kiểm tra xem đây có phải là CV đầu tiên không
-    const cvCount = candidate
-      ? await this.prisma.cV.count({
-          where: { candidateId: candidate.candidateId },
-        })
-      : 0;
-    const isMain = cvCount === 0;
+    // Tự động thiết lập CV mới nhất làm CV chính (isMain = true).
+    // Hàm saveCv() bên dưới sẽ tự động hủy isMain của các bản CV cũ.
+    const isMain = true;
 
     // BƯỚC 1: Lưu bản ghi CV vào database trước (Lưu nháp - Trang thái: Uploaded)
     return this.saveCv(userId, {
@@ -252,11 +256,15 @@ export class CandidatesService {
 
     const cv = await this.prisma.cV.findUnique({
       where: { cvId },
-      select: { cvId: true, candidateId: true, fileUrl: true },
+      select: { cvId: true, candidateId: true, fileUrl: true, isMain: true },
     });
 
     if (!cv || cv.candidateId !== candidate.candidateId) {
       throw new NotFoundException('CV not found or does not belong to user');
+    }
+
+    if (cv.isMain) {
+      throw new BadRequestException('Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.');
     }
 
     if (!cv.fileUrl)
@@ -272,33 +280,64 @@ export class CandidatesService {
       // 3. Tiến hành bóc tách AI
       const extractedData = await this.cvParsingService.parseCv(buffer);
 
-      if (extractedData) {
-        // 4. Kiểm tra xem CV này có phải của người dùng đang đăng nhập hay không
-        // Cần thực hiện loose match để tránh lỗi do họ tên thiếu dấu hoặc ghi ngược (John Doe vs Doe John)
-        const cvName = (extractedData.fullName || '').toLowerCase().trim();
-        const accName = (candidate.fullName || '').toLowerCase().trim();
-        
-        let isValidName = false;
-        
-        if (cvName && accName) {
-           const cvTokens = cvName.split(' ');
-           const accTokens = accName.split(' ');
-           
-           // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
-           isValidName = cvTokens.some(token => token.length >= 2 && accTokens.includes(token));
-           
-           if (!isValidName) {
-              throw new BadRequestException('Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.');
-           }
-        }
-        
-        // 5. Cập nhật dữ liệu bóc tách vào bản ghi
-        return this.updateCv(userId, cv.cvId, {
-          parsedData: extractedData,
-        });
+      const hasValidName = extractedData && extractedData.fullName && extractedData.fullName.trim() !== '';
+      const hasContent = extractedData && (extractedData.skills?.length > 0 || extractedData.education?.length > 0 || extractedData.experience?.length > 0);
+
+      if (!hasValidName || !hasContent) {
+         throw new BadRequestException('Hệ thống AI không thể nhận diện đủ thông tin cốt lõi (Họ tên, Trình độ/Kỹ năng) từ CV này. Vui lòng kiểm tra định dạng file hoặc thử lại.');
       }
 
-      return this.updateCv(userId, cv.cvId, {});
+      // 4. Kiểm tra xem CV này có phải của người dùng đang đăng nhập hay không
+      // Cần thực hiện loose match để tránh lỗi do họ tên thiếu dấu hoặc ghi ngược (John Doe vs Doe John)
+      const cvName = (extractedData.fullName || '').toLowerCase().trim();
+      const accName = (candidate.fullName || '').toLowerCase().trim();
+      
+      let isValidName = false;
+      
+      if (cvName && accName) {
+         const cvTokens = cvName.split(' ');
+         const accTokens = accName.split(' ');
+         
+         // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
+         isValidName = cvTokens.some(token => token.length >= 2 && accTokens.includes(token));
+         
+         if (!isValidName) {
+            throw new BadRequestException('Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.');
+         }
+      }
+        
+      // 5. Cập nhật hồ sơ ứng viên nếu còn trống
+      const isNameEmpty = !candidate.fullName || candidate.fullName === 'Người dùng';
+      const isPhoneEmpty = !candidate.user?.phoneNumber;
+      const isMajorEmpty = !candidate.major;
+      const isUniversityEmpty = !candidate.university;
+      const isSkillsEmpty = !candidate.skills || candidate.skills.length === 0;
+
+      const updateData: any = {};
+      if (isNameEmpty && extractedData.fullName) updateData.fullName = extractedData.fullName;
+      if (isPhoneEmpty && extractedData.phone) updateData.phone = extractedData.phone;
+      
+      if (isMajorEmpty && extractedData.education?.length > 0) {
+         updateData.major = extractedData.education[0].major;
+      }
+      if (isUniversityEmpty && extractedData.education?.length > 0) {
+         updateData.university = extractedData.education[0].school;
+      }
+      
+      if (!candidate.gpa && extractedData.gpa) updateData.gpa = extractedData.gpa;
+
+      if (isSkillsEmpty && extractedData.skills?.length > 0) {
+         updateData.skills = extractedData.skills;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+         await this.update(candidate.candidateId, updateData).catch(e => console.error('Failed to auto-fill candidate:', e));
+      }
+
+      // 6. Cập nhật dữ liệu bóc tách vào bản ghi CV
+      return this.updateCv(userId, cv.cvId, {
+        parsedData: extractedData,
+      });
     } catch (error) {
       console.error('[CandidatesService] Error analyzing CV:', error);
       throw error;
@@ -323,19 +362,21 @@ export class CandidatesService {
     const { skills, projects, fullName, phone, ...rest } = updateCandidateDto;
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Update Candidate basic info (university, major, gpa, etc.)
+      // 1. Update Candidate basic info (university, major, gpa, fullName, etc.)
       const updatedCandidate = await tx.candidate.update({
         where: { candidateId },
-        data: rest,
+        data: {
+          ...rest,
+          ...(fullName && { fullName }),
+        },
       });
 
-      // 2. Update User (fullName, phoneNumber)
-      if (fullName || phone) {
+      // 2. Update User (phoneNumber only)
+      if (phone) {
         await tx.user.update({
           where: { userId: candidate.userId },
           data: {
-            ...(fullName && { fullName }),
-            ...(phone && { phoneNumber: phone }),
+            phoneNumber: phone,
           },
         });
       }
@@ -348,6 +389,7 @@ export class CandidatesService {
             data: skills.map((s: any) => ({
               candidateId,
               skillName: typeof s === 'string' ? s : s.skillName,
+              category: typeof s === 'string' ? 'Khác' : s.category || 'Khác',
               level: typeof s === 'string' ? 'BEGINNER' : s.level || 'BEGINNER',
             })),
           });
@@ -570,6 +612,31 @@ export class CandidatesService {
         parsedData: true,
       },
     });
+
+    // Đồng bộ thông tin từ CV (parsedData) vào hồ sơ chính của ứng viên nếu có
+    if (parsedData) {
+      const candidateUpdateData: any = {};
+      if (parsedData.fullName) candidateUpdateData.fullName = parsedData.fullName;
+      if (parsedData.phone) candidateUpdateData.phone = parsedData.phone;
+      
+      if (parsedData.education && parsedData.education.length > 0) {
+        candidateUpdateData.university = parsedData.education[0].school;
+        candidateUpdateData.major = parsedData.education[0].major;
+      }
+      
+      if (parsedData.gpa !== undefined) candidateUpdateData.gpa = parsedData.gpa;
+      if (parsedData.skills && Array.isArray(parsedData.skills)) {
+        candidateUpdateData.skills = parsedData.skills;
+      }
+
+      if (Object.keys(candidateUpdateData).length > 0) {
+        try {
+          await this.update(candidate.candidateId, candidateUpdateData);
+        } catch (error) {
+          console.error('[CandidatesService] Lỗi khi đồng bộ dữ liệu vào hồ sơ ứng viên:', error);
+        }
+      }
+    }
 
     // Trigger matching for candidate when CV is parsed or set to main
     if (isMain || parsedData) {

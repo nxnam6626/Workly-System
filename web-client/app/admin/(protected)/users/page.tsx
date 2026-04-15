@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { RefreshCw, ShieldAlert, XCircle } from 'lucide-react';
+import { RefreshCw, ShieldAlert, XCircle, Lock } from 'lucide-react';
 import {
   adminUsersApi,
   type AdminUser,
@@ -20,12 +20,32 @@ import { useAuthStore } from '@/stores/auth';
 
 const PAGE_SIZE = 15;
 
+function AccessDenied({ perm }: { perm: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-rose-500" />
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-slate-800">Không có quyền truy cập</h2>
+        <p className="text-slate-400 text-sm mt-1">Tài khoản của bạn không có quyền <span className="font-semibold">{perm}</span>.</p>
+        <p className="text-slate-400 text-xs mt-1">Liên hệ Supreme Admin để được cấp thêm quyền.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthStore();
   const [error, setError] = useState('');
+
+  const adminLevel = user?.admin?.adminLevel ?? 2;
+  const perms: string[] = user?.admin?.permissions ?? [];
+  const canAccess = adminLevel === 1 || perms.includes('MANAGE_USERS');
+
 
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AdminUserFilters>({});
@@ -218,6 +238,9 @@ export default function UsersPage() {
     ).length,
     locked: users.filter((u) => u.status === 'LOCKED').length,
   }), [users, total]);
+
+  // --- PERMISSION GATE ---
+  if (!canAccess) return <AccessDenied perm="MANAGE_USERS" />;
 
   return (
     <div className="space-y-6">

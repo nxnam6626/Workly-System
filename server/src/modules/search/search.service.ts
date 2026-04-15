@@ -199,7 +199,16 @@ export class SearchService implements OnModuleInit {
     }
 
     if (industry) {
-      filter.push({ match: { industry: industry } });
+      // ES doesn't have an `industry` field populated; use content-based matching instead
+      must.push({
+        multi_match: {
+          query: industry,
+          fields: ['title^2', 'description'],
+          fuzziness: 'AUTO',
+          operator: 'or',
+          minimum_should_match: '50%',
+        },
+      });
     }
 
     if (experience) {

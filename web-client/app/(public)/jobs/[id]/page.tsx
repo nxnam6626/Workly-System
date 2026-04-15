@@ -37,7 +37,47 @@ import api from "@/lib/api";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatSalary, timeAgo } from "@/lib/utils";
-import { JOB_TYPE_LABEL } from "@/lib/constants";
+import { JOB_TYPE_LABEL, INDUSTRIES } from "@/lib/constants";
+
+// Industry keyword map matching the backend
+const INDUSTRY_TAG_MAP: Record<string, string[]> = {
+  'CNTT / Phần mềm': [
+    'frontend', 'backend', 'developer', 'dev ', 'lập trình', 'software', 'react', 'nodejs', 'java',
+    'python', 'devops', 'data', 'mobile', 'flutter', 'fullstack', 'qa', 'tester', 'scrum',
+    'công nghệ thông tin', 'typescript', 'golang', 'php', 'ruby', 'swift', 'kotlin',
+    'angular', 'vue', '.net', 'c++', 'blockchain', 'ai engineer', 'ml engineer',
+  ],
+  'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'crm'],
+  'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor'],
+  'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'cfo'],
+  'Nhân sự / Hành chính / Pháp lý': ['nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'compliance'],
+  'Kinh doanh / Bán hàng': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'key account'],
+  'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'figma', 'adobe', 'animation', 'ui/ux', 'creative director'],
+  'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'qc', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì'],
+  'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad'],
+  'Vận tải / Logistics / Chuỗi cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'forwarder', 'procurement'],
+  'Bán lẻ / Tiêu dùng': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer'],
+  'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'hospitality', 'chef'],
+  'Y tế / Dược phẩm / Chăm sóc sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinic', 'chăm sóc sức khỏe'],
+  'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'giáo dục'],
+  'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản'],
+  'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản'],
+  'Truyền thông / Báo chí': ['báo chí', 'journalist', 'public relations', 'media', 'broadcast'],
+  'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment'],
+};
+
+function detectIndustries(title: string, description: string, maxResults = 3): string[] {
+  // Pad with spaces so 'dev ' matches at start/end of title too
+  const text = ` ${title} ${description} `.toLowerCase();
+  const matched: string[] = [];
+  for (const [industry, keywords] of Object.entries(INDUSTRY_TAG_MAP)) {
+    if (keywords.some(kw => text.includes(kw.toLowerCase()))) {
+      matched.push(industry);
+      if (matched.length >= maxResults) break;
+    }
+  }
+  return matched;
+}
 import { JobCard, Job } from "@/components/JobCard";
 import { JobApplyModal } from "@/components/jobs/JobApplyModal";
 import { useAuthStore } from "@/stores/auth";
@@ -107,13 +147,33 @@ export default function JobDetailsPage() {
          setJob(data as JobDetails);
 
 
-         const resRelated = await api.get(`/job-postings`, {
-            params: {
-               limit: 3,
-               location: data.locationCity || undefined,
-            }
-         });
-         setRelatedJobs(resRelated.data.items?.filter((j: Job) => j.jobPostingId !== id) || []);
+         // Detect the current job's industry to find related jobs in the same field
+         const detectedIndustries = detectIndustries(data.title, data.description || '', 1);
+         const primaryIndustry = detectedIndustries[0];
+
+         const relatedParams: Record<string, any> = { limit: 6 };
+         if (primaryIndustry) {
+            relatedParams.industry = primaryIndustry;
+         }
+
+         const resRelated = await api.get(`/job-postings`, { params: relatedParams });
+
+         // Sort: URGENT first → PROFESSIONAL → BASIC, exclude current job
+         const tierOrder: Record<string, number> = { URGENT: 0, PROFESSIONAL: 1, BASIC: 2 };
+         const sorted = (resRelated.data.items || [])
+            .filter((j: Job) => j.jobPostingId !== id)
+            .sort((a: Job, b: Job) => (tierOrder[a.jobTier || 'BASIC'] ?? 2) - (tierOrder[b.jobTier || 'BASIC'] ?? 2));
+
+         // If not enough results in same industry, also fetch popular VIP jobs as filler
+         if (sorted.length < 2) {
+            const fallback = await api.get(`/job-postings`, { params: { limit: 6 } });
+            const fallbackSorted = (fallback.data.items || [])
+               .filter((j: Job) => j.jobPostingId !== id && !sorted.find((s: Job) => s.jobPostingId === j.jobPostingId))
+               .sort((a: Job, b: Job) => (tierOrder[a.jobTier || 'BASIC'] ?? 2) - (tierOrder[b.jobTier || 'BASIC'] ?? 2));
+            setRelatedJobs([...sorted, ...fallbackSorted].slice(0, 4));
+         } else {
+            setRelatedJobs(sorted.slice(0, 4));
+         }
       } catch (error) {
          console.error("Error fetching job details:", error);
       } finally {
@@ -312,11 +372,16 @@ export default function JobDetailsPage() {
 
                      <div className="space-y-10">
                         <section>
-                           <div className="flex flex-wrap gap-2 mb-6">
-                              <span className="px-3 py-1 bg-slate-50 text-slate-500 text-xs rounded border border-slate-100">Kinh doanh / Bán hàng</span>
-                              <span className="px-3 py-1 bg-slate-50 text-slate-500 text-xs rounded border border-slate-100">Tư vấn</span>
-                              <span className="px-3 py-1 bg-slate-50 text-slate-500 text-xs rounded border border-slate-100">B2C</span>
-                           </div>
+                           {(() => {
+                             const cats = detectIndustries(job.title, job.description || '', 3);
+                             return cats.length > 0 ? (
+                               <div className="flex flex-wrap gap-2 mb-6">
+                                 {cats.map(cat => (
+                                   <span key={cat} className="px-3 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-100">{cat}</span>
+                                 ))}
+                               </div>
+                             ) : null;
+                           })()}
                         </section>
 
                         <section>
@@ -415,7 +480,7 @@ export default function JobDetailsPage() {
                            <Briefcase className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
                            <div className="text-xs">
                               <p className="text-slate-400 mb-0.5 tracking-tight">Lĩnh vực:</p>
-                              <p className="font-bold text-slate-700">Dược phẩm / Thiết bị y tế</p>
+                              <p className="font-bold text-slate-700">{detectIndustries(job.title, job.description || "")[0] || "Chưa xác định"}</p>
                            </div>
                         </div>
                         <div className="flex items-start gap-4">
@@ -495,13 +560,21 @@ export default function JobDetailsPage() {
                      </div>
                   </div>
 
-                  {/* Categories Tags */}
                   <div className="bg-white rounded-lg p-6 border border-slate-100 shadow-sm">
                      <h3 className="font-bold text-slate-800 mb-6 text-sm">Danh mục nghề liên quan</h3>
                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 cursor-pointer border border-slate-100">Kinh doanh / Bán hàng</span>
-                        <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 cursor-pointer border border-slate-100">Dược phẩm / Thiết bị y tế</span>
-                        <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 cursor-pointer border border-slate-100">Direct Sales</span>
+                        {(() => {
+                          const cats = detectIndustries(job.title, job.description || "", 5);
+                          return cats.length > 0 ? (
+                            cats.map(cat => (
+                              <Link key={cat} href={`/jobs?industry=${encodeURIComponent(cat)}`}>
+                                <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 hover:bg-blue-50 cursor-pointer border border-slate-100 transition-colors">{cat}</span>
+                              </Link>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">Chưa xác định ngành nghề</span>
+                          );
+                        })()}
                      </div>
                   </div>
 

@@ -213,7 +213,7 @@ function WalletContent() {
                       {cvUnlockQuota === 0 ? 'Hết lượt' : `Còn ${Math.round((cvUnlockQuota / cvUnlockQuotaMax) * 100)}%`}
                     </span>
                   ) : (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">Chưa mua</span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400"></span>
                   )}
                 </div>
 
@@ -222,10 +222,10 @@ function WalletContent() {
                       cvUnlockQuota / Math.max(cvUnlockQuotaMax, 1) < 0.3 ? 'text-amber-500' :
                         'text-emerald-600'
                     }`}>{cvUnlockQuota}</span>
-                  <span className="text-slate-400 text-sm mb-1 font-medium">/ {cvUnlockQuotaMax} lượt</span>
+                  <span className="text-slate-400 text-sm mb-1 font-medium">Lượt xem CV</span>
                 </div>
 
-                {/* Progress bar */}
+                {/* Progress bar
                 <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                   <div
                     className={`h-2.5 rounded-full transition-all duration-500 ${cvUnlockQuota === 0 ? 'bg-rose-400' :
@@ -234,7 +234,7 @@ function WalletContent() {
                       }`}
                     style={{ width: cvUnlockQuotaMax > 0 ? `${(cvUnlockQuota / cvUnlockQuotaMax) * 100}%` : '0%' }}
                   />
-                </div>
+                </div> */}
 
                 <p className="text-xs text-slate-400 mt-2">
                   {cvUnlockQuota === 0 && cvUnlockQuotaMax > 0
@@ -264,16 +264,29 @@ function WalletContent() {
                         <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedBasicPosts / subscription.maxBasicPosts) * 100, 100)}%` }} />
                       </div>
                     </div>
-                    {(subscription.maxVipPosts > 0 || subscription.maxUrgentPosts > 0) && (
+                    {subscription.maxVipPosts > 0 && (
                       <div>
                         <div className="flex justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-500">Tin Ưu Tiên</span>
-                          <span className={subscription.usedVipPosts + subscription.usedUrgentPosts >= subscription.maxVipPosts + subscription.maxUrgentPosts ? 'text-rose-500' : 'text-slate-700'}>
-                            {subscription.usedVipPosts + subscription.usedUrgentPosts} / {subscription.maxVipPosts + subscription.maxUrgentPosts}
+                          <span className="text-slate-500">Tin VIP Chuyên Nghiệp</span>
+                          <span className={subscription.usedVipPosts >= subscription.maxVipPosts ? 'text-rose-500' : 'text-slate-700'}>
+                            {subscription.usedVipPosts} / {subscription.maxVipPosts}
                           </span>
                         </div>
                         <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(((subscription.usedVipPosts + subscription.usedUrgentPosts) / (subscription.maxVipPosts + subscription.maxUrgentPosts)) * 100, 100)}%` }} />
+                          <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedVipPosts / subscription.maxVipPosts) * 100, 100)}%` }} />
+                        </div>
+                      </div>
+                    )}
+                    {subscription.maxUrgentPosts > 0 && (
+                      <div>
+                        <div className="flex justify-between text-xs font-bold mb-1.5">
+                          <span className="text-slate-500">Tin Tuyển Gấp</span>
+                          <span className={subscription.usedUrgentPosts >= subscription.maxUrgentPosts ? 'text-rose-500' : 'text-slate-700'}>
+                            {subscription.usedUrgentPosts} / {subscription.maxUrgentPosts}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div className="bg-rose-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedUrgentPosts / subscription.maxUrgentPosts) * 100, 100)}%` }} />
                         </div>
                       </div>
                     )}

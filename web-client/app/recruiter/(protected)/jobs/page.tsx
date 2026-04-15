@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, MoreVertical, Edit, Trash2, Sparkles, Users, BarChart } from 'lucide-react';
+import { Briefcase, Plus, Search, MoreVertical, Edit, Lock, Sparkles, Users, BarChart, RefreshCw } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -14,9 +14,14 @@ import { MatchedCandidatesModal } from '@/components/recruiter/MatchedCandidates
 export default function JobsManagementPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [actionState, setActionState] = useState<{ id: string, type: 'LOCK' | 'UNLOCK' | 'RENEW' } | null>(null);
+  const [acting, setActing] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
@@ -50,21 +55,55 @@ export default function JobsManagementPage() {
     }
   };
 
-  const deleteJob = async () => {
-    if (!deleteId) return;
-    setDeleting(true);
+  const performAction = async () => {
+    if (!actionState) return;
+    const { id, type } = actionState;
+    setActing(true);
     try {
-      await api.delete(`/job-postings/${deleteId}`);
-      setJobs(jobs.filter((j) => j.jobPostingId !== deleteId));
-      toast.success('Xóa tin tuyển dụng thành công');
-    } catch (error) {
+      if (type === 'RENEW') {
+        await api.post(`/job-postings/${id}/renew`);
+        setJobs(jobs.map((j) => j.jobPostingId === id ? { ...j, status: 'APPROVED' } : j));
+        toast.success('Đã gia hạn tin tuyển dụng thành công');
+      } else {
+        const newStatus = type === 'LOCK' ? 'CLOSED' : 'APPROVED';
+        await api.patch(`/job-postings/${id}`, { status: newStatus });
+        setJobs(jobs.map((j) => j.jobPostingId === id ? { ...j, status: newStatus } : j));
+        toast.success(type === 'LOCK' ? 'Đã khóa tin tuyển dụng thành công' : 'Đã mở khóa tin tuyển dụng thành công');
+      }
+    } catch (error: any) {
       console.error(error);
-      toast.error('Xóa thất bại');
+      toast.error(error.response?.data?.message || 'Thao tác thất bại');
     } finally {
-      setDeleting(false);
-      setDeleteId(null);
+      setActing(false);
+      setActionState(null);
     }
   };
+
+  const STATUS_ORDER: Record<string, number> = {
+    'PENDING': 0,
+    'APPROVED': 1,
+    'EXPIRED': 2,
+    'CLOSED': 3,
+    'REJECTED': 4
+  };
+
+  const filteredJobs = jobs
+    .filter(job => {
+      const matchSearch = job.title?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = statusFilter === 'ALL' || job.status === statusFilter;
+      return matchSearch && matchStatus;
+    })
+    .sort((a, b) => {
+      const orderA = STATUS_ORDER[a.status] ?? 99;
+      const orderB = STATUS_ORDER[b.status] ?? 99;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      return new Date(b.refreshedAt || b.createdAt).getTime() - new Date(a.refreshedAt || a.createdAt).getTime();
+    });
+
+  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  const paginatedJobs = filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <motion.div
@@ -90,15 +129,35 @@ export default function JobsManagementPage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset to page 1 on search
+              }}
               placeholder="Tìm kiếm công việc..."
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm"
             />
           </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm bg-white"
+          >
+            <option value="ALL">Tất cả trạng thái</option>
+            <option value="APPROVED">Đã duyệt (Đang mở)</option>
+            <option value="PENDING">Chờ duyệt</option>
+            <option value="EXPIRED">Đã hết hạn</option>
+            <option value="CLOSED">Đã khóa</option>
+            <option value="REJECTED">Bị từ chối</option>
+          </select>
         </div>
 
         <div className="overflow-x-auto">
@@ -126,27 +185,35 @@ export default function JobsManagementPage() {
                   </td>
                 </tr>
               ) : (
-                jobs.map((job) => (
+                paginatedJobs.map((job) => (
                   <tr key={job.jobPostingId} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium text-slate-800 break-words max-w-xs">
                       <Link
-                        href={`/jobs/${job.jobPostingId}`}
-                        target="_blank"
-                        className="hover:text-indigo-600 transition-colors inline-block"
+                        href={`/recruiter/jobs/${job.jobPostingId}`}
+                        className="hover:text-indigo-600 transition-colors inline-block font-bold"
                       >
                         {job.title}
                       </Link>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${job.status === 'APPROVED'
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          job.status === 'APPROVED'
                             ? 'bg-emerald-100 text-emerald-700'
                             : job.status === 'PENDING'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-slate-100 text-slate-700'
-                          }`}
+                            ? 'bg-amber-100 text-amber-700'
+                            : job.status === 'REJECTED'
+                            ? 'bg-red-100 text-red-700'
+                            : job.status === 'EXPIRED'
+                            ? 'bg-slate-100 text-slate-500'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
                       >
-                        {job.status}
+                        {job.status === 'APPROVED' ? 'Đã duyệt'
+                          : job.status === 'PENDING' ? 'Chờ duyệt'
+                          : job.status === 'REJECTED' ? 'Từ chối'
+                          : job.status === 'EXPIRED' ? 'Hết hạn'
+                          : job.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -173,7 +240,7 @@ export default function JobsManagementPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/recruiter/post-job?jobId=${job.jobPostingId}`}
-                          title="Chỉnh sửa tin tuyển dụng"
+                          title="Chỉnh sửa tin (sẽ chờ duyệt lại sau khi sửa)"
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                         >
                           <Edit className="w-4 h-4" />
@@ -185,12 +252,32 @@ export default function JobsManagementPage() {
                         >
                           <BarChart className="w-4 h-4" />
                         </Link>
-                        <button
-                          onClick={() => setDeleteId(job.jobPostingId)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {job.status === 'EXPIRED' ? (
+                          <button
+                            onClick={() => setActionState({ id: job.jobPostingId, type: 'RENEW' })}
+                            title="Gia hạn tin này (Sẽ trừ 1 lượt đăng tin trong gói gốc)"
+                            className="p-2 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                        ) : job.status === 'CLOSED' ? (
+                          <button
+                            onClick={() => setActionState({ id: job.jobPostingId, type: 'UNLOCK' })}
+                            title="Mở khóa tin để ứng viên tiếp tục thấy"
+                            className="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors"
+                          >
+                            <Lock className="w-4 h-4 opacity-70" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setActionState({ id: job.jobPostingId, type: 'LOCK' })}
+                            disabled={job.status === 'REJECTED' || job.status === 'PENDING'}
+                            title={'Khóa tin này'}
+                            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Lock className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -199,16 +286,44 @@ export default function JobsManagementPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-sm text-slate-500">
+              Trang {currentPage} / {totalPages}
+            </span>
+            <div className="flex items-center gap-2">
+              <button 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Trước
+              </button>
+              <button 
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ConfirmModal
-        isOpen={!!deleteId}
-        title="Xóa tin tuyển dụng"
-        message="Bạn có chắc chắn muốn xóa tin tuyển dụng này? Hành động này không thể hoàn tác và tất cả ứng viên của tin này sẽ bị mất."
-        confirmLabel="Xóa tin"
-        onConfirm={deleteJob}
-        onCancel={() => setDeleteId(null)}
-        isLoading={deleting}
+        isOpen={!!actionState}
+        title={actionState?.type === 'LOCK' ? 'Khóa tin tuyển dụng' : actionState?.type === 'RENEW' ? 'Gia hạn tin tuyển dụng' : 'Mở khóa tin tuyển dụng'}
+        message={actionState?.type === 'LOCK' 
+          ? "Bạn có chắc chắn muốn khóa tin tuyển dụng này? Ứng viên sẽ không thể thấy tin này trên hệ thống nữa."
+          : actionState?.type === 'RENEW' ? "Việc gia hạn sẽ tiêu tốn 1 lượt đăng tin của gói bạn đang sử dụng. Tin sẽ lập tức được gia hạn lại trạng thái tốt nhất làm việc. Đồng ý?"
+          : "Bạn muốn mở khóa tin này? Tin sẽ xuất hiện trở lại trên bảng tin cho ứng viên áp tuyển."}
+        confirmLabel={actionState?.type === 'LOCK' ? 'Khóa tin' : actionState?.type === 'RENEW' ? 'Gia hạn ngay' : 'Mở khóa'}
+        onConfirm={performAction}
+        onCancel={() => setActionState(null)}
+        isLoading={acting}
       />
 
       {/* Matched Candidates Modal */}
