@@ -79,6 +79,7 @@ export default function RecruiterDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [walletInfo, setWalletInfo] = useState<any>(null);
+  const [subInfo, setSubInfo] = useState<any>(null);
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
   const [isToppingUp, setIsToppingUp] = useState(false);
 
@@ -102,9 +103,17 @@ export default function RecruiterDashboard() {
     }
   };
 
+  const fetchSub = async () => {
+    try {
+      const res = await api.get('/subscriptions/current');
+      setSubInfo(res.data);
+    } catch (err) { }
+  };
+
   useEffect(() => {
     fetchDashboard();
     fetchWallet();
+    fetchSub();
   }, []);
 
   useEffect(() => {
@@ -269,13 +278,19 @@ export default function RecruiterDashboard() {
         <div className="space-y-6">
           <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-100 overflow-hidden relative">
             <Sparkles className="absolute -top-4 -right-4 w-24 h-24 text-white/10" />
-            <h3 className="font-bold text-lg mb-2 relative z-10">Gợi ý từ AI</h3>
+            <h3 className="font-bold text-lg mb-2 relative z-10">Phân Tích AI</h3>
             <p className="text-indigo-100 text-sm mb-4 relative z-10">
-              JD cho vị trí "Senior Frontend" của bạn có thể thu hút thêm 20% ứng viên nếu bổ sung thông tin về chế độ làm việc Hybrid.
+              Công nghệ AI sẽ giúp bạn tìm ra những điểm yếu trong JD (tin tuyển dụng) của mình, từ đó sửa đổi để thu hút đúng ứng viên tiềm năng!
             </p>
-            <button className="w-full py-2.5 bg-white text-indigo-600 font-bold rounded-xl text-sm hover:bg-slate-50 transition-colors relative z-10">
-              Cập nhật JD ngay
-            </button>
+            {subInfo?.canViewAIReport ? (
+              <Link href="/recruiter/ai-report" className="w-full inline-block text-center py-2.5 bg-white text-indigo-600 font-bold rounded-xl text-sm hover:bg-slate-50 transition-colors relative z-10">
+                Mở Báo Cáo AI
+              </Link>
+            ) : (
+              <Link href="/recruiter/billing/plans" className="w-full inline-block text-center py-2.5 bg-amber-400 text-amber-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition-colors relative z-10">
+                Nâng cấp gói Growth để dùng
+              </Link>
+            )}
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">

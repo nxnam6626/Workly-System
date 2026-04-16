@@ -180,12 +180,17 @@ export class WalletsService {
 
       const transaction = await this.prisma.transaction.findUnique({
         where: { orderCode: Number(webhookData.orderCode) },
+        include: {
+          wallet: {
+            include: { recruiter: { include: { user: true } } }
+          }
+        }
       });
 
       if (!transaction || transaction.status === 'SUCCESS')
         return { status: 'ignored' };
 
-      await this.prisma.$transaction([
+      const [updatedWallet] = await this.prisma.$transaction([
         this.prisma.recruiterWallet.update({
           where: { walletId: transaction.walletId },
           data: { balance: { increment: transaction.amount } },
@@ -195,6 +200,17 @@ export class WalletsService {
           data: { status: 'SUCCESS' },
         }),
       ]);
+
+      // Emit realtime notification đến recruiter (web + mobile)
+      const userId = (transaction as any).wallet?.recruiter?.user?.userId;
+      if (userId) {
+        const newBalance = (updatedWallet as any).balance;
+        this.messagesGateway.server.to(`user_${userId}`).emit('wallet_updated', {
+          newBalance,
+          transactionId: transaction.transactionId,
+          amount: transaction.amount,
+        });
+      }
 
       return { status: 'success' };
     } catch (err) {

@@ -102,6 +102,7 @@ model Candidate {
 model Skill {
   skillId     String     @id @default(uuid())
   skillName   String
+  category    String?
   candidateId String
   level       SkillLevel @default(BEGINNER)
   candidate   Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
@@ -127,6 +128,9 @@ model Recruiter {
   violationCount        Int                    @default(0)
   updatedAt             DateTime               @default(now()) @updatedAt
   createdAt             DateTime               @default(now())
+  aiInsightsCache       Json?
+  aiInsightsCacheKey    String?
+  aiInsightsCachedAt    DateTime?
   conversations         Conversation[]
   jobPostings           JobPosting[]
   company               Company?               @relation(fields: [companyId], references: [companyId])
@@ -437,6 +441,7 @@ enum JobStatus {
   APPROVED
   REJECTED
   EXPIRED
+  CLOSED
 }
 
 enum RawJobStatus {
@@ -474,4 +479,11 @@ enum SupportStatus {
   OPEN
   IN_PROGRESS
   CLOSED
+}
+
+model AiQueryCache {
+  id        String   @id @default(uuid())
+  query     String   @unique
+  response  String   @db.Text
+  createdAt DateTime @default(now())
 }

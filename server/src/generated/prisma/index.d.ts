@@ -143,6 +143,11 @@ export type RecruiterSubscription = $Result.DefaultSelection<Prisma.$RecruiterSu
  * 
  */
 export type SupportRequest = $Result.DefaultSelection<Prisma.$SupportRequestPayload>
+/**
+ * Model AiQueryCache
+ * 
+ */
+export type AiQueryCache = $Result.DefaultSelection<Prisma.$AiQueryCachePayload>
 
 /**
  * Enums
@@ -214,7 +219,8 @@ export const JobStatus: {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
-  EXPIRED: 'EXPIRED'
+  EXPIRED: 'EXPIRED',
+  CLOSED: 'CLOSED'
 };
 
 export type JobStatus = (typeof JobStatus)[keyof typeof JobStatus]
@@ -712,6 +718,16 @@ export class PrismaClient<
     * ```
     */
   get supportRequest(): Prisma.SupportRequestDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiQueryCache`: Exposes CRUD operations for the **AiQueryCache** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiQueryCaches
+    * const aiQueryCaches = await prisma.aiQueryCache.findMany()
+    * ```
+    */
+  get aiQueryCache(): Prisma.AiQueryCacheDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1171,7 +1187,8 @@ export namespace Prisma {
     RecruiterWallet: 'RecruiterWallet',
     CandidateUnlock: 'CandidateUnlock',
     RecruiterSubscription: 'RecruiterSubscription',
-    SupportRequest: 'SupportRequest'
+    SupportRequest: 'SupportRequest',
+    AiQueryCache: 'AiQueryCache'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1187,7 +1204,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "skill" | "project" | "recruiter" | "transaction" | "crawlLog" | "company" | "companyBranch" | "rawJob" | "jobPosting" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "recruiterWallet" | "candidateUnlock" | "recruiterSubscription" | "supportRequest"
+      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "skill" | "project" | "recruiter" | "transaction" | "crawlLog" | "company" | "companyBranch" | "rawJob" | "jobPosting" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "recruiterWallet" | "candidateUnlock" | "recruiterSubscription" | "supportRequest" | "aiQueryCache"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3115,6 +3132,80 @@ export namespace Prisma {
           }
         }
       }
+      AiQueryCache: {
+        payload: Prisma.$AiQueryCachePayload<ExtArgs>
+        fields: Prisma.AiQueryCacheFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiQueryCacheFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiQueryCacheFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          findFirst: {
+            args: Prisma.AiQueryCacheFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiQueryCacheFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          findMany: {
+            args: Prisma.AiQueryCacheFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>[]
+          }
+          create: {
+            args: Prisma.AiQueryCacheCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          createMany: {
+            args: Prisma.AiQueryCacheCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiQueryCacheCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>[]
+          }
+          delete: {
+            args: Prisma.AiQueryCacheDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          update: {
+            args: Prisma.AiQueryCacheUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          deleteMany: {
+            args: Prisma.AiQueryCacheDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiQueryCacheUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiQueryCacheUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>[]
+          }
+          upsert: {
+            args: Prisma.AiQueryCacheUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiQueryCachePayload>
+          }
+          aggregate: {
+            args: Prisma.AiQueryCacheAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiQueryCache>
+          }
+          groupBy: {
+            args: Prisma.AiQueryCacheGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiQueryCacheGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiQueryCacheCountArgs<ExtArgs>
+            result: $Utils.Optional<AiQueryCacheCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3249,6 +3340,7 @@ export namespace Prisma {
     candidateUnlock?: CandidateUnlockOmit
     recruiterSubscription?: RecruiterSubscriptionOmit
     supportRequest?: SupportRequestOmit
+    aiQueryCache?: AiQueryCacheOmit
   }
 
   /* Types for Logging */
@@ -11896,6 +11988,7 @@ export namespace Prisma {
   export type SkillMinAggregateOutputType = {
     skillId: string | null
     skillName: string | null
+    category: string | null
     candidateId: string | null
     level: $Enums.SkillLevel | null
   }
@@ -11903,6 +11996,7 @@ export namespace Prisma {
   export type SkillMaxAggregateOutputType = {
     skillId: string | null
     skillName: string | null
+    category: string | null
     candidateId: string | null
     level: $Enums.SkillLevel | null
   }
@@ -11910,6 +12004,7 @@ export namespace Prisma {
   export type SkillCountAggregateOutputType = {
     skillId: number
     skillName: number
+    category: number
     candidateId: number
     level: number
     _all: number
@@ -11919,6 +12014,7 @@ export namespace Prisma {
   export type SkillMinAggregateInputType = {
     skillId?: true
     skillName?: true
+    category?: true
     candidateId?: true
     level?: true
   }
@@ -11926,6 +12022,7 @@ export namespace Prisma {
   export type SkillMaxAggregateInputType = {
     skillId?: true
     skillName?: true
+    category?: true
     candidateId?: true
     level?: true
   }
@@ -11933,6 +12030,7 @@ export namespace Prisma {
   export type SkillCountAggregateInputType = {
     skillId?: true
     skillName?: true
+    category?: true
     candidateId?: true
     level?: true
     _all?: true
@@ -12013,6 +12111,7 @@ export namespace Prisma {
   export type SkillGroupByOutputType = {
     skillId: string
     skillName: string
+    category: string | null
     candidateId: string
     level: $Enums.SkillLevel
     _count: SkillCountAggregateOutputType | null
@@ -12037,6 +12136,7 @@ export namespace Prisma {
   export type SkillSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     skillId?: boolean
     skillName?: boolean
+    category?: boolean
     candidateId?: boolean
     level?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
@@ -12045,6 +12145,7 @@ export namespace Prisma {
   export type SkillSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     skillId?: boolean
     skillName?: boolean
+    category?: boolean
     candidateId?: boolean
     level?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
@@ -12053,6 +12154,7 @@ export namespace Prisma {
   export type SkillSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     skillId?: boolean
     skillName?: boolean
+    category?: boolean
     candidateId?: boolean
     level?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
@@ -12061,11 +12163,12 @@ export namespace Prisma {
   export type SkillSelectScalar = {
     skillId?: boolean
     skillName?: boolean
+    category?: boolean
     candidateId?: boolean
     level?: boolean
   }
 
-  export type SkillOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"skillId" | "skillName" | "candidateId" | "level", ExtArgs["result"]["skill"]>
+  export type SkillOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"skillId" | "skillName" | "category" | "candidateId" | "level", ExtArgs["result"]["skill"]>
   export type SkillInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }
@@ -12084,6 +12187,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       skillId: string
       skillName: string
+      category: string | null
       candidateId: string
       level: $Enums.SkillLevel
     }, ExtArgs["result"]["skill"]>
@@ -12512,6 +12616,7 @@ export namespace Prisma {
   interface SkillFieldRefs {
     readonly skillId: FieldRef<"Skill", 'String'>
     readonly skillName: FieldRef<"Skill", 'String'>
+    readonly category: FieldRef<"Skill", 'String'>
     readonly candidateId: FieldRef<"Skill", 'String'>
     readonly level: FieldRef<"Skill", 'SkillLevel'>
   }
@@ -14038,6 +14143,8 @@ export namespace Prisma {
     violationCount: number | null
     updatedAt: Date | null
     createdAt: Date | null
+    aiInsightsCacheKey: string | null
+    aiInsightsCachedAt: Date | null
   }
 
   export type RecruiterMaxAggregateOutputType = {
@@ -14049,6 +14156,8 @@ export namespace Prisma {
     violationCount: number | null
     updatedAt: Date | null
     createdAt: Date | null
+    aiInsightsCacheKey: string | null
+    aiInsightsCachedAt: Date | null
   }
 
   export type RecruiterCountAggregateOutputType = {
@@ -14061,6 +14170,9 @@ export namespace Prisma {
     violationCount: number
     updatedAt: number
     createdAt: number
+    aiInsightsCache: number
+    aiInsightsCacheKey: number
+    aiInsightsCachedAt: number
     _all: number
   }
 
@@ -14082,6 +14194,8 @@ export namespace Prisma {
     violationCount?: true
     updatedAt?: true
     createdAt?: true
+    aiInsightsCacheKey?: true
+    aiInsightsCachedAt?: true
   }
 
   export type RecruiterMaxAggregateInputType = {
@@ -14093,6 +14207,8 @@ export namespace Prisma {
     violationCount?: true
     updatedAt?: true
     createdAt?: true
+    aiInsightsCacheKey?: true
+    aiInsightsCachedAt?: true
   }
 
   export type RecruiterCountAggregateInputType = {
@@ -14105,6 +14221,9 @@ export namespace Prisma {
     violationCount?: true
     updatedAt?: true
     createdAt?: true
+    aiInsightsCache?: true
+    aiInsightsCacheKey?: true
+    aiInsightsCachedAt?: true
     _all?: true
   }
 
@@ -14204,6 +14323,9 @@ export namespace Prisma {
     violationCount: number
     updatedAt: Date
     createdAt: Date
+    aiInsightsCache: JsonValue | null
+    aiInsightsCacheKey: string | null
+    aiInsightsCachedAt: Date | null
     _count: RecruiterCountAggregateOutputType | null
     _avg: RecruiterAvgAggregateOutputType | null
     _sum: RecruiterSumAggregateOutputType | null
@@ -14235,6 +14357,9 @@ export namespace Prisma {
     violationCount?: boolean
     updatedAt?: boolean
     createdAt?: boolean
+    aiInsightsCache?: boolean
+    aiInsightsCacheKey?: boolean
+    aiInsightsCachedAt?: boolean
     conversations?: boolean | Recruiter$conversationsArgs<ExtArgs>
     jobPostings?: boolean | Recruiter$jobPostingsArgs<ExtArgs>
     company?: boolean | Recruiter$companyArgs<ExtArgs>
@@ -14254,6 +14379,9 @@ export namespace Prisma {
     violationCount?: boolean
     updatedAt?: boolean
     createdAt?: boolean
+    aiInsightsCache?: boolean
+    aiInsightsCacheKey?: boolean
+    aiInsightsCachedAt?: boolean
     company?: boolean | Recruiter$companyArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["recruiter"]>
@@ -14268,6 +14396,9 @@ export namespace Prisma {
     violationCount?: boolean
     updatedAt?: boolean
     createdAt?: boolean
+    aiInsightsCache?: boolean
+    aiInsightsCacheKey?: boolean
+    aiInsightsCachedAt?: boolean
     company?: boolean | Recruiter$companyArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["recruiter"]>
@@ -14282,9 +14413,12 @@ export namespace Prisma {
     violationCount?: boolean
     updatedAt?: boolean
     createdAt?: boolean
+    aiInsightsCache?: boolean
+    aiInsightsCacheKey?: boolean
+    aiInsightsCachedAt?: boolean
   }
 
-  export type RecruiterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"recruiterId" | "bio" | "position" | "userId" | "companyId" | "savedCandidateIds" | "violationCount" | "updatedAt" | "createdAt", ExtArgs["result"]["recruiter"]>
+  export type RecruiterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"recruiterId" | "bio" | "position" | "userId" | "companyId" | "savedCandidateIds" | "violationCount" | "updatedAt" | "createdAt" | "aiInsightsCache" | "aiInsightsCacheKey" | "aiInsightsCachedAt", ExtArgs["result"]["recruiter"]>
   export type RecruiterInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     conversations?: boolean | Recruiter$conversationsArgs<ExtArgs>
     jobPostings?: boolean | Recruiter$jobPostingsArgs<ExtArgs>
@@ -14323,6 +14457,9 @@ export namespace Prisma {
       violationCount: number
       updatedAt: Date
       createdAt: Date
+      aiInsightsCache: Prisma.JsonValue | null
+      aiInsightsCacheKey: string | null
+      aiInsightsCachedAt: Date | null
     }, ExtArgs["result"]["recruiter"]>
     composites: {}
   }
@@ -14761,6 +14898,9 @@ export namespace Prisma {
     readonly violationCount: FieldRef<"Recruiter", 'Int'>
     readonly updatedAt: FieldRef<"Recruiter", 'DateTime'>
     readonly createdAt: FieldRef<"Recruiter", 'DateTime'>
+    readonly aiInsightsCache: FieldRef<"Recruiter", 'Json'>
+    readonly aiInsightsCacheKey: FieldRef<"Recruiter", 'String'>
+    readonly aiInsightsCachedAt: FieldRef<"Recruiter", 'DateTime'>
   }
     
 
@@ -34231,6 +34371,993 @@ export namespace Prisma {
 
 
   /**
+   * Model AiQueryCache
+   */
+
+  export type AggregateAiQueryCache = {
+    _count: AiQueryCacheCountAggregateOutputType | null
+    _min: AiQueryCacheMinAggregateOutputType | null
+    _max: AiQueryCacheMaxAggregateOutputType | null
+  }
+
+  export type AiQueryCacheMinAggregateOutputType = {
+    id: string | null
+    query: string | null
+    response: string | null
+    createdAt: Date | null
+  }
+
+  export type AiQueryCacheMaxAggregateOutputType = {
+    id: string | null
+    query: string | null
+    response: string | null
+    createdAt: Date | null
+  }
+
+  export type AiQueryCacheCountAggregateOutputType = {
+    id: number
+    query: number
+    response: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AiQueryCacheMinAggregateInputType = {
+    id?: true
+    query?: true
+    response?: true
+    createdAt?: true
+  }
+
+  export type AiQueryCacheMaxAggregateInputType = {
+    id?: true
+    query?: true
+    response?: true
+    createdAt?: true
+  }
+
+  export type AiQueryCacheCountAggregateInputType = {
+    id?: true
+    query?: true
+    response?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AiQueryCacheAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiQueryCache to aggregate.
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiQueryCaches to fetch.
+     */
+    orderBy?: AiQueryCacheOrderByWithRelationInput | AiQueryCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AiQueryCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiQueryCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiQueryCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AiQueryCaches
+    **/
+    _count?: true | AiQueryCacheCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiQueryCacheMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiQueryCacheMaxAggregateInputType
+  }
+
+  export type GetAiQueryCacheAggregateType<T extends AiQueryCacheAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiQueryCache]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiQueryCache[P]>
+      : GetScalarType<T[P], AggregateAiQueryCache[P]>
+  }
+
+
+
+
+  export type AiQueryCacheGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiQueryCacheWhereInput
+    orderBy?: AiQueryCacheOrderByWithAggregationInput | AiQueryCacheOrderByWithAggregationInput[]
+    by: AiQueryCacheScalarFieldEnum[] | AiQueryCacheScalarFieldEnum
+    having?: AiQueryCacheScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiQueryCacheCountAggregateInputType | true
+    _min?: AiQueryCacheMinAggregateInputType
+    _max?: AiQueryCacheMaxAggregateInputType
+  }
+
+  export type AiQueryCacheGroupByOutputType = {
+    id: string
+    query: string
+    response: string
+    createdAt: Date
+    _count: AiQueryCacheCountAggregateOutputType | null
+    _min: AiQueryCacheMinAggregateOutputType | null
+    _max: AiQueryCacheMaxAggregateOutputType | null
+  }
+
+  type GetAiQueryCacheGroupByPayload<T extends AiQueryCacheGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiQueryCacheGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiQueryCacheGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiQueryCacheGroupByOutputType[P]>
+            : GetScalarType<T[P], AiQueryCacheGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiQueryCacheSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    query?: boolean
+    response?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["aiQueryCache"]>
+
+  export type AiQueryCacheSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    query?: boolean
+    response?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["aiQueryCache"]>
+
+  export type AiQueryCacheSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    query?: boolean
+    response?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["aiQueryCache"]>
+
+  export type AiQueryCacheSelectScalar = {
+    id?: boolean
+    query?: boolean
+    response?: boolean
+    createdAt?: boolean
+  }
+
+  export type AiQueryCacheOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "query" | "response" | "createdAt", ExtArgs["result"]["aiQueryCache"]>
+
+  export type $AiQueryCachePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiQueryCache"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      query: string
+      response: string
+      createdAt: Date
+    }, ExtArgs["result"]["aiQueryCache"]>
+    composites: {}
+  }
+
+  type AiQueryCacheGetPayload<S extends boolean | null | undefined | AiQueryCacheDefaultArgs> = $Result.GetResult<Prisma.$AiQueryCachePayload, S>
+
+  type AiQueryCacheCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiQueryCacheFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiQueryCacheCountAggregateInputType | true
+    }
+
+  export interface AiQueryCacheDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiQueryCache'], meta: { name: 'AiQueryCache' } }
+    /**
+     * Find zero or one AiQueryCache that matches the filter.
+     * @param {AiQueryCacheFindUniqueArgs} args - Arguments to find a AiQueryCache
+     * @example
+     * // Get one AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiQueryCacheFindUniqueArgs>(args: SelectSubset<T, AiQueryCacheFindUniqueArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiQueryCache that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiQueryCacheFindUniqueOrThrowArgs} args - Arguments to find a AiQueryCache
+     * @example
+     * // Get one AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiQueryCacheFindUniqueOrThrowArgs>(args: SelectSubset<T, AiQueryCacheFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiQueryCache that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheFindFirstArgs} args - Arguments to find a AiQueryCache
+     * @example
+     * // Get one AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiQueryCacheFindFirstArgs>(args?: SelectSubset<T, AiQueryCacheFindFirstArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiQueryCache that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheFindFirstOrThrowArgs} args - Arguments to find a AiQueryCache
+     * @example
+     * // Get one AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiQueryCacheFindFirstOrThrowArgs>(args?: SelectSubset<T, AiQueryCacheFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiQueryCaches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiQueryCaches
+     * const aiQueryCaches = await prisma.aiQueryCache.findMany()
+     * 
+     * // Get first 10 AiQueryCaches
+     * const aiQueryCaches = await prisma.aiQueryCache.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aiQueryCacheWithIdOnly = await prisma.aiQueryCache.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AiQueryCacheFindManyArgs>(args?: SelectSubset<T, AiQueryCacheFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiQueryCache.
+     * @param {AiQueryCacheCreateArgs} args - Arguments to create a AiQueryCache.
+     * @example
+     * // Create one AiQueryCache
+     * const AiQueryCache = await prisma.aiQueryCache.create({
+     *   data: {
+     *     // ... data to create a AiQueryCache
+     *   }
+     * })
+     * 
+     */
+    create<T extends AiQueryCacheCreateArgs>(args: SelectSubset<T, AiQueryCacheCreateArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiQueryCaches.
+     * @param {AiQueryCacheCreateManyArgs} args - Arguments to create many AiQueryCaches.
+     * @example
+     * // Create many AiQueryCaches
+     * const aiQueryCache = await prisma.aiQueryCache.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AiQueryCacheCreateManyArgs>(args?: SelectSubset<T, AiQueryCacheCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiQueryCaches and returns the data saved in the database.
+     * @param {AiQueryCacheCreateManyAndReturnArgs} args - Arguments to create many AiQueryCaches.
+     * @example
+     * // Create many AiQueryCaches
+     * const aiQueryCache = await prisma.aiQueryCache.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AiQueryCaches and only return the `id`
+     * const aiQueryCacheWithIdOnly = await prisma.aiQueryCache.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AiQueryCacheCreateManyAndReturnArgs>(args?: SelectSubset<T, AiQueryCacheCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiQueryCache.
+     * @param {AiQueryCacheDeleteArgs} args - Arguments to delete one AiQueryCache.
+     * @example
+     * // Delete one AiQueryCache
+     * const AiQueryCache = await prisma.aiQueryCache.delete({
+     *   where: {
+     *     // ... filter to delete one AiQueryCache
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AiQueryCacheDeleteArgs>(args: SelectSubset<T, AiQueryCacheDeleteArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiQueryCache.
+     * @param {AiQueryCacheUpdateArgs} args - Arguments to update one AiQueryCache.
+     * @example
+     * // Update one AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AiQueryCacheUpdateArgs>(args: SelectSubset<T, AiQueryCacheUpdateArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiQueryCaches.
+     * @param {AiQueryCacheDeleteManyArgs} args - Arguments to filter AiQueryCaches to delete.
+     * @example
+     * // Delete a few AiQueryCaches
+     * const { count } = await prisma.aiQueryCache.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AiQueryCacheDeleteManyArgs>(args?: SelectSubset<T, AiQueryCacheDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiQueryCaches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiQueryCaches
+     * const aiQueryCache = await prisma.aiQueryCache.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AiQueryCacheUpdateManyArgs>(args: SelectSubset<T, AiQueryCacheUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiQueryCaches and returns the data updated in the database.
+     * @param {AiQueryCacheUpdateManyAndReturnArgs} args - Arguments to update many AiQueryCaches.
+     * @example
+     * // Update many AiQueryCaches
+     * const aiQueryCache = await prisma.aiQueryCache.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AiQueryCaches and only return the `id`
+     * const aiQueryCacheWithIdOnly = await prisma.aiQueryCache.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AiQueryCacheUpdateManyAndReturnArgs>(args: SelectSubset<T, AiQueryCacheUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiQueryCache.
+     * @param {AiQueryCacheUpsertArgs} args - Arguments to update or create a AiQueryCache.
+     * @example
+     * // Update or create a AiQueryCache
+     * const aiQueryCache = await prisma.aiQueryCache.upsert({
+     *   create: {
+     *     // ... data to create a AiQueryCache
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiQueryCache we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiQueryCacheUpsertArgs>(args: SelectSubset<T, AiQueryCacheUpsertArgs<ExtArgs>>): Prisma__AiQueryCacheClient<$Result.GetResult<Prisma.$AiQueryCachePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiQueryCaches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheCountArgs} args - Arguments to filter AiQueryCaches to count.
+     * @example
+     * // Count the number of AiQueryCaches
+     * const count = await prisma.aiQueryCache.count({
+     *   where: {
+     *     // ... the filter for the AiQueryCaches we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiQueryCacheCountArgs>(
+      args?: Subset<T, AiQueryCacheCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiQueryCacheCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiQueryCache.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiQueryCacheAggregateArgs>(args: Subset<T, AiQueryCacheAggregateArgs>): Prisma.PrismaPromise<GetAiQueryCacheAggregateType<T>>
+
+    /**
+     * Group by AiQueryCache.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiQueryCacheGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AiQueryCacheGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiQueryCacheGroupByArgs['orderBy'] }
+        : { orderBy?: AiQueryCacheGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiQueryCacheGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiQueryCacheGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiQueryCache model
+   */
+  readonly fields: AiQueryCacheFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiQueryCache.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiQueryCacheClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiQueryCache model
+   */
+  interface AiQueryCacheFieldRefs {
+    readonly id: FieldRef<"AiQueryCache", 'String'>
+    readonly query: FieldRef<"AiQueryCache", 'String'>
+    readonly response: FieldRef<"AiQueryCache", 'String'>
+    readonly createdAt: FieldRef<"AiQueryCache", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AiQueryCache findUnique
+   */
+  export type AiQueryCacheFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which AiQueryCache to fetch.
+     */
+    where: AiQueryCacheWhereUniqueInput
+  }
+
+  /**
+   * AiQueryCache findUniqueOrThrow
+   */
+  export type AiQueryCacheFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which AiQueryCache to fetch.
+     */
+    where: AiQueryCacheWhereUniqueInput
+  }
+
+  /**
+   * AiQueryCache findFirst
+   */
+  export type AiQueryCacheFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which AiQueryCache to fetch.
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiQueryCaches to fetch.
+     */
+    orderBy?: AiQueryCacheOrderByWithRelationInput | AiQueryCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiQueryCaches.
+     */
+    cursor?: AiQueryCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiQueryCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiQueryCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiQueryCaches.
+     */
+    distinct?: AiQueryCacheScalarFieldEnum | AiQueryCacheScalarFieldEnum[]
+  }
+
+  /**
+   * AiQueryCache findFirstOrThrow
+   */
+  export type AiQueryCacheFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which AiQueryCache to fetch.
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiQueryCaches to fetch.
+     */
+    orderBy?: AiQueryCacheOrderByWithRelationInput | AiQueryCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiQueryCaches.
+     */
+    cursor?: AiQueryCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiQueryCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiQueryCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiQueryCaches.
+     */
+    distinct?: AiQueryCacheScalarFieldEnum | AiQueryCacheScalarFieldEnum[]
+  }
+
+  /**
+   * AiQueryCache findMany
+   */
+  export type AiQueryCacheFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter, which AiQueryCaches to fetch.
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiQueryCaches to fetch.
+     */
+    orderBy?: AiQueryCacheOrderByWithRelationInput | AiQueryCacheOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AiQueryCaches.
+     */
+    cursor?: AiQueryCacheWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiQueryCaches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiQueryCaches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiQueryCaches.
+     */
+    distinct?: AiQueryCacheScalarFieldEnum | AiQueryCacheScalarFieldEnum[]
+  }
+
+  /**
+   * AiQueryCache create
+   */
+  export type AiQueryCacheCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AiQueryCache.
+     */
+    data: XOR<AiQueryCacheCreateInput, AiQueryCacheUncheckedCreateInput>
+  }
+
+  /**
+   * AiQueryCache createMany
+   */
+  export type AiQueryCacheCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiQueryCaches.
+     */
+    data: AiQueryCacheCreateManyInput | AiQueryCacheCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiQueryCache createManyAndReturn
+   */
+  export type AiQueryCacheCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiQueryCaches.
+     */
+    data: AiQueryCacheCreateManyInput | AiQueryCacheCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiQueryCache update
+   */
+  export type AiQueryCacheUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AiQueryCache.
+     */
+    data: XOR<AiQueryCacheUpdateInput, AiQueryCacheUncheckedUpdateInput>
+    /**
+     * Choose, which AiQueryCache to update.
+     */
+    where: AiQueryCacheWhereUniqueInput
+  }
+
+  /**
+   * AiQueryCache updateMany
+   */
+  export type AiQueryCacheUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiQueryCaches.
+     */
+    data: XOR<AiQueryCacheUpdateManyMutationInput, AiQueryCacheUncheckedUpdateManyInput>
+    /**
+     * Filter which AiQueryCaches to update
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * Limit how many AiQueryCaches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiQueryCache updateManyAndReturn
+   */
+  export type AiQueryCacheUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * The data used to update AiQueryCaches.
+     */
+    data: XOR<AiQueryCacheUpdateManyMutationInput, AiQueryCacheUncheckedUpdateManyInput>
+    /**
+     * Filter which AiQueryCaches to update
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * Limit how many AiQueryCaches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiQueryCache upsert
+   */
+  export type AiQueryCacheUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AiQueryCache to update in case it exists.
+     */
+    where: AiQueryCacheWhereUniqueInput
+    /**
+     * In case the AiQueryCache found by the `where` argument doesn't exist, create a new AiQueryCache with this data.
+     */
+    create: XOR<AiQueryCacheCreateInput, AiQueryCacheUncheckedCreateInput>
+    /**
+     * In case the AiQueryCache was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiQueryCacheUpdateInput, AiQueryCacheUncheckedUpdateInput>
+  }
+
+  /**
+   * AiQueryCache delete
+   */
+  export type AiQueryCacheDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+    /**
+     * Filter which AiQueryCache to delete.
+     */
+    where: AiQueryCacheWhereUniqueInput
+  }
+
+  /**
+   * AiQueryCache deleteMany
+   */
+  export type AiQueryCacheDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiQueryCaches to delete
+     */
+    where?: AiQueryCacheWhereInput
+    /**
+     * Limit how many AiQueryCaches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiQueryCache without action
+   */
+  export type AiQueryCacheDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiQueryCache
+     */
+    select?: AiQueryCacheSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiQueryCache
+     */
+    omit?: AiQueryCacheOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -34336,6 +35463,7 @@ export namespace Prisma {
   export const SkillScalarFieldEnum: {
     skillId: 'skillId',
     skillName: 'skillName',
+    category: 'category',
     candidateId: 'candidateId',
     level: 'level'
   };
@@ -34364,7 +35492,10 @@ export namespace Prisma {
     savedCandidateIds: 'savedCandidateIds',
     violationCount: 'violationCount',
     updatedAt: 'updatedAt',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    aiInsightsCache: 'aiInsightsCache',
+    aiInsightsCacheKey: 'aiInsightsCacheKey',
+    aiInsightsCachedAt: 'aiInsightsCachedAt'
   };
 
   export type RecruiterScalarFieldEnum = (typeof RecruiterScalarFieldEnum)[keyof typeof RecruiterScalarFieldEnum]
@@ -34631,6 +35762,16 @@ export namespace Prisma {
   };
 
   export type SupportRequestScalarFieldEnum = (typeof SupportRequestScalarFieldEnum)[keyof typeof SupportRequestScalarFieldEnum]
+
+
+  export const AiQueryCacheScalarFieldEnum: {
+    id: 'id',
+    query: 'query',
+    response: 'response',
+    createdAt: 'createdAt'
+  };
+
+  export type AiQueryCacheScalarFieldEnum = (typeof AiQueryCacheScalarFieldEnum)[keyof typeof AiQueryCacheScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -35463,6 +36604,7 @@ export namespace Prisma {
     NOT?: SkillWhereInput | SkillWhereInput[]
     skillId?: StringFilter<"Skill"> | string
     skillName?: StringFilter<"Skill"> | string
+    category?: StringNullableFilter<"Skill"> | string | null
     candidateId?: StringFilter<"Skill"> | string
     level?: EnumSkillLevelFilter<"Skill"> | $Enums.SkillLevel
     candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
@@ -35471,6 +36613,7 @@ export namespace Prisma {
   export type SkillOrderByWithRelationInput = {
     skillId?: SortOrder
     skillName?: SortOrder
+    category?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     level?: SortOrder
     candidate?: CandidateOrderByWithRelationInput
@@ -35482,6 +36625,7 @@ export namespace Prisma {
     OR?: SkillWhereInput[]
     NOT?: SkillWhereInput | SkillWhereInput[]
     skillName?: StringFilter<"Skill"> | string
+    category?: StringNullableFilter<"Skill"> | string | null
     candidateId?: StringFilter<"Skill"> | string
     level?: EnumSkillLevelFilter<"Skill"> | $Enums.SkillLevel
     candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
@@ -35490,6 +36634,7 @@ export namespace Prisma {
   export type SkillOrderByWithAggregationInput = {
     skillId?: SortOrder
     skillName?: SortOrder
+    category?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     level?: SortOrder
     _count?: SkillCountOrderByAggregateInput
@@ -35503,6 +36648,7 @@ export namespace Prisma {
     NOT?: SkillScalarWhereWithAggregatesInput | SkillScalarWhereWithAggregatesInput[]
     skillId?: StringWithAggregatesFilter<"Skill"> | string
     skillName?: StringWithAggregatesFilter<"Skill"> | string
+    category?: StringNullableWithAggregatesFilter<"Skill"> | string | null
     candidateId?: StringWithAggregatesFilter<"Skill"> | string
     level?: EnumSkillLevelWithAggregatesFilter<"Skill"> | $Enums.SkillLevel
   }
@@ -35580,6 +36726,9 @@ export namespace Prisma {
     violationCount?: IntFilter<"Recruiter"> | number
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
+    aiInsightsCache?: JsonNullableFilter<"Recruiter">
+    aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
+    aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
     conversations?: ConversationListRelationFilter
     jobPostings?: JobPostingListRelationFilter
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
@@ -35598,6 +36747,9 @@ export namespace Prisma {
     violationCount?: SortOrder
     updatedAt?: SortOrder
     createdAt?: SortOrder
+    aiInsightsCache?: SortOrderInput | SortOrder
+    aiInsightsCacheKey?: SortOrderInput | SortOrder
+    aiInsightsCachedAt?: SortOrderInput | SortOrder
     conversations?: ConversationOrderByRelationAggregateInput
     jobPostings?: JobPostingOrderByRelationAggregateInput
     company?: CompanyOrderByWithRelationInput
@@ -35619,6 +36771,9 @@ export namespace Prisma {
     violationCount?: IntFilter<"Recruiter"> | number
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
+    aiInsightsCache?: JsonNullableFilter<"Recruiter">
+    aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
+    aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
     conversations?: ConversationListRelationFilter
     jobPostings?: JobPostingListRelationFilter
     company?: XOR<CompanyNullableScalarRelationFilter, CompanyWhereInput> | null
@@ -35637,6 +36792,9 @@ export namespace Prisma {
     violationCount?: SortOrder
     updatedAt?: SortOrder
     createdAt?: SortOrder
+    aiInsightsCache?: SortOrderInput | SortOrder
+    aiInsightsCacheKey?: SortOrderInput | SortOrder
+    aiInsightsCachedAt?: SortOrderInput | SortOrder
     _count?: RecruiterCountOrderByAggregateInput
     _avg?: RecruiterAvgOrderByAggregateInput
     _max?: RecruiterMaxOrderByAggregateInput
@@ -35657,6 +36815,9 @@ export namespace Prisma {
     violationCount?: IntWithAggregatesFilter<"Recruiter"> | number
     updatedAt?: DateTimeWithAggregatesFilter<"Recruiter"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"Recruiter"> | Date | string
+    aiInsightsCache?: JsonNullableWithAggregatesFilter<"Recruiter">
+    aiInsightsCacheKey?: StringNullableWithAggregatesFilter<"Recruiter"> | string | null
+    aiInsightsCachedAt?: DateTimeNullableWithAggregatesFilter<"Recruiter"> | Date | string | null
   }
 
   export type TransactionWhereInput = {
@@ -37051,6 +38212,53 @@ export namespace Prisma {
     userId?: StringNullableWithAggregatesFilter<"SupportRequest"> | string | null
   }
 
+  export type AiQueryCacheWhereInput = {
+    AND?: AiQueryCacheWhereInput | AiQueryCacheWhereInput[]
+    OR?: AiQueryCacheWhereInput[]
+    NOT?: AiQueryCacheWhereInput | AiQueryCacheWhereInput[]
+    id?: StringFilter<"AiQueryCache"> | string
+    query?: StringFilter<"AiQueryCache"> | string
+    response?: StringFilter<"AiQueryCache"> | string
+    createdAt?: DateTimeFilter<"AiQueryCache"> | Date | string
+  }
+
+  export type AiQueryCacheOrderByWithRelationInput = {
+    id?: SortOrder
+    query?: SortOrder
+    response?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AiQueryCacheWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    query?: string
+    AND?: AiQueryCacheWhereInput | AiQueryCacheWhereInput[]
+    OR?: AiQueryCacheWhereInput[]
+    NOT?: AiQueryCacheWhereInput | AiQueryCacheWhereInput[]
+    response?: StringFilter<"AiQueryCache"> | string
+    createdAt?: DateTimeFilter<"AiQueryCache"> | Date | string
+  }, "id" | "query">
+
+  export type AiQueryCacheOrderByWithAggregationInput = {
+    id?: SortOrder
+    query?: SortOrder
+    response?: SortOrder
+    createdAt?: SortOrder
+    _count?: AiQueryCacheCountOrderByAggregateInput
+    _max?: AiQueryCacheMaxOrderByAggregateInput
+    _min?: AiQueryCacheMinOrderByAggregateInput
+  }
+
+  export type AiQueryCacheScalarWhereWithAggregatesInput = {
+    AND?: AiQueryCacheScalarWhereWithAggregatesInput | AiQueryCacheScalarWhereWithAggregatesInput[]
+    OR?: AiQueryCacheScalarWhereWithAggregatesInput[]
+    NOT?: AiQueryCacheScalarWhereWithAggregatesInput | AiQueryCacheScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiQueryCache"> | string
+    query?: StringWithAggregatesFilter<"AiQueryCache"> | string
+    response?: StringWithAggregatesFilter<"AiQueryCache"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"AiQueryCache"> | Date | string
+  }
+
   export type UserCreateInput = {
     userId?: string
     email: string
@@ -37588,6 +38796,7 @@ export namespace Prisma {
   export type SkillCreateInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     level?: $Enums.SkillLevel
     candidate: CandidateCreateNestedOneWithoutSkillsInput
   }
@@ -37595,6 +38804,7 @@ export namespace Prisma {
   export type SkillUncheckedCreateInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     candidateId: string
     level?: $Enums.SkillLevel
   }
@@ -37602,6 +38812,7 @@ export namespace Prisma {
   export type SkillUpdateInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
     candidate?: CandidateUpdateOneRequiredWithoutSkillsNestedInput
   }
@@ -37609,6 +38820,7 @@ export namespace Prisma {
   export type SkillUncheckedUpdateInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     candidateId?: StringFieldUpdateOperationsInput | string
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
@@ -37616,6 +38828,7 @@ export namespace Prisma {
   export type SkillCreateManyInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     candidateId: string
     level?: $Enums.SkillLevel
   }
@@ -37623,12 +38836,14 @@ export namespace Prisma {
   export type SkillUpdateManyMutationInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
 
   export type SkillUncheckedUpdateManyInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     candidateId?: StringFieldUpdateOperationsInput | string
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
@@ -37703,6 +38918,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
@@ -37721,6 +38939,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
@@ -37735,6 +38956,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
@@ -37753,6 +38977,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -37769,6 +38996,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
   }
 
   export type RecruiterUpdateManyMutationInput = {
@@ -37779,6 +39009,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RecruiterUncheckedUpdateManyInput = {
@@ -37791,6 +39024,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type TransactionCreateInput = {
@@ -39329,6 +40565,55 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type AiQueryCacheCreateInput = {
+    id?: string
+    query: string
+    response: string
+    createdAt?: Date | string
+  }
+
+  export type AiQueryCacheUncheckedCreateInput = {
+    id?: string
+    query: string
+    response: string
+    createdAt?: Date | string
+  }
+
+  export type AiQueryCacheUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    query?: StringFieldUpdateOperationsInput | string
+    response?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiQueryCacheUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    query?: StringFieldUpdateOperationsInput | string
+    response?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiQueryCacheCreateManyInput = {
+    id?: string
+    query: string
+    response: string
+    createdAt?: Date | string
+  }
+
+  export type AiQueryCacheUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    query?: StringFieldUpdateOperationsInput | string
+    response?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiQueryCacheUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    query?: StringFieldUpdateOperationsInput | string
+    response?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -39989,6 +41274,7 @@ export namespace Prisma {
   export type SkillCountOrderByAggregateInput = {
     skillId?: SortOrder
     skillName?: SortOrder
+    category?: SortOrder
     candidateId?: SortOrder
     level?: SortOrder
   }
@@ -39996,6 +41282,7 @@ export namespace Prisma {
   export type SkillMaxOrderByAggregateInput = {
     skillId?: SortOrder
     skillName?: SortOrder
+    category?: SortOrder
     candidateId?: SortOrder
     level?: SortOrder
   }
@@ -40003,6 +41290,7 @@ export namespace Prisma {
   export type SkillMinOrderByAggregateInput = {
     skillId?: SortOrder
     skillName?: SortOrder
+    category?: SortOrder
     candidateId?: SortOrder
     level?: SortOrder
   }
@@ -40079,6 +41367,9 @@ export namespace Prisma {
     violationCount?: SortOrder
     updatedAt?: SortOrder
     createdAt?: SortOrder
+    aiInsightsCache?: SortOrder
+    aiInsightsCacheKey?: SortOrder
+    aiInsightsCachedAt?: SortOrder
   }
 
   export type RecruiterAvgOrderByAggregateInput = {
@@ -40094,6 +41385,8 @@ export namespace Prisma {
     violationCount?: SortOrder
     updatedAt?: SortOrder
     createdAt?: SortOrder
+    aiInsightsCacheKey?: SortOrder
+    aiInsightsCachedAt?: SortOrder
   }
 
   export type RecruiterMinOrderByAggregateInput = {
@@ -40105,6 +41398,8 @@ export namespace Prisma {
     violationCount?: SortOrder
     updatedAt?: SortOrder
     createdAt?: SortOrder
+    aiInsightsCacheKey?: SortOrder
+    aiInsightsCachedAt?: SortOrder
   }
 
   export type RecruiterSumOrderByAggregateInput = {
@@ -41267,6 +42562,27 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSupportStatusFilter<$PrismaModel>
     _max?: NestedEnumSupportStatusFilter<$PrismaModel>
+  }
+
+  export type AiQueryCacheCountOrderByAggregateInput = {
+    id?: SortOrder
+    query?: SortOrder
+    response?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AiQueryCacheMaxOrderByAggregateInput = {
+    id?: SortOrder
+    query?: SortOrder
+    response?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AiQueryCacheMinOrderByAggregateInput = {
+    id?: SortOrder
+    query?: SortOrder
+    response?: SortOrder
+    createdAt?: SortOrder
   }
 
   export type AdminCreateNestedOneWithoutUserInput = {
@@ -43819,6 +45135,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
@@ -43835,6 +45154,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
@@ -44048,6 +45370,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
@@ -44064,6 +45389,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -44964,12 +46292,14 @@ export namespace Prisma {
   export type SkillCreateWithoutCandidateInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     level?: $Enums.SkillLevel
   }
 
   export type SkillUncheckedCreateWithoutCandidateInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     level?: $Enums.SkillLevel
   }
 
@@ -45241,6 +46571,7 @@ export namespace Prisma {
     NOT?: SkillScalarWhereInput | SkillScalarWhereInput[]
     skillId?: StringFilter<"Skill"> | string
     skillName?: StringFilter<"Skill"> | string
+    category?: StringNullableFilter<"Skill"> | string | null
     candidateId?: StringFilter<"Skill"> | string
     level?: EnumSkillLevelFilter<"Skill"> | $Enums.SkillLevel
   }
@@ -46135,6 +47466,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     user: UserCreateNestedOneWithoutRecruiterInput
@@ -46151,6 +47485,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
@@ -46269,6 +47606,9 @@ export namespace Prisma {
     violationCount?: IntFilter<"Recruiter"> | number
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
+    aiInsightsCache?: JsonNullableFilter<"Recruiter">
+    aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
+    aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
   }
 
   export type CompanyBranchUpsertWithWhereUniqueWithoutCompanyInput = {
@@ -46807,6 +48147,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
     user: UserCreateNestedOneWithoutRecruiterInput
@@ -46824,6 +48167,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
     recruiterWallet?: RecruiterWalletUncheckedCreateNestedOneWithoutRecruiterInput
@@ -47052,6 +48398,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
     user?: UserUpdateOneRequiredWithoutRecruiterNestedInput
@@ -47069,6 +48418,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
     recruiterWallet?: RecruiterWalletUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -48140,6 +49492,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
     user: UserCreateNestedOneWithoutRecruiterInput
@@ -48157,6 +49512,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
     recruiterWallet?: RecruiterWalletUncheckedCreateNestedOneWithoutRecruiterInput
@@ -48257,6 +49615,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
     user?: UserUpdateOneRequiredWithoutRecruiterNestedInput
@@ -48274,6 +49635,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
     recruiterWallet?: RecruiterWalletUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -48371,6 +49735,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
@@ -48388,6 +49755,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedCreateNestedOneWithoutRecruiterInput
@@ -48449,6 +49819,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
@@ -48466,6 +49839,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -48574,6 +49950,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingCreateNestedManyWithoutRecruiterInput
     company?: CompanyCreateNestedOneWithoutRecruitersInput
@@ -48591,6 +49970,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
     conversations?: ConversationUncheckedCreateNestedManyWithoutRecruiterInput
     jobPostings?: JobPostingUncheckedCreateNestedManyWithoutRecruiterInput
     recruiterWallet?: RecruiterWalletUncheckedCreateNestedOneWithoutRecruiterInput
@@ -48620,6 +50002,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     company?: CompanyUpdateOneWithoutRecruitersNestedInput
@@ -48637,6 +50022,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterWallet?: RecruiterWalletUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -49064,6 +50452,7 @@ export namespace Prisma {
   export type SkillCreateManyCandidateInput = {
     skillId?: string
     skillName: string
+    category?: string | null
     level?: $Enums.SkillLevel
   }
 
@@ -49232,18 +50621,21 @@ export namespace Prisma {
   export type SkillUpdateWithoutCandidateInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
 
   export type SkillUncheckedUpdateWithoutCandidateInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
 
   export type SkillUncheckedUpdateManyWithoutCandidateInput = {
     skillId?: StringFieldUpdateOperationsInput | string
     skillName?: StringFieldUpdateOperationsInput | string
+    category?: NullableStringFieldUpdateOperationsInput | string | null
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
   }
 
@@ -49479,6 +50871,9 @@ export namespace Prisma {
     violationCount?: number
     updatedAt?: Date | string
     createdAt?: Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: string | null
+    aiInsightsCachedAt?: Date | string | null
   }
 
   export type CompanyBranchCreateManyCompanyInput = {
@@ -49596,6 +50991,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUpdateManyWithoutRecruiterNestedInput
     user?: UserUpdateOneRequiredWithoutRecruiterNestedInput
@@ -49612,6 +51010,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput
     jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
@@ -49627,6 +51028,9 @@ export namespace Prisma {
     violationCount?: IntFieldUpdateOperationsInput | number
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
+    aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
+    aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type CompanyBranchUpdateWithoutCompanyInput = {

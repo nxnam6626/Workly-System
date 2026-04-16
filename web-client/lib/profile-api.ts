@@ -18,7 +18,7 @@ export interface CandidateProfile {
     gpa?: number;
     cvUrl?: string;
     isOpenToWork: boolean;
-    skills: { skillId: string; skillName: string; level: string }[];
+    skills: { skillId: string; skillName: string; level: string; category?: string }[];
     cvs: {
       cvId: string;
       cvTitle: string;

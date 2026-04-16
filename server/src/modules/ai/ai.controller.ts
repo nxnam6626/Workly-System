@@ -16,10 +16,13 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
+import { ChatService } from './chat.service';
+
 @Controller('ai')
 export class AiController {
   constructor(
     private readonly aiService: AiService,
+    private readonly chatService: ChatService,
     private readonly adminAiService: AdminAiService,
   ) { }
 
@@ -39,9 +42,16 @@ export class AiController {
     console.log(
       `[AiController] Received stream request from user ${userId} for message: ${message}`,
     );
-    return from(this.aiService.generateStreamResponse(message, userId)).pipe(
+    return from(this.chatService.generateStreamResponse(message, userId)).pipe(
       map((text) => ({ data: text }) as MessageEvent),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  @Get('recruiter-insights')
+  async getRecruiterInsights(@CurrentUser('userId') userId: string) {
+    return this.aiService.generateRecruiterInsights(userId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

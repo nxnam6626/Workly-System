@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AiService } from './ai.service';
+import { ChatService } from './chat.service';
 import { UseInterceptors } from '@nestjs/common';
 import { PiiMaskingInterceptor } from './interceptors/pii-masking.interceptor';
 
@@ -20,7 +21,10 @@ export class AiGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly chatService: ChatService,
+  ) {}
 
   @UseInterceptors(PiiMaskingInterceptor)
   @SubscribeMessage('send_message')
@@ -36,7 +40,7 @@ export class AiGateway {
       // But we handled object in Interceptor. For safety, let's rely on the service to do processing.
 
       // AI Service now handles intention extraction, RAG, and returns stream
-      const stream = this.aiService.processChatWithRAGStream(message, context);
+      const stream = this.chatService.processChatWithRAGStream(message, context);
 
       for await (const chunk of stream) {
         if (typeof chunk === 'string') {

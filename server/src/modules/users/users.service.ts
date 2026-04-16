@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -16,6 +17,7 @@ import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
 import { MessagesGateway } from '../messages/messages.gateway';
 import { SupabaseService } from '../../common/supabase/supabase.service';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class UsersService {
@@ -25,6 +27,7 @@ export class UsersService {
     private searchService: SearchService,
     private moduleRef: ModuleRef,
     private readonly supabaseService: SupabaseService,
+    private readonly aiService: AiService,
   ) {}
 
   // ==========================================
@@ -65,8 +68,8 @@ export class UsersService {
         data: { userId: newUser.userId, roleId: primaryRoleRecord.roleId },
       });
 
-      // Always grant CANDIDATE role as baseline (if not already requested)
-      if (data.role !== 'CANDIDATE') {
+      // Grant CANDIDATE role as baseline — NOT for ADMIN accounts
+      if (data.role !== 'CANDIDATE' && data.role !== 'ADMIN') {
         const candidateRoleRecord = await tx.role.upsert({
           where: { roleName: 'CANDIDATE' },
           update: {},
@@ -77,14 +80,16 @@ export class UsersService {
         });
       }
 
-      // Always create a Candidate profile for the user
-      await tx.candidate.create({
-        data: {
-          userId: newUser.userId,
-          fullName:
-            'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
-        },
-      });
+      // Create Candidate profile — NOT for ADMIN accounts
+      if (data.role !== 'ADMIN') {
+        await tx.candidate.create({
+          data: {
+            userId: newUser.userId,
+            fullName:
+              'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
+          },
+        });
+      }
 
       if (data.role === 'RECRUITER') {
         let companyId: string | null = null;
@@ -499,10 +504,16 @@ export class UsersService {
     return this.findOne(userId);
   }
 
-  /** Cập nhật ảnh đại diện của user. */
+  /** Cập nhật ảnh đại diện của user (có kiểm duyệt AI Vision). */
   async updateAvatar(userId: string, file: Express.Multer.File) {
-    const user = await this.prisma.user.findUnique({ where: { userId } });
+    const user = await this.prisma.user.findUnique({ 
+      where: { userId },
+      include: { userRoles: { include: { role: true } } }
+    });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng.');
+
+    const roles = user.userRoles?.map(ur => ur.role.roleName) || [];
+    const isCandidateOnly = roles.includes('CANDIDATE') && !roles.includes('RECRUITER') && !roles.includes('ADMIN');
 
     // 1. Upload ảnh mới lên Supabase
     const fileExt = file.originalname.split('.').pop();
@@ -515,13 +526,23 @@ export class UsersService {
       file.mimetype,
     );
 
-    // 2. Cập nhật URL vào DB
+    // 2. Kiểm duyệt ảnh bằng Gemini Vision (fail-open nếu AI không khả dụng)
+    const expectedType = isCandidateOnly ? 'face_only' : 'face_or_logo';
+    const modResult = await this.aiService.moderateImage(avatarUrl, file.mimetype, expectedType);
+    if (!modResult.safe) {
+      // Xóa ảnh vừa upload khỏi Supabase (đảm bảo không để lại rác)
+      const uploadedPath = this.supabaseService.extractPathFromUrl(avatarUrl);
+      if (uploadedPath) await this.supabaseService.deleteFile(uploadedPath).catch(() => {});
+      throw new BadRequestException(`Ảnh không phù hợp: ${modResult.reason}. Vui lòng chọn ảnh khác.`);
+    }
+
+    // 3. Cập nhật URL vào DB
     await this.prisma.user.update({
       where: { userId },
       data: { avatar: avatarUrl },
     });
 
-    // 3. Dọn dẹp ảnh cũ nếu có trên Supabase
+    // 4. Dọn dẹp ảnh cũ nếu có trên Supabase
     if (user.avatar) {
       const oldPath = this.supabaseService.extractPathFromUrl(user.avatar);
       if (oldPath) {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles, Edit } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -94,9 +94,18 @@ export default function JobDetailsPage() {
       transition={{ duration: 0.4 }}
       className="space-y-6 max-w-6xl mx-auto"
     >
-      <Link href="/recruiter/jobs" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Quay lại danh sách
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/recruiter/jobs" className="inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Quay lại danh sách
+        </Link>
+        <Link
+          href={`/recruiter/post-job?jobId=${id}`}
+          title="Chỉnh sửa tin (sẽ chờ duyệt lại sau khi sửa)"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 font-medium text-sm transition-all active:scale-95"
+        >
+          <Edit className="w-4 h-4" /> Chỉnh sửa JD
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side: Job Info */}

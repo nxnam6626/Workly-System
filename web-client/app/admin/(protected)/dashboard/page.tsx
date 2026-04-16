@@ -1,24 +1,67 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-import { Users, Briefcase, Clock, CheckCircle2, XCircle, TrendingUp, ArrowUpRight, Loader2, RefreshCw } from 'lucide-react';
-
-import { AdminAnalyticsChat } from '@/components/admin/AdminAnalyticsChat';
-import { adminDashboardApi, DashboardStats, RevenueStats } from '@/lib/admin-api';
 import Link from 'next/link';
+import {
+  Users, Briefcase, Clock, XCircle, TrendingUp,
+  ArrowUpRight, Loader2, RefreshCw, DollarSign,
+  Activity, ShieldAlert, BarChart3, Zap
+} from 'lucide-react';
+import { adminDashboardApi, DashboardStats, RevenueStats } from '@/lib/admin-api';
+import { AdminAnalyticsChat } from '@/components/admin/AdminAnalyticsChat';
 import ViolationsList from './components/ViolationsList';
+
+function StatCard({
+  label, value, icon: Icon, gradient, href, description, urgent, delta, isLoading
+}: {
+  label: string; value: number; icon: any; gradient: string;
+  href: string; description: string; urgent?: boolean; delta?: string; isLoading: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4 transition-all hover:-translate-y-1 hover:shadow-xl shadow-md"
+      style={{ background: gradient }}
+    >
+      {/* Glow circle */}
+      <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 group-hover:scale-125 transition-transform duration-500" />
+      <div className="absolute -bottom-8 -left-4 w-20 h-20 rounded-full bg-white/5 group-hover:scale-150 transition-transform duration-700" />
+
+      <div className="relative flex items-start justify-between">
+        <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex items-center gap-1 text-white/70 group-hover:text-white transition-colors">
+          <ArrowUpRight className="w-4 h-4" />
+        </div>
+      </div>
+
+      <div className="relative">
+        <p className="text-3xl font-black text-white tracking-tight">
+          {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-white/60" /> : value.toLocaleString()}
+        </p>
+        <p className="text-sm font-bold text-white/90 mt-0.5">{label}</p>
+        <p className="text-xs text-white/60 mt-0.5">{description}</p>
+      </div>
+
+      {urgent && (
+        <div className="relative flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-1.5 w-fit">
+          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          <span className="text-white text-xs font-bold">Cần xử lý ngay</span>
+        </div>
+      )}
+    </Link>
+  );
+}
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
   const [revenue, setRevenue] = useState<RevenueStats | null>(null);
 
   const fetchStats = () => {
     setIsLoading(true);
-
     Promise.allSettled([
       adminDashboardApi.getStats(),
       adminDashboardApi.getRevenueStats()
@@ -29,89 +72,68 @@ export default function DashboardPage() {
     }).finally(() => setIsLoading(false));
   };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  useEffect(() => { fetchStats(); }, []);
 
-  const statCards = [
-    {
-      label: 'Tổng Người Dùng',
-      value: stats?.totalUsers || 0,
-      icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-      border: 'border-blue-100',
-      href: '/admin/users',
-      description: 'Tài khoản đã đăng ký',
-    },
-    {
-      label: 'Tin Đang Hoạt Động',
-      value: stats?.totalJobs || 0,
-      icon: Briefcase,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-      border: 'border-emerald-100',
-      href: '/admin/jobs',
-      description: 'Đã được phê duyệt',
-    },
-    {
-      label: 'Tin Chờ Duyệt',
-      value: stats?.pendingJobs || 0,
-      icon: Clock,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      border: 'border-amber-100',
-      href: '/admin/jobs',
-      description: 'Cần xử lý',
-      urgent: (stats?.pendingJobs || 0) > 0,
-    },
-    {
-      label: 'Tin Bị Từ Chối',
-      value: stats?.totalRejected || 0,
-      icon: XCircle,
-      color: 'text-rose-600',
-      bg: 'bg-rose-50',
-      border: 'border-rose-100',
-      href: '/admin/jobs',
-      description: 'Vi phạm hoặc chưa đạt',
-    },
-  ];
-
-  // Build last 14 days chart data from dailyRevenue
+  // Build last 14 days chart data
   const chartDays = (() => {
     const days: { date: string; label: string; value: number }[] = [];
     for (let i = 13; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const key = d.toISOString().split('T')[0];
-      const label = `${d.getDate()}/${d.getMonth() + 1}`;
-      days.push({ date: key, label, value: revenue?.dailyRevenue?.[key] || 0 });
+      days.push({ date: key, label: `${d.getDate()}/${d.getMonth() + 1}`, value: revenue?.dailyRevenue?.[key] || 0 });
     }
     return days;
   })();
 
-  const maxRevenue = Math.max(...chartDays.map((d) => d.value), 1);
+  const maxRevenue = Math.max(...chartDays.map(d => d.value), 1);
+  const totalRevenue = chartDays.reduce((s, d) => s + d.value, 0);
 
-  function formatXuToVnd(xuAmount: number) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(xuAmount * 1000);
+  function formatVnd(xu: number) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(xu * 1000);
   }
 
+  const statCards = [
+    {
+      label: 'Tổng Người Dùng', value: stats?.totalUsers || 0, icon: Users,
+      gradient: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
+      href: '/admin/users', description: 'Tài khoản đã đăng ký',
+    },
+    {
+      label: 'Tin Đang Hoạt Động', value: stats?.totalJobs || 0, icon: Briefcase,
+      gradient: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
+      href: '/admin/jobs', description: 'Đã được phê duyệt',
+    },
+    {
+      label: 'Chờ Duyệt', value: stats?.pendingJobs || 0, icon: Clock,
+      gradient: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)',
+      href: '/admin/jobs', description: 'Cần xử lý',
+      urgent: (stats?.pendingJobs || 0) > 0,
+    },
+    {
+      label: 'Tin Bị Từ Chối', value: stats?.totalRejected || 0, icon: XCircle,
+      gradient: 'linear-gradient(135deg, #4c0519 0%, #e11d48 100%)',
+      href: '/admin/jobs', description: 'Vi phạm hoặc chưa đạt',
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Tổng Quan Hệ Thống</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tổng Quan Hệ Thống</h1>
+          <p className="text-sm text-slate-400 mt-1 flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5" />
             {lastUpdated
-              ? `Cập nhật lần cuối: ${lastUpdated.toLocaleTimeString('vi-VN')}`
+              ? `Cập nhật lúc ${lastUpdated.toLocaleTimeString('vi-VN')}`
               : 'Đang tải dữ liệu...'}
           </p>
         </div>
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm disabled:opacity-50 active:scale-95"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           Làm mới
@@ -121,157 +143,150 @@ export default function DashboardPage() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
-          <Link
-            key={i}
-            href={card.href}
-            className={`group bg-white rounded-2xl border ${card.urgent ? 'border-amber-200 shadow-amber-50/80' : 'border-slate-200'} p-5 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex flex-col gap-4`}
-          >
-            <div className="flex items-start justify-between">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${card.bg} ${card.border} border`}>
-                <card.icon className={`w-5 h-5 ${card.color}`} />
-              </div>
-              <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {isLoading
-                  ? <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-                  : card.value.toLocaleString()}
-              </p>
-              <p className="text-sm font-semibold text-slate-600 mt-0.5">{card.label}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{card.description}</p>
-            </div>
-            {card.urgent && (
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 rounded-lg px-2 py-1 w-fit">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                Cần xử lý ngay
-              </div>
-            )}
-          </Link>
+          <StatCard key={i} {...card} isLoading={isLoading} />
         ))}
       </div>
 
-      <div className="mt-8">
+      {/* AI Chat */}
+      <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
         <AdminAnalyticsChat />
-        {/* Metrics Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="lg:col-span-2 space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Approval rate */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-slate-800">Tỷ Lệ Duyệt</h3>
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
-                </div>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-end gap-2 mb-3">
-                      <span className="text-4xl font-black text-slate-900">{stats?.approvalRate ?? 0}</span>
-                      <span className="text-xl font-bold text-slate-400 mb-1">%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 mb-4">
-                      <div
-                        className="bg-emerald-500 h-2.5 rounded-full transition-all duration-700"
-                        style={{ width: `${stats?.approvalRate ?? 0}%` }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { label: 'Đã duyệt', value: stats?.totalApproved ?? 0, color: 'text-emerald-600 bg-emerald-50' },
-                        { label: 'Chờ duyệt', value: stats?.pendingJobs ?? 0, color: 'text-amber-600 bg-amber-50' },
-                        { label: 'Từ chối', value: stats?.totalRejected ?? 0, color: 'text-rose-600 bg-rose-50' },
-                      ].map((item) => (
-                        <div key={item.label} className={`rounded-xl p-2 text-center ${item.color}`}>
-                          <p className="text-lg font-black">{item.value}</p>
-                          <p className="text-[10px] font-semibold">{item.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Quick actions */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
-                <h3 className="font-bold text-slate-800 mb-4 text-sm">Truy Cập Nhanh</h3>
-                <div className="space-y-2 flex-1 overflow-y-auto">
-                  {[
-                    { label: 'Duyệt Tin', href: '/admin/jobs', icon: Briefcase, color: 'blue' },
-                    { label: 'Người Dùng', href: '/admin/users', icon: Users, color: 'indigo' },
-                    { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, color: 'emerald' },
-                  ].map((action) => {
-                    const Icon = action.icon;
-                    return (
-                      <Link
-                        key={action.href + action.label}
-                        href={action.href}
-                        className="group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
-                      >
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <p className="text-xs font-bold text-slate-700">{action.label}</p>
-                      </Link>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <p className="text-[10px] text-slate-400 text-center font-medium">Hệ thống quản trị Workly v1.0</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Daily Revenue Bar Chart */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h3 className="font-bold text-slate-800">Xu Hướng Doanh Thu 14 Ngày</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Thống kê nạp thẻ và thanh toán dịch vụ (VNĐ)</p>
-                </div>
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
-              </div>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-                </div>
-              ) : (
-                <div className="flex items-end gap-1.5 h-48 mt-4">
-                  {chartDays.map((day) => {
-                    const pct = (day.value / maxRevenue) * 100;
-                    return (
-                      <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative pt-8">
-                        <div className="flex-1 w-full bg-transparent flex items-end justify-center">
-                          <div
-                            className="w-full bg-blue-500 rounded-t-md transition-all duration-500 hover:bg-blue-600"
-                            style={{ height: `${Math.max(pct, day.value > 0 ? 4 : 0)}%` }}
-                          />
-                        </div>
-                        {/* tooltip */}
-                        {day.value > 0 && (
-                          <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            {formatXuToVnd(day.value)}
-                          </div>
-                        )}
-                        <span className="text-[9px] text-slate-400 rotate-0 shrink-0">{day.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Violations List Right Side */}
-          <div className="lg:col-span-1 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden h-fit">
-            <ViolationsList />
-          </div>
-        </div>
       </div>
 
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Left: Charts */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Revenue + Approval row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Approval Rate */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="font-bold text-slate-800 text-sm">Tỷ Lệ Duyệt JD</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Tỷ lệ tin được phê duyệt</p>
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                </div>
+              </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
+              ) : (
+                <>
+                  <div className="flex items-baseline gap-1 mb-3">
+                    <span className="text-4xl font-black text-slate-900">{stats?.approvalRate ?? 0}</span>
+                    <span className="text-lg font-bold text-slate-400">%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2 rounded-full transition-all duration-1000"
+                      style={{ width: `${stats?.approvalRate ?? 0}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: 'Duyệt', value: stats?.totalApproved ?? 0, cls: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+                      { label: 'Chờ', value: stats?.pendingJobs ?? 0, cls: 'text-amber-700 bg-amber-50 border-amber-100' },
+                      { label: 'Từ chối', value: stats?.totalRejected ?? 0, cls: 'text-rose-700 bg-rose-50 border-rose-100' },
+                    ].map(item => (
+                      <div key={item.label} className={`rounded-xl p-2.5 text-center border ${item.cls}`}>
+                        <p className="text-xl font-black">{item.value}</p>
+                        <p className="text-[10px] font-semibold mt-0.5">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-indigo-500" /> Truy Cập Nhanh
+              </h3>
+              <div className="space-y-2">
+                {[
+                  { label: 'Duyệt Tin Tuyển Dụng', href: '/admin/jobs', icon: Briefcase, color: 'blue', desc: 'Xem & phê duyệt JD' },
+                  { label: 'Quản Lý Người Dùng', href: '/admin/users', icon: Users, color: 'indigo', desc: 'Khóa / mở khóa tài khoản' },
+                  { label: 'Báo Cáo Doanh Thu', href: '/admin/revenue', icon: DollarSign, color: 'emerald', desc: 'Thống kê tài chính' },
+                  { label: 'Hỗ Trợ & Vi Phạm', href: '/admin/support', icon: ShieldAlert, color: 'rose', desc: 'Báo cáo vi phạm' },
+                ].map(action => {
+                  const Icon = action.icon;
+                  const colorMap: Record<string, string> = {
+                    blue: 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100',
+                    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100',
+                    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100',
+                    rose: 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100',
+                  };
+                  return (
+                    <Link
+                      key={action.href}
+                      href={action.href}
+                      className="group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 transition-all"
+                    >
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-colors ${colorMap[action.color]}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-slate-700 truncate">{action.label}</p>
+                        <p className="text-[10px] text-slate-400">{action.desc}</p>
+                      </div>
+                      <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue Bar Chart */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm">Doanh Thu 14 Ngày</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Thống kê nạp xu & thanh toán dịch vụ</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-black text-slate-900">{formatVnd(totalRevenue)}</p>
+                <p className="text-[10px] text-slate-400">Tổng 14 ngày</p>
+              </div>
+            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
+            ) : (
+              <div className="flex items-end gap-1 h-40">
+                {chartDays.map(day => {
+                  const pct = (day.value / maxRevenue) * 100;
+                  return (
+                    <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative">
+                      {day.value > 0 && (
+                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          {formatVnd(day.value)}
+                        </div>
+                      )}
+                      <div
+                        className="w-full rounded-t-md transition-all duration-500"
+                        style={{
+                          height: `${Math.max(pct, day.value > 0 ? 4 : 1)}%`,
+                          background: day.value > 0
+                            ? 'linear-gradient(180deg, #6366f1 0%, #4338ca 100%)'
+                            : '#e2e8f0'
+                        }}
+                      />
+                      <span className="text-[8px] text-slate-400 shrink-0">{day.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Violations */}
+        <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <ViolationsList />
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
@@ -20,6 +21,28 @@ import { Queue } from 'bullmq';
 import { AiService } from '../../ai/ai.service';
 import { SubscriptionsService } from '../../subscriptions/subscriptions.service';
 
+// Industry keyword map for content-based filtering (since DB has no `industry` field)
+const INDUSTRY_TAG_MAP: Record<string, string[]> = {
+  'CNTT / Phần mềm': ['frontend', 'backend', 'developer', 'lập trình', 'software', 'react', 'nodejs', 'java', 'python', 'devops', 'data', 'ai engineer', 'machine learning', 'cloud', 'mobile', 'flutter', 'fullstack', 'qa engineer', 'tester', 'kiểm thử', 'scrum', 'công nghệ thông tin'],
+  'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'growth hacker', 'crm'],
+  'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor', 'video script'],
+  'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'investment', 'cfo'],
+  'Nhân sự / Hành chính / Pháp lý': ['hr ', 'nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'c&b', 'compliance', 'labor relations'],
+  'Kinh doanh / Bán hàng': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'account executive', 'key account'],
+  'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'ui/ux', 'figma', 'adobe', 'animation', 'motion', 'illustrat', 'creative director', 'art director'],
+  'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'tự động hóa', 'qc', 'quality control', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì'],
+  'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad', 'kết cấu'],
+  'Vận tải / Logistics / Chuỗi cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'kho vận', 'forwarder', 'procurement', 'mua hàng'],
+  'Bán lẻ / Tiêu dùng': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer goods', 'siêu thị'],
+  'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'tour guide', 'hospitality', 'chef'],
+  'Y tế / Dược phẩm / Chăm sóc sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinical', 'lab', 'chăm sóc sức khỏe'],
+  'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'ngôn ngữ', 'giáo dục'],
+  'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản', 'aquaculture', 'agri'],
+  'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản', 'broker', 'leasing'],
+  'Truyền thông / Báo chí': ['báo chí', 'journalist', 'pr ', 'public relations', 'media', 'broadcast'],
+  'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment', 'esports'],
+};
+
 @Injectable()
 export class JobPostingsService {
   constructor(
@@ -35,6 +58,7 @@ export class JobPostingsService {
   ) { }
 
   private readonly VIOLATION_LIMIT = 3;
+  private readonly logger = new Logger(JobPostingsService.name);
 
   private async enrichKeywordsInBackground(jobId: string, title: string, hardSkills: string[]) {
     try {
@@ -115,7 +139,7 @@ export class JobPostingsService {
     const originalUrl =
       'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
 
-    // Automatic Content Moderation
+    // Automatic Content Moderation — Gemini AI thật (fallback về random nếu quota hết)
     const { containsBadWords, foundWords } = this.validateBlacklist(
       createJobPostingDto.title,
       createJobPostingDto.description,
@@ -125,19 +149,33 @@ export class JobPostingsService {
       softSkills,
     );
 
-    // Tạo điểm ngẫu nhiên mô phỏng AI (Nội dung xấu -> Thấp, Tốt -> Ngẫu nhiên 70-99)
-    const aiReliabilityScore = containsBadWords
-      ? 40
-      : parseFloat((Math.random() * (99 - 70) + 70).toFixed(1));
-
-    // Auto-approve criteria:
+    let aiReliabilityScore: number;
     let finalStatus: JobStatus = JobStatus.PENDING;
 
     if (containsBadWords) {
-      finalStatus = JobStatus.REJECTED; // Tự động đánh rớt nếu vi phạm
-    } else if (aiReliabilityScore >= 50) {
-      finalStatus = JobStatus.APPROVED; // Tự động duyệt nếu qua mức cơ sở
+      // Blacklist hit → từ chối ngay, không cần gọi AI
+      aiReliabilityScore = 40;
+      finalStatus = JobStatus.REJECTED;
+    } else {
+      // Gọi Gemini để kiểm duyệt nội dung thật
+      const modResult = await this.aiService.moderateJobContent(
+        createJobPostingDto.title,
+        createJobPostingDto.description,
+        createJobPostingDto.requirements,
+        createJobPostingDto.benefits,
+        hardSkills,
+      );
+      aiReliabilityScore = modResult.score;
+
+      if (!modResult.safe || modResult.score < 50) {
+        finalStatus = JobStatus.PENDING; // Cần admin duyệt thủ công
+        this.logger.warn(`[JobPostings] JD "${createJobPostingDto.title}" flagged by AI: ${modResult.reason} | flags: ${modResult.flags.join(', ')}`);
+      } else {
+        finalStatus = JobStatus.APPROVED; // AI xác nhận an toàn → tự động duyệt
+        this.logger.log(`[JobPostings] JD "${createJobPostingDto.title}" auto-approved (score=${aiReliabilityScore}, usedAI=${modResult.usedAI})`);
+      }
     }
+
 
     const job = await this.prisma.jobPosting.create({
       data: {
@@ -270,6 +308,41 @@ export class JobPostingsService {
     return job;
   }
 
+  // Normalize location query to match multiple aliases
+  private buildLocationCondition(location?: string): any | undefined {
+    if (!location) return undefined;
+
+    const LOCATION_ALIASES: Record<string, string[]> = {
+      'Hồ Chí Minh': ['TPHCM', 'TP HCM', 'TP. HCM', 'Ho Chi Minh', 'HCM', 'Thành phố Hồ Chí Minh', 'TP Hồ Chí Minh'],
+      'Hà Nội': ['Ha Noi', 'Hanoi', 'Thành phố Hà Nội', 'TP Hà Nội', 'TP. Hà Nội'],
+      'Đà Nẵng': ['Da Nang', 'Danang', 'Thành phố Đà Nẵng'],
+      'Cần Thơ': ['Can Tho', 'Thành phố Cần Thơ'],
+      'Hải Phòng': ['Hai Phong', 'Thành phố Hải Phòng'],
+    };
+
+    // Find canonical key matching input (or reverse - input is alias)
+    const variants = new Set<string>([location]);
+
+    // Direct lookup
+    if (LOCATION_ALIASES[location]) {
+      LOCATION_ALIASES[location].forEach(v => variants.add(v));
+    }
+
+    // Reverse lookup: input might be an alias, find the canonical
+    for (const [canonical, aliases] of Object.entries(LOCATION_ALIASES)) {
+      if (aliases.some(a => a.toLowerCase() === location.toLowerCase())) {
+        variants.add(canonical);
+        aliases.forEach(v => variants.add(v));
+      }
+    }
+
+    return {
+      OR: Array.from(variants).map(v => ({
+        locationCity: { contains: v, mode: 'insensitive' }
+      }))
+    };
+  }
+
   async findAll(query: FilterJobPostingDto, userId?: string) {
     const {
       search,
@@ -319,8 +392,17 @@ export class JobPostingsService {
     }
 
     // Fetch full data from Prisma using IDs from ES
-    const whereCondition: any = { jobPostingId: { in: ids } };
+    const whereCondition: any = { 
+      jobPostingId: { in: ids },
+      status: 'APPROVED',
+    };
     if (jobTier) whereCondition.jobTier = jobTier;
+
+    // Apply fuzzy location filter on top of ES results to handle alias mismatches
+    const locationCond = this.buildLocationCondition(location);
+    if (locationCond) {
+      whereCondition.AND = [locationCond];
+    }
 
     const items = await this.prisma.jobPosting.findMany({
       where: whereCondition,
@@ -365,16 +447,46 @@ export class JobPostingsService {
     const { search, location, jobType, jobTier, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = { status: 'APPROVED' };
-    if (location) where.locationCity = location;
+    const where: any = { 
+      status: 'APPROVED',
+    };
+    // Industry filter: keyword-based matching via INDUSTRY_TAG_MAP
+    const { industry } = query;
+    const industryKeywords = industry ? (INDUSTRY_TAG_MAP[industry] || [industry]) : [];
+
+    // Build all filter clauses — use AND to combine safely
+    const andClauses: any[] = [];
+
+    // Location filter
+    const locationCond = this.buildLocationCondition(location);
+    if (locationCond) andClauses.push(locationCond);
+
     if (jobType) where.jobType = jobType;
     if (jobTier) where.jobTier = jobTier;
 
+    // Search filter
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { company: { companyName: { contains: search, mode: 'insensitive' } } },
-      ];
+      andClauses.push({
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+          { company: { companyName: { contains: search, mode: 'insensitive' } } },
+        ],
+      });
+    }
+
+    // Industry keyword filter
+    if (industryKeywords.length > 0) {
+      const industryConds = industryKeywords.flatMap(kw => [
+        { title: { contains: kw, mode: 'insensitive' } },
+        { description: { contains: kw, mode: 'insensitive' } },
+        { requirements: { contains: kw, mode: 'insensitive' } },
+      ]);
+      andClauses.push({ OR: industryConds });
+    }
+
+    if (andClauses.length > 0) {
+      where.AND = andClauses;
     }
 
     let [items, total] = (await Promise.all([
@@ -558,9 +670,16 @@ export class JobPostingsService {
       softSkills,
     );
 
-    let newStatus: JobStatus = JobStatus.PENDING;
-    if (containsBadWords) {
-      newStatus = JobStatus.REJECTED;
+    const statusVal = (updateJobPostingDto as any).status;
+    const isStatusOnlyUpdate = Object.keys(updateJobPostingDto).length === 1 && statusVal !== undefined;
+    let newStatus: JobStatus = statusVal || existingJob.status;
+
+    if (!isStatusOnlyUpdate) {
+      if (containsBadWords) {
+        newStatus = JobStatus.REJECTED;
+      } else {
+        newStatus = JobStatus.PENDING;
+      }
     }
 
     const currentStructured = (existingJob.structuredRequirements as any) || {};
@@ -1148,5 +1267,40 @@ export class JobPostingsService {
       containsBadWords: foundBadWords.length > 0,
       foundWords: foundBadWords,
     };
+  }
+
+  async renew(jobId: string, userId: string) {
+    const job = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId: jobId },
+      include: { recruiter: true }
+    });
+    
+    if (!job) throw new NotFoundException('Tin tuyển dụng không tồn tại');
+    if (job.recruiter?.userId !== userId) throw new ForbiddenException('Bạn không có quyền gia hạn tin này');
+    if ((job.status as any) !== 'EXPIRED' && (job.status as any) !== 'CLOSED') {
+      throw new ForbiddenException('Chỉ có thể gia hạn tin đã hết hạn hoặc đã khóa');
+    }
+
+    // Trừ quota vì gia hạn coi như dùng lượt
+    await this.subscriptionsService.checkPermissionAndDeduct(userId, job.jobTier);
+
+    // Renew = gia hạn -> Tạo mốc ngày giờ mới và gán lại APPROVED
+    const updatedJob = await this.prisma.jobPosting.update({
+      where: { jobPostingId: jobId },
+      data: {
+        status: 'APPROVED',
+        createdAt: new Date(),
+        refreshedAt: new Date()
+      },
+      include: { company: true, recruiter: { include: { user: true } } }
+    });
+
+    try {
+      await this.syncJobToES(updatedJob);
+    } catch (e) {
+      console.error('ES Sync failed on renew', e);
+    }
+
+    return updatedJob;
   }
 }

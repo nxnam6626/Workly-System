@@ -33,15 +33,7 @@ export default function JobFilters({ filters, setFilters }: JobFiltersProps) {
         <option value={JobStatus.REJECTED}>Đã từ chối</option>
       </select>
 
-      <select
-        value={filters.postType || ''}
-        onChange={(e) => setFilters((f) => ({ ...f, postType: (e.target.value as PostType) || undefined }))}
-        className="px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white"
-      >
-        <option value="">Loại tin</option>
-        <option value={PostType.MANUAL}>Thủ công</option>
-        <option value={PostType.CRAWLED}>Crawler</option>
-      </select>
+
 
 
 

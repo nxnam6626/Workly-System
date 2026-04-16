@@ -15,6 +15,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 export default function AiChatBox() {
   const {
@@ -25,6 +26,7 @@ export default function AiChatBox() {
   const socketRef = useRef<Socket | null>(null);
   const pathname = usePathname() || '';
   const { user } = useAuthStore();
+  const confirm = useConfirm();
 
   useEffect(() => {
     if (!socketRef.current) {
@@ -93,18 +95,8 @@ export default function AiChatBox() {
         : 'bg-white/90 backdrop-blur-md border border-slate-200 text-slate-800 rounded-tl-none'
         }`}>
         {hasContent && (
-          <div className="text-[13.5px] leading-relaxed markdown-content">
-            <ReactMarkdown 
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({children}) => <p className="mb-2 last:mb-0 leading-6">{children}</p>,
-                ul: ({children}) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
-                ol: ({children}) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
-                li: ({children}) => <li className="mb-0">{children}</li>,
-                strong: ({children}) => <strong className="font-bold text-indigo-700/90 dark:text-indigo-300">{children}</strong>,
-                code: ({children}) => <code className="bg-slate-100 px-1 rounded text-pink-600 font-mono text-[12px]">{children}</code>
-              }}
-            >
+          <div className="text-sm leading-relaxed overflow-hidden [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-2 [&_strong]:font-bold [&_strong]:text-slate-900">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {msg.content}
             </ReactMarkdown>
           </div>
@@ -126,18 +118,19 @@ export default function AiChatBox() {
     );
   };
 
-  const handleSend = async (e?: React.FormEvent) => {
+  const handleSend = async (e?: React.FormEvent, presetText?: string) => {
     e?.preventDefault();
-    if (!input.trim() || isTyping) return;
+    const textToSend = presetText || input;
+    if (!textToSend.trim() || isTyping) return;
 
-    const currentInput = input.trim();
+    const currentInput = textToSend.trim();
     addMessage({
       id: Date.now().toString(),
       role: 'user',
       content: currentInput,
       timestamp: new Date()
     });
-    setInput('');
+    if (!presetText) setInput('');
     setTyping(true);
 
     const { accessToken } = useAuthStore.getState();
@@ -163,48 +156,53 @@ export default function AiChatBox() {
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
 
-                for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                        let content = line.replace('data:', ''); // REMOVED .trim() to preserve spacing
-                        if (content) {
-                            // NestJS wraps string data in quotes for SSE
-                            if (content.startsWith('"') && content.endsWith('"')) {
-                                content = content.slice(1, -1).replace(/\\n/g, '\n');
-                            }
+        for (const line of lines) {
+          if (line.startsWith('data:')) {
+            let content = line.slice(5); // remove 'data:'
+            // The SSE format often adds a space after data:
+            if (content.startsWith(' ')) content = content.slice(1);
 
-                            // Check for internal commands (e.g., job cards)
-                            if (content.startsWith('__ACTION__:')) {
-                                try {
-                                    const actionData = JSON.parse(content.replace('__ACTION__:', ''));
-                                    addMessage({
-                                        id: Date.now().toString() + Math.random(),
-                                        role: 'ai',
-                                        content: '',
-                                        timestamp: new Date(),
-                                        metadata: { action: actionData.type, payload: actionData.payload }
-                                    });
-                                } catch (e) {
-                                    console.error('Failed to parse AI action:', e);
-                                }
-                                continue;
-                            }
+            if (content) {
+              // NestJS wraps string data in quotes for SSE
+              if (content.startsWith('"') && content.endsWith('"')) {
+                content = content.slice(1, -1)
+                  .replace(/\\n/g, '\n')
+                  .replace(/\\"/g, '"');
+              }
 
-                            if (!aiMessageAdded) {
-                                addMessage({
-                                    id: aiMessageId,
-                                    role: 'ai',
-                                    content: '',
-                                    timestamp: new Date(),
-                                    metadata: { isStreaming: true }
-                                });
-                                aiMessageAdded = true;
-                                setTyping(false);
-                            }
-                            fullContent += content;
-                            updateMessage(aiMessageId, { content: fullContent });
-                        }
-                    }
+              // Check for internal commands (e.g., job cards)
+              if (content.startsWith('__ACTION__:')) {
+                try {
+                  const actionData = JSON.parse(content.replace('__ACTION__:', ''));
+                  addMessage({
+                    id: Date.now().toString() + Math.random(),
+                    role: 'ai',
+                    content: '',
+                    timestamp: new Date(),
+                    metadata: { action: actionData.type, payload: actionData.payload }
+                  });
+                } catch (e) {
+                  console.error('Failed to parse AI action:', e);
                 }
+                continue;
+              }
+
+              if (!aiMessageAdded) {
+                addMessage({
+                  id: aiMessageId,
+                  role: 'ai',
+                  content: '',
+                  timestamp: new Date(),
+                  metadata: { isStreaming: true }
+                });
+                aiMessageAdded = true;
+                setTyping(false);
+              }
+              fullContent += content;
+              updateMessage(aiMessageId, { content: fullContent.replace(/__NEWLINE__/g, '\n') });
+            }
+          }
+        }
       }
       // Kết thúc stream
       if (aiMessageAdded) {
@@ -251,23 +249,30 @@ export default function AiChatBox() {
             className="w-[380px] sm:w-[420px] h-[580px] bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-white/50 ring-1 ring-black/5"
           >
             <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 p-5 text-white flex items-center justify-between shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
               <div className="flex items-center gap-3 relative z-10">
                 <div className="w-10 h-10 bg-white/20 rounded-xl backdrop-blur-md flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg tracking-tight">Workly AI</h3>
-                  <div className="flex items-center gap-1.5 opacity-90">
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
-                    <span className="text-[11px] font-semibold uppercase tracking-wider">Đang hoạt động</span>
+                  <div className="flex items-center gap-1.5 opacity-80">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="text-[11px] font-medium uppercase tracking-wider">Trực tuyến</span>
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-1 relative z-10">
                 <button
-                  onClick={() => {
-                    if (confirm('Bạn có muốn xóa toàn bộ lịch sử trò chuyện?')) clearChat();
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: 'Xóa lịch sử trò chuyện',
+                      message: 'Bạn có muốn xóa toàn bộ lịch sử trò chuyện với AI không? Hành động này không thể hoàn tác.',
+                      confirmText: 'Xóa tất cả',
+                      cancelText: 'Giữ lại',
+                      variant: 'danger',
+                    });
+                    if (ok) clearChat();
                   }}
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                   title="Xóa lịch sử"
@@ -277,6 +282,7 @@ export default function AiChatBox() {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Đóng"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -331,18 +337,13 @@ export default function AiChatBox() {
               <div className="px-4 pb-2 bg-white flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap scroll-smooth">
                 {pathname.includes('/candidates/profile') && (
                   <>
-                    <button onClick={() => { setInput('Đánh giá CV của tôi'); handleSend(); }} className="text-[13px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full font-medium hover:bg-indigo-100 transition-colors">
+                    <button onClick={(e) => { e.preventDefault(); handleSend(undefined, 'Đánh giá CV của tôi'); }} className="text-[13px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full font-medium hover:bg-indigo-100 transition-colors">
                       Đánh giá CV của tôi
                     </button>
-                    <button onClick={() => { setInput('Gợi ý việc làm phù hợp với CV này'); handleSend(); }} className="text-[13px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full font-medium hover:bg-emerald-100 transition-colors">
+                    <button onClick={(e) => { e.preventDefault(); handleSend(undefined, 'Gợi ý việc làm phù hợp với CV này'); }} className="text-[13px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1.5 rounded-full font-medium hover:bg-emerald-100 transition-colors">
                       Gợi ý việc làm phù hợp
                     </button>
                   </>
-                )}
-                {pathname.includes('/jobs/') && (
-                  <button onClick={() => { setInput('Phân tích độ phù hợp của tôi với công việc này'); handleSend(); }} className="text-[13px] bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-full font-medium hover:bg-blue-100 transition-colors">
-                    Phân tích mức độ phù hợp
-                  </button>
                 )}
               </div>
             )}
@@ -364,8 +365,8 @@ export default function AiChatBox() {
                   type="submit"
                   disabled={!input.trim() || isTyping}
                   className={`absolute right-1.5 p-2.5 rounded-xl transition-all ${input.trim() && !isTyping
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                     }`}
                 >
                   <Send className="w-4 h-4" />

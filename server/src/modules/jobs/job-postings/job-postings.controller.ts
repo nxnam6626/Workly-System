@@ -54,6 +54,13 @@ export class JobPostingsController {
     return this.jobPostingsService.getSuggestedCandidates(id, userId);
   }
 
+  @Post(':id/renew')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  renewJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.renew(id, userId);
+  }
+
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   findAll(

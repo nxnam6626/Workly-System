@@ -191,6 +191,7 @@ exports.Prisma.CandidateScalarFieldEnum = {
 exports.Prisma.SkillScalarFieldEnum = {
   skillId: 'skillId',
   skillName: 'skillName',
+  category: 'category',
   candidateId: 'candidateId',
   level: 'level'
 };
@@ -213,7 +214,10 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   savedCandidateIds: 'savedCandidateIds',
   violationCount: 'violationCount',
   updatedAt: 'updatedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  aiInsightsCache: 'aiInsightsCache',
+  aiInsightsCacheKey: 'aiInsightsCacheKey',
+  aiInsightsCachedAt: 'aiInsightsCachedAt'
 };
 
 exports.Prisma.TransactionScalarFieldEnum = {
@@ -431,6 +435,13 @@ exports.Prisma.SupportRequestScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.AiQueryCacheScalarFieldEnum = {
+  id: 'id',
+  query: 'query',
+  response: 'response',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -507,7 +518,8 @@ exports.JobStatus = exports.$Enums.JobStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
-  EXPIRED: 'EXPIRED'
+  EXPIRED: 'EXPIRED',
+  CLOSED: 'CLOSED'
 };
 
 exports.PostType = exports.$Enums.PostType = {
@@ -566,7 +578,8 @@ exports.Prisma.ModelName = {
   RecruiterWallet: 'RecruiterWallet',
   CandidateUnlock: 'CandidateUnlock',
   RecruiterSubscription: 'RecruiterSubscription',
-  SupportRequest: 'SupportRequest'
+  SupportRequest: 'SupportRequest',
+  AiQueryCache: 'AiQueryCache'
 };
 
 /**
