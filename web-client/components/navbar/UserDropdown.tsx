@@ -156,7 +156,6 @@ export function UserDropdown() {
             </Link>
 
             {/* Quản lý tài khoản */}
-            <div className="group/item relative">
               <Link
                 href="/profile/account"
                 onClick={() => setDropdownOpen(false)}
@@ -166,21 +165,7 @@ export function UserDropdown() {
                   <UserCheck className="w-5 h-5 text-blue-500" />
                   <span>Quản lý tài khoản</span>
                 </div>
-                {!user?.isEmailVerified && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Email chưa xác minh" />
-                )}
               </Link>
-
-              {!user?.isEmailVerified && (
-                <Link
-                  href={`/verify-email?email=${user?.email}`}
-                  onClick={() => setDropdownOpen(false)}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-rose-50 text-[10px] font-bold text-rose-600 rounded border border-rose-100 opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap"
-                >
-                  Xác minh ngay
-                </Link>
-              )}
-            </div>
           </div>
 
           <div className="mt-1 border-t border-slate-50 pt-1">

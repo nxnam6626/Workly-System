@@ -35,15 +35,13 @@ export default function RegisterPage() {
     }
 
     setIsSubmitting(true);
-
     try {
       await register({ fullName, email, password, role: "CANDIDATE" });
       setIsSuccess(true);
-      setTimeout(() => {
-        router.push("/onboarding/import-cv");
-      }, 2500); // Redirect after 2.5 seconds
+      setIsSubmitting(false);
+      setError("");
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
+      setError(err.response?.data?.message || err.message || "Gửi yêu cầu thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
     }
   };
@@ -115,125 +113,141 @@ export default function RegisterPage() {
         </div>
 
         <div className="w-full max-w-md mx-auto md:mx-0">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Đăng ký tài khoản mới</h2>
-            <p className="text-slate-500 text-base">Cùng xây dựng một hồ sơ nổi bật và nhận được các cơ hội sự nghiệp lý tưởng</p>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 flex items-start gap-3 border border-red-200 rounded-xl text-red-700 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-              <span>{error}</span>
+          {isSuccess ? (
+            <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">Kiểm tra Email để kích hoạt tài khoản</h2>
+              <p className="text-slate-600 leading-relaxed">
+                Chúng tôi đã gửi một đường dẫn xác nhận đến <strong>{email}</strong>. Vui lòng nhấn vào đường dẫn trong email để hoàn tất việc tạo tài khoản và tham gia Workly.
+              </p>
+              <div className="pt-4">
+                <Link 
+                  href="/login" 
+                  className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md shadow-blue-200"
+                >
+                  Quay lại trang Đăng nhập
+                </Link>
+              </div>
+              <p className="text-sm text-slate-400">Không nhận được email? Hãy kiểm tra trong thư rác (Spam).</p>
             </div>
+          ) : (
+            <>
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">Đăng ký tài khoản mới</h2>
+                <p className="text-slate-500 text-base">Cùng xây dựng một hồ sơ nổi bật và nhận được các cơ hội sự nghiệp lý tưởng</p>
+              </div>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 flex items-start gap-3 border border-red-200 rounded-xl text-red-700 text-sm">
+                  <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Họ và tên</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      placeholder="Nhập họ và tên của bạn"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email cá nhân</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="Nhập email của bạn"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mật khẩu</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="Mật khẩu từ 6 đến 32 ký tự"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Xác nhận mật khẩu</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="Nhập lại mật khẩu"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                    style={{ height: '48px' }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      "Đăng ký"
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-sm text-slate-500 text-center mt-6">
+                  Bằng việc đăng ký, bạn đã đồng ý với Workly về{" "}
+                  <Link href="#" className="font-semibold text-blue-600 hover:text-blue-500">Quy định bảo mật</Link> và{" "}
+                  <Link href="#" className="font-semibold text-blue-600 hover:text-blue-500">Điều khoản dịch vụ</Link>.
+                </p>
+              </form>
+
+              <p className="text-center text-sm text-slate-600 pt-8">
+                Bạn đã có tài khoản?{" "}
+                <Link href="/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
+                  Đăng nhập ngay
+                </Link>
+              </p>
+            </>
           )}
-
-          {isSuccess && (
-            <div className="mb-6 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500" />
-              <span>Đăng ký thành công! Đang chuyển hướng để thiết lập hồ sơ...</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Họ và tên</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  placeholder="Nhập họ và tên của bạn"
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email cá nhân</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="Nhập email của bạn"
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mật khẩu</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Mật khẩu từ 6 đến 32 ký tự"
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Xác nhận mật khẩu</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="Nhập lại mật khẩu"
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
-                style={{ height: '48px' }}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    {isSuccess ? "Đang chuyển hướng..." : "Đang đăng ký..."}
-                  </>
-                ) : (
-                  "Đăng ký"
-                )}
-              </button>
-            </div>
-
-            <p className="text-sm text-slate-500 text-center mt-6">
-              Bằng việc đăng ký, bạn đã đồng ý với Workly về{" "}
-              <Link href="#" className="font-semibold text-blue-600 hover:text-blue-500">Quy định bảo mật</Link> và{" "}
-              <Link href="#" className="font-semibold text-blue-600 hover:text-blue-500">Điều khoản dịch vụ</Link>.
-            </p>
-          </form>
-
-          <p className="text-center text-sm text-slate-600 pt-8">
-            Bạn đã có tài khoản?{" "}
-            <Link href="/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
-              Đăng nhập ngay
-            </Link>
-          </p>
         </div>
       </div>
     </div>

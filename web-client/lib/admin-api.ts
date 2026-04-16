@@ -171,7 +171,6 @@ export interface AdminUser {
   status: UserStatus;
   phoneNumber?: string;
   avatar?: string;
-  isEmailVerified: boolean;
   createdAt: string;
   lastLogin?: string;
   userRoles: { role: { roleName: string } }[];

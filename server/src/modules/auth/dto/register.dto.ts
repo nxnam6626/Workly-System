@@ -58,4 +58,5 @@ export class RegisterDto {
   @ApiProperty({ required: false })
   @IsOptional()
   verifyStatus?: number;
+
 }

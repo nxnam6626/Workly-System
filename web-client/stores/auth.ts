@@ -8,7 +8,6 @@ interface User {
   name?: string;
   avatar?: string;
   phoneNumber?: string;
-  isEmailVerified?: boolean;
   roles?: string[];
   candidate?: {
     fullName?: string;
@@ -37,8 +36,6 @@ interface AuthState {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (data: any) => Promise<void>;
   changePassword: (data: any) => Promise<void>;
-  sendVerificationEmail: () => Promise<void>;
-  verifyEmail: (data: { email: string; token: string }) => Promise<void>;
   setOAuthTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   updateUser: (partial: Partial<User>) => void;
 }
@@ -92,13 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       await api.post('/auth/register', userData);
-
-      // Auto-login after successful registration
-      await get().login({
-        email: userData.email,
-        password: userData.password
-      });
-
+      set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -148,26 +139,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   changePassword: async (data: any) => {
     try {
       await api.patch('/auth/change-password', data);
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  sendVerificationEmail: async () => {
-    try {
-      await api.post('/auth/send-verification-email');
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  verifyEmail: async (data: { email: string; token: string }) => {
-    try {
-      await api.post('/auth/verify-email', data);
-      // Update local state if successful
-      set((state) => ({
-        user: state.user ? { ...state.user, isEmailVerified: true } : state.user,
-      }));
     } catch (error) {
       throw error;
     }

@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -103,47 +104,51 @@ export class SecurityService {
   }
 
   // ==========================================
-  // EMAIL VERIFICATION
+  // REGISTRATION LINK (XÁC MINH LINK)
   // ==========================================
 
-  /** Gửi link/mã xác minh email: Tạo OTP 6 số lưu Redis và gửi mail. */
-  async sendEmailVerification(userId: string) {
-    const user = await this.usersService.findOne(userId);
-    if (user.isEmailVerified)
-      throw new BadRequestException('Email của bạn đã được xác minh rồi.');
-
-    const token = crypto.randomInt(100000, 999999).toString();
-    const redisKey = `email_verification:${user.email}`;
-
-    // Lưu vào Redis (15 phút)
-    await this.redisService.set(redisKey, token, 900);
-
-    // Gửi mail
-    await this.mailService.sendVerificationEmail(user.email, token);
-
-    return { message: 'Mã xác minh đã được gửi đến email của bạn.' };
-  }
-
-  /** Xác minh email: so khớp OTP từ người dùng. */
-  async verifyEmail(dto: { email: string; token: string }) {
-    const redisKey = `email_verification:${dto.email}`;
-    const storedToken = await this.redisService.get(redisKey);
-
-    if (!storedToken || storedToken !== dto.token) {
-      throw new BadRequestException(
-        'Mã xác minh không hợp lệ hoặc đã hết hạn.',
-      );
+  /**
+   * Tạo một yêu cầu đăng ký, lưu thông tin vào Redis và gửi link xác minh.
+   */
+  async createRegistrationRequest(dto: any) {
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      throw new ConflictException('Email này đã được sử dụng.');
     }
 
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user) throw new BadRequestException('Tài khoản không tồn tại.');
+    // Tạo token ngẫu nhiên (64 ký tự hex)
+    const token = crypto.randomBytes(32).toString('hex');
+    const redisKey = `registration_request:${token}`;
 
-    // Cập nhật trạng thái xác minh
-    await this.usersService.update(user.userId, { isEmailVerified: true });
+    // Lưu toàn bộ RegisterDto vào Redis (24 giờ = 86400 giây)
+    await this.redisService.set(redisKey, JSON.stringify(dto), 86400);
 
-    // Hủy OTP trên Redis
-    await this.redisService.del(redisKey);
+    // Gửi email chứa đường dẫn xác minh
+    await this.mailService.sendRegistrationLink(dto.email, token);
 
-    return { message: 'Xác minh email thành công!' };
+    return { message: 'Đường dẫn xác minh đã được gửi đến email của bạn.' };
+  }
+
+  /**
+   * Xác thực token và lấy dữ liệu đăng ký từ Redis.
+   */
+  async finalizeRegistration(token: string) {
+    const redisKey = `registration_request:${token}`;
+    const storedData = await this.redisService.get(redisKey);
+
+    if (!storedData) {
+      throw new BadRequestException('Đường dẫn xác minh không hợp lệ hoặc đã hết hạn.');
+    }
+
+    try {
+      const dto = JSON.parse(storedData);
+      
+      // Xóa yêu cầu khỏi Redis sau khi lấy thành công
+      await this.redisService.del(redisKey);
+      
+      return dto;
+    } catch (e) {
+      throw new BadRequestException('Dữ liệu xác minh bị lỗi. Vui lòng đăng ký lại.');
+    }
   }
 }

@@ -26,7 +26,6 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -40,20 +39,32 @@ export class AuthController {
     private readonly securityService: SecurityService,
   ) {}
 
-  // ==========================================
-  // CORE AUTHENTICATION (Xác thực chính)
-  // ==========================================
-
   @Public()
   @Post('register')
-  @ApiOperation({ summary: 'Đăng ký tài khoản' })
-  @ApiResponse({ status: 201, description: 'Đăng ký thành công' })
+  @ApiOperation({ summary: 'Gửi yêu cầu đăng ký (Bước 1: Nhận link qua Email)' })
+  @ApiResponse({ status: 200, description: 'Đã gửi link xác thực thành công' })
   @ApiResponse({
-    status: 400,
-    description: 'Dữ liệu không hợp lệ hoặc email đã tồn tại',
+    status: 409,
+    description: 'Email đã tồn tại trong hệ thống',
   })
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Public()
+  @Post('verify-registration')
+  @ApiOperation({ summary: 'Xác nhận đăng ký từ link Email (Bước 2: Hoàn tất)' })
+  @ApiResponse({ status: 200, description: 'Đăng ký thành công' })
+  async verifyRegistration(@Body('token') token: string) {
+    return this.authService.processRegistrationLink(token);
+  }
+
+  // Alias for Frontend Stage 3
+  @Public()
+  @Post('verify')
+  @ApiOperation({ summary: 'Xác nhận đăng ký (Alias cho Frontend Stage 3)' })
+  async verify(@Body('token') token: string) {
+    return this.authService.processRegistrationLink(token);
   }
 
   @Public()
@@ -169,24 +180,5 @@ export class AuthController {
       dto.currentPassword,
       dto.newPassword,
     );
-  }
-
-  // ==========================================
-  // EMAIL VERIFICATION (Xác minh Email)
-  // ==========================================
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Post('send-verification-email')
-  @ApiOperation({ summary: 'Gửi mã xác minh tới email' })
-  sendVerificationEmail(@CurrentUser('userId') userId: string) {
-    return this.securityService.sendEmailVerification(userId);
-  }
-
-  @Public()
-  @Post('verify-email')
-  @ApiOperation({ summary: 'Xác minh email với mã OTP' })
-  verifyEmail(@Body() dto: VerifyEmailDto) {
-    return this.securityService.verifyEmail(dto);
   }
 }

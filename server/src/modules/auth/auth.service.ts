@@ -23,44 +23,46 @@ export class AuthService {
   // CORE AUTHENTICATION (Xác thực chính)
   // ==========================================
 
-  /** Đăng ký: Kiểm tra email, xác thực mật khẩu (nếu đã tồn tại), hash mật khẩu (nếu mới) rồi gọi UsersService. */
+  /** 
+   * Đăng ký Bước 1: Khởi tạo yêu cầu đăng ký (Gửi link qua email).
+   */
   async register(dto: RegisterDto) {
+    return this.securityService.createRegistrationRequest(dto);
+  }
+
+  /**
+   * Đăng ký Bước 2: Hoàn tất đăng ký sau khi người dùng nhấn vào link email.
+   */
+  async processRegistrationLink(token: string) {
+    // 1. Lấy dữ liệu từ Redis
+    const dto = await this.securityService.finalizeRegistration(token);
+
+    // 2. Kiểm tra lại xem có ai đăng ký email này trong lúc chờ chưa
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
-      if (!existingUser.password) {
-        throw new BadRequestException(
-          'Email này được đăng ký qua Google/LinkedIn. Vui lòng đăng nhập qua đó.',
-        );
-      }
-      const isMatch = await this.securityService.comparePassword(
-        dto.password,
-        existingUser.password,
-      );
-      if (!isMatch) {
-        throw new ConflictException(
-          'Email đã tồn tại. Vui lòng nhập đúng mật khẩu nếu bạn muốn đăng ký thêm vai trò cho tài khoản này.',
-        );
-      }
-      const hasRole = existingUser.userRoles.some(
-        (ur: any) => ur.role.roleName === dto.role,
-      );
-      if (hasRole) {
-        throw new ConflictException(
-          `Bạn đã đăng ký với vai trò ${dto.role} rồi. Vui lòng đăng nhập.`,
-        );
-      }
-
-      return this.usersService.addRoleToUser(existingUser.userId, dto);
+      throw new ConflictException('Email này đã được đăng ký bởi một yêu cầu khác.');
     }
 
-    const hashedPassword = await this.securityService.hashPassword(
-      dto.password,
-    );
-    return this.usersService.create(
+    // 3. Hash mật khẩu và Tạo User trong database
+    const hashedPassword = await this.securityService.hashPassword(dto.password);
+    
+    // Vì User đã vào CSDL ở bước này là mặc định đã verified (do bấm link) 
+    // ta trỏ params options passwordAlreadyHashed = true
+    const newUser = await this.usersService.create(
       { ...dto, password: hashedPassword },
       { passwordAlreadyHashed: true },
     );
+
+    return {
+      message: 'Đăng ký tài khoản thành công! Bây giờ bạn có thể đăng nhập.',
+      user: {
+        userId: newUser.userId,
+        email: dto.email,
+        fullName: 'fullName' in dto ? dto.fullName : 'Người dùng',
+      }
+    };
   }
+
 
   /** Lệnh bí mật tạo Supreme Admin trên Database Production. */
   async setupAdmin() {
@@ -117,7 +119,6 @@ export class AuthService {
       user: {
         userId: user.userId,
         email: user.email,
-        isEmailVerified: user.isEmailVerified,
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,

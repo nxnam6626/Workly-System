@@ -245,16 +245,16 @@ Trả về:
       const loc = extraction.filters?.location || 'all';
       const sal = extraction.filters?.min_salary || 0;
       
-      const cacheKey = \`jobs:\${kw}:\${loc}:\${sal}\`.toLowerCase().replace(/\\s+/g, '-');
+      const cacheKey = `jobs:${kw}:${loc}:${sal}`.toLowerCase().replace(/\s+/g, '-');
       let jobs = [];
 
       try {
         const cachedStr = await this.redisService.get(cacheKey);
         if (cachedStr) {
           jobs = JSON.parse(cachedStr);
-          this.logger.log(\`[Cache Hit] \${cacheKey}\`);
+          this.logger.log(`[Cache Hit] ${cacheKey}`);
         } else {
-          this.logger.log(\`[Cache Miss] \${cacheKey}. Querying DB...\`);
+          this.logger.log(`[Cache Miss] ${cacheKey}. Querying DB...`);
           
           // Tìm trong Elasticsearch với searchForRAG
           const searchJobs = await this.searchService.searchJobsForRAG({
@@ -269,14 +269,14 @@ Trả về:
             title: j.title,
             company_name: j.companyName || 'Công ty ẩn danh',
             location: j.locationCity || 'Toàn quốc',
-            salary: j.salaryMin ? \`\${j.salaryMin} - \${j.salaryMax} VND\` : 'Thoả thuận'
+            salary: j.salaryMin ? `${j.salaryMin} - ${j.salaryMax} VND` : 'Thoả thuận'
           }));
 
           // Lọc thủ công bằng salary nếu elasticsearch kết quả (Tùy biến)
           if (sal > 0) {
             jobs = jobs.filter((j: any) => {
                if (j.salary === 'Thoả thuận') return true; 
-               const minMatch = j.salary.match(/(\\d+)/);
+               const minMatch = j.salary.match(/(\d+)/);
                if (minMatch) {
                  return parseInt(minMatch[1]) >= (sal / 1000000); // So sánh theo triệu
                }
@@ -290,11 +290,11 @@ Trả về:
           }
         }
       } catch (err) {
-        this.logger.warn(\`Redis/Search Error: \${err.message}\`);
+        this.logger.warn(`Redis/Search Error: ${err.message}`);
       }
 
       if (jobs && jobs.length > 0) {
-        ragContext += \`\\n--- DANH SÁCH VIỆC LÀM PHÙ HỢP TỪ DATABASE ---\\n\${JSON.stringify(jobs)}\\n\`;
+        ragContext += `\n--- DANH SÁCH VIỆC LÀM PHÙ HỢP TỪ DATABASE ---\n${JSON.stringify(jobs)}\n`;
         // Đẩy Action ra UI (Bước 4)
         yield { type: 'SHOW_JOB_CARDS', payload: jobs };
       }
@@ -303,17 +303,17 @@ Trả về:
     // Bước 3: Đẩy vào mô hình LLM Streaming
     let systemPrompt: string;
     if (isRecruiter) {
-      systemPrompt = \`Bạn là Workly-AI dành cho NHÀ TUYỂN DỤNG. Tư vấn các vấn đề tuyển dụng.
-        NGỮ CẢNH: \${ragContext || 'Chưa nhận diện công ty.'}
+      systemPrompt = `Bạn là Workly-AI dành cho NHÀ TUYỂN DỤNG. Tư vấn các vấn đề tuyển dụng.
+        NGỮ CẢNH: ${ragContext || 'Chưa nhận diện công ty.'}
         PHẠM VI: Viết JD, đánh giá ứng viên, tư vấn lương, xu hướng thị trường.
         NGUYÊN TẮC: Ngắn gọn, súc tích (150 từ), từ chối câu hỏi ngoài lề.
-        CÂU HỎI: \${message}\`;
+        CÂU HỎI: ${message}`;
     } else {
-      systemPrompt = \`Bạn là Workly-AI, SIÊU CỐ VẤN NGHỀ NGHIỆP cho ỨNG VIÊN.
-        NGỮ CẢNH: \${ragContext || 'Chưa nhận diện ứng viên.'}
+      systemPrompt = `Bạn là Workly-AI, SIÊU CỐ VẤN NGHỀ NGHIỆP cho ỨNG VIÊN.
+        NGỮ CẢNH: ${ragContext || 'Chưa nhận diện ứng viên.'}
         PHẠM VI: Tìm việc, sửa CV, kỹ năng phỏng vấn, định hướng nghề nghiệp. Mục tiêu là giúp người tìm việc thành công.
         NGUYÊN TẮC VÀNG: Trình bày Markdown sạch sẽ, không xưng tôi, tối đa 200 từ. KHÔNG dùng "Dựa trên hồ sơ của bạn...".
-        CÂU HỎI: \${message}\`;
+        CÂU HỎI: ${message}`;
     }
 
     const preferredModels = ['gemini-2.5-flash', 'gemini-1.5-flash-latest', 'gemini-2.0-flash', 'gemini-flash-latest'];
@@ -341,13 +341,13 @@ Trả về:
         }
       } catch (error: any) {
         lastError = error;
-        this.logger.warn(\`Model \${modelId} failed: \${error.message}\`);
+        this.logger.warn(`Model ${modelId} failed: ${error.message}`);
         await SLEEP(1000);
       }
     }
 
     if (!success) {
-      this.logger.error(\`RAG failed, trying direct fallback. Error: \${lastError?.message}\`);
+      this.logger.error(`RAG failed, trying direct fallback. Error: ${lastError?.message}`);
       const fallbacks = ['gemini-2.5-flash', 'gemini-1.5-flash-8b'];
       for (const fId of fallbacks) {
         try {
@@ -358,10 +358,10 @@ Trả về:
           }
           return;
         } catch (e: any) {
-          this.logger.warn(\`Fallback \${fId} failed.\`);
+          this.logger.warn(`Fallback ${fId} failed.`);
         }
       }
-      yield '\\n[Hệ thống]: Hiện tại máy chủ AI đang quá tải. Vui lòng thử lại sau.';
+      yield '\n[Hệ thống]: Hiện tại máy chủ AI đang quá tải. Vui lòng thử lại sau.';
     }
   }
 }

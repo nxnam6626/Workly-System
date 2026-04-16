@@ -306,7 +306,6 @@ export class UsersService {
           status: true,
           phoneNumber: true,
           avatar: true,
-          isEmailVerified: true,
           createdAt: true,
           lastLogin: true,
           userRoles: {
@@ -333,7 +332,6 @@ export class UsersService {
         status: true,
         phoneNumber: true,
         avatar: true,
-        isEmailVerified: true,
         createdAt: true,
         updatedAt: true,
         lastLogin: true,
@@ -388,7 +386,6 @@ export class UsersService {
         status: true,
         phoneNumber: true,
         avatar: true,
-        isEmailVerified: true,
         createdAt: true,
         lastLogin: true,
         provider: true,
