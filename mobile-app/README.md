@@ -13,7 +13,10 @@
 ## 📌 Phân khu Mobile
 Thư mục `mobile-app/` chứa mã nguồn đa nền tảng (Cross-platform) dành riêng cho App Mobile. Nó biên dịch một mã nguồn thành hai nền tảng Native khổng lồ: **iOS (App Store)** và **Android (Google Play)**.
 
-Ứng dụng nhấn mạnh tính cơ động, cho phép Ứng viên (ứng tuyển ngay khi ngồi quán cà phê) và Nhà tuyển dụng (theo dõi thông số chiến dịch) với những tiện ích đặc trưng riêng của Mobile như Sinh trắc học, Push Notification.
+Ứng dụng nhấn mạnh tính cơ động, hỗ trợ trọn vẹn trải nghiệm của toàn bộ 3 nhóm người dùng trong hệ sinh thái:
+- **Ứng viên (Candidate):** Tìm việc, ứng tuyển nhanh chóng từ mọi nơi.
+- **Nhà tuyển dụng (Recruiter):** Cập nhật biến động hồ sơ và tin tuyển dụng theo thời gian thực tiện lợi.
+- **Quản trị viên (Admin):** Nắm bắt bảng theo dõi doanh thu và cảnh báo hệ thống ngay lập tức qua phiên bản di động bỏ túi.
 
 ---
 

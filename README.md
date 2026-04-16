@@ -88,7 +88,9 @@ graph TD
     Candidate --> WA
     Candidate --> MA
     Recruiter --> WA
+    Recruiter --> MA
     Admin --> WA
+    Admin --> MA
 
     WA <-->|REST / WSS| API
     MA <-->|REST / WSS| API
@@ -114,8 +116,8 @@ Hệ thống được chia thành 3 phân hệ chính. **Mỗi phân hệ (thư 
 | Phân hệ | Vai trò | Tech Stack chính |
 |---------|---------|------------------|
 | 📁 [**`server/`**](./server) | Core Backend API, xử lý nghiệp vụ, DB, Websocket | Node.js, NestJS v11, Prisma, PostgreSQL, Redis |
-| 📁 [**`web-client/`**](./web-client) | Web App cho 3 tệp User (Admin, HR, Candidate) | Next.js 16, React 19, Tailwind CSS v4, Zustand |
-| 📁 [**`mobile-app/`**](./mobile-app) | Ứng dụng điện thoại dành riêng cho Ứng viên / HR | React Native, Expo 54, Expo Router, Chart Kit |
+| 📁 [**`web-client/`**](./web-client) | Web App dành cho cả 3 tệp User (Admin, HR, Candidate) | Next.js 16, React 19, Tailwind CSS v4, Zustand |
+| 📁 [**`mobile-app/`**](./mobile-app) | Ứng dụng Mobile đầy đủ tính năng cho cả 3 đối tượng (Admin, HR, Candidate) | React Native, Expo 54, Expo Router, Chart Kit |
 
 > 👉 **Mẹo:** Nhấn vào đường dẫn của từng thư mục ở trên để vào đọc tài liệu chi tiết (Cách cấu hình `.env` cho web, cách debug mobile app, cách load Database...).
 
