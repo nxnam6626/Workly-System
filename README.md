@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 Workly Ecosystem 
+# 🚀 Workly System 
 
 **Hệ thống Quản lý Tuyển dụng & Tìm kiếm Việc làm Tiên tiến dựa trên AI**
 
