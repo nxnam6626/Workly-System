@@ -15,14 +15,14 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://workly-backend.onrender.com",
-        "EXPO_PUBLIC_SOCKET_URL": "https://workly-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://workly-backend-xvin.onrender.com",
+        "EXPO_PUBLIC_SOCKET_URL": "https://workly-backend-xvin.onrender.com"
       }
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://workly-backend.onrender.com",
-        "EXPO_PUBLIC_SOCKET_URL": "https://workly-backend.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://workly-backend-xvin.onrender.com",
+        "EXPO_PUBLIC_SOCKET_URL": "https://workly-backend-xvin.onrender.com"
       }
     }
   },

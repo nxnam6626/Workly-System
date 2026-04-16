@@ -2,11 +2,96 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Star, Zap, Crown, ArrowRight, Clock } from 'lucide-react';
+import { Check, Star, Zap, Crown, ArrowRight, Clock, Plus, Loader2, Wallet as WalletIcon, X } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
 import { useConfirm } from '@/components/ConfirmDialog';
+
+function TopUpModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [amount, setAmount] = useState('');
+  const [processing, setProcessing] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleTopUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const numAmount = Number(amount);
+    if (!numAmount || numAmount <= 0) {
+      toast.error('Vui lòng nhập số lượng xu hợp lệ');
+      return;
+    }
+    setProcessing(true);
+    try {
+      const { data } = await api.post('/wallets/top-up', { amount: numAmount });
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        toast.success('Giao dịch tạo thành công!');
+        onClose();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Không thể tạo link thanh toán');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="p-6">
+          <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-indigo-600" /> Nạp tiền vào ví
+          </h3>
+          <form onSubmit={handleTopUp} className="space-y-4">
+            <div>
+              <label className="text-sm font-semibold text-slate-600 mb-2 block">Số lượng Xu cần nạp</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Xu</span>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Ví dụ: 1000"
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-semibold text-slate-800"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {[100, 500, 1000].map(val => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setAmount(val.toString())}
+                  className="px-4 py-2 border border-indigo-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-300 text-indigo-700 font-semibold transition-colors text-sm"
+                >
+                  {val}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              disabled={processing || !amount}
+              className="w-full pt-2 mt-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+            >
+              {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : <WalletIcon className="w-5 h-5" />}
+              Tiến hành thanh toán
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const plans = [
   {
@@ -48,6 +133,7 @@ export default function PlansPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
   const fetchWallet = useWalletStore((state) => state.fetchWallet);
   const confirm = useConfirm();
 
@@ -65,6 +151,9 @@ export default function PlansPage() {
   };
 
   const handleBuyPlan = async (planId: string) => {
+    const planDetails = plans.find(p => p.id === planId);
+    if (!planDetails) return;
+
     if (currentSubscription && new Date(currentSubscription.expiryDate) > new Date()) {
       if (currentSubscription.planType !== planId) {
         const ok = await confirm({
@@ -83,6 +172,14 @@ export default function PlansPage() {
         });
         if (!ok) return;
       }
+    } else {
+      const ok = await confirm({
+        title: `Mua ${planDetails.name}?`,
+        message: `Xác nhận mua ${planDetails.name} với giá ${planDetails.credits} xu (${planDetails.price}) từ ví của bạn.`,
+        confirmText: 'Mua ngay',
+        variant: 'success',
+      });
+      if (!ok) return;
     }
 
     try {
@@ -92,7 +189,14 @@ export default function PlansPage() {
       await fetchWallet();
       await fetchCurrentSubscription();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại');
+      const message = error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại';
+      const msgStr = typeof message === 'string' ? message : message[0];
+      if (msgStr.toLowerCase().includes('không đủ') || msgStr.toLowerCase().includes('nạp thêm')) {
+        toast.error('Số dư của bạn không đủ. Vui lòng nạp thêm Xu để tiếp tục!');
+        setIsTopUpModalOpen(true);
+      } else {
+        toast.error(msgStr);
+      }
     } finally {
       setLoading(null);
     }
@@ -238,7 +342,14 @@ export default function PlansPage() {
                     toast.success(`Đăng ký thành công ${pack.name}!`);
                     await fetchWallet();
                   } catch (error: any) {
-                    toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
+                    const message = error.response?.data?.message || 'Có lỗi xảy ra';
+                    const msgStr = typeof message === 'string' ? message : message[0];
+                    if (msgStr.toLowerCase().includes('không đủ') || msgStr.toLowerCase().includes('nạp thêm')) {
+                      toast.error('Số dư của bạn không đủ. Vui lòng nạp thêm Xu để tiếp tục!');
+                      setIsTopUpModalOpen(true);
+                    } else {
+                      toast.error(msgStr);
+                    }
                   } finally {
                     setLoading(null);
                   }
@@ -251,6 +362,7 @@ export default function PlansPage() {
           ))}
         </div>
       </div>
+      <TopUpModal isOpen={isTopUpModalOpen} onClose={() => setIsTopUpModalOpen(false)} />
     </div>
   );
 }

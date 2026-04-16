@@ -32,7 +32,7 @@ const SavedItem = React.memo(({ item, onPress, onRemove }: { item: Job; onPress:
     <View style={{ flex: 1 }}>
       <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
       <Text style={styles.company} numberOfLines={1}>{item.company?.companyName}</Text>
-      <Text style={styles.salary}>{formatSalary(item.salaryMin, item.salaryMax, item.currency)}</Text>
+      <Text style={styles.salary}>{formatSalary(item.salaryMin, item.salaryMax, item.currency ?? undefined)}</Text>
     </View>
     <TouchableOpacity onPress={onRemove} style={styles.removeBtn} hitSlop={8}>
       <Ionicons name="bookmark" size={20} color={COLORS.primary} />

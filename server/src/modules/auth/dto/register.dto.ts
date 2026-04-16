@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsString,
   MinLength,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../auth/decorators/roles.decorator';
@@ -35,17 +36,26 @@ export class RegisterDto {
   role: Role;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   companyName?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   phone?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   websiteUrl?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   taxCode?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
   verifyStatus?: number;
 }

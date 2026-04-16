@@ -257,7 +257,7 @@ export class SearchService implements OnModuleInit {
       return { ids, total };
     } catch (e: any) {
       console.error('[SearchService] Search error:', e.message);
-      return { ids: [], total: 0 };
+      throw e;
     }
   }
 

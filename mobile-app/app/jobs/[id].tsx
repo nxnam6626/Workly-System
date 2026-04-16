@@ -141,7 +141,7 @@ export default function JobDetailScreen() {
             <View style={[styles.tag, styles.salaryTag]}>
               <Ionicons name="cash-outline" size={13} color={COLORS.success} />
               <Text style={[styles.tagText, { color: COLORS.success, fontWeight: '700' }]}>
-                {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+                {formatSalary(job.salaryMin, job.salaryMax, job.currency ?? undefined)}
               </Text>
             </View>
           </View>

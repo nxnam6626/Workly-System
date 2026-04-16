@@ -13,9 +13,10 @@ export class PrismaService
     if (!connectionString) {
       throw new Error('DATABASE_URL chưa được cấu hình. Kiểm tra file .env');
     }
-    const pool = new Pool({ connectionString });
+    const pool = new Pool({ connectionString, family: 4 } as any);
     const adapter = new PrismaPg(pool);
     super({ adapter });
+
   }
 
   async onModuleInit(): Promise<void> {

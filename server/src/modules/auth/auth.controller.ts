@@ -63,6 +63,13 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
+  @Get('setup-admin')
+  @ApiOperation({ summary: 'Khởi tạo tài khoản Supreme Admin đầu tiên' })
+  setupAdmin() {
+    return this.authService.setupAdmin();
+  }
+
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post('logout')

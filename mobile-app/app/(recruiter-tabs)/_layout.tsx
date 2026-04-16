@@ -10,6 +10,7 @@ import { COLORS, RADIUS, SPACING } from '../../lib/constants';
 const MORE_ITEMS = [
   { icon: 'document-text', label: 'Đơn ứng tuyển', route: '/(recruiter-tabs)/applications', color: COLORS.primary },
   { icon: 'people', label: 'Ứng viên', route: '/(recruiter-tabs)/candidates', color: COLORS.success },
+  { icon: 'business', label: 'Công ty', route: '/(recruiter-tabs)/company', color: '#0ea5e9' },
   { icon: 'brain', label: 'AI Insights', route: '/(recruiter-tabs)/ai-insight', color: '#a78bfa' },
   { icon: 'business', label: 'Gói dịch vụ', route: '/(recruiter-tabs)/billing', color: COLORS.accent },
   { icon: 'person', label: 'Hồ sơ', route: '/(recruiter-tabs)/profile', color: COLORS.textMuted },
@@ -147,7 +148,7 @@ export default function RecruiterTabsLayout() {
         />
 
         {/* Hidden screens — accessible via More sheet */}
-        {['applications', 'candidates', 'ai-insight', 'billing', 'profile', 'post-job'].map((name) => (
+        {['applications', 'candidates', 'ai-insight', 'billing', 'profile', 'post-job', 'company', 'candidates-saved'].map((name) => (
           <Tabs.Screen
             key={name}
             name={name}

@@ -48,10 +48,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  if (authLoading && !isAuthenticated) {
-    return null; 
-  }
-
+  // Wait for initial auth check via AuthProvider, no need to return null here
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row font-sans text-slate-300">
       {/* Left Column: Branding & Value Props */}
