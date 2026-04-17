@@ -263,9 +263,7 @@ export class CandidatesService {
       throw new NotFoundException('CV not found or does not belong to user');
     }
 
-    if (cv.isMain) {
-      throw new BadRequestException('Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.');
-    }
+
 
     if (!cv.fileUrl)
       throw new BadRequestException('CV does not have a file URL');
