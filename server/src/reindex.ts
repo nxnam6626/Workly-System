@@ -17,7 +17,7 @@ async function bootstrap() {
   });
 
   console.log(`Found ${jobs.length} approved jobs to index.`);
-  
+
   for (const job of jobs) {
     await searchService.indexJob({
       id: job.jobPostingId,

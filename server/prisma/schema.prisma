@@ -22,6 +22,7 @@ model User {
   providerId      String?
   isOnline        Boolean          @default(false)
   lastActive      DateTime?
+  violations      Int              @default(0)
   admin           Admin?
   candidate       Candidate?
   jobAlerts       JobAlert[]
@@ -239,6 +240,7 @@ model JobPosting {
   isVerified             Boolean       @default(false)
   originalUrl            String        @unique
   aiReliabilityScore     Float?
+  autoInviteMatches      Boolean       @default(false)
   createdAt              DateTime      @default(now()) @db.Timestamp(6)
   refreshedAt            DateTime      @default(now()) @db.Timestamp(6)
   updatedAt              DateTime      @updatedAt @db.Timestamp(6)
@@ -333,6 +335,10 @@ model Conversation {
 model Message {
   messageId      String       @id @default(uuid())
   content        String
+  fileName       String?
+  fileUrl        String?
+  fileType       String?
+  fileSize       Int?
   sentAt         DateTime     @default(now())
   isRead         Boolean      @default(false)
   conversationId String

@@ -44,13 +44,18 @@ export class JobPostingsController {
   @Get('resync-es')
   async resyncES() {
     await this.jobPostingsService.syncAllJobsToES();
-    return { message: 'Đồng bộ lại toàn bộ dữ liệu Job sang Elasticsearch thành công' };
+    return {
+      message: 'Đồng bộ lại toàn bộ dữ liệu Job sang Elasticsearch thành công',
+    };
   }
 
   @Get(':id/suggested-candidates')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
-  getSuggestedCandidates(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+  getSuggestedCandidates(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
     return this.jobPostingsService.getSuggestedCandidates(id, userId);
   }
 

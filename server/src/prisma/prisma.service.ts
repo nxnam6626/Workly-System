@@ -16,7 +16,6 @@ export class PrismaService
     const pool = new Pool({ connectionString, family: 4 } as any);
     const adapter = new PrismaPg(pool);
     super({ adapter });
-
   }
 
   async onModuleInit(): Promise<void> {

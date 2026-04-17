@@ -26,6 +26,7 @@ export default function ApplicationsPage() {
   const [unlockingAppId, setUnlockingAppId] = useState<string | null>(null);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [selectedUnlockCandidate, setSelectedUnlockCandidate] = useState<{ id: string, name: string } | null>(null);
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
   const wallet = useWalletStore((state) => state.wallet);
   const [subscription, setSubscription] = useState<any>(null);
@@ -99,6 +100,7 @@ export default function ApplicationsPage() {
   const confirmUnlock = async () => {
     if (!unlockingAppId) return;
     try {
+      setIsUnlocking(true);
       const toastId = toast.loading('Đang xử lý mở khóa...');
       const { data } = await api.post(`/applications/${unlockingAppId}/unlock`);
       await fetchApplications();
@@ -109,6 +111,7 @@ export default function ApplicationsPage() {
       console.error(error);
       toast.error(error.response?.data?.message || 'Không thể mở khóa ứng viên');
     } finally {
+      setIsUnlocking(false);
       setUnlockingAppId(null);
     }
   };
@@ -198,7 +201,7 @@ export default function ApplicationsPage() {
 
               <div className="flex gap-4 items-start flex-1 min-w-0">
                 <div className="w-12 h-12 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center shrink-0">
-                  {app.candidate?.user?.avatar ? (
+                  {app.isUnlocked && app.candidate?.user?.avatar ? (
                     <img src={app.candidate.user.avatar} className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <span className="font-bold text-indigo-600 text-lg uppercase">{(app.candidate?.fullName || 'U').charAt(0)}</span>
@@ -311,7 +314,7 @@ export default function ApplicationsPage() {
         isOpen={showUnlockModal && selectedUnlockCandidate !== null}
         onClose={() => setShowUnlockModal(false)}
         onConfirm={confirmUnlock}
-        isUnlocking={unlockingAppId === selectedUnlockCandidate?.id}
+        isUnlocking={isUnlocking}
         candidateName={selectedUnlockCandidate?.name || ''}
         wallet={wallet}
         subscription={subscription}

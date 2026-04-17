@@ -21,7 +21,7 @@ export class AiController {
   constructor(
     private readonly aiService: AiService,
     private readonly adminAiService: AdminAiService,
-  ) { }
+  ) {}
 
   @Post('chat')
   async chat(@Body('message') message: string) {
@@ -36,11 +36,41 @@ export class AiController {
     @CurrentUser('userId') userId: string,
     @CurrentUser('roles') roles: string[],
     @Query('message') message: string,
+    @Query('context') contextMode?: string,
   ): Observable<MessageEvent> {
-    const roleList = (roles || []).map((r: any) => (typeof r === 'string' ? r : r?.roleName)).filter(Boolean);
-    return from(this.aiService.generateStreamResponse(message, userId, roleList)).pipe(
-      map((text) => ({ data: typeof text === 'string' ? text.replace(/\n/g, '__NEWLINE__') : text }) as MessageEvent),
+    const roleList = (roles || [])
+      .map((r: any) => (typeof r === 'string' ? r : r?.roleName))
+      .filter(Boolean);
+    return from(
+      this.aiService.generateStreamResponse(
+        message,
+        userId,
+        roleList,
+        contextMode,
+      ),
+    ).pipe(
+      map(
+        (text) =>
+          ({
+            data:
+              typeof text === 'string'
+                ? text.replace(/\n/g, '__NEWLINE__')
+                : text,
+          }) as MessageEvent,
+      ),
     );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  @Post('fix-job')
+  async autoFixJob(
+    @CurrentUser('userId') userId: string,
+    @Body('jobId') jobId: string,
+    @Body('insightInstruction') insightInstruction: string,
+  ) {
+    if (!jobId || !insightInstruction) return { message: 'Thiếu tham số' };
+    return this.aiService.autoFixJob(userId, jobId, insightInstruction);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -11,7 +11,7 @@ import { map } from 'rxjs/operators';
 export class PiiMaskingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    
+
     // For HTTP requests: mask the body or query
     if (request) {
       if (request.body && typeof request.body.message === 'string') {
@@ -21,18 +21,22 @@ export class PiiMaskingInterceptor implements NestInterceptor {
         request.query.message = this.maskPII(request.query.message);
       }
     }
-    
+
     // For WS requests
     const wsContext = context.switchToWs();
     if (wsContext && wsContext.getClient()) {
       const data = wsContext.getData<any>();
-      if (data && typeof data === 'object' && typeof data.message === 'string') {
+      if (
+        data &&
+        typeof data === 'object' &&
+        typeof data.message === 'string'
+      ) {
         data.message = this.maskPII(data.message);
       }
     }
 
     return next.handle().pipe(
-      map(data => data) // Post-response masking if needed (not needed for AI response typically unless AI generates PII)
+      map((data) => data), // Post-response masking if needed (not needed for AI response typically unless AI generates PII)
     );
   }
 

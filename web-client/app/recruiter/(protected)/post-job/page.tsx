@@ -24,6 +24,8 @@ const defaultForm = {
   softSkills: [] as string[],
   minExperienceYears: 0,
   jobTier: 'BASIC',
+  autoInviteMatches: false,
+  isAiGenerated: false,
 };
 
 function PostJobForm() {
@@ -67,6 +69,8 @@ function PostJobForm() {
             softSkills: data.structuredRequirements?.softSkills || [],
             minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
             jobTier: data.jobTier || 'BASIC',
+            autoInviteMatches: data.autoInviteMatches || false,
+            isAiGenerated: data.structuredRequirements?.isAiGenerated || false,
           });
           setInitialFormData({
             title: data.title || '',
@@ -83,6 +87,8 @@ function PostJobForm() {
             softSkills: data.structuredRequirements?.softSkills || [],
             minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
             jobTier: data.jobTier || 'BASIC',
+            autoInviteMatches: data.autoInviteMatches || false,
+            isAiGenerated: data.structuredRequirements?.isAiGenerated || false,
           });
         } catch (error) {
           console.error('Lỗi khi tải thông tin công việc:', error);
@@ -97,6 +103,40 @@ function PostJobForm() {
     }
   }, [editJobId, accessToken]);
 
+  // Load AI Prefill Data
+  useEffect(() => {
+    if (!editJobId) {
+      const savedData = localStorage.getItem('aiPrefillJobData');
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          setFormData(prev => ({
+            ...prev,
+            title: parsed.title || prev.title,
+            description: parsed.description || prev.description,
+            requirements: parsed.requirements || prev.requirements,
+            benefits: parsed.benefits || prev.benefits,
+            salaryMin: parsed.salaryMin ? String(parsed.salaryMin) : prev.salaryMin,
+            salaryMax: parsed.salaryMax ? String(parsed.salaryMax) : prev.salaryMax,
+            jobType: ['FULLTIME', 'PARTTIME', 'INTERNSHIP'].includes(parsed.jobType) ? parsed.jobType : prev.jobType,
+            experience: parsed.experience || prev.experience,
+            vacancies: parsed.vacancies || prev.vacancies,
+            hardSkills: Array.isArray(parsed.hardSkills) ? parsed.hardSkills : prev.hardSkills,
+            softSkills: Array.isArray(parsed.softSkills) ? parsed.softSkills : prev.softSkills,
+            minExperienceYears: parsed.minExperienceYears || prev.minExperienceYears,
+            isAiGenerated: parsed.isAiGenerated !== undefined ? parsed.isAiGenerated : prev.isAiGenerated,
+          }));
+          setTimeout(() => {
+            toast.success('✨ Đã tự động điền dữ liệu từ Workly AI!', { icon: '🤖' });
+          }, 500);
+          localStorage.removeItem('aiPrefillJobData');
+        } catch (e) {
+          console.error('Failed to parse AI prefill data', e);
+        }
+      }
+    }
+  }, [editJobId]);
+
   const handleBranchToggle = (branchId: string) => {
     let updated = [...formData.branchIds];
     if (updated.includes(branchId)) {
@@ -108,8 +148,13 @@ function PostJobForm() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'minExperienceYears' ? Number(value) : value }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: name === 'minExperienceYears' ? Number(value) : value }));
+    }
   };
 
   const addHardSkill = (e: React.KeyboardEvent) => {
@@ -468,6 +513,25 @@ function PostJobForm() {
                   min="0"
                   className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
+              </div>
+
+              <div className="col-span-1 md:col-span-2 mt-4 bg-indigo-50/50 border border-indigo-100 rounded-xl p-5 w-full flex items-start gap-4">
+                 <div className="pt-1">
+                   <div 
+                     className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors relative flex items-center ${formData.autoInviteMatches ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                     onClick={() => setFormData(p => ({ ...p, autoInviteMatches: !p.autoInviteMatches }))}
+                   >
+                     <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${formData.autoInviteMatches ? 'translate-x-6' : 'translate-x-0'}`} />
+                   </div>
+                 </div>
+                 <div className="flex-1">
+                   <p className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                     Bật Tính Năng Tự Động Mở Khoá & Mời <span className="bg-amber-100 text-amber-700 text-[10px] uppercase px-2 py-0.5 rounded-full">AI Tự Động</span>
+                   </p>
+                   <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                     Khi tính năng này được bật, AI Matching Engine sẽ quét liên tục. Nếu tìm thấy ứng viên đạt <strong>trên 85%</strong> mức độ phù hợp, hệ thống sẽ tự động trừ lượt Mở CV của tin này (hoặc trừ xu trong ví) để lấy liên hệ ứng viên, và <strong>tự động nhắn tin mời phỏng vấn</strong> ngay lập tức thay bạn.
+                   </p>
+                 </div>
               </div>
             </div>
           </div>

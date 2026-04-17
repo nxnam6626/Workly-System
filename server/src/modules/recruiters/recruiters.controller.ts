@@ -40,6 +40,12 @@ export class RecruitersController {
     return this.unlockService.getWallet(req.user.userId);
   }
 
+  @Get('match-summary')
+  @Roles(Role.RECRUITER)
+  getMatchSummary(@Req() req: any) {
+    return this.recruitersService.getMatchSummary(req.user.userId);
+  }
+
   @Get('matched/:jobId')
   @Roles(Role.RECRUITER)
   getMatchedCandidates(@Req() req: any, @Param('jobId') jobId: string) {

@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Get, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { SupportService } from './support.service';
 import { CreateSupportDto } from './dto/create-support.dto';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -23,7 +31,8 @@ export class SupportController {
       user?.userId,
     );
     return {
-      message: 'Yêu cầu hỗ trợ của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất.',
+      message:
+        'Yêu cầu hỗ trợ của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất.',
       requestId: request.requestId,
     };
   }

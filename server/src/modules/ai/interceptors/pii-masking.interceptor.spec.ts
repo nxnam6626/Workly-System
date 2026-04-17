@@ -13,7 +13,8 @@ describe('PiiMaskingInterceptor', () => {
 
   describe('maskPII', () => {
     it('should mask email addresses', () => {
-      const input = 'My email is test@gmail.com and also contact abc.xyz@company.vn';
+      const input =
+        'My email is test@gmail.com and also contact abc.xyz@company.vn';
       const output = interceptor.maskPII(input);
       expect(output).toBe('My email is [BẢO MẬT] and also contact [BẢO MẬT]');
     });

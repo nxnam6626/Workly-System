@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '@/lib/api';
 import {
-  MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Trash2, Maximize2, Minimize2
+  MessageSquare, X, Send, Bot, User, Loader2, Sparkles, Trash2, Maximize2, Minimize2, Crown, ArrowRight
 } from 'lucide-react';
 import { useAiChatStore } from '@/stores/aiChatStore';
 import io, { Socket } from 'socket.io-client';
@@ -16,6 +16,8 @@ import { useAuthStore } from '@/stores/auth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useConfirm } from '@/components/ConfirmDialog';
+import api from '@/lib/api';
+
 
 export default function AiChatBox() {
   const {
@@ -26,11 +28,22 @@ export default function AiChatBox() {
   const socketRef = useRef<Socket | null>(null);
   const pathname = usePathname() || '';
   const { user } = useAuthStore();
+  const [hasAiCapability, setHasAiCapability] = useState(false);
+
+  useEffect(() => {
+    if (user?.roles?.includes('RECRUITER')) {
+      api.get('/subscriptions/current').then(res => {
+        if (res.data?.planType === 'LITE' || res.data?.planType === 'GROWTH') {
+          setHasAiCapability(true);
+        }
+      }).catch(() => { });
+    }
+  }, [user]);
   const confirm = useConfirm();
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/ai-chat`);
+      socketRef.current = io(`${API_BASE_URL}/ai-chat`);
 
       socketRef.current.on('stream_chunk', (data: { text: string }) => {
         setTyping(false);
@@ -78,7 +91,7 @@ export default function AiChatBox() {
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [messages, isOpen, isTyping]);
 
@@ -114,6 +127,64 @@ export default function AiChatBox() {
             <HumanSupportButton />
           </div>
         )}
+        {msg.metadata?.action === 'PREFILL_JOB' && msg.metadata?.payload && (
+          <div className="mt-4 border border-indigo-100 bg-indigo-50/50 rounded-xl p-4 shadow-sm">
+            <h4 className="font-bold text-indigo-900 mb-2 line-clamp-1 flex items-center gap-2">
+              <Bot className="w-4 h-4 text-indigo-500" /> Bản nháp JD
+            </h4>
+            <div className="text-[13px] text-slate-600 mb-4 space-y-1.5">
+              <p><strong>Vị trí:</strong> {msg.metadata.payload.title || 'Chưa xác định'}</p>
+              <p><strong>Loại:</strong> {msg.metadata.payload.jobType}</p>
+              <p><strong>Lương:</strong> {msg.metadata.payload.salaryMin ? `${new Intl.NumberFormat('vi-VN').format(msg.metadata.payload.salaryMin)}đ` : 'Thỏa thuận'}</p>
+              <p><strong>Kỹ năng:</strong> {(msg.metadata.payload.hardSkills || []).slice(0, 3).join(', ')}</p>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.setItem('aiPrefillJobData', JSON.stringify({ ...msg.metadata.payload, isAiGenerated: true }));
+                setIsOpen(false); // Close chat
+                window.location.href = '/recruiter/post-job';
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2.5 text-sm font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+            >
+              <Sparkles className="w-4 h-4" /> Đi tới Form Đăng Tin
+            </button>
+          </div>
+        )}
+        {msg.metadata?.action === 'SHOW_UPGRADE_CTA' && msg.metadata?.payload && (
+          <div className="mt-3 rounded-2xl overflow-hidden border border-indigo-200 shadow-md">
+            {/* Header gradient */}
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-4 text-white">
+              <div className="flex items-center gap-2 mb-1">
+                <Crown className="w-4 h-4 text-amber-300" />
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-300">Nâng cấp tài khoản</span>
+              </div>
+              <p className="font-bold text-base leading-snug">{msg.metadata.payload.title}</p>
+              <p className="text-indigo-200 text-[12px] mt-1">{msg.metadata.payload.subtitle}</p>
+            </div>
+            {/* Features list */}
+            <div className="bg-white px-4 py-3 space-y-1.5">
+              {[
+                '🤖 Tạo JD tự động bằng AI',
+                '🎯 AI Cố Vấn & tự động sửa JD',
+                '📊 AI Insights phân tích nhân sự',
+                '🔓 Tăng quota đăng tin & mở khóa CV',
+              ].map((f, i) => (
+                <p key={i} className="text-[12px] text-slate-600 font-medium">{f}</p>
+              ))}
+            </div>
+            {/* CTA button */}
+            <div className="bg-white px-4 pb-4">
+              <button
+                onClick={() => { setIsOpen(false); window.location.href = msg.metadata.payload.ctaLink; }}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:opacity-90 text-white rounded-xl py-2.5 text-sm font-bold transition-all shadow-md active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                {msg.metadata.payload.ctaText}
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -134,7 +205,8 @@ export default function AiChatBox() {
     setTyping(true);
 
     const { accessToken } = useAuthStore.getState();
-    const streamUrl = `${API_BASE_URL}/ai/chat-stream?message=${encodeURIComponent(currentInput)}${accessToken ? `&token=${accessToken}` : ''}`;
+    const userContextMode = pathname.includes('/recruiter') || pathname.includes('/admin') ? 'RECRUITER' : 'CANDIDATE';
+    const streamUrl = `${API_BASE_URL}/ai/chat-stream?message=${encodeURIComponent(currentInput)}&context=${userContextMode}${accessToken ? `&token=${accessToken}` : ''}`;
 
     const aiMessageId = (Date.now() + 1).toString();
     let aiMessageAdded = false;
@@ -156,53 +228,53 @@ export default function AiChatBox() {
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
 
-                for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                        let content = line.slice(5); // remove 'data:'
-                        // The SSE format often adds a space after data:
-                        if (content.startsWith(' ')) content = content.slice(1);
-                        
-                        if (content) {
-                            // NestJS wraps string data in quotes for SSE
-                            if (content.startsWith('"') && content.endsWith('"')) {
-                                content = content.slice(1, -1)
-                                                 .replace(/\\n/g, '\n')
-                                                 .replace(/\\"/g, '"');
-                            }
+        for (const line of lines) {
+          if (line.startsWith('data:')) {
+            let content = line.slice(5); // remove 'data:'
+            // The SSE format often adds a space after data:
+            if (content.startsWith(' ')) content = content.slice(1);
 
-                            // Check for internal commands (e.g., job cards)
-                            if (content.startsWith('__ACTION__:')) {
-                                try {
-                                    const actionData = JSON.parse(content.replace('__ACTION__:', ''));
-                                    addMessage({
-                                        id: Date.now().toString() + Math.random(),
-                                        role: 'ai',
-                                        content: '',
-                                        timestamp: new Date(),
-                                        metadata: { action: actionData.type, payload: actionData.payload }
-                                    });
-                                } catch (e) {
-                                    console.error('Failed to parse AI action:', e);
-                                }
-                                continue;
-                            }
+            if (content) {
+              // NestJS wraps string data in quotes for SSE
+              if (content.startsWith('"') && content.endsWith('"')) {
+                content = content.slice(1, -1)
+                  .replace(/\\n/g, '\n')
+                  .replace(/\\"/g, '"');
+              }
 
-                            if (!aiMessageAdded) {
-                                addMessage({
-                                    id: aiMessageId,
-                                    role: 'ai',
-                                    content: '',
-                                    timestamp: new Date(),
-                                    metadata: { isStreaming: true }
-                                });
-                                aiMessageAdded = true;
-                                setTyping(false);
-                            }
-                            fullContent += content;
-                            updateMessage(aiMessageId, { content: fullContent.replace(/__NEWLINE__/g, '\n') });
-                        }
-                    }
+              // Check for internal commands (e.g., job cards)
+              if (content.startsWith('__ACTION__:')) {
+                try {
+                  const actionData = JSON.parse(content.replace('__ACTION__:', ''));
+                  addMessage({
+                    id: Date.now().toString() + Math.random(),
+                    role: 'ai',
+                    content: '',
+                    timestamp: new Date(),
+                    metadata: { action: actionData.type, payload: actionData.payload }
+                  });
+                } catch (e) {
+                  console.error('Failed to parse AI action:', e);
                 }
+                continue;
+              }
+
+              if (!aiMessageAdded) {
+                addMessage({
+                  id: aiMessageId,
+                  role: 'ai',
+                  content: '',
+                  timestamp: new Date(),
+                  metadata: { isStreaming: true }
+                });
+                aiMessageAdded = true;
+                setTyping(false);
+              }
+              fullContent += content;
+              updateMessage(aiMessageId, { content: fullContent.replace(/__NEWLINE__/g, '\n') });
+            }
+          }
+        }
       }
       // Kết thúc stream
       if (aiMessageAdded) {
@@ -249,7 +321,7 @@ export default function AiChatBox() {
             className="w-[380px] sm:w-[420px] h-[580px] bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-white/50 ring-1 ring-black/5"
           >
             <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 p-5 text-white flex items-center justify-between shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
               <div className="flex items-center gap-3 relative z-10">
                 <div className="w-10 h-10 bg-white/20 rounded-xl backdrop-blur-md flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-white" />
@@ -345,6 +417,22 @@ export default function AiChatBox() {
                     </button>
                   </>
                 )}
+                {pathname.includes('/recruiter') && (
+                  <>
+                    {hasAiCapability ? (
+                      <button onClick={(e) => { e.preventDefault(); handleSend(undefined, 'Đăng tin tuyển 2 lập trình viên Frontend ReactJS lương 15-20 triệu'); }} className="text-[13px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full font-medium hover:bg-indigo-100 transition-colors flex items-center gap-1.5 shrink-0">
+                        <Sparkles className="w-3.5 h-3.5" /> Tạo tin tuyển dụng
+                      </button>
+                    ) : (
+                      <button onClick={(e) => { e.preventDefault(); handleSend(undefined, 'Hướng dẫn đăng tin tuyển dụng chuẩn SEO trên hệ thống Workly'); }} className="text-[13px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full font-medium hover:bg-indigo-100 transition-colors flex items-center gap-1.5 shrink-0">
+                        <Sparkles className="w-3.5 h-3.5" /> Hướng dẫn đăng JD
+                      </button>
+                    )}
+                    <button onClick={(e) => { e.preventDefault(); handleSend(undefined, 'Ví của tôi còn bao nhiêu xu?'); }} className="text-[13px] bg-amber-50 text-amber-600 border border-amber-100 px-3 py-1.5 rounded-full font-medium hover:bg-amber-100 transition-colors flex items-center gap-1.5 shrink-0">
+                      Check số dư ví
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -365,8 +453,8 @@ export default function AiChatBox() {
                   type="submit"
                   disabled={!input.trim() || isTyping}
                   className={`absolute right-1.5 p-2.5 rounded-xl transition-all ${input.trim() && !isTyping
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                     }`}
                 >
                   <Send className="w-4 h-4" />

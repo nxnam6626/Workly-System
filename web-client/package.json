@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@payos/payos-checkout": "^1.0.8",
     "axios": "^1.13.6",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.36.0",

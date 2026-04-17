@@ -64,7 +64,7 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   addBranch(
     @CurrentUser('userId') userId: string,
-    @Body() body: { name: string; address: string },
+    @Body() body: { name: string; address: string; latitude?: number; longitude?: number },
   ) {
     return this.companiesService.addBranch(userId, body);
   }

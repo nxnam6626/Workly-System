@@ -99,9 +99,9 @@ export default function SavedCandidatesPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-lg overflow-hidden shrink-0">
-                         {candidate.user?.avatar ? (
-                           <img src={candidate.user.avatar} className="w-full h-full object-cover" />
-                         ) : (
+                          {candidate.isUnlocked && candidate.user?.avatar ? (
+                            <img src={candidate.user.avatar} className="w-full h-full object-cover" />
+                          ) : (
                            (candidate.fullName || 'U').charAt(0)
                          )}
                        </div>

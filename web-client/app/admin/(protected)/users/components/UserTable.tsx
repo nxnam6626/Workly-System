@@ -130,6 +130,11 @@ export default function UserTable({
                           {ROLE_LABELS[r] ?? r}
                         </span>
                       ))}
+                      {u.recruiter?.recruiterSubscription?.planType && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-200 uppercase tracking-wider">
+                          {u.recruiter.recruiterSubscription.planType}
+                        </span>
+                      )}
                     </div>
                   </td>
 
@@ -149,14 +154,14 @@ export default function UserTable({
                   </td>
 
                   <td className="px-4 py-3">
-                    {u.recruiter ? (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${u.recruiter.violationCount >= 3 ? 'bg-rose-100 text-rose-700' : u.recruiter.violationCount > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
-                        <AlertTriangle className="w-3 h-3" />
-                        {u.recruiter.violationCount || 0}/3
-                      </span>
-                    ) : (
-                      <span className="text-slate-200 text-[10px]">N/A</span>
-                    )}
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold ${
+                      (u as any).violations >= 3 ? 'bg-rose-100 text-rose-700' : 
+                      (u as any).violations > 0 ? 'bg-amber-100 text-amber-700' : 
+                      'bg-slate-100 text-slate-500'
+                    }`}>
+                      <AlertTriangle className="w-3 h-3" />
+                      {(u as any).violations || 0}/3
+                    </span>
                   </td>
 
                   {/* Email verified */}

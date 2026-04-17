@@ -36,191 +36,203 @@ export class ApplicationsService {
     });
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng!');
 
-    return await this.prisma.$transaction(async (tx) => {
-      let candidateId: string;
+    return await this.prisma.$transaction(
+      async (tx) => {
+        let candidateId: string;
 
-      // 2. Handle Candidate identification
-      if (userId) {
-        const candidate = await tx.candidate.findUnique({ where: { userId } });
-        if (!candidate) {
-          // If logged in user is not a candidate, create one
-          const newCandidate = await tx.candidate.create({
-            data: { userId, fullName },
-          });
-          candidateId = newCandidate.candidateId;
-        } else {
-          candidateId = candidate.candidateId;
-        }
-      } else {
-        // Guest Application Logic
-        // Check if user with email already exists
-        let user = await tx.user.findUnique({ where: { email } });
-        if (!user) {
-          // Create a new guest user + candidate
-          user = await tx.user.create({
-            data: {
-              email,
-              status: 'ACTIVE',
-              phoneNumber: phone,
-            },
-          });
-
-          const roleRecord = await tx.role.upsert({
-            where: { roleName: 'CANDIDATE' },
-            update: {},
-            create: { roleName: 'CANDIDATE' },
-          });
-
-          await tx.userRole.create({
-            data: {
-              userId: user.userId,
-              roleId: roleRecord.roleId,
-            },
-          });
-
-          const newCandidate = await tx.candidate.create({
-            data: { userId: user.userId, fullName },
-          });
-          candidateId = newCandidate.candidateId;
-        } else {
+        // 2. Handle Candidate identification
+        if (userId) {
           const candidate = await tx.candidate.findUnique({
-            where: { userId: user.userId },
+            where: { userId },
           });
           if (!candidate) {
+            // If logged in user is not a candidate, create one
             const newCandidate = await tx.candidate.create({
-              data: { userId: user.userId, fullName },
+              data: { userId, fullName },
             });
             candidateId = newCandidate.candidateId;
           } else {
             candidateId = candidate.candidateId;
           }
+        } else {
+          // Guest Application Logic
+          // Check if user with email already exists
+          let user = await tx.user.findUnique({ where: { email } });
+          if (!user) {
+            // Create a new guest user + candidate
+            user = await tx.user.create({
+              data: {
+                email,
+                status: 'ACTIVE',
+                phoneNumber: phone,
+              },
+            });
+
+            const roleRecord = await tx.role.upsert({
+              where: { roleName: 'CANDIDATE' },
+              update: {},
+              create: { roleName: 'CANDIDATE' },
+            });
+
+            await tx.userRole.create({
+              data: {
+                userId: user.userId,
+                roleId: roleRecord.roleId,
+              },
+            });
+
+            const newCandidate = await tx.candidate.create({
+              data: { userId: user.userId, fullName },
+            });
+            candidateId = newCandidate.candidateId;
+          } else {
+            const candidate = await tx.candidate.findUnique({
+              where: { userId: user.userId },
+            });
+            if (!candidate) {
+              const newCandidate = await tx.candidate.create({
+                data: { userId: user.userId, fullName },
+              });
+              candidateId = newCandidate.candidateId;
+            } else {
+              candidateId = candidate.candidateId;
+            }
+          }
         }
-      }
 
-      // 3. Handle CV File or Existing CV
-      let cvId: string | undefined = createApplicationDto.cvId;
-      let fileUrl: string;
+        // 3. Handle CV File or Existing CV
+        let cvId: string | undefined = createApplicationDto.cvId;
+        let fileUrl: string;
 
-      if (cvId) {
-        const existingCv = await tx.cV.findUnique({ where: { cvId } });
-        if (!existingCv)
-          throw new NotFoundException('Không tìm thấy CV được chọn!');
-        fileUrl = existingCv.fileUrl || ''; // Allow empty if virtual CV
-      } else if (file) {
-        const cvTitle = file.originalname;
-        fileUrl = `/uploads/cvs/${file.filename}`;
+        if (cvId) {
+          const existingCv = await tx.cV.findUnique({ where: { cvId } });
+          if (!existingCv)
+            throw new NotFoundException('Không tìm thấy CV được chọn!');
+          fileUrl = existingCv.fileUrl || ''; // Allow empty if virtual CV
+        } else if (file) {
+          const cvTitle = file.originalname;
+          fileUrl = `/uploads/cvs/${file.filename}`;
 
-        const newCV = await tx.cV.create({
-          data: {
-            cvTitle,
-            fileUrl,
-            candidateId,
-            isMain: false, // Uploaded during application is not necessarily main
+          const newCV = await tx.cV.create({
+            data: {
+              cvTitle,
+              fileUrl,
+              candidateId,
+              isMain: false, // Uploaded during application is not necessarily main
+            },
+          });
+          cvId = newCV.cvId;
+        } else {
+          throw new NotFoundException(
+            'Vui lòng tải lên CV hoặc chọn CV có sẵn!',
+          );
+        }
+
+        // 4. Check for existing application
+        const existingApp = await tx.application.findFirst({
+          where: { candidateId, jobPostingId },
+        });
+        if (existingApp)
+          throw new ConflictException('Bạn đã nộp đơn cho công việc này rồi!');
+
+        // 5. Create Application
+        // 5. Check if unlocked in CandidateUnlock table
+        const existingUnlock = await tx.candidateUnlock.findUnique({
+          where: {
+            recruiterId_candidateId_jobPostingId: {
+              recruiterId: job.recruiterId!,
+              candidateId,
+              jobPostingId,
+            },
           },
         });
-        cvId = newCV.cvId;
-      } else {
-        throw new NotFoundException('Vui lòng tải lên CV hoặc chọn CV có sẵn!');
-      }
+        const isAlreadyUnlocked = !!existingUnlock;
 
-      // 4. Check for existing application
-      const existingApp = await tx.application.findFirst({
-        where: { candidateId, jobPostingId },
-      });
-      if (existingApp)
-        throw new ConflictException('Bạn đã nộp đơn cho công việc này rồi!');
+        // Check if candidate already has a match score
+        const existingMatch = await tx.jobMatch.findUnique({
+          where: {
+            candidateId_jobPostingId: { candidateId, jobPostingId },
+          },
+        });
 
-      // 5. Create Application
-      // 5. Check if unlocked in CandidateUnlock table
-      const existingUnlock = await tx.candidateUnlock.findUnique({
-        where: {
-          recruiterId_candidateId_jobPostingId: {
-             recruiterId: job.recruiterId!,
-             candidateId,
-             jobPostingId
+        // 6. Compute AI Match Score with Fallback mechanism
+        let aiMatchScore = existingMatch?.score ?? 0;
+
+        if (aiMatchScore === 0) {
+          try {
+            let cvText = '';
+            if (fileUrl.startsWith('/uploads/')) {
+              cvText = await this.aiService.extractTextFromLocalFile(fileUrl);
+            } else {
+              cvText = await this.aiService.extractTextFromPdfUrl(fileUrl);
+            }
+
+            if (cvText.trim()) {
+              const jobRequirements = job.requirements
+                ? String(job.requirements)
+                : '';
+              aiMatchScore = await this.aiService.evaluateMatch(
+                cvText,
+                job.title,
+                jobRequirements,
+              );
+            }
+          } catch (aiErr) {
+            console.error(
+              'Lỗi khi tính điểm Match bằng AI trên tệp CV ứng tuyển. Sử dụng điểm mặc định là 0:',
+              aiErr,
+            );
           }
         }
-      });
-      const isAlreadyUnlocked = !!existingUnlock;
 
-      // Check if candidate already has a match score
-      const existingMatch = await tx.jobMatch.findUnique({
-        where: {
-          candidateId_jobPostingId: { candidateId, jobPostingId }
-        }
-      });
+        const application = await tx.application.create({
+          data: {
+            candidateId,
+            jobPostingId,
+            cvId,
+            cvSnapshotUrl: fileUrl,
+            coverLetter,
+            appStatus: 'PENDING',
+            aiMatchScore,
+            isUnlocked: isAlreadyUnlocked,
+          },
+          include: {
+            jobPosting: { include: { recruiter: true } },
+            candidate: { select: { fullName: true } },
+          },
+        });
 
-      // 6. Compute AI Match Score with Fallback mechanism
-      let aiMatchScore = existingMatch?.score ?? 0;
+        // 6. Send Notification
+        if (application.jobPosting.recruiter?.userId) {
+          const recruiterId = application.jobPosting.recruiter.userId;
+          const title = 'Hồ sơ ứng viên mới';
+          const message = `Ứng viên ${application.candidate.fullName} vừa nộp hồ sơ cho vị trí "${application.jobPosting.title}".`;
 
-      if (aiMatchScore === 0) {
-        try {
-          let cvText = '';
-          if (fileUrl.startsWith('/uploads/')) {
-            cvText = await this.aiService.extractTextFromLocalFile(fileUrl);
-          } else {
-            cvText = await this.aiService.extractTextFromPdfUrl(fileUrl);
-          }
-
-          if (cvText.trim()) {
-             const jobRequirements = job.requirements ? String(job.requirements) : '';
-             aiMatchScore = await this.aiService.evaluateMatch(
-               cvText,
-               job.title,
-               jobRequirements,
-             );
-          }
-        } catch (aiErr) {
-          console.error('Lỗi khi tính điểm Match bằng AI trên tệp CV ứng tuyển. Sử dụng điểm mặc định là 0:', aiErr);
-        }
-      }
-
-      const application = await tx.application.create({
-        data: {
-          candidateId,
-          jobPostingId,
-          cvId,
-          cvSnapshotUrl: fileUrl,
-          coverLetter,
-          appStatus: 'PENDING',
-          aiMatchScore,
-          isUnlocked: isAlreadyUnlocked,
-        },
-        include: {
-          jobPosting: { include: { recruiter: true } },
-          candidate: { select: { fullName: true } },
-        },
-      });
-
-      // 6. Send Notification
-      if (application.jobPosting.recruiter?.userId) {
-        const recruiterId = application.jobPosting.recruiter.userId;
-        const title = 'Hồ sơ ứng viên mới';
-        const message = `Ứng viên ${application.candidate.fullName} vừa nộp hồ sơ cho vị trí "${application.jobPosting.title}".`;
-
-        await this.notificationsService.create(
-          recruiterId,
-          title,
-          message,
-          'info',
-          '/recruiter/applications',
-        );
-
-        this.messagesGateway.server
-          .to(`user_${recruiterId}`)
-          .emit('notification', {
+          await this.notificationsService.create(
+            recruiterId,
             title,
             message,
-            type: 'info',
-            link: '/recruiter/applications',
-          });
-      }
+            'info',
+            '/recruiter/applications',
+          );
 
-      return application;
-    }, {
-      maxWait: 5000,
-      timeout: 30000, // 30 seconds to allow slow Gemini API responses
-    });
+          this.messagesGateway.server
+            .to(`user_${recruiterId}`)
+            .emit('notification', {
+              title,
+              message,
+              type: 'info',
+              link: '/recruiter/applications',
+            });
+        }
+
+        return application;
+      },
+      {
+        maxWait: 5000,
+        timeout: 30000, // 30 seconds to allow slow Gemini API responses
+      },
+    );
   }
 
   async findAllByJob(jobPostingId: string) {
@@ -275,21 +287,30 @@ export class ApplicationsService {
 
     // Fetch all Candidate Unlocks to fix any out-of-sync application unlock logic
     const unlocks = await this.prisma.candidateUnlock.findMany({
-      where: { recruiterId: recruiter.recruiterId }
+      where: { recruiterId: recruiter.recruiterId },
     });
-    const unlockedSet = new Set(unlocks.map(u => `${u.candidateId}_${u.jobPostingId}`));
+    const unlockedSet = new Set(
+      unlocks.map((u) => `${u.candidateId}_${u.jobPostingId}`),
+    );
 
     // Fetch JobMatches to sync accurate AI Score and retro-active unlock checks
     const jobMatches = await this.prisma.jobMatch.findMany({
-       where: { jobPosting: { recruiterId: recruiter.recruiterId } }
+      where: { jobPosting: { recruiterId: recruiter.recruiterId } },
     });
-    const matchMap = new Map(jobMatches.map(m => [`${m.candidateId}_${m.jobPostingId}`, m]));
+    const matchMap = new Map(
+      jobMatches.map((m) => [`${m.candidateId}_${m.jobPostingId}`, m]),
+    );
 
     return applications.map((app) => {
       // Re-validate exactly
       const matchData = matchMap.get(`${app.candidateId}_${app.jobPostingId}`);
-      const isActuallyUnlocked = app.isUnlocked || unlockedSet.has(`${app.candidateId}_${app.jobPostingId}`);
-      const accurateScore = matchData?.score && matchData.score > 0 ? matchData.score : app.aiMatchScore;
+      const isActuallyUnlocked =
+        app.isUnlocked ||
+        unlockedSet.has(`${app.candidateId}_${app.jobPostingId}`);
+      const accurateScore =
+        matchData?.score && matchData.score > 0
+          ? matchData.score
+          : app.aiMatchScore;
 
       // Obfuscate candidate details if not unlocked
       if (!isActuallyUnlocked) {
@@ -314,9 +335,9 @@ export class ApplicationsService {
         };
       }
       return {
-         ...app,
-         isUnlocked: true,
-         aiMatchScore: accurateScore
+        ...app,
+        isUnlocked: true,
+        aiMatchScore: accurateScore,
       };
     });
   }
@@ -347,13 +368,17 @@ export class ApplicationsService {
       if (interviewLocation) dataToUpdate.interviewLocation = interviewLocation;
     }
 
-    if (status === 'ACCEPTED' && existingApp && existingApp.appStatus !== 'ACCEPTED') {
+    if (
+      status === 'ACCEPTED' &&
+      existingApp &&
+      existingApp.appStatus !== 'ACCEPTED'
+    ) {
       // Decrease vacancies when candidate is accepted
       await this.prisma.jobPosting.update({
         where: { jobPostingId: existingApp.jobPostingId },
         data: {
-          vacancies: { decrement: 1 }
-        }
+          vacancies: { decrement: 1 },
+        },
       });
     }
 
@@ -504,9 +529,8 @@ export class ApplicationsService {
 
     await this.walletsService.deductCvUnlock(
       recruiter.recruiterId,
-      `Mở khóa ứng viên: ${application.candidate?.fullName}`
+      `Mở khóa ứng viên: ${application.candidate?.fullName}`,
     );
-
 
     return this.prisma.application.update({
       where: { applicationId },

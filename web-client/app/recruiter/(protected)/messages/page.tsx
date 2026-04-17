@@ -1,23 +1,36 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { MessageSquare, Search, Send, MoreVertical, Phone, Video, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageSquare, Search, Send, MoreVertical, Loader2, ChevronLeft, User, EyeOff, X, Paperclip, File, Image as ImageIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
 import { useMessageStore } from '@/stores/message';
-import api from '@/lib/api';
+import api, { getFileUrl } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function MessagesPage() {
-  const { user } = useAuthStore();
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
   const { socket } = useSocketStore();
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeChat, setActiveChat] = useState<any | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const [previewCvUrl, setPreviewCvUrl] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Pagination & scrolling
+  const [hasMore, setHasMore] = useState(true);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const scrollHeightRef = useRef<number>(0);
 
   const getOnlineStatusText = (usr: any) => {
     if (!usr) return '';
@@ -41,6 +54,7 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (activeChat) {
+      setHasMore(true);
       fetchMessages(activeChat.conversationId);
       api.patch(`/messages/conversations/${activeChat.conversationId}/read`)
         .then(() => {
@@ -52,10 +66,6 @@ export default function MessagesPage() {
   }, [activeChat]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
     if (!socket) return;
     
     const handleNewMessage = (msg: any) => {
@@ -63,7 +73,12 @@ export default function MessagesPage() {
       setMessages((prev) => {
         // use function setState to safely check current activeChat inside effect
         if (msg.conversationId === activeChat?.conversationId) {
-          if (!prev.find(m => m.messageId === msg.messageId)) return [...prev, msg];
+          if (!prev.find(m => m.messageId === msg.messageId)) {
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
+            return [...prev, msg];
+          }
         }
         return prev;
       });
@@ -79,46 +94,65 @@ export default function MessagesPage() {
           fetchConversations(); // fetch if new
           return prev;
         }
-        const updated = [...prev];
-        const moved = { ...updated[index] };
-        updated.splice(index, 1);
-        
-        moved.lastMessage = msg.content;
-        moved.updatedAt = msg.sentAt;
-        if (msg.senderId !== user?.userId && activeChat?.conversationId !== msg.conversationId) {
-          moved.isRead = false; // pseudo unread if needed, DB handles properly later
-          moved.unread = (moved.unread || 0) + 1;
+        const newConversations = [...prev];
+        newConversations[index] = { ...newConversations[index], lastMessage: msg.content, updatedAt: new Date().toISOString(), isRead: msg.senderId === user?.userId };
+        if (msg.senderId !== user?.userId && msg.conversationId !== activeChat?.conversationId) {
+          newConversations[index].unread = 1;
         }
-        return [moved, ...updated];
+        return newConversations.sort((a,b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       });
     };
 
-    const handleUserStatusChanged = (status: { userId: string; isOnline: boolean; lastActive?: string }) => {
-      setConversations(prev => prev.map(c => {
-        if (c.candidate?.user?.userId === status.userId) {
-          return { ...c, candidate: { ...c.candidate, user: { ...c.candidate.user, isOnline: status.isOnline, lastActive: status.lastActive } } };
-        }
-        return c;
-      }));
-      if (activeChat?.candidate?.user?.userId === status.userId) {
-        setActiveChat((prev: any) => prev ? { ...prev, candidate: { ...prev.candidate, user: { ...prev.candidate!.user, isOnline: status.isOnline, lastActive: status.lastActive } } as any } : prev);
+    const handleUserStatusChanged = (data: { userId: string, isOnline: boolean, lastActive?: string }) => {
+      // update conversation candidate object
+      setConversations((prev) => 
+        prev.map(c => {
+          if (c.candidate?.user?.userId === data.userId) {
+            return {
+              ...c,
+              candidate: {
+                ...c.candidate,
+                user: {
+                  ...c.candidate.user,
+                  isOnline: data.isOnline,
+                  lastActive: data.lastActive || c.candidate.user.lastActive
+                }
+              }
+            };
+          }
+          return c;
+        })
+      );
+      if (activeChat?.candidate?.user?.userId === data.userId) {
+        setActiveChat((prev: any) => ({
+          ...prev,
+          candidate: {
+            ...prev.candidate,
+            user: {
+              ...prev.candidate.user,
+              isOnline: data.isOnline,
+              lastActive: data.lastActive || prev.candidate.user.lastActive
+            }
+          }
+        }));
       }
     };
 
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleUserStatusChanged);
+    
     return () => {
       socket.off('newMessage', handleNewMessage);
       socket.off('userStatusChanged', handleUserStatusChanged);
     };
-  }, [socket, activeChat, user?.userId]);
+  }, [socket, activeChat, user?.userId, logout]);
 
   const fetchConversations = async () => {
     try {
       const { data } = await api.get('/messages/conversations');
       setConversations(data);
       // Auto select first if none active
-      if (data.length > 0 && !activeChat) {
+      if (data.length > 0 && !activeChat && typeof window !== 'undefined' && window.innerWidth >= 768) {
         setActiveChat(data[0]);
       }
     } catch (error) {
@@ -130,10 +164,47 @@ export default function MessagesPage() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      const { data } = await api.get(`/messages/conversations/${conversationId}/messages`);
+      const { data } = await api.get(`/messages/conversations/${conversationId}/messages?limit=30`);
       setMessages(data);
+      setHasMore(data.length === 30);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ block: 'nearest' });
+      }, 50);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const fetchMoreMessages = async () => {
+    if (!activeChat || fetchingMore || !hasMore || messages.length === 0) return;
+    setFetchingMore(true);
+    try {
+      const oldestMessageId = messages[0].messageId;
+      if (messageContainerRef.current) {
+        scrollHeightRef.current = messageContainerRef.current.scrollHeight;
+      }
+      const { data } = await api.get(`/messages/conversations/${activeChat.conversationId}/messages?limit=30&cursor=${oldestMessageId}`);
+      if (data.length > 0) {
+        setMessages(prev => [...data, ...prev]);
+        setHasMore(data.length === 30);
+        setTimeout(() => {
+          if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight - scrollHeightRef.current;
+          }
+        }, 0);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setFetchingMore(false);
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (e.currentTarget.scrollTop === 0) {
+      fetchMoreMessages();
     }
   };
 
@@ -151,6 +222,41 @@ export default function MessagesPage() {
     });
     
     setInputText('');
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeChat) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước file tối đa là 5MB');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversationId', activeChat.conversationId);
+    
+    // Receiver id
+    const receiverUserId = activeChat.candidate?.user?.userId;
+    if (receiverUserId) {
+      formData.append('receiverUserId', receiverUserId);
+    }
+
+    try {
+      await api.post('/messages/upload-attachment', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    } catch (error: any) {
+      // Allow Recruiter to view error but intercepting it gracefully
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi tải file lên');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+         fileInputRef.current.value = '';
+      }
+    }
   };
 
   const filteredConversations = conversations.filter(c => 
@@ -190,7 +296,7 @@ export default function MessagesPage() {
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-0">
         
         {/* Sidebar Contacts */}
-        <div className="w-full md:w-80 border-r border-slate-100 flex flex-col shrink-0 flex-1 md:flex-none">
+        <div className={`w-full md:w-80 border-r border-slate-100 flex-col shrink-0 flex-1 md:flex-none ${activeChat ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-slate-100">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -247,12 +353,18 @@ export default function MessagesPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col hidden md:flex bg-slate-50/30">
+        <div className={`flex-1 flex-col bg-slate-50/30 min-h-0 ${activeChat ? 'flex' : 'hidden md:flex'}`}>
           {activeChat ? (
             <>
               {/* Chat Header */}
-              <div className="h-16 px-6 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10">
+              <div className="h-16 px-4 md:px-6 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10 shrink-0">
                 <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => setActiveChat(null)}
+                    className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
                   <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
                     {activeChat.candidate?.fullName?.charAt(0) || 'N'}
                   </div>
@@ -264,16 +376,77 @@ export default function MessagesPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-slate-400">
-                   <button className="p-2 hover:bg-slate-100 rounded-full transition-colors"><Phone className="w-5 h-5" /></button>
-                   <button className="p-2 hover:bg-slate-100 rounded-full transition-colors"><Video className="w-5 h-5" /></button>
-                   <div className="w-px h-6 bg-slate-200 mx-1"></div>
-                   <button className="p-2 hover:bg-slate-100 rounded-full transition-colors"><MoreVertical className="w-5 h-5" /></button>
-                </div>
+                  <div className="relative flex items-center gap-3 text-slate-400">
+                    <button 
+                      onClick={() => setShowOptions(!showOptions)}
+                      className="p-2 hover:bg-slate-100 rounded-full transition-colors relative z-20"
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </button>
+
+                    <AnimatePresence>
+                      {showOptions && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-10" 
+                            onClick={() => setShowOptions(false)}
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-20 origin-top-right text-sm"
+                          >
+                            <button 
+                              onClick={async () => {
+                                setShowOptions(false);
+                                if (!activeChat?.candidate?.candidateId) return;
+                                const loadingToast = toast.loading('Đang tải hồ sơ...');
+                                try {
+                                  const { data } = await api.get(`/candidates/${activeChat.candidate.candidateId}`);
+                                  if (data.cvs && data.cvs.length > 0) {
+                                    toast.dismiss(loadingToast);
+                                    setPreviewCvUrl(getFileUrl(data.cvs[0].fileUrl));
+                                  } else {
+                                    toast.error('Ứng viên này chưa có CV nào!', { id: loadingToast });
+                                  }
+                                } catch (error) {
+                                  toast.error('Không tải được thông tin ứng viên', { id: loadingToast });
+                                }
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 transition-colors text-slate-700 text-left font-medium"
+                            >
+                              <User className="w-4 h-4" />
+                              Xem hồ sơ ứng viên
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setShowOptions(false);
+                                setConversations(prev => prev.map(c => c.conversationId === activeChat.conversationId ? { ...c, isRead: false, unread: 1 } : c));
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 text-left font-medium border-t border-slate-50"
+                            >
+                              <EyeOff className="w-4 h-4" />
+                              Đánh dấu chưa đọc
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
               </div>
 
               {/* Messages Iteration */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div 
+                className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"
+                ref={messageContainerRef}
+                onScroll={handleScroll}
+              >
+                {fetchingMore && (
+                  <div className="flex justify-center py-2">
+                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                  </div>
+                )}
                 {messages.map((msg) => {
                   const isSender = msg.senderId === user?.userId;
                   return (
@@ -291,7 +464,19 @@ export default function MessagesPage() {
                             ? 'bg-indigo-600 text-white rounded-br-sm shadow-sm shadow-indigo-600/20' 
                             : 'bg-white text-slate-700 border border-slate-100 rounded-bl-sm shadow-sm'
                         }`}>
-                          <p className={`text-[15px] leading-relaxed whitespace-pre-wrap ${isSender ? 'text-indigo-50' : ''}`}>
+                          {msg.fileName && msg.fileUrl && (
+                            <div className="mb-2">
+                              {msg.fileType === 'IMAGE' ? (
+                                <img src={msg.fileUrl} onClick={() => window.open(msg.fileUrl, '_blank')} alt={msg.fileName} className="w-56 h-auto rounded-lg object-contain cursor-pointer border border-black/5" />
+                              ) : (
+                                <a href={msg.fileUrl} target="_blank" rel="noreferrer" className={`flex items-center gap-2 p-3 rounded-lg border text-sm shadow-sm transition hover:scale-[1.02] ${isSender ? 'bg-indigo-700/40 border-indigo-500/30 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+                                  <File className="w-5 h-5 shrink-0" />
+                                  <span className="truncate max-w-[150px] font-medium">{msg.fileName}</span>
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          <p className={`text-[15px] leading-relaxed whitespace-pre-wrap break-words ${isSender ? 'text-indigo-50' : ''}`}>
                             {(() => {
                               const urlRegex = /(https?:\/\/[^\s]+)/g;
                               const parts = msg.content.split(urlRegex);
@@ -328,19 +513,36 @@ export default function MessagesPage() {
 
               {/* Chat Input */}
               <div className="p-4 bg-white border-t border-slate-100">
-                <form onSubmit={handleSend} className="flex gap-3">
+                <form onSubmit={handleSend} className="flex gap-2">
+                   <button
+                     type="button"
+                     disabled={uploading}
+                     onClick={() => fileInputRef.current?.click()}
+                     className="w-12 h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0"
+                   >
+                     {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
+                   </button>
+                   <input 
+                     type="file" 
+                     ref={fileInputRef}
+                     onChange={handleFileUpload}
+                     className="hidden"
+                     accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                   />
                    <div className="flex-1 relative">
                      <input
                        type="text"
                        value={inputText}
+                       disabled={uploading}
                        onChange={(e) => setInputText(e.target.value)}
-                       placeholder="Nhập tin nhắn..."
-                       className="w-full h-12 pl-4 pr-12 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px]"
+                       placeholder={uploading ? "Đang tải tệp & Quét bằng AI..." : "Nhập tin nhắn..."}
+                       className="w-full h-12 pl-4 pr-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px]"
                      />
                    </div>
                    <button 
                      type="submit" 
-                     className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition-colors shadow-md shadow-indigo-500/30 shrink-0"
+                     disabled={uploading || !inputText.trim()}
+                     className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white flex items-center justify-center transition-colors shadow-md shadow-indigo-500/30 shrink-0"
                    >
                      <Send className="w-5 h-5 ml-1" />
                    </button>
@@ -356,6 +558,43 @@ export default function MessagesPage() {
           )}
         </div>
       </div>
+
+      {/* CV Preview Modal */}
+      <AnimatePresence>
+        {previewCvUrl && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPreviewCvUrl(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-2xl shadow-xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden z-10"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
+                <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                  <User className="w-5 h-5 text-indigo-600" />
+                  Hồ sơ Ứng viên
+                </h3>
+                <button
+                  onClick={() => setPreviewCvUrl(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 bg-slate-100">
+                <iframe src={previewCvUrl} className="w-full h-full border-none" />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

@@ -78,7 +78,7 @@ export default function SupportAdminPage() {
     try {
       await adminUsersApi.unlock(userId);
       await adminSupportApi.updateStatus(requestId, 'CLOSED');
-      alert('Đã mở khóa tài khoản thành công và đóng yêu cầu!');
+      toast.success('Thao tác thành công. Tài khoản đã được mở khóa và yêu cầu đã đóng!');
       // Update local state to reflect unlocked status and closed ticket
       setRequests(requests.map(req => {
         if (req.user?.userId === userId) {
@@ -91,7 +91,7 @@ export default function SupportAdminPage() {
         return req;
       }));
     } catch (err) {
-      alert('Mở khóa tài khoản thất bại.');
+      toast.error('Mở khóa tài khoản thất bại.');
     }
   };
 
@@ -196,6 +196,11 @@ export default function SupportAdminPage() {
                             </span>
                             <span className="text-xs font-semibold text-slate-500">{req.user.userRoles[0]?.role?.roleName}</span>
                             <span className="text-xs font-medium text-slate-400 break-all">{req.user.email}</span>
+                            {req.user.recruiter && req.user.recruiter.violationCount > 0 && (
+                              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 w-fit">
+                                Lỗi vi phạm: {req.user.recruiter.violationCount}
+                              </span>
+                            )}
                             {req.user.status === 'LOCKED' && (
                               <button
                                 onClick={() => handleUnlockUser(req.user!.userId, req.requestId)}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles, Edit } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles, Edit, AlertTriangle, Brain, Bot } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -10,6 +10,81 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { formatSalary } from '@/lib/utils';
+
+
+
+const formatText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={i} className="font-bold text-amber-900">{part.slice(2, -2)}</strong>;
+        }
+        
+        const subParts = part.split(/(\(\d+\))/g);
+        return (
+          <span key={i}>
+            {subParts.map((sub, j) => {
+              if (/^\(\d+\)$/.test(sub)) {
+                return (
+                  <span key={j}>
+                    <br />
+                    <span className="inline-block w-3" />
+                    <span className="font-semibold text-amber-700">{sub}</span>
+                  </span>
+                );
+              }
+              return <span key={j}>{sub}</span>;
+            })}
+          </span>
+        );
+      })}
+    </>
+  );
+};
+
+const parseToHtml = (text: string) => {
+  if (!text) return 'Chưa cập nhật';
+  
+  // Loại bỏ các tiêu đề bị lặp (do AI sinh ra) ở text đầu vào
+  let cleanTxt = text.trim().replace(/^(?:\*\*.*?\*\*|#+)?\s*(?:mô tả công việc|yêu cầu công việc|yêu cầu ứng viên|thông tin chung|quyền lợi)\s*(?::|-)?\s*(?:\*\*.*?\*\*|#+)?\s*\n*/i, '');
+
+  // Nếu đã có thẻ HTML cơ bản (từ React Quill hoặc AI nhả chuẩn HTML)
+  if (cleanTxt.includes('<p>') || cleanTxt.includes('<ul>') || cleanTxt.includes('<li>')) {
+    return cleanTxt;
+  }
+  
+  let html = cleanTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  const lines = html.split('\n');
+  let result = '';
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('* ')) {
+      if (!inList) {
+        result += '<ul class="list-disc pl-5 my-2 space-y-1">\n';
+        inList = true;
+      }
+      result += `<li>${line.substring(2)}</li>\n`;
+    } else {
+      if (inList) {
+        result += '</ul>\n';
+        inList = false;
+      }
+      if (line !== '') {
+        result += `<p class="my-2">${line}</p>\n`;
+      }
+    }
+  }
+
+  if (inList) {
+    result += '</ul>\n';
+  }
+  
+  return result;
+};
 
 export default function JobDetailsPage() {
   const params = useParams();
@@ -20,12 +95,20 @@ export default function JobDetailsPage() {
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [invitingCandidate, setInvitingCandidate] = useState<any>(null);
   const [isSubmittingInvite, setIsSubmittingInvite] = useState(false);
+  const [isAiFeedbackExpanded, setIsAiFeedbackExpanded] = useState(false);
+  const [planType, setPlanType] = useState<string | null>(null);
   const { accessToken } = useAuthStore();
+
+  // Chỉ hiển thị AI cố vấn cho gói LITE hoặc GROWTH
+  const hasAiAdvisorAccess = planType === 'LITE' || planType === 'GROWTH';
 
   useEffect(() => {
     if (id) {
       fetchJobDetails();
     }
+    api.get('/subscriptions/current')
+      .then(res => setPlanType(res.data?.planType ?? null))
+      .catch(() => setPlanType(null));
   }, [accessToken, id]);
 
   const fetchJobDetails = async () => {
@@ -69,6 +152,26 @@ export default function JobDetailsPage() {
     }
   };
 
+  const handleAutoFix = async () => {
+    const aiFeedback = (job?.structuredRequirements as any)?.aiFeedback;
+    if (!aiFeedback) return;
+    
+    // Combine feedback to instruction string
+    const insightInstruction = Array.isArray(aiFeedback) 
+      ? aiFeedback.join('\n') 
+      : String(aiFeedback);
+
+    const loadingToast = toast.loading('AI đang tự động tối ưu JD...');
+    try {
+      await api.post('/ai/fix-job', { jobId: id, insightInstruction });
+      toast.success('Đã cập nhật JD thành công!', { id: loadingToast });
+      fetchJobDetails(); // reload the page data
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Có lỗi xảy ra khi gọi AI!';
+      toast.error(msg, { id: loadingToast });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[60vh] text-slate-500 flex-col gap-2">
@@ -109,7 +212,7 @@ export default function JobDetailsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side: Job Info */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 min-w-0 break-words">
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-10 blur-xl opacity-50" />
             <div className="flex justify-between items-start mb-6">
@@ -117,13 +220,30 @@ export default function JobDetailsPage() {
                 <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{job.title}</h1>
                 <p className="text-slate-500 mt-2">{job.company?.companyName}</p>
               </div>
-              <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${
-                job.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                job.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                'bg-slate-50 text-slate-700 border-slate-200'
-              }`}>
-                {job.status}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap justify-end">
+                <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border flex items-center gap-1.5 ${
+                  job.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  job.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  'bg-slate-50 text-slate-700 border-slate-200'
+                }`}>
+                  {job.status}
+                </span>
+
+                {/* Badge: AI Generated */}
+                {(job.structuredRequirements as any)?.isAiGenerated && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold border bg-indigo-50 text-indigo-600 border-indigo-200 shadow-sm">
+                    <Bot className="w-4 h-4" />
+                    Tạo bởi AI
+                  </span>
+                )}
+
+                {job.autoInviteMatches && (
+                  <span className="px-3 py-1.5 rounded-full text-sm font-semibold border bg-indigo-50 text-indigo-700 border-indigo-200 flex items-center gap-1.5 shadow-sm">
+                    <Brain className="w-4 h-4" />
+                    Auto Invite
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 py-6 border-t border-b border-slate-100">
@@ -168,18 +288,90 @@ export default function JobDetailsPage() {
             <div className="mt-8 space-y-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-3">Mô tả công việc</h3>
-                <div className="text-slate-600 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: job.description || 'Chưa cập nhật' }} />
+                <div className="text-slate-600 prose prose-sm max-w-none break-words overflow-hidden" dangerouslySetInnerHTML={{ __html: parseToHtml(job.description) }} />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800 mb-3">Yêu cầu công việc</h3>
-                <div className="text-slate-600 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: job.requirements || 'Chưa cập nhật' }} />
+                <div className="text-slate-600 prose prose-sm max-w-none break-words overflow-hidden" dangerouslySetInnerHTML={{ __html: parseToHtml(job.requirements) }} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 mb-3">Quyền lợi</h3>
+                <div className="text-slate-600 prose prose-sm max-w-none break-words overflow-hidden" dangerouslySetInnerHTML={{ __html: parseToHtml(job.benefits) }} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Right Side: AI Suggestions */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:col-span-1 min-w-0 break-words">
+          {/* AI Moderation Feedback - chỉ hiển thị với gói LITE / GROWTH và JD không phải AI-generated */}
+          {hasAiAdvisorAccess && !(job.structuredRequirements as any)?.isAiGenerated && (job.structuredRequirements as any)?.aiFeedback && (
+            <div className="bg-amber-50 p-5 rounded-2xl shadow-sm border border-amber-200 transition-all duration-300">
+              <div
+                className="flex items-center justify-between cursor-pointer group"
+                onClick={() => setIsAiFeedbackExpanded(!isAiFeedbackExpanded)}
+              >
+                <div className="flex items-center gap-2 text-amber-800">
+                  <AlertTriangle className="w-5 h-5 text-amber-600" />
+                  <h3 className="text-lg font-bold tracking-tight">Nhận xét của AI Cố Vấn</h3>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-amber-100/50 flex items-center justify-center text-amber-600 group-hover:bg-amber-200/50 transition-colors">
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-300 ${isAiFeedbackExpanded ? "rotate-180" : ""}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              
+              <div
+                className={`transition-all duration-500 overflow-hidden ${
+                  isAiFeedbackExpanded ? "max-h-[3000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-sm font-medium text-amber-900/80 leading-relaxed pb-1">
+                  {Array.isArray((job.structuredRequirements as any).aiFeedback) ? (
+                    <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
+                      {((job.structuredRequirements as any).aiFeedback).map((str: string, i: number) => (
+                        <li key={i}>{formatText(str)}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
+                      {((job.structuredRequirements as any).aiFeedback as string)
+                        .replace(/v\.v\./g, 'v_v_')
+                        .replace(/([0-9])\.([0-9])/g, '$1_$2')
+                        .split('.')
+                        .filter((s: string) => s.trim().length > 5)
+                        .map((s: string, i: number) => (
+                          <li key={i}>{formatText(s.replace(/v_v_/g, 'v.v.').replace(/([0-9])\_([0-9])/g, '$1.$2').trim() + '.')}</li>
+                        ))
+                      }
+                    </ul>
+                  )}
+                </div>
+                <div className="mt-3 pt-3 border-t border-amber-200/50 flex justify-end">
+                  {(job.structuredRequirements as any)?.autoFixedByAI ? (
+                    <button
+                      disabled
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-[11px] font-bold rounded-lg shadow-sm opacity-80 cursor-not-allowed"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" /> Đã được chỉnh sửa
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleAutoFix(); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" /> Sửa tự động (GROWTH)
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Stats Card */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <h3 className="text-lg font-bold text-slate-800 mb-4">Thống kê tin đăng</h3>

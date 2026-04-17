@@ -77,12 +77,14 @@ export class UsersController {
   @Post()
   async create(
     @Body() createUserDto: CreateUserDto,
-    @CurrentUser('userId') reqUserId: string
+    @CurrentUser('userId') reqUserId: string,
   ) {
     if (createUserDto.role === Role.ADMIN) {
       const currentUser = await this.usersService.findOne(reqUserId);
       if (currentUser.admin?.adminLevel !== 1) {
-        throw new ForbiddenException('Chỉ Quản trị viên Toàn quyền mới được phép tạo Admin mới.');
+        throw new ForbiddenException(
+          'Chỉ Quản trị viên Toàn quyền mới được phép tạo Admin mới.',
+        );
       }
     }
     return this.usersService.create(createUserDto);

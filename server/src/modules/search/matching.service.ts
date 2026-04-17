@@ -19,7 +19,7 @@ export class MatchingService {
       this.logger.warn(`Job không tồn tại hoặc không có yêu cầu cấu trúc.`);
       return [];
     }
-    
+
     if (job.status === 'REJECTED') {
       this.logger.warn(`Job bị từ chối, không trả về gợi ý.`);
       return [];
@@ -37,22 +37,29 @@ export class MatchingService {
     })) as any[];
 
     const matches = allCvs.map((cv) => {
-      const parsedData = cv.parsedData as any;
+      const parsedData = cv.parsedData;
       const cvSkills = parsedData.skills || [];
       const cvExp = parsedData.totalYearsExp || 0;
 
       // 1. Tính điểm Kỹ năng (60%)
-      const expandedSkillsMap = typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null ? reqs.expandedSkills : {};
-      
+      const expandedSkillsMap =
+        typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null
+          ? reqs.expandedSkills
+          : {};
+
       const matchedHard = hardSkills.filter((s: string) => {
-        const synonyms = Array.isArray(expandedSkillsMap[s]) ? expandedSkillsMap[s] : [];
-        const searchTerms = [s, ...synonyms].map(t => typeof t === 'string' ? t.toLowerCase() : '');
+        const synonyms = Array.isArray(expandedSkillsMap[s])
+          ? expandedSkillsMap[s]
+          : [];
+        const searchTerms = [s, ...synonyms].map((t) =>
+          typeof t === 'string' ? t.toLowerCase() : '',
+        );
 
         return cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           if (!skillStr) return false;
           const cvs = skillStr.toLowerCase();
-          return searchTerms.some(term => term && cvs.includes(term));
+          return searchTerms.some((term) => term && cvs.includes(term));
         });
       });
       const hardScore =
@@ -109,18 +116,18 @@ export class MatchingService {
 
     // Xoá các match cũ của Job này
     await this.prisma.jobMatch.deleteMany({
-      where: { jobPostingId: jobId }
+      where: { jobPostingId: jobId },
     });
 
     // Thêm các match mới vào DB
     if (topMatches.length > 0) {
       await this.prisma.jobMatch.createMany({
-        data: topMatches.map(m => ({
+        data: topMatches.map((m) => ({
           jobPostingId: jobId,
           candidateId: m.candidateId,
           score: m.score,
-          matchedSkills: m.matchedSkills
-        }))
+          matchedSkills: m.matchedSkills,
+        })),
       });
     }
 
@@ -167,17 +174,24 @@ export class MatchingService {
       const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
 
       // 1. Tính điểm Kỹ năng (60%)
-      const expandedSkillsMap = typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null ? reqs.expandedSkills : {};
-      
+      const expandedSkillsMap =
+        typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null
+          ? reqs.expandedSkills
+          : {};
+
       const matchedHard = hardSkills.filter((s: string) => {
-        const synonyms = Array.isArray(expandedSkillsMap[s]) ? expandedSkillsMap[s] : [];
-        const searchTerms = [s, ...synonyms].map(t => typeof t === 'string' ? t.toLowerCase() : '');
+        const synonyms = Array.isArray(expandedSkillsMap[s])
+          ? expandedSkillsMap[s]
+          : [];
+        const searchTerms = [s, ...synonyms].map((t) =>
+          typeof t === 'string' ? t.toLowerCase() : '',
+        );
 
         return cvSkills.some((cs: any) => {
           const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
           if (!skillStr) return false;
           const cvs = skillStr.toLowerCase();
-          return searchTerms.some(term => term && cvs.includes(term));
+          return searchTerms.some((term) => term && cvs.includes(term));
         });
       });
       const hardScore =
@@ -221,22 +235,24 @@ export class MatchingService {
       .sort((a, b) => b.score - a.score)
       .slice(0, 50); // Giới hạn lưu Top 50 Job cho mỗi Candidate
 
-    this.logger.log(`Đã tìm thấy ${topMatches.length} Jobs phù hợp cho Candidate ${candidate.candidateId}. Đang lưu vào DB...`);
+    this.logger.log(
+      `Đã tìm thấy ${topMatches.length} Jobs phù hợp cho Candidate ${candidate.candidateId}. Đang lưu vào DB...`,
+    );
 
     // Xoá các match cũ của Candidate này
     await this.prisma.jobMatch.deleteMany({
-      where: { candidateId: candidate.candidateId }
+      where: { candidateId: candidate.candidateId },
     });
 
     // Thêm các match mới vào DB
     if (topMatches.length > 0) {
       await this.prisma.jobMatch.createMany({
-        data: topMatches.map(m => ({
+        data: topMatches.map((m) => ({
           jobPostingId: m.jobPostingId,
           candidateId: candidate.candidateId,
           score: m.score,
-          matchedSkills: m.matchedSkills
-        }))
+          matchedSkills: m.matchedSkills,
+        })),
       });
     }
 

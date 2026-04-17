@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { RecruitersController } from './recruiters.controller';
 import { PrismaModule } from '../../prisma/prisma.module';
@@ -12,7 +12,7 @@ import { SearchModule } from '../search/search.module';
 import { WalletsModule } from '../wallets/wallets.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule, SearchModule, WalletsModule],
+  imports: [PrismaModule, MessagesModule, forwardRef(() => SearchModule), WalletsModule],
   controllers: [RecruitersController],
   providers: [
     RecruitersService,

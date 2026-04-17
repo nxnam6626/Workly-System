@@ -126,14 +126,40 @@ export class MessagesGateway
       // Emit to sender to confirm
       this.server.to(`user_${senderId}`).emit('newMessage', message);
 
-      // Emit to receiver
       if (data.receiverUserId) {
         this.server
           .to(`user_${data.receiverUserId}`)
           .emit('newMessage', message);
       }
-    } catch (error) {
-      console.error('Error handling sendMessage:', error);
+    } catch (error: any) {
+      console.error('Error handling sendMessage:', error.message);
+      
+      const savedMessage = error.response?.savedMessage;
+
+      if (savedMessage) {
+        // Emit the original but flagged message to the sender so they see it in UI
+        client.emit('newMessage', savedMessage);
+        
+        // Emit the masked message to the receiver
+        if (data.receiverUserId) {
+          const receiverMessage = { 
+            ...savedMessage, 
+            content: 'Tin nhắn đã bị ẩn do vi phạm quy tắc hệ thống.',
+            isViolated: undefined 
+          };
+          this.server
+            .to(`user_${data.receiverUserId}`)
+            .emit('newMessage', receiverMessage);
+        }
+      }
+
+      if (error.response?.error === 'VIOLATION') {
+        client.emit('violationWarn', error.response.message);
+        this.server.emit('adminUserUpdated', { email: error.response.email });
+      } else if (error.response?.error === 'ACCOUNT_LOCKED') {
+        client.emit('accountLocked', error.response.message);
+        this.server.emit('adminAccountLocked', { email: error.response.email });
+      }
     }
   }
 }

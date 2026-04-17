@@ -14,9 +14,11 @@ import {
   UserCircle2,
   Briefcase,
   BadgeCheck,
-  AlertTriangle,
   RotateCcw,
   Shield,
+  Crown,
+  Search,
+  AlertTriangle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -60,6 +62,9 @@ export default function UserDetailModal({
   const [editingPermissions, setEditingPermissions] = useState(false);
   const [tempPermissions, setTempPermissions] = useState<string[]>(user.admin?.permissions || []);
   const [tempIsSupreme, setTempIsSupreme] = useState(user.admin?.adminLevel === 1);
+  const [violations, setViolations] = useState<any[]>([]);
+  const [loadingViolations, setLoadingViolations] = useState(false);
+  const [showViolations, setShowViolations] = useState(false);
 
   const displayName = user.candidate?.fullName ?? user.recruiter?.position ?? user.email.split('@')[0];
   const roles = user.userRoles.map((ur) => ur.role.roleName);
@@ -69,6 +74,25 @@ export default function UserDetailModal({
 
   const handleDelete = () => {
     onDelete(user.userId);
+  };
+
+  const loadViolations = async () => {
+    if (showViolations) {
+      setShowViolations(false);
+      return;
+    }
+    setLoadingViolations(true);
+    setShowViolations(true);
+    try {
+      // @ts-ignore
+      const { adminUsersApi } = await import('@/lib/admin-api');
+      const data = await adminUsersApi.getUserViolations(user.userId);
+      setViolations(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingViolations(false);
+    }
   };
 
   return (
@@ -287,28 +311,118 @@ export default function UserDetailModal({
                 </p>
               )}
               {user.recruiter && (
-                <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
-                  <div className="flex items-center gap-2 text-sm">
-                    <AlertTriangle className={`w-4 h-4 ${user.recruiter.violationCount >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
-                    <span className="font-medium text-slate-700">Số lần vi phạm:</span>
-                    <span className={`font-bold ${user.recruiter.violationCount >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
-                      {user.recruiter.violationCount}/3
-                    </span>
+                <div className="space-y-2 mt-3">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Crown className={`w-4 h-4 ${user.recruiter.recruiterSubscription ? 'text-amber-500' : 'text-slate-400'}`} />
+                      <span className="font-medium">Thời hạn sử dụng:</span>
+                      {user.recruiter.recruiterSubscription ? (
+                        <span className="font-bold text-amber-600">
+                          {user.recruiter.recruiterSubscription.planType} - Đến {fmt(user.recruiter.recruiterSubscription.expiryDate)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 italic">Không có gói</span>
+                      )}
+                    </div>
                   </div>
-                  {user.recruiter.violationCount > 0 && (
-                    <button
-                      onClick={() => onResetViolations(user.userId)}
-                      disabled={isProcessing}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      Khôi phục
-                    </button>
+
+                  {user.recruiter.recruiterWallet && (
+                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                       <div className="flex items-center gap-2 text-sm text-slate-700">
+                         <Search className="w-4 h-4 text-emerald-500" />
+                         <span className="font-medium">Lượt mở khóa CV:</span>
+                         <span className="font-bold text-emerald-600">
+                           {user.recruiter.recruiterWallet.cvUnlockQuota} lượt
+                         </span>
+                       </div>
+                     </div>
                   )}
+
                 </div>
               )}
             </div>
           )}
+
+          {/* Global Rule Violations */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Vi phạm quy tắc</p>
+            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className={`w-4 h-4 ${(user as any).violations >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
+                <span className="font-medium text-slate-700">Vi phạm gian lận / Chat:</span>
+                <span className={`font-bold ${(user as any).violations >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
+                  {(user as any).violations || 0}/3
+                </span>
+              </div>
+              {((user as any).violations > 0 || (user.recruiter?.violationCount ?? 0) > 0) && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={loadViolations}
+                    disabled={isProcessing}
+                    className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+                  >
+                    {showViolations ? 'Ẩn chi tiết' : 'Xem chi tiết'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      onResetViolations(user.userId);
+                      setViolations([]);
+                      setShowViolations(false);
+                    }}
+                    disabled={isProcessing}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Khôi phục
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {/* Violations List Expanded */}
+            {showViolations && (
+              <div className="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-[250px] overflow-y-auto animate-in slide-in-from-top-2">
+                {loadingViolations ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                  </div>
+                ) : violations.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">Không tìm thấy nội dung vi phạm.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {violations.map((v, i) => (
+                      <div key={i} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-red-400 group-hover:bg-red-500 transition-colors"></div>
+                        <div className="flex justify-between items-start mb-1.5 pl-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            Gửi tới: <span className="text-slate-700">{v.conversationName}</span>
+                          </p>
+                          <span className="text-[10px] text-slate-400 font-medium bg-slate-50 px-1.5 py-0.5 rounded">
+                            {fmt(v.sentAt)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-800 font-medium pl-1 break-words">
+                          "{v.content}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {user.recruiter && (user.recruiter.violationCount > 0) && (
+              <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50 mt-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <AlertTriangle className="w-4 h-4 text-amber-500" />
+                  <span className="font-medium text-slate-700">Vi phạm tin đăng việc làm:</span>
+                  <span className="font-bold text-amber-600">
+                    {user.recruiter.violationCount}/3
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Timeline */}
           <div className="space-y-3">

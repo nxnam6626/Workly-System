@@ -21,7 +21,10 @@ import {
   FileText,
   Wallet,
   Heart,
-  Brain
+  Brain,
+  Menu,
+  PartyPopper,
+  X
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
@@ -52,9 +55,13 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { wallet, fetchWallet } = useWalletStore();
   const { socket } = useSocketStore();
   const { unreadCount, fetchUnreadCount, incrementUnread } = useMessageStore();
+
+  const [showMatchPopup, setShowMatchPopup] = useState(false);
+  const [matchStats, setMatchStats] = useState({ totalMatches: 0, activeJobsCount: 0 });
 
   useEffect(() => {
     if (isAuthenticated && user?.roles?.includes('RECRUITER')) {
@@ -79,6 +86,15 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
       if (isAuthenticated && user?.roles?.includes('RECRUITER')) {
          fetchUnreadCount();
+         
+         // Check total matches for welcome popup
+         api.get('/recruiters/match-summary').then(res => {
+           if (res.data.totalMatches > 0 && sessionStorage.getItem('welcome_match_popup_shown') !== 'true') {
+              setMatchStats(res.data);
+              setShowMatchPopup(true);
+              sessionStorage.setItem('welcome_match_popup_shown', 'true');
+           }
+         }).catch(err => console.error(err));
       }
     }
   }, [isAuthenticated, isLoading, user, router, pathname, fetchUnreadCount]);
@@ -123,11 +139,80 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/50 z-[110] md:hidden backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Welcome Match Popup */}
+      <AnimatePresence>
+        {showMatchPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          >
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowMatchPopup(false)} />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden text-center p-8 border border-white"
+            >
+              <button 
+                onClick={() => setShowMatchPopup(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1 rounded-full transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="w-20 h-20 mx-auto bg-gradient-to-tr from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30 mb-6 relative">
+                 <PartyPopper className="w-10 h-10 text-white" />
+                 <div className="absolute top-0 right-0 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-black shadow-sm">
+                   +
+                 </div>
+              </div>
+              
+              <h2 className="text-2xl font-black text-slate-800 mb-2 leading-tight">Tin Vui Cho Bạn!</h2>
+              <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+                Hệ thống AI vừa quét và phát hiện <strong className="text-indigo-600 font-bold">{matchStats.totalMatches} ứng viên cực kỳ tiềm năng</strong> cho {matchStats.activeJobsCount} tin tuyển dụng của bạn.
+              </p>
+              
+              <div className="space-y-3">
+                <Link
+                  href="/recruiter/jobs"
+                  onClick={() => setShowMatchPopup(false)}
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold px-6 py-3.5 rounded-xl hover:bg-indigo-700 shadow-md transition-all active:scale-95"
+                >
+                  Xem chi tiết ứng viên <ChevronRight className="w-4 h-4" />
+                </Link>
+                <button
+                  onClick={() => setShowMatchPopup(false)}
+                  className="w-full text-slate-500 font-bold text-sm px-6 py-3 hover:text-indigo-600 transition-colors"
+                >
+                  Để sau
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <motion.aside
         animate={{ width: collapsed ? 72 : 240 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="sticky top-0 flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen"
+        className={`fixed md:sticky top-0 left-0 bottom-0 z-[120] md:z-auto flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
@@ -155,6 +240,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${
                   active
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
@@ -218,10 +304,16 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex items-center justify-between sticky top-0 z-[100] shadow-sm">
           <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <LayoutDashboard className="w-4 h-4" />
-            <span>Recruiter Dashboard</span>
+            <button 
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 text-slate-600 mr-2"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <LayoutDashboard className="w-4 h-4 hidden md:block" />
+            <span className="hidden md:inline">Recruiter Dashboard</span>
           </div>
 
           {user && (

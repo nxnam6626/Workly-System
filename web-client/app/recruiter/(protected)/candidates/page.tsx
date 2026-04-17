@@ -219,7 +219,7 @@ export default function CandidatesPage() {
               <div className="p-6 pt-10" onClick={() => toggleSelect(candidate)}>
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-inner shadow-indigo-200/50">
-                    {candidate.user?.avatar ? (
+                    {candidate.isUnlocked && candidate.user?.avatar ? (
                       <img src={candidate.user.avatar} className="w-full h-full rounded-2xl object-cover" />
                     ) : (
                       <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">

@@ -86,7 +86,9 @@ export class UsersService {
           data: {
             userId: newUser.userId,
             fullName:
-              'fullName' in data && data.fullName ? data.fullName : 'Người dùng',
+              'fullName' in data && data.fullName
+                ? data.fullName
+                : 'Người dùng',
           },
         });
       }
@@ -106,7 +108,9 @@ export class UsersService {
             let companyDataFromApi: any = null;
             if ('taxCode' in data && data.taxCode) {
               try {
-                const res = await fetch(`https://esgoo.net/api-mst/${data.taxCode}.htm`);
+                const res = await fetch(
+                  `https://esgoo.net/api-mst/${data.taxCode}.htm`,
+                );
                 const apiData = await res.json();
                 if (apiData.error === 0 && apiData.data) {
                   companyDataFromApi = apiData.data;
@@ -119,14 +123,23 @@ export class UsersService {
             const newCompany = await tx.company.create({
               data: {
                 companyName: companyDataFromApi?.ten || data.companyName,
-                taxCode: 'taxCode' in data && data.taxCode ? data.taxCode : null,
+                taxCode:
+                  'taxCode' in data && data.taxCode ? data.taxCode : null,
                 address: companyDataFromApi?.dc || null,
-                websiteUrl: 'websiteUrl' in data && data.websiteUrl ? data.websiteUrl : null,
+                websiteUrl:
+                  'websiteUrl' in data && data.websiteUrl
+                    ? data.websiteUrl
+                    : null,
                 taxAddress: companyDataFromApi?.dc || null,
                 status: companyDataFromApi?.tinhtrang || null,
-                internationalName: companyDataFromApi?.internationalName || null,
+                internationalName:
+                  companyDataFromApi?.internationalName || null,
                 shortName: companyDataFromApi?.shortName || null,
-                verifyStatus: companyDataFromApi || ('verifyStatus' in data && data.verifyStatus) ? 1 : 0,
+                verifyStatus:
+                  companyDataFromApi ||
+                  ('verifyStatus' in data && data.verifyStatus)
+                    ? 1
+                    : 0,
               },
             });
             companyId = newCompany.companyId;
@@ -140,13 +153,13 @@ export class UsersService {
           },
         });
       } else if (data.role === 'ADMIN') {
-        const permissions = 'permissions' in data ? (data.permissions as string[] | undefined) : [];
+        const permissions = 'permissions' in data ? data.permissions : [];
         const isSupreme = permissions?.includes('ALL');
         await tx.admin.create({
           data: {
             userId: newUser.userId,
             adminLevel: isSupreme ? 1 : 2,
-            permissions: isSupreme ? [] : (permissions || []),
+            permissions: isSupreme ? [] : permissions || [],
           },
         });
       }
@@ -304,6 +317,7 @@ export class UsersService {
           userId: true,
           email: true,
           status: true,
+          violations: true,
           phoneNumber: true,
           avatar: true,
           isEmailVerified: true,
@@ -313,7 +327,15 @@ export class UsersService {
             include: { role: true },
           },
           candidate: { select: { fullName: true } },
-          recruiter: { select: { position: true, bio: true, violationCount: true } },
+          recruiter: {
+            select: {
+              position: true,
+              bio: true,
+              violationCount: true,
+              recruiterSubscription: true,
+              recruiterWallet: true,
+            },
+          },
           admin: { select: { permissions: true, adminLevel: true } },
         },
       }),
@@ -331,6 +353,7 @@ export class UsersService {
         userId: true,
         email: true,
         status: true,
+        violations: true,
         phoneNumber: true,
         avatar: true,
         isEmailVerified: true,
@@ -341,7 +364,9 @@ export class UsersService {
           include: { role: true },
         },
         candidate: true,
-        recruiter: true,
+        recruiter: {
+          include: { recruiterSubscription: true, recruiterWallet: true },
+        },
         admin: { select: { permissions: true, adminLevel: true } },
       },
     });
@@ -506,14 +531,17 @@ export class UsersService {
 
   /** Cập nhật ảnh đại diện của user (có kiểm duyệt AI Vision). */
   async updateAvatar(userId: string, file: Express.Multer.File) {
-    const user = await this.prisma.user.findUnique({ 
+    const user = await this.prisma.user.findUnique({
       where: { userId },
-      include: { userRoles: { include: { role: true } } }
+      include: { userRoles: { include: { role: true } } },
     });
     if (!user) throw new NotFoundException('Không tìm thấy người dùng.');
 
-    const roles = user.userRoles?.map(ur => ur.role.roleName) || [];
-    const isCandidateOnly = roles.includes('CANDIDATE') && !roles.includes('RECRUITER') && !roles.includes('ADMIN');
+    const roles = user.userRoles?.map((ur) => ur.role.roleName) || [];
+    const isCandidateOnly =
+      roles.includes('CANDIDATE') &&
+      !roles.includes('RECRUITER') &&
+      !roles.includes('ADMIN');
 
     // 1. Upload ảnh mới lên Supabase
     const fileExt = file.originalname.split('.').pop();
@@ -528,12 +556,19 @@ export class UsersService {
 
     // 2. Kiểm duyệt ảnh bằng Gemini Vision (fail-open nếu AI không khả dụng)
     const expectedType = isCandidateOnly ? 'face_only' : 'face_or_logo';
-    const modResult = await this.aiService.moderateImage(avatarUrl, file.mimetype, expectedType);
+    const modResult = await this.aiService.moderateImage(
+      avatarUrl,
+      file.mimetype,
+      expectedType,
+    );
     if (!modResult.safe) {
       // Xóa ảnh vừa upload khỏi Supabase (đảm bảo không để lại rác)
       const uploadedPath = this.supabaseService.extractPathFromUrl(avatarUrl);
-      if (uploadedPath) await this.supabaseService.deleteFile(uploadedPath).catch(() => {});
-      throw new BadRequestException(`Ảnh không phù hợp: ${modResult.reason}. Vui lòng chọn ảnh khác.`);
+      if (uploadedPath)
+        await this.supabaseService.deleteFile(uploadedPath).catch(() => {});
+      throw new BadRequestException(
+        `Ảnh không phù hợp: ${modResult.reason}. Vui lòng chọn ảnh khác.`,
+      );
     }
 
     // 3. Cập nhật URL vào DB
@@ -606,7 +641,9 @@ export class UsersService {
               let companyDataFromApi: any = null;
               if ('taxCode' in data && data.taxCode) {
                 try {
-                  const res = await fetch(`https://esgoo.net/api-mst/${data.taxCode}.htm`);
+                  const res = await fetch(
+                    `https://esgoo.net/api-mst/${data.taxCode}.htm`,
+                  );
                   const apiData = await res.json();
                   if (apiData.error === 0 && apiData.data) {
                     companyDataFromApi = apiData.data;
@@ -621,14 +658,21 @@ export class UsersService {
                   companyName: companyDataFromApi?.ten || data.companyName,
                   taxCode:
                     'taxCode' in data && data.taxCode ? data.taxCode : null,
-                  address:
-                    companyDataFromApi?.dc || null,
-                  websiteUrl: 'websiteUrl' in data && data.websiteUrl ? data.websiteUrl : null,
+                  address: companyDataFromApi?.dc || null,
+                  websiteUrl:
+                    'websiteUrl' in data && data.websiteUrl
+                      ? data.websiteUrl
+                      : null,
                   taxAddress: companyDataFromApi?.dc || null,
                   status: companyDataFromApi?.tinhtrang || null,
-                  internationalName: companyDataFromApi?.internationalName || null,
+                  internationalName:
+                    companyDataFromApi?.internationalName || null,
                   shortName: companyDataFromApi?.shortName || null,
-                  verifyStatus: companyDataFromApi || ('verifyStatus' in data && data.verifyStatus) ? 1 : 0,
+                  verifyStatus:
+                    companyDataFromApi ||
+                    ('verifyStatus' in data && data.verifyStatus)
+                      ? 1
+                      : 0,
                 },
               });
               companyId = newCompany.companyId;
@@ -704,7 +748,9 @@ export class UsersService {
           university: dto.university ?? null,
           major: dto.major ?? null,
           gpa: dto.gpa ?? null,
-          ...(dto.isOpenToWork !== undefined && { isOpenToWork: dto.isOpenToWork }),
+          ...(dto.isOpenToWork !== undefined && {
+            isOpenToWork: dto.isOpenToWork,
+          }),
         },
       });
 
@@ -731,7 +777,6 @@ export class UsersService {
 
     return this.getMe(userId);
   }
-
 
   // ==========================================
   // ADMIN & MODERATION (Nhóm Quản trị & Xóa)
@@ -760,21 +805,31 @@ export class UsersService {
     await this.findOne(userId);
     await this.prisma.user.update({
       where: { userId },
-      data: { status: 'ACTIVE' },
+      data: { status: 'ACTIVE', violations: 0 },
     });
-    return { message: 'Tài khoản đã được mở khóa.' };
+    return { message: 'Tài khoản đã được mở khóa và reset số lần vi phạm.' };
   }
 
   async resetViolationCount(userId: string) {
     const user = await this.findOne(userId);
-    if (!user.recruiter) {
-      throw new NotFoundException('Người dùng này không phải là nhà tuyển dụng.');
-    }
-    await this.prisma.recruiter.update({
-      where: { userId },
-      data: { violationCount: 0 },
+    
+    await this.prisma.$transaction(async (tx) => {
+      // Reset global chat violations
+      await tx.user.update({
+        where: { userId },
+        data: { violations: 0 },
+      });
+
+      // Reset recruiter specific violations if they exist
+      if (user.recruiter) {
+        await tx.recruiter.update({
+          where: { userId },
+          data: { violationCount: 0 },
+        });
+      }
     });
-    return { message: 'Đã đặt lại số lần vi phạm về 0.' };
+
+    return { message: 'Đã đặt lại toàn bộ số lần vi phạm về 0.' };
   }
 
   async remove(userId: string) {
@@ -804,10 +859,12 @@ export class UsersService {
   async updateAdminPermissions(userId: string, permissions: string[]) {
     const user = await this.findOne(userId);
     if (!user.admin) {
-      throw new NotFoundException('Người dùng này không phải là quản trị viên.');
+      throw new NotFoundException(
+        'Người dùng này không phải là quản trị viên.',
+      );
     }
     const isSupreme = permissions.includes('ALL');
-    
+
     await this.prisma.admin.update({
       where: { userId },
       data: {
@@ -815,7 +872,7 @@ export class UsersService {
         permissions: isSupreme ? [] : permissions,
       },
     });
-    
+
     return { message: 'Đã cập nhật quyền hạn quản trị viên.' };
   }
 }

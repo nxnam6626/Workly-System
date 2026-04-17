@@ -7,8 +7,14 @@ import {
   Param,
   UseGuards,
   Req,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MessagesService } from './messages.service';
+import { MessagesGateway } from './messages.gateway';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -16,7 +22,10 @@ import { Roles, Role } from '../auth/decorators/roles.decorator';
 @Controller('messages')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(
+    private readonly messagesService: MessagesService,
+    private readonly messagesGateway: MessagesGateway,
+  ) {}
 
   @Get('debug')
   async debugCounts() {
@@ -38,6 +47,12 @@ export class MessagesController {
     return this.messagesService.getConversations(req.user.userId);
   }
 
+  @Get('violations/:userId')
+  @Roles(Role.ADMIN)
+  getUserViolations(@Param('userId') userId: string) {
+    return this.messagesService.getUserViolations(userId);
+  }
+
   @Get('unread-count')
   getUnreadCount(@Req() req) {
     return this.messagesService.getUnreadCount(req.user.userId);
@@ -49,8 +64,14 @@ export class MessagesController {
   }
 
   @Get('conversations/:id/messages')
-  getMessages(@Param('id') conversationId: string) {
-    return this.messagesService.getMessages(conversationId);
+  getMessages(
+    @Req() req,
+    @Param('id') conversationId: string,
+    @Query('limit') limit?: string,
+    @Query('cursor') cursor?: string,
+  ) {
+    const parsedLimit = limit ? parseInt(limit, 10) : 30;
+    return this.messagesService.getMessages(req.user.userId, conversationId, parsedLimit, cursor);
   }
 
   @Post('broadcast')
@@ -77,5 +98,36 @@ export class MessagesController {
       body.candidateId,
       body.jobPostingId,
     );
+  }
+
+  @Post('upload-attachment')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadAttachment(
+    @Req() req,
+    @Body('conversationId') conversationId: string,
+    @Body('receiverUserId') receiverUserId: string,
+    @UploadedFile() file: any,
+  ) {
+    if (!file) throw new BadRequestException('No file provided');
+    if (!conversationId) throw new BadRequestException('conversationId is required');
+
+    const message = await this.messagesService.sendAttachment(
+      req.user.userId,
+      conversationId,
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+      file.size
+    );
+
+    // Emit to sender
+    this.messagesGateway.server.to(`user_${req.user.userId}`).emit('newMessage', message);
+    
+    // Emit to receiver
+    if (receiverUserId) {
+      this.messagesGateway.server.to(`user_${receiverUserId}`).emit('newMessage', message);
+    }
+
+    return message;
   }
 }

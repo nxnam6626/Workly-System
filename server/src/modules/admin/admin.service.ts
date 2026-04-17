@@ -65,7 +65,13 @@ export class AdminService {
 
     const recentSpending = await this.prisma.transaction.findMany({
       where: {
-        type: { in: [TransactionType.BUY_PACKAGE, TransactionType.POST_JOB, TransactionType.OPEN_CV] },
+        type: {
+          in: [
+            TransactionType.BUY_PACKAGE,
+            TransactionType.POST_JOB,
+            TransactionType.OPEN_CV,
+          ],
+        },
         status: 'SUCCESS',
         createdAt: { gte: thirtyDaysAgo },
       },
@@ -84,7 +90,13 @@ export class AdminService {
     const topSpendersAgg = await this.prisma.transaction.groupBy({
       by: ['walletId'],
       where: {
-        type: { in: [TransactionType.BUY_PACKAGE, TransactionType.POST_JOB, TransactionType.OPEN_CV] },
+        type: {
+          in: [
+            TransactionType.BUY_PACKAGE,
+            TransactionType.POST_JOB,
+            TransactionType.OPEN_CV,
+          ],
+        },
         status: 'SUCCESS',
       },
       _sum: { amount: true },
@@ -106,16 +118,22 @@ export class AdminService {
           },
         });
         return {
-          companyName: wallet?.recruiter?.company?.companyName || wallet?.recruiter?.user?.email || 'N/A',
+          companyName:
+            wallet?.recruiter?.company?.companyName ||
+            wallet?.recruiter?.user?.email ||
+            'N/A',
           balance: wallet?.balance || 0,
           spentAmount: agg._sum.amount || 0,
           recruiterId: wallet?.recruiterId || '',
         };
-      })
+      }),
     );
 
-    const totalSpending = (packageAgg._sum.amount || 0) + (postJobAgg._sum.amount || 0) + (openCvAgg._sum.amount || 0);
- 
+    const totalSpending =
+      (packageAgg._sum.amount || 0) +
+      (postJobAgg._sum.amount || 0) +
+      (openCvAgg._sum.amount || 0);
+
     return {
       totalDepositVnd: depositAgg._sum.realMoney || 0,
       totalDepositXu: depositAgg._sum.amount || 0,
@@ -131,14 +149,16 @@ export class AdminService {
       topSpenders: topSpendersData,
     };
   }
- 
+
   async getLatestViolations(limit = 5) {
     const recruiters = await this.prisma.recruiter.findMany({
-      where: { violationCount: { gt: 0 } },
-      orderBy: { violationCount: 'desc' },
+      where: { user: { violations: { gt: 0 } } },
+      orderBy: { user: { violations: 'desc' } },
       take: limit,
       include: {
-        user: { select: { email: true, status: true, avatar: true, updatedAt: true } },
+        user: {
+          select: { email: true, status: true, avatar: true, updatedAt: true, violations: true },
+        },
         company: { select: { companyName: true } },
       },
     });
@@ -148,7 +168,7 @@ export class AdminService {
       companyName: r.company?.companyName || 'Chưa có công ty',
       email: r.user.email,
       avatar: r.user.avatar,
-      violationCount: r.violationCount,
+      violationCount: r.user.violations,
       status: r.user.status,
       updatedAt: r.user.updatedAt,
     }));
@@ -156,10 +176,10 @@ export class AdminService {
 
   async getViolatingRecruiters() {
     const recruiters = await this.prisma.recruiter.findMany({
-      where: { violationCount: { gt: 0 } },
-      orderBy: { violationCount: 'desc' },
+      where: { user: { violations: { gt: 0 } } },
+      orderBy: { user: { violations: 'desc' } },
       include: {
-        user: { select: { email: true, status: true } },
+        user: { select: { email: true, status: true, violations: true } },
         company: { select: { companyName: true } },
       },
     });
@@ -168,7 +188,7 @@ export class AdminService {
       recruiterId: r.recruiterId,
       companyName: r.company?.companyName || 'Chưa có công ty',
       email: r.user.email,
-      violationCount: r.violationCount,
+      violationCount: r.user.violations,
       status: r.user.status,
     }));
   }

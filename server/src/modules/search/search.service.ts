@@ -243,7 +243,9 @@ export class SearchService implements OnModuleInit {
               filter,
             },
           },
-          sort: search ? [{ _score: 'desc' }, { jobTier: 'desc' }, { refreshedAt: 'desc' }] : [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
+          sort: search
+            ? [{ _score: 'desc' }, { jobTier: 'desc' }, { refreshedAt: 'desc' }]
+            : [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
         },
       };
 
@@ -268,7 +270,13 @@ export class SearchService implements OnModuleInit {
     limit?: number;
     expandedKeywords?: string[];
   }) {
-    const { search, location, jobType, limit = 3, expandedKeywords = [] } = params;
+    const {
+      search,
+      location,
+      jobType,
+      limit = 3,
+      expandedKeywords = [],
+    } = params;
 
     const query: any = {
       bool: {
@@ -287,7 +295,9 @@ export class SearchService implements OnModuleInit {
     }
 
     // Combine original search and expanded keywords
-    const allKeywords = [...new Set([search, ...expandedKeywords])].filter(Boolean);
+    const allKeywords = [...new Set([search, ...expandedKeywords])].filter(
+      Boolean,
+    );
 
     if (allKeywords.length > 0) {
       allKeywords.forEach((kw) => {

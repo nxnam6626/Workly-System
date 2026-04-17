@@ -198,7 +198,7 @@ export default function UsersPage() {
   const handleResetViolations = async (id: string) => {
     const ok = await confirm({
       title: 'Khôi phục vi phạm?',
-      message: 'Số lần vi phạm của nhà tuyển dụng này sẽ được đặt về 0. Họ sẽ không bị khóa tự động cho đến khi có vi phạm mới.',
+      message: 'Toàn bộ số lần vi phạm (bao gồm vi phạm Tin nhắn & Lách luật) sẽ được đặt về 0. Người dùng có thể tiếp tục sử dụng bình thường.',
       confirmText: 'Xác nhận khôi phục',
       variant: 'info',
     });
@@ -209,16 +209,17 @@ export default function UsersPage() {
       await adminUsersApi.resetViolations(id);
       setUsers((prev) =>
         prev.map((u) =>
-          u.userId === id && u.recruiter
-            ? { ...u, recruiter: { ...u.recruiter, violationCount: 0 } }
+          u.userId === id
+            ? { ...u, violations: 0, recruiter: u.recruiter ? { ...u.recruiter, violationCount: 0 } : u.recruiter }
             : u,
         ),
       );
-      if (detailUser?.userId === id && detailUser.recruiter) {
+      if (detailUser?.userId === id) {
         setDetailUser({
           ...detailUser,
-          recruiter: { ...detailUser.recruiter, violationCount: 0 },
-        });
+          violations: 0,
+          recruiter: detailUser.recruiter ? { ...detailUser.recruiter, violationCount: 0 } : detailUser.recruiter,
+        } as AdminUser);
       }
       toast.success('Đã khôi phục số lần vi phạm về 0.');
     } catch {

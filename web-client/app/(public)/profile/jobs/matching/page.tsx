@@ -40,6 +40,8 @@ interface MatchingJob {
     companyName: string;
     logo: string | null;
   };
+  jobTier?: 'BASIC' | 'PROFESSIONAL' | 'URGENT';
+  aiReliabilityScore?: number;
 }
 
 export default function MatchingJobsPage() {
@@ -163,8 +165,22 @@ export default function MatchingJobsPage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all p-6"
+                    className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all p-6"
                   >
+                    {/* Tier badges */}
+                    <div className="absolute -top-3 -right-2 flex flex-col gap-1 z-10 items-end">
+                      {job.jobTier === 'URGENT' && (
+                        <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse shrink-0">
+                          <span>🔥</span>Tuyển Gấp
+                        </div>
+                      )}
+                      {job.jobTier === 'PROFESSIONAL' && (
+                        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 shrink-0">
+                          <span>⭐️</span>Nổi Bật
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Logo or Match Score */}
                       <div className="relative shrink-0">
@@ -191,8 +207,12 @@ export default function MatchingJobsPage() {
                             </Link>
                             <p className="text-sm font-bold text-slate-500">{job.company.companyName}</p>
                           </div>
-                          <div className="hidden md:flex flex-col items-end">
-                            <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">VERY HIGH MATCH</span>
+                          <div className="hidden md:flex flex-col items-end gap-1.5">
+                            {job.aiReliabilityScore !== undefined && job.aiReliabilityScore >= 80 && (
+                              <div className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
+                                ✨ Job Uy Tín
+                              </div>
+                            )}
                           </div>
                         </div>
 

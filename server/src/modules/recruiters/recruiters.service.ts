@@ -21,7 +21,7 @@ export class RecruitersService {
 
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      select: { status: true }
+      select: { status: true },
     });
 
     if (job?.status === 'REJECTED') {
@@ -199,9 +199,9 @@ export class RecruitersService {
     const unlockedIds = new Set();
     const unlocked = await this.prisma.candidateUnlock.findMany({
       where: { recruiterId: recruiter.recruiterId },
-      select: { candidateId: true }
+      select: { candidateId: true },
     });
-    unlocked.forEach(u => unlockedIds.add(u.candidateId));
+    unlocked.forEach((u) => unlockedIds.add(u.candidateId));
 
     // Enrich with candidate details (Masked)
     return Promise.all(
@@ -218,11 +218,33 @@ export class RecruitersService {
 
         return {
           ...m,
-          fullName: isUnlocked ? (candidate?.fullName || 'Ứng viên') : `Ứng viên #${m.candidateId.slice(0, 4)}`,
+          fullName: isUnlocked
+            ? candidate?.fullName || 'Ứng viên'
+            : `Ứng viên #${m.candidateId.slice(0, 4)}`,
           avatar: isUnlocked ? candidate?.user?.avatar : null,
           skills: (cv?.parsedData as any)?.skills || [],
         };
-      }),
+      })
     );
+  }
+
+  async getMatchSummary(userId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter) throw new NotFoundException('Recruiter not found');
+
+    const totalMatches = await this.prisma.jobMatch.count({
+      where: {
+        jobPosting: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
+        score: { gte: 70 }, // threshold for highlighting
+      },
+    });
+
+    const activeJobsCount = await this.prisma.jobPosting.count({
+      where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' }
+    });
+
+    return { totalMatches, activeJobsCount };
   }
 }

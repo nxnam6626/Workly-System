@@ -2,21 +2,30 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Search, Send, Loader2 } from 'lucide-react';
+import { MessageSquare, Search, Send, Loader2, ChevronLeft, EyeOff, X, Paperclip, File, Image as ImageIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
 import api from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function CandidateMessagesPage() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { socket } = useSocketStore();
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeChat, setActiveChat] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Pagination & scrolling
+  const [hasMore, setHasMore] = useState(true);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const scrollHeightRef = useRef<number>(0);
 
   const getOnlineStatusText = (usr: any) => {
     if (!usr) return '';
@@ -36,13 +45,10 @@ export default function CandidateMessagesPage() {
 
   useEffect(() => {
     if (activeChat) {
+      setHasMore(true);
       fetchMessages(activeChat.conversationId);
     }
   }, [activeChat]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   useEffect(() => {
     if (!socket) return;
@@ -50,7 +56,12 @@ export default function CandidateMessagesPage() {
     const handleNewMessage = (msg: any) => {
       setMessages((prev) => {
         if (msg.conversationId === activeChat?.conversationId) {
-          if (!prev.find(m => m.messageId === msg.messageId)) return [...prev, msg];
+          if (!prev.find(m => m.messageId === msg.messageId)) {
+            setTimeout(() => {
+              messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
+            return [...prev, msg];
+          }
         }
         return prev;
       });
@@ -88,17 +99,18 @@ export default function CandidateMessagesPage() {
 
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleUserStatusChanged);
+    
     return () => {
       socket.off('newMessage', handleNewMessage);
       socket.off('userStatusChanged', handleUserStatusChanged);
     };
-  }, [socket, activeChat, user?.userId]);
+  }, [socket, activeChat, user?.userId, logout]);
 
   const fetchConversations = async () => {
     try {
       const { data } = await api.get('/messages/conversations');
       setConversations(data);
-      if (data.length > 0 && !activeChat) {
+      if (data.length > 0 && !activeChat && typeof window !== 'undefined' && window.innerWidth >= 768) {
         setActiveChat(data[0]);
       }
     } catch (error) {
@@ -110,10 +122,47 @@ export default function CandidateMessagesPage() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      const { data } = await api.get(`/messages/conversations/${conversationId}/messages`);
+      const { data } = await api.get(`/messages/conversations/${conversationId}/messages?limit=30`);
       setMessages(data);
+      setHasMore(data.length === 30);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ block: 'nearest' });
+      }, 50);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const fetchMoreMessages = async () => {
+    if (!activeChat || fetchingMore || !hasMore || messages.length === 0) return;
+    setFetchingMore(true);
+    try {
+      const oldestMessageId = messages[0].messageId;
+      if (messageContainerRef.current) {
+        scrollHeightRef.current = messageContainerRef.current.scrollHeight;
+      }
+      const { data } = await api.get(`/messages/conversations/${activeChat.conversationId}/messages?limit=30&cursor=${oldestMessageId}`);
+      if (data.length > 0) {
+        setMessages(prev => [...data, ...prev]);
+        setHasMore(data.length === 30);
+        setTimeout(() => {
+          if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight - scrollHeightRef.current;
+          }
+        }, 0);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setFetchingMore(false);
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (e.currentTarget.scrollTop === 0) {
+      fetchMoreMessages();
     }
   };
 
@@ -131,6 +180,42 @@ export default function CandidateMessagesPage() {
     });
     
     setInputText('');
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeChat) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước file tối đa là 5MB');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('conversationId', activeChat.conversationId);
+    
+    // Receiver id
+    const receiverUserId = activeChat.recruiter?.user?.userId;
+    if (receiverUserId) {
+      formData.append('receiverUserId', receiverUserId);
+    }
+
+    try {
+      await api.post('/messages/upload-attachment', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      // the real-time socket will push the newly created message to our list.
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi tải file lên');
+    } finally {
+      setUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+         fileInputRef.current.value = '';
+      }
+    }
   };
 
   const filteredConversations = conversations.filter(c => 
@@ -170,7 +255,7 @@ export default function CandidateMessagesPage() {
 
         <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-0">
           
-          <div className="w-full md:w-80 border-r border-slate-100 flex flex-col shrink-0 flex-1 md:flex-none">
+          <div className={`w-full md:w-80 border-r border-slate-100 flex-col shrink-0 flex-1 md:flex-none ${activeChat ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 border-b border-slate-100">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -221,11 +306,17 @@ export default function CandidateMessagesPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col hidden md:flex bg-slate-50/30">
+          <div className={`flex-1 flex-col bg-slate-50/30 min-h-0 ${activeChat ? 'flex' : 'hidden md:flex'}`}>
             {activeChat ? (
               <>
-                <div className="h-16 px-6 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10">
+                <div className="h-16 px-4 md:px-6 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10 shrink-0">
                   <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setActiveChat(null)}
+                      className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
                     <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
                       {(activeChat.recruiter?.company?.companyName?.charAt(0) || 'C')}
                     </div>
@@ -239,8 +330,17 @@ export default function CandidateMessagesPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {messages.map((msg) => {
+                <div 
+                className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"
+                ref={messageContainerRef}
+                onScroll={handleScroll}
+              >
+                {fetchingMore && (
+                  <div className="flex justify-center py-2">
+                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                  </div>
+                )}
+                {messages.map((msg) => {
                     const isSender = msg.senderId === user?.userId;
                     return (
                     <div key={msg.messageId || Math.random()} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
@@ -257,7 +357,19 @@ export default function CandidateMessagesPage() {
                               ? 'bg-indigo-600 text-white rounded-br-sm shadow-sm shadow-indigo-600/20' 
                               : 'bg-white text-slate-700 border border-slate-100 rounded-bl-sm shadow-sm'
                           }`}>
-                            <p className={`text-[15px] leading-relaxed whitespace-pre-wrap ${isSender ? 'text-indigo-50' : ''}`}>
+                            {msg.fileName && msg.fileUrl && (
+                              <div className="mb-2">
+                                {msg.fileType === 'IMAGE' ? (
+                                  <img src={msg.fileUrl} onClick={() => window.open(msg.fileUrl, '_blank')} alt={msg.fileName} className="w-56 h-auto rounded-lg object-contain cursor-pointer border border-black/5" />
+                                ) : (
+                                  <a href={msg.fileUrl} target="_blank" rel="noreferrer" className={`flex items-center gap-2 p-3 rounded-lg border text-sm shadow-sm transition hover:scale-[1.02] ${isSender ? 'bg-indigo-700/40 border-indigo-500/30 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
+                                    <File className="w-5 h-5 shrink-0" />
+                                    <span className="truncate max-w-[150px] font-medium">{msg.fileName}</span>
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                            <p className={`text-[15px] leading-relaxed whitespace-pre-wrap break-words ${isSender ? 'text-indigo-50' : ''}`}>
                               {(() => {
                                 const urlRegex = /(https?:\/\/[^\s]+)/g;
                                 const parts = msg.content.split(urlRegex);
@@ -275,7 +387,7 @@ export default function CandidateMessagesPage() {
                                              : 'bg-indigo-600 text-white hover:bg-indigo-700'
                                         }`}
                                       >
-                                        Xem chi tiết & Ứng tuyển
+                                        Xem chi tiết & ứng tuyển
                                       </a>
                                     );
                                   }
@@ -292,20 +404,37 @@ export default function CandidateMessagesPage() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 bg-white border-t border-slate-100">
-                  <form onSubmit={handleSend} className="flex gap-3">
+                 <div className="p-4 bg-white border-t border-slate-100">
+                  <form onSubmit={handleSend} className="flex gap-2">
+                     <button
+                       type="button"
+                       disabled={uploading}
+                       onClick={() => fileInputRef.current?.click()}
+                       className="w-12 h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0"
+                     >
+                       {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
+                     </button>
+                     <input 
+                       type="file" 
+                       ref={fileInputRef}
+                       onChange={handleFileUpload}
+                       className="hidden"
+                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                     />
                      <div className="flex-1 relative">
                        <input
                          type="text"
                          value={inputText}
+                         disabled={uploading}
                          onChange={(e) => setInputText(e.target.value)}
-                         placeholder="Nhập tin nhắn..."
-                         className="w-full h-12 pl-4 pr-12 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px]"
+                         placeholder={uploading ? "Đang tải tệp & Quét bằng AI..." : "Nhập tin nhắn..."}
+                         className="w-full h-12 pl-4 pr-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px]"
                        />
                      </div>
                      <button 
                        type="submit" 
-                       className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center transition-colors shadow-md shadow-indigo-500/30 shrink-0"
+                       disabled={uploading || !inputText.trim()}
+                       className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white flex items-center justify-center transition-colors shadow-md shadow-indigo-500/30 shrink-0"
                      >
                        <Send className="w-5 h-5 ml-1" />
                      </button>

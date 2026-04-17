@@ -25,7 +25,7 @@ export class AiGateway {
   @UseInterceptors(PiiMaskingInterceptor)
   @SubscribeMessage('send_message')
   async handleMessage(
-    @MessageBody() data: { message: string, context?: any },
+    @MessageBody() data: { message: string; context?: any },
     @ConnectedSocket() client: Socket,
   ) {
     try {
@@ -51,7 +51,9 @@ export class AiGateway {
       client.emit('stream_end', { success: true });
     } catch (e) {
       console.error('[AiGateway] Error processing message:', e);
-      client.emit('stream_chunk', { text: '\\n[System]: Có lỗi xảy ra trong quá trình xử lý.' });
+      client.emit('stream_chunk', {
+        text: '\\n[System]: Có lỗi xảy ra trong quá trình xử lý.',
+      });
       client.emit('stream_end', { success: false });
     }
   }

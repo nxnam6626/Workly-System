@@ -35,9 +35,9 @@ export class CompaniesService {
   async findOne(id: string) {
     const company = await this.prisma.company.findUnique({
       where: { companyId: id },
-      include: { 
+      include: {
         jobPostings: { where: { status: 'APPROVED' } },
-        branches: true
+        branches: true,
       },
     });
 
@@ -51,10 +51,10 @@ export class CompaniesService {
   async getMyCompany(userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { 
+      include: {
         company: {
-          include: { branches: true }
-        }
+          include: { branches: true },
+        },
       },
     });
     if (!recruiter || !recruiter.company) {
@@ -103,7 +103,11 @@ export class CompaniesService {
     const fileExt = file.originalname.split('.').pop();
     const fileName = `logo-${recruiter.companyId}-${Date.now()}.${fileExt}`;
     const path = `companies/logos/${fileName}`;
-    const url = await this.supabaseService.uploadFile(file.buffer, path, file.mimetype);
+    const url = await this.supabaseService.uploadFile(
+      file.buffer,
+      path,
+      file.mimetype,
+    );
 
     await this.prisma.company.update({
       where: { companyId: recruiter.companyId },
@@ -123,7 +127,11 @@ export class CompaniesService {
     const fileExt = file.originalname.split('.').pop();
     const fileName = `banner-${recruiter.companyId}-${Date.now()}.${fileExt}`;
     const path = `companies/banners/${fileName}`;
-    const url = await this.supabaseService.uploadFile(file.buffer, path, file.mimetype);
+    const url = await this.supabaseService.uploadFile(
+      file.buffer,
+      path,
+      file.mimetype,
+    );
 
     await this.prisma.company.update({
       where: { companyId: recruiter.companyId },
@@ -132,7 +140,7 @@ export class CompaniesService {
     return { url };
   }
 
-  async addBranch(userId: string, data: { name: string; address: string }) {
+  async addBranch(userId: string, data: { name: string; address: string; latitude?: number; longitude?: number }) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
@@ -140,26 +148,51 @@ export class CompaniesService {
       throw new NotFoundException('Recruiter or company not found');
     }
 
-    // Call Nominatim to verify address
-    let latitude: number | null = null;
-    let longitude: number | null = null;
-    let isVerified = false;
+    let latitude: number | null = data.latitude ?? null;
+    let longitude: number | null = data.longitude ?? null;
+    let isVerified = latitude !== null && longitude !== null;
 
-    try {
-      const query = encodeURIComponent(data.address);
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`, {
-        headers: { 'User-Agent': 'Workly-System' }
-      });
+    if (!isVerified) {
+      try {
+        let query = encodeURIComponent(data.address);
+      let res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+        {
+          headers: { 'User-Agent': 'Workly-System' },
+        },
+      );
       if (res.ok) {
-        const json = await res.json();
+        let json = await res.json();
         if (json && json.length > 0) {
           latitude = parseFloat(json[0].lat);
           longitude = parseFloat(json[0].lon);
           isVerified = true;
+        } else {
+          // Fallback: Try with an extracting just the administrative divisions (last 3 comma-separated parts)
+          const parts = data.address.split(',');
+          if (parts.length > 2) {
+            const simplifiedAddress = parts.slice(Math.max(parts.length - 3, 0)).join(',').trim();
+            query = encodeURIComponent(simplifiedAddress);
+            res = await fetch(
+              `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+              {
+                headers: { 'User-Agent': 'Workly-System' },
+              },
+            );
+            if (res.ok) {
+              json = await res.json();
+              if (json && json.length > 0) {
+                latitude = parseFloat(json[0].lat);
+                longitude = parseFloat(json[0].lon);
+                isVerified = true;
+              }
+            }
+          }
         }
       }
-    } catch (e) {
-      console.error('Nominatim search error:', e);
+      } catch (e) {
+        console.error('Nominatim search error:', e);
+      }
     }
 
     return this.prisma.companyBranch.create({
@@ -170,7 +203,7 @@ export class CompaniesService {
         longitude,
         isVerified,
         companyId: recruiter.companyId,
-      }
+      },
     });
   }
 
@@ -184,7 +217,7 @@ export class CompaniesService {
       where: {
         branchId,
         companyId: recruiter.companyId,
-      }
+      },
     });
   }
 }

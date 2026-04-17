@@ -10,7 +10,14 @@ import { AiModule } from '../../ai/ai.module';
 import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
 
 @Module({
-  imports: [PrismaModule, MessagesModule, NotificationsModule, JobAlertsModule, AiModule, SubscriptionsModule],
+  imports: [
+    PrismaModule,
+    MessagesModule,
+    NotificationsModule,
+    JobAlertsModule,
+    AiModule,
+    SubscriptionsModule,
+  ],
   controllers: [JobPostingsController, AdminJobPostingsController],
   providers: [JobPostingsService],
 })

@@ -68,4 +68,10 @@ export class CreateJobPostingDto {
   @IsOptional()
   @IsEnum(['BASIC', 'PROFESSIONAL', 'URGENT'])
   jobTier?: any;
+
+  @IsOptional()
+  autoInviteMatches?: boolean;
+
+  @IsOptional()
+  isAiGenerated?: boolean;
 }

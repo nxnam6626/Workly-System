@@ -41,6 +41,11 @@ export default function JobTableRow({
       <td className="px-5 py-4">
         <div className="flex flex-col">
           <span className="text-sm font-bold text-slate-900 line-clamp-1">{job.title}</span>
+          <div className="mt-1">
+            <span className={`text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${job.jobTier === 'URGENT' ? 'bg-rose-50 text-rose-600 border-rose-200' : job.jobTier === 'PROFESSIONAL' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+              {job.jobTier === 'URGENT' ? 'Tuyển Gấp' : job.jobTier === 'PROFESSIONAL' ? 'Nổi Bật' : 'Tin Thường'}
+            </span>
+          </div>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-slate-500 font-medium">{job.company?.companyName || 'N/A'}</span>
             <span className="text-slate-300">•</span>

@@ -5,7 +5,7 @@ export class ResponseAgent {
 
   async generateResponse(userQuery: string, dataRows: any[]): Promise<string> {
     const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    
+
     // To prevent token explosion, truncate data if it's too large
     let safeData = dataRows;
     if (dataRows.length > 50) {

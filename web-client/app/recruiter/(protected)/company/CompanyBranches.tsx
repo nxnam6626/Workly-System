@@ -4,6 +4,10 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useConfirm } from '@/components/ConfirmDialog';
 
+import dynamic from 'next/dynamic';
+
+const MapPicker = dynamic(() => import('@/components/recruiter/MapPicker'), { ssr: false });
+
 interface Branch {
   branchId: string;
   name: string;
@@ -23,6 +27,9 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
   const [isAdding, setIsAdding] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
   const [newBranchAddress, setNewBranchAddress] = useState('');
+  const [newBranchLat, setNewBranchLat] = useState<number | null>(null);
+  const [newBranchLng, setNewBranchLng] = useState<number | null>(null);
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const confirm = useConfirm();
   
@@ -38,10 +45,13 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
       const { data } = await api.post('/companies/my-company/branches', {
         name: newBranchName,
         address: newBranchAddress,
+        ...(newBranchLat !== null && newBranchLng !== null ? { latitude: newBranchLat, longitude: newBranchLng } : {})
       });
       setBranches([...branches, data]);
       setNewBranchName('');
       setNewBranchAddress('');
+      setNewBranchLat(null);
+      setNewBranchLng(null);
       setIsAdding(false);
       toast.success('Thêm chi nhánh thành công');
       onUpdate();
@@ -117,14 +127,29 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-slate-700">Địa chỉ cụ thể (dành cho bản đồ)</label>
-              <input 
-                type="text" 
-                value={newBranchAddress}
-                onChange={e => setNewBranchAddress(e.target.value)}
-                placeholder="VD: 123 Đường Nam Kỳ Khởi Nghĩa, Quận 3..."
-                className="mt-1 w-full h-10 px-3 bg-white rounded-xl border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm"
-              />
+              <label className="text-sm font-semibold text-slate-700 flex items-center justify-between">
+                <span>Địa chỉ cụ thể (dành cho bản đồ)</span>
+                {newBranchLat !== null && (
+                  <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 rounded-md">Đã chọn toạ độ</span>
+                )}
+              </label>
+              <div className="flex gap-2 mt-1">
+                <input 
+                  type="text" 
+                  value={newBranchAddress}
+                  onChange={e => setNewBranchAddress(e.target.value)}
+                  placeholder="VD: 123 Đường Nam Kỳ Khởi Nghĩa, Quận 3..."
+                  className="w-full h-10 px-3 bg-white rounded-xl border border-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowMapPicker(true)}
+                  className="px-3 h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs whitespace-nowrap transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5 inline mr-1" />
+                  Bản đồ
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex justify-end pt-2">
@@ -138,6 +163,18 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
             </button>
           </div>
         </form>
+      )}
+
+      {showMapPicker && (
+        <MapPicker 
+          onClose={() => setShowMapPicker(false)}
+          onSelect={(lat, lng) => {
+            setNewBranchLat(lat);
+            setNewBranchLng(lng);
+            setShowMapPicker(false);
+            toast.success('Đã lưu toạ độ từ bản đồ!');
+          }}
+        />
       )}
 
       {branches.length === 0 ? (

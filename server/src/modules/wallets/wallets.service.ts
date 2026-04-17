@@ -14,7 +14,7 @@ export class WalletsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly messagesGateway: MessagesGateway
+    private readonly messagesGateway: MessagesGateway,
   ) {
     this.payos = new PayOS({
       clientId: process.env.PAYOS_CLIENT_ID || 'dummy-client-id',
@@ -26,7 +26,10 @@ export class WalletsService {
   async getBalance(userId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { recruiterWallet: true },
+      include: {
+        recruiterWallet: true,
+        recruiterSubscription: true,
+      },
     });
 
     if (!recruiter) {
@@ -40,10 +43,13 @@ export class WalletsService {
           balance: 0,
         },
       });
-      return newWallet;
+      return { ...newWallet, subscription: recruiter.recruiterSubscription };
     }
 
-    return recruiter.recruiterWallet;
+    return {
+      ...recruiter.recruiterWallet,
+      subscription: recruiter.recruiterSubscription,
+    };
   }
 
   async getTransactions(userId: string) {
@@ -54,19 +60,21 @@ export class WalletsService {
     });
 
     const now = Date.now();
-    const updated = await Promise.all(transactions.map(async (tx) => {
-      if (tx.status === 'PENDING') {
-        const diffMins = (now - tx.createdAt.getTime()) / 1000 / 60;
-        if (diffMins > 5) {
-          await this.prisma.transaction.update({
-            where: { transactionId: tx.transactionId },
-            data: { status: 'CANCELLED' },
-          });
-          return { ...tx, status: 'CANCELLED' };
+    const updated = await Promise.all(
+      transactions.map(async (tx) => {
+        if (tx.status === 'PENDING') {
+          const diffMins = (now - tx.createdAt.getTime()) / 1000 / 60;
+          if (diffMins > 5) {
+            await this.prisma.transaction.update({
+              where: { transactionId: tx.transactionId },
+              data: { status: 'CANCELLED' },
+            });
+            return { ...tx, status: 'CANCELLED' };
+          }
         }
-      }
-      return tx;
-    }));
+        return tx;
+      }),
+    );
 
     return updated;
   }
@@ -75,7 +83,7 @@ export class WalletsService {
     if (targetXu < 10)
       throw new BadRequestException('Amount must be at least 10 xu');
 
-    let wallet = await this.getBalance(userId);
+    const wallet = await this.getBalance(userId);
     const amountVND = targetXu * 1000;
     const orderCode = Number(String(Date.now()).slice(-6));
 
@@ -103,20 +111,20 @@ export class WalletsService {
     try {
       const paymentLink = await this.payos.paymentRequests.create(paymentData);
       const checkoutUrl = (paymentLink as any).checkoutUrl;
-      
+
       // Save link for resuming later
       await this.prisma.transaction.update({
         where: { transactionId: tx.transactionId },
-        data: { description: `Nạp ${targetXu} xu|${checkoutUrl}` }
+        data: { description: `Nạp ${targetXu} xu|${checkoutUrl}` },
       });
-      
+
       return { checkoutUrl };
     } catch (err) {
       console.error('PayOS create link failed:', err);
       // Mark as cancelled immediately if failed
       await this.prisma.transaction.update({
         where: { transactionId: tx.transactionId },
-        data: { status: 'CANCELLED' }
+        data: { status: 'CANCELLED' },
       });
       throw new BadRequestException(
         'Không thể tạo link thanh toán: ' + (err.message || err),
@@ -125,7 +133,9 @@ export class WalletsService {
   }
 
   async resumePaymentLink(userId: string, transactionId: string) {
-    const tx = await this.prisma.transaction.findUnique({ where: { transactionId } });
+    const tx = await this.prisma.transaction.findUnique({
+      where: { transactionId },
+    });
     if (!tx || tx.type !== 'DEPOSIT') {
       throw new BadRequestException('Giao dịch không hợp lệ');
     }
@@ -138,9 +148,11 @@ export class WalletsService {
     if (diffMins > 5) {
       await this.prisma.transaction.update({
         where: { transactionId },
-        data: { status: 'CANCELLED' }
+        data: { status: 'CANCELLED' },
       });
-      throw new BadRequestException('Giao dịch đã quá 5 phút, không thể tiếp tục');
+      throw new BadRequestException(
+        'Giao dịch đã quá 5 phút, không thể tiếp tục',
+      );
     }
 
     const orderCode = Number(String(Date.now()).slice(-6));
@@ -158,15 +170,15 @@ export class WalletsService {
     try {
       const paymentLink = await this.payos.paymentRequests.create(paymentData);
       const checkoutUrl = (paymentLink as any).checkoutUrl;
-      
+
       await this.prisma.transaction.update({
         where: { transactionId },
-        data: { 
-           orderCode,
-           description: `Nạp ${tx.amount} xu|${checkoutUrl}`
-        }
+        data: {
+          orderCode,
+          description: `Nạp ${tx.amount} xu|${checkoutUrl}`,
+        },
       });
-      
+
       return { checkoutUrl };
     } catch (err) {
       console.error('PayOS resume link failed:', err);
@@ -182,9 +194,9 @@ export class WalletsService {
         where: { orderCode: Number(webhookData.orderCode) },
         include: {
           wallet: {
-            include: { recruiter: { include: { user: true } } }
-          }
-        }
+            include: { recruiter: { include: { user: true } } },
+          },
+        },
       });
 
       if (!transaction || transaction.status === 'SUCCESS')
@@ -205,11 +217,13 @@ export class WalletsService {
       const userId = (transaction as any).wallet?.recruiter?.user?.userId;
       if (userId) {
         const newBalance = (updatedWallet as any).balance;
-        this.messagesGateway.server.to(`user_${userId}`).emit('wallet_updated', {
-          newBalance,
-          transactionId: transaction.transactionId,
-          amount: transaction.amount,
-        });
+        this.messagesGateway.server
+          .to(`user_${userId}`)
+          .emit('wallet_updated', {
+            newBalance,
+            transactionId: transaction.transactionId,
+            amount: transaction.amount,
+          });
       }
 
       return { status: 'success' };
@@ -219,7 +233,12 @@ export class WalletsService {
     }
   }
 
-  async deduct(recruiterId: string, amount: number, description: string, type: TransactionType = TransactionType.OPEN_CV) {
+  async deduct(
+    recruiterId: string,
+    amount: number,
+    description: string,
+    type: TransactionType = TransactionType.OPEN_CV,
+  ) {
     const wallet = await this.prisma.recruiterWallet.findUnique({
       where: { recruiterId },
     });
@@ -253,7 +272,12 @@ export class WalletsService {
     return { updatedWallet, transaction };
   }
 
-  async add(recruiterId: string, amount: number, description: string, type: TransactionType = TransactionType.DEPOSIT) {
+  async add(
+    recruiterId: string,
+    amount: number,
+    description: string,
+    type: TransactionType = TransactionType.DEPOSIT,
+  ) {
     const wallet = await this.prisma.recruiterWallet.findUnique({
       where: { recruiterId },
     });
@@ -281,7 +305,11 @@ export class WalletsService {
     return { updatedWallet, transaction };
   }
 
-  async addCvQuota(recruiterId: string, quotaAmount: number, description: string) {
+  async addCvQuota(
+    recruiterId: string,
+    quotaAmount: number,
+    description: string,
+  ) {
     const wallet = await this.prisma.recruiterWallet.findUnique({
       where: { recruiterId },
     });
@@ -341,11 +369,13 @@ export class WalletsService {
     }
 
     // 2. Không có Quota CV -> Kiểm tra gói tháng -> Tính giá mở lẻ
-    const hasActiveSub = sub && (new Date() > sub.expiryDate === false);
+    const hasActiveSub = sub && new Date() > sub.expiryDate === false;
     const cost = hasActiveSub ? 30 : 50;
 
     if (wallet.balance < cost) {
-      throw new BadRequestException(`Cần ${cost} Xu để mở khóa liên hệ (Bạn không còn lượt mở miễn phí). Vui lòng nạp thêm Xu!`);
+      throw new BadRequestException(
+        `Cần ${cost} Xu để mở khóa liên hệ (Bạn không còn lượt mở miễn phí). Vui lòng nạp thêm Xu!`,
+      );
     }
 
     const [updatedWallet, transaction] = await this.prisma.$transaction([

@@ -27,15 +27,19 @@ export class CandidatesService {
     const { skip = 0, take = 10, search, skills, major } = query;
     const where: any = {
       user: {
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     };
 
     if (search) {
       where.OR = [
         { fullName: { contains: search, mode: 'insensitive' } },
         { major: { contains: search, mode: 'insensitive' } },
-        { skills: { some: { skillName: { contains: search, mode: 'insensitive' } } } },
+        {
+          skills: {
+            some: { skillName: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
     }
     if (major) {
@@ -83,78 +87,105 @@ export class CandidatesService {
           where: { recruiterId: recruiter.recruiterId },
           select: { candidateId: true },
         });
-        const unlockedIds = new Set(unlocked.map(u => u.candidateId));
+        const unlockedIds = new Set(unlocked.map((u) => u.candidateId));
 
         // Fetch active jobs for matching
         const activeJobs = await this.prisma.jobPosting.findMany({
-           where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
-           select: { structuredRequirements: true, title: true }
+          where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
+          select: { structuredRequirements: true, title: true },
         });
 
         // Enrich data
         enrichedData = data.map((candidate) => {
           const isUnlocked = unlockedIds.has(candidate.candidateId);
-          
+
           let maxScore = 0;
           let bestJob = '';
-          
+
           // Calculate matching score natively
-          const mainCv = candidate.cvs?.find(c => c.isMain) || candidate.cvs?.[0];
+          const mainCv =
+            candidate.cvs?.find((c) => c.isMain) || candidate.cvs?.[0];
           if (mainCv && mainCv.parsedData) {
             const parsedData = mainCv.parsedData as any;
             const cvSkills = parsedData.skills || [];
             const cvExp = parsedData.totalYearsExp || 0;
-            
+
             for (const job of activeJobs) {
-               if (!job.structuredRequirements) continue;
-               const reqs = job.structuredRequirements as any;
-               const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
+              if (!job.structuredRequirements) continue;
+              const reqs = job.structuredRequirements as any;
+              const {
+                hardSkills = [],
+                softSkills = [],
+                minExperienceYears = 0,
+              } = reqs;
 
-               const matchedHard = hardSkills.filter((s: string) =>
-                 cvSkills.some((cs: any) => {
-                   const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-                   return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-                 }),
-               );
-               const hardScore = hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
+              const matchedHard = hardSkills.filter((s: string) =>
+                cvSkills.some((cs: any) => {
+                  const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+                  return (
+                    skillStr && skillStr.toLowerCase().includes(s.toLowerCase())
+                  );
+                }),
+              );
+              const hardScore =
+                hardSkills.length > 0
+                  ? matchedHard.length / hardSkills.length
+                  : 1;
 
-               const matchedSoft = softSkills.filter((s: string) =>
-                 cvSkills.some((cs: any) => {
-                   const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-                   return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-                 }),
-               );
-               const softScore = softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
-               const skillScore = hardScore * 0.8 + softScore * 0.2;
+              const matchedSoft = softSkills.filter((s: string) =>
+                cvSkills.some((cs: any) => {
+                  const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+                  return (
+                    skillStr && skillStr.toLowerCase().includes(s.toLowerCase())
+                  );
+                }),
+              );
+              const softScore =
+                softSkills.length > 0
+                  ? matchedSoft.length / softSkills.length
+                  : 1;
+              const skillScore = hardScore * 0.8 + softScore * 0.2;
 
-               const expScore = cvExp >= minExperienceYears ? 1 : cvExp / (minExperienceYears || 1);
-               
-               const totalScore = Math.round((skillScore * 0.7 + expScore * 0.3) * 100);
-               if (totalScore > maxScore) {
-                  maxScore = totalScore;
-                  bestJob = job.title;
-               }
+              const expScore =
+                cvExp >= minExperienceYears
+                  ? 1
+                  : cvExp / (minExperienceYears || 1);
+
+              const totalScore = Math.round(
+                (skillScore * 0.7 + expScore * 0.3) * 100,
+              );
+              if (totalScore > maxScore) {
+                maxScore = totalScore;
+                bestJob = job.title;
+              }
             }
           }
 
           return {
             ...candidate,
-            fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+            fullName: isUnlocked
+              ? candidate.fullName
+              : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
             user: {
               ...candidate.user,
               avatar: isUnlocked ? candidate.user?.avatar : null,
               email: isUnlocked ? candidate.user?.email : '****@***.com',
-              phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+              phoneNumber: isUnlocked
+                ? candidate.user?.phoneNumber
+                : '****-***-***',
             },
             isUnlocked,
             matchScore: maxScore,
-            bestMatchJob: bestJob
+            bestMatchJob: bestJob,
           };
         });
       }
     }
 
-    return { data: enrichedData, meta: { total, skip: Number(skip), take: Number(take) } };
+    return {
+      data: enrichedData,
+      meta: { total, skip: Number(skip), take: Number(take) },
+    };
   }
 
   async findOne(candidateId: string, recruiterUserId?: string) {
@@ -189,21 +220,28 @@ export class CandidatesService {
 
       if (recruiter) {
         const unlockedInfo = await this.prisma.candidateUnlock.findFirst({
-          where: { recruiterId: recruiter.recruiterId, candidateId: candidate.candidateId }
+          where: {
+            recruiterId: recruiter.recruiterId,
+            candidateId: candidate.candidateId,
+          },
         });
         const isUnlocked = !!unlockedInfo;
 
         enrichedCandidate = {
           ...candidate,
-          fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+          fullName: isUnlocked
+            ? candidate.fullName
+            : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
           user: {
             ...candidate.user,
             avatar: isUnlocked ? candidate.user?.avatar : null,
             email: isUnlocked ? candidate.user?.email : '****@***.com',
-            phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+            phoneNumber: isUnlocked
+              ? candidate.user?.phoneNumber
+              : '****-***-***',
           },
-          isUnlocked
-        }
+          isUnlocked,
+        };
       }
     }
 
@@ -264,7 +302,9 @@ export class CandidatesService {
     }
 
     if (cv.isMain) {
-      throw new BadRequestException('Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.');
+      throw new BadRequestException(
+        'Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.',
+      );
     }
 
     if (!cv.fileUrl)
@@ -280,58 +320,77 @@ export class CandidatesService {
       // 3. Tiến hành bóc tách AI
       const extractedData = await this.cvParsingService.parseCv(buffer);
 
-      const hasValidName = extractedData && extractedData.fullName && extractedData.fullName.trim() !== '';
-      const hasContent = extractedData && (extractedData.skills?.length > 0 || extractedData.education?.length > 0 || extractedData.experience?.length > 0);
+      const hasValidName =
+        extractedData &&
+        extractedData.fullName &&
+        extractedData.fullName.trim() !== '';
+      const hasContent =
+        extractedData &&
+        (extractedData.skills?.length > 0 ||
+          extractedData.education?.length > 0 ||
+          extractedData.experience?.length > 0);
 
       if (!hasValidName || !hasContent) {
-         throw new BadRequestException('Hệ thống AI không thể nhận diện đủ thông tin cốt lõi (Họ tên, Trình độ/Kỹ năng) từ CV này. Vui lòng kiểm tra định dạng file hoặc thử lại.');
+        throw new BadRequestException(
+          'Hệ thống AI không thể nhận diện đủ thông tin cốt lõi (Họ tên, Trình độ/Kỹ năng) từ CV này. Vui lòng kiểm tra định dạng file hoặc thử lại.',
+        );
       }
 
       // 4. Kiểm tra xem CV này có phải của người dùng đang đăng nhập hay không
       // Cần thực hiện loose match để tránh lỗi do họ tên thiếu dấu hoặc ghi ngược (John Doe vs Doe John)
       const cvName = (extractedData.fullName || '').toLowerCase().trim();
       const accName = (candidate.fullName || '').toLowerCase().trim();
-      
+
       let isValidName = false;
-      
+
       if (cvName && accName) {
-         const cvTokens = cvName.split(' ');
-         const accTokens = accName.split(' ');
-         
-         // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
-         isValidName = cvTokens.some(token => token.length >= 2 && accTokens.includes(token));
-         
-         if (!isValidName) {
-            throw new BadRequestException('Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.');
-         }
+        const cvTokens = cvName.split(' ');
+        const accTokens = accName.split(' ');
+
+        // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
+        isValidName = cvTokens.some(
+          (token) => token.length >= 2 && accTokens.includes(token),
+        );
+
+        if (!isValidName) {
+          throw new BadRequestException(
+            'Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.',
+          );
+        }
       }
-        
+
       // 5. Cập nhật hồ sơ ứng viên nếu còn trống
-      const isNameEmpty = !candidate.fullName || candidate.fullName === 'Người dùng';
+      const isNameEmpty =
+        !candidate.fullName || candidate.fullName === 'Người dùng';
       const isPhoneEmpty = !candidate.user?.phoneNumber;
       const isMajorEmpty = !candidate.major;
       const isUniversityEmpty = !candidate.university;
       const isSkillsEmpty = !candidate.skills || candidate.skills.length === 0;
 
       const updateData: any = {};
-      if (isNameEmpty && extractedData.fullName) updateData.fullName = extractedData.fullName;
-      if (isPhoneEmpty && extractedData.phone) updateData.phone = extractedData.phone;
-      
+      if (isNameEmpty && extractedData.fullName)
+        updateData.fullName = extractedData.fullName;
+      if (isPhoneEmpty && extractedData.phone)
+        updateData.phone = extractedData.phone;
+
       if (isMajorEmpty && extractedData.education?.length > 0) {
-         updateData.major = extractedData.education[0].major;
+        updateData.major = extractedData.education[0].major;
       }
       if (isUniversityEmpty && extractedData.education?.length > 0) {
-         updateData.university = extractedData.education[0].school;
+        updateData.university = extractedData.education[0].school;
       }
-      
-      if (!candidate.gpa && extractedData.gpa) updateData.gpa = extractedData.gpa;
+
+      if (!candidate.gpa && extractedData.gpa)
+        updateData.gpa = extractedData.gpa;
 
       if (isSkillsEmpty && extractedData.skills?.length > 0) {
-         updateData.skills = extractedData.skills;
+        updateData.skills = extractedData.skills;
       }
 
       if (Object.keys(updateData).length > 0) {
-         await this.update(candidate.candidateId, updateData).catch(e => console.error('Failed to auto-fill candidate:', e));
+        await this.update(candidate.candidateId, updateData).catch((e) =>
+          console.error('Failed to auto-fill candidate:', e),
+        );
       }
 
       // 6. Cập nhật dữ liệu bóc tách vào bản ghi CV
@@ -483,20 +542,24 @@ export class CandidatesService {
       where: { recruiterId: recruiter.recruiterId },
       select: { candidateId: true },
     });
-    const unlockedIds = new Set(unlocked.map(u => u.candidateId));
+    const unlockedIds = new Set(unlocked.map((u) => u.candidateId));
 
-    return savedCandidates.map(candidate => {
+    return savedCandidates.map((candidate) => {
       const isUnlocked = unlockedIds.has(candidate.candidateId);
       return {
         ...candidate,
-        fullName: isUnlocked ? candidate.fullName : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
+        fullName: isUnlocked
+          ? candidate.fullName
+          : `Ứng viên #${candidate.candidateId.slice(0, 4)}`,
         user: {
           ...candidate.user,
           avatar: isUnlocked ? candidate.user?.avatar : null,
           email: isUnlocked ? candidate.user?.email : '****@***.com',
-          phoneNumber: isUnlocked ? candidate.user?.phoneNumber : '****-***-***'
+          phoneNumber: isUnlocked
+            ? candidate.user?.phoneNumber
+            : '****-***-***',
         },
-        isUnlocked
+        isUnlocked,
       };
     });
   }
@@ -616,15 +679,17 @@ export class CandidatesService {
     // Đồng bộ thông tin từ CV (parsedData) vào hồ sơ chính của ứng viên nếu có
     if (parsedData) {
       const candidateUpdateData: any = {};
-      if (parsedData.fullName) candidateUpdateData.fullName = parsedData.fullName;
+      if (parsedData.fullName)
+        candidateUpdateData.fullName = parsedData.fullName;
       if (parsedData.phone) candidateUpdateData.phone = parsedData.phone;
-      
+
       if (parsedData.education && parsedData.education.length > 0) {
         candidateUpdateData.university = parsedData.education[0].school;
         candidateUpdateData.major = parsedData.education[0].major;
       }
-      
-      if (parsedData.gpa !== undefined) candidateUpdateData.gpa = parsedData.gpa;
+
+      if (parsedData.gpa !== undefined)
+        candidateUpdateData.gpa = parsedData.gpa;
       if (parsedData.skills && Array.isArray(parsedData.skills)) {
         candidateUpdateData.skills = parsedData.skills;
       }
@@ -633,7 +698,10 @@ export class CandidatesService {
         try {
           await this.update(candidate.candidateId, candidateUpdateData);
         } catch (error) {
-          console.error('[CandidatesService] Lỗi khi đồng bộ dữ liệu vào hồ sơ ứng viên:', error);
+          console.error(
+            '[CandidatesService] Lỗi khi đồng bộ dữ liệu vào hồ sơ ứng viên:',
+            error,
+          );
         }
       }
     }
@@ -641,7 +709,9 @@ export class CandidatesService {
     // Trigger matching for candidate when CV is parsed or set to main
     if (isMain || parsedData) {
       await this.matchingQueue.add('match-candidate', { userId });
-      console.log(`[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`);
+      console.log(
+        `[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`,
+      );
     }
 
     return updatedCv;
@@ -725,7 +795,9 @@ export class CandidatesService {
 
     // Trigger matching for candidate when CV is set to main
     await this.matchingQueue.add('match-candidate', { userId });
-    console.log(`[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`);
+    console.log(
+      `[CandidatesService] Triggered matching for candidate via BullMQ: ${userId}`,
+    );
 
     return result;
   }
@@ -778,34 +850,36 @@ export class CandidatesService {
       where: { candidateId: candidate.candidateId },
       include: {
         jobPosting: {
-          include: { company: true, branches: true }
-        }
+          include: { company: true, branches: true },
+        },
       },
       orderBy: { score: 'desc' },
-      take: 20
+      take: 20,
     });
 
     if (matches.length === 0) {
       // Triển khai cơ chế Fallback tự động
-      console.log(`[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`);
+      console.log(
+        `[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`,
+      );
       await this.matchingService.runMatchingForCandidate(userId);
-      
+
       matches = await this.prisma.jobMatch.findMany({
         where: { candidateId: candidate.candidateId },
         include: {
           jobPosting: {
-            include: { company: true, branches: true }
-          }
+            include: { company: true, branches: true },
+          },
         },
         orderBy: { score: 'desc' },
-        take: 20
+        take: 20,
       });
     }
 
-    return matches.map(m => ({
+    return matches.map((m) => ({
       ...m.jobPosting,
       score: m.score,
-      matchedSkills: m.matchedSkills
+      matchedSkills: m.matchedSkills,
     }));
   }
 }

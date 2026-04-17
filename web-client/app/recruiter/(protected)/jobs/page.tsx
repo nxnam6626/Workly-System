@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, MoreVertical, Edit, Lock, Sparkles, Users, BarChart, RefreshCw } from 'lucide-react';
+import { Briefcase, Plus, Search, Edit, Lock, Sparkles, Users, BarChart, RefreshCw, AlertTriangle, Bot } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -11,12 +11,46 @@ import { useSocketStore } from '@/stores/socket';
 import Link from 'next/link';
 import { MatchedCandidatesModal } from '@/components/recruiter/MatchedCandidatesModal';
 
+
+
+const formatText = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={i} className="font-bold text-amber-900">{part.slice(2, -2)}</strong>;
+        }
+        
+        const subParts = part.split(/(\(\d+\))/g);
+        return (
+          <span key={i}>
+            {subParts.map((sub, j) => {
+              if (/^\(\d+\)$/.test(sub)) {
+                return (
+                  <span key={j}>
+                    <br />
+                    <span className="inline-block w-3" />
+                    <span className="font-semibold text-amber-700">{sub}</span>
+                  </span>
+                );
+              }
+              return <span key={j}>{sub}</span>;
+            })}
+          </span>
+        );
+      })}
+    </>
+  );
+};
+
 export default function JobsManagementPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionState, setActionState] = useState<{ id: string, type: 'LOCK' | 'UNLOCK' | 'RENEW' } | null>(null);
   const [acting, setActing] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [planType, setPlanType] = useState<string | null>(null);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -26,8 +60,14 @@ export default function JobsManagementPage() {
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
 
+  // Kiểm tra gói dịch vụ để hiển thị các tính năng AI phù hợp
+  const hasAiAdvisorAccess = planType === 'LITE' || planType === 'GROWTH';
+
   useEffect(() => {
     fetchJobs();
+    api.get('/subscriptions/current')
+      .then(res => setPlanType(res.data?.planType ?? null))
+      .catch(() => setPlanType(null));
   }, [accessToken]);
 
   useEffect(() => {
@@ -187,13 +227,97 @@ export default function JobsManagementPage() {
               ) : (
                 paginatedJobs.map((job) => (
                   <tr key={job.jobPostingId} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-800 break-words max-w-xs">
+                    <td className="px-6 py-4 font-medium text-slate-800 break-words max-w-[280px] lg:max-w-xs align-top">
                       <Link
                         href={`/recruiter/jobs/${job.jobPostingId}`}
-                        className="hover:text-indigo-600 transition-colors inline-block font-bold"
+                        className="hover:text-indigo-600 transition-colors inline-block font-bold text-base mb-1"
                       >
                         {job.title}
                       </Link>
+                      <div className="mt-1 flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-1.5 items-center">
+                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border ${job.jobTier === 'URGENT' ? 'bg-rose-50 text-rose-600 border-rose-200' : job.jobTier === 'PROFESSIONAL' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                            {job.jobTier === 'URGENT' ? 'Tuyển Gấp' : job.jobTier === 'PROFESSIONAL' ? 'Nổi Bật' : 'Tin Thường'}
+                          </span>
+                          {/* Badge: AI Generated */}
+                          {(job.structuredRequirements as any)?.isAiGenerated && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">
+                              <Bot className="w-3 h-3" /> Tạo bởi AI
+                            </span>
+                          )}
+                        </div>
+                        {/* AI Advisor: chỉ hiển thị khi có gói LITE hoặc GROWTH và JD không phải AI-generated */}
+                        {hasAiAdvisorAccess && !(job.structuredRequirements as any)?.isAiGenerated && (job.structuredRequirements as any)?.aiFeedback && (
+                          <details className="group p-3 bg-amber-50/80 border border-amber-200 rounded-xl w-full mt-2 shadow-sm cursor-pointer [&_summary::-webkit-details-marker]:hidden overflow-hidden">
+                            <summary className="flex items-center justify-between text-amber-800 outline-none">
+                              <div className="flex items-center gap-1.5 text-amber-800">
+                                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600"/>
+                                <span className="text-xs font-bold uppercase tracking-wide">Nhận xét của AI Cố Vấn</span>
+                              </div>
+                              <span className="text-amber-600 transition-transform duration-300 group-open:rotate-180">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </span>
+                            </summary>
+                            <div className="text-xs font-medium text-amber-800/90 leading-relaxed pl-1 mt-3 transition-all whitespace-normal break-words">
+                              {Array.isArray((job.structuredRequirements as any).aiFeedback) ? (
+                                <ul className="list-none space-y-3">
+                                  {((job.structuredRequirements as any).aiFeedback).map((str: string, i: number) => (
+                                    <li key={i} className="pl-3 border-l-2 border-amber-300">{formatText(str)}</li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <ul className="list-none space-y-3">
+                                  {((job.structuredRequirements as any).aiFeedback as string)
+                                    .replace(/v\.v\./g, 'v_v_')
+                                    .replace(/([0-9])\.([0-9])/g, '$1_$2')
+                                    .split('.')
+                                    .filter((s: string) => s.trim().length > 5)
+                                    .map((s: string, i: number) => (
+                                      <li key={i} className="pl-3 border-l-2 border-amber-300">{formatText(s.replace(/v_v_/g, 'v.v.').replace(/([0-9])\_([0-9])/g, '$1.$2').trim() + '.')}</li>
+                                    ))
+                                  }
+                                </ul>
+                              )}
+                              <div className="mt-3 pt-3 border-t border-amber-200/50 flex justify-end">
+                                {(job.structuredRequirements as any)?.autoFixedByAI ? (
+                                  <button
+                                    disabled
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-[11px] font-bold rounded-lg shadow-sm opacity-80 cursor-not-allowed"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" /> Đã được chỉnh sửa
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={async (e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      const aiFeedback = (job?.structuredRequirements as any)?.aiFeedback;
+                                      const insightInstruction = Array.isArray(aiFeedback) 
+                                        ? aiFeedback.join('\n') 
+                                        : String(aiFeedback);
+                                      
+                                      const loadingToast = toast.loading('AI đang tự động tối ưu JD...');
+                                      try {
+                                        await api.post('/ai/fix-job', { jobId: job.jobPostingId, insightInstruction });
+                                        toast.success('Đã cập nhật JD thành công!', { id: loadingToast });
+                                        fetchJobs();
+                                      } catch (error: any) {
+                                        const msg = error.response?.data?.message || 'Có lỗi xảy ra khi gọi AI!';
+                                        toast.error(msg, { id: loadingToast });
+                                      }
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" /> Sửa tự động (AI)
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </details>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span

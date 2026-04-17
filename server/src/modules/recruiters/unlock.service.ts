@@ -58,7 +58,7 @@ export class UnlockService {
     try {
       const result = await this.walletsService.deductCvUnlock(
         recruiter.recruiterId,
-        `Mở khóa ứng viên #${candidateId.slice(0, 8)} cho job #${jobPostingId.slice(0, 8)}`
+        `Mở khóa ứng viên #${candidateId.slice(0, 8)} cho job #${jobPostingId.slice(0, 8)}`,
       );
       finalCost = result.cost;
     } catch (error) {
@@ -73,10 +73,9 @@ export class UnlockService {
         candidateId,
         jobPostingId,
         cvId,
-      creditSpent: finalCost,
+        creditSpent: finalCost,
       },
     });
-
 
     // Đồng bộ mở khóa cho Application (nếu có)
     await this.prisma.application.updateMany({

@@ -13,6 +13,21 @@ type Message = {
   isLoading?: boolean;
 };
 
+// Quick util to format basic markdown bold
+const formatMarkdown = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <span key={i} className="font-bold text-slate-900 bg-indigo-50/50 px-1 rounded">{part.slice(2, -2)}</span>;
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+};
+
 export function AdminAnalyticsChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -22,14 +37,13 @@ export function AdminAnalyticsChat() {
   const [expandedDetails, setExpandedDetails] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isExpanded) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isExpanded) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [messages, isExpanded]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input };
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text };
     const agentMsg: Message = { id: (Date.now() + 1).toString(), role: 'agent', content: '', isLoading: true };
 
     setMessages((prev) => [...prev, userMsg, agentMsg]);
@@ -56,6 +70,11 @@ export function AdminAnalyticsChat() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSend(input);
   };
 
   return (
@@ -112,7 +131,7 @@ export function AdminAnalyticsChat() {
                     {['Tổng doanh thu hôm nay?', 'Bao nhiêu user mới tuần này?', 'JD nào bị từ chối nhiều nhất?'].map(q => (
                       <button
                         key={q}
-                        onClick={() => { setInput(q); }}
+                        onClick={() => handleSend(q)}
                         className="text-xs bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full hover:border-indigo-300 hover:text-indigo-600 transition-colors"
                       >
                         {q}
@@ -123,34 +142,34 @@ export function AdminAnalyticsChat() {
               ) : (
                 messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3.5 ${
+                    <div className={`max-w-[85%] rounded-2xl px-5 py-4 ${
                       msg.role === 'user'
-                        ? 'bg-indigo-600 text-white rounded-tr-sm shadow-md'
-                        : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
+                        ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-tr-none shadow-md shadow-indigo-500/20'
+                        : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none shadow-sm'
                     }`}>
                       {msg.role === 'agent' && (
-                        <div className="flex items-center gap-2 mb-2 text-indigo-600 font-medium text-xs">
-                          <Bot className="w-3.5 h-3.5" /> AI Agent
+                        <div className="flex items-center gap-2 mb-3 text-indigo-600 font-semibold text-xs uppercase tracking-wider">
+                          <Bot className="w-4 h-4" /> Workly Agent
                         </div>
                       )}
 
                       {msg.isLoading ? (
-                        <div className="flex items-center gap-2.5 text-slate-500 py-1">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span className="text-sm animate-pulse">Đang phân tích & viết SQL...</span>
+                        <div className="flex items-center gap-3 text-indigo-500 py-2">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span className="text-sm font-medium animate-pulse">Đang phân tích dữ liệu & SQL...</span>
                         </div>
                       ) : (
-                        <div className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</div>
+                        <div className="whitespace-pre-wrap leading-relaxed text-[15px]">{formatMarkdown(msg.content)}</div>
                       )}
 
                       {msg.details?.sql && (
-                        <div className="mt-3 border-t border-slate-100 pt-3">
+                        <div className="mt-4 pt-4 border-t border-slate-100/60">
                           <button
                             onClick={() => setExpandedDetails(expandedDetails === msg.id ? null : msg.id)}
-                            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-indigo-600 transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-xs font-semibold text-slate-600 hover:text-indigo-600 transition-all w-fit"
                           >
-                            {expandedDetails === msg.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                            Xem chi tiết Multi-Agent
+                            {expandedDetails === msg.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            {expandedDetails === msg.id ? 'Thu gọn log' : 'Xem tiến trình Multi-Agent'}
                           </button>
                           <AnimatePresence>
                             {expandedDetails === msg.id && (

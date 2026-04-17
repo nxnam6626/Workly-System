@@ -138,7 +138,7 @@ export function NotificationMenu() {
   };
 
   return (
-    <>
+    <div className="relative" ref={menuRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors focus:outline-none"
@@ -153,20 +153,20 @@ export function NotificationMenu() {
 
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+           <>
+             {/* Backdrop exactly for mobile to click outside and close, but hidden on desktop since we have a global listener */}
              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsOpen(false)}
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="fixed inset-0 bg-slate-900/20 backdrop-blur-[2px] z-[90] sm:hidden"
              />
              <motion.div
-               initial={{ opacity: 0, scale: 0.95, y: 20 }}
+               initial={{ opacity: 0, scale: 0.95, y: 10 }}
                animate={{ opacity: 1, scale: 1, y: 0 }}
-               exit={{ opacity: 0, scale: 0.95, y: 20 }}
+               exit={{ opacity: 0, scale: 0.95, y: 10 }}
                transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
-               className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-10 text-left"
+               className="fixed left-4 right-4 top-20 z-[100] sm:absolute sm:top-full sm:-right-4 sm:left-auto sm:mt-3 sm:w-96 bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden text-left origin-top sm:origin-top-right flex flex-col"
              >
             <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
               <h3 className="font-semibold text-slate-800">Thông báo</h3>
@@ -180,7 +180,7 @@ export function NotificationMenu() {
               )}
             </div>
             
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[60vh] sm:max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-slate-500">
                   <Bell className="w-8 h-8 text-slate-300 mx-auto mb-3" />
@@ -218,11 +218,10 @@ export function NotificationMenu() {
                 </div>
               )}
             </div>
-            
             </motion.div>
-          </div>
+           </>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

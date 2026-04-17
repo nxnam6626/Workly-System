@@ -23,24 +23,26 @@ import { SubscriptionsService } from '../../subscriptions/subscriptions.service'
 
 // Industry keyword map for content-based filtering (since DB has no `industry` field)
 const INDUSTRY_TAG_MAP: Record<string, string[]> = {
-  'CNTT / Phần mềm': ['frontend', 'backend', 'developer', 'lập trình', 'software', 'react', 'nodejs', 'java', 'python', 'devops', 'data', 'ai engineer', 'machine learning', 'cloud', 'mobile', 'flutter', 'fullstack', 'qa engineer', 'tester', 'kiểm thử', 'scrum', 'công nghệ thông tin'],
-  'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'growth hacker', 'crm'],
-  'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor', 'video script'],
-  'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'investment', 'cfo'],
-  'Nhân sự / Hành chính / Pháp lý': ['hr ', 'nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'c&b', 'compliance', 'labor relations'],
-  'Kinh doanh / Bán hàng': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'account executive', 'key account'],
-  'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'ui/ux', 'figma', 'adobe', 'animation', 'motion', 'illustrat', 'creative director', 'art director'],
-  'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'tự động hóa', 'qc', 'quality control', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì'],
-  'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad', 'kết cấu'],
-  'Vận tải / Logistics / Chuỗi cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'kho vận', 'forwarder', 'procurement', 'mua hàng'],
-  'Bán lẻ / Tiêu dùng': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer goods', 'siêu thị'],
-  'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'tour guide', 'hospitality', 'chef'],
-  'Y tế / Dược phẩm / Chăm sóc sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinical', 'lab', 'chăm sóc sức khỏe'],
-  'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'ngôn ngữ', 'giáo dục'],
-  'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản', 'aquaculture', 'agri'],
-  'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản', 'broker', 'leasing'],
-  'Truyền thông / Báo chí': ['báo chí', 'journalist', 'pr ', 'public relations', 'media', 'broadcast'],
-  'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment', 'esports'],
+  'CNTT / Phần mềm': ['frontend', 'backend', 'developer', 'dev ', 'lập trình', 'software', 'react', 'nodejs', 'java', 'python', 'devops', 'data', 'mobile', 'flutter', 'fullstack', 'qa', 'tester', 'scrum', 'công nghệ thông tin', 'typescript', 'golang', 'php', 'ruby', 'swift', 'kotlin', 'angular', 'vue', '.net', 'c++', 'blockchain', 'ai engineer', 'ml engineer'],
+  'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'crm'],
+  'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor'],
+  'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'cfo', 'tín dụng', 'giao dịch viên'],
+  'Nhân sự / Hành / Pháp lý': ['nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'compliance', 'hr', 'c&b', 'chuyên viên nhân sự', 'luật'],
+  'Kinh doanh / CSKH': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'key account', 'chăm sóc khách hàng', 'cskh', 'customer service', 'tư vấn viên', 'telemarketing'],
+  'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'figma', 'adobe', 'animation', 'ui/ux', 'creative director', 'đồ họa', 'illustrator', 'video editor', 'dựng phim', 'designer'],
+  'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'qc', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì', 'điện lạnh', 'kỹ sư', 'vận hành'],
+  'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad', 'thi công', 'giám sát', 'bản vẽ'],
+  'Vận tải / Logistics / Cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'forwarder', 'procurement', 'vận tải', 'giao nhận', 'lái xe', 'tài xế', 'kho bãi'],
+  'Bán lẻ / LFP / Thời trang': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer', 'bán hàng', 'thu ngân', 'cửa hàng', 'thời trang', 'mỹ phẩm', 'trang sức', 'giày da'],
+  'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'hospitality', 'chef', 'bếp', 'pha chế', 'barista', 'phục vụ', 'bồi bàn', 'lễ tân', 'tour guide', 'hướng dẫn viên'],
+  'Y tế / Dược phẩm / Sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinic', 'chăm sóc sức khỏe', 'bác sĩ', 'phòng khám', 'trình dược viên'],
+  'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'giáo dục', 'đào tạo', 'giảng viên', 'trợ giảng', 'tiếng anh'],
+  'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản', 'lâm nghiệp', 'chăn nuôi', 'thú y'],
+  'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản', 'địa ốc', 'căn hộ'],
+  'Truyền thông / Sự kiện': ['báo chí', 'journalist', 'public relations', 'media', 'broadcast', 'sự kiện', 'event', 'phóng viên', 'truyền hình'],
+  'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment', 'thẩm mỹ'],
+  'Bảo hiểm / Tư vấn': ['bảo hiểm', 'insurance', 'tư vấn bảo hiểm'],
+  'Đa lĩnh vực / Khác': ['ngo', 'phi chính phủ', 'giúp việc', 'bảo vệ', 'tạp vụ', 'trợ lý', 'thư ký', 'part time', 'bán thời gian']
 };
 
 @Injectable()
@@ -55,23 +57,32 @@ export class JobPostingsService {
     @InjectQueue('matching') private matchingQueue: Queue,
     private aiService: AiService,
     private subscriptionsService: SubscriptionsService,
-  ) { }
+  ) {}
 
   private readonly VIOLATION_LIMIT = 3;
   private readonly logger = new Logger(JobPostingsService.name);
 
-  private async enrichKeywordsInBackground(jobId: string, title: string, hardSkills: string[]) {
+  private async enrichKeywordsInBackground(
+    jobId: string,
+    title: string,
+    hardSkills: string[],
+  ) {
     try {
       if (!hardSkills || hardSkills.length === 0) return;
-      const expandedSkills = await this.aiService.expandJobKeywords(title, hardSkills);
+      const expandedSkills = await this.aiService.expandJobKeywords(
+        title,
+        hardSkills,
+      );
       if (Object.keys(expandedSkills).length > 0) {
-        const job = await this.prisma.jobPosting.findUnique({ where: { jobPostingId: jobId } });
+        const job = await this.prisma.jobPosting.findUnique({
+          where: { jobPostingId: jobId },
+        });
         if (job && job.structuredRequirements) {
           const reqs = job.structuredRequirements as any;
           reqs.expandedSkills = expandedSkills;
           await this.prisma.jobPosting.update({
             where: { jobPostingId: jobId },
-            data: { structuredRequirements: reqs }
+            data: { structuredRequirements: reqs },
           });
           // Re-trigger matching queue to apply the new enriched keywords
           await this.matchingQueue.add('match', { jobId });
@@ -103,6 +114,7 @@ export class JobPostingsService {
       minExperienceYears,
       jobTier,
       branchIds,
+      isAiGenerated,
       ...rest
     } = createJobPostingDto as any;
 
@@ -122,7 +134,10 @@ export class JobPostingsService {
     const requestedJobTier = jobTier || 'BASIC';
 
     // TRỪ XU HOẶC CHECK QUOTA GÓI TRƯỚC KHI TẠO JOB
-    await this.subscriptionsService.checkPermissionAndDeduct(userId, requestedJobTier);
+    await this.subscriptionsService.checkPermissionAndDeduct(
+      userId,
+      requestedJobTier,
+    );
 
     // Kiểm tra logic lương
     if (
@@ -134,7 +149,6 @@ export class JobPostingsService {
         'Lương tối thiểu không thể lớn hơn lương tối đa.',
       );
     }
-
 
     const originalUrl =
       'manual-' + Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -151,6 +165,7 @@ export class JobPostingsService {
 
     let aiReliabilityScore: number;
     let finalStatus: JobStatus = JobStatus.PENDING;
+    let modResult: any = null;
 
     if (containsBadWords) {
       // Blacklist hit → từ chối ngay, không cần gọi AI
@@ -158,24 +173,28 @@ export class JobPostingsService {
       finalStatus = JobStatus.REJECTED;
     } else {
       // Gọi Gemini để kiểm duyệt nội dung thật
-      const modResult = await this.aiService.moderateJobContent(
+      modResult = await this.aiService.moderateJobContent(
         createJobPostingDto.title,
         createJobPostingDto.description,
         createJobPostingDto.requirements,
         createJobPostingDto.benefits,
         hardSkills,
+        requestedJobTier,
       );
       aiReliabilityScore = modResult.score;
 
       if (!modResult.safe || modResult.score < 50) {
         finalStatus = JobStatus.PENDING; // Cần admin duyệt thủ công
-        this.logger.warn(`[JobPostings] JD "${createJobPostingDto.title}" flagged by AI: ${modResult.reason} | flags: ${modResult.flags.join(', ')}`);
+        this.logger.warn(
+          `[JobPostings] JD "${createJobPostingDto.title}" flagged by AI: ${modResult.reason} | flags: ${modResult.flags.join(', ')}`,
+        );
       } else {
         finalStatus = JobStatus.APPROVED; // AI xác nhận an toàn → tự động duyệt
-        this.logger.log(`[JobPostings] JD "${createJobPostingDto.title}" auto-approved (score=${aiReliabilityScore}, usedAI=${modResult.usedAI})`);
+        this.logger.log(
+          `[JobPostings] JD "${createJobPostingDto.title}" auto-approved (score=${aiReliabilityScore}, usedAI=${modResult.usedAI})`,
+        );
       }
     }
-
 
     const job = await this.prisma.jobPosting.create({
       data: {
@@ -196,10 +215,16 @@ export class JobPostingsService {
           softSkills: softSkills || [],
           minExperienceYears: minExperienceYears || 0,
           vacancies: createJobPostingDto.vacancies || 1,
+          aiFeedback: modResult?.feedback || null,
+          aiFlags: modResult?.flags || [],
+          aiReason: modResult?.reason || null,
+          isAiGenerated: isAiGenerated === true,
         },
         branches: {
-          connect: createJobPostingDto.branchIds?.map(id => ({ branchId: id })) || []
-        }
+          connect:
+            createJobPostingDto.branchIds?.map((id) => ({ branchId: id })) ||
+            [],
+        },
       },
       include: {
         company: true,
@@ -223,12 +248,16 @@ export class JobPostingsService {
     await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
     if (requestedJobTier === 'PROFESSIONAL' || requestedJobTier === 'URGENT') {
-      this.enrichKeywordsInBackground(job.jobPostingId, job.title, hardSkills || []);
+      this.enrichKeywordsInBackground(
+        job.jobPostingId,
+        job.title,
+        hardSkills || [],
+      );
     }
 
     if (finalStatus === 'APPROVED') {
-      let title = 'Tin tuyển dụng được duyệt tự động';
-      let message = `Tin tuyển dụng "${job.title}" của bạn đã được hệ thống AI tự động phê duyệt an toàn.`;
+      const title = 'Tin tuyển dụng được duyệt tự động';
+      const message = `Tin tuyển dụng "${job.title}" của bạn đã được hệ thống AI tự động phê duyệt an toàn.`;
       await this.notificationsService.create(
         userId,
         title,
@@ -236,19 +265,17 @@ export class JobPostingsService {
         'success',
         '/recruiter/jobs',
       );
-      this.messagesGateway.server
-        .to(`user_${userId}`)
-        .emit('notification', {
-          title,
-          message,
-          type: 'success',
-          link: '/recruiter/jobs',
-        });
+      this.messagesGateway.server.to(`user_${userId}`).emit('notification', {
+        title,
+        message,
+        type: 'success',
+        link: '/recruiter/jobs',
+      });
       this.messagesGateway.server.emit('adminJobUpdated');
       this.triggerJobNotifications(job);
     } else if (finalStatus === 'REJECTED' && containsBadWords) {
-      let title = 'Tin tuyển dụng bị từ chối tự động';
-      let message = `Tin tuyển dụng "${job.title}" của bạn đã bị từ chối do vi phạm quy định. Từ khóa vi phạm: ${foundWords.join(', ')}.`;
+      const title = 'Tin tuyển dụng bị từ chối tự động';
+      const message = `Tin tuyển dụng "${job.title}" của bạn đã bị từ chối do vi phạm quy định. Từ khóa vi phạm: ${foundWords.join(', ')}.`;
       await this.notificationsService.create(
         userId,
         title,
@@ -256,14 +283,12 @@ export class JobPostingsService {
         'error',
         '/recruiter/jobs',
       );
-      this.messagesGateway.server
-        .to(`user_${userId}`)
-        .emit('notification', {
-          title,
-          message,
-          type: 'error',
-          link: '/recruiter/jobs',
-        });
+      this.messagesGateway.server.to(`user_${userId}`).emit('notification', {
+        title,
+        message,
+        type: 'error',
+        link: '/recruiter/jobs',
+      });
       this.messagesGateway.server.emit('adminJobUpdated');
     }
     const admins = await this.prisma.user.findMany({
@@ -273,13 +298,15 @@ export class JobPostingsService {
     });
 
     if (admins.length > 0) {
-      const title = finalStatus === 'REJECTED' && containsBadWords
-        ? 'Tin tuyển dụng vi phạm quy định'
-        : 'Tin tuyển dụng mới cần duyệt';
+      const title =
+        finalStatus === 'REJECTED' && containsBadWords
+          ? 'Tin tuyển dụng vi phạm quy định'
+          : 'Tin tuyển dụng mới cần duyệt';
 
-      const message = finalStatus === JobStatus.REJECTED && containsBadWords
-        ? `Hệ thống vừa từ chối tự động tin tuyển dụng "${job.title}" từ công ty ${recruiter.company?.companyName || 'mới'} do chứa từ khóa vi phạm: ${foundWords.join(', ')}.`
-        : `Nhà tuyển dụng ${recruiter.company?.companyName || 'mới'} vừa đăng tin "${job.title}". Vui lòng kiểm tra và phê duyệt.`;
+      const message =
+        finalStatus === JobStatus.REJECTED && containsBadWords
+          ? `Hệ thống vừa từ chối tự động tin tuyển dụng "${job.title}" từ công ty ${recruiter.company?.companyName || 'mới'} do chứa từ khóa vi phạm: ${foundWords.join(', ')}.`
+          : `Nhà tuyển dụng ${recruiter.company?.companyName || 'mới'} vừa đăng tin "${job.title}". Vui lòng kiểm tra và phê duyệt.`;
 
       const notifyType = finalStatus === 'REJECTED' ? 'error' : 'info';
 
@@ -313,8 +340,22 @@ export class JobPostingsService {
     if (!location) return undefined;
 
     const LOCATION_ALIASES: Record<string, string[]> = {
-      'Hồ Chí Minh': ['TPHCM', 'TP HCM', 'TP. HCM', 'Ho Chi Minh', 'HCM', 'Thành phố Hồ Chí Minh', 'TP Hồ Chí Minh'],
-      'Hà Nội': ['Ha Noi', 'Hanoi', 'Thành phố Hà Nội', 'TP Hà Nội', 'TP. Hà Nội'],
+      'Hồ Chí Minh': [
+        'TPHCM',
+        'TP HCM',
+        'TP. HCM',
+        'Ho Chi Minh',
+        'HCM',
+        'Thành phố Hồ Chí Minh',
+        'TP Hồ Chí Minh',
+      ],
+      'Hà Nội': [
+        'Ha Noi',
+        'Hanoi',
+        'Thành phố Hà Nội',
+        'TP Hà Nội',
+        'TP. Hà Nội',
+      ],
       'Đà Nẵng': ['Da Nang', 'Danang', 'Thành phố Đà Nẵng'],
       'Cần Thơ': ['Can Tho', 'Thành phố Cần Thơ'],
       'Hải Phòng': ['Hai Phong', 'Thành phố Hải Phòng'],
@@ -325,21 +366,21 @@ export class JobPostingsService {
 
     // Direct lookup
     if (LOCATION_ALIASES[location]) {
-      LOCATION_ALIASES[location].forEach(v => variants.add(v));
+      LOCATION_ALIASES[location].forEach((v) => variants.add(v));
     }
 
     // Reverse lookup: input might be an alias, find the canonical
     for (const [canonical, aliases] of Object.entries(LOCATION_ALIASES)) {
-      if (aliases.some(a => a.toLowerCase() === location.toLowerCase())) {
+      if (aliases.some((a) => a.toLowerCase() === location.toLowerCase())) {
         variants.add(canonical);
-        aliases.forEach(v => variants.add(v));
+        aliases.forEach((v) => variants.add(v));
       }
     }
 
     return {
-      OR: Array.from(variants).map(v => ({
-        locationCity: { contains: v, mode: 'insensitive' }
-      }))
+      OR: Array.from(variants).map((v) => ({
+        locationCity: { contains: v, mode: 'insensitive' },
+      })),
     };
   }
 
@@ -376,7 +417,10 @@ export class JobPostingsService {
       ids = result.ids;
       total = result.total;
     } catch (error) {
-      console.warn("Elasticsearch/SearchService failed, falling back to Prisma", error?.message);
+      console.warn(
+        'Elasticsearch/SearchService failed, falling back to Prisma',
+        error?.message,
+      );
       return this.findAllPrisma(query, userId);
     }
 
@@ -391,7 +435,7 @@ export class JobPostingsService {
     }
 
     // Fetch full data from Prisma using IDs from ES
-    const whereCondition: any = { 
+    const whereCondition: any = {
       jobPostingId: { in: ids },
       status: 'APPROVED',
     };
@@ -446,12 +490,14 @@ export class JobPostingsService {
     const { search, location, jobType, jobTier, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = { 
+    const where: any = {
       status: 'APPROVED',
     };
     // Industry filter: keyword-based matching via INDUSTRY_TAG_MAP
     const { industry } = query;
-    const industryKeywords = industry ? (INDUSTRY_TAG_MAP[industry] || [industry]) : [];
+    const industryKeywords = industry
+      ? INDUSTRY_TAG_MAP[industry] || [industry]
+      : [];
 
     // Build all filter clauses — use AND to combine safely
     const andClauses: any[] = [];
@@ -469,14 +515,16 @@ export class JobPostingsService {
         OR: [
           { title: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
-          { company: { companyName: { contains: search, mode: 'insensitive' } } },
+          {
+            company: { companyName: { contains: search, mode: 'insensitive' } },
+          },
         ],
       });
     }
 
     // Industry keyword filter
     if (industryKeywords.length > 0) {
-      const industryConds = industryKeywords.flatMap(kw => [
+      const industryConds = industryKeywords.flatMap((kw) => [
         { title: { contains: kw, mode: 'insensitive' } },
         { description: { contains: kw, mode: 'insensitive' } },
         { requirements: { contains: kw, mode: 'insensitive' } },
@@ -498,10 +546,7 @@ export class JobPostingsService {
           recruiter: true,
           branches: true,
         },
-        orderBy: [
-          { jobTier: 'desc' },
-          { refreshedAt: 'desc' }
-        ],
+        orderBy: [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
       }),
       this.prisma.jobPosting.count({ where }),
     ])) as [any[], number];
@@ -568,14 +613,23 @@ export class JobPostingsService {
   }
 
   async findOne(id: string, userId?: string, trackView: boolean = true) {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        id,
+      );
 
     const job = await this.prisma.jobPosting.findFirst({
       where: isUuid ? { jobPostingId: id } : { slug: id },
-      include: { company: true, recruiter: true, branches: true, applications: { select: { applicationId: true } } },
+      include: {
+        company: true,
+        recruiter: true,
+        branches: true,
+        applications: { select: { applicationId: true } },
+      },
     });
 
-    if (!job) throw new NotFoundException(`Không tìm thấy Job với ID/Slug ${id}`);
+    if (!job)
+      throw new NotFoundException(`Không tìm thấy Job với ID/Slug ${id}`);
 
     let isRecipientCandidate = true;
     if (userId) {
@@ -583,7 +637,9 @@ export class JobPostingsService {
         isRecipientCandidate = false;
       } else {
         // Check if it's a recruiter
-        const isRec = await this.prisma.recruiter.findUnique({ where: { userId } });
+        const isRec = await this.prisma.recruiter.findUnique({
+          where: { userId },
+        });
         if (isRec) isRecipientCandidate = false;
       }
     }
@@ -640,8 +696,8 @@ export class JobPostingsService {
             candidateId_jobPostingId: {
               candidateId: candidate.candidateId,
               jobPostingId: job.jobPostingId,
-            }
-          }
+            },
+          },
         });
         if (match) {
           matchScore = match.score;
@@ -654,23 +710,30 @@ export class JobPostingsService {
 
   async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
     // Kiểm tra tồn tại trước khi update (dùng findUnique để không trigger trackView)
-    const existingJob = await this.prisma.jobPosting.findUnique({ where: { jobPostingId: id } });
-    if (!existingJob) throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
+    const existingJob = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId: id },
+    });
+    if (!existingJob)
+      throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
 
-    const { branchIds, hardSkills, softSkills, minExperienceYears, ...rest } = updateJobPostingDto;
+    const { branchIds, hardSkills, softSkills, minExperienceYears, ...rest } =
+      updateJobPostingDto;
 
     // Kiểm tra blacklist khi cập nhật
     const { containsBadWords, foundWords } = this.validateBlacklist(
       updateJobPostingDto.title || existingJob.title,
       updateJobPostingDto.description || existingJob.description || '',
-      updateJobPostingDto.requirements || (existingJob.structuredRequirements as any)?.requirements,
-      updateJobPostingDto.benefits || (existingJob.structuredRequirements as any)?.benefits,
+      updateJobPostingDto.requirements ||
+        (existingJob.structuredRequirements as any)?.requirements,
+      updateJobPostingDto.benefits ||
+        (existingJob.structuredRequirements as any)?.benefits,
       hardSkills,
       softSkills,
     );
 
     const statusVal = (updateJobPostingDto as any).status;
-    const isStatusOnlyUpdate = Object.keys(updateJobPostingDto).length === 1 && statusVal !== undefined;
+    const isStatusOnlyUpdate =
+      Object.keys(updateJobPostingDto).length === 1 && statusVal !== undefined;
     let newStatus: JobStatus = statusVal || existingJob.status;
 
     if (!isStatusOnlyUpdate) {
@@ -694,22 +757,41 @@ export class JobPostingsService {
           ...(softSkills !== undefined && { softSkills }),
           ...(minExperienceYears !== undefined && { minExperienceYears }),
         },
-        ...(branchIds && { branches: { set: branchIds.map((id: string) => ({ branchId: id })) } }),
+        ...(branchIds && {
+          branches: { set: branchIds.map((id: string) => ({ branchId: id })) },
+        }),
         updatedAt: new Date(),
       },
       include: { company: true, recruiter: true },
     });
 
     // Nếu cập nhật dẫn đến vi phạm -> Cộng 1 lượt vi phạm
-    if (newStatus === JobStatus.REJECTED && containsBadWords && result.recruiterId) {
+    if (
+      newStatus === JobStatus.REJECTED &&
+      containsBadWords &&
+      result.recruiterId
+    ) {
       await this.checkAndAutoLockRecruiter(result.recruiterId);
-      
+
       // Thông báo cho nhà tuyển dụng
       const title = 'Tin tuyển dụng bị từ chối sau khi cập nhật';
       const message = `Tin tuyển dụng "${result.title}" của bạn đã bị từ chối do chứa từ khóa vi phạm mới: ${foundWords.join(', ')}.`;
       if (result.recruiter?.userId) {
-        await this.notificationsService.create(result.recruiter.userId, title, message, 'error', '/recruiter/jobs');
-        this.messagesGateway.server.to(`user_${result.recruiter.userId}`).emit('notification', { title, message, type: 'error', link: '/recruiter/jobs' });
+        await this.notificationsService.create(
+          result.recruiter.userId,
+          title,
+          message,
+          'error',
+          '/recruiter/jobs',
+        );
+        this.messagesGateway.server
+          .to(`user_${result.recruiter.userId}`)
+          .emit('notification', {
+            title,
+            message,
+            type: 'error',
+            link: '/recruiter/jobs',
+          });
       }
     }
 
@@ -720,8 +802,16 @@ export class JobPostingsService {
       await this.searchService.deleteJob(id);
     }
 
-    if ((existingJob.jobTier === 'PROFESSIONAL' || existingJob.jobTier === 'URGENT') && hardSkills !== undefined) {
-      this.enrichKeywordsInBackground(result.jobPostingId, result.title, hardSkills);
+    if (
+      (existingJob.jobTier === 'PROFESSIONAL' ||
+        existingJob.jobTier === 'URGENT') &&
+      hardSkills !== undefined
+    ) {
+      this.enrichKeywordsInBackground(
+        result.jobPostingId,
+        result.title,
+        hardSkills,
+      );
     }
 
     return result;
@@ -801,7 +891,10 @@ export class JobPostingsService {
     if (status === JobStatus.APPROVED) {
       // AI Feature cho PROFESSIONAL
       if (updated.jobTier === 'PROFESSIONAL') {
-        const skills = await this.aiService.extractFocusSkills(updated.title, updated.description || '');
+        const skills = await this.aiService.extractFocusSkills(
+          updated.title,
+          updated.description || '',
+        );
         if (skills.length > 0) {
           const structured = (updated.structuredRequirements as any) || {};
           structured.focusSkills = skills;
@@ -853,10 +946,8 @@ export class JobPostingsService {
       }
     }
 
-    // Auto-lock check after reject
-    if (status === JobStatus.REJECTED && updated.recruiterId) {
-      await this.checkAndAutoLockRecruiter(updated.recruiterId);
-    }
+    // Không cộng điểm vi phạm khi admin từ chối thủ công (per user request).
+    // Điểm vi phạm chỉ được cộng khi tin bị phát hiện vi phạm từ khóa (trong hàm create/update).
 
     if (status === JobStatus.APPROVED) {
       this.syncJobToES(updated);
@@ -966,14 +1057,7 @@ export class JobPostingsService {
       }
     }
 
-    // Auto-lock check for bulk reject: increment violation for EACH rejected job
-    if (status === JobStatus.REJECTED) {
-      for (const job of jobsToUpdate) {
-        if (job.recruiterId) {
-          await this.checkAndAutoLockRecruiter(job.recruiterId);
-        }
-      }
-    }
+    // Không cộng điểm vi phạm khi admin từ chối thủ công.
 
     this.messagesGateway.server.emit('adminJobUpdated');
 
@@ -984,20 +1068,26 @@ export class JobPostingsService {
   }
 
   /**
-   * Tăng việt count sau mỗi lần tin bị từ chối bởi Admin.
+   * Tăng vi phạm (violationCount).
    * Nếu vượt ngưỡng (VIOLATION_LIMIT) → khóa tài khoản, gửi thông báo realtime.
    */
   private async checkAndAutoLockRecruiter(recruiterId: string): Promise<void> {
-    console.log(`[VIOLATION] Incrementing violation for recruiter: ${recruiterId}`);
+    console.log(
+      `[VIOLATION] Incrementing violation for recruiter: ${recruiterId}`,
+    );
     const updated = await this.prisma.recruiter.update({
       where: { recruiterId },
       data: { violationCount: { increment: 1 } },
       include: { user: true },
     });
-    console.log(`[VIOLATION] Current count for ${recruiterId}: ${updated.violationCount}`);
+    console.log(
+      `[VIOLATION] Current count for ${recruiterId}: ${updated.violationCount}`,
+    );
 
     const newCount = updated.violationCount;
-    this.messagesGateway.server.emit('adminUserUpdated', { email: updated.user.email });
+    this.messagesGateway.server.emit('adminUserUpdated', {
+      email: updated.user.email,
+    });
 
     if (newCount < this.VIOLATION_LIMIT) {
       // Gửi cảnh báo nhưng chưa khóa
@@ -1043,7 +1133,9 @@ export class JobPostingsService {
       .to(`user_${updated.userId}`)
       .emit('accountLocked');
 
-    this.messagesGateway.server.emit('adminAccountLocked', { email: updated.user.email });
+    this.messagesGateway.server.emit('adminAccountLocked', {
+      email: updated.user.email,
+    });
   }
 
   async remove(id: string) {
@@ -1107,7 +1199,7 @@ export class JobPostingsService {
             '🔥 Cơ hội việc làm Tuyển Gấp!',
             `Công ty ${job.company?.companyName || 'đối tác'} đang tuyển gấp vị trí "${job.title}". Hãy apply ngay!`,
             'info',
-            `/jobs/${job.jobPostingId}`
+            `/jobs/${job.jobPostingId}`,
           );
           this.messagesGateway.server
             .to(`user_${c.userId}`)
@@ -1136,24 +1228,24 @@ export class JobPostingsService {
         recruiter: {
           recruiterSubscription: {
             planType: 'GROWTH',
-            expiryDate: { gt: new Date() }
-          }
-        }
-      }
+            expiryDate: { gt: new Date() },
+          },
+        },
+      },
     });
 
     if (jobs.length > 0) {
       console.log(`[Cron] Found ${jobs.length} GROWTH jobs to refresh.`);
-      const ids = jobs.map(j => j.jobPostingId);
+      const ids = jobs.map((j) => j.jobPostingId);
 
       await this.prisma.jobPosting.updateMany({
         where: { jobPostingId: { in: ids } },
-        data: { refreshedAt: new Date() }
+        data: { refreshedAt: new Date() },
       });
 
       const updatedJobs = await this.prisma.jobPosting.findMany({
         where: { jobPostingId: { in: ids } },
-        include: { company: true }
+        include: { company: true },
       });
 
       for (const j of updatedJobs) {
@@ -1190,7 +1282,9 @@ export class JobPostingsService {
     // We need recruiterId to check if unlocked
     let recruiterId: string | null = null;
     if (recruiterIdFromToken) {
-      const recruiter = await this.prisma.recruiter.findUnique({ where: { userId: recruiterIdFromToken } });
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId: recruiterIdFromToken },
+      });
       if (recruiter) recruiterId = recruiter.recruiterId;
     }
 
@@ -1199,9 +1293,9 @@ export class JobPostingsService {
     if (recruiterId) {
       const unlocked = await this.prisma.candidateUnlock.findMany({
         where: { recruiterId, jobPostingId: jobId },
-        select: { candidateId: true }
+        select: { candidateId: true },
       });
-      unlocked.forEach(u => unlockedIds.add(u.candidateId));
+      unlocked.forEach((u) => unlockedIds.add(u.candidateId));
     }
 
     // Enrich with minimum candidate details for the dashboard
@@ -1214,7 +1308,9 @@ export class JobPostingsService {
         });
         return {
           ...m,
-          fullName: isUnlocked ? (candidate?.fullName || 'Ứng viên') : `Ứng viên #${m.candidateId.slice(0, 4)}`,
+          fullName: isUnlocked
+            ? candidate?.fullName || 'Ứng viên'
+            : `Ứng viên #${m.candidateId.slice(0, 4)}`,
           major: candidate?.major || '',
           user: { avatar: isUnlocked ? candidate?.user?.avatar : null },
           isUnlocked,
@@ -1271,17 +1367,23 @@ export class JobPostingsService {
   async renew(jobId: string, userId: string) {
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      include: { recruiter: true }
+      include: { recruiter: true },
     });
-    
+
     if (!job) throw new NotFoundException('Tin tuyển dụng không tồn tại');
-    if (job.recruiter?.userId !== userId) throw new ForbiddenException('Bạn không có quyền gia hạn tin này');
+    if (job.recruiter?.userId !== userId)
+      throw new ForbiddenException('Bạn không có quyền gia hạn tin này');
     if ((job.status as any) !== 'EXPIRED' && (job.status as any) !== 'CLOSED') {
-      throw new ForbiddenException('Chỉ có thể gia hạn tin đã hết hạn hoặc đã khóa');
+      throw new ForbiddenException(
+        'Chỉ có thể gia hạn tin đã hết hạn hoặc đã khóa',
+      );
     }
 
     // Trừ quota vì gia hạn coi như dùng lượt
-    await this.subscriptionsService.checkPermissionAndDeduct(userId, job.jobTier);
+    await this.subscriptionsService.checkPermissionAndDeduct(
+      userId,
+      job.jobTier,
+    );
 
     // Renew = gia hạn -> Tạo mốc ngày giờ mới và gán lại APPROVED
     const updatedJob = await this.prisma.jobPosting.update({
@@ -1289,9 +1391,9 @@ export class JobPostingsService {
       data: {
         status: 'APPROVED',
         createdAt: new Date(),
-        refreshedAt: new Date()
+        refreshedAt: new Date(),
       },
-      include: { company: true, recruiter: { include: { user: true } } }
+      include: { company: true, recruiter: { include: { user: true } } },
     });
 
     try {

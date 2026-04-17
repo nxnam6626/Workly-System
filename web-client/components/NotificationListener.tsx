@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useSocketStore } from '@/stores/socket';
 import { useAuthStore } from '@/stores/auth';
 import toast, { Toast } from 'react-hot-toast';
-import { Bell, Briefcase, FileText, CheckCircle, Info } from 'lucide-react';
+import { Bell, Briefcase, FileText, CheckCircle, Info, X, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function NotificationListener() {
@@ -63,18 +63,77 @@ export function NotificationListener() {
       );
     };
 
-    const handleAccountLocked = () => {
-       toast.error('Tài khoản của bạn đã bị khoá bởi Quản trị viên. Hệ thống tự động đăng xuất.', { duration: 8000 });
-       logout();
-       router.push('/login');
+    const handleViolationWarn = (msg: string) => {
+      toast.custom(
+        (t) => (
+          <div
+            className={`${
+              t.visible ? 'animate-in slide-in-from-top-2 fade-in duration-300' : 'animate-out slide-out-to-top-2 fade-out duration-300'
+            } max-w-sm w-full bg-white shadow-xl shadow-red-900/5 rounded-2xl pointer-events-auto flex flex-col ring-1 ring-black/5 overflow-hidden border border-red-100 z-[999]`}
+          >
+            <div className="p-5 flex items-start gap-4">
+              <div className="flex-shrink-0 p-2.5 bg-red-50 rounded-2xl border border-red-100/50">
+                <EyeOff className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="flex-1 pt-1">
+                <h3 className="text-[15px] font-bold text-slate-800">Cảnh cáo Hệ thống</h3>
+                <p className="mt-1.5 text-[14px] text-slate-600 leading-relaxed font-medium">
+                  {msg}
+                </p>
+              </div>
+            </div>
+            <div className="border-t border-slate-100/60 bg-slate-50/50 flex">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="w-full py-3 flex items-center justify-center text-sm font-bold text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+              >
+                Tôi đã hiểu
+              </button>
+            </div>
+          </div>
+        ),
+        { duration: 6000 }
+      );
+    };
+
+    const handleAccountLocked = (msg?: string) => {
+      const displayMsg = msg || 'Tài khoản của bạn đã bị khoá bởi Quản trị viên do vi phạm điều khoản.';
+      toast.custom(
+        (t) => (
+          <div
+            className={`${
+              t.visible ? 'animate-in zoom-in-95 fade-in duration-300' : 'animate-out zoom-out-95 fade-out duration-300'
+            } max-w-md w-full bg-slate-900 shadow-2xl shadow-red-900/20 rounded-2xl pointer-events-auto flex flex-col ring-1 ring-white/10 overflow-hidden border border-red-900/30 z-[999]`}
+          >
+            <div className="p-6 flex items-start gap-4 bg-gradient-to-br from-red-900/20 to-slate-900">
+              <div className="flex-shrink-0 p-3 bg-red-500/10 rounded-2xl ring-1 ring-red-500/20 shadow-inner">
+                <X className="w-7 h-7 text-red-400" />
+              </div>
+              <div className="flex-1 pt-1">
+                <h3 className="text-base font-bold text-red-400 tracking-wide uppercase text-sm">Lệnh khóa vĩnh viễn</h3>
+                <p className="mt-2 text-[15px] text-slate-300 leading-relaxed">
+                  {displayMsg}
+                </p>
+              </div>
+            </div>
+          </div>
+        ),
+        { duration: 8000 }
+      );
+      setTimeout(() => {
+        logout();
+        router.push('/login');
+      }, 5000);
     };
 
     socket.on('notification', handleNotification);
     socket.on('accountLocked', handleAccountLocked);
+    socket.on('violationWarn', handleViolationWarn);
 
     return () => {
       socket.off('notification', handleNotification);
       socket.off('accountLocked', handleAccountLocked);
+      socket.off('violationWarn', handleViolationWarn);
     };
   }, [socket, isConnected, logout, router]);
 

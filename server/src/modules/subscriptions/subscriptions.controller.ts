@@ -25,6 +25,9 @@ export class SubscriptionsController {
   @Post('buy-cv-hunter')
   @Roles(Role.RECRUITER)
   async buyCvPackage(@Req() req, @Body() body: { packageType: string }) {
-    return this.subscriptionsService.buyCvPackage(req.user.userId, body.packageType);
+    return this.subscriptionsService.buyCvPackage(
+      req.user.userId,
+      body.packageType,
+    );
   }
 }

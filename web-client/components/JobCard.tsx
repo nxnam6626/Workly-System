@@ -25,6 +25,7 @@ export interface Job {
   slug?: string | null;
   jobTier?: 'BASIC' | 'PROFESSIONAL' | 'URGENT';
   score?: number;
+  aiReliabilityScore?: number;
 }
 
 interface JobCardProps {
@@ -96,11 +97,6 @@ export function JobCard({ job }: JobCardProps) {
               <span>⭐️</span>Nổi Bật
             </div>
           )}
-          {job.score !== undefined && (
-            <div className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-fuchsia-500/30 flex items-center gap-1 shrink-0">
-              🎯 Phù hợp {job.score}%
-            </div>
-          )}
         </div>
 
         {/* Top: Logo, Title & Company */}
@@ -137,21 +133,39 @@ export function JobCard({ job }: JobCardProps) {
         </div>
 
         {/* Middle: Key details */}
-        <div className="space-y-1 mb-4 ml-0.5">
-          <div className="flex items-center gap-2 text-[#64748b]">
-            <MapPin className="w-3.5 h-3.5 opacity-60" />
-            <span className="text-[13px] font-medium truncate">{job.locationCity || "Toàn quốc"}</span>
+        <div className="space-y-2 mb-3 ml-0.5">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-slate-500">
+              <MapPin className="w-3.5 h-3.5 opacity-70 shrink-0" />
+              <span className="text-[13px] font-medium line-clamp-1">{job.locationCity || "Toàn quốc"}</span>
+            </div>
+            <div className="flex items-center gap-2 text-emerald-600">
+              <DollarSign className="w-4 h-4 shrink-0" />
+              <span className="text-[13px] font-bold">
+                {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-emerald-600 mt-1.5 mb-1.5">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-[13px] font-bold">
-              {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
-            </span>
-          </div>
+          
+          {/* AI and Match Badges */}
+          {((job.aiReliabilityScore !== undefined && job.aiReliabilityScore >= 80) || job.score !== undefined) && (
+            <div className="flex flex-wrap gap-2 pt-1.5 border-t border-slate-100 mt-2">
+              {job.aiReliabilityScore !== undefined && job.aiReliabilityScore >= 80 && (
+                <div className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
+                  ✨ Job Uy Tín
+                </div>
+              )}
+              {job.score !== undefined && (
+                <div className="bg-indigo-50 text-indigo-700 border border-indigo-100 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
+                  🎯 Phù hợp {job.score}%
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Bottom: Apply button */}
-        <div className="mt-4 flex justify-end">
+        <div className="mt-auto pt-4 flex justify-end">
           {job.hasApplied ? (
             <button
               disabled

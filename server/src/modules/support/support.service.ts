@@ -45,13 +45,21 @@ export class SupportService {
     for (const admin of admins) {
       const title = 'Yêu cầu hỗ trợ mới';
       const msg = `Có yêu cầu hỗ trợ mới từ ${dto.email}: "${dto.subject}"`;
-      await this.notificationsService.create(admin.userId, title, msg, 'info', '/admin/support');
-      this.messagesGateway.server.to(`user_${admin.userId}`).emit('notification', {
+      await this.notificationsService.create(
+        admin.userId,
         title,
-        message: msg,
-        type: 'info',
-        link: '/admin/support',
-      });
+        msg,
+        'info',
+        '/admin/support',
+      );
+      this.messagesGateway.server
+        .to(`user_${admin.userId}`)
+        .emit('notification', {
+          title,
+          message: msg,
+          type: 'info',
+          link: '/admin/support',
+        });
     }
 
     return request;
@@ -67,13 +75,17 @@ export class SupportService {
             email: true,
             status: true,
             userRoles: { select: { role: true } },
+            recruiter: { select: { violationCount: true } },
           },
         },
       },
     });
   }
 
-  async updateStatus(requestId: string, status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED') {
+  async updateStatus(
+    requestId: string,
+    status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED',
+  ) {
     return this.prisma.supportRequest.update({
       where: { requestId },
       data: { status, updatedAt: new Date() },

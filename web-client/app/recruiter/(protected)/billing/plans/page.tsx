@@ -98,12 +98,12 @@ const plans = [
     id: 'LITE',
     name: 'Gói LITE',
     icon: <Zap className="w-6 h-6 text-blue-500" />,
-    price: '450.000đ',
-    credits: 450,
+    price: '500.000đ',
+    credits: 500,
     description: 'Phù hợp cho công ty nhỏ, nhu cầu tuyển dụng vừa phải.',
     benefits: [
-      'Đăng 10 Tin BASIC',
-      'Đăng 5 Tin VIP & 2 Tin URGENT',
+      'Đăng 5 Tin BASIC',
+      'Đăng 2 Tin VIP',
       'Mở khóa AI Report Dashboard',
       'Tiết kiệm cực sốc cho Khách hàng trải nghiệm',
     ],
@@ -118,11 +118,11 @@ const plans = [
     credits: 2000,
     description: 'Dành cho doanh nghiệp cần đẩy mạnh tuyển dụng nhanh.',
     benefits: [
-      'Đăng 5 Tin VIP chuyên nghiệp',
-      'Đăng 2 Tin URGENT Tuyển gấp',
+      'Đăng 20 Tin Thường (BASIC)',
+      'Đăng 10 Tin VIP chuyên nghiệp',
+      'Đăng 3 Tin URGENT Tuyển gấp',
       'Mở khóa AI Report Dashboard',
-      'Auto-refresh tin sau 48h',
-      'Tiết kiệm 30% chi phí',
+      'Tiết kiệm 30% chi phí tuyển dụng',
     ],
     popular: true,
     theme: 'amber',
@@ -222,7 +222,7 @@ export default function PlansPage() {
           return (
             <div
               key={plan.id}
-              className={`bg-white rounded-3xl p-8 border-2 transition-all duration-300 relative ${
+              className={`bg-white h-full flex flex-col rounded-3xl p-8 border-2 transition-all duration-300 relative ${
                 isActive
                   ? 'border-indigo-500 shadow-xl ring-4 ring-indigo-500/20'
                   : plan.popular
@@ -281,6 +281,7 @@ export default function PlansPage() {
               ))}
             </div>
 
+            <div className="mt-auto">
               <button
                 onClick={() => handleBuyPlan(plan.id)}
                 disabled={loading === plan.id}
@@ -295,12 +296,14 @@ export default function PlansPage() {
                 {loading === plan.id ? 'Đang xử lý...' : isActive ? 'Gia hạn gói' : 'Mua gói ngay'}
                 {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
-              
-              {isActive && (
-                <p className="mt-4 text-center text-[13px] text-slate-500 flex items-center justify-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> Còn hạn tới {new Date(currentSubscription.expiryDate).toLocaleDateString('vi-VN')}
-                </p>
-              )}
+              <div className="h-6 mt-4 flex items-center justify-center">
+                {isActive && (
+                  <p className="text-center text-[13px] text-slate-500 flex items-center justify-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> Còn hạn tới {new Date(currentSubscription.expiryDate).toLocaleDateString('vi-VN')}
+                  </p>
+                )}
+              </div>
+            </div>
             </div>
           );
         })}

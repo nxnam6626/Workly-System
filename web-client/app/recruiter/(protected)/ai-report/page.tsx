@@ -9,7 +9,7 @@ import {
   AlertCircle, ChevronRight, Send, Loader2, BarChart3,
   Users, Eye, ArrowUp, ArrowDown, Star, Lightbulb,
   BotMessageSquare, RefreshCw, CheckCircle2,
-  ArrowUpRight, ArrowDownRight
+  ArrowUpRight, ArrowDownRight, Copy, Filter
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -81,6 +81,17 @@ function AiChatMini() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleAskAi = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        send(customEvent.detail);
+      }
+    };
+    window.addEventListener('ask-ai', handleAskAi);
+    return () => window.removeEventListener('ask-ai', handleAskAi);
+  }, [loading, input]); // Need to capture latest dependencies for send()
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
 
@@ -158,7 +169,7 @@ const INSIGHT_CONFIG: Record<string, { icon: any; colorClass: string; borderClas
   success: { icon: CheckCircle2, colorClass: 'text-emerald-600', borderClass: 'border-emerald-100 hover:border-emerald-200', labelBg: 'bg-emerald-50', labelText: 'text-emerald-600' },
 };
 
-function InsightCard({ insight, index, jdScores }: { insight: any; index: number; jdScores: any[] }) {
+function InsightCard({ insight, index, jdScores, planType }: { insight: any; index: number; jdScores: any[]; planType: string | null }) {
   const cfg = INSIGHT_CONFIG[insight.type] || INSIGHT_CONFIG.tip;
   const Icon = cfg.icon;
   const [showModal, setShowModal] = useState(false);
@@ -200,12 +211,23 @@ function InsightCard({ insight, index, jdScores }: { insight: any; index: number
             <p className="text-xs text-slate-400 mt-1">{affectedJds.length} JD cần cải thiện</p>
           )}
         </div>
-        <button
-          onClick={() => hasAffectedJds ? setShowModal(true) : undefined}
-          className={`shrink-0 flex items-center gap-0.5 text-xs font-bold ${cfg.labelText} hover:underline`}
-        >
-          {hasAffectedJds ? 'Xem danh sách' : 'Xem'} <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+        <div className="shrink-0 flex flex-col items-end gap-2 text-right">
+          <button
+            onClick={() => hasAffectedJds ? setShowModal(true) : undefined}
+            className={`flex items-center gap-0.5 text-xs font-bold ${cfg.labelText} hover:underline`}
+          >
+            {hasAffectedJds ? 'Xem danh sách' : 'Xem'} <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+          
+          {hasAffectedJds && (
+            <button
+              onClick={() => setShowModal(true)}
+              className="mt-1 flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm"
+            >
+              <Sparkles className="w-3 h-3" /> Sửa Tự Động
+            </button>
+          )}
+        </div>
       </motion.div>
 
       {/* Affected JDs Modal */}
@@ -239,26 +261,84 @@ function InsightCard({ insight, index, jdScores }: { insight: any; index: number
               </div>
               <div className="p-4 space-y-2 max-h-72 overflow-y-auto">
                 {affectedJds.map((jd: any, i: number) => (
-                  <Link
+                  <div
                     key={jd.id}
-                    href={`/recruiter/jobs/${jd.id}`}
-                    onClick={() => setShowModal(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 transition-all group"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 transition-all group"
                   >
-                    <span className="text-xs font-bold text-slate-400 w-5">{i + 1}</span>
-                    <span className="flex-1 text-sm font-medium text-slate-700 truncate group-hover:text-indigo-700">
-                      {jd.title}
-                    </span>
-                    {jd.score != null && (
-                      <span className={`text-xs font-black ${jd.score >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>{jd.score}đ</span>
-                    )}
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-400 transition-colors" />
-                  </Link>
+                    <Link
+                      href={`/recruiter/jobs/${jd.id}`}
+                      onClick={() => setShowModal(false)}
+                      className="flex items-center gap-3 flex-1 min-w-0"
+                    >
+                      <span className="text-xs font-bold text-slate-400 w-5">{i + 1}</span>
+                      <span className="flex-1 text-sm font-medium text-slate-700 truncate group-hover:text-indigo-700">
+                        {jd.title}
+                      </span>
+                      {jd.score != null && (
+                        <span className={`text-xs font-black ${jd.score >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>{jd.score}đ</span>
+                      )}
+                    </Link>
+                    
+                    <div className="shrink-0 flex items-center justify-end">
+                      {planType === 'GROWTH' ? (
+                        jd.autoFixedByAI ? (
+                          <button
+                            disabled
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg opacity-80 cursor-not-allowed whitespace-nowrap"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" /> Đã được chỉnh sửa
+                          </button>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              const loadingToast = toast.loading('AI đang tự động tối ưu JD...');
+                              try {
+                                await api.post('/ai/fix-job', { jobId: jd.id, insightInstruction: insight.desc });
+                                toast.success('Đã cập nhật JD thành công!', { id: loadingToast });
+                              } catch (e: any) {
+                                toast.error(e.response?.data?.message || 'Có lỗi xảy ra khi gọi AI!', { id: loadingToast });
+                              }
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" /> Sửa tự động
+                          </button>
+                        )
+                      ) : (
+                        <button
+                          onClick={() => {
+                            toast.error('Tính năng này chỉ dành cho tài khoản GROWTH');
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-400 hover:text-slate-500 text-xs font-bold rounded-lg transition-all whitespace-nowrap"
+                        >
+                          <Lock className="w-3.5 h-3.5" /> Sửa tự động
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
-              <div className="px-6 py-3 border-t border-slate-100 flex justify-between items-center">
-                <p className="text-xs text-slate-400">{insight.desc}</p>
-                <Link href="/recruiter/jobs" onClick={() => setShowModal(false)} className="text-xs text-indigo-600 font-bold hover:underline shrink-0 ml-4">Xem tất cả JD</Link>
+              <div className="px-5 py-3 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${insight.title}\n${insight.desc}`);
+                    toast.success('Đã copy gợi ý!');
+                  }}
+                  className="text-xs text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors font-medium border border-transparent hover:border-indigo-100 px-2 py-1 rounded-lg"
+                >
+                  <Copy className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Copy gợi ý</span>
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      window.dispatchEvent(new CustomEvent('ask-ai', { detail: `Hãy hướng dẫn tôi cách khắc phục vấn đề này:\n[${insight.title}]\n${insight.desc}` }));
+                    }}
+                    className="text-xs text-white bg-indigo-600 hover:bg-indigo-700 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                  >
+                    <BotMessageSquare className="w-3.5 h-3.5" /> Hỏi AI Cố Vấn
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -273,13 +353,16 @@ function InsightCard({ insight, index, jdScores }: { insight: any; index: number
 export default function AiReportPage() {
   const [loading, setLoading] = useState(true);
   const [canView, setCanView] = useState(false);
+  const [planType, setPlanType] = useState<string | null>(null);
   const [analysing, setAnalysing] = useState(false);
   const [data, setData] = useState<any>(null);
+  const [sortMode, setSortMode] = useState<'newest' | 'score_desc' | 'score_asc'>('newest');
 
   const checkAccess = async () => {
     try {
       const res = await api.get('/subscriptions/current');
       const sub = res.data;
+      setPlanType(sub?.planType);
       setCanView(sub?.canViewAIReport === true && new Date() <= new Date(sub.expiryDate));
     } catch {
       setCanView(false);
@@ -337,7 +420,15 @@ export default function AiReportPage() {
 
   const stats = data?.stats;
   const insights: any[] = data?.insights || [];
-  const jdScores: any[] = data?.jdScores || [];
+  let jdScores: any[] = data?.jdScores || [];
+  
+  if (sortMode === 'score_desc') {
+    jdScores = [...jdScores].sort((a, b) => b.score - a.score);
+  } else if (sortMode === 'score_asc') {
+    jdScores = [...jdScores].sort((a, b) => a.score - b.score);
+  }
+  // 'newest' uses the original order from backend which is sorted by creation date descending usually.
+
   const summary: string = data?.summary || '';
 
   const statCards = [
@@ -433,14 +524,27 @@ export default function AiReportPage() {
               <p className="text-xs mt-1">Hãy thêm JD và đăng tin để AI có dữ liệu phân tích.</p>
             </div>
           ) : (
-            insights.map((ins: any, i: number) => <InsightCard key={i} insight={ins} index={i} jdScores={jdScores} />)
+            insights.map((ins: any, i: number) => <InsightCard key={i} insight={ins} index={i} jdScores={jdScores} planType={planType} />)
           )}
 
           {/* JD Score Table */}
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-indigo-500" />
-              <h3 className="font-bold text-slate-800 text-sm">Điểm AI cho từng JD</h3>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-indigo-500" />
+                <h3 className="font-bold text-slate-800 text-sm">Điểm AI cho từng JD</h3>
+              </div>
+              <div className="relative group/filter">
+                <button className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-100 hover:border-indigo-100 transition-colors">
+                  <Filter className="w-3.5 h-3.5" />
+                  Sắp xếp: {sortMode === 'newest' ? 'Tin mới nhất' : sortMode === 'score_desc' ? 'Điểm cao đến thấp' : 'Điểm thấp đến cao'}
+                </button>
+                <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-xl p-1.5 opacity-0 invisible group-hover/filter:opacity-100 group-hover/filter:visible transition-all z-20">
+                  <button onClick={() => setSortMode('newest')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${sortMode === 'newest' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}>Tin Mới Nhất</button>
+                  <button onClick={() => setSortMode('score_desc')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${sortMode === 'score_desc' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}>Điểm từ Cao đến Thấp</button>
+                  <button onClick={() => setSortMode('score_asc')} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors ${sortMode === 'score_asc' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}>Điểm từ Thấp đến Cao</button>
+                </div>
+              </div>
             </div>
             {analysing ? (
               <div className="divide-y divide-slate-100">

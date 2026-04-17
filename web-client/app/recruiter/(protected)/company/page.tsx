@@ -81,10 +81,11 @@ export default function CompanyProfilePage() {
       const res = await fetch(`https://api.vietqr.io/v2/business/${formData.taxCode}`);
       const data = await res.json();
       if (data.code === '00' && data.data) {
-        toast.success(`Đã tự động điền Tên Công Ty: ${data.data.name}`);
+        toast.success(`Đã tự động điền Tên Công Ty & Địa chỉ!`);
         setFormData(prev => ({ 
           ...prev, 
           companyName: data.data.name,
+          address: data.data.address || prev.address,
           verifyStatus: 1 
         }));
       } else {
@@ -286,15 +287,15 @@ export default function CompanyProfilePage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400" /> Địa Chỉ Vị Trí
+                  <MapPin className="w-4 h-4 text-slate-400" /> Địa Chỉ Trụ Sở Chính
                 </label>
                 <input
                   type="text"
                   name="address"
                   value={formData.address}
-                  onChange={handleChange}
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200"
-                  placeholder="Địa chỉ trụ sở"
+                  readOnly
+                  placeholder="Sẽ được tự động điền cùng Tên công ty"
+                  className="w-full h-11 px-4 rounded-xl bg-slate-50 text-slate-500 font-medium border border-slate-200 cursor-not-allowed focus:outline-none transition-all duration-200"
                 />
               </div>
 

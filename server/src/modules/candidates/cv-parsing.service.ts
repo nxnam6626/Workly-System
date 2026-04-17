@@ -43,9 +43,10 @@ const CV_SCHEMA = {
         type: SchemaType.OBJECT,
         properties: {
           skillName: { type: SchemaType.STRING, description: 'Tên kỹ năng.' },
-          category: { 
-            type: SchemaType.STRING, 
-            description: 'Nhóm kỹ năng. BẮT BUỘC chọn 1 trong: "Ngôn ngữ", "Frontend", "Backend", "Database", "Mobile", "DevOps & Cloud", "Khác".' 
+          category: {
+            type: SchemaType.STRING,
+            description:
+              'Nhóm kỹ năng. BẮT BUỘC chọn 1 trong: "Ngôn ngữ", "Frontend", "Backend", "Database", "Mobile", "DevOps & Cloud", "Khác".',
           },
           level: {
             type: SchemaType.STRING,
@@ -180,7 +181,11 @@ export class CvParsingService {
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
     if (!this.genAI) throw new Error('Gemini API is not configured.');
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash-8b', 'gemini-1.5-flash'];
+    const modelsToTry = [
+      'gemini-2.5-flash',
+      'gemini-1.5-flash-8b',
+      'gemini-1.5-flash',
+    ];
     let lastError: any = null;
 
     for (const modelName of modelsToTry) {
@@ -199,24 +204,30 @@ export class CvParsingService {
         ]);
         const response = await result.response;
         const cleanText = response.text().trim();
-        
-        this.logger.log(`Extracted raw text using ${modelName}, length: ${cleanText.length} characters`);
-        
+
+        this.logger.log(
+          `Extracted raw text using ${modelName}, length: ${cleanText.length} characters`,
+        );
+
         if (cleanText.length < 20) {
           throw new Error('PDF_NO_TEXT');
         }
-        
+
         return cleanText;
       } catch (error: any) {
         lastError = error;
         const msg = error.message || '';
         this.logger.warn(`Model ${modelName} failed (${msg}). Trying next...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
-    
-    this.logger.error(`Tất cả model Gemini đều lỗi khi extract text từ PDF: ${lastError?.message}`);
-    throw new Error(`Failed to parse PDF using all Gemini models. Lỗi: ${lastError?.message}`);
+
+    this.logger.error(
+      `Tất cả model Gemini đều lỗi khi extract text từ PDF: ${lastError?.message}`,
+    );
+    throw new Error(
+      `Failed to parse PDF using all Gemini models. Lỗi: ${lastError?.message}`,
+    );
   }
 
   async parseCv(buffer: Buffer, retryCount = 0): Promise<CvParsedData | null> {

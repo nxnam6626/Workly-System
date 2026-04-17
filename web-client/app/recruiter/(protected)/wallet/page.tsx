@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { motion } from 'framer-motion';
-import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus, HelpCircle, X, Crown } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
+import { useAuthStore } from '@/stores/auth';
+
 
 function WalletContent() {
   const { wallet: globalWallet, fetchWallet } = useWalletStore();
@@ -21,6 +23,13 @@ function WalletContent() {
   const [processing, setProcessing] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const { user } = useAuthStore();
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [supportMessage, setSupportMessage] = useState('');
+  const [supportSubject, setSupportSubject] = useState('Hỗ trợ nạp tiền/Giao dịch Recruiter');
+  const [sendingSupport, setSendingSupport] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchWalletData();
@@ -40,17 +49,16 @@ function WalletContent() {
   const fetchWalletData = async () => {
     setLoading(true);
     try {
-      const [balanceRes, transRes, subRes] = await Promise.all([
+      const [balanceRes, transRes] = await Promise.all([
         api.get('/wallets/balance'),
-        api.get('/wallets/transactions'),
-        api.get('/subscriptions/current').catch(() => ({ data: null }))
+        api.get('/wallets/transactions')
       ]);
       await fetchWallet(); // Tự động sync với top navbar
       
       setCvUnlockQuota(balanceRes.data.cvUnlockQuota || 0);
       setCvUnlockQuotaMax(balanceRes.data.cvUnlockQuotaMax || 0);
       setTransactions(transRes.data || []);
-      setSubscription(subRes.data || null);
+      setSubscription(balanceRes.data.subscription || null);
     } catch (error) {
       console.error('Failed to load wallet data', error);
       toast.error('Không thể tải dữ liệu ví');
@@ -70,7 +78,7 @@ function WalletContent() {
     try {
       const { data } = await api.post('/wallets/top-up', { amount });
       if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+        setPaymentUrl(data.checkoutUrl);
       } else {
         toast.success(`Đã yêu cầu nạp ${amount} xu!`);
         setTopUpAmount('');
@@ -89,13 +97,37 @@ function WalletContent() {
     try {
       const { data } = await api.post(`/wallets/transactions/${txId}/resume`);
       if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+        setPaymentUrl(data.checkoutUrl);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Không thể tiếp tục thanh toán');
       fetchWalletData(); // refresh incase it was marked cancelled
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleSupportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportMessage.trim()) {
+      toast.error('Vui lòng nhập vấn đề bạn gặp phải');
+      return;
+    }
+    setSendingSupport(true);
+    try {
+      await api.post('/support/contact', {
+        email: user?.email || '',
+        name: user?.recruiter?.company?.companyName || user?.name || user?.email || '',
+        subject: supportSubject,
+        message: supportMessage
+      });
+      toast.success('Yêu cầu hỗ trợ đã được gửi. Chúng tôi sẽ xử lý ngay.');
+      setShowSupportModal(false);
+      setSupportMessage('');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Không thể gửi yêu cầu');
+    } finally {
+      setSendingSupport(false);
     }
   };
 
@@ -137,25 +169,50 @@ function WalletContent() {
             </div>
             <div className="relative z-10">
               <p className="text-indigo-100 font-medium mb-1 flex items-center gap-2">
-                <CreditCard className="w-4 h-4" /> Tổng số dư hiện có
+                <CreditCard className="w-4 h-4" /> Tổng số dư hiện hành
               </p>
               <div className="text-4xl font-bold tracking-tight mb-4 flex items-end gap-2">
                 {loading ? <Loader2 className="w-8 h-8 animate-spin" /> : balance.toLocaleString()}
                 <span className="text-xl font-medium text-indigo-200 mb-1">Xu</span>
               </div>
 
-              <div className="pt-4 border-t border-white/20 mt-6 flex justify-between items-center text-sm">
-                <span className="text-indigo-100">Cập nhật lúc</span>
-                <span className="font-medium text-white">{new Date().toLocaleTimeString('vi-VN')}</span>
+              <div className="flex items-center gap-4 pt-4 border-t border-white/20 mt-6">
+                <div className="flex-1">
+                  <p className="text-xs text-indigo-100 mb-0.5">Hạng tài khoản</p>
+                  <p className="font-bold text-white uppercase flex items-center gap-1.5 flex-wrap">
+                    {subscription?.planType ? (
+                      <>
+                        <Crown className="w-4 h-4 text-amber-300" />
+                        Gói {subscription.planType}
+                      </>
+                    ) : (
+                      'Tài khoản Thường'
+                    )}
+                  </p>
+                </div>
+                <div className="flex-[0.8] text-right">
+                  <p className="text-xs text-indigo-100 mb-0.5">Cập nhật lúc</p>
+                  <span className="font-medium text-white text-sm">{new Date().toLocaleTimeString('vi-VN')}</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Top Up Form */}
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-            <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-600" /> Nạp tiền vào ví
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" /> Nạp tiền vào ví
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setShowSupportModal(true)}
+                className="text-sm font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors"
+                title="Gặp rắc rối khi giao dịch? Nhận hỗ trợ"
+              >
+                <HelpCircle className="w-4 h-4" /> Hỗ trợ
+              </button>
+            </div>
             <form onSubmit={handleTopUp} className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-slate-600 mb-2 block">Số lượng Xu cần nạp</label>
@@ -359,6 +416,116 @@ function WalletContent() {
         </div>
 
       </div>
+
+      {/* Support Modal */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative"
+          >
+            <button 
+              onClick={() => setShowSupportModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="mb-6">
+              <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-4">
+                <HelpCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">Cần hỗ trợ nạp tiền?</h3>
+              <p className="text-sm text-slate-500 mt-1">Mô tả vấn đề bạn gặp phải (ví dụ: đã chuyển khoản nhưng chưa có xu, lỗi thanh toán). Admin sẽ hỗ trợ bạn ngay.</p>
+            </div>
+            
+            <form onSubmit={handleSupportSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Chủ đề hỗ trợ</label>
+                <select
+                  value={supportSubject}
+                  onChange={(e) => setSupportSubject(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm font-medium text-slate-700 appearance-none"
+                >
+                  <option value="Hỗ trợ nạp tiền/Khuyến mãi">Hỗ trợ nạp tiền/Khuyến mãi</option>
+                  <option value="Hỗ trợ mua gói tin/Nâng cấp tài khoản">Hỗ trợ mua gói tin/Nâng cấp tài khoản</option>
+                  <option value="Hỗ trợ về duyệt tin tuyển dụng">Hỗ trợ về duyệt tin tuyển dụng</option>
+                  <option value="Mở khóa tài khoản">Mở khóa tài khoản</option>
+                  <option value="Báo lỗi hệ thống">Báo lỗi hệ thống</option>
+                  <option value="Vấn đề khác">Vấn đề khác...</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Chi tiết vấn đề</label>
+                <textarea
+                  value={supportMessage}
+                  onChange={(e) => setSupportMessage(e.target.value)}
+                  placeholder="Nhập nội dung vấn đề bạn đang gặp phải..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm resize-none"
+                  required
+                ></textarea>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSupportModal(false)}
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingSupport || !supportMessage.trim()}
+                  className="px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {sendingSupport && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Gửi yêu cầu
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Payment Iframe Modal */}
+      {paymentUrl && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 sm:p-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl w-full max-w-4xl h-full max-h-[90vh] flex flex-col overflow-hidden relative shadow-2xl"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-indigo-600" />
+                Thanh toán giao dịch
+              </h3>
+              <p className="text-xs text-amber-600 ml-4 font-medium px-2 py-1 bg-amber-50 rounded hidden sm:block">
+                * Nếu gặp màn hình trắng khi hủy (do lỗi giả lập localhost), vui lòng nhấn nút X ở góc phải để đóng.
+              </p>
+              <button 
+                onClick={() => {
+                  setPaymentUrl(null);
+                  fetchWalletData();
+                }}
+                className="p-2 hover:bg-slate-200 text-slate-500 rounded-full transition-colors ml-auto flex items-center gap-2 font-semibold"
+                title="Đóng"
+              >
+                Đóng <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 w-full bg-slate-100/50">
+              <iframe 
+                src={paymentUrl} 
+                className="w-full h-full border-none"
+                title="Thanh toán"
+                allow="payment"
+              />
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }

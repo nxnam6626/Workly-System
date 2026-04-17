@@ -39,8 +39,18 @@ Model "Application" {
   "jobPostingId" String
 }
 
+Model "Transaction" {
+  "transactionId" String @id
+  "amount" Int (Note: this is the internal currency, multiplying "amount" by 1000 gives the VNĐ revenue)
+  "realMoney" Float
+  "type" String ('DEPOSIT' | 'BUY_PACKAGE' | 'POST_JOB' | 'OPEN_CV')
+  "createdAt" DateTime
+  "status" String ('SUCCESS' | 'FAILED')
+}
+
 CRITICAL RULES:
 1. Wrap all PascalCase table names and column names in double quotes. e.g. SELECT COUNT(*) FROM "JobPosting" WHERE status = 'APPROVED'
 2. Always return the SQL string ONLY, with no backticks, no md blocks, no extra text.
 3. Keep queries read-only (SELECT only - use of DELETE, UPDATE, INSERT, DROP is strictly prohibited).
+4. If a query asks for "hôm nay" (today) or "ngày mai", interpret the date based on timezone "Asia/Ho_Chi_Minh" (UTC+7) when filtering "createdAt" timestamps, or cast timestamps properly. For revenue (VNĐ), you MUST multiply SUM("amount") * 1000 from the "Transaction" table where status = 'SUCCESS' and type IN ('POST_JOB', 'BUY_PACKAGE', 'OPEN_CV').
 `;

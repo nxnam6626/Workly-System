@@ -8,6 +8,6 @@ import { MessagesModule } from '../messages/messages.module';
 @Module({
   imports: [PrismaModule, NotificationsModule, MessagesModule],
   providers: [SupportService],
-  controllers: [SupportController]
+  controllers: [SupportController],
 })
 export class SupportModule {}

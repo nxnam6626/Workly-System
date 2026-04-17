@@ -7,6 +7,10 @@ interface Wallet {
   balance: number;
   cvUnlockQuota: number;
   cvUnlockQuotaMax: number;
+  subscription?: {
+    planType: string;
+    expiryDate: string;
+  } | null;
 }
 
 interface WalletState {

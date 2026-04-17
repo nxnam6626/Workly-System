@@ -54,6 +54,7 @@ export interface JobPosting {
   locationCity?: string;
   status: JobStatus;
   postType: PostType;
+  jobTier?: string;
   isVerified: boolean;
   originalUrl: string;
   aiReliabilityScore: number;
@@ -176,7 +177,13 @@ export interface AdminUser {
   lastLogin?: string;
   userRoles: { role: { roleName: string } }[];
   candidate?: { fullName: string; phone: string };
-  recruiter?: { position?: string; bio?: string; violationCount: number };
+  recruiter?: { 
+    position?: string; 
+    bio?: string; 
+    violationCount: number;
+    recruiterSubscription?: { planType: string; expiryDate: string } | null;
+    recruiterWallet?: { cvUnlockQuota: number; cvUnlockQuotaMax: number } | null;
+  };
   admin?: { permissions: string[]; adminLevel: number };
 }
 
@@ -222,6 +229,9 @@ export const adminUsersApi = {
 
   updateAdminPermissions: (id: string, permissions: string[]): Promise<{ message: string }> =>
     api.patch(`/users/${id}/admin-permissions`, { permissions }).then((r) => r.data),
+
+  getUserViolations: (id: string): Promise<any[]> =>
+    api.get(`/messages/violations/${id}`).then((r) => r.data),
 };
 
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
@@ -299,6 +309,7 @@ export interface SupportRequest {
     email: string;
     status: string;
     userRoles: { role: { roleName: string } }[];
+    recruiter?: { violationCount: number };
   } | null;
 }
 
