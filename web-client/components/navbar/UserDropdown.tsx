@@ -60,127 +60,140 @@ export function UserDropdown() {
           </div>
 
           <div className="py-1">
-            {/* Hồ sơ của tôi */}
-            <Link
-              href="/profile"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-            >
-              <User className="w-5 h-5 text-blue-500" />
-              Hồ sơ của tôi
-            </Link>
-
-            {/* Tạo CV */}
-            <Link
-              href="/cv-builder"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-            >
-              <Sparkles className="w-5 h-5 text-blue-500" />
-              Tạo CV
-            </Link>
-
-            {/* Quản lý CV */}
-            <Link
-              href="/profile/cv-management"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-            >
-              <FileText className="w-5 h-5 text-blue-500" />
-              Quản lý CV
-            </Link>
-
-            {/* Tin nhắn */}
-            <Link
-              href="/profile/messages"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-            >
-              <MessageSquare className="w-5 h-5 text-blue-500" />
-              Tin nhắn
-            </Link>
-
-            {/* Quản lý việc làm - Collapsible */}
-            <div className="relative">
-              <button
-                onClick={() => setJobMenuOpen((o) => !o)}
-                className={`w-full flex items-center justify-between px-5 py-3 text-sm font-medium transition-all duration-200 ${jobMenuOpen ? 'text-blue-700 bg-blue-50/50' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
-                  }`}
-              >
-                <div className="flex items-center gap-3.5">
-                  <Briefcase className="w-5 h-5 text-blue-500" />
-                  <span>Quản lý việc làm</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${jobMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {jobMenuOpen && (
-                <div className="bg-slate-50/30 animate-in slide-in-from-top-1 duration-300 pb-1">
-                  <Link
-                    href="/profile/jobs/applied"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                    Việc làm đã ứng tuyển
-                  </Link>
-                  <Link
-                    href="/profile/jobs/saved"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                    Việc làm đã lưu
-                  </Link>
-                  <Link
-                    href="/jobs"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                    Việc làm chờ ứng tuyển
-                  </Link>
-
-                </div>
-              )}
-            </div>
-
-            {/* Hỗ trợ và thông báo */}
-            <Link
-              href="/notifications"
-              onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-            >
-              <Bell className="w-5 h-5 text-blue-500" />
-              Hỗ trợ và thông báo
-            </Link>
-
-            {/* Quản lý tài khoản */}
-            <div className="group/item relative">
+            {/* Vai trò đặc biệt: RECRUITER */}
+            {user?.roles?.includes('RECRUITER') && (
               <Link
-                href="/profile/account"
+                href="/recruiter/dashboard"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center justify-between px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                className="flex items-center gap-3.5 px-5 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 transition-colors duration-200"
               >
-                <div className="flex items-center gap-3.5">
-                  <UserCheck className="w-5 h-5 text-blue-500" />
-                  <span>Quản lý tài khoản</span>
-                </div>
-                {!user?.isEmailVerified && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Email chưa xác minh" />
-                )}
+                <Briefcase className="w-5 h-5" />
+                Quản lý Tuyển dụng
               </Link>
+            )}
 
-              {!user?.isEmailVerified && (
+            {/* Vai trò đặc biệt: ADMIN */}
+            {user?.roles?.includes('ADMIN') && (
+              <Link
+                href="/admin/dashboard"
+                onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-3.5 px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-100 transition-colors duration-200"
+              >
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                Trang Quản trị
+              </Link>
+            )}
+
+            {/* Các mục dành riêng cho CANDIDATE */}
+            {user?.roles?.includes('CANDIDATE') && (
+              <>
+                {/* Hồ sơ của tôi */}
                 <Link
-                  href={`/verify-email?email=${user?.email}`}
+                  href="/profile"
                   onClick={() => setDropdownOpen(false)}
-                  className="absolute right-10 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-rose-50 text-[10px] font-bold text-rose-600 rounded border border-rose-100 opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap"
+                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
                 >
-                  Xác minh ngay
+                  <User className="w-5 h-5 text-blue-500" />
+                  Hồ sơ của tôi
                 </Link>
-              )}
-            </div>
+
+                {/* Tạo CV */}
+                <Link
+                  href="/cv-builder"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                >
+                  <Sparkles className="w-5 h-5 text-blue-500" />
+                  Tạo CV
+                </Link>
+
+                {/* Quản lý CV */}
+                <Link
+                  href="/profile/cv-management"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                >
+                  <FileText className="w-5 h-5 text-blue-500" />
+                  Quản lý CV
+                </Link>
+
+                {/* Tin nhắn */}
+                <Link
+                  href="/profile/messages"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                >
+                  <MessageSquare className="w-5 h-5 text-blue-500" />
+                  Tin nhắn
+                </Link>
+
+                {/* Quản lý việc làm - Collapsible */}
+                <div className="relative">
+                  <button
+                    onClick={() => setJobMenuOpen((o) => !o)}
+                    className={`w-full flex items-center justify-between px-5 py-3 text-sm font-medium transition-all duration-200 ${jobMenuOpen ? 'text-blue-700 bg-blue-50/50' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
+                      }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <Briefcase className="w-5 h-5 text-blue-500" />
+                      <span>Quản lý việc làm</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${jobMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {jobMenuOpen && (
+                    <div className="bg-slate-50/30 animate-in slide-in-from-top-1 duration-300 pb-1">
+                      <Link
+                        href="/profile/jobs/applied"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
+                        Việc làm đã ứng tuyển
+                      </Link>
+                      <Link
+                        href="/profile/jobs/saved"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
+                        Việc làm đã lưu
+                      </Link>
+                      <Link
+                        href="/jobs"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
+                        Việc làm chờ ứng tuyển
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Hỗ trợ và thông báo */}
+                <Link
+                  href="/notifications"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                >
+                  <Bell className="w-5 h-5 text-blue-500" />
+                  Hỗ trợ và thông báo
+                </Link>
+
+                {/* Quản lý tài khoản */}
+                <Link
+                  href="/profile/account"
+                  onClick={() => setDropdownOpen(false)}
+                  className="flex items-center justify-between px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <UserCheck className="w-5 h-5 text-blue-500" />
+                    <span>Quản lý tài khoản</span>
+                  </div>
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="mt-1 border-t border-slate-50 pt-1">

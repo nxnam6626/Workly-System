@@ -160,11 +160,16 @@ export class MatchingService {
     const cvSkills = parsedData.skills || [];
     const cvExp = parsedData.totalYearsExp || 0;
 
-    // Lấy tất cả Job đang mở (APPROVED) và có yêu cầu cấu trúc
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+
+    // Lấy tất cả Job đang mở (APPROVED) và có yêu cầu cấu trúc, loại bỏ job của chính mình
     const allJobs = await this.prisma.jobPosting.findMany({
       where: {
         status: 'APPROVED',
         structuredRequirements: { not: Prisma.JsonNull },
+        ...(recruiter ? { NOT: { recruiterId: recruiter.recruiterId } } : {}),
       },
       include: { company: true },
     });

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth";
-import { Mail, Lock, Loader2, ArrowRight, Sparkles, Briefcase } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowRight, Sparkles, Briefcase, CheckCircle2 } from "lucide-react";
 import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +19,14 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("verified") === "true") {
+      setSuccessMessage("Email của bạn đã được xác nhận thành công! Bây giờ bạn có thể đăng nhập.");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAuthenticated && user && user.roles) {
@@ -111,6 +118,17 @@ export default function LoginPage() {
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Chào mừng trở lại</h2>
             <p className="text-slate-500 text-base">Vui lòng đăng nhập để tiếp tục hành trình sự nghiệp</p>
           </div>
+
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm flex items-start gap-3"
+            >
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
+              <span>{successMessage}</span>
+            </motion.div>
+          )}
 
           {error && (
             <motion.div

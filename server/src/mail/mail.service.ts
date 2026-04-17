@@ -94,6 +94,97 @@ export class MailService {
     }
   }
 
+  async sendRegistrationLink(email: string, token: string) {
+    try {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
+
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: 'Kích hoạt tài khoản Workly của bạn',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 20px;">
+               <h1 style="color: #2563eb; margin-bottom: 5px;">Workly</h1>
+               <div style="height: 4px; width: 40px; background: #2563eb; margin: 0 auto;"></div>
+            </div>
+            
+            <h2 style="color: #0f172a; text-align: center;">Xác minh địa chỉ email</h2>
+            <p>Chào bạn,</p>
+            <p>Cảm ơn bạn đã đăng ký tham gia <strong>Workly</strong> - Nền tảng kết nối cơ hội sự nghiệp hàng đầu. Để hoàn tất việc tạo tài khoản, vui lòng nhấn vào nút bên dưới để xác minh email của bạn:</p>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${verificationLink}" style="background: #2563eb; color: white; padding: 18px 36px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Xác nhận đăng ký tài khoản</a>
+            </div>
+            
+            <p style="font-size: 14px; color: #64748b;">Đường dẫn này sẽ hết hạn trong vòng 24 giờ. Nếu bạn không thực hiện yêu cầu này, bạn có thể an tâm bỏ qua email này.</p>
+            
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+            
+            <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+              Nếu nút trên không hoạt động, hãy copy đường dẫn sau vào trình duyệt:<br>
+              <a href="${verificationLink}" style="color: #2563eb;">${verificationLink}</a>
+            </p>
+          </div>
+        `,
+      });
+      console.log(`[MailService] Registration link sent to ${email}`);
+    } catch (error) {
+      console.error('[MailService] Error sending registration link email:', error);
+    }
+  }
+
+  async sendRecruiterRegistrationLink(email: string, token: string) {
+    try {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
+
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: 'Workly – Xác minh địa chỉ email doanh nghiệp của bạn',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 20px;">
+               <h1 style="color: #2563eb; margin-bottom: 5px;">Workly</h1>
+               <div style="height: 4px; width: 40px; background: #2563eb; margin: 0 auto;"></div>
+            </div>
+            
+            <h2 style="color: #0f172a; text-align: center;">Xác minh tài khoản doanh nghiệp</h2>
+            <p>Chào bạn,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản doanh nghiệp tại <strong>Workly</strong>.</p>
+            <p>Để hoàn tất quá trình thiết lập và bắt đầu sử dụng các tính năng dành cho doanh nghiệp, vui lòng xác nhận rằng đây là địa chỉ email chính thức của bạn bằng cách nhấn vào nút bên dưới:</p>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${verificationLink}" style="background: #2563eb; color: white; padding: 18px 36px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Xác minh địa chỉ email</a>
+            </div>
+            
+            <p>Hoặc nhấn vào đường link sau:</p>
+            <p style="word-break: break-all;"><a href="${verificationLink}" style="color: #2563eb;">${verificationLink}</a></p>
+            
+            <p style="font-size: 14px; color: #64748b; margin-top: 30px;">
+              Lưu ý: Đường link xác minh này sẽ hết hạn trong vòng 24 giờ. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.
+            </p>
+            <p style="font-size: 14px; color: #64748b;">
+              Nếu có bất kỳ thắc mắc nào, bạn có thể phản hồi trực tiếp email này để được hỗ trợ.
+            </p>
+            
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+            
+            <p style="font-size: 14px; color: #334155; font-weight: bold;">
+              Trân trọng,<br>
+              Đội ngũ Workly
+            </p>
+          </div>
+        `,
+      });
+      console.log(`[MailService] Recruiter registration link sent to ${email}`);
+    } catch (error) {
+      console.error('[MailService] Error sending recruiter registration link email:', error);
+    }
+  }
+
   async sendJobInvitation(
     email: string,
     candidateName: string,

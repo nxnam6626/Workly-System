@@ -20,52 +20,63 @@ export function BannerSlider() {
   }, [images.length]);
 
   return (
-    <div className="relative w-full h-full min-h-[200px] rounded-2xl overflow-hidden shadow-sm group">
+    <div className="relative w-full h-full min-h-[200px] rounded-3xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.1)] group">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
           className="absolute inset-0 w-full h-full"
         >
           <img
             src={images[current]}
             alt="Tuyển dụng Workly"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform transition-transform duration-[5s] group-hover:scale-105"
           />
-          {/* Overlay for text if needed (the generated image has text, but we can add more) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent pointer-events-none" />
+          {/* Enhanced Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 p-8 pt-20 pointer-events-none">
+             <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ delay: 0.3 }}
+               className="text-white"
+             >
+                <div className="w-12 h-1 bg-safety-orange mb-3 rounded-full" />
+                <h3 className="text-2xl font-black drop-shadow-lg uppercase tracking-tight">KẾT NỐI TƯƠNG LAI CÙNG WORKLY</h3>
+             </motion.div>
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation arrows (only if more than one image) */}
+      {/* Modern Navigation Arrows */}
       {images.length > 1 && (
         <>
           <button
             onClick={() => setCurrent((prev) => (prev - 1 + images.length) % images.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+            className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30 hover:scale-110 active:scale-95"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6 stroke-[2.5px]" />
           </button>
           <button
             onClick={() => setCurrent((prev) => (prev + 1) % images.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/40"
+            className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30 hover:scale-110 active:scale-95"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-6 h-6 stroke-[2.5px]" />
           </button>
         </>
       )}
 
-      {/* Indicators */}
+      {/* Floating Indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-6 right-8 flex gap-3 z-20">
           {images.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrent(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${current === idx ? "w-6 bg-white" : "bg-white/50"}`}
+              className={`h-1.5 rounded-full transition-all duration-500 ${current === idx ? "w-8 bg-safety-orange" : "w-4 bg-white/40 hover:bg-white/60"}`}
             />
           ))}
         </div>

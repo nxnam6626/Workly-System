@@ -6,7 +6,6 @@ export interface CandidateProfile {
   status: string;
   phoneNumber?: string;
   avatar?: string;
-  isEmailVerified: boolean;
   provider: string;
   createdAt: string;
   lastLogin?: string;

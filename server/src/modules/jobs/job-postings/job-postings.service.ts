@@ -8,7 +8,7 @@ import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '../../../generated/prisma';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { MessagesGateway } from '../../messages/messages.gateway';
@@ -57,7 +57,7 @@ export class JobPostingsService {
     @InjectQueue('matching') private matchingQueue: Queue,
     private aiService: AiService,
     private subscriptionsService: SubscriptionsService,
-  ) {}
+  ) { }
 
   private readonly VIOLATION_LIMIT = 3;
   private readonly logger = new Logger(JobPostingsService.name);
@@ -431,7 +431,8 @@ export class JobPostingsService {
     }
 
     if (ids.length === 0) {
-      return { items: [], total: 0, page, limit };
+      // Nếu search bằng ES không ra kết quả, thử fallback về Prisma để đảm bảo không bị trống do chưa sync
+      return this.findAllPrisma(query, userId);
     }
 
     // Fetch full data from Prisma using IDs from ES
@@ -445,6 +446,15 @@ export class JobPostingsService {
     const locationCond = this.buildLocationCondition(location);
     if (locationCond) {
       whereCondition.AND = [locationCond];
+    }
+
+    if (userId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId },
+      });
+      if (recruiter) {
+        whereCondition.NOT = { recruiterId: recruiter.recruiterId };
+      }
     }
 
     const items = await this.prisma.jobPosting.findMany({
@@ -493,6 +503,16 @@ export class JobPostingsService {
     const where: any = {
       status: 'APPROVED',
     };
+
+    if (userId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId },
+      });
+      if (recruiter) {
+        where.NOT = { recruiterId: recruiter.recruiterId };
+      }
+    }
+
     // Industry filter: keyword-based matching via INDUSTRY_TAG_MAP
     const { industry } = query;
     const industryKeywords = industry
@@ -724,9 +744,9 @@ export class JobPostingsService {
       updateJobPostingDto.title || existingJob.title,
       updateJobPostingDto.description || existingJob.description || '',
       updateJobPostingDto.requirements ||
-        (existingJob.structuredRequirements as any)?.requirements,
+      (existingJob.structuredRequirements as any)?.requirements,
       updateJobPostingDto.benefits ||
-        (existingJob.structuredRequirements as any)?.benefits,
+      (existingJob.structuredRequirements as any)?.benefits,
       hardSkills,
       softSkills,
     );
@@ -1110,7 +1130,7 @@ export class JobPostingsService {
       return;
     }
 
-    // Đạt ngưỡng → khóa tài khoản
+    // Đạt ngưỡng -> khóa tài khoản
     await this.prisma.user.update({
       where: { userId: updated.userId },
       data: { status: 'LOCKED' },

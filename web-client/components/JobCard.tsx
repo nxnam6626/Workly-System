@@ -106,29 +106,29 @@ export function JobCard({ job }: JobCardProps) {
               <img
                 src={job.company.logo}
                 alt={job.company.companyName}
-                className="w-full h-full object-contain p-1"
+                className="w-full h-full object-contain p-2"
               />
             ) : (
-              <span className="text-base font-bold text-blue-600">
-                {job.company?.companyName?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "TC"}
+              <span className="text-xl font-bold text-mariner">
+                {job.company?.companyName?.slice(0, 1).toUpperCase() || "J"}
               </span>
             )}
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col justify-center pr-8">
-            <h3 className="font-bold text-[#1e293b] text-[15px] line-clamp-1 group-hover:text-blue-600 transition-colors tracking-tight">
+          <div className="flex-1 min-w-0 pr-6">
+            <h3 className="font-bold text-[#111827] text-[16px] line-clamp-2 group-hover:text-mariner transition-colors leading-snug">
               {job.title}
             </h3>
-            <p className="text-[#64748b] text-[13px] truncate">
+            <p className="text-slate-500 text-[14px] mt-1 line-clamp-1">
               {job.company?.companyName}
             </p>
           </div>
 
           <button
             onClick={handleToggleFavorite}
-            className={`absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all bg-white shadow-sm border border-slate-50 hover:scale-110 active:scale-95 ${isSaved ? "text-red-500 border-red-50" : "text-slate-300 hover:text-red-400"}`}
+            className={`absolute top-5 right-5 w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSaved ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}
           >
-            <Heart className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+            <Heart className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
           </button>
         </div>
 
@@ -146,7 +146,7 @@ export function JobCard({ job }: JobCardProps) {
               </span>
             </div>
           </div>
-          
+
           {/* AI and Match Badges */}
           {((job.aiReliabilityScore !== undefined && job.aiReliabilityScore >= 80) || job.score !== undefined) && (
             <div className="flex flex-wrap gap-2 pt-1.5 border-t border-slate-100 mt-2">

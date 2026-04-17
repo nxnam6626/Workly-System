@@ -36,7 +36,7 @@ export class AiService {
       return this.aiPdfService.extractTextFromBuffer(buffer, mimeType);
     }
     if (
-      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       mimeType === 'application/msword'
     ) {
       try {
@@ -193,7 +193,7 @@ export class AiService {
       where: { userId },
       include: { recruiterSubscription: true },
     });
-    
+
     if (!recruiter || recruiter.recruiterSubscription?.planType !== 'GROWTH' || !recruiter.companyId) {
       throw new Error('Tính năng Sửa Tự Động bằng AI chỉ dành cho tài khoản GROWTH thuộc công ty.');
     }
@@ -275,7 +275,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn với format sau (không markdo
         ((job.structuredRequirements as any)?.hardSkills) || [],
         job.jobTier
       );
-      
+
       const finalStatus = (modResult.safe && modResult.score >= 50) ? 'APPROVED' : 'PENDING';
 
       await this.prisma.$transaction([

@@ -275,7 +275,6 @@ export default function UserDetailModal({
             <div className="flex items-center gap-3 text-sm text-slate-700">
               <Mail className="w-4 h-4 text-slate-400 shrink-0" />
               <span className="break-all">{user.email}</span>
-              {user.isEmailVerified && <BadgeCheck className="w-4 h-4 text-emerald-500 shrink-0" />}
             </div>
             {(user.phoneNumber || user.candidate?.phone) && (
               <div className="flex items-center gap-3 text-sm text-slate-700">

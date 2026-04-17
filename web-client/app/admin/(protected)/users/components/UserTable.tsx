@@ -79,7 +79,7 @@ export default function UserTable({
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              {['Người dùng', 'Vai trò', 'Trạng thái', 'Vi phạm', 'Email xác thực', 'Đăng nhập cuối', 'Hành động'].map(
+              {['Người dùng', 'Vai trò', 'Trạng thái', 'Vi phạm', 'Đăng nhập cuối', 'Hành động'].map(
                 (h) => (
                   <th
                     key={h}
@@ -164,14 +164,7 @@ export default function UserTable({
                     </span>
                   </td>
 
-                  {/* Email verified */}
-                  <td className="px-4 py-3">
-                    <span
-                      className={`text-xs font-medium ${u.isEmailVerified ? 'text-emerald-600' : 'text-slate-400'}`}
-                    >
-                      {u.isEmailVerified ? '✓ Đã xác thực' : '✗ Chưa xác thực'}
-                    </span>
-                  </td>
+
 
                   {/* Last login */}
                   <td className="px-4 py-3 text-slate-500 whitespace-nowrap">

@@ -30,4 +30,4 @@ import { AiChatService } from './ai-chat.service';
   ],
   exports: [AiService],
 })
-export class AiModule {}
+export class AiModule { }

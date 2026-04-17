@@ -361,7 +361,7 @@ export default function AiChatBox() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-slate-50/50">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-slate-50/50 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent hover:scrollbar-thumb-slate-300 transition-colors">
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
@@ -369,7 +369,7 @@ export default function AiChatBox() {
                   animate={{ opacity: 1, x: 0 }}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`flex gap-2.5 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex gap-3 max-w-[88%] items-start ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                     {renderMessageContent(msg) && (
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white text-blue-600 border border-slate-100'
                         }`}>
@@ -383,7 +383,7 @@ export default function AiChatBox() {
 
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="flex gap-2.5 items-center">
+                  <div className="flex gap-3 items-start">
                     <div className="w-8 h-8 rounded-full bg-white text-blue-600 border border-slate-100 flex items-center justify-center shadow-sm">
                       <Bot className="w-4 h-4" />
                     </div>
@@ -445,8 +445,8 @@ export default function AiChatBox() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Nhập việc làm bạn muốn tìm..."
-                  className="w-full bg-slate-100 border-none rounded-2xl py-3.5 pl-4 pr-14 focus:ring-2 focus:ring-blue-500/30 transition-all text-sm text-slate-800 placeholder:text-slate-400"
+                  placeholder="Hỏi Workly AI về lộ trình, CV hoặc việc làm..."
+                  className="w-full bg-slate-100 border-none rounded-2xl py-3.5 pl-4 pr-14 focus:ring-2 focus:ring-blue-500/30 transition-all text-sm text-slate-800 placeholder:text-slate-400/80"
                   disabled={isTyping}
                 />
                 <button

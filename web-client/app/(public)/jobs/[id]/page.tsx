@@ -123,6 +123,10 @@ interface JobDetails extends Job {
       websiteUrl: string | null;
       verifyStatus?: number;
    };
+   recruiter?: {
+      userId: string;
+      recruiterId: string;
+   };
 }
 
 const getPlatformColor = (platform: string) => {
@@ -253,6 +257,22 @@ export default function JobDetailsPage() {
          router.push(`/login?returnUrl=/jobs/${id}`);
          return;
       }
+
+      if (!job) return;
+
+      // 1. Chặn tự lưu tin của chính mình
+      if (job.recruiter?.userId === user?.userId) {
+         toast.error("Bạn không thể lưu tin tuyển dụng của chính mình.");
+         return;
+      }
+
+      // 2. Chỉ cho phép Ứng viên lưu việc làm
+      const isCandidate = user?.roles?.includes('CANDIDATE');
+      if (!isCandidate) {
+         toast.error("Vui lòng sử dụng tài khoản Ứng viên để lưu việc làm.");
+         return;
+      }
+
       if (!job) return;
 
       try {
@@ -274,8 +294,23 @@ export default function JobDetailsPage() {
          return;
       }
 
+      if (!job) return;
+
+      // 1. Chặn tự ứng tuyển vào tin của chính mình
+      if (job.recruiter?.userId === user?.userId) {
+         toast.error("Bạn không thể ứng tuyển vào tin tuyển dụng của chính mình.");
+         return;
+      }
+
+      // 2. Kiểm tra vai trò: Phải có vai trò CANDIDATE
+      const isCandidate = user?.roles?.includes('CANDIDATE');
+      if (!isCandidate) {
+         toast.error("Vui lòng sử dụng tài khoản Ứng viên để thực hiện ứng tuyển.");
+         return;
+      }
+
       setIsApplyModalOpen(true);
-   }, [job, isAuthenticated, router, id]);
+   }, [job, isAuthenticated, user, router, id]);
 
    const searchParams = useSearchParams();
 

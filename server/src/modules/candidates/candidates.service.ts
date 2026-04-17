@@ -21,7 +21,7 @@ export class CandidatesService {
     private readonly supabaseService: SupabaseService,
     private readonly matchingService: MatchingService,
     @InjectQueue('matching') private matchingQueue: Queue,
-  ) {}
+  ) { }
 
   async findAll(query: any, recruiterUserId?: string) {
     const { skip = 0, take = 10, search, skills, major } = query;

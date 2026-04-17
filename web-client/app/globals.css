@@ -7,9 +7,24 @@
 
 @theme inline {
   --color-background: #ffffff;
-  --color-foreground: #171717;
+  --color-foreground: #313131;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* JobsGO Brand Palette */
+  --color-mariner: #2466c9;
+  --color-primary-hover: #1e55a9;
+  --color-safety-orange: #f96d15;
+  --color-slate-700: #334155;
+  --color-slate-500: #64748b;
+}
+
+/* Premium Component Shadows */
+.shadow-jobsgo {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.shadow-jobsgo-hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
 }
 
 body {
@@ -18,28 +33,22 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 10px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* slate-400 */
+}
+
 /* AI Chat Markdown Styling */
-.markdown-content p {
-  margin-bottom: 0.5rem;
-}
-.markdown-content p:last-child {
-  margin-bottom: 0;
-}
-.markdown-content ul, .markdown-content ol {
-  margin-left: 1.25rem;
-  margin-bottom: 0.5rem;
-}
-.markdown-content ul {
-  list-style-type: disc;
-}
-.markdown-content ol {
-  list-style-type: decimal;
-}
-.markdown-content strong {
-  font-weight: 700;
-}
-.markdown-content code {
-  background: rgba(0,0,0,0.05);
-  padding: 0.1rem 0.2rem;
-  border-radius: 0.25rem;
+.markdown-content {
+  line-height: 1.6;
 }
