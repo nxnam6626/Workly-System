@@ -113,7 +113,13 @@ export class SecurityService {
   async createRegistrationRequest(dto: any) {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
-      throw new ConflictException('Email này đã được sử dụng.');
+      // Allow if the user exists but is registering for a new role
+      const roles = existingUser.userRoles.map((ur: any) => ur.role.roleName);
+      if (roles.includes(dto.role)) {
+        throw new ConflictException(
+          `Email này đã được đăng ký với vai trò ${dto.role}.`,
+        );
+      }
     }
 
     // Tạo token ngẫu nhiên (64 ký tự hex)
@@ -123,8 +129,12 @@ export class SecurityService {
     // Lưu toàn bộ RegisterDto vào Redis (24 giờ = 86400 giây)
     await this.redisService.set(redisKey, JSON.stringify(dto), 86400);
 
-    // Gửi email chứa đường dẫn xác minh
-    await this.mailService.sendRegistrationLink(dto.email, token);
+    // Gửi email chứa đường dẫn xác minh (tùy chọn mẫu theo role)
+    if (dto.role === 'RECRUITER') {
+      await this.mailService.sendRecruiterRegistrationLink(dto.email, token);
+    } else {
+      await this.mailService.sendRegistrationLink(dto.email, token);
+    }
 
     return { message: 'Đường dẫn xác minh đã được gửi đến email của bạn.' };
   }

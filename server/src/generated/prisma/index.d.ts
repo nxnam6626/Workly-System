@@ -3924,7 +3924,6 @@ export namespace Prisma {
     lastLogin: Date | null
     phoneNumber: string | null
     avatar: string | null
-    isEmailVerified: boolean | null
     updatedAt: Date | null
     refreshToken: string | null
     provider: $Enums.AuthProvider | null
@@ -3942,7 +3941,6 @@ export namespace Prisma {
     lastLogin: Date | null
     phoneNumber: string | null
     avatar: string | null
-    isEmailVerified: boolean | null
     updatedAt: Date | null
     refreshToken: string | null
     provider: $Enums.AuthProvider | null
@@ -3960,7 +3958,6 @@ export namespace Prisma {
     lastLogin: number
     phoneNumber: number
     avatar: number
-    isEmailVerified: number
     updatedAt: number
     refreshToken: number
     provider: number
@@ -3980,7 +3977,6 @@ export namespace Prisma {
     lastLogin?: true
     phoneNumber?: true
     avatar?: true
-    isEmailVerified?: true
     updatedAt?: true
     refreshToken?: true
     provider?: true
@@ -3998,7 +3994,6 @@ export namespace Prisma {
     lastLogin?: true
     phoneNumber?: true
     avatar?: true
-    isEmailVerified?: true
     updatedAt?: true
     refreshToken?: true
     provider?: true
@@ -4016,7 +4011,6 @@ export namespace Prisma {
     lastLogin?: true
     phoneNumber?: true
     avatar?: true
-    isEmailVerified?: true
     updatedAt?: true
     refreshToken?: true
     provider?: true
@@ -4107,7 +4101,6 @@ export namespace Prisma {
     lastLogin: Date | null
     phoneNumber: string | null
     avatar: string | null
-    isEmailVerified: boolean
     updatedAt: Date
     refreshToken: string | null
     provider: $Enums.AuthProvider
@@ -4142,7 +4135,6 @@ export namespace Prisma {
     lastLogin?: boolean
     phoneNumber?: boolean
     avatar?: boolean
-    isEmailVerified?: boolean
     updatedAt?: boolean
     refreshToken?: boolean
     provider?: boolean
@@ -4168,7 +4160,6 @@ export namespace Prisma {
     lastLogin?: boolean
     phoneNumber?: boolean
     avatar?: boolean
-    isEmailVerified?: boolean
     updatedAt?: boolean
     refreshToken?: boolean
     provider?: boolean
@@ -4186,7 +4177,6 @@ export namespace Prisma {
     lastLogin?: boolean
     phoneNumber?: boolean
     avatar?: boolean
-    isEmailVerified?: boolean
     updatedAt?: boolean
     refreshToken?: boolean
     provider?: boolean
@@ -4204,7 +4194,6 @@ export namespace Prisma {
     lastLogin?: boolean
     phoneNumber?: boolean
     avatar?: boolean
-    isEmailVerified?: boolean
     updatedAt?: boolean
     refreshToken?: boolean
     provider?: boolean
@@ -4213,7 +4202,7 @@ export namespace Prisma {
     lastActive?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "email" | "password" | "status" | "createdAt" | "lastLogin" | "phoneNumber" | "avatar" | "isEmailVerified" | "updatedAt" | "refreshToken" | "provider" | "providerId" | "isOnline" | "lastActive", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "email" | "password" | "status" | "createdAt" | "lastLogin" | "phoneNumber" | "avatar" | "updatedAt" | "refreshToken" | "provider" | "providerId" | "isOnline" | "lastActive", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     admin?: boolean | User$adminArgs<ExtArgs>
     candidate?: boolean | User$candidateArgs<ExtArgs>
@@ -4247,7 +4236,6 @@ export namespace Prisma {
       lastLogin: Date | null
       phoneNumber: string | null
       avatar: string | null
-      isEmailVerified: boolean
       updatedAt: Date
       refreshToken: string | null
       provider: $Enums.AuthProvider
@@ -4692,7 +4680,6 @@ export namespace Prisma {
     readonly lastLogin: FieldRef<"User", 'DateTime'>
     readonly phoneNumber: FieldRef<"User", 'String'>
     readonly avatar: FieldRef<"User", 'String'>
-    readonly isEmailVerified: FieldRef<"User", 'Boolean'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly refreshToken: FieldRef<"User", 'String'>
     readonly provider: FieldRef<"User", 'AuthProvider'>
@@ -35380,7 +35367,6 @@ export namespace Prisma {
     lastLogin: 'lastLogin',
     phoneNumber: 'phoneNumber',
     avatar: 'avatar',
-    isEmailVerified: 'isEmailVerified',
     updatedAt: 'updatedAt',
     refreshToken: 'refreshToken',
     provider: 'provider',
@@ -35870,13 +35856,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'AuthProvider'
    */
   export type EnumAuthProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuthProvider'>
@@ -35887,6 +35866,13 @@ export namespace Prisma {
    * Reference to a field of type 'AuthProvider[]'
    */
   export type ListEnumAuthProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuthProvider[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -36115,7 +36101,6 @@ export namespace Prisma {
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     phoneNumber?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
-    isEmailVerified?: BoolFilter<"User"> | boolean
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshToken?: StringNullableFilter<"User"> | string | null
     provider?: EnumAuthProviderFilter<"User"> | $Enums.AuthProvider
@@ -36140,7 +36125,6 @@ export namespace Prisma {
     lastLogin?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
-    isEmailVerified?: SortOrder
     updatedAt?: SortOrder
     refreshToken?: SortOrderInput | SortOrder
     provider?: SortOrder
@@ -36168,7 +36152,6 @@ export namespace Prisma {
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     phoneNumber?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
-    isEmailVerified?: BoolFilter<"User"> | boolean
     updatedAt?: DateTimeFilter<"User"> | Date | string
     refreshToken?: StringNullableFilter<"User"> | string | null
     provider?: EnumAuthProviderFilter<"User"> | $Enums.AuthProvider
@@ -36193,7 +36176,6 @@ export namespace Prisma {
     lastLogin?: SortOrderInput | SortOrder
     phoneNumber?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
-    isEmailVerified?: SortOrder
     updatedAt?: SortOrder
     refreshToken?: SortOrderInput | SortOrder
     provider?: SortOrder
@@ -36217,7 +36199,6 @@ export namespace Prisma {
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     phoneNumber?: StringNullableWithAggregatesFilter<"User"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
-    isEmailVerified?: BoolWithAggregatesFilter<"User"> | boolean
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     refreshToken?: StringNullableWithAggregatesFilter<"User"> | string | null
     provider?: EnumAuthProviderWithAggregatesFilter<"User"> | $Enums.AuthProvider
@@ -38268,7 +38249,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -38293,7 +38273,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -38318,7 +38297,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -38343,7 +38321,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -38368,7 +38345,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -38386,7 +38362,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -38404,7 +38379,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -40673,16 +40647,16 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type EnumAuthProviderFilter<$PrismaModel = never> = {
     equals?: $Enums.AuthProvider | EnumAuthProviderFieldRefInput<$PrismaModel>
     in?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
     notIn?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
     not?: NestedEnumAuthProviderFilter<$PrismaModel> | $Enums.AuthProvider
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type AdminNullableScalarRelationFilter = {
@@ -40754,7 +40728,6 @@ export namespace Prisma {
     lastLogin?: SortOrder
     phoneNumber?: SortOrder
     avatar?: SortOrder
-    isEmailVerified?: SortOrder
     updatedAt?: SortOrder
     refreshToken?: SortOrder
     provider?: SortOrder
@@ -40772,7 +40745,6 @@ export namespace Prisma {
     lastLogin?: SortOrder
     phoneNumber?: SortOrder
     avatar?: SortOrder
-    isEmailVerified?: SortOrder
     updatedAt?: SortOrder
     refreshToken?: SortOrder
     provider?: SortOrder
@@ -40790,7 +40762,6 @@ export namespace Prisma {
     lastLogin?: SortOrder
     phoneNumber?: SortOrder
     avatar?: SortOrder
-    isEmailVerified?: SortOrder
     updatedAt?: SortOrder
     refreshToken?: SortOrder
     provider?: SortOrder
@@ -40873,14 +40844,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type EnumAuthProviderWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.AuthProvider | EnumAuthProviderFieldRefInput<$PrismaModel>
     in?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
@@ -40889,6 +40852,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAuthProviderFilter<$PrismaModel>
     _max?: NestedEnumAuthProviderFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type RoleCountOrderByAggregateInput = {
@@ -42697,12 +42668,12 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type EnumAuthProviderFieldUpdateOperationsInput = {
     set?: $Enums.AuthProvider
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type AdminUpdateOneWithoutUserNestedInput = {
@@ -44543,16 +44514,16 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedEnumAuthProviderFilter<$PrismaModel = never> = {
     equals?: $Enums.AuthProvider | EnumAuthProviderFieldRefInput<$PrismaModel>
     in?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
     notIn?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
     not?: NestedEnumAuthProviderFilter<$PrismaModel> | $Enums.AuthProvider
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -44649,14 +44620,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type NestedEnumAuthProviderWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.AuthProvider | EnumAuthProviderFieldRefInput<$PrismaModel>
     in?: $Enums.AuthProvider[] | ListEnumAuthProviderFieldRefInput<$PrismaModel>
@@ -44665,6 +44628,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumAuthProviderFilter<$PrismaModel>
     _max?: NestedEnumAuthProviderFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -45517,7 +45488,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45541,7 +45511,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45602,7 +45571,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45626,7 +45594,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45650,7 +45617,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45674,7 +45640,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45714,7 +45679,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45738,7 +45702,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45762,7 +45725,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45786,7 +45748,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45826,7 +45787,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45850,7 +45810,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -45874,7 +45833,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -45898,7 +45856,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -46000,7 +45957,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -46024,7 +45980,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -46167,7 +46122,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -46191,7 +46145,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -46427,7 +46380,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -46451,7 +46403,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -46947,7 +46898,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -46971,7 +46921,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -47198,7 +47147,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -47222,7 +47170,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -50039,7 +49986,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -50063,7 +50009,6 @@ export namespace Prisma {
     lastLogin?: Date | string | null
     phoneNumber?: string | null
     avatar?: string | null
-    isEmailVerified?: boolean
     updatedAt?: Date | string
     refreshToken?: string | null
     provider?: $Enums.AuthProvider
@@ -50103,7 +50048,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
@@ -50127,7 +50071,6 @@ export namespace Prisma {
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
     provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider

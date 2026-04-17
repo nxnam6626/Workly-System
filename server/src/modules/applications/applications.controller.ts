@@ -17,7 +17,7 @@ import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CurrentUser, type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 
 @Controller('applications')
 export class ApplicationsController {
@@ -48,9 +48,9 @@ export class ApplicationsController {
   async create(
     @UploadedFile() file: any,
     @Body() createApplicationDto: CreateApplicationDto,
-    @CurrentUser('userId') userId?: string,
+    @CurrentUser() user?: CurrentUserPayload,
   ) {
-    return this.applicationsService.create(createApplicationDto, file, userId);
+    return this.applicationsService.create(createApplicationDto, file, user);
   }
 
   @Get('job/:id')

@@ -392,7 +392,7 @@ export class JobPostingsService {
     }
 
     // Fetch full data from Prisma using IDs from ES
-    const whereCondition: any = { 
+    const whereCondition: any = {
       jobPostingId: { in: ids },
       status: 'APPROVED',
     };
@@ -402,6 +402,15 @@ export class JobPostingsService {
     const locationCond = this.buildLocationCondition(location);
     if (locationCond) {
       whereCondition.AND = [locationCond];
+    }
+
+    if (userId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId },
+      });
+      if (recruiter) {
+        whereCondition.NOT = { recruiterId: recruiter.recruiterId };
+      }
     }
 
     const items = await this.prisma.jobPosting.findMany({
@@ -450,6 +459,16 @@ export class JobPostingsService {
     const where: any = { 
       status: 'APPROVED',
     };
+
+    if (userId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId },
+      });
+      if (recruiter) {
+        where.NOT = { recruiterId: recruiter.recruiterId };
+      }
+    }
+
     // Industry filter: keyword-based matching via INDUSTRY_TAG_MAP
     const { industry } = query;
     const industryKeywords = industry ? (INDUSTRY_TAG_MAP[industry] || [industry]) : [];

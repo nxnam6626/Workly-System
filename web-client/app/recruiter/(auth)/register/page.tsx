@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/auth";
 import { Mail, Lock, Loader2, Building2, User, Phone, MapPin, FileText, CheckCircle2, AlertCircle, Globe } from "lucide-react";
 import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
-import Image from "next/image";
+
 
 
 
@@ -23,7 +23,7 @@ export default function EmployerRegisterPage() {
   const [taxCode, setTaxCode] = useState("");
   const [verifyStatus, setVerifyStatus] = useState(0); // 0: unverified, 1: verified
   const [verifying, setVerifying] = useState(false);
-  
+
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,30 +39,28 @@ export default function EmployerRegisterPage() {
     setError("");
 
     if (!email || !password || !companyName || !phone || !fullName) {
-        return setError("Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
+      return setError("Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
     }
 
     if (!taxCode || verifyStatus !== 1) {
-        return setError("Vui lòng nhập và xác thực mã số thuế trước khi đăng ký.");
+      return setError("Vui lòng nhập và xác thực mã số thuế trước khi đăng ký.");
     }
 
     setIsSubmitting(true);
 
     try {
-      await register({ 
-          email, 
-          password, 
-          fullName, 
-          role: "RECRUITER",
-          companyName,
-          phone,
-          websiteUrl,
-          taxCode
+      await register({
+        email,
+        password,
+        fullName,
+        role: "RECRUITER",
+        companyName,
+        phone,
+        websiteUrl,
+        taxCode
       });
       setIsSuccess(true);
-      setTimeout(() => {
-        router.push(getDashboardByRole("RECRUITER"));
-      }, 2500);
+      setIsSubmitting(false);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
       setIsSubmitting(false);
@@ -75,7 +73,7 @@ export default function EmployerRegisterPage() {
 
   const handleVerifyTaxCode = async () => {
     if (!taxCode) return;
-    
+
     setVerifying(true);
     setError("");
     setCompanyName("");
@@ -104,16 +102,10 @@ export default function EmployerRegisterPage() {
       {/* Left Column: Branding & Value Props */}
       <div className="hidden md:flex md:w-4/12 lg:w-5/12 bg-slate-50 relative overflow-hidden flex-col sticky top-0 h-screen">
         <div className="absolute inset-0 z-0">
-          <Image
-            src="/recruiter-hero-bg-light.png"
-            alt="Tuyển dụng thông minh"
-            fill
-            className="object-cover opacity-90"
-            priority
-          />
+
           <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/70 to-white/30" />
         </div>
-        
+
         <div className="relative z-10 flex flex-col justify-between h-full p-12 lg:p-16">
           <div>
             <Link href="/recruiter/dashboard" className="flex items-center gap-2 mb-12 inline-flex">
@@ -185,160 +177,176 @@ export default function EmployerRegisterPage() {
             </div>
           )}
 
-          {isSuccess && (
-            <div className="mb-8 p-4 bg-emerald-50 flex items-start gap-3 border border-emerald-200 rounded-xl text-emerald-700 text-sm">
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
-              <span>Đăng ký doanh nghiệp thành công! Đang chuyển hướng bạn đến bảng điều khiển...</span>
+          {isSuccess ? (
+            <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">Kiểm tra Email để kích hoạt tài khoản doanh nghiệp</h2>
+              <p className="text-slate-600 leading-relaxed">
+                Chúng tôi đã gửi một đường dẫn xác nhận đến <strong>{email}</strong>. Vui lòng nhấn vào đường dẫn trong email để hoàn tất việc đăng ký doanh nghiệp và bắt đầu tuyển dụng trên Workly.
+              </p>
+              <div className="pt-4">
+                <Link
+                  href="/recruiter/login"
+                  className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
+                >
+                  Quay lại đăng nhập
+                </Link>
+              </div>
+              <p className="text-sm text-slate-400">Không nhận được email? Hãy kiểm tra trong thư rác (Spam).</p>
             </div>
-          )}
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-6">
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Row 1: Email & Password */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email làm việc <span className="text-red-500">*</span></label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                    <input
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                    placeholder="VD: hr@congty.com"
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                    />
-                </div>
-                </div>
-
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mật khẩu <span className="text-red-500">*</span></label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                    <input
-                    type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                    placeholder="Tối thiểu 6 ký tự"
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                    />
-                </div>
-                </div>
-            </div>
-
-            {/* Row 2: Tax Code & Company Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between items-center">
-                    <span>Mã số thuế <span className="text-red-500">*</span></span>
-                    {verifyStatus === 1 && <span className="text-xs text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực</span>}
-                    {verifyStatus === -1 && <span className="text-xs text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Lỗi xác thực</span>}
-                  </label>
-                  <div className="flex gap-2">
-                    <div className="relative group flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                        </div>
-                        <input
-                        type="text" value={taxCode} onChange={(e) => { setTaxCode(e.target.value); setVerifyStatus(0); setCompanyName(""); }} required
-                        placeholder="Nhập mã số thuế"
-                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                        />
-                    </div>
-                    <button 
-                      type="button"
-                      onClick={handleVerifyTaxCode}
-                      disabled={verifying || !taxCode}
-                      className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors whitespace-nowrap disabled:opacity-50 border border-slate-200"
-                    >
-                      {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kiểm tra'}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tên công ty <span className="text-red-500">*</span></label>
-                  <div className="relative group">
+                {/* Row 1: Email & Password */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email làm việc <span className="text-red-500">*</span></label>
+                    <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                        <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                       </div>
                       <input
-                      type="text" value={companyName} readOnly required
-                      placeholder="Sẽ được tự động điền sau khi kiểm tra mã số thuế"
-                      className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-500 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm cursor-not-allowed"
+                        type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                        placeholder="VD: hr@congty.com"
+                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mật khẩu <span className="text-red-500">*</span></label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                        type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                        placeholder="Tối thiểu 6 ký tự"
+                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                      />
+                    </div>
                   </div>
                 </div>
-            </div>
 
-            {/* Row 3: Phone & Contact Person */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Số điện thoại <span className="text-red-500">*</span></label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                {/* Row 2: Tax Code & Company Name */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex justify-between items-center">
+                      <span>Mã số thuế <span className="text-red-500">*</span></span>
+                      {verifyStatus === 1 && <span className="text-xs text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Đã xác thực</span>}
+                      {verifyStatus === -1 && <span className="text-xs text-red-600 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> Lỗi xác thực</span>}
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative group flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <FileText className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                        </div>
+                        <input
+                          type="text" value={taxCode} onChange={(e) => { setTaxCode(e.target.value); setVerifyStatus(0); setCompanyName(""); }} required
+                          placeholder="Nhập mã số thuế"
+                          className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleVerifyTaxCode}
+                        disabled={verifying || !taxCode}
+                        className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors whitespace-nowrap disabled:opacity-50 border border-slate-200"
+                      >
+                        {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Kiểm tra'}
+                      </button>
                     </div>
-                    <input
-                    type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required
-                    placeholder="Nhập số điện thoại"
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                    />
-                </div>
-                </div>
-
-                <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Người đăng ký <span className="text-red-500">*</span></label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                    </div>
-                    <input
-                    type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                    placeholder="Họ và tên người liên hệ"
-                    className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                    />
-                </div>
-                </div>
-            </div>
-
-            {/* Row 4: Website URL */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">URL công ty (Website)</label>
-              <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Globe className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
-                  <input
-                  type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
-                  placeholder="https://yourwebsite.com"
-                  className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
-                  />
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tên công ty <span className="text-red-500">*</span></label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <Building2 className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                        type="text" value={companyName} readOnly required
+                        placeholder="Sẽ được tự động điền sau khi kiểm tra mã số thuế"
+                        className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-500 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3: Phone & Contact Person */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Số điện thoại <span className="text-red-500">*</span></label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <Phone className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                        type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required
+                        placeholder="Nhập số điện thoại"
+                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Người đăng ký <span className="text-red-500">*</span></label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <User className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                      </div>
+                      <input
+                        type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+                        placeholder="Họ và tên người liên hệ"
+                        className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 4: Website URL */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">URL công ty (Website)</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Globe className="h-5 w-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                    </div>
+                    <input
+                      type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)}
+                      placeholder="https://yourwebsite.com"
+                      className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit" disabled={isSubmitting}
+                    className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        Đang đăng ký...
+                      </>
+                    ) : "ĐĂNG KÝ MỞ TÀI KHOẢN"}
+                  </button>
+                </div>
+              </form>
+
+              <div className="mt-8 pt-8 border-t border-slate-100 mb-10">
+                <p className="text-center text-sm text-slate-600">
+                  Bạn đã có tài khoản doanh nghiệp?{" "}
+                  <Link href="/recruiter/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
+                    Đăng nhập ngay
+                  </Link>
+                </p>
               </div>
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit" disabled={isSubmitting}
-                className="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    {isSuccess ? "Đang chuyển hướng..." : "Đang đăng ký..."}
-                  </>
-                ) : "ĐĂNG KÝ MỞ TÀI KHOẢN"}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-8 pt-8 border-t border-slate-100 mb-10">
-            <p className="text-center text-sm text-slate-600">
-              Bạn đã có tài khoản doanh nghiệp?{" "}
-              <Link href="/recruiter/login" className="font-bold text-blue-600 hover:text-blue-500 transition-colors">
-                Đăng nhập ngay
-              </Link>
-            </p>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

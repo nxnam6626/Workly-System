@@ -40,7 +40,13 @@ export class AuthService {
     // 2. Kiểm tra lại xem có ai đăng ký email này trong lúc chờ chưa
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
-      throw new ConflictException('Email này đã được đăng ký bởi một yêu cầu khác.');
+      // Check if user already has requested role
+      const roles = existingUser.userRoles.map((ur: any) => ur.role.roleName);
+      if (roles.includes(dto.role)) {
+        throw new ConflictException(
+          `Email này đã được đăng ký với vai trò ${dto.role}.`,
+        );
+      }
     }
 
     // 3. Hash mật khẩu và Tạo User trong database
@@ -59,6 +65,7 @@ export class AuthService {
         userId: newUser.userId,
         email: dto.email,
         fullName: 'fullName' in dto ? dto.fullName : 'Người dùng',
+        role: dto.role,
       }
     };
   }

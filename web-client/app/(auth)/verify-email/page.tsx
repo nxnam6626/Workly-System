@@ -1,9 +1,9 @@
 "use client";
 
+import { Loader2, CheckCircle2, XCircle, Sparkles, ArrowRight, Building2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
-import { Loader2, CheckCircle2, XCircle, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -14,6 +14,7 @@ export default function VerifyEmailPage() {
   
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Đang xác thực tài khoản của bạn...");
+  const [role, setRole] = useState<string | null>(null);
   const hasCalledAPI = useRef(false);
 
   useEffect(() => {
@@ -33,9 +34,15 @@ export default function VerifyEmailPage() {
         setStatus("success");
         setMessage(data.message || "Xác thực tài khoản thành công!");
         
-        // Tự động chuyển hướng sau 3 giây
+        const userRole = data.user?.role || "CANDIDATE";
+        setRole(userRole);
+
+        // Tự động chuyển hướng sau 3 giây tùy theo role
         setTimeout(() => {
-          router.push("/login?verified=true");
+          const redirectPath = userRole === "RECRUITER" 
+            ? "/recruiter/login?verified=true" 
+            : "/login?verified=true";
+          router.push(redirectPath);
         }, 3000);
       } catch (err: any) {
         setStatus("error");
@@ -81,21 +88,28 @@ export default function VerifyEmailPage() {
               <motion.div 
                 initial={{ scale: 0.5 }}
                 animate={{ scale: 1 }}
-                className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto"
+                className={`w-20 h-20 ${role === 'RECRUITER' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-500'} rounded-full flex items-center justify-center mx-auto`}
               >
-                <CheckCircle2 className="w-10 h-10" />
+                {role === 'RECRUITER' ? <Building2 className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
               </motion.div>
-              <h2 className="text-2xl font-bold text-slate-900">Thành công!</h2>
+              
+              <h2 className="text-2xl font-bold text-slate-900">
+                {role === 'RECRUITER' ? "Chào mừng Doanh nghiệp!" : "Thành công!"}
+              </h2>
+              
               <p className="text-slate-600 leading-relaxed">
-                {message}
+                {role === 'RECRUITER' 
+                  ? "Tài khoản tuyển dụng của bạn đã được kích hoạt thành công. Hãy bắt đầu tìm kiếm những tài năng phù hợp."
+                  : message}
               </p>
+
               <div className="pt-4 space-y-4">
                 <p className="text-sm text-slate-400">Đang chuyển hướng về trang đăng nhập...</p>
                 <Link 
-                  href="/login" 
-                  className="w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-200 gap-2"
+                  href={role === 'RECRUITER' ? "/recruiter/login" : "/login"} 
+                  className={`w-full inline-flex items-center justify-center px-6 py-3.5 border border-transparent text-base font-semibold rounded-xl text-white ${role === 'RECRUITER' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'} transition-all shadow-md gap-2`}
                 >
-                  Đăng nhập ngay
+                  {role === 'RECRUITER' ? "Đăng nhập Nhà tuyển dụng" : "Đăng nhập ngay"}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
@@ -134,7 +148,7 @@ export default function VerifyEmailPage() {
         </motion.div>
 
         <p className="text-center mt-12 text-sm text-slate-400 font-medium">
-          © 2026 Workly – Nền tảng kết nối thực tập sinh.
+          © 2026 Workly – Nền tảng kết nối cơ hội sự nghiệp.
         </p>
       </div>
     </div>

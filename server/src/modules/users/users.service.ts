@@ -41,8 +41,20 @@ export class UsersService {
   ) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
+      include: { userRoles: { include: { role: true } } },
     });
-    if (existingUser) throw new ConflictException('Email đã tồn tại!');
+
+    if (existingUser) {
+      const hasRole = existingUser.userRoles.some(
+        (ur) => ur.role.roleName === data.role,
+      );
+      if (hasRole) {
+        throw new ConflictException(
+          `Email này đã được đăng ký với vai trò ${data.role}.`,
+        );
+      }
+      return this.addRoleToUser(existingUser.userId, data as RegisterDto);
+    }
 
     const hashedPassword =
       options?.passwordAlreadyHashed === true
@@ -68,20 +80,8 @@ export class UsersService {
         data: { userId: newUser.userId, roleId: primaryRoleRecord.roleId },
       });
 
-      // Grant CANDIDATE role as baseline — NOT for ADMIN accounts
-      if (data.role !== 'CANDIDATE' && data.role !== 'ADMIN') {
-        const candidateRoleRecord = await tx.role.upsert({
-          where: { roleName: 'CANDIDATE' },
-          update: {},
-          create: { roleName: 'CANDIDATE' },
-        });
-        await tx.userRole.create({
-          data: { userId: newUser.userId, roleId: candidateRoleRecord.roleId },
-        });
-      }
-
-      // Create Candidate profile — NOT for ADMIN accounts
-      if (data.role !== 'ADMIN') {
+      // Create profiles based on requested role
+      if (data.role === 'CANDIDATE') {
         await tx.candidate.create({
           data: {
             userId: newUser.userId,
@@ -447,18 +447,6 @@ export class UsersService {
         await tx.userRole.deleteMany({
           where: { userId },
         });
-
-        // Always re-grant CANDIDATE base role
-        if (dto.role !== 'CANDIDATE') {
-          const candRole = await tx.role.upsert({
-            where: { roleName: 'CANDIDATE' },
-            update: {},
-            create: { roleName: 'CANDIDATE' },
-          });
-          await tx.userRole.create({
-            data: { userId, roleId: candRole.roleId },
-          });
-        }
 
         // Add the new primary role
         const roleRecord = await tx.role.upsert({

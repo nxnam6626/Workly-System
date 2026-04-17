@@ -73,14 +73,16 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   // Fetch profile and CVs
   useEffect(() => {
     if (isOpen && isAuthenticated) {
-      fetchUserCVs();
+      if (user?.roles?.includes('CANDIDATE')) {
+        fetchUserCVs();
+      }
     }
-  }, [isOpen, isAuthenticated]);
+  }, [isOpen, isAuthenticated, user]);
 
   const fetchUserCVs = async () => {
     setFetchingProfile(true);
@@ -241,7 +243,25 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
           </button>
         </div>
 
-        {isSuccess ? (
+        {isAuthenticated && !user?.roles?.includes('CANDIDATE') ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
+             <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-amber-500">
+                <AlertCircle className="w-8 h-8" />
+             </div>
+             <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900">Quyền truy cập bị hạn chế</h3>
+                <p className="text-sm text-slate-500 max-w-sm mx-auto">
+                   Tài khoản của bạn đang có vai trò **Nhà tuyển dụng / Admin**. Chỉ tài khoản **Ứng viên** mới có thể thực hiện ứng tuyển việc làm.
+                </p>
+             </div>
+             <button
+                onClick={onClose}
+                className="px-8 py-2.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-all"
+             >
+                Đã hiểu
+             </button>
+          </div>
+        ) : isSuccess ? (
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-6 animate-in zoom-in-95 duration-300">
             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center text-green-500 mb-2">
               <CheckCircle2 className="w-12 h-12" />

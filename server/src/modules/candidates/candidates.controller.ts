@@ -16,6 +16,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { CandidatesService } from './candidates.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('candidates')
@@ -23,7 +25,8 @@ export class CandidatesController {
   constructor(private readonly candidatesService: CandidatesService) {}
 
   @Post('cv/upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -41,7 +44,8 @@ export class CandidatesController {
   }
 
   @Post('cv/:cvId/analyze')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async analyzeCv(
     @Param('cvId') cvId: string,
     @CurrentUser('userId') userId: string,
@@ -50,7 +54,8 @@ export class CandidatesController {
   }
 
   @Post('cv/extract')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -93,7 +98,8 @@ export class CandidatesController {
   }
 
   @Patch('cv/:cvId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async updateCv(
     @CurrentUser('userId') userId: string,
     @Param('cvId') cvId: string,
@@ -103,13 +109,15 @@ export class CandidatesController {
   }
 
   @Post('cv')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async saveCv(@CurrentUser('userId') userId: string, @Body() saveCvDto: any) {
     return this.candidatesService.saveCv(userId, saveCvDto);
   }
 
   @Patch('cv/:cvId/set-main')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async setMainCv(
     @CurrentUser('userId') userId: string,
     @Param('cvId') cvId: string,
@@ -118,7 +126,8 @@ export class CandidatesController {
   }
 
   @Delete('cv/:cvId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async deleteCv(
     @CurrentUser('userId') userId: string,
     @Param('cvId') cvId: string,
@@ -132,19 +141,22 @@ export class CandidatesController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   async getMe(@CurrentUser('userId') userId: string) {
     return this.candidatesService.findByUserId(userId);
   }
 
   @Get('saved')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
   getSavedCandidates(@CurrentUser('userId') userId: string) {
     return this.candidatesService.getSavedCandidates(userId);
   }
 
   @Get('recommended-jobs')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
   getRecommendedJobs(@CurrentUser('userId') userId: string) {
     return this.candidatesService.getRecommendedJobs(userId);
   }
@@ -162,7 +174,8 @@ export class CandidatesController {
   }
 
   @Post(':id/save')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
   toggleSave(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.candidatesService.toggleSave(id, userId);
   }

@@ -58,11 +58,13 @@ export class MessagesGateway
 
       if (count === 0) {
         try {
-          await this.prismaService.user.update({
+          const result = await this.prismaService.user.updateMany({
             where: { userId },
             data: { isOnline: true },
           });
-          this.server.emit('userStatusChanged', { userId, isOnline: true });
+          if (result.count > 0) {
+            this.server.emit('userStatusChanged', { userId, isOnline: true });
+          }
         } catch (e) {
           console.error('Failed to update online status:', e);
         }
@@ -85,15 +87,17 @@ export class MessagesGateway
     if (count - 1 === 0) {
       try {
         const lastActive = new Date();
-        await this.prismaService.user.update({
+        const result = await this.prismaService.user.updateMany({
           where: { userId },
           data: { isOnline: false, lastActive },
         });
-        this.server.emit('userStatusChanged', {
-          userId,
-          isOnline: false,
-          lastActive,
-        });
+        if (result.count > 0) {
+          this.server.emit('userStatusChanged', {
+            userId,
+            isOnline: false,
+            lastActive,
+          });
+        }
       } catch (e) {
         console.error('Failed to update offline status:', e);
       }

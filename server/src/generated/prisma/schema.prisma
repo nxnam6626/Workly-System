@@ -16,7 +16,6 @@ model User {
   lastLogin       DateTime?
   phoneNumber     String?
   avatar          String?
-  isEmailVerified Boolean          @default(false)
   updatedAt       DateTime         @updatedAt
   refreshToken    String?
   provider        AuthProvider     @default(LOCAL)

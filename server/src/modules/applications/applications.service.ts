@@ -2,12 +2,13 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { MessagesGateway } from '../messages/messages.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
-
+import { type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { WalletsService } from '../wallets/wallets.service';
 import { AiService } from '../ai/ai.service'; // Added AiService
 import { TransactionType } from '@prisma/client';
@@ -25,8 +26,16 @@ export class ApplicationsService {
   async create(
     createApplicationDto: CreateApplicationDto,
     file?: any,
-    userId?: string,
+    user?: CurrentUserPayload,
   ) {
+    const userId = user?.userId;
+
+    if (userId && !user.roles.includes('CANDIDATE')) {
+      throw new ForbiddenException(
+        'Chỉ tài khoản ứng viên mới có thể nộp đơn ứng tuyển cho công việc.',
+      );
+    }
+
     const { jobPostingId, fullName, email, phone, coverLetter } =
       createApplicationDto;
 
@@ -36,21 +45,37 @@ export class ApplicationsService {
     });
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng!');
 
+    // Chặn tự ứng tuyển: Nếu người dùng là chủ của tin tuyển dụng này
+    if (userId) {
+      const recruiter = await this.prisma.recruiter.findUnique({
+        where: { userId },
+      });
+      if (recruiter && recruiter.recruiterId === job.recruiterId) {
+        throw new ForbiddenException(
+          'Bạn không thể ứng tuyển vào tin tuyển dụng của chính mình.',
+        );
+      }
+    }
+
     return await this.prisma.$transaction(async (tx) => {
       let candidateId: string;
 
       // 2. Handle Candidate identification
       if (userId) {
+        // Kiểm tra xem người dùng có vai trò CANDIDATE không
+        if (!user.roles.includes('CANDIDATE')) {
+          throw new ForbiddenException(
+            'Chỉ tài khoản ứng viên mới có thể nộp đơn ứng tuyển cho công việc.',
+          );
+        }
+
         const candidate = await tx.candidate.findUnique({ where: { userId } });
         if (!candidate) {
-          // If logged in user is not a candidate, create one
-          const newCandidate = await tx.candidate.create({
-            data: { userId, fullName },
-          });
-          candidateId = newCandidate.candidateId;
-        } else {
-          candidateId = candidate.candidateId;
+          throw new NotFoundException(
+            'Không tìm thấy hồ sơ ứng viên. Vui lòng hoàn tất thông tin ứng viên của bạn trước.',
+          );
         }
+        candidateId = candidate.candidateId;
       } else {
         // Guest Application Logic
         // Check if user with email already exists
