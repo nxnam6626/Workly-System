@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface CvDropzoneProps {
   onUpload: (file: File) => void;
+  onManualEntry: () => void;
   isLoading: boolean;
 }
 
 import { AIScanner } from '@/components/ui/ai-scanner';
 
-export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, isLoading }) => {
+export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry, isLoading }) => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,8 +70,8 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, isLoading }) =
         <input {...dropzone.getInputProps()} />
 
         <AnimatePresence mode="wait">
-          {!file && !isLoading && <DropzoneIdle isDragActive={dropzone.isDragActive} key="idle" />}
-          {isLoading && <DropzoneLoading key="loading" />}
+          {!file && !isLoading && <DropzoneIdle isDragActive={dropzone.isDragActive} onManualEntry={onManualEntry} key="idle" />}
+          {isLoading && <DropzoneLoading onManualEntry={onManualEntry} key="loading" />}
           {file && !isLoading && (
             <DropzonePreview
               file={file}
@@ -101,7 +102,7 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, isLoading }) =
 
 // --- INTERNAL SUB-COMPONENTS ---
 
-function DropzoneIdle({ isDragActive }: { isDragActive: boolean }) {
+function DropzoneIdle({ isDragActive, onManualEntry }: { isDragActive: boolean; onManualEntry: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -129,11 +130,23 @@ function DropzoneIdle({ isDragActive }: { isDragActive: boolean }) {
         <Upload size={16} strokeWidth={2.5} />
         <span>Chọn tệp trên máy tính</span>
       </div>
+
+      {!isDragActive && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onManualEntry();
+          }}
+          className="mt-4 text-[13px] font-medium text-gray-400 hover:text-sky-500 transition-colors underline underline-offset-4"
+        >
+          Hoặc nhập thông tin thủ công
+        </button>
+      )}
     </motion.div>
   );
 }
 
-function DropzoneLoading() {
+function DropzoneLoading({ onManualEntry }: { onManualEntry: () => void }) {
   const steps = [
     'Đọc và nhận dạng nội dung CV...',
     'Trích xuất kỹ năng & kinh nghiệm...',
@@ -189,6 +202,16 @@ function DropzoneLoading() {
           className="h-full bg-sky-500 rounded-full"
         />
       </div>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onManualEntry();
+        }}
+        className="mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-wider"
+      >
+        Bỏ qua & Nhập thủ công
+      </button>
     </motion.div>
   );
 }

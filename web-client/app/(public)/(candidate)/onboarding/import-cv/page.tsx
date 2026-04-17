@@ -17,6 +17,7 @@ export default function ImportCvPage() {
     parsedData,
     handleUpload,
     handleSaveProfile,
+    handleManualEntry,
     goToUpload,
   } = useCvImport();
 
@@ -43,7 +44,7 @@ export default function ImportCvPage() {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <CvDropzone onUpload={handleUpload} isLoading={isLoading} />
+                <CvDropzone onUpload={handleUpload} onManualEntry={handleManualEntry} isLoading={isLoading} />
               </motion.div>
             )}
 

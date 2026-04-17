@@ -9,6 +9,7 @@ import { AiMatchingService } from './ai-matching.service';
 import { AiModerationService } from './ai-moderation.service';
 import { AiInsightsService } from './ai-insights.service';
 import { AiChatService } from './ai-chat.service';
+import { ChatService } from './chat.service';
 
 @Global()
 @Module({
@@ -27,6 +28,7 @@ import { AiChatService } from './ai-chat.service';
     AiModerationService,
     AiInsightsService,
     AiChatService,
+    ChatService,
   ],
   exports: [AiService],
 })

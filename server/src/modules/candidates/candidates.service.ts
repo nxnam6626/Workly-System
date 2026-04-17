@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CvParsingService } from './cv-parsing.service';
@@ -22,6 +23,8 @@ export class CandidatesService {
     private readonly matchingService: MatchingService,
     @InjectQueue('matching') private matchingQueue: Queue,
   ) { }
+
+  private readonly logger = new Logger(CandidatesService.name);
 
   async findAll(query: any, recruiterUserId?: string) {
     const { skip = 0, take = 10, search, skills, major } = query;
@@ -301,12 +304,6 @@ export class CandidatesService {
       throw new NotFoundException('CV not found or does not belong to user');
     }
 
-    if (cv.isMain) {
-      throw new BadRequestException(
-        'Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.',
-      );
-    }
-
     if (!cv.fileUrl)
       throw new BadRequestException('CV does not have a file URL');
 
@@ -320,19 +317,21 @@ export class CandidatesService {
       // 3. Tiến hành bóc tách AI
       const extractedData = await this.cvParsingService.parseCv(buffer);
 
+      if (!extractedData) {
+        throw new BadRequestException('Hệ thống AI không thể bóc tách dữ liệu từ CV này.');
+      }
+
       const hasValidName =
-        extractedData &&
         extractedData.fullName &&
         extractedData.fullName.trim() !== '';
       const hasContent =
-        extractedData &&
         (extractedData.skills?.length > 0 ||
           extractedData.education?.length > 0 ||
           extractedData.experience?.length > 0);
 
       if (!hasValidName || !hasContent) {
-        throw new BadRequestException(
-          'Hệ thống AI không thể nhận diện đủ thông tin cốt lõi (Họ tên, Trình độ/Kỹ năng) từ CV này. Vui lòng kiểm tra định dạng file hoặc thử lại.',
+        this.logger.warn(
+          `[CandidatesService] AI parsing for CV ${cvId} returned partial/insufficient data. Proceeding with caution.`,
         );
       }
 
@@ -343,7 +342,7 @@ export class CandidatesService {
 
       let isValidName = false;
 
-      if (cvName && accName) {
+      if (cvName && accName && accName !== 'người dùng' && accName !== '') {
         const cvTokens = cvName.split(' ');
         const accTokens = accName.split(' ');
 
@@ -353,9 +352,11 @@ export class CandidatesService {
         );
 
         if (!isValidName) {
-          throw new BadRequestException(
-            'Hệ thống phát hiện Tên trong CV không khớp với Tên tài khoản của bạn. Xin vui lòng sử dụng CV gốc của chính mình.',
+          this.logger.warn(
+            `[CandidatesService] AI detected name mismatch: CV="${cvName}", Account="${accName}". Warning user but allowing proceed.`,
           );
+          // Return with a warning flag instead of throwing
+          (extractedData as any).aiWarning = 'Tên trong CV có thể không khớp với tên tài khoản.';
         }
       }
 
@@ -817,10 +818,17 @@ export class CandidatesService {
 
     const cv = await this.prisma.cV.findUnique({
       where: { cvId },
-      select: { cvId: true, candidateId: true, fileUrl: true },
+      select: { cvId: true, candidateId: true, fileUrl: true, isMain: true },
     });
+
     if (!cv || cv.candidateId !== candidate.candidateId) {
       throw new NotFoundException('CV not found or does not belong to user');
+    }
+
+    if (cv.isMain) {
+      throw new BadRequestException(
+        'Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.',
+      );
     }
 
     // Xóa tệp trên Supabase nếy có URL

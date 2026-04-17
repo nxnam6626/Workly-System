@@ -21,16 +21,37 @@ export function useCvImport() {
       if (response && response.parsedData) {
         setParsedData(response.parsedData);
         setStep('review');
-        toast.success('Bóc tách CV thành công!');
+        
+        if (response.parsedData.aiWarning) {
+          toast.error(response.parsedData.aiWarning, { duration: 5000 });
+        } else {
+          toast.success('Bóc tách CV thành công!');
+        }
       } else {
-        toast.error('Không thể bóc tách dữ liệu từ CV này. Vui lòng thử lại.');
+        toast.error('Không thể bóc tách dữ liệu. Bạn có thể nhập thông tin thủ công.');
       }
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xử lý CV.');
+      const message = error.response?.data?.message || 'Có lỗi xảy ra khi xử lý CV.';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleManualEntry = () => {
+    setParsedData({
+      fullName: '',
+      email: '',
+      phone: '',
+      skills: [],
+      experience: [],
+      education: [],
+      projects: [],
+      summary: '',
+      gpa: 0,
+    });
+    setStep('review');
   };
 
   const handleSaveProfile = async (data: any) => {
@@ -76,6 +97,7 @@ export function useCvImport() {
     parsedData,
     handleUpload,
     handleSaveProfile,
+    handleManualEntry,
     goToUpload,
   };
 }
