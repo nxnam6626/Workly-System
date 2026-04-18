@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 model User {
@@ -16,6 +16,7 @@ model User {
   lastLogin       DateTime?
   phoneNumber     String?
   avatar          String?
+  isEmailVerified Boolean          @default(false)
   updatedAt       DateTime         @updatedAt
   refreshToken    String?
   provider        AuthProvider     @default(LOCAL)
@@ -51,14 +52,14 @@ model UserRole {
 
 model Notification {
   notificationId String   @id @default(uuid())
+  userId         String
   title          String
-  message        String
   type           String   @default("info")
   isRead         Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  userId         String
-  link           String?
   metadata       Json?
+  createdAt      DateTime @default(now())
+  message        String
+  link           String?
   user           User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
@@ -73,9 +74,9 @@ model JobAlert {
 model Admin {
   adminId     String    @id @default(uuid())
   adminLevel  Int       @default(1)
-  permissions String[]  @default([])
   lastAction  String?
   userId      String    @unique
+  permissions String[]  @default([])
   user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
   companies   Company[]
 }
@@ -93,18 +94,18 @@ model Candidate {
   cvs           CV[]
   user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
   conversations Conversation[]
+  jobMatches    JobMatch[]
   projects      Project[]
   savedJobs     SavedJob[]
   skills        Skill[]
-  jobMatches    JobMatch[]
 }
 
 model Skill {
   skillId     String     @id @default(uuid())
   skillName   String
-  category    String?
   candidateId String
   level       SkillLevel @default(BEGINNER)
+  category    String?
   candidate   Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
@@ -125,12 +126,12 @@ model Recruiter {
   userId                String                 @unique
   companyId             String?
   savedCandidateIds     String[]
-  violationCount        Int                    @default(0)
-  updatedAt             DateTime               @default(now()) @updatedAt
-  createdAt             DateTime               @default(now())
   aiInsightsCache       Json?
   aiInsightsCacheKey    String?
   aiInsightsCachedAt    DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @default(now()) @updatedAt
+  violationCount        Int                    @default(0)
   conversations         Conversation[]
   jobPostings           JobPosting[]
   company               Company?               @relation(fields: [companyId], references: [companyId])
@@ -142,13 +143,13 @@ model Recruiter {
 model Transaction {
   transactionId String          @id @default(uuid())
   amount        Int
-  realMoney     Float?
-  type          TransactionType
   description   String?
   createdAt     DateTime        @default(now())
   walletId      String
   orderCode     Int?            @unique
   status        String          @default("SUCCESS")
+  realMoney     Float?
+  type          TransactionType
   wallet        RecruiterWallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
 }
 
@@ -163,43 +164,43 @@ model CrawlLog {
 }
 
 model Company {
-  companyId          String       @id @default(uuid())
+  companyId          String          @id @default(uuid())
   companyName        String
-  slug               String?      @unique
-  taxCode            String?      @unique
-  isRegistered       Boolean      @default(false)
-  verifyStatus       Int          @default(0)
+  taxCode            String?         @unique
+  isRegistered       Boolean         @default(false)
+  verifyStatus       Int             @default(0)
   logo               String?
   banner             String?
   address            String?
-  taxAddress         String?
-  status             String?
-  internationalName  String?
-  shortName          String?
-  operatingDate      String?
-  enterpriseType     String?
-  mainIndustry       String?
   description        String?
   websiteUrl         String?
   companySize        Int?
   businessLicenseUrl String?
   adminId            String?
+  enterpriseType     String?
+  internationalName  String?
+  mainIndustry       String?
+  operatingDate      String?
+  shortName          String?
+  slug               String?         @unique
+  status             String?
+  taxAddress         String?
   admin              Admin?          @relation(fields: [adminId], references: [adminId])
+  branches           CompanyBranch[]
   jobPostings        JobPosting[]
   recruiters         Recruiter[]
-  branches           CompanyBranch[]
 }
 
 model CompanyBranch {
-  branchId     String       @id @default(uuid())
-  name         String
-  address      String
-  latitude     Float?
-  longitude    Float?
-  isVerified   Boolean      @default(false)
-  companyId    String
-  company      Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  jobPostings  JobPosting[] @relation("JobPostingBranches")
+  branchId    String       @id @default(uuid())
+  name        String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  isVerified  Boolean      @default(false)
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  jobPostings JobPosting[] @relation("JobPostingBranches")
 }
 
 model RawJob {
@@ -221,55 +222,54 @@ model RawJob {
 }
 
 model JobPosting {
-  jobPostingId           String        @id @default(uuid())
+  jobPostingId           String          @id @default(uuid())
   title                  String
-  slug                   String?       @unique
   description            String?
   requirements           String?
   benefits               String?
-  salaryMin              Decimal?      @db.Decimal(19, 0)
-  salaryMax              Decimal?      @db.Decimal(19, 0)
-  currency               String?       @default("VND")
+  salaryMin              Decimal?        @db.Decimal(19, 0)
+  salaryMax              Decimal?        @db.Decimal(19, 0)
+  currency               String?         @default("VND")
   jobType                JobType?
   experience             String?
-  vacancies              Int           @default(1)
+  vacancies              Int             @default(1)
   locationCity           String?
-  status                 JobStatus     @default(PENDING)
-  postType               PostType      @default(CRAWLED)
-  jobTier                JobTier       @default(BASIC)
-  isVerified             Boolean       @default(false)
-  originalUrl            String        @unique
+  status                 JobStatus       @default(PENDING)
+  postType               PostType        @default(CRAWLED)
+  isVerified             Boolean         @default(false)
+  originalUrl            String          @unique
   aiReliabilityScore     Float?
-  autoInviteMatches      Boolean       @default(false)
-  createdAt              DateTime      @default(now()) @db.Timestamp(6)
-  refreshedAt            DateTime      @default(now()) @db.Timestamp(6)
-  updatedAt              DateTime      @updatedAt @db.Timestamp(6)
+  createdAt              DateTime        @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime        @updatedAt @db.Timestamp(6)
   approvedBy             String?
   recruiterId            String?
   companyId              String
-  rawJobId               String?       @unique
-  viewCount              Int           @default(0)
+  rawJobId               String?         @unique
   structuredRequirements Json?
+  viewCount              Int             @default(0)
+  jobTier                JobTier         @default(BASIC)
+  refreshedAt            DateTime        @default(now()) @db.Timestamp(6)
+  slug                   String?         @unique
+  autoInviteMatches      Boolean         @default(false)
   applications           Application[]
-  company                Company       @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  rawJob                 RawJob?       @relation(fields: [rawJobId], references: [rawJobId])
-  recruiter              Recruiter?    @relation(fields: [recruiterId], references: [recruiterId])
+  jobMatches             JobMatch[]
+  company                Company         @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  rawJob                 RawJob?         @relation(fields: [rawJobId], references: [rawJobId])
+  recruiter              Recruiter?      @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
   branches               CompanyBranch[] @relation("JobPostingBranches")
-  jobMatches             JobMatch[]
 }
 
 model JobMatch {
-  matchId      String     @id @default(uuid())
-  score        Float
+  matchId       String     @id @default(uuid())
+  score         Float
   matchedSkills String[]
-  candidateId  String
-  jobPostingId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  candidate    Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
+  candidateId   String
+  jobPostingId  String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  candidate     Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  jobPosting    JobPosting @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
 
   @@unique([candidateId, jobPostingId])
 }
@@ -335,14 +335,14 @@ model Conversation {
 model Message {
   messageId      String       @id @default(uuid())
   content        String
-  fileName       String?
-  fileUrl        String?
-  fileType       String?
-  fileSize       Int?
   sentAt         DateTime     @default(now())
   isRead         Boolean      @default(false)
   conversationId String
   senderId       String
+  fileName       String?
+  fileSize       Int?
+  fileType       String?
+  fileUrl        String?
   conversation   Conversation @relation(fields: [conversationId], references: [conversationId], onDelete: Cascade)
 }
 
@@ -350,9 +350,9 @@ model RecruiterWallet {
   walletId         String        @id @default(uuid())
   recruiterId      String        @unique
   balance          Int           @default(0)
+  updatedAt        DateTime      @updatedAt
   cvUnlockQuota    Int           @default(0)
   cvUnlockQuotaMax Int           @default(0)
-  updatedAt        DateTime      @updatedAt
   recruiter        Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
   transactions     Transaction[]
 }
@@ -398,6 +398,13 @@ model SupportRequest {
   updatedAt DateTime      @updatedAt
   userId    String?
   user      User?         @relation(fields: [userId], references: [userId])
+}
+
+model AiQueryCache {
+  id        String   @id @default(uuid())
+  query     String   @unique
+  response  String
+  createdAt DateTime @default(now())
 }
 
 enum AuthProvider {
@@ -484,11 +491,4 @@ enum SupportStatus {
   OPEN
   IN_PROGRESS
   CLOSED
-}
-
-model AiQueryCache {
-  id String @id @default(uuid())
-  query String @unique
-  response String @db.Text
-  createdAt DateTime @default(now())
 }

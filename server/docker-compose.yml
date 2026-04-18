@@ -25,7 +25,22 @@ services:
       - es_data:/usr/share/elasticsearch/data
     restart: unless-stopped
 
+  # Cấu hình PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: workly_postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+      - POSTGRES_DB=workly
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 # Khai báo volume để dữ liệu không bị mất khi tắt Docker
 volumes:
   redis_data:
   es_data:
+  postgres_data:

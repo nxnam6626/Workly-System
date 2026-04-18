@@ -8,7 +8,7 @@ import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { JobStatus } from '../../../generated/prisma';
+import { JobStatus, Prisma } from '../../../generated/prisma';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { MessagesGateway } from '../../messages/messages.gateway';
@@ -616,7 +616,7 @@ export class JobPostingsService {
     const enrichedJobs = await Promise.all(
       jobs.map(async (job) => {
         let matchedCount = 0;
-        let autoInvitedCandidates = [];
+        let autoInvitedCandidates: any[] = [];
 
         if (job.status !== 'REJECTED') {
           // 1. Lấy số lượng phù hợp từ JobMatch
@@ -1327,12 +1327,12 @@ export class JobPostingsService {
   }
 
   async getSuggestedCandidates(jobId: string, recruiterIdFromToken?: string) {
-    const job = await this.prisma.jobPosting.findUnique({
+    const jobPost = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      select: { status: true },
+      select: { status: true, structuredRequirements: true },
     });
 
-    if (job?.status === 'REJECTED') {
+    if (jobPost?.status === 'REJECTED') {
       return [];
     }
 
@@ -1363,22 +1363,50 @@ export class JobPostingsService {
         const isUnlocked = unlockedIds.has(m.candidateId);
         const candidate = await this.prisma.candidate.findUnique({
           where: { candidateId: m.candidateId },
-          include: { user: { select: { avatar: true } } },
+          include: { 
+            user: { select: { avatar: true, email: true } },
+            cvs: {
+              where: { parsedData: { not: Prisma.JsonNull } },
+              orderBy: { createdAt: 'desc' },
+              take: 1
+            }
+          },
         });
+
+        // Tính toán kỹ năng thiếu (Missing Skills)
+        const jobReqs = jobPost?.structuredRequirements as any;
+        const candidateSkills = (candidate?.cvs?.[0]?.parsedData as any)?.skills || [];
+        const hardSkills = jobReqs?.hardSkills || [];
+        
+        const missingSkills = hardSkills.filter(s => 
+          !m.matchedSkills.some(ms => ms.toLowerCase().includes(s.toLowerCase()))
+        );
+
         return {
           ...m,
           fullName: isUnlocked
             ? candidate?.fullName || 'Ứng viên'
             : `Ứng viên #${m.candidateId.slice(0, 4)}`,
+          email: isUnlocked ? candidate?.user?.email : '***@***.***',
           major: candidate?.major || '',
           user: { avatar: isUnlocked ? candidate?.user?.avatar : null },
           isUnlocked,
+          missingSkills,
+          // Thêm thông tin cho bảng phân tích
+          analysis: {
+            hardSkillsCount: hardSkills.length,
+            matchedCount: m.matchedSkills.length,
+            missingCount: missingSkills.length,
+            experienceMatch: (candidate?.cvs?.[0]?.parsedData as any)?.totalYearsExp >= (jobReqs?.minExperienceYears || 0),
+            totalYearsExp: (candidate?.cvs?.[0]?.parsedData as any)?.totalYearsExp || 0,
+            requiredExp: jobReqs?.minExperienceYears || 0
+          }
         };
       }),
     );
 
-    // Return top 5 matches
-    return enriched.sort((a, b) => b.score - a.score).slice(0, 5);
+    // Return top 10 matches
+    return enriched.sort((a, b) => b.score - a.score).slice(0, 10);
   }
 
   async getRecommendations(userId: string) {
@@ -1421,6 +1449,84 @@ export class JobPostingsService {
       containsBadWords: foundBadWords.length > 0,
       foundWords: foundBadWords,
     };
+  }
+
+  async reparse(id: string, userId: string) {
+    const job = await this.prisma.jobPosting.findUnique({
+      where: { jobPostingId: id },
+      include: { recruiter: true },
+    });
+
+    if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng');
+    if (job.recruiter?.userId !== userId) {
+      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    }
+
+    this.logger.log(`Reparsing Job ID: ${id}`);
+
+    try {
+      // 1. Bóc tách lại kỹ năng từ tiêu đề và yêu cầu
+      const hardSkills = await this.aiService.extractFocusSkills(
+        job.title,
+        job.requirements || '',
+      );
+
+      // 2. Dự đoán lại số năm kinh nghiệm (Prompt tối ưu qua AI)
+      const prompt = `Dựa trên văn bản yêu cầu công việc sau, hãy xác định số năm kinh nghiệm tối thiểu yêu cầu.
+      QUY TẮC QUAN TRỌNG:
+      - Nếu Tiêu đề hoặc Mô tả có chứa các từ khóa: "Intern", "Thực tập sinh", "Junior", "Fresher", "Mới tốt nghiệp", "Không yêu cầu kinh nghiệm" -> Trả về 0.
+      - Các trường hợp khác: Trả về con số nhỏ nhất được nhắc đến cho số năm kinh nghiệm.
+      - TRẢ VỀ DUY NHẤT 1 CON SỐ.
+
+      Tiêu đề: ${job.title}
+      Yêu cầu: ${job.requirements}
+      Mô tả: ${job.description}`;
+      
+      let minExperienceYears = 0;
+      try {
+        const aiResponse = await this.aiService.generateResponse(prompt);
+        const match = aiResponse.match(/\d+/);
+        if (match) minExperienceYears = parseInt(match[0]);
+      } catch (e) {
+        this.logger.warn('Failed to parse experience via AI, defaulting to 0');
+      }
+
+      const currentStruct = (job.structuredRequirements as any) || {};
+      const updatedStruct = {
+        ...currentStruct,
+        hardSkills,
+        minExperienceYears,
+      };
+
+      const updatedJob = await this.prisma.jobPosting.update({
+        where: { jobPostingId: id },
+        data: {
+          structuredRequirements: updatedStruct,
+        },
+      });
+
+      // 3. Mở rộng từ khóa (Keywords Expansion) ngầm
+      await this.enrichKeywordsInBackground(id, job.title, hardSkills);
+
+      // 4. Đồng bộ ES
+      try {
+        await this.syncJobToES(updatedJob as any);
+      } catch (e) {
+        this.logger.error('ES Sync failed during reparse:', e);
+      }
+
+      // 5. Trigger Matching
+      await this.matchingQueue.add('match', { jobId: id });
+
+      return {
+        success: true,
+        message: 'Đã bóc tách lại dữ liệu thành công',
+        newRequirements: updatedStruct,
+      };
+    } catch (error) {
+      this.logger.error(`Reparse failed for Job ${id}: ${error.message}`);
+      throw new Error('Không thể bóc tách lại dữ liệu lúc này');
+    }
   }
 
   async renew(jobId: string, userId: string) {

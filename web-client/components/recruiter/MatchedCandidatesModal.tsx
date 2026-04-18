@@ -7,6 +7,8 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
 import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
+import MatchingAnalysisModal from '@/components/recruiter/MatchingAnalysisModal';
+import { BarChart3 } from 'lucide-react';
 
 interface MatchedCandidatesModalProps {
   isOpen: boolean;
@@ -21,6 +23,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
   const [messagingId, setMessagingId] = useState<string | null>(null);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<{ id: string; cvId: string; name: string } | null>(null);
+  const [analysisTarget, setAnalysisTarget] = useState<any | null>(null);
 
   const fetchWallet = useWalletStore((state) => state.fetchWallet);
   const wallet = useWalletStore((state) => state.wallet);
@@ -184,6 +187,13 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
 
                   {/* Actions */}
                   <div className="flex gap-2 w-full md:w-auto justify-end flex-shrink-0">
+                    <button
+                      onClick={() => setAnalysisTarget(candidate)}
+                      className="p-2.5 bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 rounded-lg transition-all shadow-sm"
+                      title="Phân tích AI Matching"
+                    >
+                      <BarChart3 className="w-5 h-5" />
+                    </button>
                     {candidate.isUnlocked ? (
                       <>
                         <button
@@ -232,6 +242,18 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
         wallet={wallet}
         subscription={subscription}
       />
+
+      {analysisTarget && (
+        <MatchingAnalysisModal
+          isOpen={!!analysisTarget}
+          onClose={() => setAnalysisTarget(null)}
+          candidateName={analysisTarget.fullName}
+          score={analysisTarget.score}
+          matchedSkills={analysisTarget.matchedSkills || []}
+          missingSkills={analysisTarget.missingSkills || []}
+          analysis={analysisTarget.analysis}
+        />
+      )}
     </div>
   );
 };

@@ -104,9 +104,9 @@ export class MatchingService {
 
     const uniqueMatches = Array.from(bestMatchesMap.values());
 
-    // Sắp xếp và lấy Top N
+    // Sắp xếp và lấy Top N - Đồng bộ Threshold về 40
     const topMatches = uniqueMatches
-      .filter((m) => m.score >= 50)
+      .filter((m) => m.score >= 40)
       .sort((a, b) => b.score - a.score)
       .slice(0, (job.vacancies || 1) * 5);
 
@@ -154,12 +154,6 @@ export class MatchingService {
       return [];
     }
 
-    // Chọn CV chính hoặc CV mới nhất
-    const mainCv = candidate.cvs.find((cv) => cv.isMain) || candidate.cvs[0];
-    const parsedData = mainCv.parsedData as any;
-    const cvSkills = parsedData.skills || [];
-    const cvExp = parsedData.totalYearsExp || 0;
-
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
@@ -175,70 +169,44 @@ export class MatchingService {
     });
 
     const matches = allJobs.map((job) => {
-      const reqs = job.structuredRequirements as any;
-      const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
-
-      // 1. Tính điểm Kỹ năng (60%)
-      const expandedSkillsMap =
-        typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null
-          ? reqs.expandedSkills
-          : {};
-
-      const matchedHard = hardSkills.filter((s: string) => {
-        const synonyms = Array.isArray(expandedSkillsMap[s])
-          ? expandedSkillsMap[s]
-          : [];
-        const searchTerms = [s, ...synonyms].map((t) =>
-          typeof t === 'string' ? t.toLowerCase() : '',
-        );
-
-        return cvSkills.some((cs: any) => {
-          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-          if (!skillStr) return false;
-          const cvs = skillStr.toLowerCase();
-          return searchTerms.some((term) => term && cvs.includes(term));
-        });
-      });
-      const hardScore =
-        hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
-
-      const matchedSoft = softSkills.filter((s: string) =>
-        cvSkills.some((cs: any) => {
-          const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-          return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
-        }),
+      const parsedData = candidate.cvs.find((cv) => cv.isMain)?.parsedData || candidate.cvs[0].parsedData;
+      const { score, matchedSkills } = this._calculateScore(
+        job.structuredRequirements,
+        parsedData,
+        job.company?.verifyStatus === 1,
       );
-      const softScore =
-        softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
 
-      const skillScore = hardScore * 0.8 + softScore * 0.2;
-
-      // 2. Tính điểm Kinh nghiệm (30%)
-      let expScore = 1;
-      if (minExperienceYears > 0) {
-        expScore = Math.min(cvExp / minExperienceYears, 1.2);
-      }
-
-      // 3. Điểm tổng hợp
-      let finalScore = skillScore * 0.6 + expScore * 0.4;
-
-      // 4. Cộng thêm độ tin cậy nếu công ty đã xác thực MST (+15% điểm tin cậy)
-      if (job.company && job.company.verifyStatus === 1) {
-        finalScore += 0.15;
-      }
+      // Tính toán analysis data cho candidate
+      const jobReqs = job.structuredRequirements as any;
+      const hardSkills = jobReqs?.hardSkills || [];
+      const matchedHard = matchedSkills.filter(s => 
+        hardSkills.some(hs => hs.toLowerCase() === s.toLowerCase())
+      );
+      const missingSkills = hardSkills.filter(s => 
+        !matchedSkills.some(ms => ms.toLowerCase().includes(s.toLowerCase()))
+      );
 
       return {
         ...job,
-        score: Math.min(Math.round(finalScore * 100), 100),
-        matchedSkills: [...matchedHard, ...matchedSoft],
+        score,
+        matchedSkills,
+        missingSkills,
+        analysis: {
+          hardSkillsCount: hardSkills.length,
+          matchedCount: matchedHard.length,
+          missingCount: missingSkills.length,
+          experienceMatch: (parsedData as any)?.totalYearsExp >= (jobReqs?.minExperienceYears || 0),
+          totalYearsExp: (parsedData as any)?.totalYearsExp || 0,
+          requiredExp: jobReqs?.minExperienceYears || 0
+        }
       };
     });
 
     // Sắp xếp và lấy Top
     const topMatches = matches
-      .filter((m) => m.score >= 40) // Ngưỡng thấp hơn tí cho ứng viên nhiều lựa chọn
+      .filter((m) => m.score >= 40)
       .sort((a, b) => b.score - a.score)
-      .slice(0, 50); // Giới hạn lưu Top 50 Job cho mỗi Candidate
+      .slice(0, 50);
 
     this.logger.log(
       `Đã tìm thấy ${topMatches.length} Jobs phù hợp cho Candidate ${candidate.candidateId}. Đang lưu vào DB...`,
@@ -262,5 +230,73 @@ export class MatchingService {
     }
 
     return topMatches;
+  }
+
+  /**
+   * Logic tính điểm Matching dùng chung
+   */
+  private _calculateScore(
+    structuredRequirements: any,
+    parsedCvData: any,
+    isCompanyVerified: boolean = false,
+  ): { score: number; matchedSkills: string[] } {
+    const reqs = structuredRequirements || {};
+    const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
+    const cvSkills = parsedCvData.skills || [];
+    const cvExp = parsedCvData.totalYearsExp || 0;
+
+    // 1. Tính điểm Kỹ năng (60%)
+    const expandedSkillsMap =
+      typeof reqs.expandedSkills === 'object' && reqs.expandedSkills !== null
+        ? reqs.expandedSkills
+        : {};
+
+    const matchedHard = hardSkills.filter((s: string) => {
+      const synonyms = Array.isArray(expandedSkillsMap[s])
+        ? expandedSkillsMap[s]
+        : [];
+      const searchTerms = [s, ...synonyms].map((t) =>
+        typeof t === 'string' ? t.toLowerCase() : '',
+      );
+
+      return cvSkills.some((cs: any) => {
+        const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+        if (!skillStr) return false;
+        const cvs = skillStr.toLowerCase();
+        return searchTerms.some((term) => term && cvs.includes(term));
+      });
+    });
+    const hardScore =
+      hardSkills.length > 0 ? matchedHard.length / hardSkills.length : 1;
+
+    const matchedSoft = softSkills.filter((s: string) =>
+      cvSkills.some((cs: any) => {
+        const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
+        return skillStr && skillStr.toLowerCase().includes(s.toLowerCase());
+      }),
+    );
+    const softScore =
+      softSkills.length > 0 ? matchedSoft.length / softSkills.length : 1;
+
+    const skillScore = hardScore * 0.8 + softScore * 0.2;
+
+    // 2. Tính điểm Kinh nghiệm (40%)
+    let expScore = 1;
+    if (minExperienceYears > 0) {
+      expScore = Math.min(cvExp / minExperienceYears, 1.2);
+    }
+
+    // 3. Điểm tổng hợp
+    let finalScore = skillScore * 0.6 + expScore * 0.4;
+
+    // 4. Cộng thêm độ tin cậy nếu công ty đã xác thực (+15% điểm tin cậy)
+    if (isCompanyVerified) {
+      finalScore += 0.15;
+    }
+
+    return {
+      score: Math.min(Math.round(finalScore * 100), 100),
+      matchedSkills: [...matchedHard, ...matchedSoft],
+    };
   }
 }

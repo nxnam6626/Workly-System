@@ -49,6 +49,13 @@ export class JobPostingsController {
     };
   }
 
+  @Post(':id/re-parse')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  reparseJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.reparse(id, userId);
+  }
+
   @Get(':id/suggested-candidates')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)

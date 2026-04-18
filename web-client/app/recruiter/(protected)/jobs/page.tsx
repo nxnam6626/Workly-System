@@ -389,6 +389,24 @@ export default function JobsManagementPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm('Bạn có chắc muốn AI bóc tách lại dữ liệu cho tin này? (Thao tác này sẽ cập nhật lại tiêu chuẩn so khớp)')) return;
+                            const loadingToast = toast.loading('AI đang phân tích lại JD...');
+                            try {
+                              await api.post(`/job-postings/${job.jobPostingId}/re-parse`);
+                              toast.success('Đã bóc tách lại thành công!', { id: loadingToast });
+                              fetchJobs();
+                            } catch (error: any) {
+                              const msg = error.response?.data?.message || 'Có lỗi xảy ra!';
+                              toast.error(msg, { id: loadingToast });
+                            }
+                          }}
+                          title="Bóc tách lại dữ liệu bằng AI (Nếu bóc tách sai)"
+                          className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                        </button>
                         <Link
                           href={`/recruiter/post-job?jobId=${job.jobPostingId}`}
                           title="Chỉnh sửa tin (sẽ chờ duyệt lại sau khi sửa)"
