@@ -21,7 +21,6 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m # Giới hạn RAM tối đa 512MB để tránh treo máy
     ports:
       - '9200:9200'
-      - '9300:9300'
     volumes:
       - es_data:/usr/share/elasticsearch/data
     restart: unless-stopped

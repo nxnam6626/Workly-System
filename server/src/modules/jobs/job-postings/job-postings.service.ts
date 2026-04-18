@@ -1275,6 +1275,9 @@ export class JobPostingsService {
   }
 
   async syncAllJobsToES() {
+    // Xóa và tạo lại index để đảm bảo dữ liệu sạch 100%
+    await this.searchService.recreateIndex();
+
     const jobs = await this.prisma.jobPosting.findMany({
       where: { status: JobStatus.APPROVED },
       include: { company: true },
