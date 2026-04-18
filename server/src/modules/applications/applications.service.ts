@@ -216,7 +216,7 @@ export class ApplicationsService {
           coverLetter,
           appStatus: 'PENDING',
           aiMatchScore,
-          isUnlocked: isAlreadyUnlocked,
+          isUnlocked: true, // Luôn mặc định mở khóa cho ứng viên chủ động ứng tuyển tự nguyện
         },
         include: {
           jobPosting: { include: { recruiter: true } },

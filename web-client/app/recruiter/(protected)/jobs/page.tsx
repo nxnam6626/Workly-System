@@ -246,6 +246,33 @@ export default function JobsManagementPage() {
                             </span>
                           )}
                         </div>
+
+                        {/* HIỂN THỊ ỨNG VIÊN TỰ ĐỘNG MỜI (AUTO-INVITED) */}
+                        {job.autoInvitedCandidates && job.autoInvitedCandidates.length > 0 && (
+                          <div className="flex flex-col gap-1 mt-1 p-2 bg-indigo-50/50 rounded-lg border border-indigo-100/50">
+                            <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tight flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" /> Đã mời tự động ({job.autoInvitedCandidates.length})
+                            </span>
+                            <div className="flex -space-x-2 overflow-hidden py-1">
+                              {job.autoInvitedCandidates.map((c: any) => (
+                                <div 
+                                  key={c.candidateId} 
+                                  className="inline-block h-6 w-6 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600 overflow-hidden shadow-sm"
+                                  title={c.fullName}
+                                >
+                                  {c.avatar ? (
+                                    <img src={c.avatar} alt={c.fullName} className="h-full w-full object-cover" />
+                                  ) : c.fullName.charAt(0)}
+                                </div>
+                              ))}
+                              {job.matchedCount > 5 && (
+                                <div className="flex items-center justify-center h-6 w-6 rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-400">
+                                  +{job.matchedCount - 5}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                         {/* AI Advisor: chỉ hiển thị khi có gói LITE hoặc GROWTH và JD không phải AI-generated */}
                         {hasAiAdvisorAccess && !(job.structuredRequirements as any)?.isAiGenerated && (job.structuredRequirements as any)?.aiFeedback && (
                           <details className="group p-3 bg-amber-50/80 border border-amber-200 rounded-xl w-full mt-2 shadow-sm cursor-pointer [&_summary::-webkit-details-marker]:hidden overflow-hidden">

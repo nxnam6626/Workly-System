@@ -616,15 +616,51 @@ export class JobPostingsService {
     const enrichedJobs = await Promise.all(
       jobs.map(async (job) => {
         let matchedCount = 0;
+        let autoInvitedCandidates = [];
+
         if (job.status !== 'REJECTED') {
-          const matches = await this.matchingService.runMatchingForJob(
-            job.jobPostingId,
-          );
+          // 1. Lấy số lượng phù hợp từ JobMatch
+          const matches = await this.prisma.jobMatch.findMany({
+            where: { jobPostingId: job.jobPostingId },
+            include: {
+              candidate: {
+                include: { user: { select: { avatar: true } } },
+              },
+            },
+            orderBy: { score: 'desc' },
+          });
           matchedCount = matches.length;
+
+          // 2. Kiểm tra những người đã được Unlock (Auto-invited)
+          const unlocks = await this.prisma.candidateUnlock.findMany({
+            where: {
+              jobPostingId: job.jobPostingId,
+              recruiterId: recruiter.recruiterId,
+            },
+            include: {
+              cv: {
+                include: {
+                  candidate: {
+                    include: { user: { select: { avatar: true } } },
+                  },
+                },
+              },
+            },
+            take: 5,
+          });
+
+          autoInvitedCandidates = unlocks.map((u) => ({
+            candidateId: u.candidateId,
+            fullName: u.cv.candidate.fullName,
+            avatar: u.cv.candidate.user.avatar,
+            unlockedAt: u.unlockedAt,
+          }));
         }
+
         return {
           ...job,
           matchedCount,
+          autoInvitedCandidates,
         };
       }),
     );
