@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [vector]
 }
 
 model User {
@@ -258,6 +260,7 @@ model JobPosting {
   recruiter              Recruiter?      @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
   branches               CompanyBranch[] @relation("JobPostingBranches")
+  embedding              Unsupported("vector(768)")?
 }
 
 model JobMatch {
@@ -286,6 +289,7 @@ model CV {
   applications     Application[]
   candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
+  embedding        Unsupported("vector(768)")?
 }
 
 model Application {

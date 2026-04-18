@@ -7,6 +7,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { MessagesModule } from '../messages/messages.module';
 import { RecruitersModule } from '../recruiters/recruiters.module';
+import { MatchingEngineModule } from '../matching-engine/matching-engine.module';
 
 @Global()
 @Module({
@@ -14,6 +15,7 @@ import { RecruitersModule } from '../recruiters/recruiters.module';
     PrismaModule,
     NotificationsModule,
     MessagesModule,
+    MatchingEngineModule,
     forwardRef(() => RecruitersModule),
     BullModule.registerQueue({
       name: 'matching',

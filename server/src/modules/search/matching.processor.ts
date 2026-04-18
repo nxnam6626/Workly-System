@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { MatchingService } from './matching.service';
+import { MatchingOrchestratorService } from '../matching-engine/services/matching-orchestrator.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { MessagesGateway } from '../messages/messages.gateway';
 import { MessagesService } from '../messages/messages.service';
@@ -13,7 +13,7 @@ export class MatchingProcessor extends WorkerHost {
   private readonly logger = new Logger(MatchingProcessor.name);
 
   constructor(
-    private readonly matchingService: MatchingService,
+    private readonly matchingOrchestrator: MatchingOrchestratorService,
     private readonly notificationsService: NotificationsService,
     private readonly messagesGateway: MessagesGateway,
     private readonly messagesService: MessagesService,
@@ -30,7 +30,7 @@ export class MatchingProcessor extends WorkerHost {
     if (jobId) {
       this.logger.log(`Processing matching job for Job ID: ${jobId}`);
       try {
-        const topMatches = await this.matchingService.runMatchingForJob(jobId);
+        const topMatches = await this.matchingOrchestrator.runMatchingForJob(jobId);
 
         if (topMatches.length > 0) {
           // Lưu kết quả hoặc chỉ gửi thông báo
@@ -107,9 +107,9 @@ export class MatchingProcessor extends WorkerHost {
     } else if (userId) {
       this.logger.log(`Processing candidate matching for User ID: ${userId}`);
       try {
-        const topMatches =
-          await this.matchingService.runMatchingForCandidate(userId);
-        return { success: true, count: topMatches.length };
+        const response =
+          await this.matchingOrchestrator.runMatchingForCandidate(userId);
+        return { success: true, count: response.results.length };
       } catch (error) {
         this.logger.error(
           `Error in MatchingProcessor (Candidate): ${error.message}`,

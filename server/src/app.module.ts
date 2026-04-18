@@ -27,6 +27,7 @@ import { SupabaseModule } from './common/supabase/supabase.module';
 import { WalletsModule } from './modules/wallets/wallets.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { SupportModule } from './modules/support/support.module';
+import { MatchingEngineModule } from './modules/matching-engine/matching-engine.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { SupportModule } from './modules/support/support.module';
     SupabaseModule,
     SubscriptionsModule,
     SupportModule,
+    MatchingEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],
