@@ -33,7 +33,11 @@ export default function LoginPage() {
       if (returnUrl) {
         router.push(returnUrl);
       } else if (user.roles.includes("CANDIDATE")) {
-        router.push("/");
+        if (user.isFirstLogin) {
+          router.push("/onboarding/import-cv");
+        } else {
+          router.push("/");
+        }
       }
     }
   }, [isAuthenticated, user, router, returnUrl]);
@@ -48,7 +52,11 @@ export default function LoginPage() {
       if (returnUrl) {
         router.push(returnUrl);
       } else if (loggedInUser.roles?.includes("CANDIDATE")) {
-        router.push("/");
+        if (loggedInUser.isFirstLogin) {
+          router.push("/onboarding/import-cv");
+        } else {
+          router.push("/");
+        }
       } else if (loggedInUser.roles?.includes("RECRUITER")) {
         setError("Tài khoản của bạn là tài khoản Nhà tuyển dụng. Vui lòng đăng nhập tại trang dành cho Nhà tuyển dụng.");
         // We might want to logout here to keep the "worlds separate"

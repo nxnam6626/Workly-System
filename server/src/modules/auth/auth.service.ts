@@ -127,6 +127,7 @@ export class AuthService {
     if (!user)
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng.');
 
+    const isFirstLogin = user.lastLogin === null;
     await this.usersService.updateLastLogin(user.userId);
     const roles = user.userRoles.map((ur: any) => ur.role.roleName);
     const tokens = await this.tokenService.issueTokens(
@@ -138,6 +139,7 @@ export class AuthService {
     return {
       ...tokens,
       expiresIn: process.env.JWT_ACCESS_EXPIRES ?? '15m',
+      isFirstLogin,
       user: {
         userId: user.userId,
         email: user.email,
@@ -171,9 +173,23 @@ export class AuthService {
       );
     }
 
+    const isFirstLogin = user.lastLogin === null;
     await this.usersService.updateLastLogin(user.userId);
     const roles = user.userRoles.map((ur: any) => ur.role.roleName);
-    return this.tokenService.issueTokens(user.userId, user.email, roles);
+    const tokens = await this.tokenService.issueTokens(user.userId, user.email, roles);
+
+    return {
+      ...tokens,
+      isFirstLogin,
+      user: {
+        userId: user.userId,
+        email: user.email,
+        roles: roles,
+        candidate: user.candidate,
+        recruiter: user.recruiter,
+        admin: user.admin,
+      },
+    };
   }
 
   /** Đăng xuất: xóa refresh token trong DB và Redis. */

@@ -183,8 +183,10 @@ export class CvParsingService {
     if (!this.genAI) throw new Error('Gemini API is not configured.');
     const modelsToTry = [
       'gemini-2.5-flash',
-      'gemini-1.5-flash-8b',
-      'gemini-1.5-flash',
+      'gemini-3-flash',
+      'gemma-4-31b',
+      'gemma-4-26b',
+      'gemma-3-27b',
     ];
     let lastError: any = null;
 

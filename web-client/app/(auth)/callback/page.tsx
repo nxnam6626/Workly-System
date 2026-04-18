@@ -11,6 +11,7 @@ export default function CallbackPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const refreshToken = searchParams.get("refresh_token");
+  const isFirstLoginParam = searchParams.get("is_first_login") === "true";
   const { setOAuthTokens, user } = useAuthStore();
   const [error, setError] = useState("");
 
@@ -24,7 +25,7 @@ export default function CallbackPage() {
       }
       
       try {
-        await setOAuthTokens(token, refreshToken);
+        await setOAuthTokens(token, refreshToken, isFirstLoginParam);
         // The second useEffect will handle redirection once the user object is updated in the store
       } catch (err) {
         console.error("[OAuth Callback Error]", err);
@@ -39,6 +40,10 @@ export default function CallbackPage() {
   // Handle redirection based on user role
   useEffect(() => {
     if (user && user.roles && user.roles.length > 0) {
+      if (user.roles.includes("CANDIDATE") && user.isFirstLogin) {
+        router.push("/onboarding/import-cv");
+        return;
+      }
       const targetDashboard = getDashboardByRole(user.roles[0]);
       router.push(targetDashboard);
     }

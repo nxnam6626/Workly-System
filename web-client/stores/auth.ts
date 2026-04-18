@@ -9,6 +9,8 @@ interface User {
   avatar?: string;
   phoneNumber?: string;
   roles?: string[];
+  lastLogin?: string | null;
+  isFirstLogin?: boolean;
   candidate?: {
     fullName?: string;
     university?: string;
@@ -36,7 +38,7 @@ interface AuthState {
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (data: any) => Promise<void>;
   changePassword: (data: any) => Promise<void>;
-  setOAuthTokens: (accessToken: string, refreshToken: string) => Promise<void>;
+  setOAuthTokens: (accessToken: string, refreshToken: string, isFirstLogin?: boolean) => Promise<void>;
   updateUser: (partial: Partial<User>) => void;
 }
 
@@ -60,7 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await api.post('/auth/login', credentials);
-      const { accessToken, refreshToken, user } = data;
+      const { accessToken, refreshToken, user, isFirstLogin } = data;
 
       if (typeof window !== 'undefined') {
         localStorage.setItem('refreshToken', refreshToken);
@@ -73,12 +75,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         accessToken,
-        user,
+        user: { ...user, isFirstLogin },
         isAuthenticated: true,
         isLoading: false,
       });
 
-      return user;
+      return { ...user, isFirstLogin };
     } catch (error) {
       set({ isLoading: false });
       throw error;
@@ -189,7 +191,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  setOAuthTokens: async (accessToken: string, refreshToken: string) => {
+  setOAuthTokens: async (accessToken: string, refreshToken: string, isFirstLogin = false) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('refreshToken', refreshToken);
     }
@@ -201,7 +203,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       set({
         accessToken,
-        user: validateData.user,
+        user: { ...validateData.user, isFirstLogin },
         isAuthenticated: true,
         isLoading: false,
       });

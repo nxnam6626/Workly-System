@@ -125,7 +125,7 @@ export class AuthController {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(
-      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`,
+      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}&is_first_login=${result.isFirstLogin}`,
     );
   }
 
@@ -145,7 +145,7 @@ export class AuthController {
     const result = await this.authService.oauthLogin(req.user);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(
-      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}`,
+      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}&is_first_login=${result.isFirstLogin}`,
     );
   }
 
