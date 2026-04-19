@@ -20,8 +20,14 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const droppedFile = acceptedFiles[0];
     if (droppedFile) {
-      if (droppedFile.type !== 'application/pdf') {
-        setError('Vui lòng chỉ tải lên tệp định dạng PDF.');
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (!allowedTypes.includes(droppedFile.type)) {
+        setError('Vui lòng tải lên tệp định dạng PDF hoặc Word (.doc, .docx).');
         return;
       }
       setFile(droppedFile);
@@ -31,7 +37,11 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
 
   const dropzone = useDropzone({
     onDrop,
-    accept: { 'application/pdf': ['.pdf'] },
+    accept: { 
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+    },
     multiple: false,
     disabled: isLoading,
     noClick: file !== null,
@@ -118,7 +128,7 @@ function DropzoneIdle({ isDragActive, onManualEntry }: { isDragActive: boolean; 
           {isDragActive ? 'Thả CV vào đây!' : 'Kéo thả CV của bạn vào đây'}
         </h3>
         <p className="text-gray-500 max-w-sm mx-auto text-sm leading-relaxed">
-          Tải lên CV định dạng PDF. AI sẽ tự động bóc tách thông tin giúp bạn hoàn thiện hồ sơ.
+          Tải lên CV định dạng PDF hoặc Word. AI sẽ tự động bóc tách thông tin giúp bạn hoàn thiện hồ sơ.
         </p>
       </div>
       <div className={`mt-5 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm
@@ -217,6 +227,10 @@ function DropzoneLoading({ onManualEntry }: { onManualEntry: () => void }) {
 }
 
 function DropzonePreview({ file, onRemove, onChangeFile, onUpload }: { file: File, onRemove: (e: React.MouseEvent) => void, onChangeFile: (e: React.MouseEvent) => void, onUpload: (e: React.MouseEvent) => void }) {
+  const getFileExtension = (filename: string) => {
+    return filename.split('.').pop()?.toUpperCase() || 'FILE';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -244,7 +258,7 @@ function DropzonePreview({ file, onRemove, onChangeFile, onUpload }: { file: Fil
             <CheckCircle2 size={12} strokeWidth={3} /> Đã chọn thành công
           </p>
           <h3 className="text-sm font-bold text-gray-900 truncate px-1 mt-1" title={file.name}>{file.name}</h3>
-          <p className="text-xs text-gray-500 font-medium">{(file.size / 1024 / 1024).toFixed(2)} MB <span className="mx-1 font-bold opacity-30">•</span> PDF</p>
+          <p className="text-xs text-gray-500 font-medium">{(file.size / 1024 / 1024).toFixed(2)} MB <span className="mx-1 font-bold opacity-30">•</span> {getFileExtension(file.name)}</p>
         </div>
       </div>
       <div className="flex flex-col justify-center items-center w-full sm:w-1/2 space-y-3">

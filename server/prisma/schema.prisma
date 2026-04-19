@@ -84,22 +84,44 @@ model Admin {
 }
 
 model Candidate {
-  candidateId   String         @id @default(uuid())
-  fullName      String
-  university    String?
-  major         String?
-  gpa           Float?
-  cvUrl         String?
-  userId        String         @unique
-  isOpenToWork  Boolean        @default(true)
-  applications  Application[]
-  cvs           CV[]
-  user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  conversations Conversation[]
-  jobMatches    JobMatch[]
-  projects      Project[]
-  savedJobs     SavedJob[]
-  skills        Skill[]
+  candidateId    String          @id @default(uuid())
+  fullName       String
+  university     String?
+  major          String?
+  gpa            Float?
+  location       String?
+  cvUrl          String?
+  userId         String          @unique
+  isOpenToWork   Boolean         @default(true)
+  summary        String?
+  desiredJob     Json?
+  applications   Application[]
+  cvs            CV[]
+  user           User            @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  conversations  Conversation[]
+  jobMatches     JobMatch[]
+  projects       Project[]
+  experiences    Experience[]
+  savedJobs      SavedJob[]
+  skills         Skill[]
+  certifications Certification[]
+}
+
+model Experience {
+  experienceId String    @id @default(uuid())
+  company      String
+  role         String
+  duration     String
+  description  String?
+  candidateId  String
+  candidate    Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
+
+model Certification {
+  certificationId String    @id @default(uuid())
+  name            String
+  candidateId     String
+  candidate       Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
 model Skill {

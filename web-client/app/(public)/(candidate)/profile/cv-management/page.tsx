@@ -139,10 +139,6 @@ export default function CvManagementPage() {
 
   const handleDeleteCv = async (cvId: string) => {
     const cvToDelete = profile?.candidate?.cvs?.find((c) => c.cvId === cvId);
-    if (cvToDelete?.isMain) {
-      toast.error('Không thể xóa CV mặc định. Vui lòng thiết lập một CV khác làm mặc định trước khi xóa tài liệu này.', { duration: 4000 });
-      return;
-    }
 
     const ok = await confirm({
       title: 'Xóa tài liệu',

@@ -7,7 +7,7 @@ import { UrgentJobsSection } from "@/components/UrgentJobsSection";
 import { StatsSection } from "@/components/StatsSection";
 import { TopEmployers } from "@/components/TopEmployers";
 import { CareerTools } from "@/components/CareerTools";
-import { CTABanner } from "@/components/CTABanner";
+
 
 
 export default function Home() {
@@ -39,9 +39,6 @@ export default function Home() {
 
          {/* 4. Urgent Jobs Section */}
          <UrgentJobsSection />
-
-         {/* 5. Recruiter CTA */}
-         <CTABanner />
 
          {/* 6. Additional Sections */}
          <div className="w-full space-y-20 mt-10">

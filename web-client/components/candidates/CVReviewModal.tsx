@@ -32,9 +32,11 @@ const cvSchema = z.object({
   phone: z.string().min(9, "Số điện thoại không hợp lệ").or(z.literal("")),
   skills: z.array(z.any()).min(1, "Vui lòng nhập ít nhất 1 kỹ năng"),
   experience: z.array(z.any()),
+  projects: z.array(z.any()),
   education: z.array(z.any()),
   totalYearsExp: z.number().min(0).or(z.string()),
   summary: z.string().optional(),
+  desiredJob: z.any().optional(),
 });
 
 type CVFormData = z.infer<typeof cvSchema>;
@@ -53,14 +55,30 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
   const { register, control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<CVFormData>({
     resolver: zodResolver(cvSchema),
     defaultValues: {
-      fullName: initialData?.fullName || "",
-      email: initialData?.email || "",
-      phone: initialData?.phone || "",
-      skills: initialData?.skills || [],
-      experience: initialData?.experience || [],
-      education: initialData?.education || [],
-      totalYearsExp: initialData?.totalYearsExp || 0,
+      fullName: initialData?.personal_info?.full_name || initialData?.fullName || "",
+      email: initialData?.personal_info?.email || initialData?.email || "",
+      phone: initialData?.personal_info?.phone || initialData?.phone || "",
+      skills: (() => {
+        const s = initialData?.skills;
+        if (Array.isArray(s)) return s;
+        if (s && (s.hard_skills || s.soft_skills)) {
+          return [...(s.hard_skills || []), ...(s.soft_skills || [])];
+        }
+        return [];
+      })(),
+      experience: initialData?.experience?.roles || initialData?.experience || [],
+      education: (() => {
+        const e = initialData?.education;
+        if (Array.isArray(e)) return e;
+        if (e && typeof e === 'object') {
+          return [{ school: e.institution || '', degree: e.degree || '', major: e.major || '' }];
+        }
+        return [];
+      })(),
+      totalYearsExp: initialData?.experience?.total_months ? Math.round(initialData.experience.total_months / 12) : (initialData?.totalYearsExp || 0),
       summary: initialData?.summary || "",
+      projects: initialData?.projects || [],
+      desiredJob: initialData?.desired_job || initialData?.desiredJob || {},
     },
   });
 
@@ -75,27 +93,51 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
   });
 
   const [skillInput, setSkillInput] = React.useState("");
-  const [skills, setSkills] = React.useState<any[]>(initialData?.skills || []);
+  const [skills, setSkills] = React.useState<any[]>(() => {
+    const s = initialData?.skills;
+    if (Array.isArray(s)) return s;
+    if (s && (s.hard_skills || s.soft_skills)) {
+      return [...(s.hard_skills || []), ...(s.soft_skills || [])];
+    }
+    return [];
+  });
 
   // Sync skills when they change
   React.useEffect(() => {
     setValue("skills", skills);
   }, [skills, setValue]);
 
-  // Update form values whenever incoming data changes
   React.useEffect(() => {
     if (isOpen) {
+      const normalizedSkills = (() => {
+        const s = initialData?.skills;
+        if (Array.isArray(s)) return s;
+        if (s && (s.hard_skills || s.soft_skills)) {
+          return [...(s.hard_skills || []), ...(s.soft_skills || [])];
+        }
+        return [];
+      })();
+
       reset({
-        fullName: initialData?.fullName || "",
-        email: initialData?.email || "",
-        phone: initialData?.phone || "",
-        skills: initialData?.skills || [],
-        experience: initialData?.experience || [],
-        education: initialData?.education || [],
-        totalYearsExp: initialData?.totalYearsExp || 0,
+        fullName: initialData?.personal_info?.full_name || initialData?.fullName || "",
+        email: initialData?.personal_info?.email || initialData?.email || "",
+        phone: initialData?.personal_info?.phone || initialData?.phone || "",
+        skills: normalizedSkills,
+        experience: initialData?.experience?.roles || initialData?.experience || [],
+        education: (() => {
+          const e = initialData?.education;
+          if (Array.isArray(e)) return e;
+          if (e && typeof e === 'object') {
+            return [{ school: e.institution || '', degree: e.degree || '', major: e.major || '' }];
+          }
+          return [];
+        })(),
+        totalYearsExp: initialData?.experience?.total_months ? Math.round(initialData.experience.total_months / 12) : (initialData?.totalYearsExp || 0),
         summary: initialData?.summary || "",
+        projects: initialData?.projects || [],
+        desiredJob: initialData?.desired_job || initialData?.desiredJob || {},
       });
-      setSkills(initialData?.skills || []);
+      setSkills(normalizedSkills);
     }
   }, [isOpen, initialData, reset]);
 

@@ -129,6 +129,7 @@ exports.Prisma.UserScalarFieldEnum = {
   lastLogin: 'lastLogin',
   phoneNumber: 'phoneNumber',
   avatar: 'avatar',
+  isEmailVerified: 'isEmailVerified',
   updatedAt: 'updatedAt',
   refreshToken: 'refreshToken',
   provider: 'provider',
@@ -152,14 +153,14 @@ exports.Prisma.UserRoleScalarFieldEnum = {
 
 exports.Prisma.NotificationScalarFieldEnum = {
   notificationId: 'notificationId',
+  userId: 'userId',
   title: 'title',
-  message: 'message',
   type: 'type',
   isRead: 'isRead',
+  metadata: 'metadata',
   createdAt: 'createdAt',
-  userId: 'userId',
-  link: 'link',
-  metadata: 'metadata'
+  message: 'message',
+  link: 'link'
 };
 
 exports.Prisma.JobAlertScalarFieldEnum = {
@@ -172,9 +173,9 @@ exports.Prisma.JobAlertScalarFieldEnum = {
 exports.Prisma.AdminScalarFieldEnum = {
   adminId: 'adminId',
   adminLevel: 'adminLevel',
-  permissions: 'permissions',
   lastAction: 'lastAction',
-  userId: 'userId'
+  userId: 'userId',
+  permissions: 'permissions'
 };
 
 exports.Prisma.CandidateScalarFieldEnum = {
@@ -183,17 +184,35 @@ exports.Prisma.CandidateScalarFieldEnum = {
   university: 'university',
   major: 'major',
   gpa: 'gpa',
+  location: 'location',
   cvUrl: 'cvUrl',
   userId: 'userId',
-  isOpenToWork: 'isOpenToWork'
+  isOpenToWork: 'isOpenToWork',
+  summary: 'summary',
+  desiredJob: 'desiredJob'
+};
+
+exports.Prisma.ExperienceScalarFieldEnum = {
+  experienceId: 'experienceId',
+  company: 'company',
+  role: 'role',
+  duration: 'duration',
+  description: 'description',
+  candidateId: 'candidateId'
+};
+
+exports.Prisma.CertificationScalarFieldEnum = {
+  certificationId: 'certificationId',
+  name: 'name',
+  candidateId: 'candidateId'
 };
 
 exports.Prisma.SkillScalarFieldEnum = {
   skillId: 'skillId',
   skillName: 'skillName',
-  category: 'category',
   candidateId: 'candidateId',
-  level: 'level'
+  level: 'level',
+  category: 'category'
 };
 
 exports.Prisma.ProjectScalarFieldEnum = {
@@ -212,24 +231,24 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   userId: 'userId',
   companyId: 'companyId',
   savedCandidateIds: 'savedCandidateIds',
-  violationCount: 'violationCount',
-  updatedAt: 'updatedAt',
-  createdAt: 'createdAt',
   aiInsightsCache: 'aiInsightsCache',
   aiInsightsCacheKey: 'aiInsightsCacheKey',
-  aiInsightsCachedAt: 'aiInsightsCachedAt'
+  aiInsightsCachedAt: 'aiInsightsCachedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  violationCount: 'violationCount'
 };
 
 exports.Prisma.TransactionScalarFieldEnum = {
   transactionId: 'transactionId',
   amount: 'amount',
-  realMoney: 'realMoney',
-  type: 'type',
   description: 'description',
   createdAt: 'createdAt',
   walletId: 'walletId',
   orderCode: 'orderCode',
-  status: 'status'
+  status: 'status',
+  realMoney: 'realMoney',
+  type: 'type'
 };
 
 exports.Prisma.CrawlLogScalarFieldEnum = {
@@ -245,25 +264,25 @@ exports.Prisma.CrawlLogScalarFieldEnum = {
 exports.Prisma.CompanyScalarFieldEnum = {
   companyId: 'companyId',
   companyName: 'companyName',
-  slug: 'slug',
   taxCode: 'taxCode',
   isRegistered: 'isRegistered',
   verifyStatus: 'verifyStatus',
   logo: 'logo',
   banner: 'banner',
   address: 'address',
-  taxAddress: 'taxAddress',
-  status: 'status',
-  internationalName: 'internationalName',
-  shortName: 'shortName',
-  operatingDate: 'operatingDate',
-  enterpriseType: 'enterpriseType',
-  mainIndustry: 'mainIndustry',
   description: 'description',
   websiteUrl: 'websiteUrl',
   companySize: 'companySize',
   businessLicenseUrl: 'businessLicenseUrl',
-  adminId: 'adminId'
+  adminId: 'adminId',
+  enterpriseType: 'enterpriseType',
+  internationalName: 'internationalName',
+  mainIndustry: 'mainIndustry',
+  operatingDate: 'operatingDate',
+  shortName: 'shortName',
+  slug: 'slug',
+  status: 'status',
+  taxAddress: 'taxAddress'
 };
 
 exports.Prisma.CompanyBranchScalarFieldEnum = {
@@ -296,7 +315,6 @@ exports.Prisma.RawJobScalarFieldEnum = {
 exports.Prisma.JobPostingScalarFieldEnum = {
   jobPostingId: 'jobPostingId',
   title: 'title',
-  slug: 'slug',
   description: 'description',
   requirements: 'requirements',
   benefits: 'benefits',
@@ -309,20 +327,21 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   locationCity: 'locationCity',
   status: 'status',
   postType: 'postType',
-  jobTier: 'jobTier',
   isVerified: 'isVerified',
   originalUrl: 'originalUrl',
   aiReliabilityScore: 'aiReliabilityScore',
-  autoInviteMatches: 'autoInviteMatches',
   createdAt: 'createdAt',
-  refreshedAt: 'refreshedAt',
   updatedAt: 'updatedAt',
   approvedBy: 'approvedBy',
   recruiterId: 'recruiterId',
   companyId: 'companyId',
   rawJobId: 'rawJobId',
+  structuredRequirements: 'structuredRequirements',
   viewCount: 'viewCount',
-  structuredRequirements: 'structuredRequirements'
+  jobTier: 'jobTier',
+  refreshedAt: 'refreshedAt',
+  slug: 'slug',
+  autoInviteMatches: 'autoInviteMatches'
 };
 
 exports.Prisma.JobMatchScalarFieldEnum = {
@@ -383,23 +402,23 @@ exports.Prisma.ConversationScalarFieldEnum = {
 exports.Prisma.MessageScalarFieldEnum = {
   messageId: 'messageId',
   content: 'content',
-  fileName: 'fileName',
-  fileUrl: 'fileUrl',
-  fileType: 'fileType',
-  fileSize: 'fileSize',
   sentAt: 'sentAt',
   isRead: 'isRead',
   conversationId: 'conversationId',
-  senderId: 'senderId'
+  senderId: 'senderId',
+  fileName: 'fileName',
+  fileSize: 'fileSize',
+  fileType: 'fileType',
+  fileUrl: 'fileUrl'
 };
 
 exports.Prisma.RecruiterWalletScalarFieldEnum = {
   walletId: 'walletId',
   recruiterId: 'recruiterId',
   balance: 'balance',
+  updatedAt: 'updatedAt',
   cvUnlockQuota: 'cvUnlockQuota',
-  cvUnlockQuotaMax: 'cvUnlockQuotaMax',
-  updatedAt: 'updatedAt'
+  cvUnlockQuotaMax: 'cvUnlockQuotaMax'
 };
 
 exports.Prisma.CandidateUnlockScalarFieldEnum = {
@@ -565,6 +584,8 @@ exports.Prisma.ModelName = {
   JobAlert: 'JobAlert',
   Admin: 'Admin',
   Candidate: 'Candidate',
+  Experience: 'Experience',
+  Certification: 'Certification',
   Skill: 'Skill',
   Project: 'Project',
   Recruiter: 'Recruiter',

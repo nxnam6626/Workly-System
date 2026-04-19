@@ -374,7 +374,6 @@ export default function ProfileDashboard() {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-8 py-4">
             <h1 className="text-[20px] font-bold text-slate-900 mb-4">Thông tin chung</h1>
 
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-[15px]">
               <div className="flex items-center">
                 <span className="font-bold text-slate-800 w-[45%]">Email:</span>
@@ -405,7 +404,47 @@ export default function ProfileDashboard() {
                 </span>
               </div>
             </div>
+            
+            {/* Desired Job / Objective Info */}
+            <div className="mt-6 pt-6 border-t border-slate-50">
+              <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider text-slate-400">Mục tiêu nghề nghiệp</h3>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 bg-blue-50/50 px-3 py-2 rounded-xl border border-blue-100/50">
+                  <Briefcase size={14} className="text-blue-500" />
+                  <span className="text-[13px] font-bold text-blue-700">
+                    {profile?.candidate?.desiredJob?.jobTitle || "Chưa xác định vị trí"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-emerald-50/50 px-3 py-2 rounded-xl border border-emerald-100/50">
+                  <MapPin size={14} className="text-emerald-500" />
+                  <span className="text-[13px] font-bold text-emerald-700">
+                    {profile?.candidate?.desiredJob?.location || "Toàn quốc"}
+                  </span>
+                </div>
+                {profile?.candidate?.desiredJob?.expectedSalary && (
+                  <div className="flex items-center gap-2 bg-amber-50/50 px-3 py-2 rounded-xl border border-amber-100/50">
+                    <TrendingUp size={14} className="text-amber-500" />
+                    <span className="text-[13px] font-bold text-amber-700">
+                      {profile.candidate.desiredJob.expectedSalary}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+
+          {/* Summary / Introduction */}
+          {profile?.candidate?.summary && (
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+              <h3 className="text-[18px] font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                Giới thiệu bản thân
+              </h3>
+              <p className="text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap">
+                {profile.candidate.summary}
+              </p>
+            </div>
+          )}
 
           {/* CVs & Resumes */}
           <div id="cv-list" className="bg-white rounded-2xl shadow-sm border border-slate-100 py-4 w-full overflow-hidden">
@@ -500,25 +539,77 @@ export default function ProfileDashboard() {
             </div>
           </div>
 
-          {/* Education & Skills Split */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Education */}
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 flex flex-col">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3">Học vấn</h3>
-              <div className="space-y-4 flex-1">
-                <div className="relative pl-6">
-                  <CircleDot className="absolute left-[-2px] top-1 w-3.5 h-3.5 text-blue-500" />
-                  <h4 className="font-semibold text-slate-800 text-sm">{profile?.candidate?.major || "Cử nhân khoa học máy tính"}</h4>
-                  <p className="text-slate-600 text-[13px] mt-1">{profile?.candidate?.university || "Đại học Khoa học Tự nhiên, ĐHQG-HCM"}</p>
-                  <p className="text-slate-500 text-[13px] mt-0.5">{profile?.candidate?.gpa ? `GPA: ${profile?.candidate?.gpa}/4.0` : "Dự kiến tốt nghiệp 2025"}</p>
-                </div>
+          {/* Experience & Projects */}
+          <div className="flex flex-col gap-6">
+            {/* Experience */}
+            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-900">Kinh nghiệm làm việc</h3>
+                <Link href="/profile/edit" className="text-blue-600 hover:text-blue-700">
+                  <Edit className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="space-y-6">
+                {profile?.candidate?.experiences?.length ? (
+                  profile.candidate.experiences.map((exp, idx) => (
+                    <div key={idx} className="relative pl-6 border-l-2 border-slate-100 pb-2">
+                      <div className="absolute left-[-9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-blue-500" />
+                      <h4 className="font-bold text-slate-800 text-sm">{exp.role}</h4>
+                      <p className="text-slate-700 font-medium text-[13px]">{exp.company}</p>
+                      <p className="text-slate-500 text-[11px] mb-2">{exp.duration}</p>
+                      {exp.description && (
+                        <p className="text-slate-600 text-[13px] leading-relaxed line-clamp-3">
+                          {exp.description}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-6 text-slate-400 italic text-sm">
+                    Chưa có kinh nghiệm làm việc nào được thêm.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Projects */}
+            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-900">Dự án tiêu biểu</h3>
+                <Link href="/profile/edit" className="text-blue-600 hover:text-blue-700">
+                  <Edit className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {profile?.candidate?.projects?.length ? (
+                  profile.candidate.projects.map((p, idx) => (
+                    <div key={idx} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-blue-200 transition-colors">
+                      <h4 className="font-bold text-slate-800 text-[14px]">{p.projectName}</h4>
+                      {p.role && <p className="text-blue-600 text-[11px] font-bold uppercase mt-1">{p.role}</p>}
+                      {p.description && <p className="text-slate-600 text-[12px] mt-2 line-clamp-2">{p.description}</p>}
+                      {p.technology && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {p.technology.split(',').map((tech, i) => (
+                            <span key={i} className="text-[9px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500">
+                              {tech.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-6 text-slate-400 italic text-sm">
+                    Chưa có dự án nào được thêm.
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Skills */}
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 flex flex-col">
+            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
               <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3">Kỹ năng</h3>
-              <div className="space-y-4 w-full mt-1">
+              <div className="space-y-4">
                 {profile?.candidate?.skills?.length ? (
                   Object.entries(
                     profile.candidate.skills.reduce((acc, s) => {
@@ -540,17 +631,10 @@ export default function ProfileDashboard() {
                             INTERMEDIATE: 'bg-sky-50 text-sky-700 border-sky-200',
                             BEGINNER: 'bg-amber-50 text-amber-700 border-amber-200',
                           };
-                          const levelLabels: Record<string, string> = {
-                            ADVANCED: 'Nâng cao',
-                            INTERMEDIATE: 'Trung bình',
-                            BEGINNER: 'Cơ bản',
-                          };
                           const color = levelColors[s.level] || levelColors.BEGINNER;
-                          const label = levelLabels[s.level] || 'Cơ bản';
                           return (
                             <span key={idx} className={`px-3 py-1.5 text-[13px] font-medium rounded-xl border transition-colors ${color}`}>
                               {s.skillName}
-                              <span className="ml-1.5 text-[10px] font-bold opacity-70">• {label}</span>
                             </span>
                           );
                         })}
@@ -558,7 +642,7 @@ export default function ProfileDashboard() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-slate-400 text-sm">Chưa có kỹ năng. <Link href="/profile/edit" className="text-blue-600 hover:underline">Thêm ngay</Link></p>
+                  <p className="text-slate-400 text-sm">Chưa có kỹ năng.</p>
                 )}
               </div>
             </div>

@@ -315,19 +315,29 @@ export class CandidatesService {
       const buffer = await this.supabaseService.downloadFile(path);
 
       // 3. Tiến hành bóc tách AI
-      const extractedData = await this.cvParsingService.parseCv(buffer);
+      // Xác định mimeType từ URL để truyền vào service bóc tách
+      let mimeType = 'application/pdf'; // mặc định
+      const ext = extname(cv.fileUrl).toLowerCase();
+      if (ext === '.docx') {
+        mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      } else if (ext === '.doc') {
+        mimeType = 'application/msword';
+      }
+
+      const extractedData = await this.cvParsingService.parseCv(buffer, mimeType);
 
       if (!extractedData) {
         throw new BadRequestException('Hệ thống AI không thể bóc tách dữ liệu từ CV này.');
       }
 
-      const hasValidName =
-        extractedData.fullName &&
-        extractedData.fullName.trim() !== '';
+      const personal = extractedData.personal_info || {};
+      const fullName = personal.full_name || '';
+      const hasValidName = fullName.trim() !== '';
       const hasContent =
-        (extractedData.skills?.length > 0 ||
-          extractedData.education?.length > 0 ||
-          extractedData.experience?.length > 0);
+        (extractedData.skills?.hard_skills?.length > 0 ||
+          extractedData.skills?.soft_skills?.length > 0 ||
+          extractedData.education?.institution ||
+          extractedData.experience?.roles?.length > 0);
 
       if (!hasValidName || !hasContent) {
         this.logger.warn(
@@ -336,8 +346,7 @@ export class CandidatesService {
       }
 
       // 4. Kiểm tra xem CV này có phải của người dùng đang đăng nhập hay không
-      // Cần thực hiện loose match để tránh lỗi do họ tên thiếu dấu hoặc ghi ngược (John Doe vs Doe John)
-      const cvName = (extractedData.fullName || '').toLowerCase().trim();
+      const cvName = fullName.toLowerCase().trim();
       const accName = (candidate.fullName || '').toLowerCase().trim();
 
       let isValidName = false;
@@ -346,7 +355,6 @@ export class CandidatesService {
         const cvTokens = cvName.split(' ');
         const accTokens = accName.split(' ');
 
-        // Nếu có ít nhất 1 từ dài >= 2 ký tự trùng khớp là tạm chấp nhận (VD: Trùng tên hoặc trùng họ)
         isValidName = cvTokens.some(
           (token) => token.length >= 2 && accTokens.includes(token),
         );
@@ -355,42 +363,53 @@ export class CandidatesService {
           this.logger.warn(
             `[CandidatesService] AI detected name mismatch: CV="${cvName}", Account="${accName}". Warning user but allowing proceed.`,
           );
-          // Return with a warning flag instead of throwing
           (extractedData as any).aiWarning = 'Tên trong CV có thể không khớp với tên tài khoản.';
         }
       }
 
       // 5. Cập nhật hồ sơ ứng viên nếu còn trống
-      const isNameEmpty =
-        !candidate.fullName || candidate.fullName === 'Người dùng';
+      const isNameEmpty = !candidate.fullName || candidate.fullName === 'Người dùng' || candidate.fullName === 'người dùng';
       const isPhoneEmpty = !candidate.user?.phoneNumber;
       const isMajorEmpty = !candidate.major;
       const isUniversityEmpty = !candidate.university;
+      const isLocationEmpty = !candidate.location;
       const isSkillsEmpty = !candidate.skills || candidate.skills.length === 0;
 
       const updateData: any = {};
-      if (isNameEmpty && extractedData.fullName)
-        updateData.fullName = extractedData.fullName;
-      if (isPhoneEmpty && extractedData.phone)
-        updateData.phone = extractedData.phone;
+      if (isNameEmpty && fullName) updateData.fullName = fullName;
+      if (isPhoneEmpty && personal.phone) updateData.phone = personal.phone;
+      if (isLocationEmpty && personal.location) updateData.location = personal.location;
+      if (!candidate.gpa && personal.gpa) updateData.gpa = personal.gpa;
+      if (!candidate.summary && extractedData.summary) updateData.summary = extractedData.summary;
+      if (!candidate.desiredJob && extractedData.desired_job) updateData.desiredJob = extractedData.desired_job;
 
-      if (isMajorEmpty && extractedData.education?.length > 0) {
-        updateData.major = extractedData.education[0].major;
+      if (isMajorEmpty && extractedData.education?.major) {
+        updateData.major = extractedData.education.major;
       }
-      if (isUniversityEmpty && extractedData.education?.length > 0) {
-        updateData.university = extractedData.education[0].school;
+      if (isUniversityEmpty && extractedData.education?.institution) {
+        updateData.university = extractedData.education.institution;
       }
 
-      if (!candidate.gpa && extractedData.gpa)
-        updateData.gpa = extractedData.gpa;
+      // Mapping Skills
+      if (isSkillsEmpty && extractedData.skills) {
+        const skills: any[] = [];
+        if (extractedData.skills.hard_skills?.length > 0) {
+          skills.push(...extractedData.skills.hard_skills.map(s => ({ ...s, category: 'Hard Skill' })));
+        }
+        if (extractedData.skills.soft_skills?.length > 0) {
+          skills.push(...extractedData.skills.soft_skills.map(s => ({ ...s, category: 'Soft Skill' })));
+        }
+        if (skills.length > 0) updateData.skills = skills;
+      }
 
-      if (isSkillsEmpty && extractedData.skills?.length > 0) {
-        updateData.skills = extractedData.skills;
+      // Certifications
+      if (extractedData.certifications && extractedData.certifications.length > 0) {
+        updateData.certifications = extractedData.certifications;
       }
 
       if (Object.keys(updateData).length > 0) {
         await this.update(candidate.candidateId, updateData).catch((e) =>
-          console.error('Failed to auto-fill candidate:', e),
+          this.logger.error(`Failed to auto-fill candidate: ${e.message}`),
         );
       }
 
@@ -419,10 +438,10 @@ export class CandidatesService {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
     }
 
-    const { skills, projects, fullName, phone, ...rest } = updateCandidateDto;
+    const { skills, projects, experiences, certifications, fullName, phone, ...rest } = updateCandidateDto;
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Update Candidate basic info (university, major, gpa, fullName, etc.)
+      // 1. Update Candidate basic info (university, major, gpa, location, fullName, etc.)
       const updatedCandidate = await tx.candidate.update({
         where: { candidateId },
         data: {
@@ -467,6 +486,35 @@ export class CandidatesService {
               description: p.description,
               role: p.role,
               technology: p.technology,
+            })),
+          });
+        }
+      }
+      
+      // 5. Update Experiences if provided
+      if (experiences && Array.isArray(experiences)) {
+        await tx.experience.deleteMany({ where: { candidateId } });
+        if (experiences.length > 0) {
+          await tx.experience.createMany({
+            data: experiences.map((exp: any) => ({
+              candidateId,
+              company: exp.company || 'Unknown',
+              role: exp.role || 'Unknown',
+              duration: exp.duration || 'Unknown',
+              description: exp.description || '',
+            })),
+          });
+        }
+      }
+      
+      // 6. Update Certifications if provided
+      if (certifications && Array.isArray(certifications)) {
+        await tx.certification.deleteMany({ where: { candidateId } });
+        if (certifications.length > 0) {
+          await tx.certification.createMany({
+            data: certifications.map((cert: any) => ({
+              candidateId,
+              name: typeof cert === 'string' ? cert : cert.name || cert,
             })),
           });
         }
@@ -724,6 +772,7 @@ export class CandidatesService {
       include: {
         user: { select: { email: true, phoneNumber: true, avatar: true } },
         skills: true,
+        experiences: true,
         cvs: {
           select: {
             cvId: true,
@@ -825,10 +874,24 @@ export class CandidatesService {
       throw new NotFoundException('CV not found or does not belong to user');
     }
 
+    // Nếu xóa CV main, hãy thử chọn CV khác làm main (nếu còn)
     if (cv.isMain) {
-      throw new BadRequestException(
-        'Không thể xóa CV mặc định. Vui lòng chọn CV khác làm mặc định trước.',
-      );
+      const otherCv = await this.prisma.cV.findFirst({
+        where: {
+          candidateId: candidate.candidateId,
+          NOT: { cvId },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (otherCv) {
+        await this.prisma.cV.update({
+          where: { cvId: otherCv.cvId },
+          data: { isMain: true },
+        });
+        // Trigger matching lại cho CV mặc định mới
+        await this.matchingQueue.add('match-candidate', { userId });
+      }
     }
 
     // Xóa tệp trên Supabase nếy có URL

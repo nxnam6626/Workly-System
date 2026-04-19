@@ -15,9 +15,12 @@ export interface CandidateProfile {
     university?: string;
     major?: string;
     gpa?: number;
-    cvUrl?: string;
+    summary?: string;
+    desiredJob?: any;
     isOpenToWork: boolean;
     skills: { skillId: string; skillName: string; level: string; category?: string }[];
+    experiences: { experienceId: string; company: string; role: string; duration: string; description?: string }[];
+    projects: { projectId: string; projectName: string; description?: string; role?: string; technology?: string }[];
     cvs: {
       cvId: string;
       cvTitle: string;
@@ -35,13 +38,31 @@ export interface SkillInput {
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 }
 
+export interface ExperienceInput {
+  company: string;
+  role: string;
+  duration: string;
+  description?: string;
+}
+
+export interface ProjectInput {
+  projectName: string;
+  description: string;
+  role?: string;
+  technology?: string;
+}
+
 export interface UpdateProfileDto {
-  fullName: string;
-  phone: string;
+  fullName?: string;
+  phone?: string;
   university?: string;
   major?: string;
   gpa?: number;
+  summary?: string;
+  desiredJob?: any;
   skills?: SkillInput[];
+  experiences?: ExperienceInput[];
+  projects?: ProjectInput[];
   isOpenToWork?: boolean;
 }
 

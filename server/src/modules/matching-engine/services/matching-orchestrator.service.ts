@@ -59,7 +59,14 @@ export class MatchingOrchestratorService {
       // 3. Đảm bảo CV có Embedding
       if (!(mainCv as any).embedding) {
         const parsedData = (mainCv.parsedData as any) || {};
-        const textForEmbedding = `${parsedData.summary || ''} ${parsedData.experience || ''} ${(parsedData.skills || []).join(' ')}`;
+        const skillNames = Array.isArray(parsedData.skills)
+          ? parsedData.skills.join(' ')
+          : [
+              ...(parsedData.skills?.hard_skills || []),
+              ...(parsedData.skills?.soft_skills || [])
+            ].map(s => typeof s === 'string' ? s : s.skillName).join(' ');
+            
+        const textForEmbedding = `${parsedData.summary || ''} ${parsedData.experience || ''} ${skillNames}`;
         const vector = await this.dataParser.getEmbedding(textForEmbedding);
         const vectorSql = `[${vector.join(',')}]`;
         await this.prisma.$executeRaw`
@@ -125,7 +132,14 @@ export class MatchingOrchestratorService {
     // Đảm bảo CV có embedding
     if (!(mainCv as any).embedding) {
       const parsedData = (mainCv.parsedData as any) || {};
-      const text = `${parsedData.summary || ''} ${(parsedData.skills || []).join(' ')}`;
+      const skillNames = Array.isArray(parsedData.skills)
+        ? parsedData.skills.join(' ')
+        : [
+            ...(parsedData.skills?.hard_skills || []),
+            ...(parsedData.skills?.soft_skills || [])
+          ].map(s => typeof s === 'string' ? s : s.skillName).join(' ');
+
+      const text = `${parsedData.summary || ''} ${skillNames}`;
       const vector = await this.dataParser.getEmbedding(text);
       const vectorSql = `[${vector.join(',')}]`;
       await this.prisma.$executeRaw`

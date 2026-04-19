@@ -58,21 +58,31 @@ export function useCvImport() {
     setIsSaving(true);
     try {
       // Mapping fields for profile update
-      // The backend updateProfile expects certain fields
       await profileApi.updateProfile({
         fullName: data.fullName,
         phone: data.phone,
+        summary: data.summary,
+        desiredJob: data.desiredJob,
         skills: data.skills.map((s: any) => ({
           skillName: typeof s === 'string' ? s : s.skillName,
           level: (typeof s === 'string' ? 'BEGINNER' : s.level) || 'BEGINNER',
+        })),
+        experiences: data.experience.map((exp: any) => ({
+          company: exp.company,
+          role: exp.role,
+          duration: exp.duration,
+          description: exp.description || '',
+        })),
+        projects: data.projects.map((p: any) => ({
+          projectName: p.projectName,
+          role: p.role || '',
+          description: p.description || '',
+          technology: p.technology || '',
         })),
         university: data.education?.[0]?.school,
         major: data.education?.[0]?.major,
         gpa: data.gpa,
       });
-
-      // Also might need to update other parts of the profile if needed
-      // but for onboarding purposes, this is the main part.
 
       setStep('success');
       toast.success('Hồ sơ của bạn đã được cập nhật!');

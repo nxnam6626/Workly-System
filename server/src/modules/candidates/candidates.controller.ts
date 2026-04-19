@@ -37,7 +37,7 @@ export class CandidatesController {
     @CurrentUser('userId') userId: string,
   ) {
     if (!file) {
-      throw new BadRequestException('Vui lòng tải lên tệp CV (PDF).');
+      throw new BadRequestException('Vui lòng tải lên tệp CV (PDF hoặc Word).');
     }
 
     return this.candidatesService.uploadCvOnly(userId, file);
@@ -66,7 +66,7 @@ export class CandidatesController {
     @CurrentUser('userId') userId: string,
   ) {
     if (!file) {
-      throw new BadRequestException('Vui lòng tải lên tệp CV (PDF).');
+      throw new BadRequestException('Vui lòng tải lên tệp CV (PDF hoặc Word).');
     }
 
     // Luồng Onboarding: Tự động xóa file nếu phân tích thất bại để tránh rác dữ liệu

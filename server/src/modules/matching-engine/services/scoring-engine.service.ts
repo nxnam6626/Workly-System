@@ -31,9 +31,19 @@ export class ScoringEngineService {
   }> {
     // 1. Hard Skills (40% tổng) = (Keyword * 0.4) + (Semantic * 0.6)
     const keywordStrategy = this.strategyFactory.getStrategy('keyword');
+    
+    // Normalize skills for strategy
+    const skillsObj = cv.parsedData?.skills;
+    const flattenedSkills = Array.isArray(skillsObj)
+      ? skillsObj
+      : [
+          ...(skillsObj?.hard_skills || []),
+          ...(skillsObj?.soft_skills || [])
+        ].map(s => typeof s === 'string' ? s : s.skillName);
+
     const keywordRes = await keywordStrategy.calculate(
       (job.structuredRequirements as any) || {},
-      { skills: cv.skills || [] },
+      { skills: flattenedSkills },
     );
 
     const semanticStrategy = this.strategyFactory.getStrategy('semantic');

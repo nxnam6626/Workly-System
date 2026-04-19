@@ -6,149 +6,118 @@ import {
   GenerativeModel,
 } from '@google/generative-ai';
 import { CvParsedData } from './interfaces/cv-parsing.interface';
-import * as path from 'path';
+import * as mammoth from 'mammoth';
 
 const CV_EXTRACTION_PROMPT = `
-Bạn là một chuyên gia nhân sự (HR) cấp cao và chuyên gia bóc tách dữ liệu hồ sơ (CV Parsing).
-Hãy phân tích tài liệu CV đính kèm dưới đây và trích xuất thông tin một cách chính xác nhất.
-
-Yêu cầu:
-1. Chỉ trả về dữ liệu thuần túy dưới dạng JSON theo đúng schema.
-2. Tuyệt đối không giải thích hoặc thêm văn bản ngoài JSON.
-3. Nếu không tìm thấy thông tin cho một trường, hãy để giá trị mặc định (chuỗi trống, mảng trống, hoặc 0).
-4. Chuẩn hóa các kỹ năng thành các từ khóa ngắn gọn (VD: "Expert in ReactJS" -> "ReactJS").
-5. **BẮT BUỘC**: Trường "summary" (giới thiệu bản thân) và trường "description" trong mỗi mục kinh nghiệm (mô tả công việc) PHẢI được viết hoàn toàn bằng tiếng Việt. Nếu nội dung gốc bằng tiếng Anh, hãy dịch sang tiếng Việt tự nhiên và chuyên nghiệp trước khi trả về.
-6. **Phân tích cấp độ kỹ năng**: Đối với mỗi kỹ năng, hãy đánh giá cấp độ dựa trên ngữ cảnh:
-   - **BEGINNER**: Mới học, kiến thức nền tảng, hoặc kinh nghiệm < 1 năm.
-   - **INTERMEDIATE**: Đã làm nhiều dự án, hiểu sâu vấn đề, hoặc kinh nghiệm 1-3 năm.
-   - **ADVANCED**: Chuyên gia, có khả năng tối ưu hóa, mentor, hoặc kinh nghiệm > 3 năm.
-7. **Phân biệt Dự án và Kinh nghiệm**:
-   - **Experience**: Chỉ dành cho công việc làm tại các công ty, tổ chức (Work at companies).
-   - **Projects**: Dành cho đồ án, dự án cá nhân, dự án tự do (Side projects, academic projects).
-8. **Học vấn**: Trích xuất chi tiết lịch sử học vấn vào mảng 'education'.
+Nhiệm vụ: Trích xuất thông tin từ CV thành JSON.
+Quy tắc:
+1. Không trích xuất thông tin nhạy cảm.
+2. Ngôn ngữ: Toàn bộ nội dung mô tả (summary, job description, project description) PHẢI được trả về bằng tiếng Việt.
+3. Summary: Trích xuất phần "Giới thiệu/About Me".
+4. Desired Job: Trích xuất phần "Mục tiêu nghề nghiệp/Objective".
+5. Phân loại: 
+   - experience: Lịch sử làm việc tại công ty/tổ chức.
+   - projects: Các sản phẩm cá nhân, đồ án chuyên ngành.
+6. Trả về đúng JSON Schema yêu cầu. Bắt buộc duy nhất khối JSON.
 `.trim();
 
 const CV_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
-    fullName: {
-      type: SchemaType.STRING,
-      description: 'Họ và tên đầy đủ của ứng viên.',
-    },
-    email: { type: SchemaType.STRING, description: 'Địa chỉ email liên hệ.' },
-    phone: { type: SchemaType.STRING, description: 'Số điện thoại liên hệ.' },
-    skills: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          skillName: { type: SchemaType.STRING, description: 'Tên kỹ năng.' },
-          category: {
-            type: SchemaType.STRING,
-            description:
-              'Nhóm kỹ năng. BẮT BUỘC chọn 1 trong: "Ngôn ngữ", "Frontend", "Backend", "Database", "Mobile", "DevOps & Cloud", "Khác".',
-          },
-          level: {
-            type: SchemaType.STRING,
-            description:
-              'Mức độ thành thạo: BEGINNER, INTERMEDIATE, hoặc ADVANCED.',
-          },
-        },
-        required: ['skillName', 'category', 'level'],
+    personal_info: {
+      type: SchemaType.OBJECT,
+      properties: {
+        full_name: { type: SchemaType.STRING },
+        email: { type: SchemaType.STRING },
+        phone: { type: SchemaType.STRING },
+        location: { type: SchemaType.STRING },
+        gpa: { type: SchemaType.NUMBER },
       },
-      description: 'Danh sách các kỹ năng kèm theo mức độ thành thạo.',
+      required: ['full_name', 'email', 'phone'],
     },
-    experience: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          company: {
-            type: SchemaType.STRING,
-            description: 'Tên công ty/tổ chức.',
-          },
-          role: {
-            type: SchemaType.STRING,
-            description: 'Chức danh/Vị trí công việc.',
-          },
-          duration: {
-            type: SchemaType.STRING,
-            description:
-              "Thời gian làm việc (ví dụ: '6 tháng', '2 năm', '01/2020 - 05/2023').",
-          },
-          description: {
-            type: SchemaType.STRING,
-            description:
-              'Mô tả ngắn gọn công việc, PHẢI bằng tiếng Việt. Nếu gốc là tiếng Anh hãy dịch sang tiếng Việt.',
-          },
-        },
-        required: ['company', 'role', 'duration'],
+    summary: { type: SchemaType.STRING },
+    desired_job: {
+      type: SchemaType.OBJECT,
+      properties: {
+        jobTitle: { type: SchemaType.STRING },
+        jobType: { type: SchemaType.STRING },
+        expectedSalary: { type: SchemaType.STRING },
+        location: { type: SchemaType.STRING },
       },
     },
     education: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          school: {
-            type: SchemaType.STRING,
-            description: 'Tên trường học/cơ sở đào tạo.',
-          },
-          degree: {
-            type: SchemaType.STRING,
-            description: 'Bằng cấp (VD: Cử nhân, Thạc sĩ).',
-          },
-          major: { type: SchemaType.STRING, description: 'Chuyên ngành học.' },
-        },
-        required: ['school', 'degree', 'major'],
+      type: SchemaType.OBJECT,
+      properties: {
+        degree: { type: SchemaType.STRING },
+        major: { type: SchemaType.STRING },
+        institution: { type: SchemaType.STRING },
       },
     },
-    totalYearsExp: {
-      type: SchemaType.NUMBER,
-      description: 'Tổng số năm kinh nghiệm làm việc tích lũy.',
+    certifications: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
-    summary: {
-      type: SchemaType.STRING,
-      description:
-        'Bản tóm tắt ngắn gọn về ứng viên (Profile Summary), PHẢI bằng tiếng Việt. Nếu gốc là tiếng Anh hãy dịch sang tiếng Việt.',
+    skills: {
+      type: SchemaType.OBJECT,
+      properties: {
+        hard_skills: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              skillName: { type: SchemaType.STRING },
+              level: { type: SchemaType.STRING },
+            },
+            required: ['skillName', 'level'],
+          },
+        },
+        soft_skills: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              skillName: { type: SchemaType.STRING },
+              level: { type: SchemaType.STRING },
+            },
+            required: ['skillName', 'level'],
+          },
+        },
+      },
     },
-    gpa: {
-      type: SchemaType.NUMBER,
-      description: 'Điểm trung bình tích lũy (GPA). Nếu CV không có hãy để 0.',
+    experience: {
+      type: SchemaType.OBJECT,
+      properties: {
+        total_months: { type: SchemaType.NUMBER },
+        roles: {
+          type: SchemaType.ARRAY,
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              job_title: { type: SchemaType.STRING },
+              company_or_project: { type: SchemaType.STRING },
+              duration: { type: SchemaType.STRING },
+              description: { type: SchemaType.STRING },
+            },
+            required: ['job_title', 'company_or_project'],
+          },
+        },
+      },
     },
     projects: {
       type: SchemaType.ARRAY,
       items: {
         type: SchemaType.OBJECT,
         properties: {
-          projectName: { type: SchemaType.STRING, description: 'Tên dự án.' },
-          role: {
-            type: SchemaType.STRING,
-            description: 'Vai trò trong dự án.',
-          },
-          description: {
-            type: SchemaType.STRING,
-            description: 'Mô tả dự án, PHẢI bằng tiếng Việt.',
-          },
-          technology: {
-            type: SchemaType.STRING,
-            description: 'Công nghệ sử dụng (VD: React, Node.js).',
-          },
+          projectName: { type: SchemaType.STRING },
+          description: { type: SchemaType.STRING },
+          role: { type: SchemaType.STRING },
+          technology: { type: SchemaType.STRING },
         },
         required: ['projectName', 'description'],
       },
-      description: 'Danh sách hồ sơ dự án cá nhân hoặc học thuật.',
     },
   },
-  required: [
-    'fullName',
-    'email',
-    'phone',
-    'skills',
-    'experience',
-    'education',
-    'totalYearsExp',
-  ],
+  required: ['personal_info', 'skills', 'experience'],
 };
 
 @Injectable()
@@ -165,34 +134,33 @@ export class CvParsingService {
       this.genAI = new GoogleGenerativeAI(apiKey);
       this.model = this.genAI.getGenerativeModel(
         {
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.1-flash-lite-preview',
           generationConfig: {
             responseMimeType: 'application/json',
             responseSchema: CV_SCHEMA as any,
+            maxOutputTokens: 8192,
+            temperature: 0.1,
           },
         },
         { apiVersion: 'v1beta' },
       );
       this.logger.log(
-        'Đã khởi tạo thành công Gemini 2.5 Flash cho CV Parsing.',
+        'Đã khởi tạo thành công Gemini 3.1 Flash-Lite cho CV Parsing.',
       );
     }
   }
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
     if (!this.genAI) throw new Error('Gemini API is not configured.');
-    const modelsToTry = [
-      'gemini-2.5-flash',
-      'gemini-3-flash',
-      'gemma-4-31b',
-      'gemma-4-26b',
-      'gemma-3-27b',
-    ];
+    const modelsToTry = ['gemini-3.1-flash-lite-preview', 'gemini-2.5-flash-lite'];
     let lastError: any = null;
 
     for (const modelName of modelsToTry) {
       try {
-        const targetModel = this.genAI.getGenerativeModel({ model: modelName });
+        const targetModel = this.genAI.getGenerativeModel(
+          { model: modelName },
+          { apiVersion: 'v1beta' },
+        );
         const filePart = {
           inlineData: {
             data: buffer.toString('base64'),
@@ -232,69 +200,172 @@ export class CvParsingService {
     );
   }
 
-  async parseCv(buffer: Buffer, retryCount = 0): Promise<CvParsedData | null> {
-    if (!this.model || !buffer) return null;
+  async extractTextLocal(buffer: Buffer, mimeType: string): Promise<string> {
+    try {
+      if (mimeType === 'application/pdf') {
+        // pdf-parse removed as requested. Local PDF text extraction is disabled.
+        return '';
+      }
+      if (
+        mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        mimeType === 'application/msword'
+      ) {
+        const result = await mammoth.extractRawText({ buffer });
+        return result.value || '';
+      }
+      if (mimeType === 'text/plain' || mimeType === 'text/markdown') {
+        return buffer.toString('utf8');
+      }
+      return '';
+    } catch (error: any) {
+      this.logger.error(
+        `Lỗi bóc tách văn bản local (${mimeType}): ${error.message}`,
+      );
+      return '';
+    }
+  }
 
-    let targetModel = this.model;
-    // Fallback to older stable model on higher retries if demand is too high
-    if (retryCount >= 2 && this.genAI) {
-      targetModel = this.genAI.getGenerativeModel(
-        {
-          model: 'gemini-1.5-flash',
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: CV_SCHEMA as any,
-          },
-        },
-        { apiVersion: 'v1beta' },
-      );
-      this.logger.warn(
-        `Switching to fallback model (gemini-1.5-flash) for retry ${retryCount}`,
-      );
+  private cleanAndParseJson(text: string): any {
+    // Tiền xử lý để loại bỏ các ký tự điều khiển lỗi hoặc khoảng trắng thừa
+    let cleanText = text.trim();
+    
+    try {
+      // 1. Thử parse trực tiếp
+      return JSON.parse(cleanText);
+    } catch (e) {
+      try {
+        // 2. Loại bỏ code blocks nếu có (```json ... ``` hoặc ``` ... ```)
+        cleanText = cleanText.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim();
+        
+        // 3. Tìm khối JSON bằng regex (từ { đầu tiên đến } cuối cùng)
+        const firstBrace = cleanText.indexOf('{');
+        const lastBrace = cleanText.lastIndexOf('}');
+        
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          const jsonPotential = cleanText.substring(firstBrace, lastBrace + 1);
+          return JSON.parse(jsonPotential);
+        }
+        
+        throw new Error('No JSON structure found');
+      } catch (innerError) {
+        this.logger.error(`Parse JSON failed. Raw response length: ${text.length}`);
+        // Log một phần kết quả để debug nhưng không quá dài
+        this.logger.debug(`Preview: ${text.substring(0, 200)}[...]${text.substring(text.length - 100)}`);
+        throw new Error(`AI returned invalid JSON: ${innerError.message}`);
+      }
+    }
+  }
+
+  async parseCv(
+    buffer: Buffer,
+    mimeType: string = 'application/pdf',
+  ): Promise<CvParsedData | null> {
+    if (!this.genAI || !buffer) return null;
+
+    const tiers = [
+      {
+        name: 'Layer 1: Gemini 3.0 Flash (Preview)',
+        model: 'gemini-3-flash-preview',
+      },
+      { name: 'Layer 2: Gemini Flash Latest (Stable)', model: 'gemini-flash-latest' },
+      {
+        name: 'Layer 3: Gemini 3.1 Flash-Lite (Preview)',
+        model: 'gemini-3.1-flash-lite-preview',
+      },
+    ];
+
+    const isWord =
+      mimeType.includes('officedocument.wordprocessingml.document') ||
+      mimeType.includes('msword');
+    let rawText: string | null = null;
+
+    // --- PHASE 1: DIRECT BINARY ATTEMPTS (Only for PDF) ---
+    if (!isWord) {
+      for (const tier of tiers) {
+        this.logger.log(`[CV Parsing] Thử ${tier.name} (Direct Binary)...`);
+
+        try {
+          const genModel = this.genAI.getGenerativeModel(
+            {
+              model: tier.model,
+              generationConfig: {
+                responseMimeType: 'application/json',
+                responseSchema: CV_SCHEMA as any,
+                maxOutputTokens: 8192,
+                temperature: 0.1,
+              },
+            },
+            { apiVersion: 'v1beta' },
+          );
+
+          const filePart = {
+            inlineData: {
+              data: buffer.toString('base64'),
+              mimeType: 'application/pdf',
+            },
+          };
+
+          const result = await genModel.generateContent([
+            CV_EXTRACTION_PROMPT,
+            filePart,
+          ]);
+          const response = await result.response;
+          const parsedData = this.cleanAndParseJson(response.text());
+
+          this.logger.log(`✅ Thành công tại ${tier.name} (Direct)`);
+          return parsedData as CvParsedData;
+        } catch (error: any) {
+          this.logger.warn(`❌ ${tier.name} (Direct) thất bại: ${error.message}`);
+          if (error.status === 429)
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+      }
     }
 
-    try {
-      const filePart = {
-        inlineData: {
-          data: buffer.toString('base64'),
-          mimeType: 'application/pdf',
-        },
-      };
+    // --- PHASE 2: TEXT-ONLY FALLBACK (For Word or after PDF Direct fails) ---
+    this.logger.log(
+      `[CV Parsing] Chuyển đổi sang luồng bóc tách văn bản thô (Text-only)...`,
+    );
 
-      const result = await targetModel.generateContent([
-        CV_EXTRACTION_PROMPT,
-        filePart,
-      ]);
-      const response = await result.response;
-      let text = response.text();
-
-      // Cleanup markdown artifacts just in case
-      if (text.startsWith('```json')) {
-        text = text
-          .replace(/```json/g, '')
-          .replace(/```/g, '')
-          .trim();
-      }
-
-      return JSON.parse(text) as CvParsedData;
-    } catch (error: any) {
-      const isOverloaded =
-        error.status === 503 ||
-        error.message?.includes('503') ||
-        error.message?.includes('high demand') ||
-        error.message?.includes('429');
-
-      if (isOverloaded && retryCount < 3) {
-        const waitTime = (retryCount + 1) * 2000; // 2s, 4s, 6s
-        this.logger.warn(
-          `API is experiencing high demand (${error.message}). Retrying in ${waitTime}ms... (Attempt ${retryCount + 1}/3)`,
-        );
-        await new Promise((resolve) => setTimeout(resolve, waitTime));
-        return this.parseCv(buffer, retryCount + 1);
-      }
-
-      this.logger.error(`Lỗi khi gọi Gemini AI để parse CV: ${error.message}`);
+    rawText = await this.extractTextLocal(buffer, mimeType);
+    if (!rawText || rawText.length < 20) {
+      this.logger.error('Không thể bóc tách nội dung văn bản từ file.');
       return null;
     }
+
+    // Thử lại với các model Gemini bằng văn bản thô
+    for (const tier of tiers) {
+      this.logger.log(`[CV Parsing] Thử ${tier.name} (Text Mode)...`);
+      try {
+        const genModel = this.genAI.getGenerativeModel(
+          {
+            model: tier.model,
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: CV_SCHEMA as any,
+              maxOutputTokens: 8192,
+              temperature: 0.1,
+            },
+          },
+          { apiVersion: 'v1beta' },
+        );
+
+        const promptWithText = `${CV_EXTRACTION_PROMPT}\n\nNỘI DUNG VĂN BẢN CV:\n${rawText}`;
+        const result = await genModel.generateContent(promptWithText);
+        const response = await result.response;
+        const parsedData = this.cleanAndParseJson(response.text());
+
+        this.logger.log(`✅ Thành công tại ${tier.name} (Text Mode)`);
+        return parsedData as CvParsedData;
+      } catch (error: any) {
+        this.logger.warn(`❌ ${tier.name} (Text Mode) thất bại: ${error.message}`);
+        if (error.status === 429)
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
+
+    this.logger.error('Tất cả các phương pháp bóc tách CV đều thất bại.');
+    return null;
   }
 }
