@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150.png?text=Workly+AI" alt="Workly Logo" width="150" height="150">
   <h1>Workly System</h1>
   <p><em>Nền tảng tuyển dụng thông minh được siêu nạp bởi Trí Tuệ Nhân Tạo (AI)</em></p>
 </div>
