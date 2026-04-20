@@ -26,7 +26,9 @@ export class MatchingService {
     }
 
     const reqs = job.structuredRequirements as any;
-    const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
+    const hardSkills = Array.isArray(reqs?.hardSkills) ? reqs.hardSkills : [];
+    const softSkills = Array.isArray(reqs?.softSkills) ? reqs.softSkills : [];
+    const minExperienceYears = reqs?.minExperienceYears || 0;
 
     // Lấy tất cả CV đã được bóc tách và ở trạng thái PUBLISHED
     const allCvs = (await this.prisma.cV.findMany({
@@ -38,8 +40,8 @@ export class MatchingService {
 
     const matches = allCvs.map((cv) => {
       const parsedData = cv.parsedData;
-      const cvSkills = parsedData.skills || [];
-      const cvExp = parsedData.totalYearsExp || 0;
+      const cvSkills = Array.isArray(parsedData?.skills) ? parsedData.skills : [];
+      const cvExp = parsedData?.totalYearsExp || 0;
 
       // 1. Tính điểm Kỹ năng (60%)
       const expandedSkillsMap =
@@ -178,7 +180,7 @@ export class MatchingService {
 
       // Tính toán analysis data cho candidate
       const jobReqs = job.structuredRequirements as any;
-      const hardSkills = jobReqs?.hardSkills || [];
+      const hardSkills = Array.isArray(jobReqs?.hardSkills) ? jobReqs.hardSkills : [];
       const matchedHard = matchedSkills.filter(s => 
         hardSkills.some(hs => hs.toLowerCase() === s.toLowerCase())
       );
@@ -241,9 +243,11 @@ export class MatchingService {
     isCompanyVerified: boolean = false,
   ): { score: number; matchedSkills: string[] } {
     const reqs = structuredRequirements || {};
-    const { hardSkills = [], softSkills = [], minExperienceYears = 0 } = reqs;
-    const cvSkills = parsedCvData.skills || [];
-    const cvExp = parsedCvData.totalYearsExp || 0;
+    const hardSkills = Array.isArray(reqs?.hardSkills) ? reqs.hardSkills : [];
+    const softSkills = Array.isArray(reqs?.softSkills) ? reqs.softSkills : [];
+    const minExperienceYears = reqs?.minExperienceYears || 0;
+    const cvSkills = Array.isArray(parsedCvData?.skills) ? parsedCvData.skills : [];
+    const cvExp = parsedCvData?.totalYearsExp || 0;
 
     // 1. Tính điểm Kỹ năng (60%)
     const expandedSkillsMap =

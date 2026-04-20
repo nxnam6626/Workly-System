@@ -50,14 +50,15 @@ export class ChatService {
     if (!this.isConfigured) return { intent: 'general', filters: {} };
     try {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
-      const prompt = `Bạn là hệ thống trích xuất ý định tìm việc. 
+      const prompt = `Bạn là hệ thống trích xuất ý định tìm việc và tuyển dụng. 
 Câu nói người dùng: "${message}"
 
 Nhiệm vụ: Trả về JSON thuần tuý (không markdown).
-Nếu người dùng đang nhắc đến tìm việc, xin gợi ý việc làm, hãy đặt intent = "job_search" và trích xuất các filters (keyword, location, min_salary dạng số).
-Nếu không phải tìm việc, đặt intent = "general".
+Nếu người dùng (ứng viên) đang nhắc đến tìm việc, xin gợi ý việc làm, hãy đặt intent = "job_search" và trích xuất các filters (keyword, location, min_salary dạng số).
+Nếu người dùng (Nhà tuyển dụng) muốn đăng tin tuyển dụng hoặc tạo việc làm, hãy đặt intent = "create_job" và trích xuất các filters (title, vacancies dạng số, min_salary dạng số, max_salary dạng số).
+Nếu không phải 2 ý định trên, đặt intent = "general".
 
-Ví dụ: "Có việc frontend nào ở HCM lương trên 15 triệu không?"
+Ví dụ 1: "Có việc frontend nào ở HCM lương trên 15 triệu không?"
 Trả về: 
 {
   "intent": "job_search",
@@ -67,7 +68,18 @@ Trả về:
     "min_salary": 15000000
   }
 }
-`;
+
+Ví dụ 2: "tuyển 10 thực tập 9tr đến 15 triệu"
+Trả về:
+{
+  "intent": "create_job",
+  "filters": {
+    "title": "Thực tập",
+    "vacancies": 10,
+    "min_salary": 9000000,
+    "max_salary": 15000000
+  }
+}`;
       const result = await model.generateContent(prompt);
       let text = result.response.text();
       text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
@@ -234,9 +246,36 @@ Trả về:
     const extraction = await this.extractIntent(message);
     let ragContext = '';
 
-    if (context?.userId) {
+    if (context?.userId && !isRecruiter) {
       const userContext = await this.getCandidateRagContext(context.userId);
       if (userContext) ragContext += userContext;
+    }
+
+    if (isRecruiter && (extraction.intent === 'create_job' || message.toLowerCase().includes('tuyển'))) {
+       const filters = extraction.filters || {};
+       let title = filters.title || 'Vị trí tuyển dụng';
+       let jobType = 'FULLTIME';
+
+       if (message.toLowerCase().includes('thực tập')) {
+           title = 'Thực tập sinh';
+           jobType = 'INTERNSHIP';
+       } else if (message.toLowerCase().includes('part time') || message.toLowerCase().includes('bán thời gian')) {
+           jobType = 'PARTTIME';
+       }
+
+       yield 'Hệ thống đã tạo bản nháp tin tuyển dụng cho bạn. Vui lòng kiểm tra và bổ sung thêm thông tin chi tiết trước khi đăng.';
+       yield {
+          type: 'PREFILL_JOB',
+          payload: {
+             title,
+             vacancies: filters.vacancies || 1,
+             salaryMin: filters.min_salary || null,
+             salaryMax: filters.max_salary || null,
+             jobType,
+             hardSkills: filters.keyword ? [filters.keyword] : []
+          }
+       };
+       return;
     }
 
     if (extraction.intent === 'job_search' || extraction.intent === 'job' || extraction.filters?.keyword) {
