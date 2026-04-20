@@ -15,7 +15,7 @@ export class UnlockService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly walletsService: WalletsService,
-  ) {}
+  ) { }
 
   async getWallet(userId: string) {
     // Return Wallet through WalletsService instead of RecruiterWallet

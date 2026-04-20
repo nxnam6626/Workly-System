@@ -141,10 +141,14 @@ export class CandidatesController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CANDIDATE)
-  async getMe(@CurrentUser('userId') userId: string) {
-    return this.candidatesService.findByUserId(userId);
+  @UseGuards(JwtAuthGuard)
+  async findMe(@CurrentUser('userId') userId: string) {
+    try {
+      return await this.candidatesService.findByUserId(userId);
+    } catch (e) {
+      console.error('ERROR IN findMe candidates:', e);
+      throw e;
+    }
   }
 
   @Get('saved')

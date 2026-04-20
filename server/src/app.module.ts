@@ -69,4 +69,4 @@ import { AiLabModule } from './modules/ai-lab/ai-lab.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

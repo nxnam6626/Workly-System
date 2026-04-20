@@ -41,7 +41,7 @@ const navItems = [
   { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
   { label: 'AI Insights', href: '/recruiter/ai-report', icon: Brain },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
-  { label: 'Tìm Ứng Viên', href: '/recruiter/candidates', icon: Users },
+  { label: 'Ứng Viên Tiềm Năng', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },
   { label: 'Nhắn Tin', href: '/recruiter/messages', icon: MessageSquare },
 ];

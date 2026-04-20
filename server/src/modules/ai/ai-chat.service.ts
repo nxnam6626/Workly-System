@@ -1,7 +1,8 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SearchService } from '../search/search.service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
 
 const SLEEP = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -24,7 +25,8 @@ export class AiChatService {
   }
 
   async generateResponse(message: string): Promise<string> {
-    if (!this.isConfigured) return 'AI is not configured.';
+    if (!this.isConfigured && !process.env.GROQ_API_KEY)
+      return 'AI is not configured.';
 
     const normalizedQuery = message.trim().toLowerCase();
 
@@ -43,39 +45,82 @@ export class AiChatService {
       this.logger.warn(`Failed to read from AI Query cache: ${e}`);
     }
 
-    const modelsToTry = [
-      'gemini-2.5-flash',
-      'gemini-1.5-flash-8b',
-      'gemini-1.5-flash',
-    ];
-    for (const modelName of modelsToTry) {
+    let responseText = '';
+    let success = false;
+
+    // 🥇 Priority 1: Groq Llama-3.3
+    if (process.env.GROQ_API_KEY) {
       try {
-        const model = this.genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(message);
-        const responseText = result.response.text();
-
-        // 2. Lưu vào cache câu hỏi và câu trả lời hoàn chỉnh
-        try {
-          await this.prisma.aiQueryCache.create({
-            data: {
-              query: normalizedQuery,
-              response: responseText,
+        const groqRes = await axios.post(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { 
+                role: 'system', 
+                content: 'Bạn là chuyên gia tư vấn Tuyển Dụng và Nhân Sự (Workly-AI). NGUYÊN TẮC TỐI THƯỢNG: TUYỆT ĐỐI KHÔNG trả lời các chủ đề ngoài lề (Thời tiết, Bóng đá, Giải trí, Chính trị, Toán học, Coding...). Nếu người dùng hỏi ngoài lề, chỉ trả lời duy nhất: "Tôi là Trợ lý AI Tuyển Dụng, tôi chỉ có thể giúp bạn các vấn đề liên quan đến tuyển dụng, tối ưu JD và nhân sự."' 
+              },
+              { role: 'user', content: message },
+            ],
+            temperature: 0.3,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+              'Content-Type': 'application/json',
             },
-          });
-        } catch (e) {
-          // Bỏ qua lỗi duplicate nếu bị gửi đồng thời
-        }
-
-        return responseText;
+          },
+        );
+        responseText = groqRes.data.choices[0].message.content;
+        success = true;
+        this.logger.log(`[AiChatService] generateResponse via Groq successful`);
       } catch (e: any) {
         this.logger.warn(
-          `[AiChatService] generateResponse error with ${modelName}. Trying next...`,
+          `[AiChatService] Groq generateResponse failed: ${e.message}. Falling back to Gemini...`,
         );
-        await SLEEP(500);
       }
     }
-    this.logger.error('generateResponse error: All models failed.');
-    return 'Error generating response';
+
+    // 🥈 Priority 2: Google Gemini (Fallback)
+    if (!success) {
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+      for (const modelName of modelsToTry) {
+        try {
+          const model = this.genAI.getGenerativeModel({ 
+            model: modelName,
+            systemInstruction: 'Bạn là chuyên gia tư vấn Tuyển Dụng và Nhân Sự. NGUYÊN TẮC: TUYỆT ĐỐI KHÔNG trả lời chủ đề ngoài lề (Toán học, Lập trình, Thể thao...). Nếu hỏi ngoài lề, từ chối và nói bạn chỉ hỗ trợ tuyển dụng.'
+          });
+          const result = await model.generateContent(message);
+          responseText = result.response.text();
+          success = true;
+          this.logger.log(
+            `[AiChatService] generateResponse via Gemini (${modelName}) successful`,
+          );
+          break;
+        } catch (e: any) {
+          this.logger.warn(
+            `[AiChatService] generateResponse error with ${modelName}.`,
+          );
+          await SLEEP(500);
+        }
+      }
+    }
+
+    if (!success) {
+      this.logger.error('generateResponse error: All models failed.');
+      return 'Error generating response';
+    }
+
+    // 2. Lưu vào cache câu hỏi và câu trả lời hoàn chỉnh
+    try {
+      await this.prisma.aiQueryCache.create({
+        data: { query: normalizedQuery, response: responseText },
+      });
+    } catch (e) {
+      // Bỏ qua lỗi duplicate nếu bị gửi đồng thời
+    }
+
+    return responseText;
   }
 
   async *generateStreamResponse(
@@ -138,40 +183,81 @@ export class AiChatService {
   }
 
   async expandSearchQuery(message: string): Promise<string[]> {
-    if (!this.isConfigured) return [];
+    if (!this.isConfigured && !process.env.GROQ_API_KEY) return [];
 
-    // Thử với danh sách model ưu tiên
-    const models = ['gemini-flash-latest', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
-    let lastError: any = null;
-
-    for (const modelId of models) {
-      try {
-        const model = this.genAI.getGenerativeModel({ model: modelId });
-        const prompt = `Bạn là chuyên gia tuyển dụng. Hãy phân tích câu hỏi của người dùng và trích xuất danh sách các từ khóa tìm kiếm (Job Titles, Skills, Industry) bằng cả tiếng Việt và tiếng Anh để tối ưu kết quả tìm kiếm.
+    const prompt = `Bạn là chuyên gia tuyển dụng. Hãy phân tích câu hỏi của người dùng và trích xuất danh sách các từ khóa tìm kiếm (Job Titles, Skills, Industry) bằng cả tiếng Việt và tiếng Anh để tối ưu kết quả tìm kiếm.
         
-        Ví dụ: "Tìm việc kế toán" -> ["kế toán", "accountant", "audit", "finance"]
-        Ví dụ: "Tuyển ReactJS ở Hà Nội" -> ["reactjs", "frontend", "web developer", "javascript"]
+        Ví dụ: "Tìm việc kế toán" -> {"keywords": ["kế toán", "accountant", "audit", "finance"]}
+        Ví dụ: "Tuyển ReactJS ở Hà Nội" -> {"keywords": ["reactjs", "frontend", "web developer", "javascript"]}
         
         Input: "${message}"
-        Return ONLY a JSON array of strings.`;
+        Return ONLY a JSON object with a "keywords" array of strings.`;
 
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
-        return JSON.parse(text.replace(/```json|```/g, '').trim());
-      } catch (error: any) {
-        lastError = error;
-        // Nếu lỗi 503 hoặc 429, thử model tiếp theo
-        this.logger.warn(
-          `Model ${modelId} lỗi (${error.status || 'unknown'}). Thử model tiếp theo...`,
+    let keywords: string[] | null = null;
+
+    // 🥇 Priority 1: Groq Llama-3.3
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqRes = await axios.post(
+          'https://api.groq.com/openai/v1/chat/completions',
+          {
+            model: 'llama-3.3-70b-versatile',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.1,
+            response_format: { type: 'json_object' },
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+          },
         );
-        await SLEEP(500);
+        const text = groqRes.data.choices[0].message.content;
+        const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+        keywords = parsed.keywords || [];
+        this.logger.log(
+          `[AiChatService] expandSearchQuery via Groq successful`,
+        );
+      } catch (e: any) {
+        this.logger.warn(
+          `[AiChatService] Groq expandSearchQuery failed: ${e.message}. Falling back to Gemini...`,
+        );
       }
     }
 
-    this.logger.error(
-      `Tất cả model expandSearchQuery đều lỗi: ${lastError?.message}`,
-    );
-    return [];
+    // 🥈 Priority 2: Gemini
+    if (!keywords) {
+      const models = ['gemini-flash-latest', 'gemini-2.5-flash'];
+      for (const modelId of models) {
+        try {
+          const model = this.genAI.getGenerativeModel({
+            model: modelId,
+            generationConfig: { responseMimeType: 'application/json' },
+          });
+          const result = await model.generateContent(prompt);
+          const text = result.response.text();
+          const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+          keywords = parsed.keywords || [];
+          this.logger.log(
+            `[AiChatService] expandSearchQuery via Gemini successful`,
+          );
+          break;
+        } catch (error: any) {
+          this.logger.warn(
+            `Model ${modelId} lỗi (${error.status || 'unknown'}). Thử model tiếp theo...`,
+          );
+          await SLEEP(500);
+        }
+      }
+    }
+
+    if (!keywords) {
+      this.logger.error(`Tất cả model expandSearchQuery đều lỗi`);
+      return [];
+    }
+
+    return keywords;
   }
 
   async *processChatWithRAGStream(
@@ -199,6 +285,47 @@ export class AiChatService {
         (userRoles.includes('CANDIDATE') || userRoles.length === 0));
 
     const normalizedMsg = message.trim().toLowerCase();
+
+    // 1. LẤY THÔNG TIN SUBSCRIPTION CỦA RECRUITER (Dùng cho cả FAST PATH và RAG)
+    let recruiterPlanType: string | null = null;
+    let upsellContext = '';
+    if (isRecruiter && context?.userId) {
+      try {
+        const recruiterRecord = await this.prisma.recruiter.findUnique({
+          where: { userId: context.userId },
+          include: { recruiterSubscription: true },
+        });
+        recruiterPlanType =
+          recruiterRecord?.recruiterSubscription?.planType ?? null;
+
+        // Nếu FREE hoặc không có gói, chuẩn bị context upsell
+        if (!recruiterPlanType || recruiterPlanType === 'FREE') {
+          upsellContext = `
+--- [THÔNG TIN GÓI DỊCH VỤ CỦA NHÀ TUYỂN DỤNG] ---
+Nhà tuyển dụng này đang dùng GÓI MIỄN PHÍ (FREE).
+
+CÁC TÍNH NĂNG HẠN CHẾ VỚI GÓI FREE:
+- Không dùng tính năng tạo tin tự động bằng AI
+- Không có AI Cố Vấn JD và tự động sửa JD
+- Không có AI Insights & phân tích nhân sự nâng cao
+- Giới hạn số lượt đăng tin và mở khóa hồ sơ
+
+CÁC GÓI NÂNG CẤP:
+- GÓI LITE: Cho phép tạo JD bằng AI, AI Cố Vấn, tăng quotas. Liên hệ đường dẫn /recruiter/billing/plans
+- GÓI GROWTH: Đầy đủ tính năng: AI Insights, tự động sửa JD, không giới hạn. Liên hệ đường dẫn /recruiter/billing/plans
+
+HƯỚNG DẪN CHO AI:
+- Khi nhà tuyển dụng hỏi về tính năng nào mà họ chưa có quyền truy cập: hãy giải thích mạch lạc nhưng chuyên nghiệp rằng tính năng này có trong gói trả phí.
+- Ở cuối mỗi phản hồi hữu ích: THÊM vào 1 câu gợi mở khóa tiềm năng của gói trả phí. Ví dụ: "Nếu muốn AI tự động viết JD chuẩn cho bạn, hãy thử Gói LITE trên Workly."
+- Không spam, chỉ gợi ý 1 lần mỗi phản hồi và luôn giữ văn phong chuyên nghiệp.
+---`;
+        }
+      } catch (e) {
+        this.logger.warn(
+          `[AiChatService] Could not fetch recruiter plan: ${e}`,
+        );
+      }
+    }
 
     // 1. FAST PATH INTERCEPTION: CV Matching Intent
     // If user explicitly asks for jobs matching their CV, we fetch from JobMatch DB (no tokens sent)
@@ -430,62 +557,169 @@ export class AiChatService {
     } // Closes the `if (isRecruiter && ...)` for 1(g). FAST PATH
 
     // 1(h). FAST PATH: Recruiter wants to post a job
-    const isJobPostingIntent = isRecruiter && (
-      normalizedMsg.includes('đăng tin') ||
-      normalizedMsg.includes('tuyển dụng') ||
-      normalizedMsg.includes('cần tuyển') ||
-      normalizedMsg.includes('cần tìm') ||
-      normalizedMsg.includes('cần gấp') ||
-      normalizedMsg.includes('tìm người') ||
-      normalizedMsg.includes('tìm nhân viên') ||
-      normalizedMsg.includes('tìm ứng viên') ||
-      normalizedMsg.includes('tuyển') ||
-      normalizedMsg.includes('đăng việc')
-    );
+    const jobKeywords = [
+      'đăng tin',
+      'tuyển dụng',
+      'cần tuyển',
+      'viết jd',
+      'tạo jd',
+      'đăng jd',
+      'tạo tin',
+      'đăng tin tuyển dụng',
+      'cần tìm',
+      'cần gấp',
+      'tìm người',
+      'tìm nhân viên',
+      'tìm ứng viên',
+      'tuyển',
+      'đăng việc',
+    ];
+    const excludeKeywords = [
+      'hướng dẫn',
+      'làm sao',
+      'cách',
+      'như thế nào',
+      'lỗi',
+    ];
+
+    let hasJobKeyword = false;
+    let hasExcludeKeyword = false;
+
+    for (const k of jobKeywords) {
+      if (normalizedMsg.includes(k)) hasJobKeyword = true;
+    }
+    for (const k of excludeKeywords) {
+      if (normalizedMsg.includes(k)) hasExcludeKeyword = true;
+    }
+
+    const isJobPostingIntent =
+      isRecruiter && hasJobKeyword && !hasExcludeKeyword;
 
     // If message is fairly detailed (over 5 chars), try to extract job data
     if (isJobPostingIntent && message.length > 5) {
-      try {
-        const model = this.genAI.getGenerativeModel({
-          model: 'gemini-2.5-flash',
-          generationConfig: { responseMimeType: 'application/json' },
-        });
-        const extractionPrompt = `Bạn là hệ thống trích xuất thông tin tuyển dụng. Hãy phân tích đoạn yêu cầu dưới đây và chuyển thành JSON.
+      // FREE Users are not allowed to use AI JD Generation
+      if (!recruiterPlanType || recruiterPlanType === 'FREE') {
+        yield 'Hệ thống nhận thấy bạn muốn tạo tin tuyển dụng. Tuy nhiên, tính năng AI tự động sinh JD chỉ hỗ trợ các tài khoản nâng cấp (LITE hoặc GROWTH).';
+        yield '__ACTION__:' +
+          JSON.stringify({
+            type: 'SHOW_UPGRADE_CTA',
+            payload: {
+              title: 'Mở khóa tính năng Tự động sinh JD',
+              subtitle:
+                'Dùng trợ lý AI chuyên nghiệp tự động điền thông tin và tối ưu SEO.',
+              ctaText: 'Nâng cấp ngay',
+              ctaLink: '/recruiter/billing/plans',
+            },
+          });
+        return;
+      }
+
+      let jobData: any = null;
+      let usedAI = '';
+
+      const extractionPrompt = `Bạn là hệ thống trích xuất thông tin tuyển dụng. Hãy phân tích đoạn yêu cầu dưới đây và chuyển thành JSON.
         
         Yêu cầu: "${message}"
         
         Quy tắc:
-        - title: Tiêu đề công việc ngắn gọn (nếu không nói rõ, tự đoán dựa trên role).
+        - title: Tiêu đề công việc cực kỳ chuyên nghiệp. BẮT BUỘC giữ nguyên các role chuẩn ngành IT bằng Tiếng Anh (Ví dụ: "Backend Developer", "Frontend Engineer", "Data Analyst") thay vì dịch máy móc sang Tiếng Việt như "Nhân viên phát triển...". Chỉ dùng Tiếng Việt khi danh xưng đủ sang trọng (VD: "Trưởng phòng Marketing", "Chuyên viên Phân tích Dữ liệu").
         - jobType: "FULLTIME", "PARTTIME", hoặc "INTERNSHIP" (mặc định FULLTIME).
         - salaryMin: Lương thấp nhất (số nguyên, e.g. 10000000) (nếu nói 10tr -> 10000000). Trả về 0 nếu không có.
-        - salaryMax: Lương cấu nhất (số nguyên, e.g. 20000000). Trả về 0 nếu không có.
+        - salaryMax: Lương cao nhất (số nguyên, e.g. 20000000). Trả về 0 nếu không có.
         - vacancies: Số lượng tuyển (số nguyên, mặc định 1).
         - experience: Yêu cầu kinh nghiệm bằng chữ (e.g. "1 - 2 năm").
         - minExperienceYears: Số năm tối thiểu dạng số (e.g. 1). Default: 0.
-        - hardSkills: Mảng các kỹ năng chuyên môn dạng text (e.g. ["ReactJS", "NodeJS"]).
-        - softSkills: Mảng các kỹ năng mềm.
+        - hardSkills: Mảng các kỹ năng chuyên môn (công cụ, ngôn ngữ lập trình, hệ thống) dạng text cực kỳ ngắn gọn và ĐẬM CHẤT KỸ THUẬT. TUYỆT ĐỐI KHÔNG dịch thuật ngữ IT sang Tiếng Việt (Ví dụ: KHÔNG dùng "Lập trình Java" hay "Kiến thức thiết kế phần mềm", PHẢI TRẢ VỀ CHUẨN là "Java", "Software Architecture", "Database/SQL").
+        - softSkills: Mảng các kỹ năng mềm chuẩn mực doanh nghiệp. Hạn chế dùng từ quá chung chung, ưu tiên từ đắt giá (e.g. ["Problem Solving", "Tư duy phản biện", "Khả năng chịu áp lực", "Giao tiếp linh hoạt"]).
         - autoInviteMatches: Bật tính năng tìm ứng viên tự động mở khoá và nhắn tin. Nếu nội dung có từ khoá "tự động", "mở khoá", "dùng AI", "tìm hộ" thì trả về true, nếu không có thì trả về false. (boolean).
-        - description: Mô tả công việc chi tiết rành mạch bằng Markdown (bullet points). Văn phong PHẢI cực kỳ chuyên nghiệp và trang trọng. TUYỆT ĐỐI KHÔNG dùng bất kỳ biểu tượng cảm xúc (emoji) hay sticker nào. Tự sinh (generate) sao cho đầy đủ dựa theo vị trí.
-        - requirements: Yêu cầu ứng viên chi tiết bằng Markdown.
-        - benefits: Quyền lợi chi tiết bằng Markdown.
+        - description: Mô tả công việc cực kỳ chi tiết rành mạch bằng Markdown. Bắt buộc PHẢI CÓ ít nhất 5-7 gạch đầu dòng (bullet points) giải thích rõ ràng các nhiệm vụ hàng ngày. Văn phong PHẢI cực kỳ chuyên nghiệp và trang trọng. TUYỆT ĐỐI KHÔNG dùng bất kỳ biểu tượng cảm xúc (emoji) hay sticker nào. Tự sinh (generate) nội dung thật dài và đầy đủ dựa theo chức danh (title) công việc.
+        - requirements: Yêu cầu ứng viên cực kỳ chi tiết bằng Markdown. Bắt buộc PHẢI CÓ ít nhất 5-7 gạch đầu dòng về chuyên môn, bằng cấp, kỹ năng mềm và thái độ. Tự sinh chi tiết dựa trên title công việc.
+        - benefits: Quyền lợi chi tiết bằng Markdown. Bắt buộc PHẢI CÓ ít nhất 5-7 gạch đầu dòng (Chế độ lương, thưởng lễ tết, BHXH, khám sức khoẻ, teambuilding, môi trường làm việc...).
         
-        Chỉ trả về chuỗi JSON hợp lệ, không có markdown formatting backticks (\`\`\`).`;
+        Chỉ trả về chuỗi JSON hợp lệ, bắt đầu và kết thúc bằng ngoặc nhọn. Không có markdown formatting backticks (\`\`\`).`;
 
-        const result = await model.generateContent(extractionPrompt);
-        const textResponse = result.response.text();
-        const jsonText = textResponse.replace(/```json|```/gi, '').trim();
-        const jobData = JSON.parse(jsonText);
+      // ---------------------------------------------------------
+      // 🥇 PRIORITY 1: GROQ LLAMA-3.3 (Siêu tốc độ, ưu tiên hàng đầu)
+      // ---------------------------------------------------------
+      if (process.env.GROQ_API_KEY) {
+        try {
+          const groqResponse = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
+              model: 'llama-3.3-70b-versatile',
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are an elite HR Recruiter API. You MUST output extremely long, highly detailed, and professional job descriptions in Vietnamese. For fields like description, requirements, and benefits, NEVER output short text; always generate at least 5-8 detailed bullet points.',
+                },
+                { role: 'user', content: extractionPrompt },
+              ],
+              temperature: 0.2,
+              response_format: { type: 'json_object' },
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+            },
+          );
 
-        // Notify user context
-        yield 'Tuyệt vời! Tôi đã phân tích yêu cầu của bạn, tự động viết sinh động phần mô tả và điền sẵn các thông số vào biểu mẫu đăng tin.';
-        
-        // Push the action
-        yield '__ACTION__:' + JSON.stringify({ type: 'PREFILL_JOB', payload: jobData });
-        return;
-      } catch (error) {
-        this.logger.warn(`Failed to extract job posting intent JSON: ${error}`);
-        // Fallthrough to normal chat processing if JSON parsing fails
+          const textResponse = groqResponse.data.choices[0].message.content;
+          const jsonText = textResponse.replace(/```json|```/gi, '').trim();
+          jobData = JSON.parse(jsonText);
+          usedAI = 'Groq AI (Llama-3.3-70B)';
+          this.logger.log(`[AI] Successfully extracted using Groq!`);
+        } catch (error) {
+          this.logger.error(`[AI] Groq API failed: ${error.message || error}`);
+        }
       }
+
+      // ---------------------------------------------------------
+      // 🥈 PRIORITY 2: GOOGLE GEMINI (Dự phòng nếu Groq sập hoặc lỗi)
+      // ---------------------------------------------------------
+      if (!jobData) {
+        this.logger.log(`[AI] Falling back to Google Gemini...`);
+        const geminiModels = ['gemini-flash-latest', 'gemini-1.5-flash'];
+        for (const modelId of geminiModels) {
+          try {
+            const model = this.genAI.getGenerativeModel({
+              model: modelId,
+              generationConfig: { responseMimeType: 'application/json' },
+            });
+
+            const result = await model.generateContent(extractionPrompt);
+            const textResponse = result.response.text();
+            const jsonText = textResponse.replace(/```json|```/gi, '').trim();
+            jobData = JSON.parse(jsonText);
+            usedAI = `Google Gemini (${modelId})`;
+            this.logger.log(
+              `[AI] Successfully extracted using Gemini fallback!`,
+            );
+            break; // success
+          } catch (error) {
+            this.logger.warn(
+              `[AI] Gemini API failed to parse JD using ${modelId}: ${error.message}`,
+            );
+          }
+        }
+      }
+
+      // ---------------------------------------------------------
+      // 📤 KẾT QUẢ TRẢ VỀ
+      // ---------------------------------------------------------
+      if (jobData) {
+        // Notify user context
+        yield `Tuyệt vời! Tôi đã phân tích yêu cầu của bạn bằng **${usedAI}**, tự động viết văn phong chuyên nghiệp và điền sẵn các thông số vào biểu mẫu đăng tin.`;
+
+        // Push the action
+        yield '__ACTION__:' +
+          JSON.stringify({ type: 'PREFILL_JOB', payload: jobData });
+        return;
+      }
+
+      // Fallthrough to normal chat processing if all models fail
     }
 
     // 2. CHECK CACHE FOR SIMILAR QUESTIONS
@@ -499,7 +733,12 @@ export class AiChatService {
       }
     } catch (e) {}
 
-    const models = ['gemini-flash-latest', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+    const models = [
+      'gemini-flash-latest',
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+    ];
     let success = false;
     let lastError: any = null;
 
@@ -519,43 +758,8 @@ export class AiChatService {
           }
         }
 
-        // 1.5. Với RECRUITER: kiểm tra gói dịch vụ để tích hợp upsell
-        let recruiterPlanType: string | null = null;
-        let upsellContext = '';
-        if (isRecruiter && context?.userId) {
-          try {
-            const recruiterRecord = await this.prisma.recruiter.findUnique({
-              where: { userId: context.userId },
-              include: { recruiterSubscription: true },
-            });
-            recruiterPlanType = recruiterRecord?.recruiterSubscription?.planType ?? null;
-
-            // Nếu FREE hoặc không có gói, chuẩn bị context upsell
-            if (!recruiterPlanType || recruiterPlanType === 'FREE') {
-              upsellContext = `
---- [THÔNG TIN GÓI DỊCH VỤ CỦA NHÀ TUYỂN DỤNG] ---
-Nhà tuyển dụng này đang dùng GÓI MIỄN PHÍ (FREE).
-
-CÁC TÍNH NĂNG HẠN CHẾ VỚI GÓI FREE:
-- Không dung tính năng tạo tin tự động bằng AI
-- Không có AI Cố Vấn JD và tự động sửa JD
-- Không có AI Insights & phân tích nhân sự nâng cao
-- Giới hạn số lượt đăng tin và mở khóa hồ sơ
-
-CÁC GÓI NÂNG CẤP:
-- GÓI LITE: Cho phép tạo JD bằng AI, AI Cố Vấn, tăng quotas. Liên hệ đường dẫn /recruiter/billing/plans
-- GÓI GROWTH: Đầy đủ tính năng: AI Insights, tự động sửa JD, không giới hạn. Liên hệ đường dẫn /recruiter/billing/plans
-
-HƯỚNG DẪN CHO AI:
-- Khi nhà tuyển dụng hỏi về tính năng nào mà họ chưa có quyền truy cập: hãy giải thích mảnh lệ nhưng chuyên nghiệp rằng tính năng này có trong gói trả phí.
-- Ở cuối mỗi phản hồi hữu ích: THÊM vào 1 câu gợi mở khóa tiềm năng của gói trả. Ví dụ: "Nếu muốn AI tự động viết JD chuẩn cho bạn, hãy thử Gói LITE trên Workly."
-- Không spam, chỉ gợi ý 1 lần mỗi phản hồi và luôn giữ văn phong chuyên nghiệp.
----`;
-            }
-          } catch (e) {
-            this.logger.warn(`[AiChatService] Could not fetch recruiter plan: ${e}`);
-          }
-        }
+        // 1.5. Kế thừa upsellContext đã truy vấn ở trên
+        // Không gọi database thêm một lần nữa
 
         // 2. Phân tích ý định tìm việc
         const userMessage = message.toLowerCase();
@@ -609,10 +813,10 @@ HƯỚNG DẪN CHO AI:
         - Sàng lọc hồ sơ, câu hỏi phỏng vấn
         - Xu hướng tuyển dụng, chính sách đãi ngộ
 
-        NGUYÊN TẮC:
-        1. Từ chối NGAY nếu câu hỏi lạc chủ đề tuyển dụng. Nói: "Tôi chỉ hỗ trợ các vấn đề tuyển dụng."
-        2. Ngắn gọn, súc tích, trình bày bằng bullet points dễ đọc, tối đa 150 từ.
-        3. Không giả vờ mình là ứng viên.
+        NGUYÊN TẮC VÀNG (BẮT BUỘC TUÂN THỦ):
+        1. TUYỆT ĐỐI KHÔNG trả lời các chủ đề ngoài lề (Thời tiết, Bóng đá, Giải trí, Chính trị, Toán học...). Trả lời duy nhất: "Tôi chỉ hỗ trợ các vấn đề tuyển dụng."
+        2. CÂU TRẢ LỜI PHẢI CỰC KỲ NGẮN GỌN VÀ ĐÚNG TRỌNG TÂM (Tối đa 3-4 câu, dưới 60 từ). Tuyệt đối không dài dòng.
+        3. Không giả vờ mình là ứng viên. Trình bày bằng bullet points nếu cần liệt kê.
 
         CÂU HỎI: ${message}`;
         } else {
@@ -628,11 +832,11 @@ HƯỚNG DẪN CHO AI:
         - Kỹ năng phỏng vấn, thương lượng lương
         - Định hướng nghề nghiệp, kỹ năng cần học
 
-        NGUYÊN TẮC VÀNG:
-        1. **Bỏ Filler**: Không dùng "Dựa trên hồ sơ của bạn". Nói thẳng như cố vấn thiết thực.
-        2. Trình bày sạch sẽ, phân đoạn rõ ràng bằng Markdown (bullet points, in đậm từ khóa).
-        3. Tuyệt đối không xưng "tôi" khi không cần thiết, tập trung vào giải phẫu kỹ năng ứng viên.
-        4. **Guardrails**: Từ chối câu hỏi ngoài lề (Toán, Thời tiết, Chính trị) bằng 1 câu.
+        NGUYÊN TẮC VÀNG (BẮT BUỘC TUÂN THỦ):
+        1. **Bỏ Filler**: Không dùng câu mào đầu vô nghĩa. Đi thẳng vào vấn đề như một cố vấn uy quyền.
+        2. TRẢ LỜI CỰC KỲ NGẮN GỌN VÀ ĐÚNG TRỌNG TÂM (Tối đa 3-4 câu, dưới 60 từ). Tuyệt đối không dài dòng.
+        3. Trình bày sạch sẽ bằng Markdown (nếu cần lập danh sách). Không xưng "tôi" khi không cần thiết.
+        4. **Guardrails**: TUYỆT ĐỐI KHÔNG trả lời các chủ đề ngoài lề (Bóng đá, Giải trí, Toán...). Đáp án duy nhất: "Tôi chỉ tư vấn nghề nghiệp."
 
         CÂU HỎI: ${message}`;
         }
@@ -659,16 +863,21 @@ HƯỚNG DẪN CHO AI:
         success = true; // Đã xong và thành công
 
         // Sau khi stream xong: nếu recruiter đang dùng gói FREE, emit CTA nâng cấp
-        if (isRecruiter && (!recruiterPlanType || recruiterPlanType === 'FREE')) {
-          yield '__ACTION__:' + JSON.stringify({
-            type: 'SHOW_UPGRADE_CTA',
-            payload: {
-              title: 'Ờ khóa tiềm năng tuyển dụng của bạn',
-              subtitle: 'Nâng cấp để dùng AI tạo JD, phân tích hồ sơ và nhiều hơn nữa.',
-              ctaText: 'Xem các gói dịch vụ',
-              ctaLink: '/recruiter/billing/plans',
-            },
-          });
+        if (
+          isRecruiter &&
+          (!recruiterPlanType || recruiterPlanType === 'FREE')
+        ) {
+          yield '__ACTION__:' +
+            JSON.stringify({
+              type: 'SHOW_UPGRADE_CTA',
+              payload: {
+                title: 'Ờ khóa tiềm năng tuyển dụng của bạn',
+                subtitle:
+                  'Nâng cấp để dùng AI tạo JD, phân tích hồ sơ và nhiều hơn nữa.',
+                ctaText: 'Xem các gói dịch vụ',
+                ctaLink: '/recruiter/billing/plans',
+              },
+            });
         }
       } catch (error: any) {
         lastError = error;
@@ -718,4 +927,3 @@ HƯỚNG DẪN CHO AI:
     }
   }
 }
-

@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ADMIN_SQL_SCHEMA_CONTEXT } from './sql-context';
+import axios from 'axios';
 
 export class SqlGeneratorAgent {
   constructor(private readonly genAI: GoogleGenerativeAI) {}
@@ -9,7 +10,6 @@ export class SqlGeneratorAgent {
     previousError?: string,
     failedSql?: string,
   ): Promise<string> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     let prompt = `${ADMIN_SQL_SCHEMA_CONTEXT}\n\nUser Question: "${userQuery}"\nGenerate the SQL query.`;
 
@@ -25,6 +25,23 @@ ${previousError}
 Fix the SQL query and return ONLY the corrected SQL string.`;
     }
 
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqRes = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: 'You are an expert SQL architect. Output ONLY the raw SQL query, no markdown blocks.' }, { role: 'user', content: prompt }],
+          temperature: 0.1
+        }, {
+          headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' }
+        });
+        let sql = groqRes.data.choices[0].message.content;
+        return sql.replace(/```sql/gi, '').replace(/```/gi, '').trim();
+      } catch (e: any) {
+        console.warn(`[SqlGenerator] Groq failed: ${e.message}. Falling back...`);
+      }
+    }
+
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(prompt);
     let sql = result.response.text();
 

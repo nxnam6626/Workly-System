@@ -15,8 +15,8 @@ export class HardFilterStrategy implements IMatchingStrategy {
       
       let locationScore = 100;
       if (jobLocation && candLocation && !candLocation.includes(jobLocation) && !jobLocation.includes(candLocation)) {
-        // Sai thành phố: Trừ nặng 40 điểm (có thể điều chỉnh)
-        locationScore = 60; 
+        // Sai thành phố: Hình phạt cực đoan (Extreme Penalty) -> trừ 100 điểm location
+        locationScore = 0; 
       }
 
       // 2. Kiểm tra Lương (Salary)

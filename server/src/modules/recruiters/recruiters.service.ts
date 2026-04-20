@@ -21,14 +21,25 @@ export class RecruitersService {
 
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      select: { status: true },
+      select: { status: true, structuredRequirements: true },
     });
 
     if (job?.status === 'REJECTED') {
       return [];
     }
 
-    const matches = await this.matchingService.runMatchingForJob(jobId);
+    const dbMatches = await this.prisma.jobMatch.findMany({
+      where: { jobPostingId: jobId },
+      orderBy: { score: 'desc' },
+      include: { candidate: { select: { cvs: { where: { isMain: true }, select: { cvId: true } } } } }
+    });
+
+    const matches = dbMatches.map(m => ({
+      candidateId: m.candidateId,
+      score: m.score,
+      matchedSkills: m.matchedSkills,
+      cvId: m.candidate?.cvs?.[0]?.cvId
+    }));
 
     // Lấy danh sách đã mở khóa
     const unlocked = await this.prisma.candidateUnlock.findMany({
@@ -81,6 +92,14 @@ export class RecruitersService {
           backendCvUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api${backendCvUrl}`;
         }
 
+        const jobReqs = (job?.structuredRequirements as any) || {};
+        const hardSkills = Array.isArray(jobReqs?.hardSkills) ? jobReqs.hardSkills : [];
+        const missingSkills = hardSkills.filter((s: string) => 
+          !m.matchedSkills.some((ms: string) => ms.toLowerCase().includes(s.toLowerCase()))
+        );
+        const cvExp = (cv?.parsedData as any)?.totalYearsExp || 0;
+        const requiredExp = jobReqs?.minExperienceYears || 0;
+
         return {
           ...m,
           fullName: isUnlocked
@@ -91,8 +110,16 @@ export class RecruitersService {
           phone: isUnlocked ? candidate?.user?.phoneNumber : '****-***-***',
           isUnlocked,
           cvUrl: isUnlocked ? backendCvUrl : null,
-          // Bổ sung thông tin từ CV (đã bóc tách) để hiển thị kỹ năng
           skills: (cv?.parsedData as any)?.skills || [],
+          missingSkills,
+          analysis: {
+            hardSkillsCount: hardSkills.length,
+            matchedCount: hardSkills.length - missingSkills.length,
+            missingCount: missingSkills.length,
+            experienceMatch: cvExp >= requiredExp,
+            totalYearsExp: cvExp,
+            requiredExp: requiredExp
+          }
         };
       }),
     );
@@ -100,7 +127,7 @@ export class RecruitersService {
     return enrichedMatches;
   }
 
-  async getDashboardData(userId: string) {
+  async getDashboardData(userId: string, targetDate?: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
@@ -154,6 +181,36 @@ export class RecruitersService {
       },
     });
 
+    // 6. Lấy lịch phỏng vấn sắp tới
+    let interviewDateCondition: any = { gte: new Date(new Date().setHours(0, 0, 0, 0)) };
+    if (targetDate) {
+      const startOfDay = new Date(targetDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(targetDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      interviewDateCondition = {
+        gte: startOfDay,
+        lte: endOfDay
+      };
+    }
+
+    const upcomingInterviews = await this.prisma.application.findMany({
+      where: {
+        jobPosting: { recruiterId },
+        NOT: { interviewDate: null },
+        interviewDate: interviewDateCondition
+      },
+      orderBy: [
+        { interviewDate: 'asc' },
+        { interviewTime: 'asc' }
+      ],
+      take: 5,
+      include: {
+        candidate: { select: { fullName: true, candidateId: true } },
+        jobPosting: { select: { title: true } }
+      }
+    });
+
     return {
       stats: {
         activeJobsCount,
@@ -168,6 +225,15 @@ export class RecruitersService {
         status: job.status,
         date: job.createdAt,
       })),
+      upcomingInterviews: upcomingInterviews.map((app) => ({
+        id: app.applicationId,
+        candidateName: app.candidate?.fullName || 'Ứng viên',
+        jobTitle: app.jobPosting?.title || 'Công việc',
+        time: app.interviewTime,
+        date: app.interviewDate,
+        location: app.interviewLocation,
+        status: app.appStatus,
+      })),
     };
   }
 
@@ -179,16 +245,43 @@ export class RecruitersService {
 
     const activeJobs = await this.prisma.jobPosting.findMany({
       where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
-      select: { jobPostingId: true, title: true },
+      select: { jobPostingId: true, title: true, structuredRequirements: true },
       take: 5,
       orderBy: { createdAt: 'desc' },
     });
 
     const allMatches: any[] = [];
     for (const job of activeJobs) {
-      const matches = await this.matchingService.runMatchingForJob(
-        job.jobPostingId,
-      );
+      const dbMatches = await this.prisma.jobMatch.findMany({
+        where: { jobPostingId: job.jobPostingId },
+        orderBy: { score: 'desc' },
+        include: { candidate: { select: { cvs: { where: { isMain: true }, select: { cvId: true, parsedData: true } } } } }
+      });
+      const matches = dbMatches.map(m => {
+        const jobReqs = (job?.structuredRequirements as any) || {};
+        const hardSkills = Array.isArray(jobReqs?.hardSkills) ? jobReqs.hardSkills : [];
+        const missingSkills = hardSkills.filter((s: string) => 
+          !m.matchedSkills.some((ms: string) => ms.toLowerCase().includes(s.toLowerCase()))
+        );
+        const cvExp = (m.candidate?.cvs?.[0]?.parsedData as any)?.totalYearsExp || 0;
+        const requiredExp = jobReqs?.minExperienceYears || 0;
+
+        return {
+          candidateId: m.candidateId,
+          score: m.score,
+          matchedSkills: m.matchedSkills,
+          cvId: m.candidate?.cvs?.[0]?.cvId,
+          missingSkills,
+          analysis: {
+            hardSkillsCount: hardSkills.length,
+            matchedCount: hardSkills.length - missingSkills.length,
+            missingCount: missingSkills.length,
+            experienceMatch: cvExp >= requiredExp,
+            totalYearsExp: cvExp,
+            requiredExp: requiredExp
+          }
+        };
+      });
       allMatches.push(...matches.map((m) => ({ ...m, jobTitle: job.title })));
     }
 

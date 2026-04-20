@@ -35,19 +35,21 @@ export class ScoringEngineService {
     // Normalize skills for strategy
     const skillsObj = cv.parsedData?.skills;
     const flattenedSkills = Array.isArray(skillsObj)
-      ? skillsObj
+      ? skillsObj.map(s => typeof s === 'string' ? s : (s?.skillName || ''))
       : [
           ...(skillsObj?.hard_skills || []),
           ...(skillsObj?.soft_skills || [])
-        ].map(s => typeof s === 'string' ? s : s.skillName);
+        ].map(s => typeof s === 'string' ? s : (s?.skillName || ''));
+
+    const cvFullText = JSON.stringify(cv.parsedData || {}).toLowerCase();
 
     const keywordRes = await keywordStrategy.calculate(
       (job.structuredRequirements as any) || {},
-      { skills: flattenedSkills },
+      { skills: flattenedSkills, fullText: cvFullText },
     );
 
     const semanticStrategy = this.strategyFactory.getStrategy('semantic');
-    const semanticRes = await semanticStrategy.calculate(job.jobPostingId, cv.cvId);
+    const semanticRes = await semanticStrategy.calculate(job, cv);
 
     const hardSkillsScore = (keywordRes.score * 0.4) + (semanticRes.score * 0.6);
 

@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [vector]
 }
 
 model User {
@@ -282,7 +281,7 @@ model JobPosting {
   recruiter              Recruiter?      @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
   branches               CompanyBranch[] @relation("JobPostingBranches")
-  embedding              Unsupported("vector(768)")?
+  // embedding              Unsupported("vector(768)")?
 }
 
 model JobMatch {
@@ -311,7 +310,7 @@ model CV {
   applications     Application[]
   candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
-  embedding        Unsupported("vector(768)")?
+  // embedding        Unsupported("vector(768)")?
 }
 
 model Application {

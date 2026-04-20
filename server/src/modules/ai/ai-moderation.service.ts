@@ -128,6 +128,34 @@ QUY TẮC CHẤM ĐIỂM (score: 0-100):
 CẤU TRÚC JSON PHẢI TRẢ VỀ CHÍNH XÁC NHƯ SAU:
 {"score":85,"safe":true,"flags":["thiếu mô tả chi tiết quyền lợi"],"reason":"Tóm tắt nhanh lý do chấm điểm","feedback":["Lời khuyên 1","Lời khuyên 2"]} (Lưu ý mảng feedback bắt buộc phải là Array gồm các chuỗi String)`;
 
+    // 🥇 Priority 1: Groq
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqRes = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: 'You are a strict JD Moderator. Always return JSON.' }, { role: 'user', content: prompt }],
+          temperature: 0.1,
+          response_format: { type: "json_object" }
+        }, {
+          headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' }
+        });
+        const raw = groqRes.data.choices[0].message.content;
+        const parsed = JSON.parse(raw.replace(/```json/gi, '').replace(/```/gi, '').trim());
+        this.logger.log(`[AiModerationService] moderateJobContent: score=${parsed.score}, safe=${parsed.safe} (Groq)`);
+        return {
+          score: Math.min(100, Math.max(0, Number(parsed.score) || 70)),
+          safe: parsed.safe !== false,
+          flags: Array.isArray(parsed.flags) ? parsed.flags : [],
+          reason: parsed.reason || '',
+          feedback: Array.isArray(parsed.feedback) ? parsed.feedback : [parsed.feedback || ''],
+          usedAI: true,
+        };
+      } catch (e: any) {
+        this.logger.warn(`[AiModerationService] Groq moderateJobContent failed: ${e.message}. Falling back to Gemini...`);
+      }
+    }
+
+    // 🥈 Priority 2: Gemini Fallback
     const modelsToTry = [
       'gemini-2.0-flash',
       'gemini-2.0-flash-lite',
@@ -135,7 +163,7 @@ CẤU TRÚC JSON PHẢI TRẢ VỀ CHÍNH XÁC NHƯ SAU:
     ];
     for (const modelName of modelsToTry) {
       try {
-        const model = this.genAI.getGenerativeModel({ model: modelName });
+        const model = this.genAI.getGenerativeModel({ model: modelName, generationConfig: { responseMimeType: "application/json" } });
         const result = await model.generateContent(prompt);
         const raw = result.response
           .text()

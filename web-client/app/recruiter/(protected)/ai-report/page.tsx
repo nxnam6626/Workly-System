@@ -9,7 +9,7 @@ import {
   AlertCircle, ChevronRight, Send, Loader2, BarChart3,
   Users, Eye, ArrowUp, ArrowDown, Star, Lightbulb,
   BotMessageSquare, RefreshCw, CheckCircle2,
-  ArrowUpRight, ArrowDownRight, Copy, Filter
+  ArrowUpRight, ArrowDownRight, Copy, Filter, Wand2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -64,7 +64,7 @@ function AiChatMini() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const send = async (overrideMsg?: string) => {
     const msg = (overrideMsg !== undefined ? overrideMsg : input).trim();
@@ -91,73 +91,79 @@ function AiChatMini() {
     };
     window.addEventListener('ask-ai', handleAskAi);
     return () => window.removeEventListener('ask-ai', handleAskAi);
-  }, [loading, input]); // Need to capture latest dependencies for send()
+  }, [loading, input]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, loading]);
 
   return (
     <>
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[420px]">
-      <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-600 to-indigo-700 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-          <BotMessageSquare className="w-5 h-5 text-white" />
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[420px]">
+        <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-600 to-indigo-700 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
+            <BotMessageSquare className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-white text-sm">AI Recruiter Assistant</p>
+            <p className="text-indigo-200 text-xs">Powered by Gemini</p>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs text-indigo-100 font-medium">Online</span>
+          </div>
         </div>
-        <div>
-          <p className="font-bold text-white text-sm">AI Recruiter Assistant</p>
-          <p className="text-indigo-200 text-xs">Powered by Gemini</p>
+        <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+          <AnimatePresence initial={false}>
+            {messages.map((m, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed overflow-hidden ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 shadow-sm rounded-bl-sm [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-2 [&_strong]:font-bold [&_strong]:text-slate-900'}`}>
+                  {m.role === 'user' ? (
+                    m.text
+                  ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            {loading && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                <div className="bg-white border border-slate-100 rounded-2xl px-4 py-2.5 shadow-sm">
+                  <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-indigo-100 font-medium">Online</span>
+        <div className="p-3 border-t border-slate-100 bg-white">
+          <div className="flex gap-2">
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Hỏi AI về chiến lược tuyển dụng..." className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 text-sm transition-all" />
+            <button onClick={() => send()} disabled={!input.trim() || loading} className="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center transition-all shrink-0">
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
-        <AnimatePresence initial={false}>
-          {messages.map((m, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed overflow-hidden ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 shadow-sm rounded-bl-sm [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-2 [&_strong]:font-bold [&_strong]:text-slate-900'}`}>
-                {m.role === 'user' ? (
-                  m.text
-                ) : (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown>
-                )}
-              </div>
-            </motion.div>
+      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Câu hỏi gợi ý</p>
+        <div className="flex flex-col gap-2">
+          {['Phân tích JD đang có ít ứng viên nhất', 'Gợi ý cách viết mô tả JD hấp dẫn hơn', 'Làm thế nào để tăng tỉ lệ apply/view?'].map((q, i) => (
+            <button
+              key={i}
+              onClick={() => send(q)}
+              disabled={loading}
+              className="text-left text-xs text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors border border-transparent hover:border-indigo-100 font-medium disabled:opacity-50"
+            >
+              💡 {q}
+            </button>
           ))}
-          {loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="bg-white border border-slate-100 rounded-2xl px-4 py-2.5 shadow-sm">
-                <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <div ref={bottomRef} />
-      </div>
-      <div className="p-3 border-t border-slate-100 bg-white">
-        <div className="flex gap-2">
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Hỏi AI về chiến lược tuyển dụng..." className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 text-sm transition-all" />
-          <button onClick={() => send()} disabled={!input.trim() || loading} className="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center transition-all shrink-0">
-            <Send className="w-4 h-4" />
-          </button>
         </div>
       </div>
-    </div>
-    <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
-      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Câu hỏi gợi ý</p>
-      <div className="flex flex-col gap-2">
-        {['Phân tích JD đang có ít ứng viên nhất', 'Gợi ý cách viết mô tả JD hấp dẫn hơn', 'Làm thế nào để tăng tỉ lệ apply/view?'].map((q, i) => (
-          <button
-            key={i}
-            onClick={() => send(q)}
-            disabled={loading}
-            className="text-left text-xs text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors border border-transparent hover:border-indigo-100 font-medium disabled:opacity-50"
-          >
-            💡 {q}
-          </button>
-        ))}
-      </div>
-    </div>
     </>
   );
 }
@@ -165,7 +171,7 @@ function AiChatMini() {
 // --- Insight Card ---
 const INSIGHT_CONFIG: Record<string, { icon: any; colorClass: string; borderClass: string; labelBg: string; labelText: string }> = {
   warning: { icon: AlertCircle, colorClass: 'text-amber-600', borderClass: 'border-amber-100 hover:border-amber-200', labelBg: 'bg-amber-50', labelText: 'text-amber-600' },
-  tip:     { icon: Lightbulb,   colorClass: 'text-indigo-600', borderClass: 'border-indigo-100 hover:border-indigo-200', labelBg: 'bg-indigo-50', labelText: 'text-indigo-600' },
+  tip: { icon: Lightbulb, colorClass: 'text-indigo-600', borderClass: 'border-indigo-100 hover:border-indigo-200', labelBg: 'bg-indigo-50', labelText: 'text-indigo-600' },
   success: { icon: CheckCircle2, colorClass: 'text-emerald-600', borderClass: 'border-emerald-100 hover:border-emerald-200', labelBg: 'bg-emerald-50', labelText: 'text-emerald-600' },
 };
 
@@ -175,18 +181,20 @@ function InsightCard({ insight, index, jdScores, planType }: { insight: any; ind
   const [showModal, setShowModal] = useState(false);
 
   // jobRefs = [{id, title}] from rule-based; jobIds = [id,...] from AI or old cache
-  const affectedJds: { id: string; title: string; score?: number }[] =
+  const affectedJds: { id: string; title: string; score?: number; autoFixedByAI?: boolean }[] =
     insight.jobRefs?.length > 0
       ? insight.jobRefs.map((ref: any, i: number) => ({
-          id: ref.id,
-          title: ref.title,
-          score: jdScores?.find((s: any) => s.id === ref.id)?.score ?? jdScores?.[i]?.score,
-        }))
+        id: ref.id,
+        title: ref.title,
+        score: jdScores?.find((s: any) => s.id === ref.id)?.score ?? jdScores?.[i]?.score,
+        autoFixedByAI: ref.autoFixedByAI ?? jdScores?.find((s: any) => s.id === ref.id)?.autoFixedByAI,
+      }))
       : (insight.jobIds ?? []).map((id: string, i: number) => ({
-          id,
-          title: jdScores?.[i]?.title ?? `JD #${i + 1}`,
-          score: jdScores?.[i]?.score,
-        }));
+        id,
+        title: jdScores?.find((s: any) => s.id === id)?.title ?? `JD #${i + 1}`,
+        score: jdScores?.find((s: any) => s.id === id)?.score,
+        autoFixedByAI: jdScores?.find((s: any) => s.id === id)?.autoFixedByAI,
+      }));
 
   const hasAffectedJds = affectedJds.length > 0;
 
@@ -218,7 +226,7 @@ function InsightCard({ insight, index, jdScores, planType }: { insight: any; ind
           >
             {hasAffectedJds ? 'Xem danh sách' : 'Xem'} <ChevronRight className="w-3.5 h-3.5" />
           </button>
-          
+
           {hasAffectedJds && (
             <button
               onClick={() => setShowModal(true)}
@@ -278,7 +286,7 @@ function InsightCard({ insight, index, jdScores, planType }: { insight: any; ind
                         <span className={`text-xs font-black ${jd.score >= 60 ? 'text-amber-500' : 'text-rose-500'}`}>{jd.score}đ</span>
                       )}
                     </Link>
-                    
+
                     <div className="shrink-0 flex items-center justify-end">
                       {planType === 'GROWTH' ? (
                         jd.autoFixedByAI ? (
@@ -295,6 +303,7 @@ function InsightCard({ insight, index, jdScores, planType }: { insight: any; ind
                               try {
                                 await api.post('/ai/fix-job', { jobId: jd.id, insightInstruction: insight.desc });
                                 toast.success('Đã cập nhật JD thành công!', { id: loadingToast });
+                                setTimeout(() => window.location.reload(), 1500);
                               } catch (e: any) {
                                 toast.error(e.response?.data?.message || 'Có lỗi xảy ra khi gọi AI!', { id: loadingToast });
                               }
@@ -357,6 +366,8 @@ export default function AiReportPage() {
   const [analysing, setAnalysing] = useState(false);
   const [data, setData] = useState<any>(null);
   const [sortMode, setSortMode] = useState<'newest' | 'score_desc' | 'score_asc'>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const checkAccess = async () => {
     try {
@@ -384,7 +395,7 @@ export default function AiReportPage() {
     setAnalysing(true);
     if (isRefresh) toast.loading('AI đang phân tích dữ liệu thực tế của bạn...', { id: 'ai-refresh' });
     try {
-      const res = await api.get('/ai/recruiter-insights');
+      const res = await api.get(`/ai/recruiter-insights${isRefresh ? '?force=true' : ''}`);
       setData(res.data);
       if (isRefresh) {
         localStorage.setItem('ai_last_refresh', Date.now().toString());
@@ -398,9 +409,24 @@ export default function AiReportPage() {
   };
 
   useEffect(() => {
-    checkAccess().then(() => {
-      if (canView) fetchInsights();
-    });
+    const init = async () => {
+      try {
+        const res = await api.get('/subscriptions/current');
+        const sub = res.data;
+        const planType = sub?.planType;
+        const hasAccess = sub?.canViewAIReport === true && new Date() <= new Date(sub.expiryDate);
+        setPlanType(planType);
+        setCanView(hasAccess);
+        if (hasAccess) {
+          fetchInsights();
+        }
+      } catch {
+        setCanView(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
   }, []);
 
   useEffect(() => {
@@ -421,13 +447,15 @@ export default function AiReportPage() {
   const stats = data?.stats;
   const insights: any[] = data?.insights || [];
   let jdScores: any[] = data?.jdScores || [];
-  
+
   if (sortMode === 'score_desc') {
     jdScores = [...jdScores].sort((a, b) => b.score - a.score);
   } else if (sortMode === 'score_asc') {
     jdScores = [...jdScores].sort((a, b) => a.score - b.score);
   }
-  // 'newest' uses the original order from backend which is sorted by creation date descending usually.
+
+  const totalPages = Math.ceil(jdScores.length / ITEMS_PER_PAGE);
+  const currentScores = jdScores.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const summary: string = data?.summary || '';
 
@@ -501,7 +529,7 @@ export default function AiReportPage() {
         {/* Left: Insights + JD Scores */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-amber-500" /> Gợi ý từ Gemini AI
+            <Zap className="w-4 h-4 text-amber-500" /> Gợi ý từ AI
             <span className="text-xs font-normal text-slate-400">(Dựa trên dữ liệu tuyển dụng thực tế của bạn)</span>
           </h2>
 
@@ -560,17 +588,22 @@ export default function AiReportPage() {
               <div className="px-6 py-8 text-center text-slate-400 text-sm">Chưa có JD nào để chấm điểm.</div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {jdScores.map((jd: any, i: number) => (
+                {currentScores.map((jd: any, i: number) => (
                   <div key={i} className="px-6 py-3.5 flex items-center gap-4 hover:bg-slate-50 transition-colors group">
-                    <span className="text-xs font-bold text-slate-400 w-5">{i + 1}</span>
+                    <span className="text-xs font-bold text-slate-400 w-6">{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm text-slate-800 truncate">{jd.title}</span>
+                        <Link href={`/recruiter/jobs/${jd.id}`} className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-colors truncate">{jd.title}</Link>
                         {jd.trend === 'up' && <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />}
                         {jd.trend === 'down' && <ArrowDownRight className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-slate-500 line-clamp-1">{jd.reason}</p>
-                      
+                      <div className="flex items-center gap-2">
+                         <p className="text-xs text-slate-500 line-clamp-1">{jd.reason}</p>
+                         <Link href={`/recruiter/jobs/${jd.id}`} title="Sửa tin bằng AI" className="text-indigo-500 hover:text-indigo-600 transition-colors shrink-0">
+                           <Wand2 className="w-3.5 h-3.5" />
+                         </Link>
+                      </div>
+
                       {/* Hiển thị điểm mạnh và điểm yếu */}
                       <div className="flex flex-col gap-1.5 mt-2">
                         {jd.strengths && jd.strengths.length > 0 && (
@@ -598,6 +631,34 @@ export default function AiReportPage() {
                     </div>
                   </div>
                 ))}
+
+                {/* Pagination Controls */}
+                {jdScores.length > ITEMS_PER_PAGE && (
+                  <div className="px-6 py-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+                    <span className="text-xs font-medium text-slate-500">
+                      Đang xem {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, jdScores.length)} trên tổng {jdScores.length} tin
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      >
+                        <ChevronRight className="w-4 h-4 rotate-180" />
+                      </button>
+                      <span className="text-xs font-bold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+                        {currentPage} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

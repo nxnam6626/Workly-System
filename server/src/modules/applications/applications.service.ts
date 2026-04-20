@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { MessagesGateway } from '../messages/messages.gateway';
@@ -207,6 +208,70 @@ export class ApplicationsService {
         }
       }
 
+      let targetAppStatus = 'PENDING';
+      let autoInterviewDate: Date | null = null;
+      let autoInterviewTime: string | null = null;
+      let autoInterviewLocation: string | null = null;
+
+      if (aiMatchScore >= 80) {
+        targetAppStatus = 'INTERVIEWING';
+
+        let scheduleDate = new Date();
+        let daysUntilThu = (4 + 7 - scheduleDate.getDay()) % 7;
+
+        // Cần cho thí sinh chuẩn bị (nếu chênh lệch nhỏ hơn 2 ngày thì tự đẩy sang Thứ 5 tuần sau)
+        if (daysUntilThu <= 2) {
+          daysUntilThu += 7;
+        }
+
+        scheduleDate.setDate(scheduleDate.getDate() + daysUntilThu);
+        scheduleDate.setHours(0, 0, 0, 0); // Convert to midnight
+
+        const possibleSlots = ['08:00', '10:00', '14:00', '16:00'];
+        let foundSlot = false;
+
+        while (!foundSlot) {
+          const startOfDay = new Date(scheduleDate);
+          const endOfDay = new Date(scheduleDate);
+          endOfDay.setHours(23, 59, 59, 999);
+
+          const scheduledApps = await tx.application.findMany({
+            where: {
+              jobPostingId,
+              appStatus: 'INTERVIEWING',
+              interviewDate: {
+                gte: startOfDay,
+                lte: endOfDay
+              }
+            },
+            select: { interviewTime: true }
+          });
+
+          const slotCounts: Record<string, number> = {};
+          possibleSlots.forEach(s => slotCounts[s] = 0);
+          scheduledApps.forEach(app => {
+            if (app.interviewTime && slotCounts[app.interviewTime] !== undefined) {
+              slotCounts[app.interviewTime]++;
+            }
+          });
+
+          for (const slot of possibleSlots) {
+            if (slotCounts[slot] < 5) {
+              autoInterviewDate = new Date(scheduleDate);
+              autoInterviewTime = slot;
+              foundSlot = true;
+              break;
+            }
+          }
+
+          if (!foundSlot) {
+            scheduleDate.setDate(scheduleDate.getDate() + 7);
+          }
+        }
+
+        autoInterviewLocation = 'Workly System tự động xếp lịch. Vui lòng đợi HR liên hệ ấn định chi tiết (Phỏng vấn qua Meet/Trực tiếp).';
+      }
+
       const application = await tx.application.create({
         data: {
           candidateId,
@@ -214,7 +279,10 @@ export class ApplicationsService {
           cvId,
           cvSnapshotUrl: fileUrl,
           coverLetter,
-          appStatus: 'PENDING',
+          appStatus: targetAppStatus as any,
+          interviewDate: autoInterviewDate,
+          interviewTime: autoInterviewTime,
+          interviewLocation: autoInterviewLocation,
           aiMatchScore,
           isUnlocked: true, // Luôn mặc định mở khóa cho ứng viên chủ động ứng tuyển tự nguyện
         },
@@ -246,6 +314,68 @@ export class ApplicationsService {
             type: 'info',
             link: '/recruiter/applications',
           });
+
+        this.messagesGateway.server
+          .to(`user_${recruiterId}`)
+          .emit('dashboardUpdated');
+      }
+
+      // 7. Auto-Send Chat and Notify Candidate if Auto-Scheduled!
+      if (targetAppStatus === 'INTERVIEWING') {
+        const candidateUser = await tx.candidate.findUnique({
+          where: { candidateId },
+          select: { userId: true },
+        });
+
+        if (candidateUser?.userId && application.jobPosting.recruiter?.userId) {
+          const recruiterUserId = application.jobPosting.recruiter.userId;
+          const recruiterId = application.jobPosting.recruiterId;
+
+          const dateStr = autoInterviewDate ? autoInterviewDate.toLocaleDateString('vi-VN') : '';
+          const msgContent = `CHÚC MỪNG! Dựa trên phân tích AI hệ thống, hồ sơ của bạn cho vị trí "${application.jobPosting.title}" đạt điểm kỹ năng xuất sắc. \n\nHệ thống đã tự động cấp đặc quyền vượt qua vòng hồ sơ và xếp lịch Phỏng vấn đặc cách cho bạn vào lúc ${autoInterviewTime} ngày ${dateStr}. \n\nVui lòng giữ liên lạc để phòng nhân sự phản hồi sớm nhất!`;
+
+          await this.notificationsService.create(
+            candidateUser.userId,
+            'Lịch Phỏng Vấn Đặc Cách',
+            msgContent,
+            'success',
+            '/applied-jobs',
+          );
+
+          this.messagesGateway.server
+            .to(`user_${candidateUser.userId}`)
+            .emit('notification', {
+              title: 'Lịch Phỏng Vấn Đặc Cách',
+              message: msgContent,
+              type: 'success',
+              link: '/applied-jobs',
+            });
+
+          // Inject message into conversation
+          if (recruiterId) {
+            let conversation = await tx.conversation.findFirst({
+              where: { candidateId, recruiterId }
+            });
+            if (!conversation) {
+              conversation = await tx.conversation.create({
+                data: { candidateId, recruiterId, lastMessage: '', isRead: false }
+              });
+            }
+
+            await tx.message.create({
+              data: {
+                senderId: recruiterUserId,
+                conversationId: conversation.conversationId,
+                content: msgContent
+              }
+            });
+
+            await tx.conversation.update({
+              where: { conversationId: conversation.conversationId },
+              data: { lastMessage: msgContent, updatedAt: new Date(), isRead: false }
+            });
+          }
+        }
       }
 
       return application;
@@ -572,5 +702,74 @@ export class ApplicationsService {
     return this.prisma.application.delete({
       where: { applicationId },
     });
+  }
+
+  @Cron('* * * * *') // Run every minute for testing/live tracking
+  async checkPastInterviews() {
+    try {
+      const now = new Date();
+      console.log(`[Cron] Checking for past interviews at ${now.toLocaleTimeString('vi-VN')}...`);
+
+      const interviewingApps = await this.prisma.application.findMany({
+        where: {
+          appStatus: 'INTERVIEWING',
+          interviewDate: { not: null },
+          interviewTime: { not: null }
+        },
+        include: {
+          jobPosting: { include: { recruiter: true } },
+          candidate: true
+        }
+      });
+
+      for (const app of interviewingApps) {
+        if (!app.interviewDate || !app.interviewTime || !app.jobPosting.recruiter?.userId) continue;
+
+        const [hours, minutes] = app.interviewTime.split(':').map(Number);
+        const interviewDateTime = new Date(app.interviewDate);
+        interviewDateTime.setHours(hours, minutes, 0, 0);
+
+        // Notify 2 hours after the interview start time
+        interviewDateTime.setHours(interviewDateTime.getHours() + 2);
+
+        if (now > interviewDateTime) {
+          const recruiterId = app.jobPosting.recruiter.userId;
+          const trackingLink = `/recruiter/applications?remind=${app.applicationId}`;
+
+          const existingNotif = await this.prisma.notification.findFirst({
+            where: {
+              userId: recruiterId,
+              link: trackingLink
+            }
+          });
+
+          if (!existingNotif) {
+            console.log(`[Cron] Sending reminder for candidate ${app.candidate.fullName} (Application: ${app.applicationId}) to recruiter ${recruiterId}`);
+
+            const title = 'Cập nhật kết quả phỏng vấn';
+            const message = `Buổi phỏng vấn với ứng viên ${app.candidate.fullName} đã diễn ra. Vui lòng cập nhật trạng thái đã phỏng vấn hay chưa (Chấp nhận/Từ chối).`;
+
+            await this.notificationsService.create(
+              recruiterId,
+              title,
+              message,
+              'warning',
+              trackingLink
+            );
+
+            this.messagesGateway.server
+              .to(`user_${recruiterId}`)
+              .emit('notification', {
+                title,
+                message,
+                type: 'warning',
+                link: trackingLink
+              });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error in checkPastInterviews cron job:', err);
+    }
   }
 }

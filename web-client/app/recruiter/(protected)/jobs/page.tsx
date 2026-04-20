@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Plus, Search, Edit, Lock, Sparkles, Users, BarChart, RefreshCw, AlertTriangle, Bot } from 'lucide-react';
 import api from '@/lib/api';
@@ -21,7 +21,7 @@ const formatText = (text: string) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return <strong key={i} className="font-bold text-amber-900">{part.slice(2, -2)}</strong>;
         }
-        
+
         const subParts = part.split(/(\(\d+\))/g);
         return (
           <span key={i}>
@@ -51,7 +51,7 @@ export default function JobsManagementPage() {
   const [acting, setActing] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [planType, setPlanType] = useState<string | null>(null);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,23 +70,48 @@ export default function JobsManagementPage() {
       .catch(() => setPlanType(null));
   }, [accessToken]);
 
+  const fetchJobsRef = useRef<() => void>();
+  useEffect(() => {
+    fetchJobsRef.current = fetchJobs;
+  });
+
   useEffect(() => {
     if (!socket) return;
+
     const handleNotification = (msg: any) => {
-      if (msg.title?.includes('Tin tuyển dụng') || msg.title?.includes('Hồ sơ')) {
-        fetchJobs();
+      console.log('Socket notification received:', msg);
+      if (
+        msg.title?.includes('Tin tuyển dụng') ||
+        msg.title?.includes('Hồ sơ') ||
+        msg.type === 'candidate_match' ||
+        msg.title?.includes('ứng viên phù hợp')
+      ) {
+        if (fetchJobsRef.current) fetchJobsRef.current();
       }
     };
+
+    // Realtime: update matchedCount directly without full refetch
+    const handleJobMatchUpdated = (payload: { jobId: string; matchedCount: number }) => {
+      console.log('job_match_updated received:', payload);
+      setJobs(prev => prev.map(j =>
+        j.jobPostingId === payload.jobId
+          ? { ...j, matchedCount: payload.matchedCount }
+          : j
+      ));
+    };
+
     socket.on('notification', handleNotification);
+    socket.on('job_match_updated', handleJobMatchUpdated);
     return () => {
       socket.off('notification', handleNotification);
+      socket.off('job_match_updated', handleJobMatchUpdated);
     };
   }, [socket]);
 
   const fetchJobs = async () => {
     if (!accessToken) return;
     try {
-      const { data } = await api.get('/job-postings/my-jobs');
+      const { data } = await api.get(`/job-postings/my-jobs?t=${Date.now()}`);
       setJobs(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -192,7 +217,7 @@ export default function JobsManagementPage() {
             className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm bg-white"
           >
             <option value="ALL">Tất cả trạng thái</option>
-            <option value="APPROVED">Đã duyệt (Đang mở)</option>
+            <option value="APPROVED">Đã duyệt</option>
             <option value="PENDING">Chờ duyệt</option>
             <option value="EXPIRED">Đã hết hạn</option>
             <option value="CLOSED">Đã khóa</option>
@@ -255,8 +280,8 @@ export default function JobsManagementPage() {
                             </span>
                             <div className="flex -space-x-2 overflow-hidden py-1">
                               {job.autoInvitedCandidates.map((c: any) => (
-                                <div 
-                                  key={c.candidateId} 
+                                <div
+                                  key={c.candidateId}
                                   className="inline-block h-6 w-6 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600 overflow-hidden shadow-sm"
                                   title={c.fullName}
                                 >
@@ -278,7 +303,7 @@ export default function JobsManagementPage() {
                           <details className="group p-3 bg-amber-50/80 border border-amber-200 rounded-xl w-full mt-2 shadow-sm cursor-pointer [&_summary::-webkit-details-marker]:hidden overflow-hidden">
                             <summary className="flex items-center justify-between text-amber-800 outline-none">
                               <div className="flex items-center gap-1.5 text-amber-800">
-                                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600"/>
+                                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
                                 <span className="text-xs font-bold uppercase tracking-wide">Nhận xét của AI Cố Vấn</span>
                               </div>
                               <span className="text-amber-600 transition-transform duration-300 group-open:rotate-180">
@@ -321,10 +346,10 @@ export default function JobsManagementPage() {
                                       e.preventDefault();
                                       e.stopPropagation();
                                       const aiFeedback = (job?.structuredRequirements as any)?.aiFeedback;
-                                      const insightInstruction = Array.isArray(aiFeedback) 
-                                        ? aiFeedback.join('\n') 
+                                      const insightInstruction = Array.isArray(aiFeedback)
+                                        ? aiFeedback.join('\n')
                                         : String(aiFeedback);
-                                      
+
                                       const loadingToast = toast.loading('AI đang tự động tối ưu JD...');
                                       try {
                                         await api.post('/ai/fix-job', { jobId: job.jobPostingId, insightInstruction });
@@ -348,23 +373,22 @@ export default function JobsManagementPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          job.status === 'APPROVED'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : job.status === 'PENDING'
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${job.status === 'APPROVED'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : job.status === 'PENDING'
                             ? 'bg-amber-100 text-amber-700'
                             : job.status === 'REJECTED'
-                            ? 'bg-red-100 text-red-700'
-                            : job.status === 'EXPIRED'
-                            ? 'bg-slate-100 text-slate-500'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
+                              ? 'bg-red-100 text-red-700'
+                              : job.status === 'EXPIRED'
+                                ? 'bg-slate-100 text-slate-500'
+                                : 'bg-slate-100 text-slate-700'
+                          }`}
                       >
                         {job.status === 'APPROVED' ? 'Đã duyệt'
                           : job.status === 'PENDING' ? 'Chờ duyệt'
-                          : job.status === 'REJECTED' ? 'Từ chối'
-                          : job.status === 'EXPIRED' ? 'Hết hạn'
-                          : job.status}
+                            : job.status === 'REJECTED' ? 'Từ chối'
+                              : job.status === 'EXPIRED' ? 'Hết hạn'
+                                : job.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -463,14 +487,14 @@ export default function JobsManagementPage() {
               Trang {currentPage} / {totalPages}
             </span>
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Trước
               </button>
-              <button 
+              <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -485,10 +509,10 @@ export default function JobsManagementPage() {
       <ConfirmModal
         isOpen={!!actionState}
         title={actionState?.type === 'LOCK' ? 'Khóa tin tuyển dụng' : actionState?.type === 'RENEW' ? 'Gia hạn tin tuyển dụng' : 'Mở khóa tin tuyển dụng'}
-        message={actionState?.type === 'LOCK' 
+        message={actionState?.type === 'LOCK'
           ? "Bạn có chắc chắn muốn khóa tin tuyển dụng này? Ứng viên sẽ không thể thấy tin này trên hệ thống nữa."
           : actionState?.type === 'RENEW' ? "Việc gia hạn sẽ tiêu tốn 1 lượt đăng tin của gói bạn đang sử dụng. Tin sẽ lập tức được gia hạn lại trạng thái tốt nhất làm việc. Đồng ý?"
-          : "Bạn muốn mở khóa tin này? Tin sẽ xuất hiện trở lại trên bảng tin cho ứng viên áp tuyển."}
+            : "Bạn muốn mở khóa tin này? Tin sẽ xuất hiện trở lại trên bảng tin cho ứng viên áp tuyển."}
         confirmLabel={actionState?.type === 'LOCK' ? 'Khóa tin' : actionState?.type === 'RENEW' ? 'Gia hạn ngay' : 'Mở khóa'}
         onConfirm={performAction}
         onCancel={() => setActionState(null)}

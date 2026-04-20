@@ -22,7 +22,7 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Controller('job-postings')
 export class JobPostingsController {
-  constructor(private readonly jobPostingsService: JobPostingsService) {}
+  constructor(private readonly jobPostingsService: JobPostingsService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

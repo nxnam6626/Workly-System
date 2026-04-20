@@ -79,8 +79,23 @@ export class AiController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
   @Get('recruiter-insights')
-  async getRecruiterInsights(@CurrentUser('userId') userId: string) {
-    return this.aiService.generateRecruiterInsights(userId);
+  async getRecruiterInsights(
+    @CurrentUser('userId') userId: string,
+    @Query('force') force: string,
+  ) {
+    const forceRefresh = force === 'true';
+    return this.aiService.generateRecruiterInsights(userId, forceRefresh);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  @Post('generate-jd')
+  async generateJd(
+    @CurrentUser('userId') userId: string,
+    @Body('prompt') prompt: string,
+  ) {
+    if (!prompt) return { message: 'Vui lòng nhập yêu cầu' };
+    return this.aiService.generateJdFromPrompt(userId, prompt);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
