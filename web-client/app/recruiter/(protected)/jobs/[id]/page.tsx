@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles, Edit, AlertTriangle, Brain, Bot } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, Users, Eye, ArrowLeft, Loader2, Star, Sparkles, Edit, AlertTriangle, Brain, Bot, Crown } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -21,7 +21,7 @@ const formatText = (text: string) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return <strong key={i} className="font-bold text-amber-900">{part.slice(2, -2)}</strong>;
         }
-        
+
         const subParts = part.split(/(\(\d+\))/g);
         return (
           <span key={i}>
@@ -46,7 +46,7 @@ const formatText = (text: string) => {
 
 const parseToHtml = (text: string) => {
   if (!text) return 'Chưa cập nhật';
-  
+
   // Loại bỏ các tiêu đề bị lặp (do AI sinh ra) ở text đầu vào
   let cleanTxt = text.trim().replace(/^(?:\*\*.*?\*\*|#+)?\s*(?:mô tả công việc|yêu cầu công việc|yêu cầu ứng viên|thông tin chung|quyền lợi)\s*(?::|-)?\s*(?:\*\*.*?\*\*|#+)?\s*\n*/i, '');
 
@@ -54,7 +54,7 @@ const parseToHtml = (text: string) => {
   if (cleanTxt.includes('<p>') || cleanTxt.includes('<ul>') || cleanTxt.includes('<li>')) {
     return cleanTxt;
   }
-  
+
   let html = cleanTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   const lines = html.split('\n');
   let result = '';
@@ -82,7 +82,7 @@ const parseToHtml = (text: string) => {
   if (inList) {
     result += '</ul>\n';
   }
-  
+
   return result;
 };
 
@@ -153,12 +153,13 @@ export default function JobDetailsPage() {
   };
 
   const handleAutoFix = async () => {
-    const aiFeedback = (job?.structuredRequirements as any)?.aiFeedback;
+    const structReq = job?.structuredRequirements as any;
+    const aiFeedback = structReq?.aiFeedback || structReq?.aiAnalysis?.weaknesses || structReq?.aiAnalysis?.reason;
     if (!aiFeedback) return;
-    
+
     // Combine feedback to instruction string
-    const insightInstruction = Array.isArray(aiFeedback) 
-      ? aiFeedback.join('\n') 
+    const insightInstruction = Array.isArray(aiFeedback)
+      ? aiFeedback.join('\n')
       : String(aiFeedback);
 
     const loadingToast = toast.loading('AI đang tự động tối ưu JD...');
@@ -221,11 +222,10 @@ export default function JobDetailsPage() {
                 <p className="text-slate-500 mt-2">{job.company?.companyName}</p>
               </div>
               <div className="flex items-center gap-2 flex-wrap justify-end">
-                <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border flex items-center gap-1.5 ${
-                  job.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                  job.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                  'bg-slate-50 text-slate-700 border-slate-200'
-                }`}>
+                <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border flex items-center gap-1.5 ${job.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                    job.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-slate-50 text-slate-700 border-slate-200'
+                  }`}>
                   {job.status}
                 </span>
 
@@ -305,7 +305,7 @@ export default function JobDetailsPage() {
         {/* Right Side: AI Suggestions */}
         <div className="space-y-6 lg:col-span-1 min-w-0 break-words">
           {/* AI Moderation Feedback - chỉ hiển thị với gói LITE / GROWTH và JD không phải AI-generated */}
-          {hasAiAdvisorAccess && !(job.structuredRequirements as any)?.isAiGenerated && (job.structuredRequirements as any)?.aiFeedback && (
+          {hasAiAdvisorAccess && !(job.structuredRequirements as any)?.isAiGenerated && ((job.structuredRequirements as any)?.aiFeedback || (job.structuredRequirements as any)?.aiAnalysis) && (
             <div className="bg-amber-50 p-5 rounded-2xl shadow-sm border border-amber-200 transition-all duration-300">
               <div
                 className="flex items-center justify-between cursor-pointer group"
@@ -324,32 +324,66 @@ export default function JobDetailsPage() {
                   </svg>
                 </div>
               </div>
-              
+
               <div
-                className={`transition-all duration-500 overflow-hidden ${
-                  isAiFeedbackExpanded ? "max-h-[3000px] opacity-100 mt-4" : "max-h-0 opacity-0"
-                }`}
+                className={`transition-all duration-500 overflow-hidden ${isAiFeedbackExpanded ? "max-h-[3000px] opacity-100 mt-4" : "max-h-0 opacity-0"
+                  }`}
               >
                 <div className="text-sm font-medium text-amber-900/80 leading-relaxed pb-1">
-                  {Array.isArray((job.structuredRequirements as any).aiFeedback) ? (
-                    <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
-                      {((job.structuredRequirements as any).aiFeedback).map((str: string, i: number) => (
-                        <li key={i}>{formatText(str)}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
-                      {((job.structuredRequirements as any).aiFeedback as string)
+                  {(() => {
+                    const structReq = job.structuredRequirements as any;
+                    const feedbackData = structReq?.aiFeedback || structReq?.aiAnalysis?.detailedAdvice || structReq?.aiAnalysis?.weaknesses;
+                    const isLite = planType === 'LITE';
+
+                    if (Array.isArray(feedbackData)) {
+                      let displayArr = [...feedbackData];
+                      if (isLite && displayArr.length > 1) {
+                         displayArr = [displayArr[0], `Mua gói GROWTH để xem trọn bộ phân tích chi tiết của AI (đang ẩn ${displayArr.length - 1} nhận xét nâng cao).`];
+                      }
+                      return (
+                        <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
+                          {displayArr.map((str: string, i: number) => {
+                             if (isLite && i === displayArr.length - 1 && feedbackData.length > 1) {
+                                return (
+                                   <li key={i} className="text-amber-700 font-bold opacity-80 list-none -ml-4 flex items-center gap-2 mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20 shadow-sm cursor-pointer hover:bg-amber-500/20 transition-colors">
+                                     <Crown className="w-4 h-4 shrink-0" />
+                                     <Link href="/recruiter/billing/plans">{str}</Link>
+                                   </li>
+                                );
+                             }
+                             return <li key={i}>{formatText(str)}</li>;
+                          })}
+                        </ul>
+                      );
+                    } else if (typeof feedbackData === 'string') {
+                      let stringArr = feedbackData
                         .replace(/v\.v\./g, 'v_v_')
                         .replace(/([0-9])\.([0-9])/g, '$1_$2')
                         .split('.')
-                        .filter((s: string) => s.trim().length > 5)
-                        .map((s: string, i: number) => (
-                          <li key={i}>{formatText(s.replace(/v_v_/g, 'v.v.').replace(/([0-9])\_([0-9])/g, '$1.$2').trim() + '.')}</li>
-                        ))
+                        .filter((s: string) => s.trim().length > 5);
+
+                      if (isLite && stringArr.length > 1) {
+                         stringArr = [stringArr[0], `🔒 Mua gói GROWTH để xem trọn bộ phân tích chi tiết của AI (đang ẩn ${stringArr.length - 1} nhận xét nâng cao).`];
                       }
-                    </ul>
-                  )}
+                      
+                      return (
+                        <ul className="list-disc space-y-1.5 pl-4 marker:text-amber-500">
+                          {stringArr.map((s: string, i: number) => {
+                             if (isLite && i === stringArr.length - 1 && feedbackData.split('.').filter((x:string)=>x.trim().length>5).length > 1) {
+                                return (
+                                   <li key={i} className="text-amber-700 font-bold opacity-80 list-none -ml-4 flex items-center gap-2 mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20 shadow-sm cursor-pointer hover:bg-amber-500/20 transition-colors">
+                                     <Crown className="w-4 h-4 shrink-0" />
+                                     <Link href="/recruiter/billing/plans">{s}</Link>
+                                   </li>
+                                );
+                             }
+                             return <li key={i}>{formatText(s.replace(/v_v_/g, 'v.v.').replace(/([0-9])\_([0-9])/g, '$1.$2').trim() + '.')}</li>;
+                          })}
+                        </ul>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 <div className="mt-3 pt-3 border-t border-amber-200/50 flex justify-end">
                   {(job.structuredRequirements as any)?.autoFixedByAI ? (
@@ -361,10 +395,17 @@ export default function JobDetailsPage() {
                     </button>
                   ) : (
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleAutoFix(); }}
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        if (planType === 'LITE') {
+                           toast.error('Tính năng sửa JD tự động chỉ dành cho gói GROWTH!');
+                           return;
+                        }
+                        handleAutoFix(); 
+                      }}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm"
                     >
-                      <Sparkles className="w-3.5 h-3.5" /> Sửa tự động (GROWTH)
+                      <Sparkles className="w-3.5 h-3.5" /> Sửa tự động (Với GROWTH)
                     </button>
                   )}
                 </div>
@@ -401,7 +442,7 @@ export default function JobDetailsPage() {
           <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 rounded-2xl shadow-md text-white relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-            
+
             <div className="relative z-10 flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-300" />
@@ -423,8 +464,8 @@ export default function JobDetailsPage() {
             ) : (
               <div className="space-y-4 relative z-10">
                 {suggestedCandidates.map((candidate) => (
-                  <Link 
-                    key={candidate.candidateId} 
+                  <Link
+                    key={candidate.candidateId}
                     href={`/recruiter/jobs/${id}/matches`}
                     className="bg-white/10 border border-white/20 hover:bg-white/20 transition-colors p-4 rounded-xl cursor-pointer backdrop-blur-md flex items-center justify-between gap-4 block"
                   >
@@ -441,8 +482,8 @@ export default function JobDetailsPage() {
                         <p className="text-xs text-indigo-200 truncate">{candidate.major}</p>
                       </div>
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={(e) => handleInviteClick(e, candidate)}
                       className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-lg font-semibold hover:bg-indigo-50 transition-colors shrink-0"
                     >
@@ -452,8 +493,8 @@ export default function JobDetailsPage() {
                 ))}
               </div>
             )}
-            
-            <Link 
+
+            <Link
               href={`/recruiter/jobs/${id}/matches`}
               className="w-full mt-6 bg-white/10 hover:bg-white/20 border border-white/30 transition-colors py-2.5 rounded-xl text-sm font-semibold relative z-10 flex items-center justify-center gap-2"
             >
@@ -465,7 +506,7 @@ export default function JobDetailsPage() {
       {/* Modal xác nhận gửi lời mời */}
       {invitingCandidate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"

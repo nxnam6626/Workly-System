@@ -26,7 +26,12 @@ export class ApplicationsController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async findAllForMe(@CurrentUser('userId') userId: string) {
-    return this.applicationsService.findAllForUser(userId);
+    try {
+      return await this.applicationsService.findAllForUser(userId);
+    } catch (e) {
+      console.error('ERROR IN findAllForMe:', e);
+      throw e;
+    }
   }
 
   @Post()

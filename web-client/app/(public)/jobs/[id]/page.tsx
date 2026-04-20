@@ -41,58 +41,58 @@ import { JOB_TYPE_LABEL, INDUSTRIES } from "@/lib/constants";
 
 // Industry keyword map matching the backend
 const INDUSTRY_TAG_MAP: Record<string, string[]> = {
-  'CNTT / Phần mềm': ['frontend', 'backend', 'developer', 'dev ', 'lập trình', 'software', 'react', 'nodejs', 'java', 'python', 'devops', 'data', 'mobile', 'flutter', 'fullstack', 'qa', 'tester', 'scrum', 'công nghệ thông tin', 'typescript', 'golang', 'php', 'ruby', 'swift', 'kotlin', 'angular', 'vue', '.net', 'c++', 'blockchain', 'ai engineer', 'ml engineer'],
-  'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'crm'],
-  'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor'],
-  'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'cfo', 'tín dụng', 'giao dịch viên'],
-  'Nhân sự / Hành / Pháp lý': ['nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'compliance', 'hr', 'c&b', 'chuyên viên nhân sự', 'luật'],
-  'Kinh doanh / CSKH': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'key account', 'chăm sóc khách hàng', 'cskh', 'customer service', 'tư vấn viên', 'telemarketing'],
-  'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'figma', 'adobe', 'animation', 'ui/ux', 'creative director', 'đồ họa', 'illustrator', 'video editor', 'dựng phim', 'designer'],
-  'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'qc', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì', 'điện lạnh', 'kỹ sư', 'vận hành'],
-  'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad', 'thi công', 'giám sát', 'bản vẽ'],
-  'Vận tải / Logistics / Cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'forwarder', 'procurement', 'vận tải', 'giao nhận', 'lái xe', 'tài xế', 'kho bãi'],
-  'Bán lẻ / LFP / Thời trang': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer', 'bán hàng', 'thu ngân', 'cửa hàng', 'thời trang', 'mỹ phẩm', 'trang sức', 'giày da'],
-  'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'hospitality', 'chef', 'bếp', 'pha chế', 'barista', 'phục vụ', 'bồi bàn', 'lễ tân', 'tour guide', 'hướng dẫn viên'],
-  'Y tế / Dược phẩm / Sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinic', 'chăm sóc sức khỏe', 'bác sĩ', 'phòng khám', 'trình dược viên'],
-  'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'giáo dục', 'đào tạo', 'giảng viên', 'trợ giảng', 'tiếng anh'],
-  'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản', 'lâm nghiệp', 'chăn nuôi', 'thú y'],
-  'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản', 'địa ốc', 'căn hộ'],
-  'Truyền thông / Sự kiện': ['báo chí', 'journalist', 'public relations', 'media', 'broadcast', 'sự kiện', 'event', 'phóng viên', 'truyền hình'],
-  'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment', 'thẩm mỹ'],
-  'Bảo hiểm / Tư vấn': ['bảo hiểm', 'insurance', 'tư vấn bảo hiểm'],
-  'Đa lĩnh vực / Khác': ['ngo', 'phi chính phủ', 'giúp việc', 'bảo vệ', 'tạp vụ', 'trợ lý', 'thư ký', 'part time', 'bán thời gian']
+   'CNTT / Phần mềm': ['frontend', 'backend', 'developer', 'dev ', 'lập trình', 'software', 'react', 'nodejs', 'java', 'python', 'devops', 'data', 'mobile', 'flutter', 'fullstack', 'qa', 'tester', 'scrum', 'công nghệ thông tin', 'typescript', 'golang', 'php', 'ruby', 'swift', 'kotlin', 'angular', 'vue', '.net', 'c++', 'blockchain', 'ai engineer', 'ml engineer'],
+   'Marketing / Truyền thông': ['marketing', 'digital marketing', 'brand', 'tiếp thị', 'thị trường', 'google ads', 'facebook ads', 'campaign', 'crm'],
+   'Content / SEO': ['content', 'copywriter', 'seo', 'sem', 'social media', 'blog', 'editor'],
+   'Tài chính / Kế toán / Ngân hàng': ['kế toán', 'accounting', 'finance', 'tài chính', 'audit', 'kiểm toán', 'ngân hàng', 'banking', 'tax', 'thuế', 'chứng khoán', 'cfo', 'tín dụng', 'giao dịch viên'],
+   'Nhân sự / Hành / Pháp lý': ['nhân sự', 'tuyển dụng', 'recruiter', 'hành chính', 'legal', 'pháp lý', 'compliance', 'hr', 'c&b', 'chuyên viên nhân sự', 'luật'],
+   'Kinh doanh / CSKH': ['sales', 'kinh doanh', 'telesale', 'business development', 'bán hàng', 'b2b', 'b2c', 'key account', 'chăm sóc khách hàng', 'cskh', 'customer service', 'tư vấn viên', 'telemarketing'],
+   'Thiết kế / Sáng tạo': ['graphic', 'thiết kế', 'figma', 'adobe', 'animation', 'ui/ux', 'creative director', 'đồ họa', 'illustrator', 'video editor', 'dựng phim', 'designer'],
+   'Kỹ thuật / Cơ khí / Sản xuất': ['cơ khí', 'electrical', 'điện tử', 'automation', 'qc', 'sản xuất', 'manufacturing', 'cnc', 'plc', 'bảo trì', 'điện lạnh', 'kỹ sư', 'vận hành'],
+   'Xây dựng / Kiến trúc': ['xây dựng', 'kiến trúc', 'civil engineering', 'mep', 'construction', 'bim', 'autocad', 'thi công', 'giám sát', 'bản vẽ'],
+   'Vận tải / Logistics / Cung ứng': ['logistics', 'supply chain', 'xuất nhập khẩu', 'warehouse', 'forwarder', 'procurement', 'vận tải', 'giao nhận', 'lái xe', 'tài xế', 'kho bãi'],
+   'Bán lẻ / LFP / Thời trang': ['retail', 'bán lẻ', 'store manager', 'fmcg', 'consumer', 'bán hàng', 'thu ngân', 'cửa hàng', 'thời trang', 'mỹ phẩm', 'trang sức', 'giày da'],
+   'Nhà hàng / Khách sạn / Du lịch': ['hotel', 'khách sạn', 'du lịch', 'f&b', 'nhà hàng', 'hospitality', 'chef', 'bếp', 'pha chế', 'barista', 'phục vụ', 'bồi bàn', 'lễ tân', 'tour guide', 'hướng dẫn viên'],
+   'Y tế / Dược phẩm / Sức khỏe': ['y tế', 'dược', 'pharma', 'medical', 'nurse', 'điều dưỡng', 'clinic', 'chăm sóc sức khỏe', 'bác sĩ', 'phòng khám', 'trình dược viên'],
+   'Giáo dục / Đào tạo / Ngôn ngữ': ['giáo viên', 'teacher', 'gia sư', 'tutor', 'e-learning', 'training', 'biên dịch', 'giáo dục', 'đào tạo', 'giảng viên', 'trợ giảng', 'tiếng anh'],
+   'Nông nghiệp / Môi trường': ['nông nghiệp', 'agriculture', 'môi trường', 'thủy sản', 'lâm nghiệp', 'chăn nuôi', 'thú y'],
+   'Bất động sản': ['bất động sản', 'real estate', 'property', 'môi giới bất động sản', 'địa ốc', 'căn hộ'],
+   'Truyền thông / Sự kiện': ['báo chí', 'journalist', 'public relations', 'media', 'broadcast', 'sự kiện', 'event', 'phóng viên', 'truyền hình'],
+   'Thể thao / Làm đẹp / Giải trí': ['gym', 'fitness', 'spa', 'nail', 'làm đẹp', 'game', 'entertainment', 'thẩm mỹ'],
+   'Bảo hiểm / Tư vấn': ['bảo hiểm', 'insurance', 'tư vấn bảo hiểm'],
+   'Đa lĩnh vực / Khác': ['ngo', 'phi chính phủ', 'giúp việc', 'bảo vệ', 'tạp vụ', 'trợ lý', 'thư ký', 'part time', 'bán thời gian']
 };
 
 function detectIndustries(title: string, description: string, maxResults = 3): string[] {
-  // Pad with spaces so 'dev ' matches at start/end of title too
-  const text = ` ${title} ${description} `.toLowerCase();
-  const matched: string[] = [];
-  for (const [industry, keywords] of Object.entries(INDUSTRY_TAG_MAP)) {
-    if (keywords.some(kw => text.includes(kw.toLowerCase()))) {
-      matched.push(industry);
-      if (matched.length >= maxResults) break;
-    }
-  }
-  return matched;
+   // Pad with spaces so 'dev ' matches at start/end of title too
+   const text = ` ${title} ${description} `.toLowerCase();
+   const matched: string[] = [];
+   for (const [industry, keywords] of Object.entries(INDUSTRY_TAG_MAP)) {
+      if (keywords.some(kw => text.includes(kw.toLowerCase()))) {
+         matched.push(industry);
+         if (matched.length >= maxResults) break;
+      }
+   }
+   return matched;
 }
 
 function inferJobLevel(title: string, description: string): string {
-  const text = `${title} ${description}`.toLowerCase();
-  if (text.includes("thực tập") || text.includes("intern")) return "Thực tập sinh";
-  if (text.includes("trưởng phòng") || text.includes("manager") || text.includes("giám đốc") || text.includes("trưởng nhóm") || text.includes("leader") || text.includes("quản lý")) return "Quản lý / Trưởng nhóm";
-  if (text.includes("phó phòng") || text.includes("phó giám đốc")) return "Phó phòng / Phó giám đốc";
-  return "Nhân viên / Chuyên viên";
+   const text = `${title} ${description}`.toLowerCase();
+   if (text.includes("thực tập") || text.includes("intern")) return "Thực tập sinh";
+   if (text.includes("trưởng phòng") || text.includes("manager") || text.includes("giám đốc") || text.includes("trưởng nhóm") || text.includes("leader") || text.includes("quản lý")) return "Quản lý / Trưởng nhóm";
+   if (text.includes("phó phòng") || text.includes("phó giám đốc")) return "Phó phòng / Phó giám đốc";
+   return "Nhân viên / Chuyên viên";
 }
 
 function inferEducation(reqs: string): string {
-  const text = reqs.toLowerCase();
-  if (text.includes("đại học") || text.includes("bachelor")) return "Đại học trở lên";
-  if (text.includes("cao đẳng")) return "Cao đẳng trở lên";
-  if (text.includes("trung cấp")) return "Trung cấp";
-  if (text.includes("thpt") || text.includes("phổ thông") || text.includes("12/12")) return "Tốt nghiệp THPT";
-  if (text.includes("tiến sĩ") || text.includes("phd")) return "Tiến sĩ";
-  if (text.includes("thạc sĩ") || text.includes("master")) return "Thạc sĩ";
-  return "Không yêu cầu bằng cấp";
+   const text = reqs.toLowerCase();
+   if (text.includes("đại học") || text.includes("bachelor")) return "Đại học trở lên";
+   if (text.includes("cao đẳng")) return "Cao đẳng trở lên";
+   if (text.includes("trung cấp")) return "Trung cấp";
+   if (text.includes("thpt") || text.includes("phổ thông") || text.includes("12/12")) return "Tốt nghiệp THPT";
+   if (text.includes("tiến sĩ") || text.includes("phd")) return "Tiến sĩ";
+   if (text.includes("thạc sĩ") || text.includes("master")) return "Thạc sĩ";
+   return "Không yêu cầu bằng cấp";
 }
 import { JobCard, Job } from "@/components/JobCard";
 import { JobApplyModal } from "@/components/jobs/JobApplyModal";
@@ -139,45 +139,45 @@ const getPlatformColor = (platform: string) => {
 };
 
 const parseToHtml = (text: string) => {
-  if (!text) return 'Chưa cập nhật';
-  
-  // Loại bỏ các tiêu đề bị lặp (do AI sinh ra) ở text đầu vào
-  let cleanTxt = text.trim().replace(/^(?:\*\*.*?\*\*|#+)?\s*(?:mô tả công việc|yêu cầu công việc|yêu cầu ứng viên|thông tin chung|quyền lợi)\s*(?::|-)?\s*(?:\*\*.*?\*\*|#+)?\s*\n*/i, '');
+   if (!text) return 'Chưa cập nhật';
 
-  // Nếu đã có thẻ HTML cơ bản (từ React Quill hoặc AI nhả chuẩn HTML)
-  if (cleanTxt.includes('<p>') || cleanTxt.includes('<ul>') || cleanTxt.includes('<li>')) {
-    return cleanTxt;
-  }
-  
-  let html = cleanTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  const lines = html.split('\n');
-  let result = '';
-  let inList = false;
+   // Loại bỏ các tiêu đề bị lặp (do AI sinh ra) ở text đầu vào
+   let cleanTxt = text.trim().replace(/^(?:\*\*.*?\*\*|#+)?\s*(?:mô tả công việc|yêu cầu công việc|yêu cầu ứng viên|thông tin chung|quyền lợi)\s*(?::|-)?\s*(?:\*\*.*?\*\*|#+)?\s*\n*/i, '');
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line.startsWith('* ')) {
-      if (!inList) {
-        result += '<ul class="list-disc pl-5 my-2 space-y-1">\n';
-        inList = true;
-      }
-      result += `<li>${line.substring(2)}</li>\n`;
-    } else {
-      if (inList) {
-        result += '</ul>\n';
-        inList = false;
-      }
-      if (line !== '') {
-        result += `<p class="my-2">${line}</p>\n`;
-      }
-    }
-  }
+   // Nếu đã có thẻ HTML cơ bản (từ React Quill hoặc AI nhả chuẩn HTML)
+   if (cleanTxt.includes('<p>') || cleanTxt.includes('<ul>') || cleanTxt.includes('<li>')) {
+      return cleanTxt;
+   }
 
-  if (inList) {
-    result += '</ul>\n';
-  }
-  
-  return result;
+   let html = cleanTxt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+   const lines = html.split('\n');
+   let result = '';
+   let inList = false;
+
+   for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.startsWith('* ')) {
+         if (!inList) {
+            result += '<ul class="list-disc pl-5 my-2 space-y-1">\n';
+            inList = true;
+         }
+         result += `<li>${line.substring(2)}</li>\n`;
+      } else {
+         if (inList) {
+            result += '</ul>\n';
+            inList = false;
+         }
+         if (line !== '') {
+            result += `<p class="my-2">${line}</p>\n`;
+         }
+      }
+   }
+
+   if (inList) {
+      result += '</ul>\n';
+   }
+
+   return result;
 };
 
 export default function JobDetailsPage() {
@@ -475,38 +475,38 @@ export default function JobDetailsPage() {
                      <div className="space-y-10">
                         <section>
                            {(() => {
-                             const cats = detectIndustries(job.title, job.description || '', 3);
-                             return cats.length > 0 ? (
-                               <div className="flex flex-wrap gap-2 mb-6">
-                                 {cats.map(cat => (
-                                   <span key={cat} className="px-3 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-100">{cat}</span>
-                                 ))}
-                               </div>
-                             ) : null;
+                              const cats = detectIndustries(job.title, job.description || '', 3);
+                              return cats.length > 0 ? (
+                                 <div className="flex flex-wrap gap-2 mb-6">
+                                    {cats.map(cat => (
+                                       <span key={cat} className="px-3 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-100">{cat}</span>
+                                    ))}
+                                 </div>
+                              ) : null;
                            })()}
                         </section>
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Mô tả công việc</h3>
-                           <div 
-                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
-                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.description) }} 
+                           <div
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.description) }}
                            />
                         </section>
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Yêu cầu ứng viên</h3>
-                           <div 
-                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
-                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.requirements) }} 
+                           <div
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.requirements) }}
                            />
                         </section>
 
                         <section>
                            <h3 className="text-md font-bold text-slate-800 mb-4">Quyền lợi</h3>
-                           <div 
-                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none" 
-                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.benefits) }} 
+                           <div
+                              className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap ml-4 border-l-2 border-slate-50 pl-6 prose prose-slate prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: parseToHtml(job.benefits) }}
                            />
                         </section>
 
@@ -530,8 +530,8 @@ export default function JobDetailsPage() {
 
                   {/* Branches & Map */}
                   {(() => {
-                     const displayBranches = job.branches && job.branches.length > 0 
-                        ? job.branches 
+                     const displayBranches = job.branches && job.branches.length > 0
+                        ? job.branches
                         : (job.company?.address ? [{
                            branchId: 'hq-default',
                            name: 'Trụ sở / Địa điểm làm việc',
@@ -540,7 +540,7 @@ export default function JobDetailsPage() {
                            longitude: null,
                            isVerified: false
                         }] : []);
-                        
+
                      if (displayBranches.length === 0) return null;
 
                      return (
@@ -550,15 +550,15 @@ export default function JobDetailsPage() {
                               Bản Đồ Chỉ Đường {job.branches && job.branches.length > 0 ? '& Các Chi Nhánh' : ''}
                            </h3>
                            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                               {displayBranches.map((b: any) => (
-                                   <div key={b.branchId} className="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-3">
-                                       <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
-                                       <div>
-                                           <p className="font-bold text-slate-700 text-sm">{b.name}</p>
-                                           <p className="text-xs text-slate-500 mt-1">{b.address}</p>
-                                       </div>
-                                   </div>
-                               ))}
+                              {displayBranches.map((b: any) => (
+                                 <div key={b.branchId} className="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-start gap-3">
+                                    <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                       <p className="font-bold text-slate-700 text-sm">{b.name}</p>
+                                       <p className="text-xs text-slate-500 mt-1">{b.address}</p>
+                                    </div>
+                                 </div>
+                              ))}
                            </div>
                            <JobMap branches={displayBranches} />
                         </div>
@@ -681,16 +681,16 @@ export default function JobDetailsPage() {
                      <h3 className="font-bold text-slate-800 mb-6 text-sm">Danh mục nghề liên quan</h3>
                      <div className="flex flex-wrap gap-2">
                         {(() => {
-                          const cats = detectIndustries(job.title, job.description || "", 5);
-                          return cats.length > 0 ? (
-                            cats.map(cat => (
-                              <Link key={cat} href={`/jobs?industry=${encodeURIComponent(cat)}`}>
-                                <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 hover:bg-blue-50 cursor-pointer border border-slate-100 transition-colors">{cat}</span>
-                              </Link>
-                            ))
-                          ) : (
-                            <span className="text-xs text-slate-400 italic">Chưa xác định ngành nghề</span>
-                          );
+                           const cats = detectIndustries(job.title, job.description || "", 5);
+                           return cats.length > 0 ? (
+                              cats.map(cat => (
+                                 <Link key={cat} href={`/jobs?industry=${encodeURIComponent(cat)}`}>
+                                    <span className="px-3 py-1 bg-slate-50 text-slate-500 text-[10px] rounded hover:text-blue-600 hover:bg-blue-50 cursor-pointer border border-slate-100 transition-colors">{cat}</span>
+                                 </Link>
+                              ))
+                           ) : (
+                              <span className="text-xs text-slate-400 italic">Chưa xác định ngành nghề</span>
+                           );
                         })()}
                      </div>
                   </div>

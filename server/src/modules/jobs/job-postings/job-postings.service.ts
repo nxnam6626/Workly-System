@@ -184,9 +184,14 @@ export class JobPostingsService {
       aiReliabilityScore = modResult.score;
 
       if (!modResult.safe || modResult.score < 50) {
+        finalStatus = JobStatus.REJECTED; // Thông tin rác / Vi phạm / Thiếu sót nặng → Tự động từ chối
+        this.logger.warn(
+          `[JobPostings] JD "${createJobPostingDto.title}" auto-rejected by AI (score=${aiReliabilityScore}): ${modResult.reason} | flags: ${modResult.flags.join(', ')}`,
+        );
+      } else if (modResult.score < 70) {
         finalStatus = JobStatus.PENDING; // Cần admin duyệt thủ công
         this.logger.warn(
-          `[JobPostings] JD "${createJobPostingDto.title}" flagged by AI: ${modResult.reason} | flags: ${modResult.flags.join(', ')}`,
+          `[JobPostings] JD "${createJobPostingDto.title}" flagged pending by AI (score=${aiReliabilityScore}): ${modResult.reason}`,
         );
       } else {
         finalStatus = JobStatus.APPROVED; // AI xác nhận an toàn → tự động duyệt
@@ -195,6 +200,29 @@ export class JobPostingsService {
         );
       }
     }
+
+    // Determine Industry Categories
+    const categories = new Set<string>();
+    const textToAnalyze = `${createJobPostingDto.title} ${hardSkills?.join(' ') || ''}`.toLowerCase();
+    const combinedKeywords = {
+      ...INDUSTRY_TAG_MAP,
+      'Backend': ['backend', 'back-end', 'java', 'node', 'python', 'php', 'c#', '.net', 'golang', 'ruby'],
+      'Frontend': ['frontend', 'front-end', 'react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
+      'Fullstack': ['fullstack', 'full-stack', 'mern', 'mean'],
+      'Mobile': ['mobile', 'ios', 'android', 'flutter', 'react native', 'swift', 'kotlin'],
+      'DevOps/Cloud': ['devops', 'cloud', 'aws', 'docker', 'kubernetes', 'azure', 'gcp', 'ci/cd', 'jenkins'],
+      'AI/Machine Learning': ['ai ', 'machine learning', 'deep learning', 'nlp', 'computer vision', 'ai engineer'],
+      'Data': ['data engineer', 'data analyst', 'data scientist', 'sql', 'spark', 'hadoop'],
+      'QA/Tester': ['qa', 'tester', 'automation test', 'manual test', 'selenium', 'cypress'],
+      'System/Network': ['system admin', 'network', 'linux', 'sysadmin', 'it helpdesk'],
+      'UI/UX Design': ['ui/ux', 'designer', 'figma', 'design', 'graphic'],
+    };
+    for (const [cat, kws] of Object.entries(combinedKeywords)) {
+      if (kws.some(kw => textToAnalyze.includes(kw))) {
+        categories.add(cat);
+      }
+    }
+    if (categories.size === 0) categories.add('Đa lĩnh vực / Khác');
 
     const job = await this.prisma.jobPosting.create({
       data: {
@@ -219,6 +247,7 @@ export class JobPostingsService {
           aiFlags: modResult?.flags || [],
           aiReason: modResult?.reason || null,
           isAiGenerated: isAiGenerated === true,
+          categories: Array.from(categories),
         },
         branches: {
           connect:
@@ -629,7 +658,7 @@ export class JobPostingsService {
             },
             orderBy: { score: 'desc' },
           });
-          matchedCount = matches.length;
+          matchedCount = matches.filter(m => m.score >= 60).length;
 
           // 2. Kiểm tra những người đã được Unlock (Auto-invited)
           const unlocks = await this.prisma.candidateUnlock.findMany({
@@ -772,8 +801,8 @@ export class JobPostingsService {
     if (!existingJob)
       throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
 
-    const { branchIds, hardSkills, softSkills, minExperienceYears, ...rest } =
-      updateJobPostingDto;
+    const { branchIds, hardSkills, softSkills, minExperienceYears, isAiGenerated, expandedSkills, ...rest } =
+      updateJobPostingDto as any;
 
     // Kiểm tra blacklist khi cập nhật
     const { containsBadWords, foundWords } = this.validateBlacklist(
@@ -792,15 +821,59 @@ export class JobPostingsService {
       Object.keys(updateJobPostingDto).length === 1 && statusVal !== undefined;
     let newStatus: JobStatus = statusVal || existingJob.status;
 
+    let modResult: any = null;
+    let aiReliabilityScore: number | undefined;
+
     if (!isStatusOnlyUpdate) {
       if (containsBadWords) {
         newStatus = JobStatus.REJECTED;
+        aiReliabilityScore = 40;
       } else {
-        newStatus = JobStatus.PENDING;
+        // Tái kiểm duyệt bằng AI
+        modResult = await this.aiService.moderateJobContent(
+          updateJobPostingDto.title || existingJob.title,
+          updateJobPostingDto.description || existingJob.description || '',
+          updateJobPostingDto.requirements || (existingJob.structuredRequirements as any)?.requirements || '',
+          updateJobPostingDto.benefits || (existingJob.structuredRequirements as any)?.benefits || '',
+          hardSkills || (existingJob.structuredRequirements as any)?.hardSkills || [],
+          existingJob.jobTier
+        );
+        aiReliabilityScore = modResult.score;
+
+        if (!modResult.safe || modResult.score < 50) {
+          newStatus = JobStatus.REJECTED;
+        } else if (modResult.score < 70) {
+          newStatus = JobStatus.PENDING;
+        } else {
+          newStatus = JobStatus.APPROVED;
+        }
       }
     }
 
     const currentStructured = (existingJob.structuredRequirements as any) || {};
+
+    // Determine Industry Categories during update
+    const categoriesSet = new Set<string>();
+    const textToAnalyze = `${updateJobPostingDto.title || existingJob.title || ''} ${(hardSkills || currentStructured.hardSkills || []).join(' ')}`.toLowerCase();
+    const combinedKeywordsUpdate = {
+      ...INDUSTRY_TAG_MAP,
+      'Backend': ['backend', 'back-end', 'java', 'node', 'python', 'php', 'c#', '.net', 'golang', 'ruby'],
+      'Frontend': ['frontend', 'front-end', 'react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
+      'Fullstack': ['fullstack', 'full-stack', 'mern', 'mean'],
+      'Mobile': ['mobile', 'ios', 'android', 'flutter', 'react native', 'swift', 'kotlin'],
+      'DevOps/Cloud': ['devops', 'cloud', 'aws', 'docker', 'kubernetes', 'azure', 'gcp', 'ci/cd', 'jenkins'],
+      'AI/Machine Learning': ['ai ', 'machine learning', 'deep learning', 'nlp', 'computer vision', 'ai engineer'],
+      'Data': ['data engineer', 'data analyst', 'data scientist', 'sql', 'spark', 'hadoop'],
+      'QA/Tester': ['qa', 'tester', 'automation test', 'manual test', 'selenium', 'cypress'],
+      'System/Network': ['system admin', 'network', 'linux', 'sysadmin', 'it helpdesk'],
+      'UI/UX Design': ['ui/ux', 'designer', 'figma', 'design', 'graphic'],
+    };
+    for (const [cat, kws] of Object.entries(combinedKeywordsUpdate)) {
+      if (kws.some(kw => textToAnalyze.includes(kw))) {
+        categoriesSet.add(cat);
+      }
+    }
+    if (categoriesSet.size === 0 && !isStatusOnlyUpdate) categoriesSet.add('Đa lĩnh vực / Khác');
 
     const result = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
@@ -812,7 +885,17 @@ export class JobPostingsService {
           ...(hardSkills !== undefined && { hardSkills }),
           ...(softSkills !== undefined && { softSkills }),
           ...(minExperienceYears !== undefined && { minExperienceYears }),
+          ...(isAiGenerated !== undefined && { isAiGenerated }),
+          ...(expandedSkills !== undefined && { expandedSkills }),
+          ...(!isStatusOnlyUpdate && { categories: Array.from(categoriesSet) }),
+          ...(modResult && {
+            aiFeedback: modResult.feedback,
+            aiFlags: modResult.flags,
+            aiReason: modResult.reason
+          }),
         },
+        ...(aiReliabilityScore !== undefined && { aiReliabilityScore }),
+        ...(newStatus === JobStatus.APPROVED && { isVerified: true }),
         ...(branchIds && {
           branches: { set: branchIds.map((id: string) => ({ branchId: id })) },
         }),
@@ -854,6 +937,8 @@ export class JobPostingsService {
     // Update ES if approved
     if (result.status === JobStatus.APPROVED) {
       this.syncJobToES(result);
+      // Trigger matching after update → bao gồm cả trường hợp bài được sửa và duyệt lại
+      await this.matchingQueue.add('match', { jobId: id });
     } else {
       await this.searchService.deleteJob(id);
     }
@@ -1363,7 +1448,7 @@ export class JobPostingsService {
         const isUnlocked = unlockedIds.has(m.candidateId);
         const candidate = await this.prisma.candidate.findUnique({
           where: { candidateId: m.candidateId },
-          include: { 
+          include: {
             user: { select: { avatar: true, email: true } },
             cvs: {
               where: { parsedData: { not: Prisma.JsonNull } },
@@ -1377,8 +1462,8 @@ export class JobPostingsService {
         const jobReqs = jobPost?.structuredRequirements as any;
         const candidateSkills = (candidate?.cvs?.[0]?.parsedData as any)?.skills || [];
         const hardSkills = jobReqs?.hardSkills || [];
-        
-        const missingSkills = hardSkills.filter(s => 
+
+        const missingSkills = hardSkills.filter(s =>
           !m.matchedSkills.some(ms => ms.toLowerCase().includes(s.toLowerCase()))
         );
 
@@ -1481,7 +1566,7 @@ export class JobPostingsService {
       Tiêu đề: ${job.title}
       Yêu cầu: ${job.requirements}
       Mô tả: ${job.description}`;
-      
+
       let minExperienceYears = 0;
       try {
         const aiResponse = await this.aiService.generateResponse(prompt);

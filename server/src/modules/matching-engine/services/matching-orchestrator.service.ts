@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { ScoringEngineService } from './scoring-engine.service';
@@ -33,22 +34,72 @@ export class MatchingOrchestratorService {
       const textForEmbedding = `${job.title} ${job.description} ${job.requirements}`;
       const vector = await this.dataParser.getEmbedding(textForEmbedding);
       const vectorSql = `[${vector.join(',')}]`;
-      await this.prisma.$executeRaw`
-        UPDATE "JobPosting" 
-        SET "embedding" = ${vectorSql}::vector 
-        WHERE "jobPostingId" = ${jobId}
-      `;
+      try {
+        await this.prisma.$executeRaw`
+          UPDATE "JobPosting" 
+          SET "embedding" = ${vectorSql}::vector 
+          WHERE "jobPostingId" = ${jobId}
+        `;
+      } catch (dbErr: any) {
+        this.logger.warn(`Lưu ý: Chưa bật PostgreSQL pgvector, hệ thống tự động chạy thuật toán RAM/Cosine Similarity dự phòng để tính tỷ lệ Matching. Chi tiết lỗi bỏ qua: ${dbErr.message}`);
+      }
       (job as any).embedding = vector;
+
     }
 
     // 2. Lấy danh sách ứng viên (Cần tối ưu phân trang nếu DB lớn)
-    const candidates = await this.prisma.candidate.findMany({
-      where: { user: { status: 'ACTIVE' } },
+    const whereCandidate: any = { user: { status: 'ACTIVE' } };
+
+    // -- LOCATION FILTER --
+    const isRemote = job.locationCity?.toLowerCase().includes('remote') || 
+                     job.title.toLowerCase().includes('remote') ||
+                     (job.structuredRequirements as any)?.hardSkills?.some((s: any) => typeof s === 'string' && s.toLowerCase() === 'remote');
+                     
+    if (!isRemote && job.locationCity) {
+      const location = job.locationCity;
+      const LOCATION_ALIASES: Record<string, string[]> = {
+        'Hồ Chí Minh': ['TPHCM', 'TP HCM', 'TP. HCM', 'Ho Chi Minh', 'HCM', 'Thành phố Hồ Chí Minh', 'TP Hồ Chí Minh'],
+        'Hà Nội': ['Ha Noi', 'Hanoi', 'Thành phố Hà Nội', 'TP Hà Nội', 'TP. Hà Nội'],
+        'Đà Nẵng': ['Da Nang', 'Danang', 'Thành phố Đà Nẵng'],
+        'Cần Thơ': ['Can Tho', 'Thành phố Cần Thơ'],
+        'Hải Phòng': ['Hai Phong', 'Thành phố Hải Phòng'],
+      };
+      const variants = new Set<string>([location]);
+      if (LOCATION_ALIASES[location]) LOCATION_ALIASES[location].forEach((v) => variants.add(v));
+      for (const [canonical, aliases] of Object.entries(LOCATION_ALIASES)) {
+        if (aliases.some((a) => a.toLowerCase() === location.toLowerCase())) {
+          variants.add(canonical);
+          aliases.forEach((a) => variants.add(a));
+        }
+      }
+
+      whereCandidate.OR = Array.from(variants).map(v => ({ location: { contains: v, mode: 'insensitive' } }));
+      // Allow candidates who haven't updated location yet
+      whereCandidate.OR.push({ location: null });
+      whereCandidate.OR.push({ location: '' });
+    }
+
+    let candidates = await this.prisma.candidate.findMany({
+      where: whereCandidate,
       include: { 
         cvs: { where: { isMain: true } },
         user: true 
       },
     });
+
+    // -- CATEGORY FILTER (INDUSTRY CLUSTERING) --
+    // Only process candidates whose CV category overlaps with Job categories (or if no category assigned yet)
+    const jobCategories = (job.structuredRequirements as any)?.categories as string[] || [];
+    if (jobCategories.length > 0) {
+      candidates = candidates.filter(c => {
+        if (!c.cvs[0]) return false;
+        const cvCats = (c.cvs[0].parsedData as any)?.categories as string[];
+        // Fallback for old CVs without categories: allow them to be scored
+        if (!Array.isArray(cvCats) || cvCats.length === 0) return true;
+        // Intersection check
+        return cvCats.some(cat => jobCategories.includes(cat));
+      });
+    }
 
     const results: any[] = [];
 
@@ -68,12 +119,16 @@ export class MatchingOrchestratorService {
             
         const textForEmbedding = `${parsedData.summary || ''} ${parsedData.experience || ''} ${skillNames}`;
         const vector = await this.dataParser.getEmbedding(textForEmbedding);
-        const vectorSql = `[${vector.join(',')}]`;
-        await this.prisma.$executeRaw`
-          UPDATE "CV" 
-          SET "embedding" = ${vectorSql}::vector 
-          WHERE "cvId" = ${mainCv.cvId}
-        `;
+        try {
+          const vectorSql = `[${vector.join(',')}]`;
+          await this.prisma.$executeRaw`
+            UPDATE "CV" 
+            SET "embedding" = ${vectorSql}::vector 
+            WHERE "cvId" = ${mainCv.cvId}
+          `;
+        } catch (dbErr: any) {
+          this.logger.warn(`Lưu ý: Chưa bật PostgreSQL pgvector, sử dụng bộ nhớ RAM để quét Matching cho ứng viên. Chi tiết lỗi bỏ qua: ${dbErr.message}`);
+        }
         (mainCv as any).embedding = vector;
       }
 
@@ -142,11 +197,15 @@ export class MatchingOrchestratorService {
       const text = `${parsedData.summary || ''} ${skillNames}`;
       const vector = await this.dataParser.getEmbedding(text);
       const vectorSql = `[${vector.join(',')}]`;
-      await this.prisma.$executeRaw`
-        UPDATE "CV" 
-        SET "embedding" = ${vectorSql}::vector 
-        WHERE "cvId" = ${mainCv.cvId}
-      `;
+      try {
+        await this.prisma.$executeRaw`
+          UPDATE "CV" 
+          SET "embedding" = ${vectorSql}::vector 
+          WHERE "cvId" = ${mainCv.cvId}
+        `;
+      } catch (dbErr: any) {
+        this.logger.warn(`Failed to update CV embedding in DB (possibly missing pgvector extension): ${dbErr.message}`);
+      }
       (mainCv as any).embedding = vector;
     }
 
@@ -159,11 +218,15 @@ export class MatchingOrchestratorService {
       if (!(job as any).embedding) {
         const vector = await this.dataParser.getEmbedding(`${job.title} ${job.requirements}`);
         const vectorSql = `[${vector.join(',')}]`;
-        await this.prisma.$executeRaw`
-          UPDATE "JobPosting" 
-          SET "embedding" = ${vectorSql}::vector 
-          WHERE "jobPostingId" = ${job.jobPostingId}
-        `;
+        try {
+          await this.prisma.$executeRaw`
+            UPDATE "JobPosting" 
+            SET "embedding" = ${vectorSql}::vector 
+            WHERE "jobPostingId" = ${job.jobPostingId}
+          `;
+        } catch (dbErr: any) {
+          this.logger.warn(`Failed to update JobPosting embedding in DB (possibly missing pgvector extension): ${dbErr.message}`);
+        }
         (job as any).embedding = vector;
       }
 

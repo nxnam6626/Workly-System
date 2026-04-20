@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
 
 export class ResponseAgent {
   constructor(private readonly genAI: GoogleGenerativeAI) {}
@@ -23,6 +24,21 @@ ${dataRows.length > 50 ? '(Note: The data was truncated to 50 rows due to size l
 Analyze the data and provide a concise, professional answer in Vietnamese. 
 If the data is an array of numbers/counts, tell them the exact number clearly. 
 Do not include technical SQL jargon in the final answer. Provide insights if obvious.`;
+
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqRes = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: 'You are a professional data analyst. Provide clear, concise, and professional Vietnamese answers.' }, { role: 'user', content: prompt }],
+          temperature: 0.1
+        }, {
+          headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' }
+        });
+        return groqRes.data.choices[0].message.content;
+      } catch (e: any) {
+        console.warn(`[ResponseAgent] Groq failed: ${e.message}. Falling back...`);
+      }
+    }
 
     const result = await model.generateContent(prompt);
     return result.response.text();

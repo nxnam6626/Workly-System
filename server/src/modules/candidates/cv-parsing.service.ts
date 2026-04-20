@@ -17,7 +17,8 @@ Quy tắc:
 4. Desired Job: Trích xuất phần "Mục tiêu nghề nghiệp/Objective".
 5. Phân loại: 
    - experience: Lịch sử làm việc tại công ty/tổ chức.
-   - projects: Các sản phẩm cá nhân, đồ án chuyên ngành.
+   - projects: Các sản phẩm cá nhân, đồ án.
+   - categories: Phân loại mảng chuyên môn/ngành nghề của UV (VD: Backend, Frontend, Marketing, Kế toán, Nhân sự, Sales, Xây dựng, Bán lẻ...). Gán 1-3 thẻ.
 6. Trả về đúng JSON Schema yêu cầu. Bắt buộc duy nhất khối JSON.
 `.trim();
 
@@ -44,6 +45,11 @@ const CV_SCHEMA = {
         expectedSalary: { type: SchemaType.STRING },
         location: { type: SchemaType.STRING },
       },
+    },
+    categories: {
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
+      description: "Danh mục/mảng chuyên môn/ngành nghề chính của ứng viên (ví dụ: Backend, Marketing, Kế toán, Sales)",
     },
     education: {
       type: SchemaType.OBJECT,

@@ -6,6 +6,7 @@ import {
   Body,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { UnlockService } from './unlock.service';
@@ -24,8 +25,8 @@ export class RecruitersController {
 
   @Get('dashboard')
   @Roles(Role.RECRUITER)
-  getDashboardData(@Req() req: any) {
-    return this.recruitersService.getDashboardData(req.user.userId);
+  getDashboardData(@Req() req: any, @Query('date') date?: string) {
+    return this.recruitersService.getDashboardData(req.user.userId, date);
   }
 
   @Get('top-matches')

@@ -19,7 +19,16 @@ export class ExperienceStrategy implements IMatchingStrategy {
       if (requiredYears === 0) {
         yearScore = 100;
       } else {
-        yearScore = Math.min(100, (candidateYears / requiredYears) * 100);
+        const ratio = candidateYears / requiredYears;
+        if (ratio < 1) {
+          yearScore = Math.min(100, ratio * 100);
+        } else if (ratio <= 2.5) {
+          yearScore = 100;
+        } else if (ratio <= 4) {
+          yearScore = 85; // Overqualified penalty
+        } else {
+          yearScore = 70; // Highly overqualified penalty
+        }
       }
 
       // 2. Tính điểm tương đồng Chức danh (50% của Strategy này)

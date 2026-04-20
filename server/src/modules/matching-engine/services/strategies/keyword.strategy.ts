@@ -17,15 +17,41 @@ export class KeywordStrategy implements IMatchingStrategy {
     const matchedSkills: string[] = [];
     const missingSkills: string[] = [];
 
+    const COMMON_SKILLS = ['word', 'excel', 'powerpoint', 'teamwork', 'communication', 'english', 'giao tiếp', 'làm việc nhóm', 'tiếng anh'];
+    
+    let totalWeight = 0;
+    let earnedWeight = 0;
+
     jobSkills.forEach((skill: string) => {
-      if (cvSkillsLower.includes(skill.toLowerCase())) {
+      const lowerSkill = skill.toLowerCase();
+      const weight = COMMON_SKILLS.some(c => lowerSkill.includes(c)) ? 0.5 : 2.0;
+      totalWeight += weight;
+
+      let found = false;
+
+      // 1. Tìm trong mảng skills đã bóc tách
+      if (cvSkillsLower.some((cvS: string) => typeof cvS === 'string' && (cvS.includes(lowerSkill) || lowerSkill.includes(cvS)))) {
+        found = true;
+      } 
+      // 2. Tìm quét qua toàn bộ text của CV (dự phòng trường hợp bộ thu thập bỏ sót)
+      else if (cvProps.fullText) {
+        if (lowerSkill.length <= 2) {
+           const regex = new RegExp(`\\b${lowerSkill.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\b`, 'i');
+           if (regex.test(cvProps.fullText)) found = true;
+        } else {
+           if (cvProps.fullText.includes(lowerSkill)) found = true;
+        }
+      }
+
+      if (found) {
         matchedSkills.push(skill);
+        earnedWeight += weight;
       } else {
         missingSkills.push(skill);
       }
     });
 
-    const score = Math.round((matchedSkills.length / jobSkills.length) * 100);
+    const score = totalWeight === 0 ? 100 : Math.round((earnedWeight / totalWeight) * 100);
 
     return {
       score,

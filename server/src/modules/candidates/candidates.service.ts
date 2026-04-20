@@ -27,7 +27,7 @@ export class CandidatesService {
   private readonly logger = new Logger(CandidatesService.name);
 
   async findAll(query: any, recruiterUserId?: string) {
-    const { skip = 0, take = 10, search, skills, major } = query;
+    const { skip = 0, take = 50, search, skills, major } = query;
     const where: any = {
       user: {
         status: 'ACTIVE',
@@ -104,6 +104,7 @@ export class CandidatesService {
 
           let maxScore = 0;
           let bestJob = '';
+          const matchDetails: { title: string; score: number }[] = [];
 
           // Calculate matching score natively
           const mainCv =
@@ -157,11 +158,21 @@ export class CandidatesService {
               const totalScore = Math.round(
                 (skillScore * 0.7 + expScore * 0.3) * 100,
               );
+              
+              // Chỉ thêm vào danh sách nếu điểm phù hợp >= 50%
+              if (totalScore >= 50) {
+                matchDetails.push({ title: job.title, score: totalScore });
+              }
+
               if (totalScore > maxScore) {
                 maxScore = totalScore;
                 bestJob = job.title;
               }
             }
+            
+            // Sort matchDetails descending and take top 3
+            matchDetails.sort((a, b) => b.score - a.score);
+            matchDetails.splice(3);
           }
 
           return {
@@ -180,9 +191,13 @@ export class CandidatesService {
             isUnlocked,
             matchScore: maxScore,
             bestMatchJob: bestJob,
+            matchDetails,
           };
         });
       }
+
+      // Sort by match score descending to surface the most relevant matches first
+      enrichedData.sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
     }
 
     return {

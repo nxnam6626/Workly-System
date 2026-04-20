@@ -6,6 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Graceful shutdown — giải phóng port ngay khi nhận signal (SIGTERM từ nest watch)
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }),
   );
@@ -32,6 +36,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
+  console.log(`🚀 Server running on http://localhost:${port}`);
 }
 
 bootstrap().catch((err) => {

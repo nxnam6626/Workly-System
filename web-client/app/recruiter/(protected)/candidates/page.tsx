@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail, Send, X, CheckSquare, Loader2, Unlock } from 'lucide-react';
+import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail, Send, X, CheckSquare, Loader2, Unlock, Sparkles } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
@@ -16,6 +16,7 @@ export default function CandidatesPage() {
   const [major, setMajor] = useState('');
   const [skills, setSkills] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showTopMatchesOnly, setShowTopMatchesOnly] = useState(false);
   const { accessToken } = useAuthStore();
   const router = useRouter();
 
@@ -24,6 +25,14 @@ export default function CandidatesPage() {
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [sending, setSending] = useState(false);
+
+  // Thêm state cho Unlock Modal
+  const [isUnlockOpen, setIsUnlockOpen] = useState(false);
+  const [unlockingCandidate, setUnlockingCandidate] = useState<any>(null);
+  const [myJobs, setMyJobs] = useState<any[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState('');
+  const [unlocking, setUnlocking] = useState(false);
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     // Add debounce for search typing
@@ -100,6 +109,49 @@ export default function CandidatesPage() {
       toast.error(e.response?.data?.message || 'Lỗi khi gửi tin nhắn');
     } finally {
       setSending(false);
+    }
+  };
+
+  const fetchMyJobs = async () => {
+    try {
+      const { data } = await api.get('/job-postings/my-jobs');
+      const activeJobs = data.filter((j: any) => j.status === 'APPROVED');
+      setMyJobs(activeJobs);
+      if (activeJobs.length > 0) setSelectedJobId(activeJobs[0].jobPostingId);
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Không thể tải danh sách Tin tuyển dụng');
+    }
+  };
+
+  const openUnlockModal = (candidate: any) => {
+    setUnlockingCandidate(candidate);
+    setIsUnlockOpen(true);
+    fetchMyJobs();
+  };
+
+  const handleUnlock = async () => {
+    if (!selectedJobId || !unlockingCandidate) return;
+    setUnlocking(true);
+    try {
+      const { data } = await api.post('/recruiters/unlock', {
+        candidateId: unlockingCandidate.candidateId,
+        jobPostingId: selectedJobId,
+        cvId: unlockingCandidate.cvs?.[0]?.cvId || ''
+      });
+
+      if (data.status === 'ALREADY_UNLOCKED') {
+        toast.error(data.message);
+      } else {
+        toast.success('Mở khóa thành công! Đã trừ xu.');
+        // Refresh 
+        fetchCandidates();
+        setIsUnlockOpen(false);
+      }
+    } catch (e: any) {
+      toast.error(e.response?.data?.message || 'Có lỗi xảy ra khi mở khóa. Vui lòng thử lại.');
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -188,6 +240,23 @@ export default function CandidatesPage() {
                         className="w-full pl-12 pr-4 h-12 rounded-xl bg-slate-800/50 border border-slate-700 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                       />
                     </div>
+                    <div className="col-span-full flex items-center justify-between bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 mt-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                          <CheckSquare className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-200 text-sm">Chỉ hiển thị ứng viên Tiềm Năng</p>
+                          <p className="text-slate-400 text-xs">Lọc các hồ sơ do AI đánh giá độ phù hợp {'>'} 75%</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowTopMatchesOnly(!showTopMatchesOnly)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${showTopMatchesOnly ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showTopMatchesOnly ? 'translate-x-6' : 'translate-x-1'}`} />
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -201,15 +270,17 @@ export default function CandidatesPage() {
           <div className="col-span-full py-12 flex justify-center">
             <div className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin"></div>
           </div>
-        ) : candidates.length === 0 ? (
+        ) : candidates.filter(c => !showTopMatchesOnly || c.matchScore >= 75).length === 0 ? (
           <div className="col-span-full py-12 text-center text-slate-500 bg-white rounded-3xl border border-dashed border-slate-300">
-            Không tìm thấy ứng viên nào phù hợp.
+            {showTopMatchesOnly ? 'Chưa có ứng viên nào đạt mức Siêu Phù Hợp (>75%). Vui lòng tắt bộ lọc AI.' : 'Không tìm thấy ứng viên nào phù hợp.'}
           </div>
-        ) : candidates.map(candidate => {
+        ) : candidates.filter(c => !showTopMatchesOnly || c.matchScore >= 75).map(candidate => {
           const isSelected = selectedIds.includes(candidate.candidateId);
           const isSaved = savedIds.includes(candidate.candidateId);
+          const isSuperMatch = candidate.matchScore >= 75;
+
           return (
-            <div key={candidate.candidateId} className={`bg-white rounded-2xl border transition-all duration-300 group overflow-hidden relative cursor-pointer ${isSelected ? 'border-indigo-500 shadow-md ring-2 ring-indigo-500/20 ring-offset-2' : 'border-slate-100 hover:shadow-lg hover:border-indigo-100'}`}>
+            <div key={candidate.candidateId} className={`bg-white rounded-2xl border transition-all duration-300 group overflow-hidden relative cursor-pointer ${isSelected ? 'border-indigo-500 shadow-md ring-2 ring-indigo-500/20 ring-offset-2' : isSuperMatch ? 'border-emerald-200 shadow-emerald-100 shadow-lg hover:shadow-emerald-200' : 'border-slate-100 hover:shadow-lg hover:border-indigo-100'}`}>
               <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); toggleSelect(candidate); }}>
                 <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white/80 backdrop-blur border-slate-300 text-transparent hover:border-indigo-400'}`}>
                   <CheckSquare className="w-4 h-4" />
@@ -243,10 +314,46 @@ export default function CandidatesPage() {
                 </h3>
                 <p className="text-indigo-600 font-medium text-sm mt-1 mb-2">{candidate.major || 'Software Engineer'}</p>
                 {candidate.matchScore > 0 && (
-                  <div className="inline-flex mt-1">
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-md">
+                  <div className="mt-1 flex flex-col items-start gap-1">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Nếu có nhiều hơn 1 job thì cho phép Toggle
+                        if (candidate.matchDetails?.length > 1) {
+                          setExpandedMatchId(expandedMatchId === candidate.candidateId ? null : candidate.candidateId);
+                        }
+                      }}
+                      className={`text-[10px] font-bold border px-2 py-1 rounded-md flex items-center gap-1 transition-all ${
+                        candidate.matchDetails?.length > 1 ? 'cursor-pointer hover:bg-emerald-100 hover:shadow-md' : 'cursor-default'
+                      } ${isSuperMatch ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-emerald-600 shadow-sm' : 'text-emerald-700 bg-emerald-50 border-emerald-100'}`}
+                    >
+                      {isSuperMatch ? <Sparkles className="w-3 h-3" /> : null}
                       Phù hợp {candidate.matchScore}% với {candidate.bestMatchJob}
-                    </span>
+                      {candidate.matchDetails?.length > 1 && (
+                        <span className={`bg-black/10 rounded-full px-1.5 ml-1 transition-transform ${expandedMatchId === candidate.candidateId ? 'rotate-180' : ''}`}>▼</span>
+                      )}
+                    </button>
+
+                    <AnimatePresence>
+                      {expandedMatchId === candidate.candidateId && candidate.matchDetails?.length > 1 && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="w-full mt-2 bg-emerald-50/50 rounded-lg border border-emerald-100/50 overflow-hidden"
+                        >
+                          <div className="p-2 space-y-1.5 flex flex-col">
+                            <p className="text-[10px] text-emerald-600/70 font-semibold uppercase mb-1">Cũng phù hợp với:</p>
+                            {candidate.matchDetails.filter((m: any) => m.title !== candidate.bestMatchJob).map((m: any, idx: number) => (
+                              <div key={idx} className="flex justify-between items-center bg-white/60 p-1.5 rounded-md border border-emerald-100/30">
+                                <span className="text-xs font-medium text-slate-700 truncate mr-2" title={m.title}>{m.title}</span>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${m.score >= 75 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>{m.score}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
 
@@ -299,7 +406,7 @@ export default function CandidatesPage() {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      toast.error('Ứng viên chưa được mở khóa. Hãy dùng tính năng AI Matching trên tin tuyển dụng để mở khóa.');
+                      openUnlockModal(candidate);
                     }}
                     className="flex-1 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-200"
                   >
@@ -360,6 +467,78 @@ export default function CandidatesPage() {
                     <><Loader2 className="w-4 h-4 animate-spin" /> Đang gửi...</>
                   ) : (
                     <><Send className="w-4 h-4" /> Gửi Tin Nhắn</>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {isUnlockOpen && unlockingCandidate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            >
+              <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <Unlock className="w-5 h-5 text-indigo-600" />
+                  Mở Khóa Hồ Sơ
+                </h2>
+                <button
+                  onClick={() => setIsUnlockOpen(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-6">
+                  <p className="text-sm text-indigo-800 font-medium leading-relaxed">
+                    Bạn đang chuẩn bị mở khóa thông tin liên hệ và CV đầy đủ của ứng viên <strong className="text-indigo-900">{unlockingCandidate.fullName}</strong>.
+                    Việc này sẽ tiêu tốn <strong className="text-rose-600">tối đa 50 xu</strong> từ ví của bạn (tùy thuộc vào gói dịch vụ).
+                  </p>
+                </div>
+                
+                <label className="block text-sm font-bold text-slate-700 mb-2">Chọn vị trí tuyển dụng liên kết</label>
+                {myJobs.length === 0 ? (
+                  <p className="text-sm text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 italic">
+                    Bạn chưa có vị trí tuyển dụng nào đang hoạt động (Đã duyệt). Vui lòng đăng tin trước khi mở khóa!
+                  </p>
+                ) : (
+                  <select
+                    value={selectedJobId}
+                    onChange={(e) => setSelectedJobId(e.target.value)}
+                    className="w-full h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-slate-700"
+                  >
+                    {myJobs.map(job => (
+                      <option key={job.jobPostingId} value={job.jobPostingId}>
+                        {job.title}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="px-6 py-5 bg-slate-50/50 border-t border-slate-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setIsUnlockOpen(false)}
+                  className="px-6 h-12 rounded-xl border border-slate-200 font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleUnlock}
+                  disabled={unlocking || myJobs.length === 0 || !selectedJobId}
+                  className="px-6 h-12 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md shadow-indigo-500/30 flex items-center gap-2"
+                >
+                  {unlocking ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Đang xử lý...</>
+                  ) : (
+                    <><Unlock className="w-4 h-4" /> Mở khóa (Trừ xu)</>
                   )}
                 </button>
               </div>
