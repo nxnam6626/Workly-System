@@ -70,7 +70,7 @@ export default function JobsManagementPage() {
       .catch(() => setPlanType(null));
   }, [accessToken]);
 
-  const fetchJobsRef = useRef<() => void>();
+  const fetchJobsRef = useRef<() => void>(undefined);
   useEffect(() => {
     fetchJobsRef.current = fetchJobs;
   });

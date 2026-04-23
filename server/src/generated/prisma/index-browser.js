@@ -184,12 +184,20 @@ exports.Prisma.CandidateScalarFieldEnum = {
   university: 'university',
   major: 'major',
   gpa: 'gpa',
-  location: 'location',
   cvUrl: 'cvUrl',
   userId: 'userId',
   isOpenToWork: 'isOpenToWork',
+  location: 'location',
+  desiredJob: 'desiredJob',
   summary: 'summary',
-  desiredJob: 'desiredJob'
+  gender: 'gender',
+  birthYear: 'birthYear',
+  currentSalary: 'currentSalary',
+  degree: 'degree',
+  industries: 'industries',
+  languages: 'languages',
+  softSkills: 'softSkills',
+  interests: 'interests'
 };
 
 exports.Prisma.ExperienceScalarFieldEnum = {

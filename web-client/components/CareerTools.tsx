@@ -1,8 +1,8 @@
-import { Briefcase, FileText, Target } from "lucide-react";
+﻿import { Briefcase, FileText, Target } from "lucide-react";
 
 export function CareerTools() {
   return (
-    <section className="w-full max-w-7xl mx-auto px-6 py-24 flex flex-col border-t border-slate-100 mt-12 bg-white/50">
+    <section className="w-full max-w-6xl mx-auto px-6 py-24 flex flex-col border-t border-slate-100 mt-12 bg-white/50">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Công cụ nghề nghiệp cho thế hệ mới</h2>
         <p className="text-slate-500 text-lg max-w-2xl mx-auto">Mọi thứ bạn cần để đi từ ứng viên đến thực tập sinh tại các công ty yêu thích của bạn.</p>

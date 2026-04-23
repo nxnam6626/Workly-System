@@ -25,11 +25,23 @@ export class CompaniesService {
         skip,
         take: limit,
         orderBy: { companyName: 'asc' },
+        include: {
+          _count: {
+            select: {
+              jobPostings: { where: { status: 'APPROVED' } },
+            },
+          },
+        },
       }),
       this.prisma.company.count({ where }),
     ]);
 
-    return { items, total, page, limit };
+    const formattedItems = items.map((c) => ({
+      ...c,
+      activeJobs: c._count.jobPostings,
+    }));
+
+    return { items: formattedItems, total, page, limit };
   }
 
   async findOne(id: string) {
@@ -219,5 +231,33 @@ export class CompaniesService {
         companyId: recruiter.companyId,
       },
     });
+  }
+
+  async getTopEmployers(limit = 10) {
+    const companies = await this.prisma.company.findMany({
+      take: limit,
+      include: {
+        _count: {
+          select: { jobPostings: { where: { status: 'APPROVED' } } },
+        },
+      },
+      orderBy: {
+        jobPostings: {
+          _count: 'desc',
+        },
+      },
+    });
+
+    return companies
+      .filter((c) => c._count.jobPostings > 0)
+      .map((c) => ({
+        companyId: c.companyId,
+        companyName: c.companyName,
+        logo: c.logo,
+        slug: c.slug,
+        jobsCount: c._count.jobPostings,
+        mainIndustry: c.mainIndustry,
+        isRegistered: c.isRegistered,
+      }));
   }
 }

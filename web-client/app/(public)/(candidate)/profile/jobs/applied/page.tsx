@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Briefcase,
   Building2,
@@ -11,21 +11,22 @@ import {
   FileText,
   MapPin,
   Search,
-  CheckCircle2,
-  AlertCircle,
-  MoreVertical,
-  ExternalLink,
-  Filter
+  Filter,
+  ArrowRight,
+  Sparkles,
+  ExternalLink
 } from "lucide-react";
 
-import api from "@/lib/api";
+import api, { getFileUrl } from "@/lib/api";
 import Link from "next/link";
-import { formatSalary, timeAgo } from "@/lib/utils";
+import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useSocketStore } from "@/stores/socket";
-import { getFileUrl } from "@/lib/api";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
+import { AppliedJobsPageSkeleton } from "@/components/candidates/AppliedJobSkeleton";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AppliedJob {
   applicationId: string;
@@ -49,60 +50,53 @@ interface AppliedJob {
   };
 }
 
-const STATUS_MAP: Record<string, { label: string, color: string, bg: string }> = {
-  PENDING: { label: "Đang chờ", color: "text-amber-600", bg: "bg-amber-50 border-amber-100" },
-  REVIEWED: { label: "Đã xem", color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
-  SHORTLISTED: { label: "Tiềm năng", color: "text-indigo-600", bg: "bg-indigo-50 border-indigo-100" },
-  INTERVIEWING: { label: "Đang phỏng vấn", color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-  ACCEPTED: { label: "Đã tuyển", color: "text-green-600", bg: "bg-green-50 border-green-100" },
-  REJECTED: { label: "Từ chối", color: "text-red-600", bg: "bg-red-50 border-red-100" },
+const STATUS_MAP: Record<string, { label: string, color: string, bg: string, ring: string }> = {
+  PENDING: { label: "Đang chờ", color: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-500/20" },
+  REVIEWED: { label: "Đã xem", color: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-500/20" },
+  SHORTLISTED: { label: "Tiềm năng", color: "text-indigo-600", bg: "bg-indigo-50", ring: "ring-indigo-500/20" },
+  INTERVIEWING: { label: "Đang phỏng vấn", color: "text-purple-600", bg: "bg-purple-50", ring: "ring-purple-500/20" },
+  ACCEPTED: { label: "Đã tuyển", color: "text-green-600", bg: "bg-green-50", ring: "ring-green-500/20" },
+  REJECTED: { label: "Từ chối", color: "text-red-600", bg: "bg-red-50", ring: "ring-red-500/20" },
 };
 
 export default function AppliedJobsPage() {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { accessToken, user } = useAuthStore();
+  const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
   const confirm = useConfirm();
 
-  const fetchData = async () => {
+  // Optimized fetch with separate initial status
+  const fetchData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setInitialLoading(true);
     try {
-      const [appRes, profileRes] = await Promise.all([
-        api.get("/applications/me"),
-        api.get("/candidates/me")
-      ]);
-      setApplications(appRes.data);
-      setProfile(profileRes.data);
+      const res = await api.get("/applications/me");
+      setApplications(res.data);
     } catch (error) {
-      console.error("Error fetching applied jobs data:", error);
+      console.error("Error fetching applied jobs:", error);
     } finally {
-      setLoading(false);
+      if (!isSilent) setInitialLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [accessToken]);
+  }, [accessToken, fetchData]);
 
   useEffect(() => {
     if (!socket) return;
-    const handleNotification = (msg: any) => {
-      fetchData();
-    };
-    socket.on('notification', handleNotification);
+    socket.on('notification', () => fetchData(true));
     return () => {
-      socket.off('notification', handleNotification);
+      socket.off('notification');
     };
-  }, [socket]);
+  }, [socket, fetchData]);
 
   const handleCancelApplication = async (applicationId: string) => {
     const ok = await confirm({
       title: 'Hủy đơn ứng tuyển?',
-      message: 'Bạn có chắc chắn muốn hủy đơn ứng tuyển này? Hành động này không thể hoàn tác.',
+      message: 'Bạn có chắc chắn muốn hủy đơn ứng tuyển này?',
       confirmText: 'Hủy ứng tuyển',
-      cancelText: 'Giữ lại',
       variant: 'danger',
     });
     if (!ok) return;
@@ -110,222 +104,176 @@ export default function AppliedJobsPage() {
     try {
       await api.delete(`/applications/${applicationId}`);
       setApplications(prev => prev.filter(app => app.applicationId !== applicationId));
-      toast.success('Đã hủy ứng tuyển thành công.');
+      toast.success('Đã hủy ứng tuyển.');
     } catch (error: any) {
-      console.error('Error canceling application:', error);
-      toast.error(error.response?.data?.message || 'Không thể hủy đơn ứng tuyển. Vui lòng thử lại sau.');
+      toast.error('Không thể hủy đơn ứng tuyển.');
     }
   };
 
-  const filteredApps = applications.filter(app =>
-    app.jobPosting.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.jobPosting.company.companyName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f4f7f6] pt-32 pb-12 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-4 border-blue-50 border-t-blue-600 rounded-full animate-spin mb-4" />
-        <p className="text-slate-400 font-medium font-sans">Đang tải danh sách việc làm đã ứng tuyển...</p>
-      </div>
+  // Performance Optimization: Memoized filter logic
+  const filteredApps = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return applications.filter(app =>
+      app.jobPosting.title.toLowerCase().includes(term) ||
+      app.jobPosting.company.companyName.toLowerCase().includes(term)
     );
-  }
+  }, [applications, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-[#f4f7f6] pt-24 pb-20 font-sans">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6">
-
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-1">Việc làm đã ứng tuyển</h1>
-            <p className="text-sm text-slate-500">Xem và theo dõi trạng thái các công việc bạn đã nộp hồ sơ.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-blue-600 transition-colors" />
-              <input
-                type="text"
-                placeholder="Tìm theo tên công việc, công ty..."
-                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm w-full md:w-64 focus:border-blue-600 focus:ring-0 outline-none transition-all shadow-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm">
-              <Filter className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-          {/* Sidebar Navigation */}
-          <aside className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-50 bg-gradient-to-br from-blue-600/5 to-indigo-600/5">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-100 overflow-hidden">
-                    {user?.avatar ? (
-                      <img src={user.avatar} alt={profile?.fullName || "Candidate"} className="w-full h-full object-cover" />
-                    ) : (
-                      (profile?.fullName || user?.email || "C").charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-900 truncate">{profile?.fullName || "Người dùng Workly"}</p>
-                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-2">
-                <Link href="/profile/jobs/applied" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-blue-600 bg-blue-50 rounded-lg transition-colors">
-                  <Briefcase className="w-4 h-4" />
-                  Việc làm đã ứng tuyển
-                </Link>
-                <Link href="/profile/jobs/matching" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Việc làm phù hợp
-                </Link>
-                <Link href="/profile/cv-management" className="flex items-center gap-3 px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                  <FileText className="w-4 h-4" />
-                  Hồ sơ của tôi
-                </Link>
-              </div>
-            </div>
-
-            {/* Ad banner or quick tips */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white text-center relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2" />
-              <h4 className="font-bold mb-2 relative z-10">Tải App Workly</h4>
-              <p className="text-xs text-blue-100 mb-4 relative z-10">Ứng tuyển nhanh hơn, cập nhật trạng thái mọi lúc mọi nơi.</p>
-              <button className="w-full py-2.5 bg-white text-blue-600 font-bold rounded-lg text-xs hover:bg-blue-50 transition-colors relative z-10 shadow-lg">
-                Khám phá ngay
-              </button>
-            </div>
+    <div className="min-h-screen bg-[#fcfdfe] pt-24 pb-20 font-sans">
+      <div className="max-w-6xl mx-auto px-4 lg:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Sidebar - Memoized via Component Wrapper */}
+          <aside className="lg:col-span-1">
+            <ProfileSidebar />
           </aside>
 
-          {/* Main List Column */}
-          <div className="lg:col-span-3 space-y-4">
-            {filteredApps.length > 0 ? (
-              filteredApps.map((app) => {
-                const status = STATUS_MAP[app.appStatus] || STATUS_MAP.PENDING;
-                return (
-                  <div key={app.applicationId} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all group p-5">
-                    <div className="flex flex-col md:flex-row gap-5 items-start">
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-6">
+            
+            {/* Page Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-blue-600">Ứng tuyển</span></h1>
+                <p className="text-sm text-slate-500 font-medium">Theo dõi hành trình chinh phục sự nghiệp của bạn.</p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    className="pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm w-full md:w-64 focus:border-blue-600 outline-none transition-all shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <button className="p-3 bg-white border border-slate-100 rounded-xl text-slate-500 hover:text-blue-600 transition-all shadow-sm">
+                  <Filter className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-                      {/* Company Logo */}
-                      <div className="w-16 h-16 rounded-xl border border-slate-100 bg-white flex items-center justify-center p-3 flex-shrink-0 group-hover:border-blue-200 transition-colors">
-                        {app.jobPosting.company.logo ? (
-                          <img
-                            src={app.jobPosting.company.logo}
-                            alt={app.jobPosting.company.companyName}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <Building2 className="w-8 h-8 text-slate-200" />
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 space-y-3">
-                        <div>
-                          <Link
-                            href={`/jobs/${app.jobPostingId}`}
-                            className="text-lg font-bold text-slate-900 hover:text-blue-600 transition-colors line-clamp-1 leading-tight"
-                          >
-                            {app.jobPosting.title}
-                          </Link>
-                          <p className="text-sm font-medium text-slate-500 mt-0.5">{app.jobPosting.company.companyName}</p>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-500">
-                          <div className="flex items-center gap-1.5">
-                            <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="font-bold text-emerald-600 text-[13px]">
-                              {formatSalary(app.jobPosting.salaryMin, app.jobPosting.salaryMax, app.jobPosting.currency)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{app.jobPosting.locationCity}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                            <span>Nộp ngày: <b>{new Date(app.applyDate).toLocaleDateString('vi-VN')}</b></span>
-                          </div>
-                        </div>
-
-                        {app.appStatus === 'INTERVIEWING' && (
-                          <div className="p-3 bg-purple-50 rounded-xl border border-purple-100 flex items-start gap-3 mt-2">
-                            <div className="w-8 h-8 rounded-full bg-white text-purple-600 flex items-center justify-center shrink-0 shadow-sm">
-                              <Calendar className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-slate-800">Lịch phỏng vấn sắp tới</p>
-                              <p className="text-xs text-slate-600 mt-1">
-                                Thời gian: <span className="font-semibold text-slate-800">{app.interviewTime} ngày {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : ''}</span>
-                              </p>
-                              {app.interviewLocation && (
-                                <p className="text-xs text-slate-600 mt-0.5">
-                                  Địa điểm/Link: <span className="font-semibold text-slate-800">{app.interviewLocation}</span>
-                                </p>
+            {/* Optimized List Rendering */}
+            <div className="space-y-4">
+              {initialLoading ? (
+                <AppliedJobsPageSkeleton />
+              ) : (
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {filteredApps.length > 0 ? (
+                    filteredApps.map((app, idx) => {
+                      const status = STATUS_MAP[app.appStatus] || STATUS_MAP.PENDING;
+                      return (
+                        <motion.div
+                          key={app.applicationId}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
+                          className="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all p-6 overflow-hidden"
+                        >
+                          <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          
+                          <div className="flex flex-col md:flex-row gap-6">
+                            {/* Company Logo */}
+                            <div className="w-20 h-20 rounded-2xl border border-slate-50 bg-slate-50/30 flex items-center justify-center p-4 shrink-0">
+                              {app.jobPosting.company.logo ? (
+                                <img src={app.jobPosting.company.logo} alt="" className="max-w-full max-h-full object-contain" />
+                              ) : (
+                                <Building2 className="w-10 h-10 text-slate-200" />
                               )}
                             </div>
-                          </div>
-                        )}
 
-                        <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-50">
-                          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold ${status.bg} ${status.color}`}>
-                            <div className={`w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]`} />
-                            {status.label}
-                          </div>
+                            {/* Info */}
+                            <div className="flex-1 min-w-0 space-y-4">
+                              <div className="flex justify-between items-start gap-4">
+                                <div className="space-y-1">
+                                  <Link href={`/jobs/${app.jobPostingId}`} className="text-xl font-black text-slate-900 hover:text-blue-600 transition-colors block truncate pr-4">
+                                    {app.jobPosting.title}
+                                  </Link>
+                                  <p className="text-sm font-bold text-slate-500 flex items-center gap-2">
+                                    <Building2 className="w-3.5 h-3.5" />
+                                    {app.jobPosting.company.companyName}
+                                  </p>
+                                </div>
+                                <div className={`px-3 py-1.5 rounded-xl border-2 ring-4 ${status.ring} ${status.bg} ${status.color} text-[11px] font-black uppercase tracking-wider shrink-0`}>
+                                  {status.label}
+                                </div>
+                              </div>
 
-                          <div className="flex items-center gap-3">
-                            <a
-                              href={getFileUrl(app.cvSnapshotUrl)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1"
-                            >
-                              Xem CV <ExternalLink className="w-3 h-3" />
-                            </a>
-                            <div className="w-[1px] h-3 bg-slate-200" />
-                            {app.appStatus === 'PENDING' && (
-                              <button
-                                onClick={() => handleCancelApplication(app.applicationId)}
-                                className="p-1 px-2 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors"
-                              >
-                                Hủy ứng tuyển
-                              </button>
-                            )}
+                              <div className="flex flex-wrap items-center gap-y-3 gap-x-6 text-[13px] font-bold text-slate-500">
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-lg group-hover:bg-blue-50/50 transition-colors">
+                                  <DollarSign className="w-4 h-4 text-emerald-600" />
+                                  <span className="text-emerald-600 font-black">
+                                    {formatSalary(app.jobPosting.salaryMin, app.jobPosting.salaryMax, app.jobPosting.currency)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin className="w-4 h-4 text-slate-400" />
+                                  <span>{app.jobPosting.locationCity}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <Calendar className="w-4 h-4 text-slate-400" />
+                                  <span>{new Date(app.applyDate).toLocaleDateString('vi-VN')}</span>
+                                </div>
+                              </div>
+
+                              {/* Interview Info */}
+                              {app.appStatus === 'INTERVIEWING' && (
+                                <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-100/50 flex items-center justify-between gap-4">
+                                  <div className="flex items-start gap-3 text-purple-700">
+                                    <Sparkles className="w-5 h-5 text-purple-600" />
+                                    <div>
+                                      <p className="text-[13px] font-black leading-tight">Lịch phỏng vấn sắp tới</p>
+                                      <p className="text-[11px] font-bold opacity-80 italic">
+                                        Thời gian: {app.interviewTime} | Ngày {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : ''}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button className="px-4 py-2 bg-purple-600 text-white text-[11px] font-black rounded-lg hover:bg-purple-700 shadow-md">
+                                    Tham gia
+                                  </button>
+                                </div>
+                              )}
+
+                              <div className="pt-4 border-t border-slate-50 flex items-center justify-between gap-4">
+                                <a href={getFileUrl(app.cvSnapshotUrl)} target="_blank" rel="noreferrer" className="text-xs text-blue-600 font-bold hover:text-blue-800 flex items-center gap-1 transition-colors">
+                                  <FileText className="w-3.5 h-3.5" />
+                                  Xem hồ sơ đã nộp <ExternalLink className="w-3 h-3" />
+                                </a>
+
+                                <div className="flex items-center gap-3">
+                                  {app.appStatus === 'PENDING' && (
+                                    <button onClick={() => handleCancelApplication(app.applicationId)} className="px-4 py-2 text-[11px] font-black text-slate-400 hover:text-red-500 transition-all">
+                                      Hủy đơn
+                                    </button>
+                                  )}
+                                  <Link href={`/jobs/${app.jobPostingId}`} className="px-6 py-2 bg-slate-900 text-white text-[11px] font-black rounded-xl hover:bg-blue-600 shadow-lg active:scale-95 transition-all">
+                                    Chi tiết
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                        </motion.div>
+                      );
+                    })
+                  ) : (
+                    <div className="bg-white rounded-[48px] border border-slate-100 shadow-sm p-24 text-center space-y-8">
+                       <Briefcase className="w-16 h-16 mx-auto text-slate-200" />
+                       <h3 className="text-2xl font-black text-slate-900">Danh sách <span className="text-blue-600 italic">đang trống</span></h3>
+                       <Link href="/jobs" className="inline-flex items-center gap-2 px-12 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest">
+                         Tìm việc ngay <ArrowRight className="w-4 h-4" />
+                       </Link>
                     </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-20 text-center space-y-6">
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
-                  <Briefcase className="w-10 h-10" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-800">Bạn chưa ứng tuyển công việc nào</h3>
-                  <p className="text-sm text-slate-500 max-w-sm mx-auto">Hàng ngàn cơ hội việc làm hấp dẫn đang chờ đón bạn. Ứng tuyển ngay để không bỏ lỡ!</p>
-                </div>
-                <Link
-                  href="/jobs"
-                  className="inline-flex items-center justify-center px-10 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-                >
-                  Tìm việc ngay
-                </Link>
-              </div>
-            )}
+                  )}
+                </AnimatePresence>
+              )}
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );

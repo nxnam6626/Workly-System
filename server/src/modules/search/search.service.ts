@@ -153,6 +153,8 @@ export class SearchService implements OnModuleInit {
     experience?: string;
     salaryMin?: number;
     salaryMax?: number;
+    rank?: string;
+    education?: string;
     page?: number;
     limit?: number;
   }) {
@@ -165,6 +167,8 @@ export class SearchService implements OnModuleInit {
       experience,
       salaryMin,
       salaryMax,
+      rank,
+      education,
       page = 1,
       limit = 10,
     } = params;
@@ -175,32 +179,88 @@ export class SearchService implements OnModuleInit {
     const filter: any[] = [];
 
     if (search) {
-      must.push({
-        multi_match: {
-          query: search,
-          fields: ['title^3', 'companyName^2', 'description', 'locationCity'],
-          fuzziness: 'AUTO',
-          operator: 'or',
-          minimum_should_match: '70%',
+      const matchQuery = {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                query: search,
+                fields: ['title^3', 'companyName^2', 'description', 'locationCity'],
+                fuzziness: 'AUTO',
+                operator: 'or',
+                minimum_should_match: '70%',
+              },
+            }
+          ],
+          should: [
+            {
+              match_phrase: {
+                title: {
+                  query: search,
+                  boost: 10,
+                },
+              },
+            },
+            {
+              match_phrase: {
+                description: {
+                  query: search,
+                  boost: 2,
+                },
+              },
+            }
+          ]
+        }
+      };
+      must.push(matchQuery);
+    }
+
+    // Tier-based Boosting (URGENT > PROFESSIONAL > BASIC)
+    const tierBoosts = {
+      bool: {
+        should: [
+          {
+            term: {
+              jobTier: {
+                value: 'URGENT',
+                boost: 5,
+              },
+            },
+          },
+          {
+            term: {
+              jobTier: {
+                value: 'PROFESSIONAL',
+                boost: 2,
+              },
+            },
+          },
+        ],
+      },
+    };
+    must.push(tierBoosts);
+
+    if (location) {
+      filter.push({
+        match: {
+          locationCity: {
+            query: location,
+            fuzziness: 'AUTO',
+          },
         },
       });
     }
 
-    if (location) {
-      filter.push({ match: { locationCity: location } });
-    }
-
     if (jobTier) {
-      filter.push({ match: { jobTier: jobTier } });
+      filter.push({ term: { jobTier } });
     }
 
     if (jobType) {
-      filter.push({ match: { jobType: jobType } });
+      filter.push({ term: { jobType } });
     }
 
     if (industry) {
-      // ES doesn't have an `industry` field populated; use content-based matching instead
-      must.push({
+      filter.push({
         multi_match: {
           query: industry,
           fields: ['title^2', 'description'],
@@ -212,7 +272,27 @@ export class SearchService implements OnModuleInit {
     }
 
     if (experience) {
-      filter.push({ match: { experience: experience } });
+      filter.push({ match: { experience } });
+    }
+
+    if (rank) {
+      filter.push({
+        multi_match: {
+          query: rank,
+          fields: ['title^2', 'description', 'structuredRequirements'],
+          fuzziness: 'AUTO',
+        },
+      });
+    }
+
+    if (education) {
+      filter.push({
+        multi_match: {
+          query: education,
+          fields: ['description', 'requirements', 'structuredRequirements'],
+          fuzziness: 'AUTO',
+        },
+      });
     }
 
     // Salary range filter

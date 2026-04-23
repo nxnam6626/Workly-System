@@ -767,8 +767,16 @@ export class UsersService {
   // ADMIN & MODERATION (Nhóm Quản trị & Xóa)
   // ==========================================
 
-  async lockUser(userId: string) {
-    await this.findOne(userId);
+  async lockUser(userId: string, reqUserId?: string) {
+    if (userId === reqUserId) {
+      throw new BadRequestException('Bạn không thể tự khóa tài khoản của chính mình.');
+    }
+    
+    const userToLock = await this.findOne(userId);
+    if (userToLock.email === 'admin@workly.com') {
+      throw new BadRequestException('Không thể khóa tài khoản Quản trị viên tối cao.');
+    }
+
     await this.prisma.user.update({
       where: { userId },
       data: { status: 'LOCKED' },
@@ -817,8 +825,16 @@ export class UsersService {
     return { message: 'Đã đặt lại toàn bộ số lần vi phạm về 0.' };
   }
 
-  async remove(userId: string) {
-    await this.findOne(userId);
+  async remove(userId: string, reqUserId?: string) {
+    if (userId === reqUserId) {
+      throw new BadRequestException('Bạn không thể tự xóa tài khoản của chính mình.');
+    }
+
+    const userToDelete = await this.findOne(userId);
+    if (userToDelete.email === 'admin@workly.com') {
+      throw new BadRequestException('Không thể xóa tài khoản Quản trị viên tối cao.');
+    }
+
     await this.prisma.user.delete({ where: { userId } });
     return { message: 'Đã xóa user.' };
   }

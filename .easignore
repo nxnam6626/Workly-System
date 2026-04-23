@@ -4,4 +4,6 @@
 **/.expo/
 temp_build/
 .agent/
+.agents/
 .git/
+skills-lock.json

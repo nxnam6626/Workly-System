@@ -23,6 +23,16 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 @Controller('job-postings')
 export class JobPostingsController {
   constructor(private readonly jobPostingsService: JobPostingsService) { }
+  
+  @Get('stats/categories')
+  getCategoryStats() {
+    return this.jobPostingsService.getCategoryStats();
+  }
+
+  @Get('industries')
+  getIndustries() {
+    return this.jobPostingsService.getIndustries();
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

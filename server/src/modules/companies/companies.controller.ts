@@ -23,6 +23,11 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
+  @Get('top')
+  getTopEmployers() {
+    return this.companiesService.getTopEmployers(12);
+  }
+
   @Get('my-company')
   @UseGuards(JwtAuthGuard)
   getMyCompany(@CurrentUser('userId') userId: string) {

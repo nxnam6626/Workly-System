@@ -6,6 +6,7 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
+  extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
 }
 
 model User {
@@ -88,22 +89,30 @@ model Candidate {
   university     String?
   major          String?
   gpa            Float?
-  location       String?
   cvUrl          String?
   userId         String          @unique
   isOpenToWork   Boolean         @default(true)
-  summary        String?
+  location       String?
   desiredJob     Json?
+  summary        String?
+  birthYear      Int?
+  currentSalary  String?
+  degree         String?
+  gender         String?
+  industries     String[]        @default([])
+  interests      String[]        @default([])
+  languages      Json?
+  softSkills     String[]        @default([])
   applications   Application[]
   cvs            CV[]
   user           User            @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  certifications Certification[]
   conversations  Conversation[]
+  experiences    Experience[]
   jobMatches     JobMatch[]
   projects       Project[]
-  experiences    Experience[]
   savedJobs      SavedJob[]
   skills         Skill[]
-  certifications Certification[]
 }
 
 model Experience {
@@ -245,43 +254,43 @@ model RawJob {
 }
 
 model JobPosting {
-  jobPostingId           String          @id @default(uuid())
+  jobPostingId           String                 @id @default(uuid())
   title                  String
   description            String?
   requirements           String?
   benefits               String?
-  salaryMin              Decimal?        @db.Decimal(19, 0)
-  salaryMax              Decimal?        @db.Decimal(19, 0)
-  currency               String?         @default("VND")
+  salaryMin              Decimal?               @db.Decimal(19, 0)
+  salaryMax              Decimal?               @db.Decimal(19, 0)
+  currency               String?                @default("VND")
   jobType                JobType?
   experience             String?
-  vacancies              Int             @default(1)
+  vacancies              Int                    @default(1)
   locationCity           String?
-  status                 JobStatus       @default(PENDING)
-  postType               PostType        @default(CRAWLED)
-  isVerified             Boolean         @default(false)
-  originalUrl            String          @unique
+  status                 JobStatus              @default(PENDING)
+  postType               PostType               @default(CRAWLED)
+  isVerified             Boolean                @default(false)
+  originalUrl            String                 @unique
   aiReliabilityScore     Float?
-  createdAt              DateTime        @default(now()) @db.Timestamp(6)
-  updatedAt              DateTime        @updatedAt @db.Timestamp(6)
+  createdAt              DateTime               @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime               @updatedAt @db.Timestamp(6)
   approvedBy             String?
   recruiterId            String?
   companyId              String
-  rawJobId               String?         @unique
+  rawJobId               String?                @unique
   structuredRequirements Json?
-  viewCount              Int             @default(0)
-  jobTier                JobTier         @default(BASIC)
-  refreshedAt            DateTime        @default(now()) @db.Timestamp(6)
-  slug                   String?         @unique
-  autoInviteMatches      Boolean         @default(false)
+  viewCount              Int                    @default(0)
+  jobTier                JobTier                @default(BASIC)
+  refreshedAt            DateTime               @default(now()) @db.Timestamp(6)
+  slug                   String?                @unique
+  autoInviteMatches      Boolean                @default(false)
+  embedding              Unsupported("vector")?
   applications           Application[]
   jobMatches             JobMatch[]
-  company                Company         @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  rawJob                 RawJob?         @relation(fields: [rawJobId], references: [rawJobId])
-  recruiter              Recruiter?      @relation(fields: [recruiterId], references: [recruiterId])
+  company                Company                @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  rawJob                 RawJob?                @relation(fields: [rawJobId], references: [rawJobId])
+  recruiter              Recruiter?             @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
-  branches               CompanyBranch[] @relation("JobPostingBranches")
-  // embedding              Unsupported("vector(768)")?
+  branches               CompanyBranch[]        @relation("JobPostingBranches")
 }
 
 model JobMatch {
@@ -299,18 +308,18 @@ model JobMatch {
 }
 
 model CV {
-  cvId             String            @id @default(uuid())
+  cvId             String                 @id @default(uuid())
   cvTitle          String
   fileUrl          String?
-  isMain           Boolean           @default(false)
-  createdAt        DateTime          @default(now())
+  isMain           Boolean                @default(false)
+  createdAt        DateTime               @default(now())
   candidateId      String
   fileHash         String?
   parsedData       Json?
+  embedding        Unsupported("vector")?
   applications     Application[]
-  candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate        Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
-  // embedding        Unsupported("vector(768)")?
 }
 
 model Application {

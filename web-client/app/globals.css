@@ -10,21 +10,24 @@
   --color-foreground: #313131;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
-  /* JobsGO Brand Palette */
+
+  /* Workly Brand Palette */
   --color-mariner: #2466c9;
   --color-primary-hover: #1e55a9;
   --color-safety-orange: #f96d15;
+  --color-workly-blue: #002B67;
+  --color-workly-blue-light: #00418E;
   --color-slate-700: #334155;
   --color-slate-500: #64748b;
 }
 
 /* Premium Component Shadows */
-.shadow-jobsgo {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+.shadow-workly {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
-.shadow-jobsgo-hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
+.shadow-workly-hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 body {
@@ -37,15 +40,20 @@ body {
 .scrollbar-thin::-webkit-scrollbar {
   width: 5px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd5e1; /* slate-300 */
+  background: #cbd5e1;
+  /* slate-300 */
   border-radius: 10px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; /* slate-400 */
+  background: #94a3b8;
+  /* slate-400 */
 }
 
 /* AI Chat Markdown Styling */

@@ -3,14 +3,30 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, User, LogOut, ChevronDown, Bell, Briefcase, UserCheck, MessageSquare, FileText } from 'lucide-react';
+import {
+  ChevronDown,
+  User,
+  Edit3,
+  Download,
+  ClipboardCheck,
+  Heart,
+  FileText,
+  Briefcase,
+  RefreshCcw,
+  Eye,
+  LogOut,
+  Sparkles,
+  Lock,
+  Bell
+} from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import Image from 'next/image';
 
 export function UserDropdown() {
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [jobMenuOpen, setJobMenuOpen] = useState(false);
+  const [isLookingForJob, setIsLookingForJob] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -18,7 +34,6 @@ export function UserDropdown() {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
-        setJobMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -34,179 +49,104 @@ export function UserDropdown() {
   const displayName = user?.name || user?.candidate?.fullName || user?.email || 'Người dùng';
   const initial = displayName.charAt(0).toUpperCase();
 
+  const navItems = [
+    { icon: <User className="w-5 h-5" />, label: "Quản lý hồ sơ", href: "/profile" },
+    { icon: <Edit3 className="w-5 h-5" />, label: "Cập nhật hồ sơ", href: "/profile/edit" },
+    { icon: <ClipboardCheck className="w-5 h-5" />, label: "Việc làm đã ứng tuyển", href: "/profile/jobs/applied" },
+    { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
+    { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
+    { icon: <Briefcase className="w-5 h-5" />, label: "Việc làm phù hợp", href: "/profile/jobs/matching" },
+    { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/connections" },
+    { icon: <Lock className="w-5 h-5" />, label: "Đổi mật khẩu", href: "/profile/change-password" },
+    { icon: <Bell className="w-5 h-5" />, label: "Cài đặt thông báo email", href: "/profile/settings/notifications" },
+  ];
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setDropdownOpen((o) => !o)}
-        className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-100 transition-all duration-200 active:scale-95 shadow-sm"
+        className="flex items-center gap-2.5 hover:bg-slate-50 px-2 py-1.5 rounded-xl transition-all duration-200"
         aria-expanded={dropdownOpen}
       >
-        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm overflow-hidden">
+        <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-100 shadow-sm relative">
           {user?.avatar ? (
             <img src={user.avatar} alt={displayName} className="w-full h-full object-cover" />
           ) : (
-            initial
+            <div className="w-full h-full bg-[#1e60ad] text-white flex items-center justify-center text-[15px] font-bold">
+              {initial}
+            </div>
           )}
         </div>
-        <span className="text-sm font-medium max-w-[120px] truncate hidden sm:block text-slate-700">{displayName}</span>
-        <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
+        <div className="flex flex-col items-start text-left">
+          <span className="text-[14px] font-bold text-slate-800 leading-tight">{displayName}</span>
+          <span className="text-[12px] font-medium text-[#22c55e]">Đang tìm việc</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {dropdownOpen && (
-        <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 animate-in fade-in slide-in-from-top-2 z-50 overflow-hidden ring-1 ring-black/5">
-          <div className="px-5 py-3.5 border-b border-slate-50 bg-slate-50/50">
-            <p className="text-xs font-bold text-slate-800 truncate uppercase tracking-wider">{displayName}</p>
-            <p className="text-xs text-slate-400 truncate mt-0.5">{user?.email}</p>
-          </div>
-
-          <div className="py-1">
-            {/* Vai trò đặc biệt: RECRUITER */}
-            {user?.roles?.includes('RECRUITER') && (
-              <Link
-                href="/recruiter/dashboard"
-                onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-3.5 px-5 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+        <div className="absolute right-0 mt-3 w-[340px] bg-white rounded-[32px] shadow-2xl border border-slate-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="px-5 pt-6 pb-4">
+            {/* Toggle Section */}
+            <div className="flex items-center justify-between mb-5 px-1">
+              <span className="text-[15px] font-bold text-[#22c55e]">Đang tìm việc</span>
+              <button
+                onClick={() => setIsLookingForJob(!isLookingForJob)}
+                className={`w-12 h-6 rounded-full transition-all duration-300 relative flex items-center ${isLookingForJob ? 'bg-[#22c55e]' : 'bg-slate-200'
+                  }`}
               >
-                <Briefcase className="w-5 h-5" />
-                Quản lý Tuyển dụng
-              </Link>
-            )}
+                <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 shadow-sm ${isLookingForJob ? 'left-[25px]' : 'left-0.5'
+                  }`} />
+              </button>
+            </div>
 
-            {/* Vai trò đặc biệt: ADMIN */}
-            {user?.roles?.includes('ADMIN') && (
-              <Link
-                href="/admin/dashboard"
-                onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-3.5 px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-100 transition-colors duration-200"
-              >
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                Trang Quản trị
-              </Link>
-            )}
-
-            {/* Các mục dành riêng cho CANDIDATE */}
-            {user?.roles?.includes('CANDIDATE') && (
-              <>
-                {/* Hồ sơ của tôi */}
+            {/* Nav List with Scrollbar */}
+            <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+              {navItems.map((item, idx) => (
                 <Link
-                  href="/profile"
+                  key={idx}
+                  href={item.href}
                   onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                  className="flex items-center gap-4 px-4 py-3 bg-[#f8fafc] hover:bg-[#f1f5f9] rounded-2xl text-slate-700 hover:text-mariner group transition-all"
                 >
-                  <User className="w-5 h-5 text-blue-500" />
-                  Hồ sơ của tôi
-                </Link>
-
-                {/* Tạo CV */}
-                <Link
-                  href="/cv-builder"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                >
-                  <Sparkles className="w-5 h-5 text-blue-500" />
-                  Tạo CV
-                </Link>
-
-                {/* Quản lý CV */}
-                <Link
-                  href="/profile/cv-management"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                >
-                  <FileText className="w-5 h-5 text-blue-500" />
-                  Quản lý CV
-                </Link>
-
-                {/* Tin nhắn */}
-                <Link
-                  href="/profile/messages"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                >
-                  <MessageSquare className="w-5 h-5 text-blue-500" />
-                  Tin nhắn
-                </Link>
-
-                {/* Quản lý việc làm - Collapsible */}
-                <div className="relative">
-                  <button
-                    onClick={() => setJobMenuOpen((o) => !o)}
-                    className={`w-full flex items-center justify-between px-5 py-3 text-sm font-medium transition-all duration-200 ${jobMenuOpen ? 'text-blue-700 bg-blue-50/50' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <Briefcase className="w-5 h-5 text-blue-500" />
-                      <span>Quản lý việc làm</span>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${jobMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {jobMenuOpen && (
-                    <div className="bg-slate-50/30 animate-in slide-in-from-top-1 duration-300 pb-1">
-                      <Link
-                        href="/profile/jobs/applied"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                        Việc làm đã ứng tuyển
-                      </Link>
-                      <Link
-                        href="/profile/jobs/saved"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                        Việc làm đã lưu
-                      </Link>
-                      <Link
-                        href="/jobs"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-12 py-2.5 text-sm text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 mr-2" />
-                        Việc làm chờ ứng tuyển
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Hỗ trợ và thông báo */}
-                <Link
-                  href="/notifications"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                >
-                  <Bell className="w-5 h-5 text-blue-500" />
-                  Hỗ trợ và thông báo
-                </Link>
-
-                {/* Quản lý tài khoản */}
-                <Link
-                  href="/profile/account"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center justify-between px-5 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <UserCheck className="w-5 h-5 text-blue-500" />
-                    <span>Quản lý tài khoản</span>
+                  <div className="text-mariner opacity-70 group-hover:opacity-100 transition-opacity">
+                    {item.icon}
                   </div>
+                  <span className="text-[14.5px] font-bold">{item.label}</span>
                 </Link>
-              </>
-            )}
-          </div>
+              ))}
+            </div>
 
-          <div className="mt-1 border-t border-slate-50 pt-1">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3.5 px-5 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-              Đăng xuất
-            </button>
+            {/* Logout Button */}
+            <div className="mt-4 pt-4 border-t border-slate-50 px-1">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-4 px-4 py-3 bg-[#fff5f5] hover:bg-[#ffebeb] rounded-2xl text-[#f04438] transition-all group"
+              >
+                <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+                <span className="text-[14.5px] font-bold">Đăng xuất</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f8fafc;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
+      `}</style>
     </div>
   );
 }

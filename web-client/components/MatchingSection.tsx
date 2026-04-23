@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { Sparkles, ArrowRight, Target, Bot, Zap, Search, UserCheck, Building2, MapPin, Briefcase } from "lucide-react";
@@ -18,6 +18,7 @@ interface MatchItem {
   avatar?: string;
   jobTitle?: string; // For recruiters
   type: "JOB" | "CANDIDATE";
+  raw?: any;
 }
 
 export function MatchingSection() {
@@ -35,32 +36,42 @@ export function MatchingSection() {
       try {
         if (isCandidate) {
           const res = await api.get("/candidates/recommended-jobs");
-          const mapped: MatchItem[] = res.data.slice(0, 4).map((j: any) => ({
-            id: j.jobPostingId,
-            title: j.title,
-            subtitle: j.company.companyName,
-            score: j.score || 95, // Default score if not provided
-            tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
-            type: "JOB",
-            raw: j
-          }));
-          setItems(mapped);
+          const items = res.data.items || [];
+          if (items.length > 0) {
+            const mapped: MatchItem[] = items.slice(0, 4).map((j: any) => ({
+              id: j.jobPostingId,
+              title: j.title,
+              subtitle: j.company.companyName,
+              score: j.score || 95,
+              tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
+              type: "JOB",
+              raw: j
+            }));
+            setItems(mapped);
+          } else {
+            setItems([]);
+          }
         } else if (isRecruiter) {
           const res = await api.get("/recruiters/top-matches");
-          const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
-            id: c.candidateId,
-            title: c.fullName,
-            subtitle: `Phù hợp cho vị trí: ${c.jobTitle}`,
-            score: c.score,
-            tags: c.skills || [],
-            avatar: c.avatar,
-            type: "CANDIDATE",
-            raw: c
-          }));
-          setItems(mapped);
+          if (res.data && res.data.length > 0) {
+            const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
+              id: c.candidateId,
+              title: c.fullName,
+              subtitle: `Phù hợp cho vị trí: ${c.jobTitle}`,
+              score: c.score,
+              tags: c.skills || [],
+              avatar: c.avatar,
+              type: "CANDIDATE",
+              raw: c
+            }));
+            setItems(mapped);
+          } else {
+            setItems([]);
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch matches for homepage", error);
+        console.error("Failed to fetch matches for homepage, using fallback", error);
+        setItems([]);
       } finally {
         setLoading(false);
       }
@@ -69,7 +80,49 @@ export function MatchingSection() {
     fetchMatches();
   }, [isAuthenticated, isCandidate, isRecruiter]);
 
+const MOCK_MATCHES: MatchItem[] = [
+  {
+    id: "m1",
+    title: "Senior Frontend Developer",
+    subtitle: "Công Ty Cổ Phần VINHOMES",
+    score: 98,
+    tags: ["React", "TypeScript", "Next.js"],
+    type: "JOB",
+    raw: {
+      jobPostingId: "m1",
+      title: "Senior Frontend Developer",
+      company: { companyName: "Công Ty Cổ Phần VINHOMES", logo: "/logos/workly-gau-logo.png" },
+      locationCity: "Hà Nội",
+      salaryMin: 30000000,
+      salaryMax: 50000000,
+      currency: "VND",
+      createdAt: new Date().toISOString(),
+      jobTier: "URGENT"
+    } as any
+  },
+  {
+    id: "m2",
+    title: "Product Designer (UI/UX)",
+    subtitle: "VNG Corporation",
+    score: 95,
+    tags: ["Figma", "Design System", "Mobile"],
+    type: "JOB",
+    raw: {
+      jobPostingId: "m2",
+      title: "Product Designer (UI/UX)",
+      company: { companyName: "VNG Corporation", logo: "/logos/workly-gau-logo-2.png" },
+      locationCity: "Hồ Chí Minh",
+      salaryMin: 20000000,
+      salaryMax: 40000000,
+      currency: "VND",
+      createdAt: new Date().toISOString(),
+      jobTier: "PROFESSIONAL"
+    } as any
+  }
+];
 
+
+  if (!isAuthenticated) return null;
 
   const title = isCandidate ? "Việc làm Phù hợp nhất" : "Ứng viên Tiềm năng nhất";
   const subtitle = isCandidate ? "Dựa trên kỹ năng trong CV của bạn." : "Phù hợp với các vị trí bạn đang tuyển.";
@@ -77,7 +130,7 @@ export function MatchingSection() {
   const linkHref = isCandidate ? "/profile/jobs/matching" : "/recruiter/dashboard";
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-6 py-20 bg-white border-y border-slate-50">
+    <section className="w-full max-w-6xl mx-auto px-6 py-20 bg-white border-y border-slate-50">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12 border-l-4 border-mariner pl-6">
         <div className="space-y-3">
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#111827] tracking-tight leading-tight uppercase">

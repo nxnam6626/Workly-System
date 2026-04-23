@@ -42,7 +42,16 @@ export class FilterJobPostingDto {
   @IsOptional()
   @Transform(({ value }) => parseFloat(value))
   @IsNumber()
+  @Min(0)
   salaryMax?: number;
+
+  @IsOptional()
+  @IsString()
+  rank?: string;
+
+  @IsOptional()
+  @IsString()
+  education?: string;
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value, 10))

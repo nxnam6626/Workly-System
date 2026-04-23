@@ -68,7 +68,7 @@ export default function ProfileDashboard() {
 
       setLoadingJobs(true);
       api.get('/candidates/recommended-jobs')
-        .then((res: any) => setRecommendedJobs(res.data || []))
+        .then((res: any) => setRecommendedJobs(res.data.items || []))
         .catch((err: any) => console.error("Failed to load recommended jobs", err))
         .finally(() => setLoadingJobs(false));
     }
@@ -113,7 +113,8 @@ export default function ProfileDashboard() {
     setLoadingMatching(true);
     try {
       const res = await api.get("/candidates/recommended-jobs");
-      const mapped = res.data.slice(0, 4).map((j: any) => ({
+      const items = res.data.items || [];
+      const mapped = items.slice(0, 4).map((j: any) => ({
         ...j,
         score: j.score || 95,
         matchedSkills: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : [])
@@ -404,7 +405,7 @@ export default function ProfileDashboard() {
                 </span>
               </div>
             </div>
-            
+
             {/* Desired Job / Objective Info */}
             <div className="mt-6 pt-6 border-t border-slate-50">
               <h3 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider text-slate-400">Mục tiêu nghề nghiệp</h3>

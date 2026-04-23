@@ -228,7 +228,7 @@ export default function UserDetailModal({
                     {!tempIsSupreme && [
                       { id: 'MANAGE_USERS', label: 'Quản lý Người dùng' },
                       { id: 'MANAGE_JOBS', label: 'Quản lý Việc làm' },
-                      { id: 'MANAGE_BILLING', label: 'Quản lý Doanh thu' },
+                      { id: 'MANAGE_REVENUE', label: 'Quản lý Doanh thu' },
                       { id: 'MANAGE_SUPPORT', label: 'Chăm sóc Khách hàng' },
                     ].map(perm => (
                       <label key={perm.id} className={`flex items-center gap-2.5 text-sm ${editingPermissions ? 'cursor-pointer' : 'opacity-80'}`}>
@@ -442,8 +442,9 @@ export default function UserDetailModal({
           {user.status === 'ACTIVE' ? (
             <button
               onClick={() => { onLock(user.userId); onClose(); }}
-              disabled={isProcessing}
+              disabled={isProcessing || user.email === 'admin@workly.com'}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 text-amber-700 font-semibold text-sm hover:bg-amber-100 transition-colors disabled:opacity-50"
+              title={user.email === 'admin@workly.com' ? 'Không thể khóa tài khoản tối cao' : ''}
             >
               {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
               Khóa tài khoản
@@ -461,8 +462,9 @@ export default function UserDetailModal({
 
           <button
             onClick={handleDelete}
-            disabled={isProcessing}
+            disabled={isProcessing || user.email === 'admin@workly.com'}
             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 text-red-600 font-semibold text-sm hover:bg-red-100 transition-colors disabled:opacity-50"
+            title={user.email === 'admin@workly.com' ? 'Không thể xóa tài khoản tối cao' : ''}
           >
             <Trash2 className="w-4 h-4" />
             Xóa

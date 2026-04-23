@@ -1,17 +1,24 @@
-'use client';
-
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 export function NavBrand() {
   return (
-    <Link href="/" className="flex items-center gap-2 cursor-pointer">
-      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm ring-2 ring-blue-100">
-        <Sparkles className="w-5 h-5" />
+    <Link href="/" className="flex items-center gap-3 cursor-pointer group">
+      <div className="relative w-10 h-10 overflow-hidden rounded-xl bg-white shadow-sm border border-slate-100 group-hover:shadow-md transition-all">
+        <Image 
+          src="/logos/logo.png" 
+          alt="Workly Logo" 
+          fill
+          sizes="40px"
+          className="object-contain p-1"
+          priority
+        />
       </div>
-      <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
-        Workly
-      </span>
+      <div className="flex flex-col">
+        <span className="text-2xl font-black tracking-tighter text-mariner leading-none">
+          Workly
+        </span>
+      </div>
     </Link>
   );
 }

@@ -129,8 +129,11 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch(':userId/lock')
-  lock(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.usersService.lockUser(userId);
+  lock(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser('userId') reqUserId: string,
+  ) {
+    return this.usersService.lockUser(userId, reqUserId);
   }
 
   @UseGuards(RolesGuard)
@@ -150,8 +153,11 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete(':userId')
-  remove(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.usersService.remove(userId);
+  remove(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser('userId') reqUserId: string,
+  ) {
+    return this.usersService.remove(userId, reqUserId);
   }
 
   @UseGuards(RolesGuard)

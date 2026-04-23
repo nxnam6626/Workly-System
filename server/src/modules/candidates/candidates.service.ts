@@ -453,7 +453,23 @@ export class CandidatesService {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
     }
 
-    const { skills, projects, experiences, certifications, fullName, phone, ...rest } = updateCandidateDto;
+    const {
+      skills,
+      projects,
+      experiences,
+      certifications,
+      fullName,
+      phone,
+      gender,
+      birthYear,
+      currentSalary,
+      degree,
+      industries,
+      languages,
+      softSkills,
+      interests,
+      ...rest
+    } = updateCandidateDto;
 
     return this.prisma.$transaction(async (tx) => {
       // 1. Update Candidate basic info (university, major, gpa, location, fullName, etc.)
@@ -462,6 +478,14 @@ export class CandidatesService {
         data: {
           ...rest,
           ...(fullName && { fullName }),
+          ...(gender !== undefined && { gender }),
+          ...(birthYear !== undefined && { birthYear }),
+          ...(currentSalary !== undefined && { currentSalary }),
+          ...(degree !== undefined && { degree }),
+          ...(industries !== undefined && { industries }),
+          ...(languages !== undefined && { languages }),
+          ...(softSkills !== undefined && { softSkills }),
+          ...(interests !== undefined && { interests }),
         },
       });
 
@@ -926,31 +950,16 @@ export class CandidatesService {
     });
   }
 
-  async getRecommendedJobs(userId: string) {
+  async getRecommendedJobs(userId: string, page: number = 1, limit: number = 10) {
     const candidate = await this.prisma.candidate.findUnique({
       where: { userId },
     });
-    if (!candidate) return [];
+    if (!candidate) return { items: [], total: 0, page, limit };
 
-    let matches = await this.prisma.jobMatch.findMany({
-      where: { candidateId: candidate.candidateId },
-      include: {
-        jobPosting: {
-          include: { company: true, branches: true },
-        },
-      },
-      orderBy: { score: 'desc' },
-      take: 20,
-    });
+    const skip = (page - 1) * limit;
 
-    if (matches.length === 0) {
-      // Triển khai cơ chế Fallback tự động
-      console.log(
-        `[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`,
-      );
-      await this.matchingService.runMatchingForCandidate(userId);
-
-      matches = await this.prisma.jobMatch.findMany({
+    let [matches, total] = await Promise.all([
+      this.prisma.jobMatch.findMany({
         where: { candidateId: candidate.candidateId },
         include: {
           jobPosting: {
@@ -958,14 +967,48 @@ export class CandidatesService {
           },
         },
         orderBy: { score: 'desc' },
-        take: 20,
-      });
+        skip,
+        take: Number(limit),
+      }),
+      this.prisma.jobMatch.count({
+        where: { candidateId: candidate.candidateId },
+      }),
+    ]);
+
+    if (matches.length === 0 && page === 1) {
+      // Triển khai cơ chế Fallback tự động
+      console.log(
+        `[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`,
+      );
+      await this.matchingService.runMatchingForCandidate(userId);
+
+      [matches, total] = await Promise.all([
+        this.prisma.jobMatch.findMany({
+          where: { candidateId: candidate.candidateId },
+          include: {
+            jobPosting: {
+              include: { company: true, branches: true },
+            },
+          },
+          orderBy: { score: 'desc' },
+          skip,
+          take: Number(limit),
+        }),
+        this.prisma.jobMatch.count({
+          where: { candidateId: candidate.candidateId },
+        }),
+      ]);
     }
 
-    return matches.map((m) => ({
-      ...m.jobPosting,
-      score: m.score,
-      matchedSkills: m.matchedSkills,
-    }));
+    return {
+      items: matches.map((m) => ({
+        ...m.jobPosting,
+        score: m.score,
+        matchedSkills: m.matchedSkills,
+      })),
+      total,
+      page: Number(page),
+      limit: Number(limit),
+    };
   }
 }

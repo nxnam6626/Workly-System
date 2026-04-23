@@ -18,6 +18,14 @@ export interface CandidateProfile {
     summary?: string;
     desiredJob?: any;
     isOpenToWork: boolean;
+    gender?: string;
+    birthYear?: number;
+    currentSalary?: string;
+    degree?: string;
+    industries?: string[];
+    languages?: { name: string; level: string }[];
+    softSkills?: string[];
+    interests?: string[];
     skills: { skillId: string; skillName: string; level: string; category?: string }[];
     experiences: { experienceId: string; company: string; role: string; duration: string; description?: string }[];
     projects: { projectId: string; projectName: string; description?: string; role?: string; technology?: string }[];
@@ -64,6 +72,14 @@ export interface UpdateProfileDto {
   experiences?: ExperienceInput[];
   projects?: ProjectInput[];
   isOpenToWork?: boolean;
+  gender?: string;
+  birthYear?: number;
+  currentSalary?: string;
+  degree?: string;
+  industries?: string[];
+  languages?: { name: string; level: string }[];
+  softSkills?: string[];
+  interests?: string[];
 }
 
 export interface ChangePasswordDto {

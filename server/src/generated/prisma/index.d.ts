@@ -3725,25 +3725,25 @@ export namespace Prisma {
   export type CandidateCountOutputType = {
     applications: number
     cvs: number
+    certifications: number
     conversations: number
+    experiences: number
     jobMatches: number
     projects: number
-    experiences: number
     savedJobs: number
     skills: number
-    certifications: number
   }
 
   export type CandidateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | CandidateCountOutputTypeCountApplicationsArgs
     cvs?: boolean | CandidateCountOutputTypeCountCvsArgs
+    certifications?: boolean | CandidateCountOutputTypeCountCertificationsArgs
     conversations?: boolean | CandidateCountOutputTypeCountConversationsArgs
+    experiences?: boolean | CandidateCountOutputTypeCountExperiencesArgs
     jobMatches?: boolean | CandidateCountOutputTypeCountJobMatchesArgs
     projects?: boolean | CandidateCountOutputTypeCountProjectsArgs
-    experiences?: boolean | CandidateCountOutputTypeCountExperiencesArgs
     savedJobs?: boolean | CandidateCountOutputTypeCountSavedJobsArgs
     skills?: boolean | CandidateCountOutputTypeCountSkillsArgs
-    certifications?: boolean | CandidateCountOutputTypeCountCertificationsArgs
   }
 
   // Custom InputTypes
@@ -3774,8 +3774,22 @@ export namespace Prisma {
   /**
    * CandidateCountOutputType without action
    */
+  export type CandidateCountOutputTypeCountCertificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CertificationWhereInput
+  }
+
+  /**
+   * CandidateCountOutputType without action
+   */
   export type CandidateCountOutputTypeCountConversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ConversationWhereInput
+  }
+
+  /**
+   * CandidateCountOutputType without action
+   */
+  export type CandidateCountOutputTypeCountExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExperienceWhereInput
   }
 
   /**
@@ -3795,13 +3809,6 @@ export namespace Prisma {
   /**
    * CandidateCountOutputType without action
    */
-  export type CandidateCountOutputTypeCountExperiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ExperienceWhereInput
-  }
-
-  /**
-   * CandidateCountOutputType without action
-   */
   export type CandidateCountOutputTypeCountSavedJobsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SavedJobWhereInput
   }
@@ -3811,13 +3818,6 @@ export namespace Prisma {
    */
   export type CandidateCountOutputTypeCountSkillsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SkillWhereInput
-  }
-
-  /**
-   * CandidateCountOutputType without action
-   */
-  export type CandidateCountOutputTypeCountCertificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CertificationWhereInput
   }
 
 
@@ -10902,10 +10902,12 @@ export namespace Prisma {
 
   export type CandidateAvgAggregateOutputType = {
     gpa: number | null
+    birthYear: number | null
   }
 
   export type CandidateSumAggregateOutputType = {
     gpa: number | null
+    birthYear: number | null
   }
 
   export type CandidateMinAggregateOutputType = {
@@ -10914,11 +10916,15 @@ export namespace Prisma {
     university: string | null
     major: string | null
     gpa: number | null
-    location: string | null
     cvUrl: string | null
     userId: string | null
     isOpenToWork: boolean | null
+    location: string | null
     summary: string | null
+    gender: string | null
+    birthYear: number | null
+    currentSalary: string | null
+    degree: string | null
   }
 
   export type CandidateMaxAggregateOutputType = {
@@ -10927,11 +10933,15 @@ export namespace Prisma {
     university: string | null
     major: string | null
     gpa: number | null
-    location: string | null
     cvUrl: string | null
     userId: string | null
     isOpenToWork: boolean | null
+    location: string | null
     summary: string | null
+    gender: string | null
+    birthYear: number | null
+    currentSalary: string | null
+    degree: string | null
   }
 
   export type CandidateCountAggregateOutputType = {
@@ -10940,22 +10950,32 @@ export namespace Prisma {
     university: number
     major: number
     gpa: number
-    location: number
     cvUrl: number
     userId: number
     isOpenToWork: number
-    summary: number
+    location: number
     desiredJob: number
+    summary: number
+    gender: number
+    birthYear: number
+    currentSalary: number
+    degree: number
+    industries: number
+    languages: number
+    softSkills: number
+    interests: number
     _all: number
   }
 
 
   export type CandidateAvgAggregateInputType = {
     gpa?: true
+    birthYear?: true
   }
 
   export type CandidateSumAggregateInputType = {
     gpa?: true
+    birthYear?: true
   }
 
   export type CandidateMinAggregateInputType = {
@@ -10964,11 +10984,15 @@ export namespace Prisma {
     university?: true
     major?: true
     gpa?: true
-    location?: true
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
+    location?: true
     summary?: true
+    gender?: true
+    birthYear?: true
+    currentSalary?: true
+    degree?: true
   }
 
   export type CandidateMaxAggregateInputType = {
@@ -10977,11 +11001,15 @@ export namespace Prisma {
     university?: true
     major?: true
     gpa?: true
-    location?: true
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
+    location?: true
     summary?: true
+    gender?: true
+    birthYear?: true
+    currentSalary?: true
+    degree?: true
   }
 
   export type CandidateCountAggregateInputType = {
@@ -10990,12 +11018,20 @@ export namespace Prisma {
     university?: true
     major?: true
     gpa?: true
-    location?: true
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
-    summary?: true
+    location?: true
     desiredJob?: true
+    summary?: true
+    gender?: true
+    birthYear?: true
+    currentSalary?: true
+    degree?: true
+    industries?: true
+    languages?: true
+    softSkills?: true
+    interests?: true
     _all?: true
   }
 
@@ -11091,12 +11127,20 @@ export namespace Prisma {
     university: string | null
     major: string | null
     gpa: number | null
-    location: string | null
     cvUrl: string | null
     userId: string
     isOpenToWork: boolean
-    summary: string | null
+    location: string | null
     desiredJob: JsonValue | null
+    summary: string | null
+    gender: string | null
+    birthYear: number | null
+    currentSalary: string | null
+    degree: string | null
+    industries: string[]
+    languages: JsonValue | null
+    softSkills: string[]
+    interests: string[]
     _count: CandidateCountAggregateOutputType | null
     _avg: CandidateAvgAggregateOutputType | null
     _sum: CandidateSumAggregateOutputType | null
@@ -11124,22 +11168,30 @@ export namespace Prisma {
     university?: boolean
     major?: boolean
     gpa?: boolean
-    location?: boolean
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
-    summary?: boolean
+    location?: boolean
     desiredJob?: boolean
+    summary?: boolean
+    gender?: boolean
+    birthYear?: boolean
+    currentSalary?: boolean
+    degree?: boolean
+    industries?: boolean
+    languages?: boolean
+    softSkills?: boolean
+    interests?: boolean
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
+    certifications?: boolean | Candidate$certificationsArgs<ExtArgs>
     conversations?: boolean | Candidate$conversationsArgs<ExtArgs>
+    experiences?: boolean | Candidate$experiencesArgs<ExtArgs>
     jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>
     projects?: boolean | Candidate$projectsArgs<ExtArgs>
-    experiences?: boolean | Candidate$experiencesArgs<ExtArgs>
     savedJobs?: boolean | Candidate$savedJobsArgs<ExtArgs>
     skills?: boolean | Candidate$skillsArgs<ExtArgs>
-    certifications?: boolean | Candidate$certificationsArgs<ExtArgs>
     _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
 
@@ -11149,12 +11201,20 @@ export namespace Prisma {
     university?: boolean
     major?: boolean
     gpa?: boolean
-    location?: boolean
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
-    summary?: boolean
+    location?: boolean
     desiredJob?: boolean
+    summary?: boolean
+    gender?: boolean
+    birthYear?: boolean
+    currentSalary?: boolean
+    degree?: boolean
+    industries?: boolean
+    languages?: boolean
+    softSkills?: boolean
+    interests?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
 
@@ -11164,12 +11224,20 @@ export namespace Prisma {
     university?: boolean
     major?: boolean
     gpa?: boolean
-    location?: boolean
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
-    summary?: boolean
+    location?: boolean
     desiredJob?: boolean
+    summary?: boolean
+    gender?: boolean
+    birthYear?: boolean
+    currentSalary?: boolean
+    degree?: boolean
+    industries?: boolean
+    languages?: boolean
+    softSkills?: boolean
+    interests?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
 
@@ -11179,26 +11247,34 @@ export namespace Prisma {
     university?: boolean
     major?: boolean
     gpa?: boolean
-    location?: boolean
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
-    summary?: boolean
+    location?: boolean
     desiredJob?: boolean
+    summary?: boolean
+    gender?: boolean
+    birthYear?: boolean
+    currentSalary?: boolean
+    degree?: boolean
+    industries?: boolean
+    languages?: boolean
+    softSkills?: boolean
+    interests?: boolean
   }
 
-  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "location" | "cvUrl" | "userId" | "isOpenToWork" | "summary" | "desiredJob", ExtArgs["result"]["candidate"]>
+  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "gender" | "birthYear" | "currentSalary" | "degree" | "industries" | "languages" | "softSkills" | "interests", ExtArgs["result"]["candidate"]>
   export type CandidateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
+    certifications?: boolean | Candidate$certificationsArgs<ExtArgs>
     conversations?: boolean | Candidate$conversationsArgs<ExtArgs>
+    experiences?: boolean | Candidate$experiencesArgs<ExtArgs>
     jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>
     projects?: boolean | Candidate$projectsArgs<ExtArgs>
-    experiences?: boolean | Candidate$experiencesArgs<ExtArgs>
     savedJobs?: boolean | Candidate$savedJobsArgs<ExtArgs>
     skills?: boolean | Candidate$skillsArgs<ExtArgs>
-    certifications?: boolean | Candidate$certificationsArgs<ExtArgs>
     _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CandidateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11214,13 +11290,13 @@ export namespace Prisma {
       applications: Prisma.$ApplicationPayload<ExtArgs>[]
       cvs: Prisma.$CVPayload<ExtArgs>[]
       user: Prisma.$UserPayload<ExtArgs>
+      certifications: Prisma.$CertificationPayload<ExtArgs>[]
       conversations: Prisma.$ConversationPayload<ExtArgs>[]
+      experiences: Prisma.$ExperiencePayload<ExtArgs>[]
       jobMatches: Prisma.$JobMatchPayload<ExtArgs>[]
       projects: Prisma.$ProjectPayload<ExtArgs>[]
-      experiences: Prisma.$ExperiencePayload<ExtArgs>[]
       savedJobs: Prisma.$SavedJobPayload<ExtArgs>[]
       skills: Prisma.$SkillPayload<ExtArgs>[]
-      certifications: Prisma.$CertificationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       candidateId: string
@@ -11228,12 +11304,20 @@ export namespace Prisma {
       university: string | null
       major: string | null
       gpa: number | null
-      location: string | null
       cvUrl: string | null
       userId: string
       isOpenToWork: boolean
-      summary: string | null
+      location: string | null
       desiredJob: Prisma.JsonValue | null
+      summary: string | null
+      gender: string | null
+      birthYear: number | null
+      currentSalary: string | null
+      degree: string | null
+      industries: string[]
+      languages: Prisma.JsonValue | null
+      softSkills: string[]
+      interests: string[]
     }, ExtArgs["result"]["candidate"]>
     composites: {}
   }
@@ -11631,13 +11715,13 @@ export namespace Prisma {
     applications<T extends Candidate$applicationsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     cvs<T extends Candidate$cvsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$cvsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    certifications<T extends Candidate$certificationsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$certificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CertificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     conversations<T extends Candidate$conversationsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    experiences<T extends Candidate$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     jobMatches<T extends Candidate$jobMatchesArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$jobMatchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobMatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     projects<T extends Candidate$projectsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    experiences<T extends Candidate$experiencesArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$experiencesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     savedJobs<T extends Candidate$savedJobsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$savedJobsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     skills<T extends Candidate$skillsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    certifications<T extends Candidate$certificationsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$certificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CertificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11672,12 +11756,20 @@ export namespace Prisma {
     readonly university: FieldRef<"Candidate", 'String'>
     readonly major: FieldRef<"Candidate", 'String'>
     readonly gpa: FieldRef<"Candidate", 'Float'>
-    readonly location: FieldRef<"Candidate", 'String'>
     readonly cvUrl: FieldRef<"Candidate", 'String'>
     readonly userId: FieldRef<"Candidate", 'String'>
     readonly isOpenToWork: FieldRef<"Candidate", 'Boolean'>
-    readonly summary: FieldRef<"Candidate", 'String'>
+    readonly location: FieldRef<"Candidate", 'String'>
     readonly desiredJob: FieldRef<"Candidate", 'Json'>
+    readonly summary: FieldRef<"Candidate", 'String'>
+    readonly gender: FieldRef<"Candidate", 'String'>
+    readonly birthYear: FieldRef<"Candidate", 'Int'>
+    readonly currentSalary: FieldRef<"Candidate", 'String'>
+    readonly degree: FieldRef<"Candidate", 'String'>
+    readonly industries: FieldRef<"Candidate", 'String[]'>
+    readonly languages: FieldRef<"Candidate", 'Json'>
+    readonly softSkills: FieldRef<"Candidate", 'String[]'>
+    readonly interests: FieldRef<"Candidate", 'String[]'>
   }
     
 
@@ -12127,6 +12219,30 @@ export namespace Prisma {
   }
 
   /**
+   * Candidate.certifications
+   */
+  export type Candidate$certificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Certification
+     */
+    select?: CertificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Certification
+     */
+    omit?: CertificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CertificationInclude<ExtArgs> | null
+    where?: CertificationWhereInput
+    orderBy?: CertificationOrderByWithRelationInput | CertificationOrderByWithRelationInput[]
+    cursor?: CertificationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CertificationScalarFieldEnum | CertificationScalarFieldEnum[]
+  }
+
+  /**
    * Candidate.conversations
    */
   export type Candidate$conversationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12148,6 +12264,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ConversationScalarFieldEnum | ConversationScalarFieldEnum[]
+  }
+
+  /**
+   * Candidate.experiences
+   */
+  export type Candidate$experiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Experience
+     */
+    select?: ExperienceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Experience
+     */
+    omit?: ExperienceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExperienceInclude<ExtArgs> | null
+    where?: ExperienceWhereInput
+    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
+    cursor?: ExperienceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
   }
 
   /**
@@ -12199,30 +12339,6 @@ export namespace Prisma {
   }
 
   /**
-   * Candidate.experiences
-   */
-  export type Candidate$experiencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Experience
-     */
-    select?: ExperienceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Experience
-     */
-    omit?: ExperienceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExperienceInclude<ExtArgs> | null
-    where?: ExperienceWhereInput
-    orderBy?: ExperienceOrderByWithRelationInput | ExperienceOrderByWithRelationInput[]
-    cursor?: ExperienceWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[]
-  }
-
-  /**
    * Candidate.savedJobs
    */
   export type Candidate$savedJobsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12268,30 +12384,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SkillScalarFieldEnum | SkillScalarFieldEnum[]
-  }
-
-  /**
-   * Candidate.certifications
-   */
-  export type Candidate$certificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Certification
-     */
-    select?: CertificationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Certification
-     */
-    omit?: CertificationOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CertificationInclude<ExtArgs> | null
-    where?: CertificationWhereInput
-    orderBy?: CertificationOrderByWithRelationInput | CertificationOrderByWithRelationInput[]
-    cursor?: CertificationWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CertificationScalarFieldEnum | CertificationScalarFieldEnum[]
   }
 
   /**
@@ -38003,12 +38095,20 @@ export namespace Prisma {
     university: 'university',
     major: 'major',
     gpa: 'gpa',
-    location: 'location',
     cvUrl: 'cvUrl',
     userId: 'userId',
     isOpenToWork: 'isOpenToWork',
+    location: 'location',
+    desiredJob: 'desiredJob',
     summary: 'summary',
-    desiredJob: 'desiredJob'
+    gender: 'gender',
+    birthYear: 'birthYear',
+    currentSalary: 'currentSalary',
+    degree: 'degree',
+    industries: 'industries',
+    languages: 'languages',
+    softSkills: 'softSkills',
+    interests: 'interests'
   };
 
   export type CandidateScalarFieldEnum = (typeof CandidateScalarFieldEnum)[keyof typeof CandidateScalarFieldEnum]
@@ -39101,22 +39201,30 @@ export namespace Prisma {
     university?: StringNullableFilter<"Candidate"> | string | null
     major?: StringNullableFilter<"Candidate"> | string | null
     gpa?: FloatNullableFilter<"Candidate"> | number | null
-    location?: StringNullableFilter<"Candidate"> | string | null
     cvUrl?: StringNullableFilter<"Candidate"> | string | null
     userId?: StringFilter<"Candidate"> | string
     isOpenToWork?: BoolFilter<"Candidate"> | boolean
-    summary?: StringNullableFilter<"Candidate"> | string | null
+    location?: StringNullableFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableFilter<"Candidate">
+    summary?: StringNullableFilter<"Candidate"> | string | null
+    gender?: StringNullableFilter<"Candidate"> | string | null
+    birthYear?: IntNullableFilter<"Candidate"> | number | null
+    currentSalary?: StringNullableFilter<"Candidate"> | string | null
+    degree?: StringNullableFilter<"Candidate"> | string | null
+    industries?: StringNullableListFilter<"Candidate">
+    languages?: JsonNullableFilter<"Candidate">
+    softSkills?: StringNullableListFilter<"Candidate">
+    interests?: StringNullableListFilter<"Candidate">
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    certifications?: CertificationListRelationFilter
     conversations?: ConversationListRelationFilter
+    experiences?: ExperienceListRelationFilter
     jobMatches?: JobMatchListRelationFilter
     projects?: ProjectListRelationFilter
-    experiences?: ExperienceListRelationFilter
     savedJobs?: SavedJobListRelationFilter
     skills?: SkillListRelationFilter
-    certifications?: CertificationListRelationFilter
   }
 
   export type CandidateOrderByWithRelationInput = {
@@ -39125,22 +39233,30 @@ export namespace Prisma {
     university?: SortOrderInput | SortOrder
     major?: SortOrderInput | SortOrder
     gpa?: SortOrderInput | SortOrder
-    location?: SortOrderInput | SortOrder
     cvUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
-    summary?: SortOrderInput | SortOrder
+    location?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
+    gender?: SortOrderInput | SortOrder
+    birthYear?: SortOrderInput | SortOrder
+    currentSalary?: SortOrderInput | SortOrder
+    degree?: SortOrderInput | SortOrder
+    industries?: SortOrder
+    languages?: SortOrderInput | SortOrder
+    softSkills?: SortOrder
+    interests?: SortOrder
     applications?: ApplicationOrderByRelationAggregateInput
     cvs?: CVOrderByRelationAggregateInput
     user?: UserOrderByWithRelationInput
+    certifications?: CertificationOrderByRelationAggregateInput
     conversations?: ConversationOrderByRelationAggregateInput
+    experiences?: ExperienceOrderByRelationAggregateInput
     jobMatches?: JobMatchOrderByRelationAggregateInput
     projects?: ProjectOrderByRelationAggregateInput
-    experiences?: ExperienceOrderByRelationAggregateInput
     savedJobs?: SavedJobOrderByRelationAggregateInput
     skills?: SkillOrderByRelationAggregateInput
-    certifications?: CertificationOrderByRelationAggregateInput
   }
 
   export type CandidateWhereUniqueInput = Prisma.AtLeast<{
@@ -39153,21 +39269,29 @@ export namespace Prisma {
     university?: StringNullableFilter<"Candidate"> | string | null
     major?: StringNullableFilter<"Candidate"> | string | null
     gpa?: FloatNullableFilter<"Candidate"> | number | null
-    location?: StringNullableFilter<"Candidate"> | string | null
     cvUrl?: StringNullableFilter<"Candidate"> | string | null
     isOpenToWork?: BoolFilter<"Candidate"> | boolean
-    summary?: StringNullableFilter<"Candidate"> | string | null
+    location?: StringNullableFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableFilter<"Candidate">
+    summary?: StringNullableFilter<"Candidate"> | string | null
+    gender?: StringNullableFilter<"Candidate"> | string | null
+    birthYear?: IntNullableFilter<"Candidate"> | number | null
+    currentSalary?: StringNullableFilter<"Candidate"> | string | null
+    degree?: StringNullableFilter<"Candidate"> | string | null
+    industries?: StringNullableListFilter<"Candidate">
+    languages?: JsonNullableFilter<"Candidate">
+    softSkills?: StringNullableListFilter<"Candidate">
+    interests?: StringNullableListFilter<"Candidate">
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    certifications?: CertificationListRelationFilter
     conversations?: ConversationListRelationFilter
+    experiences?: ExperienceListRelationFilter
     jobMatches?: JobMatchListRelationFilter
     projects?: ProjectListRelationFilter
-    experiences?: ExperienceListRelationFilter
     savedJobs?: SavedJobListRelationFilter
     skills?: SkillListRelationFilter
-    certifications?: CertificationListRelationFilter
   }, "candidateId" | "userId">
 
   export type CandidateOrderByWithAggregationInput = {
@@ -39176,12 +39300,20 @@ export namespace Prisma {
     university?: SortOrderInput | SortOrder
     major?: SortOrderInput | SortOrder
     gpa?: SortOrderInput | SortOrder
-    location?: SortOrderInput | SortOrder
     cvUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
-    summary?: SortOrderInput | SortOrder
+    location?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
+    summary?: SortOrderInput | SortOrder
+    gender?: SortOrderInput | SortOrder
+    birthYear?: SortOrderInput | SortOrder
+    currentSalary?: SortOrderInput | SortOrder
+    degree?: SortOrderInput | SortOrder
+    industries?: SortOrder
+    languages?: SortOrderInput | SortOrder
+    softSkills?: SortOrder
+    interests?: SortOrder
     _count?: CandidateCountOrderByAggregateInput
     _avg?: CandidateAvgOrderByAggregateInput
     _max?: CandidateMaxOrderByAggregateInput
@@ -39198,12 +39330,20 @@ export namespace Prisma {
     university?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     major?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     gpa?: FloatNullableWithAggregatesFilter<"Candidate"> | number | null
-    location?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     cvUrl?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     userId?: StringWithAggregatesFilter<"Candidate"> | string
     isOpenToWork?: BoolWithAggregatesFilter<"Candidate"> | boolean
-    summary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    location?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableWithAggregatesFilter<"Candidate">
+    summary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    gender?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    birthYear?: IntNullableWithAggregatesFilter<"Candidate"> | number | null
+    currentSalary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    degree?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    industries?: StringNullableListFilter<"Candidate">
+    languages?: JsonNullableWithAggregatesFilter<"Candidate">
+    softSkills?: StringNullableListFilter<"Candidate">
+    interests?: StringNullableListFilter<"Candidate">
   }
 
   export type ExperienceWhereInput = {
@@ -41442,21 +41582,29 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateInput = {
@@ -41465,21 +41613,29 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUpdateInput = {
@@ -41488,21 +41644,29 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateInput = {
@@ -41511,21 +41675,29 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateCreateManyInput = {
@@ -41534,12 +41706,20 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
   }
 
   export type CandidateUpdateManyMutationInput = {
@@ -41548,11 +41728,19 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
   }
 
   export type CandidateUncheckedUpdateManyInput = {
@@ -41561,12 +41749,20 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
   }
 
   export type ExperienceCreateInput = {
@@ -44057,6 +44253,17 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type ApplicationListRelationFilter = {
     every?: ApplicationWhereInput
     some?: ApplicationWhereInput
@@ -44069,10 +44276,22 @@ export namespace Prisma {
     none?: CVWhereInput
   }
 
+  export type CertificationListRelationFilter = {
+    every?: CertificationWhereInput
+    some?: CertificationWhereInput
+    none?: CertificationWhereInput
+  }
+
   export type ConversationListRelationFilter = {
     every?: ConversationWhereInput
     some?: ConversationWhereInput
     none?: ConversationWhereInput
+  }
+
+  export type ExperienceListRelationFilter = {
+    every?: ExperienceWhereInput
+    some?: ExperienceWhereInput
+    none?: ExperienceWhereInput
   }
 
   export type JobMatchListRelationFilter = {
@@ -44087,12 +44306,6 @@ export namespace Prisma {
     none?: ProjectWhereInput
   }
 
-  export type ExperienceListRelationFilter = {
-    every?: ExperienceWhereInput
-    some?: ExperienceWhereInput
-    none?: ExperienceWhereInput
-  }
-
   export type SavedJobListRelationFilter = {
     every?: SavedJobWhereInput
     some?: SavedJobWhereInput
@@ -44105,12 +44318,6 @@ export namespace Prisma {
     none?: SkillWhereInput
   }
 
-  export type CertificationListRelationFilter = {
-    every?: CertificationWhereInput
-    some?: CertificationWhereInput
-    none?: CertificationWhereInput
-  }
-
   export type ApplicationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -44119,7 +44326,15 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type CertificationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ConversationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ExperienceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -44131,19 +44346,11 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type ExperienceOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type SavedJobOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type SkillOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type CertificationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -44153,16 +44360,25 @@ export namespace Prisma {
     university?: SortOrder
     major?: SortOrder
     gpa?: SortOrder
-    location?: SortOrder
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
-    summary?: SortOrder
+    location?: SortOrder
     desiredJob?: SortOrder
+    summary?: SortOrder
+    gender?: SortOrder
+    birthYear?: SortOrder
+    currentSalary?: SortOrder
+    degree?: SortOrder
+    industries?: SortOrder
+    languages?: SortOrder
+    softSkills?: SortOrder
+    interests?: SortOrder
   }
 
   export type CandidateAvgOrderByAggregateInput = {
     gpa?: SortOrder
+    birthYear?: SortOrder
   }
 
   export type CandidateMaxOrderByAggregateInput = {
@@ -44171,11 +44387,15 @@ export namespace Prisma {
     university?: SortOrder
     major?: SortOrder
     gpa?: SortOrder
-    location?: SortOrder
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    location?: SortOrder
     summary?: SortOrder
+    gender?: SortOrder
+    birthYear?: SortOrder
+    currentSalary?: SortOrder
+    degree?: SortOrder
   }
 
   export type CandidateMinOrderByAggregateInput = {
@@ -44184,15 +44404,20 @@ export namespace Prisma {
     university?: SortOrder
     major?: SortOrder
     gpa?: SortOrder
-    location?: SortOrder
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    location?: SortOrder
     summary?: SortOrder
+    gender?: SortOrder
+    birthYear?: SortOrder
+    currentSalary?: SortOrder
+    degree?: SortOrder
   }
 
   export type CandidateSumOrderByAggregateInput = {
     gpa?: SortOrder
+    birthYear?: SortOrder
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -44209,6 +44434,22 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type CandidateScalarRelationFilter = {
@@ -44403,17 +44644,6 @@ export namespace Prisma {
     violationCount?: SortOrder
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type EnumTransactionTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
     in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
@@ -44472,22 +44702,6 @@ export namespace Prisma {
     amount?: SortOrder
     orderCode?: SortOrder
     realMoney?: SortOrder
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -46068,6 +46282,18 @@ export namespace Prisma {
     deleteMany?: CompanyScalarWhereInput | CompanyScalarWhereInput[]
   }
 
+  export type CandidateCreateindustriesInput = {
+    set: string[]
+  }
+
+  export type CandidateCreatesoftSkillsInput = {
+    set: string[]
+  }
+
+  export type CandidateCreateinterestsInput = {
+    set: string[]
+  }
+
   export type ApplicationCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -46088,11 +46314,25 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type CertificationCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
+    createMany?: CertificationCreateManyCandidateInputEnvelope
+    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+  }
+
   export type ConversationCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ConversationCreateWithoutCandidateInput, ConversationUncheckedCreateWithoutCandidateInput> | ConversationCreateWithoutCandidateInput[] | ConversationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ConversationCreateOrConnectWithoutCandidateInput | ConversationCreateOrConnectWithoutCandidateInput[]
     createMany?: ConversationCreateManyCandidateInputEnvelope
     connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+  }
+
+  export type ExperienceCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
+    createMany?: ExperienceCreateManyCandidateInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
   }
 
   export type JobMatchCreateNestedManyWithoutCandidateInput = {
@@ -46109,13 +46349,6 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
   }
 
-  export type ExperienceCreateNestedManyWithoutCandidateInput = {
-    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
-    createMany?: ExperienceCreateManyCandidateInputEnvelope
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-  }
-
   export type SavedJobCreateNestedManyWithoutCandidateInput = {
     create?: XOR<SavedJobCreateWithoutCandidateInput, SavedJobUncheckedCreateWithoutCandidateInput> | SavedJobCreateWithoutCandidateInput[] | SavedJobUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: SavedJobCreateOrConnectWithoutCandidateInput | SavedJobCreateOrConnectWithoutCandidateInput[]
@@ -46128,13 +46361,6 @@ export namespace Prisma {
     connectOrCreate?: SkillCreateOrConnectWithoutCandidateInput | SkillCreateOrConnectWithoutCandidateInput[]
     createMany?: SkillCreateManyCandidateInputEnvelope
     connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[]
-  }
-
-  export type CertificationCreateNestedManyWithoutCandidateInput = {
-    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
-    createMany?: CertificationCreateManyCandidateInputEnvelope
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
   }
 
   export type ApplicationUncheckedCreateNestedManyWithoutCandidateInput = {
@@ -46151,11 +46377,25 @@ export namespace Prisma {
     connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
   }
 
+  export type CertificationUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
+    createMany?: CertificationCreateManyCandidateInputEnvelope
+    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+  }
+
   export type ConversationUncheckedCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ConversationCreateWithoutCandidateInput, ConversationUncheckedCreateWithoutCandidateInput> | ConversationCreateWithoutCandidateInput[] | ConversationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ConversationCreateOrConnectWithoutCandidateInput | ConversationCreateOrConnectWithoutCandidateInput[]
     createMany?: ConversationCreateManyCandidateInputEnvelope
     connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[]
+  }
+
+  export type ExperienceUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
+    createMany?: ExperienceCreateManyCandidateInputEnvelope
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
   }
 
   export type JobMatchUncheckedCreateNestedManyWithoutCandidateInput = {
@@ -46172,13 +46412,6 @@ export namespace Prisma {
     connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[]
   }
 
-  export type ExperienceUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
-    createMany?: ExperienceCreateManyCandidateInputEnvelope
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-  }
-
   export type SavedJobUncheckedCreateNestedManyWithoutCandidateInput = {
     create?: XOR<SavedJobCreateWithoutCandidateInput, SavedJobUncheckedCreateWithoutCandidateInput> | SavedJobCreateWithoutCandidateInput[] | SavedJobUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: SavedJobCreateOrConnectWithoutCandidateInput | SavedJobCreateOrConnectWithoutCandidateInput[]
@@ -46193,19 +46426,35 @@ export namespace Prisma {
     connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[]
   }
 
-  export type CertificationUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
-    createMany?: CertificationCreateManyCandidateInputEnvelope
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-  }
-
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type CandidateUpdateindustriesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CandidateUpdatesoftSkillsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type CandidateUpdateinterestsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type ApplicationUpdateManyWithoutCandidateNestedInput = {
@@ -46244,6 +46493,20 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCandidateInput, UserUpdateWithoutCandidateInput>, UserUncheckedUpdateWithoutCandidateInput>
   }
 
+  export type CertificationUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
+    upsert?: CertificationUpsertWithWhereUniqueWithoutCandidateInput | CertificationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: CertificationCreateManyCandidateInputEnvelope
+    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    disconnect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    update?: CertificationUpdateWithWhereUniqueWithoutCandidateInput | CertificationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: CertificationUpdateManyWithWhereWithoutCandidateInput | CertificationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
+  }
+
   export type ConversationUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<ConversationCreateWithoutCandidateInput, ConversationUncheckedCreateWithoutCandidateInput> | ConversationCreateWithoutCandidateInput[] | ConversationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ConversationCreateOrConnectWithoutCandidateInput | ConversationCreateOrConnectWithoutCandidateInput[]
@@ -46256,6 +46519,20 @@ export namespace Prisma {
     update?: ConversationUpdateWithWhereUniqueWithoutCandidateInput | ConversationUpdateWithWhereUniqueWithoutCandidateInput[]
     updateMany?: ConversationUpdateManyWithWhereWithoutCandidateInput | ConversationUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[]
+  }
+
+  export type ExperienceUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutCandidateInput | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: ExperienceCreateManyCandidateInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutCandidateInput | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutCandidateInput | ExperienceUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
   }
 
   export type JobMatchUpdateManyWithoutCandidateNestedInput = {
@@ -46286,20 +46563,6 @@ export namespace Prisma {
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
   }
 
-  export type ExperienceUpdateManyWithoutCandidateNestedInput = {
-    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
-    upsert?: ExperienceUpsertWithWhereUniqueWithoutCandidateInput | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
-    createMany?: ExperienceCreateManyCandidateInputEnvelope
-    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    update?: ExperienceUpdateWithWhereUniqueWithoutCandidateInput | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
-    updateMany?: ExperienceUpdateManyWithWhereWithoutCandidateInput | ExperienceUpdateManyWithWhereWithoutCandidateInput[]
-    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
-  }
-
   export type SavedJobUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<SavedJobCreateWithoutCandidateInput, SavedJobUncheckedCreateWithoutCandidateInput> | SavedJobCreateWithoutCandidateInput[] | SavedJobUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: SavedJobCreateOrConnectWithoutCandidateInput | SavedJobCreateOrConnectWithoutCandidateInput[]
@@ -46326,20 +46589,6 @@ export namespace Prisma {
     update?: SkillUpdateWithWhereUniqueWithoutCandidateInput | SkillUpdateWithWhereUniqueWithoutCandidateInput[]
     updateMany?: SkillUpdateManyWithWhereWithoutCandidateInput | SkillUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: SkillScalarWhereInput | SkillScalarWhereInput[]
-  }
-
-  export type CertificationUpdateManyWithoutCandidateNestedInput = {
-    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
-    upsert?: CertificationUpsertWithWhereUniqueWithoutCandidateInput | CertificationUpsertWithWhereUniqueWithoutCandidateInput[]
-    createMany?: CertificationCreateManyCandidateInputEnvelope
-    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    disconnect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    update?: CertificationUpdateWithWhereUniqueWithoutCandidateInput | CertificationUpdateWithWhereUniqueWithoutCandidateInput[]
-    updateMany?: CertificationUpdateManyWithWhereWithoutCandidateInput | CertificationUpdateManyWithWhereWithoutCandidateInput[]
-    deleteMany?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
   }
 
   export type ApplicationUncheckedUpdateManyWithoutCandidateNestedInput = {
@@ -46370,6 +46619,20 @@ export namespace Prisma {
     deleteMany?: CVScalarWhereInput | CVScalarWhereInput[]
   }
 
+  export type CertificationUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
+    upsert?: CertificationUpsertWithWhereUniqueWithoutCandidateInput | CertificationUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: CertificationCreateManyCandidateInputEnvelope
+    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    disconnect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
+    update?: CertificationUpdateWithWhereUniqueWithoutCandidateInput | CertificationUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: CertificationUpdateManyWithWhereWithoutCandidateInput | CertificationUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
+  }
+
   export type ConversationUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<ConversationCreateWithoutCandidateInput, ConversationUncheckedCreateWithoutCandidateInput> | ConversationCreateWithoutCandidateInput[] | ConversationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ConversationCreateOrConnectWithoutCandidateInput | ConversationCreateOrConnectWithoutCandidateInput[]
@@ -46382,6 +46645,20 @@ export namespace Prisma {
     update?: ConversationUpdateWithWhereUniqueWithoutCandidateInput | ConversationUpdateWithWhereUniqueWithoutCandidateInput[]
     updateMany?: ConversationUpdateManyWithWhereWithoutCandidateInput | ConversationUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[]
+  }
+
+  export type ExperienceUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
+    upsert?: ExperienceUpsertWithWhereUniqueWithoutCandidateInput | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: ExperienceCreateManyCandidateInputEnvelope
+    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
+    update?: ExperienceUpdateWithWhereUniqueWithoutCandidateInput | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: ExperienceUpdateManyWithWhereWithoutCandidateInput | ExperienceUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
   }
 
   export type JobMatchUncheckedUpdateManyWithoutCandidateNestedInput = {
@@ -46412,20 +46689,6 @@ export namespace Prisma {
     deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[]
   }
 
-  export type ExperienceUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput> | ExperienceCreateWithoutCandidateInput[] | ExperienceUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: ExperienceCreateOrConnectWithoutCandidateInput | ExperienceCreateOrConnectWithoutCandidateInput[]
-    upsert?: ExperienceUpsertWithWhereUniqueWithoutCandidateInput | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[]
-    createMany?: ExperienceCreateManyCandidateInputEnvelope
-    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[]
-    update?: ExperienceUpdateWithWhereUniqueWithoutCandidateInput | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[]
-    updateMany?: ExperienceUpdateManyWithWhereWithoutCandidateInput | ExperienceUpdateManyWithWhereWithoutCandidateInput[]
-    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
-  }
-
   export type SavedJobUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<SavedJobCreateWithoutCandidateInput, SavedJobUncheckedCreateWithoutCandidateInput> | SavedJobCreateWithoutCandidateInput[] | SavedJobUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: SavedJobCreateOrConnectWithoutCandidateInput | SavedJobCreateOrConnectWithoutCandidateInput[]
@@ -46452,20 +46715,6 @@ export namespace Prisma {
     update?: SkillUpdateWithWhereUniqueWithoutCandidateInput | SkillUpdateWithWhereUniqueWithoutCandidateInput[]
     updateMany?: SkillUpdateManyWithWhereWithoutCandidateInput | SkillUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: SkillScalarWhereInput | SkillScalarWhereInput[]
-  }
-
-  export type CertificationUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput> | CertificationCreateWithoutCandidateInput[] | CertificationUncheckedCreateWithoutCandidateInput[]
-    connectOrCreate?: CertificationCreateOrConnectWithoutCandidateInput | CertificationCreateOrConnectWithoutCandidateInput[]
-    upsert?: CertificationUpsertWithWhereUniqueWithoutCandidateInput | CertificationUpsertWithWhereUniqueWithoutCandidateInput[]
-    createMany?: CertificationCreateManyCandidateInputEnvelope
-    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    disconnect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[]
-    update?: CertificationUpdateWithWhereUniqueWithoutCandidateInput | CertificationUpdateWithWhereUniqueWithoutCandidateInput[]
-    updateMany?: CertificationUpdateManyWithWhereWithoutCandidateInput | CertificationUpdateManyWithWhereWithoutCandidateInput[]
-    deleteMany?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
   }
 
   export type CandidateCreateNestedOneWithoutExperiencesInput = {
@@ -46719,14 +46968,6 @@ export namespace Prisma {
     create?: XOR<RecruiterWalletCreateWithoutTransactionsInput, RecruiterWalletUncheckedCreateWithoutTransactionsInput>
     connectOrCreate?: RecruiterWalletCreateOrConnectWithoutTransactionsInput
     connect?: RecruiterWalletWhereUniqueInput
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type EnumTransactionTypeFieldUpdateOperationsInput = {
@@ -47876,6 +48117,22 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumSkillLevelFilter<$PrismaModel = never> = {
     equals?: $Enums.SkillLevel | EnumSkillLevelFieldRefInput<$PrismaModel>
     in?: $Enums.SkillLevel[] | ListEnumSkillLevelFieldRefInput<$PrismaModel>
@@ -47898,22 +48155,6 @@ export namespace Prisma {
     in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
     notIn?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
     not?: NestedEnumTransactionTypeFilter<$PrismaModel> | $Enums.TransactionType
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumTransactionTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -48172,20 +48413,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutUserInput = {
@@ -48194,20 +48443,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutUserInput = {
@@ -48408,20 +48665,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutUserInput = {
@@ -48430,20 +48695,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type JobAlertUpsertWithWhereUniqueWithoutUserInput = {
@@ -49381,6 +49654,26 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutCandidateInput, UserUncheckedCreateWithoutCandidateInput>
   }
 
+  export type CertificationCreateWithoutCandidateInput = {
+    certificationId?: string
+    name: string
+  }
+
+  export type CertificationUncheckedCreateWithoutCandidateInput = {
+    certificationId?: string
+    name: string
+  }
+
+  export type CertificationCreateOrConnectWithoutCandidateInput = {
+    where: CertificationWhereUniqueInput
+    create: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type CertificationCreateManyCandidateInputEnvelope = {
+    data: CertificationCreateManyCandidateInput | CertificationCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ConversationCreateWithoutCandidateInput = {
     conversationId?: string
     lastMessage?: string | null
@@ -49408,6 +49701,32 @@ export namespace Prisma {
 
   export type ConversationCreateManyCandidateInputEnvelope = {
     data: ConversationCreateManyCandidateInput | ConversationCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ExperienceCreateWithoutCandidateInput = {
+    experienceId?: string
+    company: string
+    role: string
+    duration: string
+    description?: string | null
+  }
+
+  export type ExperienceUncheckedCreateWithoutCandidateInput = {
+    experienceId?: string
+    company: string
+    role: string
+    duration: string
+    description?: string | null
+  }
+
+  export type ExperienceCreateOrConnectWithoutCandidateInput = {
+    where: ExperienceWhereUniqueInput
+    create: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type ExperienceCreateManyCandidateInputEnvelope = {
+    data: ExperienceCreateManyCandidateInput | ExperienceCreateManyCandidateInput[]
     skipDuplicates?: boolean
   }
 
@@ -49465,32 +49784,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type ExperienceCreateWithoutCandidateInput = {
-    experienceId?: string
-    company: string
-    role: string
-    duration: string
-    description?: string | null
-  }
-
-  export type ExperienceUncheckedCreateWithoutCandidateInput = {
-    experienceId?: string
-    company: string
-    role: string
-    duration: string
-    description?: string | null
-  }
-
-  export type ExperienceCreateOrConnectWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput
-    create: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput>
-  }
-
-  export type ExperienceCreateManyCandidateInputEnvelope = {
-    data: ExperienceCreateManyCandidateInput | ExperienceCreateManyCandidateInput[]
-    skipDuplicates?: boolean
-  }
-
   export type SavedJobCreateWithoutCandidateInput = {
     savedJobId?: string
     savedAt?: Date | string
@@ -49534,26 +49827,6 @@ export namespace Prisma {
 
   export type SkillCreateManyCandidateInputEnvelope = {
     data: SkillCreateManyCandidateInput | SkillCreateManyCandidateInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CertificationCreateWithoutCandidateInput = {
-    certificationId?: string
-    name: string
-  }
-
-  export type CertificationUncheckedCreateWithoutCandidateInput = {
-    certificationId?: string
-    name: string
-  }
-
-  export type CertificationCreateOrConnectWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput
-    create: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput>
-  }
-
-  export type CertificationCreateManyCandidateInputEnvelope = {
-    data: CertificationCreateManyCandidateInput | CertificationCreateManyCandidateInput[]
     skipDuplicates?: boolean
   }
 
@@ -49684,6 +49957,31 @@ export namespace Prisma {
     userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type CertificationUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: CertificationWhereUniqueInput
+    update: XOR<CertificationUpdateWithoutCandidateInput, CertificationUncheckedUpdateWithoutCandidateInput>
+    create: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type CertificationUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: CertificationWhereUniqueInput
+    data: XOR<CertificationUpdateWithoutCandidateInput, CertificationUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type CertificationUpdateManyWithWhereWithoutCandidateInput = {
+    where: CertificationScalarWhereInput
+    data: XOR<CertificationUpdateManyMutationInput, CertificationUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type CertificationScalarWhereInput = {
+    AND?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
+    OR?: CertificationScalarWhereInput[]
+    NOT?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
+    certificationId?: StringFilter<"Certification"> | string
+    name?: StringFilter<"Certification"> | string
+    candidateId?: StringFilter<"Certification"> | string
+  }
+
   export type ConversationUpsertWithWhereUniqueWithoutCandidateInput = {
     where: ConversationWhereUniqueInput
     update: XOR<ConversationUpdateWithoutCandidateInput, ConversationUncheckedUpdateWithoutCandidateInput>
@@ -49711,6 +50009,34 @@ export namespace Prisma {
     isRead?: BoolFilter<"Conversation"> | boolean
     updatedAt?: DateTimeFilter<"Conversation"> | Date | string
     userId?: StringNullableFilter<"Conversation"> | string | null
+  }
+
+  export type ExperienceUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: ExperienceWhereUniqueInput
+    update: XOR<ExperienceUpdateWithoutCandidateInput, ExperienceUncheckedUpdateWithoutCandidateInput>
+    create: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type ExperienceUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: ExperienceWhereUniqueInput
+    data: XOR<ExperienceUpdateWithoutCandidateInput, ExperienceUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type ExperienceUpdateManyWithWhereWithoutCandidateInput = {
+    where: ExperienceScalarWhereInput
+    data: XOR<ExperienceUpdateManyMutationInput, ExperienceUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type ExperienceScalarWhereInput = {
+    AND?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+    OR?: ExperienceScalarWhereInput[]
+    NOT?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
+    experienceId?: StringFilter<"Experience"> | string
+    company?: StringFilter<"Experience"> | string
+    role?: StringFilter<"Experience"> | string
+    duration?: StringFilter<"Experience"> | string
+    description?: StringNullableFilter<"Experience"> | string | null
+    candidateId?: StringFilter<"Experience"> | string
   }
 
   export type JobMatchUpsertWithWhereUniqueWithoutCandidateInput = {
@@ -49770,34 +50096,6 @@ export namespace Prisma {
     candidateId?: StringFilter<"Project"> | string
   }
 
-  export type ExperienceUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput
-    update: XOR<ExperienceUpdateWithoutCandidateInput, ExperienceUncheckedUpdateWithoutCandidateInput>
-    create: XOR<ExperienceCreateWithoutCandidateInput, ExperienceUncheckedCreateWithoutCandidateInput>
-  }
-
-  export type ExperienceUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput
-    data: XOR<ExperienceUpdateWithoutCandidateInput, ExperienceUncheckedUpdateWithoutCandidateInput>
-  }
-
-  export type ExperienceUpdateManyWithWhereWithoutCandidateInput = {
-    where: ExperienceScalarWhereInput
-    data: XOR<ExperienceUpdateManyMutationInput, ExperienceUncheckedUpdateManyWithoutCandidateInput>
-  }
-
-  export type ExperienceScalarWhereInput = {
-    AND?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
-    OR?: ExperienceScalarWhereInput[]
-    NOT?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[]
-    experienceId?: StringFilter<"Experience"> | string
-    company?: StringFilter<"Experience"> | string
-    role?: StringFilter<"Experience"> | string
-    duration?: StringFilter<"Experience"> | string
-    description?: StringNullableFilter<"Experience"> | string | null
-    candidateId?: StringFilter<"Experience"> | string
-  }
-
   export type SavedJobUpsertWithWhereUniqueWithoutCandidateInput = {
     where: SavedJobWhereUniqueInput
     update: XOR<SavedJobUpdateWithoutCandidateInput, SavedJobUncheckedUpdateWithoutCandidateInput>
@@ -49851,51 +50149,34 @@ export namespace Prisma {
     category?: StringNullableFilter<"Skill"> | string | null
   }
 
-  export type CertificationUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput
-    update: XOR<CertificationUpdateWithoutCandidateInput, CertificationUncheckedUpdateWithoutCandidateInput>
-    create: XOR<CertificationCreateWithoutCandidateInput, CertificationUncheckedCreateWithoutCandidateInput>
-  }
-
-  export type CertificationUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput
-    data: XOR<CertificationUpdateWithoutCandidateInput, CertificationUncheckedUpdateWithoutCandidateInput>
-  }
-
-  export type CertificationUpdateManyWithWhereWithoutCandidateInput = {
-    where: CertificationScalarWhereInput
-    data: XOR<CertificationUpdateManyMutationInput, CertificationUncheckedUpdateManyWithoutCandidateInput>
-  }
-
-  export type CertificationScalarWhereInput = {
-    AND?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
-    OR?: CertificationScalarWhereInput[]
-    NOT?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
-    certificationId?: StringFilter<"Certification"> | string
-    name?: StringFilter<"Certification"> | string
-    candidateId?: StringFilter<"Certification"> | string
-  }
-
   export type CandidateCreateWithoutExperiencesInput = {
     candidateId?: string
     fullName: string
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutExperiencesInput = {
@@ -49904,20 +50185,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutExperiencesInput = {
@@ -49942,20 +50231,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutExperiencesInput = {
@@ -49964,20 +50261,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateCreateWithoutCertificationsInput = {
@@ -49986,18 +50291,26 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
   }
@@ -50008,18 +50321,26 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
@@ -50046,18 +50367,26 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
   }
@@ -50068,18 +50397,26 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
@@ -50090,20 +50427,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutSkillsInput = {
@@ -50112,20 +50457,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutSkillsInput = {
@@ -50150,20 +50503,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutSkillsInput = {
@@ -50172,20 +50533,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateCreateWithoutProjectsInput = {
@@ -50194,20 +50563,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutProjectsInput = {
@@ -50216,20 +50593,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutProjectsInput = {
@@ -50254,20 +50639,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutProjectsInput = {
@@ -50276,20 +50669,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type ConversationCreateWithoutRecruiterInput = {
@@ -52014,20 +52415,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
-    projects?: ProjectCreateNestedManyWithoutCandidateInput
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput
+    projects?: ProjectCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutJobMatchesInput = {
@@ -52036,20 +52445,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutJobMatchesInput = {
@@ -52149,20 +52566,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutJobMatchesInput = {
@@ -52171,20 +52596,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type JobPostingUpsertWithoutJobMatchesInput = {
@@ -52316,20 +52749,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCvsInput = {
@@ -52338,20 +52779,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCvsInput = {
@@ -52420,20 +52869,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCvsInput = {
@@ -52442,20 +52899,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUnlockUpsertWithWhereUniqueWithoutCvInput = {
@@ -52493,20 +52958,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutApplicationsInput = {
@@ -52515,20 +52988,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutApplicationsInput = {
@@ -52657,20 +53138,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutApplicationsInput = {
@@ -52679,20 +53168,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type CVUpsertWithoutApplicationsInput = {
@@ -52817,20 +53314,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
     conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutSavedJobsInput = {
@@ -52839,20 +53344,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutSavedJobsInput = {
@@ -52952,20 +53465,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutSavedJobsInput = {
@@ -52974,20 +53495,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type JobPostingUpsertWithoutSavedJobsInput = {
@@ -53077,20 +53606,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
     projects?: ProjectCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
     skills?: SkillCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutConversationsInput = {
@@ -53099,20 +53636,28 @@ export namespace Prisma {
     university?: string | null
     major?: string | null
     gpa?: number | null
-    location?: string | null
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
-    summary?: string | null
+    location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    gender?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    degree?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutConversationsInput = {
@@ -53212,20 +53757,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
     skills?: SkillUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutConversationsInput = {
@@ -53234,20 +53787,28 @@ export namespace Prisma {
     university?: NullableStringFieldUpdateOperationsInput | string | null
     major?: NullableStringFieldUpdateOperationsInput | string | null
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
-    location?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
-    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
   }
 
   export type RecruiterUpsertWithoutConversationsInput = {
@@ -54088,6 +54649,11 @@ export namespace Prisma {
     parsedData?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type CertificationCreateManyCandidateInput = {
+    certificationId?: string
+    name: string
+  }
+
   export type ConversationCreateManyCandidateInput = {
     conversationId?: string
     recruiterId: string
@@ -54095,6 +54661,14 @@ export namespace Prisma {
     isRead?: boolean
     updatedAt?: Date | string
     userId?: string | null
+  }
+
+  export type ExperienceCreateManyCandidateInput = {
+    experienceId?: string
+    company: string
+    role: string
+    duration: string
+    description?: string | null
   }
 
   export type JobMatchCreateManyCandidateInput = {
@@ -54114,14 +54688,6 @@ export namespace Prisma {
     technology?: string | null
   }
 
-  export type ExperienceCreateManyCandidateInput = {
-    experienceId?: string
-    company: string
-    role: string
-    duration: string
-    description?: string | null
-  }
-
   export type SavedJobCreateManyCandidateInput = {
     savedJobId?: string
     savedAt?: Date | string
@@ -54133,11 +54699,6 @@ export namespace Prisma {
     skillName: string
     level?: $Enums.SkillLevel
     category?: string | null
-  }
-
-  export type CertificationCreateManyCandidateInput = {
-    certificationId?: string
-    name: string
   }
 
   export type ApplicationUpdateWithoutCandidateInput = {
@@ -54222,6 +54783,21 @@ export namespace Prisma {
     parsedData?: NullableJsonNullValueInput | InputJsonValue
   }
 
+  export type CertificationUpdateWithoutCandidateInput = {
+    certificationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CertificationUncheckedUpdateWithoutCandidateInput = {
+    certificationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CertificationUncheckedUpdateManyWithoutCandidateInput = {
+    certificationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
   export type ConversationUpdateWithoutCandidateInput = {
     conversationId?: StringFieldUpdateOperationsInput | string
     lastMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54249,6 +54825,30 @@ export namespace Prisma {
     isRead?: BoolFieldUpdateOperationsInput | boolean
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     userId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExperienceUpdateWithoutCandidateInput = {
+    experienceId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    duration?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExperienceUncheckedUpdateWithoutCandidateInput = {
+    experienceId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    duration?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ExperienceUncheckedUpdateManyWithoutCandidateInput = {
+    experienceId?: StringFieldUpdateOperationsInput | string
+    company?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    duration?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type JobMatchUpdateWithoutCandidateInput = {
@@ -54302,30 +54902,6 @@ export namespace Prisma {
     technology?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type ExperienceUpdateWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    duration?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type ExperienceUncheckedUpdateWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    duration?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type ExperienceUncheckedUpdateManyWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string
-    company?: StringFieldUpdateOperationsInput | string
-    role?: StringFieldUpdateOperationsInput | string
-    duration?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
   export type SavedJobUpdateWithoutCandidateInput = {
     savedJobId?: StringFieldUpdateOperationsInput | string
     savedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -54363,21 +54939,6 @@ export namespace Prisma {
     skillName?: StringFieldUpdateOperationsInput | string
     level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel
     category?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type CertificationUpdateWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CertificationUncheckedUpdateWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CertificationUncheckedUpdateManyWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
   }
 
   export type ConversationCreateManyRecruiterInput = {
