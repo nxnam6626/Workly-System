@@ -27,7 +27,7 @@ const MOCK_HISTORY = [
     salaryMin: 2500,
     salaryMax: 4500,
     currency: "USD",
-    locationCity: "H? Ch� Minh",
+    locationCity: "Hồ Chí Minh",
     viewedAt: new Date().toISOString()
   },
   {
@@ -37,7 +37,7 @@ const MOCK_HISTORY = [
     salaryMin: 1500,
     salaryMax: 3000,
     currency: "USD",
-    locationCity: "H� N?i",
+    locationCity: "Hà Nội",
     viewedAt: new Date(Date.now() - 3600000).toISOString()
   }
 ];
@@ -70,7 +70,7 @@ export default function ViewedJobsPage() {
     return (
       <div className="min-h-screen bg-[#fcfdfe] pt-32 pb-12 flex flex-col items-center justify-center">
         <div className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin mb-4" />
-        <p className="text-slate-400 font-bold tracking-tight">�ang t?i l?ch s? xem...</p>
+        <p className="text-slate-400 font-bold tracking-tight">Đang tải lịch sử xem...</p>
       </div>
     );
   }
@@ -92,8 +92,8 @@ export default function ViewedJobsPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
               <div className="space-y-1">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Vi?c l�m <span className="text-blue-500">�� xem</span></h1>
-                <p className="text-sm text-slate-500 font-medium font-sans">L?ch s? xem vi?c l�m gi�p b?n d? d?nh hu?ng v� t�m l?i nh?ng co h?i d� lu?t qua.</p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-blue-500">Đã xem</span></h1>
+                <p className="text-sm text-slate-500 font-medium font-sans">Lịch sử xem việc làm giúp bạn dễ định hướng và tìm lại những cơ hội đã lướt qua.</p>
               </div>
               
               <div className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function ViewedJobsPage() {
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-blue-600 transition-colors" />
                   <input
                     type="text"
-                    placeholder="T�m ki?m..."
+                    placeholder="Tìm kiếm..."
                     className="pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm w-full md:w-64 focus:border-blue-600 outline-none transition-all shadow-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -152,7 +152,7 @@ export default function ViewedJobsPage() {
                             </div>
                             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400 group-hover:text-amber-500 transition-colors">
                                <Clock className="w-3.5 h-3.5" />
-                               <span className="text-[11px] font-black uppercase tracking-tighter">V?a xem</span>
+                               <span className="text-[11px] font-black uppercase tracking-tighter">Vừa xem</span>
                             </div>
                           </div>
 
@@ -172,7 +172,7 @@ export default function ViewedJobsPage() {
                               href={`/jobs/${job.jobPostingId}`}
                               className="inline-flex items-center justify-center gap-1.5 px-6 py-2 bg-slate-900 text-white text-[11px] font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg active:scale-95 group font-sans uppercase tracking-widest"
                             >
-                              Xem l?i ngay <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                              Xem lại ngay <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                             </Link>
                           </div>
                         </div>
@@ -192,16 +192,16 @@ export default function ViewedJobsPage() {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <h3 className="text-2xl font-black text-slate-900 leading-tight">B?n chua xem <span className="text-blue-600 italic">c�ng vi?c n�o?</span></h3>
+                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Bạn chưa xem <span className="text-blue-600 italic">công việc nào?</span></h3>
                       <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
-                        L?ch s? xem s? gi�p b?n luu l?i h�nh tr�nh t�m ki?m. H�y b?t d?u kh�m ph� c�c co h?i ngh? nghi?p ngay!
+                        Lịch sử xem sẽ giúp bạn lưu lại hành trình tìm kiếm. Hãy bắt đầu khám phá các cơ hội nghề nghiệp ngay!
                       </p>
                     </div>
                     <Link
                       href="/jobs"
                       className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl active:scale-95 text-xs font-sans uppercase tracking-widest"
                     >
-                      B?t d?u t�m ki?m <ArrowRight className="w-4 h-4" />
+                      Bắt đầu tìm kiếm <ArrowRight className="w-4 h-4" />
                     </Link>
                   </motion.div>
                 )}

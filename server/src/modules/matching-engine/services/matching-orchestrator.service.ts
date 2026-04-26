@@ -181,7 +181,7 @@ export class MatchingOrchestratorService {
       },
     });
 
-    if (!candidate || !candidate.cvs[0]) return { success: true, results: [] };
+    if (!candidate || !candidate.cvs[0]) return [];
     const mainCv = candidate.cvs[0];
 
     // Đảm bảo CV có embedding
@@ -214,6 +214,7 @@ export class MatchingOrchestratorService {
       include: { company: true },
     });
 
+    const matchResults: any[] = [];
     for (const job of activeJobs) {
       if (!(job as any).embedding) {
         const vector = await this.dataParser.getEmbedding(`${job.title} ${job.requirements}`);
@@ -233,7 +234,7 @@ export class MatchingOrchestratorService {
       const { finalScore, breakdown, details } = await this.scoringEngine.calculateFinalScore(job, mainCv);
       const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
 
-      await this.prisma.jobMatch.upsert({
+      const matchRecord = await this.prisma.jobMatch.upsert({
         where: { 
           candidateId_jobPostingId: { 
             candidateId: candidate.candidateId, 
@@ -242,7 +243,8 @@ export class MatchingOrchestratorService {
         },
         update: { 
           score: finalScore, 
-          matchedSkills: analysis.skillsAnalysis.matchedSkills 
+          matchedSkills: analysis.skillsAnalysis.matchedSkills,
+          updatedAt: new Date(),
         },
         create: {
           jobPostingId: job.jobPostingId,
@@ -251,8 +253,9 @@ export class MatchingOrchestratorService {
           matchedSkills: analysis.skillsAnalysis.matchedSkills,
         },
       });
+      matchResults.push(matchRecord);
     }
 
-    return { success: true, results: activeJobs };
+    return matchResults.sort((a, b) => b.score - a.score);
   }
 }

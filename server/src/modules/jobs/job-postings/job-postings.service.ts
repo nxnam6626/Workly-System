@@ -636,9 +636,9 @@ export class JobPostingsService {
       } catch (e) {
         console.error('ES Sync failed automatically', e);
       }
+      // Tự động chạy Matching Engine chỉ khi job được duyệt
+      await this.matchingQueue.add('match', { jobId: job.jobPostingId });
     }
-    // Tự động chạy Matching Engine
-    await this.matchingQueue.add('match', { jobId: job.jobPostingId });
 
     if (requestedJobTier === 'PROFESSIONAL' || requestedJobTier === 'URGENT') {
       this.enrichKeywordsInBackground(
@@ -1097,58 +1097,62 @@ export class JobPostingsService {
       orderBy: { refreshedAt: 'desc' },
     });
 
-    const enrichedJobs = await Promise.all(
-      jobs.map(async (job) => {
-        let matchedCount = 0;
-        let autoInvitedCandidates: any[] = [];
+    const jobIds = jobs.map((j) => j.jobPostingId);
 
-        if (job.status !== 'REJECTED') {
-          // 1. Lấy số lượng phù hợp từ JobMatch
-          const matches = await this.prisma.jobMatch.findMany({
-            where: { jobPostingId: job.jobPostingId },
-            include: {
-              candidate: {
-                include: { user: { select: { avatar: true } } },
-              },
+    // 1. Fetch all matches for these jobs in ONE query
+    const allMatches = await this.prisma.jobMatch.findMany({
+      where: {
+        jobPostingId: { in: jobIds },
+        score: { gte: 60 },
+      },
+      select: { jobPostingId: true, score: true },
+    });
+
+    // 2. Fetch all unlocks for these jobs in ONE query
+    const allUnlocks = await this.prisma.candidateUnlock.findMany({
+      where: {
+        jobPostingId: { in: jobIds },
+        recruiterId: recruiter.recruiterId,
+      },
+      include: {
+        cv: {
+          include: {
+            candidate: {
+              include: { user: { select: { avatar: true } } },
             },
-            orderBy: { score: 'desc' },
-          });
-          matchedCount = matches.filter(m => m.score >= 60).length;
+          },
+        },
+      },
+      orderBy: { unlockedAt: 'desc' },
+    });
 
-          // 2. Kiểm tra những người đã được Unlock (Auto-invited)
-          const unlocks = await this.prisma.candidateUnlock.findMany({
-            where: {
-              jobPostingId: job.jobPostingId,
-              recruiterId: recruiter.recruiterId,
-            },
-            include: {
-              cv: {
-                include: {
-                  candidate: {
-                    include: { user: { select: { avatar: true } } },
-                  },
-                },
-              },
-            },
-            take: 5,
-          });
+    // Grouping by jobPostingId
+    const matchesByJob = allMatches.reduce((acc, m) => {
+      acc[m.jobPostingId] = (acc[m.jobPostingId] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-          autoInvitedCandidates = unlocks.map((u) => ({
-            candidateId: u.candidateId,
-            fullName: u.cv.candidate.fullName,
-            avatar: u.cv.candidate.user.avatar,
-            unlockedAt: u.unlockedAt,
-          }));
-        }
+    const unlocksByJob = allUnlocks.reduce((acc, u) => {
+      if (!acc[u.jobPostingId]) acc[u.jobPostingId] = [];
+      if (acc[u.jobPostingId].length < 5) {
+        acc[u.jobPostingId].push({
+          candidateId: u.candidateId,
+          fullName: u.cv.candidate.fullName,
+          avatar: u.cv.candidate.user.avatar,
+          unlockedAt: u.unlockedAt,
+        });
+      }
+      return acc;
+    }, {} as Record<string, any[]>);
 
-        return {
-          ...job,
-          matchedCount,
-          autoInvitedCandidates,
-          branches: (job as any).branches.map((b: any) => b.branch),
-        };
-      }),
-    );
+    const enrichedJobs = jobs.map((job) => {
+      return {
+        ...job,
+        matchedCount: matchesByJob[job.jobPostingId] || 0,
+        autoInvitedCandidates: unlocksByJob[job.jobPostingId] || [],
+        branches: (job as any).branches.map((b: any) => b.branch),
+      };
+    });
 
     return enrichedJobs;
   }
@@ -1839,7 +1843,7 @@ export class JobPostingsService {
       refreshedAt: job.refreshedAt,
       jobTier: job.jobTier,
       status: job.status,
-      industry: (job.structuredRequirements as any)?.categories?.[0] || 'Đa lĩnh vực / Khác',
+      industry: (job.structuredRequirements as any)?.categories?.length > 0 ? (job.structuredRequirements as any).categories : ['Đa lĩnh vực / Khác'],
     });
   }
 
@@ -1936,7 +1940,18 @@ export class JobPostingsService {
       return [];
     }
 
-    const matches = await this.matchingOrchestrator.runMatchingForJob(jobId);
+    // 1. Chỉ lấy từ DB đã tính toán sẵn
+    let matches = await this.prisma.jobMatch.findMany({
+      where: { jobPostingId: jobId },
+      orderBy: { score: 'desc' },
+      take: 20, // Lấy nhiều hơn một chút để filter sau
+    });
+
+    // 2. Nếu chưa có dữ liệu, trigger Background Job và trả về rỗng (hoặc chờ 1 chút)
+    if (matches.length === 0) {
+      await this.matchingQueue.add('match', { jobId });
+      return [];
+    }
 
     // We need recruiterId to check if unlocked
     let recruiterId: string | null = null;
@@ -2005,12 +2020,16 @@ export class JobPostingsService {
       }),
     );
 
-    // Return top 10 matches
-    return enriched.sort((a, b) => b.score - a.score).slice(0, 10);
+    // Return top 10 matches with score >= 60
+    return enriched
+      .filter((m) => m.score >= 60)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
   }
 
   async getRecommendations(userId: string) {
-    return this.matchingOrchestrator.runMatchingForCandidate(userId);
+    const matches = await this.matchingOrchestrator.runMatchingForCandidate(userId);
+    return (matches as any[]).filter((m) => m.score >= 60);
   }
 
   private validateBlacklist(

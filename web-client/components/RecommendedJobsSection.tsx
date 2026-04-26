@@ -149,7 +149,7 @@ export function RecommendedJobsSection() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -160,7 +160,7 @@ export function RecommendedJobsSection() {
   };
 
   const fetchJobs = async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user?.roles?.includes('CANDIDATE')) return;
     setLoading(true);
     try {
       const response = await api.get("/candidates/recommended-jobs", {

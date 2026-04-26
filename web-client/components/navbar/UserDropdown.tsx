@@ -63,7 +63,7 @@ export function UserDropdown() {
       { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
       { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
       { icon: <Briefcase className="w-5 h-5" />, label: "Việc làm phù hợp", href: "/profile/jobs/matching" },
-      { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/connections" },
+      { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/messages" },
     );
   }
 

@@ -51,12 +51,12 @@ interface AppliedJob {
 }
 
 const STATUS_MAP: Record<string, { label: string, color: string, bg: string, ring: string }> = {
-  PENDING: { label: "�ang ch?", color: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-500/20" },
-  REVIEWED: { label: "�� xem", color: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-500/20" },
-  SHORTLISTED: { label: "Ti?m nang", color: "text-indigo-600", bg: "bg-indigo-50", ring: "ring-indigo-500/20" },
-  INTERVIEWING: { label: "�ang ph?ng v?n", color: "text-purple-600", bg: "bg-purple-50", ring: "ring-purple-500/20" },
-  ACCEPTED: { label: "�� tuy?n", color: "text-green-600", bg: "bg-green-50", ring: "ring-green-500/20" },
-  REJECTED: { label: "T? ch?i", color: "text-red-600", bg: "bg-red-50", ring: "ring-red-500/20" },
+  PENDING: { label: "Đang chờ", color: "text-amber-600", bg: "bg-amber-50", ring: "ring-amber-500/20" },
+  REVIEWED: { label: "Đã xem", color: "text-blue-600", bg: "bg-blue-50", ring: "ring-blue-500/20" },
+  SHORTLISTED: { label: "Tiềm năng", color: "text-indigo-600", bg: "bg-indigo-50", ring: "ring-indigo-500/20" },
+  INTERVIEWING: { label: "Đang phỏng vấn", color: "text-purple-600", bg: "bg-purple-50", ring: "ring-purple-500/20" },
+  ACCEPTED: { label: "Đã tuyển", color: "text-green-600", bg: "bg-green-50", ring: "ring-green-500/20" },
+  REJECTED: { label: "Từ chối", color: "text-red-600", bg: "bg-red-50", ring: "ring-red-500/20" },
 };
 
 export default function AppliedJobsPage() {
@@ -94,9 +94,9 @@ export default function AppliedJobsPage() {
 
   const handleCancelApplication = async (applicationId: string) => {
     const ok = await confirm({
-      title: 'H?y don ?ng tuy?n?',
-      message: 'B?n c� ch?c ch?n mu?n h?y don ?ng tuy?n n�y?',
-      confirmText: 'H?y ?ng tuy?n',
+      title: 'Hủy đơn ứng tuyển?',
+      message: 'Bạn có chắc chắn muốn hủy đơn ứng tuyển này?',
+      confirmText: 'Hủy ứng tuyển',
       variant: 'danger',
     });
     if (!ok) return;
@@ -104,9 +104,9 @@ export default function AppliedJobsPage() {
     try {
       await api.delete(`/applications/${applicationId}`);
       setApplications(prev => prev.filter(app => app.applicationId !== applicationId));
-      toast.success('�� h?y ?ng tuy?n.');
+      toast.success('Đã hủy ứng tuyển.');
     } catch (error: any) {
-      toast.error('Kh�ng th? h?y don ?ng tuy?n.');
+      toast.error('Không thể hủy đơn ứng tuyển.');
     }
   };
 
@@ -123,7 +123,7 @@ export default function AppliedJobsPage() {
     <div className="min-h-screen bg-[#fcfdfe] pt-24 pb-20 font-sans">
       <div className="max-w-6xl mx-auto px-4 lg:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
+
           {/* Sidebar - Memoized via Component Wrapper */}
           <aside className="lg:col-span-1">
             <ProfileSidebar />
@@ -131,20 +131,20 @@ export default function AppliedJobsPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
-            
+
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
               <div className="space-y-1">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Vi?c l�m <span className="text-blue-600">?ng tuy?n</span></h1>
-                <p className="text-sm text-slate-500 font-medium">Theo d�i h�nh tr�nh chinh ph?c s? nghi?p c?a b?n.</p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-blue-600">ứng tuyển</span></h1>
+                <p className="text-sm text-slate-500 font-medium">Theo dõi hành trình chinh phục sự nghiệp của bạn.</p>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="T�m ki?m..."
+                    placeholder="Tìm kiếm..."
                     className="pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm w-full md:w-64 focus:border-blue-600 outline-none transition-all shadow-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -175,7 +175,7 @@ export default function AppliedJobsPage() {
                           className="group relative bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all p-6 overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          
+
                           <div className="flex flex-col md:flex-row gap-6">
                             {/* Company Logo */}
                             <div className="w-20 h-20 rounded-2xl border border-slate-50 bg-slate-50/30 flex items-center justify-center p-4 shrink-0">
@@ -226,9 +226,9 @@ export default function AppliedJobsPage() {
                                   <div className="flex items-start gap-3 text-purple-700">
                                     <Sparkles className="w-5 h-5 text-purple-600" />
                                     <div>
-                                      <p className="text-[13px] font-black leading-tight">L?ch ph?ng v?n s?p t?i</p>
+                                      <p className="text-[13px] font-black leading-tight">Lịch phỏng vấn sắp tới</p>
                                       <p className="text-[11px] font-bold opacity-80 italic">
-                                        Th?i gian: {app.interviewTime} | Ng�y {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : ''}
+                                        Thời gian: {app.interviewTime} | Ngày {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : ''}
                                       </p>
                                     </div>
                                   </div>
@@ -241,17 +241,17 @@ export default function AppliedJobsPage() {
                               <div className="pt-4 border-t border-slate-50 flex items-center justify-between gap-4">
                                 <a href={getFileUrl(app.cvSnapshotUrl)} target="_blank" rel="noreferrer" className="text-xs text-blue-600 font-bold hover:text-blue-800 flex items-center gap-1 transition-colors">
                                   <FileText className="w-3.5 h-3.5" />
-                                  Xem h? so d� n?p <ExternalLink className="w-3 h-3" />
+                                  Xem hồ sơ đã nộp <ExternalLink className="w-3 h-3" />
                                 </a>
 
                                 <div className="flex items-center gap-3">
                                   {app.appStatus === 'PENDING' && (
                                     <button onClick={() => handleCancelApplication(app.applicationId)} className="px-4 py-2 text-[11px] font-black text-slate-400 hover:text-red-500 transition-all">
-                                      H?y don
+                                      Hủy đơn
                                     </button>
                                   )}
                                   <Link href={`/jobs/${app.jobPostingId}`} className="px-6 py-2 bg-slate-900 text-white text-[11px] font-black rounded-xl hover:bg-blue-600 shadow-lg active:scale-95 transition-all">
-                                    Chi ti?t
+                                    Chi tiết
                                   </Link>
                                 </div>
                               </div>
@@ -262,11 +262,17 @@ export default function AppliedJobsPage() {
                     })
                   ) : (
                     <div className="bg-white rounded-[48px] border border-slate-100 shadow-sm p-24 text-center space-y-8">
-                       <Briefcase className="w-16 h-16 mx-auto text-slate-200" />
-                       <h3 className="text-2xl font-black text-slate-900">Danh s�ch <span className="text-blue-600 italic">dang tr?ng</span></h3>
-                       <Link href="/jobs" className="inline-flex items-center gap-2 px-12 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:bg-blue-700 transition-all text-xs uppercase tracking-widest">
-                         T�m vi?c ngay <ArrowRight className="w-4 h-4" />
-                       </Link>
+                      <Briefcase className="w-16 h-16 mx-auto text-slate-200" />
+                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Chưa có <span className="text-blue-600 italic">ứng tuyển nào</span></h3>
+                      <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
+                        Theo dõi hành trình sự nghiệp bằng cách ứng tuyển ngay những công việc phù hợp với bạn!
+                      </p>
+                      <Link
+                        href="/jobs"
+                        className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-blue-600 hover:-translate-y-1 transition-all shadow-xl active:scale-95 group font-sans uppercase tracking-wider text-xs"
+                      >
+                        Khám phá việc làm ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
                     </div>
                   )}
                 </AnimatePresence>

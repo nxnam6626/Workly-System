@@ -174,7 +174,7 @@ export class MatchingProcessor extends WorkerHost {
       this.logger.log(`[Matching] Processing candidate ${userId}`);
       try {
         const response = await this.matchingOrchestrator.runMatchingForCandidate(userId);
-        return { success: true, count: response.results.length };
+        return { success: true, count: (response as any[]).length };
       } catch (error: any) {
         this.logger.error(`[Matching] Error for candidate ${userId}: ${error.message}`);
         throw error;

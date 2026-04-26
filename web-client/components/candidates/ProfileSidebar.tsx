@@ -61,8 +61,8 @@ export const ProfileSidebar = React.memo(function ProfileSidebar() {
     { 
       icon: <RefreshCcw className="w-5 h-5" />, 
       label: "NTD yêu cầu kết nối", 
-      href: "/profile/connections",
-      isActive: pathname === "/profile/connections"
+      href: "/profile/messages",
+      isActive: pathname === "/profile/messages"
     },
   ];
 

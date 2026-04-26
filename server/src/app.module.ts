@@ -28,6 +28,7 @@ import { WalletsModule } from './modules/wallets/wallets.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { SupportModule } from './modules/support/support.module';
 import { MatchingEngineModule } from './modules/matching-engine/matching-engine.module';
+import { DebugModule } from './modules/debug/debug.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { MatchingEngineModule } from './modules/matching-engine/matching-engine.
     SubscriptionsModule,
     SupportModule,
     MatchingEngineModule,
+    DebugModule,
   ],
   controllers: [AppController],
   providers: [AppService],

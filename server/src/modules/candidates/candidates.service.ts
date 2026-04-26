@@ -926,7 +926,11 @@ export class CandidatesService {
 
     let [matches, total] = await Promise.all([
       this.prisma.jobMatch.findMany({
-        where: { candidateId: candidate.candidateId },
+        where: { 
+          candidateId: candidate.candidateId,
+          score: { gte: 60 },
+          jobPosting: { status: 'APPROVED' }
+        },
         include: {
           jobPosting: {
             include: { company: true, branches: true },
@@ -937,7 +941,11 @@ export class CandidatesService {
         take: Number(limit),
       }),
       this.prisma.jobMatch.count({
-        where: { candidateId: candidate.candidateId },
+        where: { 
+          candidateId: candidate.candidateId,
+          score: { gte: 60 },
+          jobPosting: { status: 'APPROVED' }
+        },
       }),
     ]);
 
@@ -950,7 +958,11 @@ export class CandidatesService {
 
       [matches, total] = await Promise.all([
         this.prisma.jobMatch.findMany({
-          where: { candidateId: candidate.candidateId },
+          where: { 
+            candidateId: candidate.candidateId,
+            score: { gte: 60 },
+            jobPosting: { status: 'APPROVED' }
+          },
           include: {
             jobPosting: {
               include: { company: true, branches: true },
@@ -961,7 +973,11 @@ export class CandidatesService {
           take: Number(limit),
         }),
         this.prisma.jobMatch.count({
-          where: { candidateId: candidate.candidateId },
+          where: { 
+            candidateId: candidate.candidateId,
+            score: { gte: 60 },
+            jobPosting: { status: 'APPROVED' }
+          },
         }),
       ]);
     }

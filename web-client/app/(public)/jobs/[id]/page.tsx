@@ -29,7 +29,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatSalary, timeAgo } from "@/lib/utils";
 import { JOB_TYPE_LABEL } from "@/lib/constants";
-import { MOCK_URGENT_JOBS, MOCK_REMOTE_JOBS, MOCK_FEATURED_JOBS } from "@/lib/mock-data";
+import { MOCK_URGENT_JOBS, MOCK_RECOMMENDED_JOBS, MOCK_FEATURED_JOBS } from "@/lib/mock-data";
 import { JobCard, Job } from "@/components/JobCard";
 import { JobApplyModal } from "@/components/jobs/JobApplyModal";
 import { useAuthStore } from "@/stores/auth";
@@ -150,7 +150,7 @@ export default function JobDetailsPage() {
       setLoading(true);
       try {
          if (typeof id === 'string' && (id.startsWith('u') || id.startsWith('i') || id.startsWith('f') || id.startsWith('m'))) {
-            const allMocks = [...MOCK_URGENT_JOBS, ...MOCK_REMOTE_JOBS, ...MOCK_FEATURED_JOBS];
+            const allMocks = [...MOCK_URGENT_JOBS, ...MOCK_RECOMMENDED_JOBS, ...MOCK_FEATURED_JOBS];
             const foundMock = allMocks.find(j => j.jobPostingId === id);
             if (foundMock) {
                const mockDetails: JobDetails = {
@@ -297,25 +297,25 @@ export default function JobDetailsPage() {
                   {/* Header */}
                   <div className="bg-white rounded-2xl p-6 md:p-10 border border-slate-100 shadow-sm relative overflow-hidden">
                      <div className="absolute top-0 left-0 w-2.5 h-full bg-[#1e60ad]" />
-                     <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-8">
+                     <h1 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-8">
                         {job.title}
                      </h1>
                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-50/50 p-6 rounded-2xl mb-8">
                         <div className="flex flex-col gap-1">
                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mức lương</p>
-                           <p className="text-[15px] font-black text-slate-900">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</p>
+                           <p className="text-sm font-black text-slate-900">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Địa điểm</p>
-                           <p className="text-[15px] font-black text-slate-900">{job.locationCity || 'Toàn quốc'}</p>
+                           <p className="text-sm font-black text-slate-900">{job.locationCity || 'Toàn quốc'}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kinh nghiệm</p>
-                           <p className="text-[15px] font-black text-slate-900">{job.experience || 'Không yêu cầu'}</p>
+                           <p className="text-sm font-black text-slate-900">{job.experience || 'Không yêu cầu'}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Học vấn</p>
-                           <p className="text-[15px] font-black text-slate-900">{inferEducation(job.requirements)}</p>
+                           <p className="text-sm font-black text-slate-900">{inferEducation(job.requirements)}</p>
                         </div>
                      </div>
                      <div className="flex flex-wrap gap-4">
@@ -351,22 +351,22 @@ export default function JobDetailsPage() {
                   {/* Body */}
                   <div className="bg-white rounded-2xl p-8 md:p-10 border border-slate-100 shadow-sm space-y-12">
                      <section>
-                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
+                        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
                            <div className="w-1.5 h-6 bg-[#1e60ad] rounded-full" /> Mô tả công việc
                         </h2>
-                        <div className="text-slate-600 leading-relaxed text-[15px] pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.description) }} />
+                        <div className="text-slate-600 leading-relaxed text-sm pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.description) }} />
                      </section>
                      <section>
-                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
+                        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
                            <div className="w-1.5 h-6 bg-[#1e60ad] rounded-full" /> Yêu cầu ứng viên
                         </h2>
-                        <div className="text-slate-600 leading-relaxed text-[15px] pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.requirements) }} />
+                        <div className="text-slate-600 leading-relaxed text-sm pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.requirements) }} />
                      </section>
                      <section>
-                        <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
+                        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-6 flex items-center gap-3">
                            <div className="w-1.5 h-6 bg-[#1e60ad] rounded-full" /> Quyền lợi
                         </h2>
-                        <div className="text-slate-600 leading-relaxed text-[15px] pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.benefits) }} />
+                        <div className="text-slate-600 leading-relaxed text-sm pl-5 border-l-2 border-slate-50" dangerouslySetInnerHTML={{ __html: parseToHtml(job.benefits) }} />
                      </section>
                      <div className="pt-6 border-t border-slate-50 flex gap-4">
                         <button onClick={handleApply} className="flex-1 py-4 bg-[#1e60ad] text-white font-black rounded-xl uppercase">Ứng tuyển ngay</button>
@@ -412,21 +412,21 @@ export default function JobDetailsPage() {
                   </div>
 
                   <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
-                     <h3 className="text-lg font-black text-slate-900 uppercase mb-8 flex items-center gap-2"><div className="w-1.5 h-4 bg-[#1e60ad] rounded-full" /> Thông tin chung</h3>
+                     <h3 className="text-base font-black text-slate-900 uppercase mb-8 flex items-center gap-2"><div className="w-1.5 h-4 bg-[#1e60ad] rounded-full" /> Thông tin chung</h3>
                      <div className="space-y-6">
                         <div className="flex gap-5">
                            <div className="w-11 h-11 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400"><Clock className="w-6 h-6" /></div>
-                           <div><p className="text-[10px] font-black text-slate-400 uppercase">Hình thức</p><p className="text-[15px] font-black text-slate-800 uppercase tracking-tight">{job.jobType ? (JOB_TYPE_LABEL as any)[job.jobType] : 'Toàn thời gian'}</p></div>
+                           <div><p className="text-[10px] font-black text-slate-400 uppercase">Hình thức</p><p className="text-sm font-black text-slate-800 uppercase tracking-tight">{job.jobType ? (JOB_TYPE_LABEL as any)[job.jobType] : 'Toàn thời gian'}</p></div>
                         </div>
                         <div className="flex gap-5">
                            <div className="w-11 h-11 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400"><Target className="w-6 h-6" /></div>
-                           <div><p className="text-[10px] font-black text-slate-400 uppercase">Cấp bậc</p><p className="text-[15px] font-black text-slate-800 uppercase tracking-tight">{inferJobLevel(job.title, job.description)}</p></div>
+                           <div><p className="text-[10px] font-black text-slate-400 uppercase">Cấp bậc</p><p className="text-sm font-black text-slate-800 uppercase tracking-tight">{inferJobLevel(job.title, job.description)}</p></div>
                         </div>
                      </div>
                   </div>
 
                   <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm">
-                     <h3 className="text-lg font-black text-slate-900 uppercase mb-8 flex items-center gap-2"><div className="w-1.5 h-4 bg-[#1e60ad] rounded-full" /> Việc làm tương tự</h3>
+                     <h3 className="text-base font-black text-slate-900 uppercase mb-8 flex items-center gap-2"><div className="w-1.5 h-4 bg-[#1e60ad] rounded-full" /> Việc làm tương tự</h3>
                      <div className="space-y-8">
                         {relatedJobs.slice(0, 4).map(rj => (
                            <Link key={rj.jobPostingId} href={`/jobs/${rj.jobPostingId}`} className="flex gap-4 group">
@@ -434,8 +434,8 @@ export default function JobDetailsPage() {
                                  {rj.company.logo ? <img src={rj.company.logo} className="max-w-full max-h-full object-contain" alt="" /> : <Building2 className="w-6 h-6 text-slate-100" />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                 <h4 className="text-sm font-black text-slate-800 leading-tight uppercase line-clamp-2 group-hover:text-[#1e60ad] transition-colors">{rj.title}</h4>
-                                 <p className="text-[#1e60ad] font-black text-[13px] mt-1.5">{formatSalary(rj.salaryMin, rj.salaryMax, rj.currency)}</p>
+                                 <h4 className="text-[13px] font-black text-slate-800 leading-tight uppercase line-clamp-2 group-hover:text-[#1e60ad] transition-colors">{rj.title}</h4>
+                                 <p className="text-[#1e60ad] font-black text-[12px] mt-1.5">{formatSalary(rj.salaryMin, rj.salaryMax, rj.currency)}</p>
                               </div>
                            </Link>
                         ))}

@@ -68,7 +68,7 @@ export default function SavedJobsPage() {
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           className="w-12 h-12 border-4 border-slate-100 border-t-blue-600 rounded-full mb-4"
         />
-        <p className="text-slate-400 font-bold tracking-tight">�ang t?i danh s�ch d� luu...</p>
+        <p className="text-slate-400 font-bold tracking-tight">Đang tải danh sách đã lưu...</p>
       </div>
     );
   }
@@ -90,8 +90,8 @@ export default function SavedJobsPage() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
               <div className="space-y-1">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Vi?c l�m <span className="text-rose-500">�� luu</span></h1>
-                <p className="text-sm text-slate-500 font-medium font-sans">Luu tr? nh?ng co h?i th� v? d? chu?n b? h? so ?ng tuy?n t?t nh?t.</p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-rose-500">đã lưu</span></h1>
+                <p className="text-sm text-slate-500 font-medium font-sans">Lưu trữ những cơ hội thú vị để chuẩn bị hồ sơ ứng tuyển tốt nhất.</p>
               </div>
               
               <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ export default function SavedJobsPage() {
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-blue-600 transition-colors" />
                   <input
                     type="text"
-                    placeholder="T�m ki?m..."
+                    placeholder="Tìm kiếm..."
                     className="pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm w-full md:w-64 focus:border-blue-600 outline-none transition-all shadow-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -143,16 +143,16 @@ export default function SavedJobsPage() {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Danh s�ch d� luu <span className="text-rose-500 italic">dang tr?ng</span></h3>
+                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Danh sách đã lưu <span className="text-rose-500 italic">đang trống</span></h3>
                       <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
-                        H�y luu l?i nh?ng c�ng vi?c b?n quan t�m d? d? d�ng theo d�i v� ?ng tuy?n b?t c? l�c n�o!
+                        Hãy lưu lại những công việc bạn quan tâm để dễ dàng theo dõi và ứng tuyển bất cứ lúc nào!
                       </p>
                     </div>
                     <Link
                       href="/jobs"
                       className="inline-flex items-center justify-center gap-2 px-12 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-blue-600 hover:-translate-y-1 transition-all shadow-xl active:scale-95 group font-sans uppercase tracking-wider text-xs"
                     >
-                      Kh�m ph� vi?c l�m ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      Khám phá việc làm ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </motion.div>
                 )}

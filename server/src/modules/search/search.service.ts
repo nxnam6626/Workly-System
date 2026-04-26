@@ -94,7 +94,7 @@ export class SearchService implements OnModuleInit {
     salaryMin?: number;
     salaryMax?: number;
     experience?: string;
-    industry?: string;
+    industry?: string | string[];
     status?: string;
     companyName?: string;
     createdAt?: Date | string;
@@ -217,30 +217,27 @@ export class SearchService implements OnModuleInit {
       must.push(matchQuery);
     }
 
+    const should: any[] = [];
+    
     // Tier-based Boosting (URGENT > PROFESSIONAL > BASIC)
-    const tierBoosts = {
-      bool: {
-        should: [
-          {
-            term: {
-              jobTier: {
-                value: 'URGENT',
-                boost: 5,
-              },
-            },
+    should.push(
+      {
+        term: {
+          jobTier: {
+            value: 'URGENT',
+            boost: 5,
           },
-          {
-            term: {
-              jobTier: {
-                value: 'PROFESSIONAL',
-                boost: 2,
-              },
-            },
-          },
-        ],
+        },
       },
-    };
-    must.push(tierBoosts);
+      {
+        term: {
+          jobTier: {
+            value: 'PROFESSIONAL',
+            boost: 2,
+          },
+        },
+      }
+    );
 
     if (location) {
       filter.push({
@@ -342,6 +339,7 @@ export class SearchService implements OnModuleInit {
             bool: {
               must,
               filter,
+              should,
             },
           },
           sort: sort,

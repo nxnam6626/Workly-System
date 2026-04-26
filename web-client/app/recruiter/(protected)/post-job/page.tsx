@@ -417,11 +417,14 @@ function PostJobForm() {
       } else if (data.safe) {
         toast('AI đánh giá tin tuyển dụng cần cải thiện thêm.', { icon: '⚠️' });
       } else {
-        toast.error('AI phát hiện vi phạm chính sách hoặc nội dung rác.');
+        toast.error(`AI phát hiện vi phạm: ${data.reason}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Moderation check failed', error);
-      toast.error('Không thể kiểm duyệt nội dung lúc này.');
+      const errorMessage = error.response?.data?.message || 'Không thể kiểm duyệt nội dung lúc này.';
+      // Nếu message là mảng (class-validator), join chúng lại
+      const displayMessage = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      toast.error(displayMessage);
     } finally {
       setIsChecking(false);
     }
@@ -1087,15 +1090,51 @@ function PostJobForm() {
               <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                 <div className="space-y-4">
                   <label className="text-base font-black text-slate-800 flex items-center gap-3">Hạng tin đăng</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[
-                      { id: 'BASIC', label: 'BASIC', price: '100 xu' },
-                      { id: 'PROFESSIONAL', label: 'PROFESSIONAL', price: '250 xu' },
-                      { id: 'URGENT', label: 'URGENT', price: '450 xu' }
-                    ].filter(t => userPlan === 'GROWTH' || (userPlan === 'LITE' ? t.id !== 'URGENT' : t.id === 'BASIC')).map(t => (
-                      <div key={t.id} onClick={() => setFormData(p => ({ ...p, jobTier: t.id as any }))} className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${formData.jobTier === t.id ? 'bg-indigo-50 border-indigo-600' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}>
-                        <h4 className="font-bold">{t.label}</h4>
-                        <p className="text-xs text-slate-500">{t.price}</p>
+                      { 
+                        id: 'BASIC', 
+                        label: 'BASIC', 
+                        hasQuota: subscription && subscription.maxBasicPosts > subscription.usedBasicPosts,
+                        quotaText: '1 lượt (Miễn phí từ gói)',
+                        priceText: '100 xu',
+                        disabled: false
+                      },
+                      { 
+                        id: 'PROFESSIONAL', 
+                        label: 'PROFESSIONAL', 
+                        hasQuota: subscription && subscription.maxVipPosts > subscription.usedVipPosts,
+                        quotaText: '1 lượt (Miễn phí từ gói)',
+                        priceText: 'Yêu cầu nâng cấp gói LITE/GROWTH',
+                        disabled: !(subscription && subscription.maxVipPosts > subscription.usedVipPosts)
+                      },
+                      { 
+                        id: 'URGENT', 
+                        label: 'URGENT', 
+                        hasQuota: subscription && subscription.maxUrgentPosts > subscription.usedUrgentPosts,
+                        quotaText: '1 lượt (Miễn phí từ gói)',
+                        priceText: 'Yêu cầu nâng cấp gói GROWTH',
+                        disabled: !(subscription && subscription.maxUrgentPosts > subscription.usedUrgentPosts)
+                      }
+                    ].map(t => (
+                      <div 
+                        key={t.id} 
+                        onClick={() => !t.disabled && setFormData(p => ({ ...p, jobTier: t.id as any }))} 
+                        className={`p-4 rounded-2xl border-2 transition-all ${
+                          t.disabled 
+                            ? 'opacity-50 cursor-not-allowed bg-slate-50 border-transparent' 
+                            : formData.jobTier === t.id 
+                              ? 'bg-indigo-50 border-indigo-600 cursor-pointer shadow-md' 
+                              : 'bg-white border-slate-200 hover:border-indigo-300 cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="font-black text-slate-800">{t.label}</h4>
+                          {t.disabled && <Lock className="w-4 h-4 text-slate-400" />}
+                        </div>
+                        <p className={`text-xs font-semibold ${t.hasQuota ? 'text-emerald-600' : 'text-slate-500'}`}>
+                          {t.hasQuota ? t.quotaText : t.priceText}
+                        </p>
                       </div>
                     ))}
                   </div>
