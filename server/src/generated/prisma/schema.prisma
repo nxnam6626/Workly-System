@@ -33,6 +33,7 @@ model User {
   recruiter       Recruiter?
   supportRequests SupportRequest[]
   userRoles       UserRole[]
+  accountLevel    AccountLevel     @default(NORMAL)
 }
 
 model Role {
@@ -75,7 +76,7 @@ model JobAlert {
 
 model Admin {
   adminId     String    @id @default(uuid())
-  adminLevel  Int       @default(1)
+  fullName    String?   @default("Quản trị viên")
   lastAction  String?
   userId      String    @unique
   permissions String[]  @default([])
@@ -84,28 +85,25 @@ model Admin {
 }
 
 model Candidate {
-  candidateId  String  @id @default(uuid())
-  fullName     String
-  university   String?
-  major        String?
-  gpa          Float?
-  cvUrl        String?
-  userId       String  @unique
-  isOpenToWork Boolean @default(true)
-  location     String?
-  desiredJob   Json?
-  summary      String?
-
-  // New fields for Profile Redesign
-  gender        String? // "Nam", "Nữ", "Khác"
-  birthYear     Int?
-  currentSalary String?
-  degree        String?
-  industries    String[] @default([])
-  languages     Json? // Array of { name, level }
-  softSkills    String[] @default([])
-  interests     String[] @default([])
-
+  candidateId    String          @id @default(uuid())
+  fullName       String
+  university     String?
+  major          String?
+  gpa            Float?
+  cvUrl          String?
+  userId         String          @unique
+  isOpenToWork   Boolean         @default(true)
+  location       String?
+  desiredJob     Json?
+  summary        String?
+  birthYear      Int?
+  currentSalary  String?
+  degree         String?
+  gender         String?
+  industries     String[]        @default([])
+  interests      String[]        @default([])
+  languages      Json?
+  softSkills     String[]        @default([])
   applications   Application[]
   cvs            CV[]
   user           User            @relation(fields: [userId], references: [userId], onDelete: Cascade)
@@ -156,6 +154,7 @@ model Project {
 
 model Recruiter {
   recruiterId           String                 @id @default(uuid())
+  fullName              String?                @default("Nhà tuyển dụng")
   bio                   String?
   position              String?
   userId                String                 @unique
@@ -188,16 +187,6 @@ model Transaction {
   wallet        RecruiterWallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
 }
 
-model CrawlLog {
-  crawlLogId     String      @id @default(uuid())
-  status         CrawlStatus
-  startTime      DateTime    @default(now())
-  endTime        DateTime?
-  itemsProcessed Int?
-  errorMessage   String?
-  providerName   String
-}
-
 model Company {
   companyId          String          @id @default(uuid())
   companyName        String
@@ -227,33 +216,15 @@ model Company {
 }
 
 model CompanyBranch {
-  branchId    String       @id @default(uuid())
+  branchId    String             @id @default(uuid())
   name        String
   address     String
   latitude    Float?
   longitude   Float?
-  isVerified  Boolean      @default(false)
+  isVerified  Boolean            @default(false)
   companyId   String
-  company     Company      @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  jobPostings JobPosting[] @relation("JobPostingBranches")
-}
-
-model RawJob {
-  rawJobId     String       @id @default(uuid())
-  source       String
-  fingerprint  String       @unique
-  rawPayload   Json
-  title        String?
-  companyName  String?
-  location     String?
-  originalUrl  String?
-  jobType      String?
-  status       RawJobStatus @default(PENDING)
-  errorMessage String?
-  lastSeenAt   DateTime     @default(now()) @db.Timestamp(6)
-  createdAt    DateTime     @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime     @updatedAt @db.Timestamp(6)
-  jobPosting   JobPosting?
+  company     Company            @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  jobPostings JobPostingBranch[]
 }
 
 model JobPosting {
@@ -266,20 +237,19 @@ model JobPosting {
   salaryMax              Decimal?               @db.Decimal(19, 0)
   currency               String?                @default("VND")
   jobType                JobType?
+  jobLevel               JobLevel?              @default(STAFF)
   experience             String?
   vacancies              Int                    @default(1)
   locationCity           String?
   status                 JobStatus              @default(PENDING)
-  postType               PostType               @default(CRAWLED)
   isVerified             Boolean                @default(false)
-  originalUrl            String                 @unique
   aiReliabilityScore     Float?
   createdAt              DateTime               @default(now()) @db.Timestamp(6)
   updatedAt              DateTime               @updatedAt @db.Timestamp(6)
   approvedBy             String?
+  moderationFeedback     Json?
   recruiterId            String?
   companyId              String
-  rawJobId               String?                @unique
   structuredRequirements Json?
   viewCount              Int                    @default(0)
   jobTier                JobTier                @default(BASIC)
@@ -290,10 +260,18 @@ model JobPosting {
   applications           Application[]
   jobMatches             JobMatch[]
   company                Company                @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  rawJob                 RawJob?                @relation(fields: [rawJobId], references: [rawJobId])
   recruiter              Recruiter?             @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
-  branches               CompanyBranch[]        @relation("JobPostingBranches")
+  branches               JobPostingBranch[]
+}
+
+model JobPostingBranch {
+  jobPostingId String
+  branchId     String
+  jobPosting   JobPosting    @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
+  branch       CompanyBranch @relation(fields: [branchId], references: [branchId], onDelete: Cascade)
+
+  @@id([jobPostingId, branchId])
 }
 
 model JobMatch {
@@ -419,6 +397,7 @@ model RecruiterSubscription {
   usedUrgentPosts Int       @default(0)
   expiryDate      DateTime
   canViewAIReport Boolean   @default(false)
+  isCancelled     Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   recruiter       Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
@@ -453,12 +432,12 @@ enum AuthProvider {
 enum StatusUser {
   ACTIVE
   LOCKED
+  BANNED
 }
 
-enum CrawlStatus {
-  RUNNING
-  SUCCESS
-  FAILED
+enum AccountLevel {
+  NORMAL
+  PROBATION
 }
 
 enum FilterAction {
@@ -469,12 +448,14 @@ enum FilterAction {
 enum JobType {
   FULLTIME
   PARTTIME
-  INTERNSHIP
+  REMOTE
 }
 
-enum PostType {
-  CRAWLED
-  MANUAL
+enum JobLevel {
+  INTERN
+  STAFF
+  MANAGER
+  DIRECTOR
 }
 
 enum AppStatus {
@@ -491,13 +472,6 @@ enum JobStatus {
   REJECTED
   EXPIRED
   CLOSED
-}
-
-enum RawJobStatus {
-  PENDING
-  PROCESSED
-  FAILED
-  IGNORED
 }
 
 enum SkillLevel {

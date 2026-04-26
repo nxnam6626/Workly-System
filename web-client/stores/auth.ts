@@ -20,7 +20,6 @@ interface User {
   };
   recruiter?: any;
   admin?: {
-    adminLevel: number;
     permissions: string[];
   };
 }

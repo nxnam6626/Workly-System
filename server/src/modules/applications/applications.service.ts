@@ -12,7 +12,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
 import { WalletsService } from '../wallets/wallets.service';
 import { AiService } from '../ai/ai.service'; // Added AiService
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '@/generated/prisma';
 
 @Injectable()
 export class ApplicationsService {

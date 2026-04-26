@@ -8,7 +8,7 @@ export class CompaniesService {
   constructor(
     private prisma: PrismaService,
     private supabaseService: SupabaseService,
-  ) {}
+  ) { }
 
   async findAll(query: FilterCompanyDto) {
     const { search, page = 1, limit = 10 } = query;
@@ -167,41 +167,41 @@ export class CompaniesService {
     if (!isVerified) {
       try {
         let query = encodeURIComponent(data.address);
-      let res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-        {
-          headers: { 'User-Agent': 'Workly-System' },
-        },
-      );
-      if (res.ok) {
-        let json = await res.json();
-        if (json && json.length > 0) {
-          latitude = parseFloat(json[0].lat);
-          longitude = parseFloat(json[0].lon);
-          isVerified = true;
-        } else {
-          // Fallback: Try with an extracting just the administrative divisions (last 3 comma-separated parts)
-          const parts = data.address.split(',');
-          if (parts.length > 2) {
-            const simplifiedAddress = parts.slice(Math.max(parts.length - 3, 0)).join(',').trim();
-            query = encodeURIComponent(simplifiedAddress);
-            res = await fetch(
-              `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-              {
-                headers: { 'User-Agent': 'Workly-System' },
-              },
-            );
-            if (res.ok) {
-              json = await res.json();
-              if (json && json.length > 0) {
-                latitude = parseFloat(json[0].lat);
-                longitude = parseFloat(json[0].lon);
-                isVerified = true;
+        let res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+          {
+            headers: { 'User-Agent': 'Workly-System' },
+          },
+        );
+        if (res.ok) {
+          let json = await res.json();
+          if (json && json.length > 0) {
+            latitude = parseFloat(json[0].lat);
+            longitude = parseFloat(json[0].lon);
+            isVerified = true;
+          } else {
+            // Fallback: Try with an extracting just the administrative divisions (last 3 comma-separated parts)
+            const parts = data.address.split(',');
+            if (parts.length > 2) {
+              const simplifiedAddress = parts.slice(Math.max(parts.length - 3, 0)).join(',').trim();
+              query = encodeURIComponent(simplifiedAddress);
+              res = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+                {
+                  headers: { 'User-Agent': 'Workly-System' },
+                },
+              );
+              if (res.ok) {
+                json = await res.json();
+                if (json && json.length > 0) {
+                  latitude = parseFloat(json[0].lat);
+                  longitude = parseFloat(json[0].lon);
+                  isVerified = true;
+                }
               }
             }
           }
         }
-      }
       } catch (e) {
         console.error('Nominatim search error:', e);
       }

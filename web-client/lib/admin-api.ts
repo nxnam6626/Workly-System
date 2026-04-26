@@ -9,15 +9,10 @@ export enum JobStatus {
   EXPIRED = 'EXPIRED',
 }
 
-export enum PostType {
-  CRAWLED = 'CRAWLED',
-  MANUAL = 'MANUAL',
-}
-
 export enum JobType {
   FULLTIME = 'FULLTIME',
   PARTTIME = 'PARTTIME',
-  INTERNSHIP = 'INTERNSHIP',
+  REMOTE = 'REMOTE',
 }
 
 export interface Company {
@@ -53,10 +48,8 @@ export interface JobPosting {
   vacancies: number;
   locationCity?: string;
   status: JobStatus;
-  postType: PostType;
   jobTier?: string;
   isVerified: boolean;
-  originalUrl: string;
   aiReliabilityScore: number;
   createdAt: string;
   updatedAt: string;
@@ -116,7 +109,6 @@ export const rapidJobApi = {
 
 export interface AdminFilterJobPostingDto {
   status?: JobStatus;
-  postType?: PostType;
   minAiScore?: number;
   searchTerm?: string;
 }
@@ -125,7 +117,6 @@ export interface AdminJobStats {
   totalPending: number;
   totalApproved: number;
   totalRejected: number;
-  totalCrawled: number;
 }
 
 export interface PaginatedJobPostings {
@@ -152,8 +143,8 @@ export const adminJobsApi = {
   approve: (id: string): Promise<JobPosting> =>
     api.patch(`/admin/job-postings/${id}/approve`).then((r) => r.data),
 
-  reject: (id: string): Promise<JobPosting> =>
-    api.patch(`/admin/job-postings/${id}/reject`).then((r) => r.data),
+  reject: (id: string, reason?: string): Promise<JobPosting> =>
+    api.patch(`/admin/job-postings/${id}/reject`, { reason }).then((r) => r.data),
 
   bulkApprove: (ids: string[]): Promise<{ count: number }> =>
     api.patch('/admin/job-postings/bulk-approve', { ids }).then((r) => r.data),
@@ -164,12 +155,14 @@ export const adminJobsApi = {
 
 // ─── Admin User Management ─────────────────────────────────────────────────────
 
-export type UserStatus = 'ACTIVE' | 'LOCKED';
+export type UserStatus = 'ACTIVE' | 'LOCKED' | 'BANNED';
+export type AccountLevel = 'NORMAL' | 'PROBATION';
 
 export interface AdminUser {
   userId: string;
   email: string;
   status: UserStatus;
+  accountLevel: AccountLevel;
   phoneNumber?: string;
   avatar?: string;
   createdAt: string;
@@ -183,7 +176,7 @@ export interface AdminUser {
     recruiterSubscription?: { planType: string; expiryDate: string } | null;
     recruiterWallet?: { cvUnlockQuota: number; cvUnlockQuotaMax: number } | null;
   };
-  admin?: { permissions: string[]; adminLevel: number };
+  admin?: { permissions: string[] };
 }
 
 export interface PaginatedUsers {
@@ -213,6 +206,9 @@ export const adminUsersApi = {
 
   unlock: (id: string): Promise<{ message: string }> =>
     api.patch(`/users/${id}/unlock`).then((r) => r.data),
+
+  unlockWithProbation: (id: string): Promise<{ message: string }> =>
+    api.patch(`/users/${id}/unlock-probation`).then((r) => r.data),
 
   remove: (id: string): Promise<{ message: string }> =>
     api.delete(`/users/${id}`).then((r) => r.data),
@@ -307,6 +303,7 @@ export interface SupportRequest {
     userId: string;
     email: string;
     status: string;
+    accountLevel: string;
     userRoles: { role: { roleName: string } }[];
     recruiter?: { violationCount: number };
   } | null;

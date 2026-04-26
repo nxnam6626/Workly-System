@@ -19,8 +19,7 @@ async function main() {
     await prisma.jobPosting.deleteMany({
       where: {
         OR: [
-          { title: { startsWith: '[TUYỂN GẤP]' } },
-          { originalUrl: { contains: 'workly.vn/jobs/' } } // Sample tailored jobs
+          { title: { startsWith: '[TUYỂN GẤP]' } }
         ]
       }
     });
@@ -82,8 +81,7 @@ async function main() {
             status: 'APPROVED',
             jobTier: 'PROFESSIONAL',
             companyId: company.companyId,
-            recruiterId: recruiter.recruiterId,
-            originalUrl: `https://workly.vn/jobs/${Date.now()}-${Math.random()}`
+            recruiterId: recruiter.recruiterId
           }
         });
       }
@@ -92,14 +90,17 @@ async function main() {
 
     // 2. Create 18 Urgent Jobs (one for each industry)
     const industries = [
-        "CNTT / Phần mềm", "Marketing / Truyền thông", "Content / SEO",
-        "Tài chính / Kế toán / Ngân hàng", "Nhân sự / Hành chính / Pháp lý",
-        "Kinh doanh / Bán hàng", "Thiết kế / Sáng tạo", "Kỹ thuật / Cơ khí / Sản xuất",
-        "Xây dựng / Kiến trúc", "Vận tải / Logistics / Chuỗi cung ứng",
-        "Bán lẻ / Tiêu dùng", "Nhà hàng / Khách sạn / Du lịch",
-        "Y tế / Dược phẩm / Chăm sóc sức khỏe", "Giáo dục / Đào tạo / Ngôn ngữ",
-        "Nông nghiệp / Môi trường", "Bất động sản", "Truyền thông / Báo chí",
-        "Thể thao / Làm đẹp / Giải trí"
+      "Kinh Doanh / Bán Hàng", "Công Nghệ Thông Tin", "Marketing / Truyền Thông",
+      "Content / SEO", "Tài Chính / Kế Toán / Ngân Hàng", "Nhân Sự / Hành Chính / Pháp Lý",
+      "Thiết Kế / Sáng Tạo", "Kỹ Thuật / Cơ Khí / Sản Xuất", "Xây Dựng / Kiến Trúc",
+      "Vận Tải / Logistics", "Bán Lẻ / Tiêu Dùng", "Nhà Hàng / Khách Sạn / Du lịch",
+      "Y Tế / Dược Phẩm", "Giáo Dục / Đào Tạo", "Nông Nghiệp / Môi Trường",
+      "Bất Động Sản", "Truyền Thông / Báo Chí", "Thể Thao / Làm Đẹp / Giải Trí",
+      "Luật / Tư Vấn Pháp Lý", "Dệt May / Da Giày", "Thực Phẩm & Đồ Uống (F&B)",
+      "Viễn Thông", "Bảo Hiểm", "Điện / Điện Tử / Điện Lạnh", "Hóa Học / Sinh Học",
+      "Thời Trang / Mỹ Phẩm", "Cơ Khí / Chế Tạo Máy", "Xuất Nhập Khẩu",
+      "Thẩm Mỹ / Spa / Massage", "Bảo Vệ / An Ninh", "Lao Động Phổ Thông",
+      "Freelance / Việc Làm Tự Do"
     ];
 
     const recruiter = await prisma.recruiter.findFirst();
@@ -122,8 +123,7 @@ async function main() {
                 structuredRequirements: {
                     industry: industry,
                     hardSkills: [industry]
-                },
-                originalUrl: `https://workly.vn/urgent/${industry.replace(/\s/g, '-')}-${Date.now()}`
+                }
             }
         });
     }

@@ -623,7 +623,7 @@ HƯỚNG DẪN CHO AI:
         
         Quy tắc:
         - title: Tiêu đề công việc cực kỳ chuyên nghiệp. BẮT BUỘC giữ nguyên các role chuẩn ngành IT bằng Tiếng Anh (Ví dụ: "Backend Developer", "Frontend Engineer", "Data Analyst") thay vì dịch máy móc sang Tiếng Việt như "Nhân viên phát triển...". Chỉ dùng Tiếng Việt khi danh xưng đủ sang trọng (VD: "Trưởng phòng Marketing", "Chuyên viên Phân tích Dữ liệu").
-        - jobType: "FULLTIME", "PARTTIME", hoặc "INTERNSHIP" (mặc định FULLTIME).
+        - jobType: "FULLTIME", "PARTTIME", hoặc "REMOTE" (mặc định FULLTIME).
         - salaryMin: Lương thấp nhất (số nguyên, e.g. 10000000) (nếu nói 10tr -> 10000000). Trả về 0 nếu không có.
         - salaryMax: Lương cao nhất (số nguyên, e.g. 20000000). Trả về 0 nếu không có.
         - vacancies: Số lượng tuyển (số nguyên, mặc định 1).

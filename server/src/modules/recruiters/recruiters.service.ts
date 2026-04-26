@@ -1,23 +1,30 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MessagesService } from '../messages/messages.service';
-import { MatchingService } from '../search/matching.service';
 
 @Injectable()
 export class RecruitersService {
   constructor(
     private prisma: PrismaService,
     private messagesService: MessagesService,
-    private matchingService: MatchingService,
   ) {}
 
-  async getMatchedCandidates(userId: string, jobId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
+  private async ensureRecruiter(userId: string) {
+    let recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { recruiterWallet: true },
     });
 
-    if (!recruiter) throw new NotFoundException('Recruiter not found');
+    if (!recruiter) {
+      recruiter = await this.prisma.recruiter.create({
+        data: { userId },
+      });
+    }
+
+    return recruiter;
+  }
+
+  async getMatchedCandidates(userId: string, jobId: string) {
+    const recruiter = await this.ensureRecruiter(userId);
 
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
@@ -128,13 +135,7 @@ export class RecruitersService {
   }
 
   async getDashboardData(userId: string, targetDate?: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-    });
-
-    if (!recruiter) {
-      throw new NotFoundException('Không tìm thấy dữ liệu nhà tuyển dụng.');
-    }
+    const recruiter = await this.ensureRecruiter(userId);
 
     const recruiterId = recruiter.recruiterId;
 
@@ -238,10 +239,7 @@ export class RecruitersService {
   }
 
   async getTopMatchesForAllJobs(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-    });
-    if (!recruiter) throw new NotFoundException('Recruiter not found');
+    const recruiter = await this.ensureRecruiter(userId);
 
     const activeJobs = await this.prisma.jobPosting.findMany({
       where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
@@ -322,10 +320,7 @@ export class RecruitersService {
   }
 
   async getMatchSummary(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-    });
-    if (!recruiter) throw new NotFoundException('Recruiter not found');
+    const recruiter = await this.ensureRecruiter(userId);
 
     const totalMatches = await this.prisma.jobMatch.count({
       where: {

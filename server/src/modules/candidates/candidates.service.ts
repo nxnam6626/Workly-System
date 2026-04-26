@@ -8,7 +8,8 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CvParsingService } from './cv-parsing.service';
 import { SupabaseService } from '../../common/supabase/supabase.service';
-import { MatchingService } from '../search/matching.service';
+import { ScoringEngineService } from '../matching-engine/services/scoring-engine.service';
+import { MatchingOrchestratorService } from '../matching-engine/services/matching-orchestrator.service';
 import * as crypto from 'crypto';
 import { extname } from 'path';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -20,7 +21,8 @@ export class CandidatesService {
     private readonly prisma: PrismaService,
     private readonly cvParsingService: CvParsingService,
     private readonly supabaseService: SupabaseService,
-    private readonly matchingService: MatchingService,
+    private readonly scoringEngine: ScoringEngineService,
+    private readonly matchingOrchestrator: MatchingOrchestratorService,
     @InjectQueue('matching') private matchingQueue: Queue,
   ) { }
 
@@ -92,88 +94,52 @@ export class CandidatesService {
         });
         const unlockedIds = new Set(unlocked.map((u) => u.candidateId));
 
-        // Fetch active jobs for matching
+        // Fetch active job IDs for this recruiter
         const activeJobs = await this.prisma.jobPosting.findMany({
           where: { recruiterId: recruiter.recruiterId, status: 'APPROVED' },
-          select: { structuredRequirements: true, title: true },
+          select: { jobPostingId: true, title: true },
         });
+        const activeJobIds = activeJobs.map(j => j.jobPostingId);
+        const jobTitleMap = new Map(activeJobs.map(j => [j.jobPostingId, j.title]));
+
+        // Fetch all pre-calculated matches for these candidates and these jobs
+        const candidateIds = data.map(c => c.candidateId);
+        const allMatches = await this.prisma.jobMatch.findMany({
+          where: {
+            candidateId: { in: candidateIds },
+            jobPostingId: { in: activeJobIds },
+          },
+        });
+
+        // Group matches by candidate
+        const matchesByCandidate = allMatches.reduce((acc, match) => {
+          let list = acc.get(match.candidateId);
+          if (!list) {
+            list = [];
+            acc.set(match.candidateId, list);
+          }
+          list.push(match);
+          return acc;
+        }, new Map<string, any[]>());
 
         // Enrich data
         enrichedData = data.map((candidate) => {
           const isUnlocked = unlockedIds.has(candidate.candidateId);
+          const candidateMatches = matchesByCandidate.get(candidate.candidateId) || [];
+          
+          // Sort candidate's matches by score
+          candidateMatches.sort((a, b) => b.score - a.score);
 
-          let maxScore = 0;
-          let bestJob = '';
-          const matchDetails: { title: string; score: number }[] = [];
-
-          // Calculate matching score natively
-          const mainCv =
-            candidate.cvs?.find((c) => c.isMain) || candidate.cvs?.[0];
-          if (mainCv && mainCv.parsedData) {
-            const parsedData = mainCv.parsedData as any;
-            const cvSkills = parsedData.skills || [];
-            const cvExp = parsedData.totalYearsExp || 0;
-
-            for (const job of activeJobs) {
-              if (!job.structuredRequirements) continue;
-              const reqs = job.structuredRequirements as any;
-              const {
-                hardSkills = [],
-                softSkills = [],
-                minExperienceYears = 0,
-              } = reqs;
-
-              const matchedHard = hardSkills.filter((s: string) =>
-                cvSkills.some((cs: any) => {
-                  const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-                  return (
-                    skillStr && skillStr.toLowerCase().includes(s.toLowerCase())
-                  );
-                }),
-              );
-              const hardScore =
-                hardSkills.length > 0
-                  ? matchedHard.length / hardSkills.length
-                  : 1;
-
-              const matchedSoft = softSkills.filter((s: string) =>
-                cvSkills.some((cs: any) => {
-                  const skillStr = typeof cs === 'string' ? cs : cs?.skillName;
-                  return (
-                    skillStr && skillStr.toLowerCase().includes(s.toLowerCase())
-                  );
-                }),
-              );
-              const softScore =
-                softSkills.length > 0
-                  ? matchedSoft.length / softSkills.length
-                  : 1;
-              const skillScore = hardScore * 0.8 + softScore * 0.2;
-
-              const expScore =
-                cvExp >= minExperienceYears
-                  ? 1
-                  : cvExp / (minExperienceYears || 1);
-
-              const totalScore = Math.round(
-                (skillScore * 0.7 + expScore * 0.3) * 100,
-              );
-              
-              // Chỉ thêm vào danh sách nếu điểm phù hợp >= 50%
-              if (totalScore >= 50) {
-                matchDetails.push({ title: job.title, score: totalScore });
-              }
-
-              if (totalScore > maxScore) {
-                maxScore = totalScore;
-                bestJob = job.title;
-              }
-            }
-            
-            // Sort matchDetails descending and take top 3
-            matchDetails.sort((a, b) => b.score - a.score);
-            matchDetails.splice(3);
-          }
+          const maxScore = candidateMatches.length > 0 ? candidateMatches[0].score : 0;
+          const bestJobId = candidateMatches.length > 0 ? candidateMatches[0].jobPostingId : null;
+          const bestJob = bestJobId ? jobTitleMap.get(bestJobId) : '';
+          
+          const matchDetails = candidateMatches
+            .slice(0, 3)
+            .map(m => ({ 
+              title: jobTitleMap.get(m.jobPostingId) || '', 
+              score: m.score 
+            }));
 
           return {
             ...candidate,
@@ -980,7 +946,7 @@ export class CandidatesService {
       console.log(
         `[CandidatesService] JobMatch is empty for user ${userId}. Running fallback matching...`,
       );
-      await this.matchingService.runMatchingForCandidate(userId);
+      await this.matchingOrchestrator.runMatchingForCandidate(userId);
 
       [matches, total] = await Promise.all([
         this.prisma.jobMatch.findMany({

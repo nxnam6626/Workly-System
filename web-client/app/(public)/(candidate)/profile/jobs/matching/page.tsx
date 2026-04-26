@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -77,7 +77,7 @@ export default function MatchingJobsPage() {
         >
           <div className="absolute inset-2 border-r-2 border-t-2 border-indigo-400 rounded-full animate-spin-slow" />
         </motion.div>
-        <p className="text-slate-500 font-black tracking-widest uppercase text-xs animate-pulse">AI đang phân tích hồ sơ của bạn...</p>
+        <p className="text-slate-500 font-black tracking-widest uppercase text-xs animate-pulse">AI dang ph�n t�ch h? so c?a b?n...</p>
       </div>
     );
   }
@@ -113,10 +113,10 @@ export default function MatchingJobsPage() {
                     Workly AI Matching Engine
                   </div>
                   <h1 className="text-4xl font-black text-white tracking-tight leading-none">
-                    Việc làm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 italic">Dành riêng</span> <br/> cho phong cách của bạn
+                    Vi?c l�m <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 italic">D�nh ri�ng</span> <br/> cho phong c�ch c?a b?n
                   </h1>
                   <p className="text-slate-400 max-w-lg text-[15px] leading-relaxed font-medium">
-                    Thuật toán AI của chúng tôi đã phân tích {user?.candidate?.skills?.length || 0} kỹ năng trong CV để đề xuất những vị trí có độ tương thích cao nhất.
+                    Thu?t to�n AI c?a ch�ng t�i d� ph�n t�ch {user?.candidate?.skills?.length || 0} k? nang trong CV d? d? xu?t nh?ng v? tr� c� d? tuong th�ch cao nh?t.
                   </p>
                 </div>
 
@@ -131,7 +131,7 @@ export default function MatchingJobsPage() {
                       <span className="text-[8px] font-black text-blue-400 uppercase tracking-tighter">Accuracy</span>
                     </div>
                   </div>
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Dựa trên Workly Core II</p>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">D?a tr�n Workly Core II</p>
                 </div>
               </div>
             </motion.div>
@@ -139,10 +139,10 @@ export default function MatchingJobsPage() {
             {/* Jobs List */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-4">
-                <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.15em]">Đề xuất hàng đầu ({jobs.length})</h3>
+                <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.15em]">�? xu?t h�ng d?u ({jobs.length})</h3>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[11px] font-bold text-slate-500 italic">Đang cập nhật theo thời gian thực</span>
+                  <span className="text-[11px] font-bold text-slate-500 italic">�ang c?p nh?t theo th?i gian th?c</span>
                 </div>
               </div>
 
@@ -176,7 +176,7 @@ export default function MatchingJobsPage() {
                           </div>
                           {job.score >= 90 && (
                             <div className="absolute -bottom-2 -left-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white text-[10px] font-black w-10 h-10 rounded-[14px] flex items-center justify-center border-4 border-white shadow-lg">
-                              ✨
+                              ?
                             </div>
                           )}
                         </div>
@@ -192,7 +192,7 @@ export default function MatchingJobsPage() {
                             <p className="text-[15px] font-bold text-slate-400 flex items-center gap-2">
                               {job.company.companyName}
                               <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                              <span className="text-slate-300 font-medium">Bản tin đăng 2 ngày trước</span>
+                              <span className="text-slate-300 font-medium">B?n tin dang 2 ng�y tru?c</span>
                             </p>
                           </div>
 
@@ -216,7 +216,7 @@ export default function MatchingJobsPage() {
                             <div className="flex items-center justify-between mb-1">
                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                 <Sparkles className="w-3 h-3 text-blue-500" />
-                                Kỹ năng tương thích
+                                K? nang tuong th�ch
                                </p>
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -226,25 +226,25 @@ export default function MatchingJobsPage() {
                                 </span>
                               ))}
                               {(!job.matchedSkills || job.matchedSkills.length === 0) && (
-                                <span className="text-xs text-slate-400 italic">Đang phân tích kỹ năng...</span>
+                                <span className="text-xs text-slate-400 italic">�ang ph�n t�ch k? nang...</span>
                               )}
                             </div>
                           </div>
 
                           <div className="pt-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <p className="text-[11px] font-bold text-slate-400 italic">Hệ thống gợi ý dựa trên hồ sơ chuyên sâu của bạn</p>
+                            <p className="text-[11px] font-bold text-slate-400 italic">H? th?ng g?i � d?a tr�n h? so chuy�n s�u c?a b?n</p>
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                               <Link
                                 href={`/jobs/${job.jobPostingId}`}
                                 className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-slate-100 text-slate-700 text-xs font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-wider"
                               >
-                                Chi tiết
+                                Chi ti?t
                               </Link>
                               <Link
                                 href={`/jobs/${job.jobPostingId}`}
                                 className="flex-[2] sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white text-xs font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 uppercase tracking-widest group"
                               >
-                                Ứng tuyển ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                ?ng tuy?n ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </Link>
                             </div>
                           </div>
@@ -265,16 +265,16 @@ export default function MatchingJobsPage() {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Chưa tìm thấy mục <span className="text-blue-600 italic">Matching chính xác</span></h3>
+                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Chua t�m th?y m?c <span className="text-blue-600 italic">Matching ch�nh x�c</span></h3>
                       <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
-                        Đừng lo lắng! Hãy cập nhật thêm kỹ năng vào hồ sơ hoặc tải lên CV mới để AI có thể phân tích chính xác hơn.
+                        �?ng lo l?ng! H�y c?p nh?t th�m k? nang v�o h? so ho?c t?i l�n CV m?i d? AI c� th? ph�n t�ch ch�nh x�c hon.
                       </p>
                     </div>
                     <Link
                       href="/profile/cv-management"
                       className="inline-flex items-center justify-center px-12 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-xs uppercase tracking-widest"
                     >
-                      Cập nhật Hồ sơ/CV ngay
+                      C?p nh?t H? so/CV ngay
                     </Link>
                   </motion.div>
                 )}

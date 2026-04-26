@@ -1,24 +1,12 @@
-// Danh sách tỉnh thành chuẩn hóa - dùng tên chuẩn, không dùng sub-vn để tránh lỗi diacritics
-export const LOCATIONS = [
-  "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
-  "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước",
-  "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng",
-  "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp",
-  "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh",
-  "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hồ Chí Minh",
-  "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu",
-  "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định",
-  "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
-  "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
-  "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên",
-  "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang",
-  "Vĩnh Long", "Vĩnh Phúc", "Yên Bái",
-];
+import { VIETNAM_LOCATIONS } from "./locations";
+
+// Danh sách tỉnh thành chuẩn hóa - lấy từ thư viện sub-vn
+export const LOCATIONS = VIETNAM_LOCATIONS.map(p => p.name);
 
 export const JOB_TYPES = [
   { value: "FULLTIME", label: "Toàn thời gian" },
   { value: "PARTTIME", label: "Bán thời gian" },
-  { value: "INTERNSHIP", label: "Thực tập" },
+  { value: "REMOTE", label: "Làm việc từ xa" },
 ];
 
 export const EXPERIENCE_LEVELS = [
@@ -28,6 +16,13 @@ export const EXPERIENCE_LEVELS = [
   "2 - 3 năm",
   "3 - 5 năm",
   "Trên 5 năm",
+];
+
+export const JOB_LEVELS = [
+  { value: "INTERN", label: "Thực tập sinh" },
+  { value: "STAFF", label: "Nhân viên/Chuyên viên" },
+  { value: "MANAGER", label: "Trưởng nhóm/Trưởng phòng" },
+  { value: "DIRECTOR", label: "Giám đốc/Cấp cao hơn" },
 ];
 
 // Mức lương thực tế thị trường VN (triệu VNĐ)
@@ -58,7 +53,14 @@ export const HOT_KEYWORDS = [
 export const JOB_TYPE_LABEL: Record<string, string> = {
   FULLTIME: "Toàn thời gian",
   PARTTIME: "Bán thời gian",
-  INTERNSHIP: "Thực tập",
+  REMOTE: "Làm việc từ xa",
+};
+
+export const JOB_LEVEL_LABEL: Record<string, string> = {
+  INTERN: "Thực tập sinh",
+  STAFF: "Nhân viên/Chuyên viên",
+  MANAGER: "Trưởng nhóm/Trưởng phòng",
+  DIRECTOR: "Giám đốc/Cấp cao hơn",
 };
 
 // Danh sách ngành nghề chuẩn (dùng cho dropdown)

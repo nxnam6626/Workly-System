@@ -49,17 +49,41 @@ export function UserDropdown() {
   const displayName = user?.name || user?.candidate?.fullName || user?.email || 'Người dùng';
   const initial = displayName.charAt(0).toUpperCase();
 
-  const navItems = [
-    { icon: <User className="w-5 h-5" />, label: "Quản lý hồ sơ", href: "/profile" },
-    { icon: <Edit3 className="w-5 h-5" />, label: "Cập nhật hồ sơ", href: "/profile/edit" },
-    { icon: <ClipboardCheck className="w-5 h-5" />, label: "Việc làm đã ứng tuyển", href: "/profile/jobs/applied" },
-    { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
-    { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
-    { icon: <Briefcase className="w-5 h-5" />, label: "Việc làm phù hợp", href: "/profile/jobs/matching" },
-    { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/connections" },
+  const isCandidate = user?.roles?.includes('CANDIDATE');
+  const isRecruiter = user?.roles?.includes('RECRUITER');
+  const isAdmin = user?.roles?.includes('ADMIN');
+
+  const navItems = [];
+
+  if (isCandidate) {
+    navItems.push(
+      { icon: <User className="w-5 h-5" />, label: "Quản lý hồ sơ", href: "/profile" },
+      { icon: <Edit3 className="w-5 h-5" />, label: "Cập nhật hồ sơ", href: "/profile/edit" },
+      { icon: <ClipboardCheck className="w-5 h-5" />, label: "Việc làm đã ứng tuyển", href: "/profile/jobs/applied" },
+      { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
+      { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
+      { icon: <Briefcase className="w-5 h-5" />, label: "Việc làm phù hợp", href: "/profile/jobs/matching" },
+      { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/connections" },
+    );
+  }
+
+  if (isRecruiter) {
+    navItems.push(
+      { icon: <Sparkles className="w-5 h-5" />, label: "Trang quản lý Tuyển dụng", href: "/recruiter/dashboard" },
+      { icon: <Briefcase className="w-5 h-5" />, label: "Đăng tin tuyển dụng", href: "/recruiter/jobs/create" },
+    );
+  }
+
+  if (isAdmin) {
+    navItems.push(
+      { icon: <Sparkles className="w-5 h-5" />, label: "Trang Quản trị Hệ thống", href: "/admin/dashboard" },
+    );
+  }
+
+  navItems.push(
     { icon: <Lock className="w-5 h-5" />, label: "Đổi mật khẩu", href: "/profile/change-password" },
     { icon: <Bell className="w-5 h-5" />, label: "Cài đặt thông báo email", href: "/profile/settings/notifications" },
-  ];
+  );
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -79,7 +103,9 @@ export function UserDropdown() {
         </div>
         <div className="flex flex-col items-start text-left">
           <span className="text-[14px] font-bold text-slate-800 leading-tight">{displayName}</span>
-          <span className="text-[12px] font-medium text-[#22c55e]">Đang tìm việc</span>
+          <span className={`text-[12px] font-medium ${isCandidate ? 'text-[#22c55e]' : 'text-indigo-500'}`}>
+            {isCandidate ? 'Đang tìm việc' : (isAdmin ? 'Quản trị viên' : 'Nhà tuyển dụng')}
+          </span>
         </div>
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -88,17 +114,19 @@ export function UserDropdown() {
         <div className="absolute right-0 mt-3 w-[340px] bg-white rounded-[32px] shadow-2xl border border-slate-50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="px-5 pt-6 pb-4">
             {/* Toggle Section */}
-            <div className="flex items-center justify-between mb-5 px-1">
-              <span className="text-[15px] font-bold text-[#22c55e]">Đang tìm việc</span>
-              <button
-                onClick={() => setIsLookingForJob(!isLookingForJob)}
-                className={`w-12 h-6 rounded-full transition-all duration-300 relative flex items-center ${isLookingForJob ? 'bg-[#22c55e]' : 'bg-slate-200'
-                  }`}
-              >
-                <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 shadow-sm ${isLookingForJob ? 'left-[25px]' : 'left-0.5'
-                  }`} />
-              </button>
-            </div>
+            {isCandidate && (
+              <div className="flex items-center justify-between mb-5 px-1">
+                <span className="text-[15px] font-bold text-[#22c55e]">Đang tìm việc</span>
+                <button
+                  onClick={() => setIsLookingForJob(!isLookingForJob)}
+                  className={`w-12 h-6 rounded-full transition-all duration-300 relative flex items-center ${isLookingForJob ? 'bg-[#22c55e]' : 'bg-slate-200'
+                    }`}
+                >
+                  <div className={`w-5 h-5 bg-white rounded-full absolute transition-all duration-300 shadow-sm ${isLookingForJob ? 'left-[25px]' : 'left-0.5'
+                    }`} />
+                </button>
+              </div>
+            )}
 
             {/* Nav List with Scrollbar */}
             <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">

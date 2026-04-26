@@ -149,12 +149,13 @@ export class SearchService implements OnModuleInit {
     location?: string;
     jobTier?: string;
     jobType?: string;
-    industry?: string;
+    industry?: string | string[];
     experience?: string;
     salaryMin?: number;
     salaryMax?: number;
     rank?: string;
     education?: string;
+    sortBy?: string;
     page?: number;
     limit?: number;
   }) {
@@ -169,6 +170,7 @@ export class SearchService implements OnModuleInit {
       salaryMax,
       rank,
       education,
+      sortBy,
       page = 1,
       limit = 10,
     } = params;
@@ -260,15 +262,19 @@ export class SearchService implements OnModuleInit {
     }
 
     if (industry) {
-      filter.push({
-        multi_match: {
-          query: industry,
-          fields: ['title^2', 'description'],
-          fuzziness: 'AUTO',
-          operator: 'or',
-          minimum_should_match: '50%',
-        },
-      });
+      if (Array.isArray(industry)) {
+        filter.push({
+          terms: {
+            industry: industry
+          },
+        });
+      } else {
+        filter.push({
+          term: {
+            industry: industry
+          },
+        });
+      }
     }
 
     if (experience) {
@@ -312,6 +318,21 @@ export class SearchService implements OnModuleInit {
     }
 
     try {
+      // Sắp xếp động
+      let sort: any[] = [];
+      if (sortBy === 'new') {
+        sort = [{ createdAt: 'desc' }, { jobTier: 'desc' }];
+      } else if (sortBy === 'updated') {
+        sort = [{ refreshedAt: 'desc' }, { jobTier: 'desc' }];
+      } else if (sortBy === 'salary') {
+        sort = [{ salaryMax: 'desc' }, { jobTier: 'desc' }];
+      } else {
+        // Mặc định (suitable)
+        sort = search 
+          ? [{ _score: 'desc' }, { jobTier: 'desc' }, { refreshedAt: 'desc' }]
+          : [{ jobTier: 'desc' }, { refreshedAt: 'desc' }];
+      }
+
       const queryParams: any = {
         index: 'jobs',
         from: skip,
@@ -323,9 +344,7 @@ export class SearchService implements OnModuleInit {
               filter,
             },
           },
-          sort: search
-            ? [{ _score: 'desc' }, { jobTier: 'desc' }, { refreshedAt: 'desc' }]
-            : [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
+          sort: sort,
         },
       };
 

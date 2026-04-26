@@ -11,7 +11,7 @@ import { RegisterDto } from '../auth/dto/register.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/decorators/roles.decorator';
-import type { StatusUser } from '@prisma/client';
+import type { StatusUser } from '@/generated/prisma';
 
 import { MailService } from '../../mail/mail.service';
 import { SearchService } from '../search/search.service';
@@ -140,6 +140,13 @@ export class UsersService {
                   ('verifyStatus' in data && data.verifyStatus)
                     ? 1
                     : 0,
+                branches: {
+                  create: {
+                    name: 'Trụ sở chính',
+                    address: companyDataFromApi?.dc || 'Đang cập nhật',
+                    isVerified: !!companyDataFromApi,
+                  },
+                },
               },
             });
             companyId = newCompany.companyId;
@@ -149,17 +156,19 @@ export class UsersService {
         await tx.recruiter.create({
           data: {
             userId: newUser.userId,
+            fullName: 'fullName' in data && data.fullName ? data.fullName : 'Nhà tuyển dụng',
             ...(companyId ? { companyId } : {}),
           },
         });
       } else if (data.role === 'ADMIN') {
         const permissions = 'permissions' in data ? data.permissions : [];
-        const isSupreme = permissions?.includes('ALL');
+        const isSupreme = permissions?.includes('ALL') || permissions?.includes('SUPER_ADMIN');
         await tx.admin.create({
+          // Removed legacy field
           data: {
             userId: newUser.userId,
-            adminLevel: isSupreme ? 1 : 2,
-            permissions: isSupreme ? [] : permissions || [],
+            fullName: 'fullName' in data && data.fullName ? data.fullName : 'Quản trị viên',
+            permissions: isSupreme ? ['SUPER_ADMIN'] : permissions || [],
           },
         });
       }
@@ -335,7 +344,7 @@ export class UsersService {
               recruiterWallet: true,
             },
           },
-          admin: { select: { permissions: true, adminLevel: true } },
+          admin: { select: { permissions: true } },
         },
       }),
       this.prisma.user.count({ where }),
@@ -365,7 +374,7 @@ export class UsersService {
         recruiter: {
           include: { recruiterSubscription: true, recruiterWallet: true },
         },
-        admin: { select: { permissions: true, adminLevel: true } },
+        admin: { select: { permissions: true } },
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
@@ -379,7 +388,7 @@ export class UsersService {
       include: {
         candidate: true,
         recruiter: true,
-        admin: { select: { permissions: true, adminLevel: true } },
+        admin: { select: { permissions: true } },
         userRoles: {
           include: { role: true },
         },
@@ -393,7 +402,7 @@ export class UsersService {
       include: {
         candidate: true,
         recruiter: true,
-        admin: { select: { permissions: true, adminLevel: true } },
+        admin: { select: { permissions: true } },
         userRoles: {
           include: { role: true },
         },
@@ -432,7 +441,7 @@ export class UsersService {
           },
         },
         recruiter: true,
-        admin: { select: { permissions: true, adminLevel: true } },
+        admin: { select: { permissions: true } },
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
@@ -493,7 +502,7 @@ export class UsersService {
           if (!ext) await tx.recruiter.create({ data: { userId } });
         } else if (dto.role === 'ADMIN') {
           const ext = await tx.admin.findUnique({ where: { userId } });
-          if (!ext) await tx.admin.create({ data: { userId, adminLevel: 1 } });
+          if (!ext) await tx.admin.create({ data: { userId, permissions: ['SUPER_ADMIN'] } });
         }
       }
     });
@@ -658,6 +667,13 @@ export class UsersService {
                     ('verifyStatus' in data && data.verifyStatus)
                       ? 1
                       : 0,
+                  branches: {
+                    create: {
+                      name: 'Trụ sở chính',
+                      address: companyDataFromApi?.dc || 'Đang cập nhật',
+                      isVerified: !!companyDataFromApi,
+                    },
+                  },
                 },
               });
               companyId = newCompany.companyId;
@@ -667,6 +683,7 @@ export class UsersService {
           await tx.recruiter.create({
             data: {
               userId,
+              fullName: (data as any).fullName || 'Nhà tuyển dụng',
               ...(companyId ? { companyId } : {}),
             },
           });
@@ -677,7 +694,8 @@ export class UsersService {
           await tx.admin.create({
             data: {
               userId,
-              adminLevel: 1,
+              fullName: (data as any).fullName || 'Quản trị viên',
+              permissions: ['SUPER_ADMIN'],
             },
           });
         }
@@ -796,11 +814,35 @@ export class UsersService {
 
   async unlockUser(userId: string) {
     await this.findOne(userId);
+    await this.resetViolationCount(userId);
     await this.prisma.user.update({
       where: { userId },
-      data: { status: 'ACTIVE', violations: 0 },
+      data: { status: 'ACTIVE', accountLevel: 'NORMAL' },
     });
     return { message: 'Tài khoản đã được mở khóa và reset số lần vi phạm.' };
+  }
+
+  async unlockWithProbation(userId: string) {
+    await this.findOne(userId);
+    await this.resetViolationCount(userId);
+    await this.prisma.user.update({
+      where: { userId },
+      data: { status: 'ACTIVE', accountLevel: 'PROBATION' },
+    });
+    return { message: 'Đã mở khóa tài khoản và đưa vào danh sách Thử thách (Reset vi phạm).' };
+  }
+
+  async banUser(userId: string) {
+    const user = await this.findOne(userId);
+    if (user.email === 'admin@workly.com') {
+      throw new BadRequestException('Không thể ban tài khoản Quản trị viên tối cao.');
+    }
+    
+    await this.prisma.user.update({
+      where: { userId },
+      data: { status: 'BANNED' },
+    });
+    return { message: 'Đã cấm vĩnh viễn tài khoản người dùng.' };
   }
 
   async resetViolationCount(userId: string) {
@@ -857,20 +899,19 @@ export class UsersService {
     });
   }
 
-  async updateAdminPermissions(userId: string, permissions: string[]) {
+  async updateAdminPermissions(userId: string, permissions: string[], fullName?: string) {
     const user = await this.findOne(userId);
     if (!user.admin) {
       throw new NotFoundException(
         'Người dùng này không phải là quản trị viên.',
       );
     }
-    const isSupreme = permissions.includes('ALL');
-
+    const isSupreme = permissions.includes('ALL') || permissions.includes('SUPER_ADMIN');
     await this.prisma.admin.update({
       where: { userId },
       data: {
-        adminLevel: isSupreme ? 1 : 2,
-        permissions: isSupreme ? [] : permissions,
+        permissions: isSupreme ? ['SUPER_ADMIN'] : permissions,
+        ...(fullName && { fullName }),
       },
     });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Heart, MapPin, Send, DollarSign, Building2 } from "lucide-react";
+import { Heart, MapPin, Send, DollarSign, Building2, Briefcase } from "lucide-react";
 import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useFavoriteStore } from "@/stores/favorites";
@@ -29,7 +29,9 @@ export interface Job {
   description?: string;
   requirements?: string;
   benefits?: string;
+  vacancies?: number | null;
   category?: string;
+  jobLevel?: 'INTERN' | 'STAFF' | 'MANAGER' | 'DIRECTOR' | null;
 }
 
 interface JobCardProps {
@@ -38,7 +40,18 @@ interface JobCardProps {
   onToggleFavorite?: (jobId: string, isSaved: boolean) => void;
 }
 
-export function JobCard({ job, variant = 'vertical', onToggleFavorite }: JobCardProps) {
+function timeAgo(dateStr: string): string {
+  if (!dateStr) return "vừa xong";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "vừa xong";
+  if (mins < 60) return `${mins} phút trước`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} giờ trước`;
+  return `${Math.floor(hrs / 24)} ngày trước`;
+}
+
+export function JobCard({ job, variant = 'horizontal', onToggleFavorite }: JobCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { favoriteIds, toggleFavorite } = useFavoriteStore();
@@ -61,141 +74,132 @@ export function JobCard({ job, variant = 'vertical', onToggleFavorite }: JobCard
     }
   };
 
-  const handleApply = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (job.postType === 'CRAWLED' && job.originalUrl) {
-      window.open(job.originalUrl, '_blank');
-    } else {
-      router.push(`/jobs/${job.slug || job.jobPostingId}`);
-    }
+  const isHot = job.jobTier === "PROFESSIONAL";
+  const isUrgent = job.jobTier === "URGENT";
+
+  const jobTypeLabelMap: Record<string, string> = {
+    FULLTIME: "Full-time",
+    PARTTIME: "Part-time",
+    REMOTE: "Remote",
   };
+
+  const jobLevelLabelMap: Record<string, string> = {
+    INTERN: "Thực tập sinh",
+    STAFF: "Nhân viên",
+    MANAGER: "Quản lý",
+    DIRECTOR: "Giám đốc",
+  };
+
+  const expLabelMap: Record<string, string> = {
+    NO_EXPERIENCE: "Không yêu cầu",
+    UNDER_1_YEAR: "Dưới 1 năm",
+    "1_TO_3_YEARS": "Trên 1 năm",
+    "3_TO_5_YEARS": "Trên 3 năm",
+    OVER_5_YEARS: "Trên 5 năm",
+  };
+
+  const jobTypeLabel = job.jobType ? (jobTypeLabelMap[job.jobType] ?? job.jobType) : "Full-time";
+  const jobLevelLabel = job.jobLevel ? (jobLevelLabelMap[job.jobLevel] ?? null) : null;
+  const expLabel = job.experience ? (expLabelMap[job.experience] ?? job.experience) : null;
 
   if (variant === 'horizontal') {
     return (
       <div
         onClick={() => router.push(`/jobs/${job.slug || job.jobPostingId}`)}
-        className="bg-white rounded-xl p-5 border border-slate-100 hover:shadow-lg transition-all duration-300 cursor-pointer group flex gap-5 relative"
+        className="group relative bg-white rounded-lg border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden p-2 flex gap-2.5 min-h-[110px]"
       >
-        {/* Logo Container */}
-        <div className="w-20 h-20 bg-slate-50 rounded-xl flex items-center justify-center shrink-0 border border-slate-50 overflow-hidden p-2">
+        {/* 1. Logo Section (Left) */}
+        <div className="w-[48px] h-[48px] rounded-lg border border-slate-50 flex items-center justify-center flex-shrink-0 bg-white shadow-sm mt-1">
           {job.company?.logo ? (
-            <img src={job.company.logo} alt={job.company.companyName} className="w-full h-full object-contain" />
+            <img
+              src={job.company.logo}
+              alt={job.company.companyName}
+              className="w-full h-full object-contain p-1"
+            />
           ) : (
-            <Building2 className="w-8 h-8 text-slate-300" />
+            <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
+              <Briefcase className="w-5 h-5" />
+            </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0 pr-8">
-          <div className="flex items-start gap-2 mb-1">
-             {job.jobTier === 'URGENT' && (
-               <span className="shrink-0 bg-red-50 text-red-600 text-[10px] font-black px-1.5 py-0.5 rounded border border-red-100 uppercase mt-0.5">GẤP</span>
-             )}
-             <h3 className="font-bold text-slate-900 text-[15px] group-hover:text-[#1e60ad] transition-colors line-clamp-1 leading-tight">
-               {job.title}
-             </h3>
-          </div>
-          <p className="text-slate-500 text-[13px] font-medium mb-3 line-clamp-1">{job.company?.companyName}</p>
-          
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <div className="flex items-center gap-1.5 text-[#1e60ad] font-bold text-[13px]">
-              <span className="opacity-80"><DollarSign className="w-3.5 h-3.5" /></span>
-              {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
-            </div>
-            <div className="flex items-center gap-1.5 text-slate-500 text-[13px]">
-               <MapPin className="w-3.5 h-3.5 opacity-60" />
-               {job.locationCity || "Toàn quốc"}
+        {/* 2. Content Section (Right) */}
+        <div className="flex-1 flex flex-col justify-between py-0.5">
+          <div>
+            <h3 className="font-bold text-slate-800 text-[13px] leading-tight line-clamp-2 pr-6 group-hover:underline transition-all">
+              {isHot && <span className="bg-[#FF4D4D] text-white text-[10px] px-1.5 py-0.5 rounded mr-1 inline-block align-middle font-black tracking-tighter">HOT</span>}
+              {isUrgent && <span className="bg-[#E12B28] text-white text-[10px] px-1.5 py-0.5 rounded mr-1 inline-block align-middle font-black tracking-tighter">GẤP</span>}
+              {job.title}
+            </h3>
+            <p className="text-slate-400 text-[11px] mt-0.5 line-clamp-1">
+              {job.company?.companyName}
+            </p>
+
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[#1e60ad] font-bold text-[12px]">
+                {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+              </span>
+              <span className="text-slate-200 text-[10px]">|</span>
+              <span className="text-slate-400 font-medium text-[12px]">
+                {job.locationCity || "Toàn quốc"}
+              </span>
             </div>
           </div>
 
-          <div className="mt-3 flex items-center gap-3">
-             <span className="px-2 py-1 bg-slate-50 text-slate-500 text-[11px] font-bold rounded border border-slate-100 uppercase shrink-0">
-               {job.jobType || "Full-time"}
-             </span>
-             <span className="px-2 py-1 bg-slate-50 text-slate-500 text-[11px] font-bold rounded border border-slate-100 uppercase shrink-0">
-                {job.experience || "Kinh nghiệm"}
-             </span>
-             <span className="text-slate-400 text-[11px] font-medium ml-auto">18 phút trước</span>
+          {/* Tags Row */}
+          <div className="flex items-center gap-2 mt-auto pt-1.5 overflow-hidden">
+            <span className="px-1.5 py-0.5 bg-slate-50 rounded text-[9px] text-slate-400 font-bold whitespace-nowrap uppercase">
+              {jobTypeLabel}
+            </span>
+            {jobLevelLabel && (
+              <span className="px-1.5 py-0.5 bg-blue-50 text-blue-500 rounded text-[9px] font-bold whitespace-nowrap uppercase border border-blue-100">
+                {jobLevelLabel}
+              </span>
+            )}
+            {expLabel && (
+              <span className="px-1.5 py-0.5 bg-slate-50 rounded text-[9px] text-slate-400 font-bold whitespace-nowrap uppercase">
+                {expLabel}
+              </span>
+            )}
+            <span className="text-[9px] text-slate-400 font-medium whitespace-nowrap flex items-center gap-1">
+              {timeAgo(job.createdAt)}
+            </span>
           </div>
         </div>
 
-        {/* Action icons */}
+        {/* Favorite Button (Top Right) */}
         <button
           onClick={handleToggleFavorite}
-          className={`absolute top-5 right-5 w-8 h-8 flex items-center justify-center transition-all ${isSaved ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}
+          className="absolute top-2 right-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
         >
-          <Heart className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
+          <Heart
+            className={`w-4 h-4 transition-colors ${isSaved ? "fill-[#1e60ad] text-[#1e60ad]" : "text-slate-300"
+              }`}
+          />
         </button>
       </div>
     );
   }
 
-  // Original Vertical Design
-  const tierBorder = job.jobTier === 'URGENT' ? 'border-2 border-red-400' : job.jobTier === 'PROFESSIONAL' ? 'border-2 border-amber-400' : 'border border-slate-100';
-  const applyBtnClass = job.jobTier === 'URGENT' ? 'bg-gradient-to-r from-red-500 to-rose-600 shadow-lg shadow-red-500/30 hover:opacity-90' : job.jobTier === 'PROFESSIONAL' ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30 hover:opacity-90' : 'bg-[#1e5aff] hover:bg-blue-700 shadow-lg shadow-blue-200/40';
-
+  // Fallback Vertical Design (if needed)
   return (
     <div
       onClick={() => router.push(`/jobs/${job.slug || job.jobPostingId}`)}
-      className="group block h-full cursor-pointer"
+      className="bg-white rounded-xl p-4 border border-slate-100 hover:shadow-lg transition-all cursor-pointer h-full flex flex-col"
     >
-      <div className={`bg-white rounded-2xl p-4 flex flex-col h-full hover:shadow-xl transition-all duration-300 relative shadow-md shadow-slate-200/30 ${tierBorder}`}>
-        <div className="absolute -top-3 -right-2 flex flex-col gap-1 z-10 items-end">
-          {job.jobTier === 'URGENT' && (
-            <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse shrink-0">
-              <span>🔥</span>Tuyển Gấp
-            </div>
-          )}
-          {job.jobTier === 'PROFESSIONAL' && (
-            <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 shrink-0">
-              <span>⭐️</span>Nổi Bật
-            </div>
-          )}
+      <div className="flex gap-3 mb-3">
+        <div className="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 border border-slate-50 overflow-hidden">
+          {job.company?.logo ? <img src={job.company.logo} className="w-full h-full object-contain" /> : <Building2 className="w-6 h-6 text-slate-300" />}
         </div>
-
-        <div className="flex gap-3 mb-3">
-          <div className="w-10 h-10 bg-[#eff6ff] rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
-            {job.company?.logo ? (
-              <img src={job.company.logo} alt={job.company.companyName} className="w-full h-full object-contain p-2" />
-            ) : (
-              <Building2 className="w-6 h-6 text-slate-300" />
-            )}
-          </div>
-          <div className="flex-1 min-w-0 pr-6">
-            <h3 className="font-bold text-[#111827] text-[16px] line-clamp-2 group-hover:text-mariner transition-colors leading-snug">
-              {job.title}
-            </h3>
-            <p className="text-slate-500 text-[14px] mt-1 line-clamp-1">{job.company?.companyName}</p>
-          </div>
-          <button onClick={handleToggleFavorite} className={`absolute top-5 right-5 w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSaved ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}>
-            <Heart className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
-          </button>
+        <div className="flex-1 min-w-0 pr-6">
+          <h3 className="font-bold text-slate-900 text-[15px] group-hover:text-[#1e60ad] transition-colors line-clamp-1">{job.title}</h3>
+          <p className="text-slate-500 text-[13px] line-clamp-1 mt-0.5">{job.company?.companyName}</p>
         </div>
-
-        <div className="space-y-2 mb-3 ml-0.5">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-slate-500">
-              <MapPin className="w-3.5 h-3.5 opacity-70 shrink-0" />
-              <span className="text-[13px] font-medium line-clamp-1">{job.locationCity || "Toàn quốc"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-emerald-600">
-              <DollarSign className="w-4 h-4 shrink-0" />
-              <span className="text-[13px] font-bold">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-auto pt-4 flex justify-end">
-          {job.hasApplied ? (
-            <button disabled className="px-4 py-2 bg-slate-100 text-[13px] text-slate-400 font-bold rounded-2xl border border-slate-200 cursor-not-allowed flex items-center gap-2 shadow-sm whitespace-nowrap">
-              <Send className="w-3.5 h-3.5 opacity-40" /> Đã nộp
-            </button>
-          ) : (
-            <button onClick={handleApply} className={`px-4 py-2 text-[13px] text-white font-bold rounded-2xl transition-all active:scale-[0.98] flex items-center gap-2 whitespace-nowrap overflow-hidden ${applyBtnClass}`}>
-              <Send className="w-3.5 h-3.5 shrink-0" /> <span className="truncate">Ứng tuyển</span>
-            </button>
-          )}
+      </div>
+      <div className="mt-auto pt-3 border-t border-slate-50">
+        <div className="flex items-center justify-between">
+          <span className="text-[#1e60ad] font-bold text-[13px]">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</span>
+          <span className="text-slate-400 text-[11px] font-medium">{job.locationCity}</span>
         </div>
       </div>
     </div>

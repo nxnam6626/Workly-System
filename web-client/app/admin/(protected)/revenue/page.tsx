@@ -55,9 +55,8 @@ export default function RevenuePage() {
   const { socket } = useSocketStore();
   const { user } = useAuthStore();
 
-  const adminLevel = user?.admin?.adminLevel ?? 2;
   const perms: string[] = user?.admin?.permissions ?? [];
-  const canAccess = adminLevel === 1 || perms.includes('MANAGE_REVENUE');
+  const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_REVENUE');
 
   const isLoading = isLoadingRevenue || isLoadingViolations;
 

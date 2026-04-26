@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useFavoriteStore } from "@/stores/favorites";
 import { formatSalary } from "@/lib/utils";
 import { Job } from "@/components/JobCard";
+import { JOB_LEVEL_LABEL } from "@/lib/constants";
 
 const ITEMS_PER_PAGE = 12; // 3 columns x 4 rows
 
@@ -36,8 +37,9 @@ function RecommendedJobCard({ job }: { job: Job }) {
   };
 
   const jobTypeLabelMap: Record<string, string> = {
-    FULL_TIME: "Full-time", PART_TIME: "Part-time",
-    CONTRACT: "Hợp đồng", INTERNSHIP: "Thực tập",
+    FULLTIME: "Full-time",
+    PARTTIME: "Part-time",
+    REMOTE: "Remote",
   };
 
   const expLabelMap: Record<string, string> = {
@@ -49,6 +51,7 @@ function RecommendedJobCard({ job }: { job: Job }) {
   };
 
   const jobTypeLabel = job.jobType ? (jobTypeLabelMap[job.jobType] ?? job.jobType) : "Full-time";
+  const jobLevelLabel = job.jobLevel ? (JOB_LEVEL_LABEL[job.jobLevel] ?? null) : null;
   const expLabel = job.experience ? (expLabelMap[job.experience] ?? job.experience) : null;
 
   return (
@@ -97,6 +100,11 @@ function RecommendedJobCard({ job }: { job: Job }) {
           <span className="px-1.5 py-0.5 bg-slate-50 border border-slate-100 rounded text-[9px] text-slate-400 font-medium whitespace-nowrap">
             {jobTypeLabel}
           </span>
+          {jobLevelLabel && (
+            <span className="px-1.5 py-0.5 bg-blue-50 text-blue-500 border border-blue-100 rounded text-[9px] font-bold whitespace-nowrap uppercase">
+              {jobLevelLabel}
+            </span>
+          )}
           {expLabel && (
             <span className="px-1.5 py-0.5 bg-slate-50 border border-slate-100 rounded text-[9px] text-slate-400 font-medium whitespace-nowrap">
               {expLabel}

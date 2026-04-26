@@ -1,12 +1,20 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import {
-  LayoutGrid, Briefcase,
-  DollarSign, User, History, GraduationCap,
-  ChevronDown, X
+import { 
+  Search, 
+  MapPin, 
+  Briefcase, 
+  DollarSign, 
+  User, 
+  Star, 
+  GraduationCap, 
+  ChevronDown,
+  LayoutGrid,
+  X 
 } from "lucide-react";
 import IndustryMegaMenu from "../shared/IndustryMegaMenu";
+import LocationMegaMenu from "../shared/LocationMegaMenu";
 
 interface JobSearchHeroProps {
   searchQuery: string;
@@ -32,7 +40,7 @@ interface JobSearchHeroProps {
 }
 
 const FILTER_OPTIONS: Record<string, string[]> = {
-  "Loại hình": ["Full-time", "Part-time", "Thực tập", "Thời vụ", "Remote"],
+  "Loại hình": ["Full-time", "Part-time", "Thời vụ", "Remote"],
   "Mức lương": ["Dưới 5 triệu", "5 - 7 triệu", "7 - 10 triệu", "10 - 15 triệu", "15 - 20 triệu", "20 - 30 triệu", "30 - 50 triệu", "Trên 50 triệu", "Thoả thuận"],
   "Chức vụ": ["Thực tập sinh", "Nhân viên/Chuyên viên", "Trưởng nhóm/Trưởng phòng", "Giám đốc/Cấp cao hơn"],
   "Kinh nghiệm": ["Không yêu cầu", "Dưới 1 năm", "1 - 2 năm", "3 - 5 năm", "Trên 5 năm"],
@@ -42,7 +50,6 @@ const FILTER_OPTIONS: Record<string, string[]> = {
 const JOB_TYPE_MAP: Record<string, string> = {
   "Full-time": "FULLTIME",
   "Part-time": "PARTTIME",
-  "Thực tập": "INTERNSHIP",
   "Thời vụ": "PARTTIME",
   "Remote": "FULLTIME"
 };
@@ -88,17 +95,22 @@ export function JobSearchHero({
 }: JobSearchHeroProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const locationDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpenFilter(null);
       }
-    }
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node)) {
+        setOpenLocation(false);
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const [openLocation, setOpenLocation] = useState(false);
 
   const handleSelectFilterValue = (type: string, label: string) => {
     setOpenFilter(null);
@@ -128,7 +140,7 @@ export function JobSearchHero({
     { label: "Loại hình", icon: <Briefcase className="w-4 h-4" /> },
     { label: "Mức lương", icon: <DollarSign className="w-4 h-4" /> },
     { label: "Chức vụ", icon: <User className="w-4 h-4" /> },
-    { label: "Kinh nghiệm", icon: <History className="w-4 h-4" /> },
+    { label: "Kinh nghiệm", icon: <Star className="w-4 h-4" /> },
     { label: "Học vấn", icon: <GraduationCap className="w-4 h-4" /> },
   ];
 
@@ -153,15 +165,37 @@ export function JobSearchHero({
               />
             </div>
             <div className="hidden md:block w-px h-8 bg-slate-100 self-center" />
-            <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5">
-              <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
-              <input
-                type="text"
-                placeholder="Tỉnh/thành, quận..."
-                className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300"
-                value={locationParam}
-                onChange={(e) => setLocationParam(e.target.value)}
-              />
+            <div className="flex-1 flex flex-col md:flex-row items-stretch gap-1 relative" ref={locationDropdownRef}>
+              <div 
+                className="flex-1 flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                onClick={() => setOpenLocation(!openLocation)}
+              >
+                <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
+                <input
+                  type="text"
+                  placeholder="Tỉnh/thành, quận..."
+                  className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300 pointer-events-none"
+                  value={locationParam}
+                  readOnly
+                />
+                {locationParam && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setLocationParam(""); }}
+                    className="p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                )}
+              </div>
+
+              {openLocation && (
+                <div className="absolute top-[calc(100%+8px)] left-0 right-0 md:left-auto md:right-0 md:w-[700px] z-[60]">
+                  <LocationMegaMenu 
+                    onSelect={(val) => { setLocationParam(val); setOpenLocation(false); }}
+                    onClose={() => setOpenLocation(false)}
+                  />
+                </div>
+              )}
             </div>
             <button
               type="submit"
@@ -171,79 +205,45 @@ export function JobSearchHero({
             </button>
           </form>
 
-          {(industryParam || jobTypeParam || experienceParam || salaryMinParam || salaryMaxParam || rankParam || educationParam) && (
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-[12px] font-bold text-blue-700 uppercase tracking-tight">Đang lọc:</span>
-              {industryParam && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">{industryParam}</span>
-                  <button onClick={() => setIndustryParam("")} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-              {jobTypeParam && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">{getJobTypeLabel(jobTypeParam)}</span>
-                  <button onClick={() => setJobTypeParam("")} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-              {experienceParam && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">{experienceParam}</span>
-                  <button onClick={() => setExperienceParam("")} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-              {rankParam && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">{rankParam}</span>
-                  <button onClick={() => setRankParam("")} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-              {educationParam && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">{educationParam}</span>
-                  <button onClick={() => setEducationParam("")} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-              {(salaryMinParam || salaryMaxParam) && (
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                  <span className="text-[13px] font-bold text-[#1e60ad]">
-                    {salaryMinParam && salaryMaxParam ? `${(salaryMinParam / 1000000).toFixed(0)}-${(salaryMaxParam / 1000000).toFixed(0)} triệu` :
-                      salaryMinParam ? `Trên ${(salaryMinParam / 1000000).toFixed(0)} triệu` :
-                        `Dưới ${(salaryMaxParam! / 1000000).toFixed(0)} triệu`}
-                  </span>
-                  <button onClick={() => { setSalaryMinParam(undefined); setSalaryMaxParam(undefined); }} className="p-0.5 hover:bg-slate-100 rounded-full transition-colors">
-                    <X className="w-3.5 h-3.5 text-slate-400 hover:text-red-500" />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="grid grid-cols-2 md:grid-cols-6 gap-1.5 px-0.5">
-            {filterButtons.map((btn) => (
-              <div key={btn.label} className="relative w-full">
-                <button
-                  onClick={() => setOpenFilter(openFilter === btn.label ? null : btn.label)}
-                  className={`w-full flex items-center justify-between gap-1 px-4 py-2 rounded-lg text-[13px] font-bold transition-all group shadow-sm active:scale-[0.97] ${openFilter === btn.label ? "bg-white text-[#1e60ad]" : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`transition-opacity ${openFilter === btn.label ? "" : "opacity-90 group-hover:opacity-100"}`}>
-                      {btn.icon && <span className="scale-95">{btn.icon}</span>}
-                    </span>
-                    {btn.label}
-                  </div>
-                  <ChevronDown className={`w-4 h-4 transition-all ${openFilter === btn.label ? "rotate-180" : "opacity-70 group-hover:translate-y-0.5"}`} />
-                </button>
+            {filterButtons.map((btn) => {
+              const getSelectedValue = () => {
+                if (btn.label === "Ngành nghề") return industryParam;
+                if (btn.label === "Loại hình") return getJobTypeLabel(jobTypeParam);
+                if (btn.label === "Mức lương") {
+                  if (salaryMinParam && salaryMaxParam) return `${(salaryMinParam / 1000000).toFixed(0)}-${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
+                  if (salaryMinParam) return `Trên ${(salaryMinParam / 1000000).toFixed(0)} triệu`;
+                  if (salaryMaxParam) return `Dưới ${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
+                  return null;
+                }
+                if (btn.label === "Chức vụ") return rankParam;
+                if (btn.label === "Kinh nghiệm") return experienceParam;
+                if (btn.label === "Học vấn") return educationParam;
+                return null;
+              };
+
+              const displayValue = getSelectedValue() || btn.label;
+              const hasValue = !!getSelectedValue();
+
+              return (
+                <div key={btn.label} className="relative w-full">
+                  <button
+                    onClick={() => setOpenFilter(openFilter === btn.label ? null : btn.label)}
+                    className={`w-full flex items-center justify-between gap-1 px-4 py-2.5 rounded-full text-[13px] font-bold transition-all group shadow-sm active:scale-[0.97] border border-transparent ${
+                      openFilter === btn.label 
+                        ? "bg-white text-[#1e60ad] border-blue-200 shadow-md" 
+                        : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 transition-opacity ${openFilter === btn.label ? "" : "opacity-90 group-hover:opacity-100"}`}>
+                        {btn.icon && <span className="scale-95">{btn.icon}</span>}
+                      </span>
+                      <span className="truncate">{displayValue}</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 shrink-0 transition-all ${openFilter === btn.label ? "rotate-180" : "opacity-70 group-hover:translate-y-0.5"}`} />
+                  </button>
                 {openFilter === btn.label && btn.label !== "Ngành nghề" && (
                   <div className="absolute top-[calc(100%+8px)] left-0 min-w-[200px] bg-white rounded-xl shadow-2xl border border-slate-100 z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                     {FILTER_OPTIONS[btn.label]?.map((val) => (
@@ -253,8 +253,9 @@ export function JobSearchHero({
                     ))}
                   </div>
                 )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
           {openFilter === "Ngành nghề" && (

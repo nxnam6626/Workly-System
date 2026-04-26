@@ -59,7 +59,7 @@ export default function AdminUsersScreen() {
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [creating, setCreating] = useState(false);
 
-  const isSupremeAdmin = currentUser?.admin?.adminLevel === 1;
+  const isSupremeAdmin = currentUser?.admin?.permissions?.includes('SUPER_ADMIN');
 
   const fetchUsers = useCallback(async (q = '') => {
     setLoading(true);

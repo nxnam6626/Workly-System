@@ -410,7 +410,7 @@ export default function EditProfilePage() {
                  <PremiumInput label="Lương kỳ vọng" value={formData.desiredJob.expectedSalary} onChange={(val: string) => setFormData({...formData, desiredJob: {...formData.desiredJob, expectedSalary: val}})} icon={Banknote} />
                  <PremiumInput label="Khu vực" value={formData.desiredJob.location} onChange={(val: string) => setFormData({...formData, desiredJob: {...formData.desiredJob, location: val}})} icon={MapPin} />
                  <div className="space-y-3.5"><label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-3">Hình thức</label>
-                    <div className="flex p-1.5 bg-slate-100 rounded-2xl gap-1">{["FULLTIME", "PARTTIME", "INTERNSHIP"].map(t => (
+                    <div className="flex p-1.5 bg-slate-100 rounded-2xl gap-1">{["FULLTIME", "PARTTIME", "REMOTE"].map(t => (
                       <button key={t} onClick={() => setFormData({...formData, desiredJob: {...formData.desiredJob, jobType: t}})} className={`flex-1 py-3 rounded-xl text-[10px] font-black transition-all ${formData.desiredJob.jobType === t ? "bg-white text-slate-900 shadow-xl" : "text-slate-400"}`}>{t}</button>
                     ))}</div>
                  </div>

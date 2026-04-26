@@ -86,7 +86,7 @@ const baseRecommendedJobs: Partial<Job>[] = [
   {
     title: "Thực Tập Sinh Công Nghệ Thông Tin (IT)",
     company: { companyName: "Công Ty TNHH Nine Outfit", logo: "/logos/workly-gau-logo-4.png" },
-    locationCity: "Hồ Chí Minh", salaryMin: 2000000, salaryMax: 4000000, jobType: "INTERNSHIP", experience: "NO_EXPERIENCE"
+    locationCity: "Hồ Chí Minh", salaryMin: 2000000, salaryMax: 4000000, jobType: "REMOTE", experience: "NO_EXPERIENCE"
   },
   {
     title: "Senior / Principal Php Software Engineer - MSCV 233-1",
@@ -101,7 +101,7 @@ const baseRecommendedJobs: Partial<Job>[] = [
   {
     title: "Thực Tập Công Nghệ Thông Tin AI",
     company: { companyName: "Công Ty TNHH Duy Trường Phát", logo: "/logos/workly-gau-logo-2.png" },
-    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "INTERNSHIP", experience: "NO_EXPERIENCE"
+    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "REMOTE", experience: "NO_EXPERIENCE"
   },
   {
     title: "Blockchain Leader",
@@ -111,7 +111,7 @@ const baseRecommendedJobs: Partial<Job>[] = [
   {
     title: "Thực Tập Sinh Phát Triển Học Liệu",
     company: { companyName: "Công Ty TNHH Học Viện Gia Sư The Tutorx", logo: "/logos/workly-gau-logo-4.png" },
-    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "INTERNSHIP", experience: "NO_EXPERIENCE"
+    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "REMOTE", experience: "NO_EXPERIENCE"
   },
   {
     title: "Nhân Viên Technical SEO Tại Hồ Chí Minh",
@@ -126,7 +126,7 @@ const baseRecommendedJobs: Partial<Job>[] = [
   {
     title: "Thực Tập Sinh Phần Mềm Ứng Dụng Công Nghệ",
     company: { companyName: "Công Ty TNHH CMT-Dragon", logo: "/logos/workly-gau-logo-2.png" },
-    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "INTERNSHIP", experience: "NO_EXPERIENCE"
+    locationCity: "Hồ Chí Minh", salaryMin: null, salaryMax: null, jobType: "REMOTE", experience: "NO_EXPERIENCE"
   }
 ];
 
@@ -163,7 +163,7 @@ export const INTERNSHIP_CATEGORIES = [
   "Tất cả", "IT", "SEO", "R&D", "Pháp Lý", "Nhân Sự", "Kinh Doanh", "Kế Toán", "Đào Tạo", "Kỹ Thuật", "Thiết Kế", "Marketing", "Tuyển Dụng"
 ];
 
-const baseInternshipJobs: Partial<Job>[] = [
+const baseINTERNSHIPJobs: Partial<Job>[] = [
   { title: "Thực Tập Sinh Nhân Sự (HR Intern)", category: "Nhân Sự", company: { companyName: "Công Ty Cổ Phần BPO Mắt Bão", logo: "https://vcdn.jobsgo.vn/company_logos/hDIdkXzJ9W.jpg" }, salaryMin: 0, salaryMax: 0, locationCity: "Hồ Chí Minh" },
   { title: "Thực Tập Sinh Marketing", category: "Marketing", company: { companyName: "Công Ty Cổ Phần Thương Mại Visnam", logo: "https://vcdn.jobsgo.vn/company_logos/vIAnUo6I8a.jpg" }, salaryMin: 0, salaryMax: 0, locationCity: "Đà Nẵng" },
   { title: "Thực Tập Sinh Thu Hút Nhân Tài (Talent Acquisition)", category: "Tuyển Dụng", company: { companyName: "Công Ty TNHH Quốc Tế Tam Sơn", logo: "https://vcdn.jobsgo.vn/company_logos/z7a7eUuN1C.jpg" }, salaryMin: 4000000, salaryMax: 4000000, locationCity: "Hà Nội" },
@@ -172,7 +172,7 @@ const baseInternshipJobs: Partial<Job>[] = [
   { title: "Thực Tập Sinh Chăm Sóc Khách Hàng", category: "Nhân Sự", company: { companyName: "Uoymedia Company", logo: "https://vcdn.jobsgo.vn/company_logos/vPIdLuZq5v.jpg" }, salaryMin: 0, salaryMax: 0, locationCity: "Đà Nẵng" },
 ];
 
-export const MOCK_INTERNSHIP_JOBS: Job[] = generateJobs(baseInternshipJobs as Job[], 72, 'i', 'NORMAL');
+export const MOCK_INTERNSHIP_JOBS: Job[] = generateJobs(baseINTERNSHIPJobs as Job[], 72, 'i', 'NORMAL');
 
 export const MOCK_FEATURED_JOBS: Job[] = generateJobs(baseUrgentJobs, 96, 'f', 'NORMAL');
 

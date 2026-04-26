@@ -1,15 +1,11 @@
 import { IsOptional, IsEnum, IsNumber, IsString } from 'class-validator';
-import { JobStatus, PostType } from '@prisma/client';
+import { JobStatus } from '@/generated/prisma';
 import { Type } from 'class-transformer';
 
 export class AdminFilterJobPostingDto {
   @IsOptional()
   @IsEnum(JobStatus)
   status?: JobStatus;
-
-  @IsOptional()
-  @IsEnum(PostType)
-  postType?: PostType;
 
   @IsOptional()
   @IsNumber()

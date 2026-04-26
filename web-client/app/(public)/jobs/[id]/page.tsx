@@ -29,7 +29,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { formatSalary, timeAgo } from "@/lib/utils";
 import { JOB_TYPE_LABEL } from "@/lib/constants";
-import { MOCK_URGENT_JOBS, MOCK_INTERNSHIP_JOBS, MOCK_FEATURED_JOBS } from "@/lib/mock-data";
+import { MOCK_URGENT_JOBS, MOCK_REMOTE_JOBS, MOCK_FEATURED_JOBS } from "@/lib/mock-data";
 import { JobCard, Job } from "@/components/JobCard";
 import { JobApplyModal } from "@/components/jobs/JobApplyModal";
 import { useAuthStore } from "@/stores/auth";
@@ -96,8 +96,6 @@ interface JobDetails extends Job {
    updatedAt: string;
    hasApplied: boolean;
    isSaved: boolean;
-   postType: 'CRAWLED' | 'MANUAL';
-   originalUrl?: string;
    matchScore?: number | null;
    company: {
       companyId: string;
@@ -152,7 +150,7 @@ export default function JobDetailsPage() {
       setLoading(true);
       try {
          if (typeof id === 'string' && (id.startsWith('u') || id.startsWith('i') || id.startsWith('f') || id.startsWith('m'))) {
-            const allMocks = [...MOCK_URGENT_JOBS, ...MOCK_INTERNSHIP_JOBS, ...MOCK_FEATURED_JOBS];
+            const allMocks = [...MOCK_URGENT_JOBS, ...MOCK_REMOTE_JOBS, ...MOCK_FEATURED_JOBS];
             const foundMock = allMocks.find(j => j.jobPostingId === id);
             if (foundMock) {
                const mockDetails: JobDetails = {
@@ -165,7 +163,6 @@ export default function JobDetailsPage() {
                   updatedAt: new Date().toISOString(),
                   hasApplied: false,
                   isSaved: false,
-                  postType: foundMock.postType as any || 'MANUAL',
                   company: {
                      companyId: "mock-company",
                      companyName: foundMock.company.companyName,
@@ -243,7 +240,6 @@ export default function JobDetailsPage() {
    };
 
    const handleApply = useCallback(() => {
-      if (job?.postType === 'CRAWLED' && job?.originalUrl) { window.open(job.originalUrl, '_blank'); return; }
       if (!isAuthenticated) { router.push(`/login?returnUrl=/jobs/${id}`); return; }
       if (!job) return;
       if (job.recruiter?.userId === user?.userId) { toast.error("Bạn không thể ứng tuyển vào tin tuyển dụng của chính mình."); return; }

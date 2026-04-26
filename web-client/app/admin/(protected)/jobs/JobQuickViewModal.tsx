@@ -20,7 +20,7 @@ import {
   UserCheck,
   Hash,
 } from 'lucide-react';
-import { JobPosting, JobStatus, PostType } from '@/lib/admin-api';
+import { JobPosting, JobStatus } from '@/lib/admin-api';
 
 interface Props {
   job: JobPosting | null;
@@ -62,7 +62,7 @@ export default function JobQuickViewModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${job.postType === PostType.CRAWLED ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
+            <div className="p-2 rounded-xl bg-indigo-100 text-indigo-600">
               <Briefcase className="w-5 h-5" />
             </div>
             <div>
@@ -164,8 +164,8 @@ export default function JobQuickViewModal({
             </div>
           </div>
 
-          {/* Recruiter Info (for Manual Posts) */}
-          {job.postType === PostType.MANUAL && job.recruiter && (
+          {/* Recruiter Info */}
+          {job.recruiter && (
             <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
                     <Mail className="w-5 h-5" />
@@ -282,20 +282,7 @@ export default function JobQuickViewModal({
             </div>
           </section>
 
-          {/* Links */}
-          {job.originalUrl && (
-             <div className="pt-4 flex justify-center">
-                <a 
-                    href={job.originalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors py-2 px-4 rounded-xl border border-indigo-100 bg-indigo-50/30"
-                >
-                    <ExternalLink className="w-4 h-4" />
-                    Xem trang nguồn gốc bài đăng
-                </a>
-             </div>
-          )}
+          {/* AI Analysis */}
         </div>
 
         {/* Footer Actions */}

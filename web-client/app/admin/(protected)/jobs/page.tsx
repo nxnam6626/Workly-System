@@ -38,9 +38,8 @@ function AccessDenied() {
 
 export default function JobsPage() {
   const { user } = useAuthStore();
-  const adminLevel = user?.admin?.adminLevel ?? 2;
   const perms: string[] = user?.admin?.permissions ?? [];
-  const canAccess = adminLevel === 1 || perms.includes('MANAGE_JOBS');
+  const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_JOBS');
 
   const { socket } = useSocketStore();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
@@ -53,7 +52,6 @@ export default function JobsPage() {
   const [totalItems, setTotalItems] = useState(0);
   const [filters, setFilters] = useState<AdminFilterJobPostingDto>({
     status: JobStatus.PENDING,
-    postType: undefined,
     minAiScore: undefined,
     searchTerm: '',
   });
@@ -109,9 +107,12 @@ export default function JobsPage() {
   };
 
   const handleReject = async (id: string) => {
+    const reason = window.prompt('Nhập lý do từ chối (Gửi đến nhà tuyển dụng):', 'Nội dung chưa đạt yêu cầu');
+    if (reason === null) return;
+
     setIsProcessing(id);
     try {
-      await adminJobsApi.reject(id);
+      await adminJobsApi.reject(id, reason);
       setJobs((prev) => prev.map(j => j.jobPostingId === id ? { ...j, status: JobStatus.REJECTED } : j));
       if (quickViewJob?.jobPostingId === id) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.REJECTED } : null);
     } catch { setError('Từ chối tin thất bại.'); }

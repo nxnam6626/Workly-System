@@ -2,21 +2,8 @@
 
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-
-const industries = [
-  "Kinh Doanh/Bán Hàng",
-  "Chăm Sóc Khách Hàng",
-  "Hành Chính/Văn Phòng",
-  "Kế Toán/Kiểm Toán",
-  "Xây Dựng/Kiến Trúc/Nội Thất",
-  "Marketing/PR/Quảng Cáo",
-  "Sản Xuất/Lắp Ráp/Chế Biến",
-  "Chuỗi Cung Ứng/Kho Vận/Xuất Nhập...",
-  "Cơ Khí/Ô Tô/Tự Động Hoá",
-  "Điện/Điện Tử/Năng Lượng",
-  "Thiết Kế",
-  "Tài Chính/Ngân Hàng/Chứng Khoán"
-];
+import { useSearchParams } from "next/navigation";
+import { HIERARCHICAL_INDUSTRIES } from "@/lib/industries";
 
 const locations = [
   "Việc Làm Hồ Chí Minh",
@@ -41,55 +28,81 @@ const locations = [
   "Việc Làm Kiên Giang"
 ];
 
-const jobTitles = [
-  "Nhân Viên Tư Vấn",
-  "Nhân Viên Kinh Doanh",
-  "Sales",
-  "Nhân Viên Telesale",
-  "Nhân Viên Kế Toán",
-  "Chuyên Viên Quản Lý",
-  "Nhân Viên Chăm Sóc Khách Hàng",
-  "Nhân Viên Kỹ Thuật",
-  "Công Nhân Kỹ Thuật",
-  "Trợ Lý",
-  "Chuyên Viên Marketing",
-  "Chuyên Viên Thiết Kế"
-];
-
-const jobTypes = [
-  "Việc Làm Part-Time",
-  "Việc Làm Thời Vụ"
-];
-
 export function CareerSidebar() {
-  const renderSection = (title: string, items: string[], activeIndex: number = 0) => (
+  const searchParams = useSearchParams();
+  const currentIndustry = searchParams.get("industry");
+
+  // Find which main category is active (either it is selected or one of its sub-categories is selected)
+  const activeMainCategory = HIERARCHICAL_INDUSTRIES.find(i =>
+    i.category === currentIndustry || i.subCategories.includes(currentIndustry || "")
+  );
+
+  const renderSection = (title: string, content: React.ReactNode) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
       <h3 className="text-slate-800 font-black text-[15px] mb-4 uppercase tracking-tight">{title}</h3>
-      <div className="space-y-0.5 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
-        {items.map((item, i) => (
-          <Link
-            key={item}
-            href="#"
-            className={`flex items-center justify-between py-2.5 px-3 rounded-lg text-[13px] font-medium transition-all group ${i === activeIndex
-                ? "bg-slate-50 text-[#1e60ad] border-r-4 border-r-[#1e60ad]"
-                : "text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad]"
-              }`}
-          >
-            <span className="line-clamp-1">{item}</span>
-            <ChevronRight className={`w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ${i === activeIndex ? "opacity-100" : ""}`} />
-          </Link>
-        ))}
+      <div className="space-y-0.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
+        {content}
       </div>
     </div>
   );
 
+  const industryContent = (
+    <div className="space-y-1">
+      {HIERARCHICAL_INDUSTRIES.map((main) => {
+        const isMainActive = main.category === currentIndustry;
+        const isParentOfActive = main.subCategories.includes(currentIndustry || "");
+        const isOpen = isMainActive || isParentOfActive;
+
+        return (
+          <div key={main.category} className="space-y-1">
+            <Link
+              href={`/jobs?industry=${encodeURIComponent(main.category)}`}
+              className={`flex items-center justify-between py-2 px-3 rounded-lg text-[13px] font-bold transition-all group ${isMainActive || isParentOfActive
+                ? "bg-[#1e60ad]/5 text-[#1e60ad]"
+                : "text-slate-700 hover:bg-slate-50 hover:text-[#1e60ad]"
+                }`}
+            >
+              <span className="line-clamp-1">{main.category}</span>
+              <ChevronRight className={`w-3.5 h-3.5 shrink-0 transition-transform ${isOpen ? "rotate-90 text-[#1e60ad]" : "opacity-40 group-hover:opacity-100"}`} />
+            </Link>
+
+            {isOpen && (
+              <div className="ml-4 pl-3 border-l-2 border-slate-100 space-y-1 py-1 animate-in slide-in-from-top-1 duration-200">
+                {main.subCategories.map((sub) => (
+                  <Link
+                    key={sub}
+                    href={`/jobs?industry=${encodeURIComponent(sub)}`}
+                    className={`block py-1.5 px-3 rounded-md text-[12.5px] font-medium transition-all ${sub === currentIndustry
+                      ? "text-[#1e60ad] bg-[#1e60ad]/5 font-bold"
+                      : "text-slate-500 hover:text-[#1e60ad] hover:bg-slate-50"
+                      }`}
+                  >
+                    {sub}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const locationContent = locations.map((item) => (
+    <Link
+      key={item}
+      href={`/jobs?location=${encodeURIComponent(item.replace("Việc Làm ", ""))}`}
+      className="flex items-center justify-between py-2 px-3 rounded-lg text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad] transition-all group"
+    >
+      <span className="line-clamp-1">{item}</span>
+      <ChevronRight className="w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </Link>
+  ));
+
   return (
     <div className="w-full space-y-6">
       {/* Sections */}
-      {renderSection("Tìm theo ngành nghề", industries, 0)}
-      {renderSection("Tìm theo địa điểm", locations, -1)}
-      {renderSection("Tìm theo loại hình", jobTypes, -1)}
-      {renderSection("Tìm theo chức danh", jobTitles, 0)}
+      {renderSection("Ngành nghề chuyên môn", industryContent)}
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {

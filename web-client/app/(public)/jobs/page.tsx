@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { Search, BellRing, Check, ChevronRight } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 import api from "@/lib/api";
 import { JobCard, Job } from "@/components/JobCard";
@@ -13,6 +13,7 @@ import { JobCardSkeleton } from "@/components/jobs/JobCardSkeleton";
 
 function JobSearchContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -20,19 +21,58 @@ function JobSearchContent() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [locationParam, setLocationParam] = useState(searchParams.get("location") || "");
   const [industryParam, setIndustryParam] = useState(searchParams.get("industry") || "");
-  const [jobTypeParam, setJobTypeParam] = useState("");
-  const [salaryMinParam, setSalaryMinParam] = useState<number | undefined>(undefined);
-  const [salaryMaxParam, setSalaryMaxParam] = useState<number | undefined>(undefined);
-  const [experienceParam, setExperienceParam] = useState("");
-  const [rankParam, setRankParam] = useState("");
-  const [educationParam, setEducationParam] = useState("");
+  const [jobTypeParam, setJobTypeParam] = useState(searchParams.get("jobType") || "");
+  const [salaryMinParam, setSalaryMinParam] = useState<number | undefined>(
+    searchParams.get("salaryMin") ? Number(searchParams.get("salaryMin")) : undefined
+  );
+  const [salaryMaxParam, setSalaryMaxParam] = useState<number | undefined>(
+    searchParams.get("salaryMax") ? Number(searchParams.get("salaryMax")) : undefined
+  );
+  const [experienceParam, setExperienceParam] = useState(searchParams.get("experience") || "");
+  const [rankParam, setRankParam] = useState(searchParams.get("rank") || "");
+  const [educationParam, setEducationParam] = useState(searchParams.get("education") || "");
   
-  const [sortBy, setSortBy] = useState("suitable");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "suitable");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isSavingAlert, setIsSavingAlert] = useState(false);
   const [alertSaved, setAlertSaved] = useState(false);
   const LIMIT = 12;
+
+  // 1. Sync state FROM URL when searchParams change (e.g., clicking sidebar links)
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+    setLocationParam(searchParams.get("location") || "");
+    setIndustryParam(searchParams.get("industry") || "");
+    setJobTypeParam(searchParams.get("jobType") || "");
+    setSalaryMinParam(searchParams.get("salaryMin") ? Number(searchParams.get("salaryMin")) : undefined);
+    setSalaryMaxParam(searchParams.get("salaryMax") ? Number(searchParams.get("salaryMax")) : undefined);
+    setExperienceParam(searchParams.get("experience") || "");
+    setRankParam(searchParams.get("rank") || "");
+    setEducationParam(searchParams.get("education") || "");
+    setSortBy(searchParams.get("sortBy") || "suitable");
+  }, [searchParams]);
+
+  // 2. Sync state TO URL when local filters change (e.g., using search hero dropdowns)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (locationParam) params.set("location", locationParam);
+    if (industryParam) params.set("industry", industryParam);
+    if (jobTypeParam) params.set("jobType", jobTypeParam);
+    if (salaryMinParam) params.set("salaryMin", salaryMinParam.toString());
+    if (salaryMaxParam) params.set("salaryMax", salaryMaxParam.toString());
+    if (experienceParam) params.set("experience", experienceParam);
+    if (rankParam) params.set("rank", rankParam);
+    if (educationParam) params.set("education", educationParam);
+    if (sortBy !== "suitable") params.set("sortBy", sortBy);
+    
+    const newUrl = `/jobs?${params.toString()}`;
+    if (window.location.search !== `?${params.toString()}`) {
+      router.replace(newUrl, { scroll: false });
+    }
+    fetchJobs(1);
+  }, [searchQuery, locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, sortBy]);
 
   const fetchJobs = useCallback(
     async (p = page) => {
@@ -49,6 +89,7 @@ function JobSearchContent() {
             experience: experienceParam || undefined,
             rank: rankParam || undefined,
             education: educationParam || undefined,
+            sortBy: sortBy,
             page: p,
             limit: LIMIT,
           },
@@ -63,10 +104,6 @@ function JobSearchContent() {
     },
     [searchQuery, locationParam, jobTypeParam, industryParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, page]
   );
-
-  useEffect(() => {
-    fetchJobs(1);
-  }, [locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -142,7 +179,9 @@ function JobSearchContent() {
              {/* Header Section */}
              <div className="mb-6">
                 <h1 className="text-2xl font-black text-slate-900 mb-4">
-                  Tuyển dụng <span className="text-[#1e60ad]">{total.toLocaleString()}</span> việc làm mới nhất năm 2026
+                  {industryParam ? `Tìm việc ${industryParam}` : 
+                   searchQuery ? `Tìm việc làm ${searchQuery}` : 
+                   `Tuyển dụng ${total.toLocaleString()} việc làm mới nhất năm 2026`}
                 </h1>
                 
                 <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-slate-100">
@@ -199,13 +238,29 @@ function JobSearchContent() {
                  </div>
                </div>
              ) : (
-               <div className="bg-white rounded-2xl border border-slate-100 py-32 text-center shadow-sm">
-                 <Search className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                 <h3 className="text-xl font-black text-slate-900 mb-2">Không tìm thấy kết quả</h3>
-                 <p className="text-slate-500 text-sm font-medium">Hãy thử thay đổi từ khóa hoặc sử dụng các bộ lọc khác.</p>
+               <div className="bg-white rounded-3xl border border-slate-100 py-20 px-6 text-center shadow-sm flex flex-col items-center">
+                 <img 
+                   src="/assets/mascot-no-results.png" 
+                   alt="No jobs found" 
+                   className="w-48 h-48 object-contain mb-6 grayscale-[0.2] opacity-90"
+                 />
+                 <h3 className="text-[17px] font-bold text-slate-600 mb-2">
+                   Hiện tại chưa có công việc phù hợp với yêu cầu của bạn
+                 </h3>
+                 <p className="text-slate-400 text-[15px] font-medium max-w-md">
+                   Đừng lo lắng! Hãy thử khám phá các cơ hội nghề nghiệp thú vị bên dưới để tìm kiếm công việc phù hợp với bạn.
+                 </p>
                  <button 
-                  onClick={() => {setSearchQuery(""); setLocationParam("");}} 
-                  className="mt-6 text-[#1e60ad] font-bold text-sm hover:underline"
+                  onClick={() => {
+                    setSearchQuery(""); 
+                    setLocationParam(""); 
+                    setIndustryParam("");
+                    setJobTypeParam("");
+                    setExperienceParam("");
+                    setRankParam("");
+                    setEducationParam("");
+                  }} 
+                  className="mt-8 px-6 py-2 rounded-full border border-blue-100 text-[#1e60ad] font-bold text-sm hover:bg-blue-50 transition-colors"
                  >
                    Xóa tất cả bộ lọc
                  </button>

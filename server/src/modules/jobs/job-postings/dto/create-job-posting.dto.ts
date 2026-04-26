@@ -5,7 +5,8 @@ import {
   IsNumber,
   IsEnum,
 } from 'class-validator';
-import { JobType } from '@prisma/client';
+import { JobType, JobLevel } from '../../../../generated/prisma';
+console.log('DEBUG: JobLevel enum object:', JobLevel);
 
 export class CreateJobPostingDto {
   @IsString()
@@ -39,6 +40,10 @@ export class CreateJobPostingDto {
   @IsEnum(JobType, { message: 'Loại công việc không hợp lệ' })
   @IsOptional()
   jobType?: JobType;
+
+  @IsEnum(JobLevel, { message: 'Chức vụ không hợp lệ' })
+  @IsOptional()
+  jobLevel?: JobLevel;
 
   @IsString()
   @IsOptional()

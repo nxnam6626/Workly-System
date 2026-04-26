@@ -73,7 +73,7 @@ export class AuthService {
 
   /** Lệnh bí mật tạo Supreme Admin trên Database Production. */
   async setupAdmin() {
-    const email = 'admin@workly.com';
+    const email = 'admin@test.com';
     const existing = await this.usersService.findByEmail(email);
     if (existing) {
       return {
@@ -110,7 +110,7 @@ export class AuthService {
         userRoles: {
           create: [{ roleId: adminRole.roleId }],
         },
-        admin: { create: { adminLevel: 1 } },
+        admin: { create: { permissions: ['SUPER_ADMIN'] } },
       },
     });
 

@@ -346,7 +346,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn với format sau (không markdo
         
         Quy tắc:
         - title: Tiêu đề công việc cực kỳ chuyên nghiệp. BẮT BUỘC giữ nguyên các role chuẩn ngành IT bằng Tiếng Anh (Ví dụ: "Backend Developer", "Frontend Engineer", "Data Analyst") thay vì dịch máy móc sang Tiếng Việt như "Nhân viên phát triển...". Chỉ dùng Tiếng Việt khi danh xưng đủ sang trọng (VD: "Trưởng phòng Marketing", "Chuyên viên Phân tích Dữ liệu").
-        - jobType: "FULLTIME", "PARTTIME", hoặc "INTERNSHIP" (mặc định FULLTIME).
+        - jobType: "FULLTIME", "PARTTIME", hoặc "REMOTE" (mặc định FULLTIME).
         - salaryMin: Lương thấp nhất (số nguyên, e.g. 10000000) (nếu nói 10tr -> 10000000). Trả về 0 nếu không có.
         - salaryMax: Lương cao nhất (số nguyên, e.g. 20000000). Trả về 0 nếu không có.
         - vacancies: Số lượng tuyển (số nguyên, mặc định 1).
@@ -367,7 +367,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn với format sau (không markdo
     if (process.env.GROQ_API_KEY) {
       try {
         const groqResponse = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-          model: 'llama-3.3-70b-versatile', 
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'You are an elite HR Recruiter API. You MUST output extremely detailed JD in JSON format. EXTREMELY IMPORTANT: Use perfectly fluent Vietnamese for ALL contents (titles, descriptions, benefits, etc.). NEVER use Chinese, Japanese, or any other foreign language unless it is an industry-standard English IT term.' },
             { role: 'user', content: extractionPrompt }
@@ -380,7 +380,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn với format sau (không markdo
         const textResponse = groqResponse.data.choices[0].message.content;
         jobData = JSON.parse(textResponse.replace(/```json|```/gi, '').trim());
         success = true;
-      } catch(error) {
+      } catch (error) {
         this.logger.error(`Groq generateJdFromPrompt failed`);
       }
     }
@@ -390,16 +390,16 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn với format sau (không markdo
       const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
       for (const modelName of modelsToTry) {
         try {
-          const model = this.aiChatService['genAI'].getGenerativeModel({ 
-            model: modelName, 
-            generationConfig: { responseMimeType: "application/json" }, 
-            systemInstruction: 'You are an HR JD Editor. Always reply ONLY in perfectly fluent Vietnamese. Always return strict JSON.' 
+          const model = this.aiChatService['genAI'].getGenerativeModel({
+            model: modelName,
+            generationConfig: { responseMimeType: "application/json" },
+            systemInstruction: 'You are an HR JD Editor. Always reply ONLY in perfectly fluent Vietnamese. Always return strict JSON.'
           });
           const result = await model.generateContent(extractionPrompt);
           jobData = JSON.parse(result.response.text().replace(/```json|```/gi, '').trim());
           success = true;
           break;
-        } catch (error) {}
+        } catch (error) { }
       }
     }
 

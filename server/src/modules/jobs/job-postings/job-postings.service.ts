@@ -8,386 +8,382 @@ import { Cron } from '@nestjs/schedule';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { JobStatus, Prisma } from '../../../generated/prisma';
+import { JobStatus, Prisma } from '@/generated/prisma';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
 import { MessagesGateway } from '../../messages/messages.gateway';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { JobAlertsService } from '../../job-alerts/job-alerts.service';
 import { SearchService } from '../../search/search.service';
-import { MatchingService } from '../../search/matching.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { AiService } from '../../ai/ai.service';
+import { MatchingOrchestratorService } from '../../matching-engine/services/matching-orchestrator.service';
 import { SubscriptionsService } from '../../subscriptions/subscriptions.service';
+import { EVASION_REGEX } from '../../ai/ai-moderation.service';
 
 export const HIERARCHICAL_INDUSTRIES = [
   {
-    category: 'Kinh Doanh/Bán Hàng',
+    category: "Kinh Doanh / Bán Hàng",
     subCategories: [
-      'Bán Hàng Doanh Nghiệp - B2B',
-      'Bán Hàng Cá Nhân - B2C',
-      'Telesales - Bán Hàng Online',
-      'Phát Triển Kinh Doanh',
-      'Bán Hàng Kỹ Thuật',
-      'Hỗ Trợ Kinh Doanh - Sales Admin',
-      'Bán Hàng Kênh Phân Phối - Đại Lý',
-      'Sales Marketing - PR - Quảng Cáo',
-      'Sales Công Nghệ Thông Tin',
-      'Sales Xây Dựng - Vật Liệu',
-      'Sales Logistics',
-      'Sales Viễn Thông',
+      "Bán Hàng Doanh Nghiệp (B2B)",
+      "Bán Hàng Cá Nhân (B2C)",
+      "Telesales / Bán Hàng Online",
+      "Phát Triển Kinh Doanh",
+      "Quản Lý Đại Lý / Kênh Phân Phối",
+      "Sales Admin / Hỗ Trợ Kinh Doanh",
+      "Bán Hàng Kỹ Thuật",
+      "Bán Hàng Bất Động Sản",
+      "Bán Hàng Bảo Hiểm / Tài Chính"
     ],
-    keywords: ['sales', 'kinh doanh', 'bán hàng', 'b2b', 'b2c', 'telesales', 'phát triển kinh doanh', 'sales admin', 'phân phối', 'đại lý', 'sales marketing', 'sales it', 'sales logistics'],
+    keywords: ['sales', 'kinh doanh', 'bán hàng', 'b2b', 'b2c', 'telesales', 'phát triển kinh doanh', 'sales admin', 'phân phối', 'đại lý']
   },
   {
-    category: 'Marketing/PR/Quảng Cáo',
+    category: "Công Nghệ Thông Tin",
     subCategories: [
-      'Sáng Tạo Nội Dung',
-      'Quảng Cáo - Sáng Tạo',
-      'Trade - Brand - Product Marketing',
-      'PR - Truyền Thông - Sự Kiện',
-      'Nghiên Cứu Thị Trường',
-      'Digital Marketing',
-      'Sales Marketing - PR - Quảng Cáo',
+      "Lập Trình Phần Mềm (Frontend/Backend)",
+      "Lập Trình Di Động (iOS/Android)",
+      "Dữ Liệu & AI (Big Data/Machine Learning)",
+      "An Toàn Thông Tin / Cyber Security",
+      "Quản Lý Dự Án IT (PM/PO/BA)",
+      "Kiểm Thử Phần Mềm (QC/QA/Tester)",
+      "Hạ Tầng / Mạng / Cloud",
+      "Vận Hành IT / Helpdesk",
+      "DevOps / SRE"
     ],
-    keywords: ['marketing', 'pr', 'quảng cáo', 'content creator', 'sáng tạo', 'brand', 'product marketing', 'truyền thông', 'sự kiện', 'market research', 'digital marketing', 'seo', 'ads'],
+    keywords: ['it', 'cntt', 'phần mềm', 'software', 'lập trình', 'developer', 'frontend', 'backend', 'mobile', 'data', 'ai', 'cloud', 'devops', 'tester', 'qa']
   },
   {
-    category: 'Công Nghệ Thông Tin',
+    category: "Marketing / Truyền Thông",
     subCategories: [
-      'Quản Lý Sản Phẩm IT',
-      'Quản Lý Dự Án IT',
-      'Kiểm Thử Phần Mềm',
-      'Dữ Liệu - AI - Học Máy',
-      'An Toàn Thông Tin - An Ninh Mạng',
-      'Hạ Tầng - Mạng',
-      'Vận Hành IT - IT Helpdesk',
-      'Triển Khai Giải Pháp IT',
-      'DevOps - Cloud',
-      'Phần Cứng - Lập Trình Nhúng',
-      'Lập Trình - Phát Triển Phần Mềm',
-      'Fintech',
-      'Phân Tích Nghiệp Vụ (BA)',
-      'Sales Công Nghệ Thông Tin',
+      "Digital Marketing",
+      "Quản Lý Thương Hiệu (Brand)",
+      "Nghiên Cứu Thị Trường",
+      "Trade Marketing",
+      "PR / Truyền Thông / Tổ Chức Sự Kiện",
+      "SEO / SEM / Google Ads",
+      "Performance Marketing",
+      "Marketing Tổng Hợp"
     ],
-    keywords: ['it', 'công nghệ thông tin', 'software', 'phần mềm', 'tester', 'qa', 'data science', 'ai', 'machine learning', 'security', 'cybersecurity', 'network', 'helpdesk', 'devops', 'cloud', 'embedded', 'lập trình', 'fintech', 'ba', 'business analyst'],
+    keywords: ['marketing', 'truyền thông', 'pr', 'brand', 'thương hiệu', 'digital marketing', 'sự kiện', 'quảng cáo', 'ads']
   },
   {
-    category: 'Hành Chính/Văn Phòng',
+    category: "Content / SEO",
     subCategories: [
-      'Thư Ký - Trợ Lý',
-      'Hành Chính Tổng Hợp',
-      'Lễ Tân',
-      'Nhập Liệu - Lưu Trữ',
+      "Sáng Tạo Nội Dung (Copywriter)",
+      "Sản Xuất Video / TikTok / YouTube",
+      "Quản Lý Fanpage / Social Media",
+      "Chuyên Viên SEO",
+      "Biên Tập Viên / Báo Chí",
+      "Thiết Kế Nội Dung"
     ],
-    keywords: ['hành chính', 'văn phòng', 'thư ký', 'trợ lý', 'lễ tân', 'nhập liệu', 'admin', 'office management'],
+    keywords: ['content', 'seo', 'copywriter', 'biên tập', 'nội dung', 'social media', 'tiktok', 'youtube']
   },
   {
-    category: 'Kế Toán/Kiểm Toán',
+    category: "Tài Chính / Kế Toán / Ngân Hàng",
     subCategories: [
-      'Kế Toán - Kế Toán Tổng Hợp',
-      'Kế Toán Thuế - Kế Toán Chi Phí',
-      'Kiểm Toán - Kiểm Soát Nội Bộ',
-      'Tài Chính Kế Toán',
+      "Kế Toán Tổng Hợp",
+      "Kế Toán Thuế / Kiểm Toán",
+      "Kế Toán Nội Bộ / Kho",
+      "Phân Tích Tài Chính",
+      "Ngân Hàng (Tín Dụng / Giao Dịch Viên)",
+      "Chứng Khoán / Đầu Tư",
+      "Quản Lý Quỹ"
     ],
-    keywords: ['kế toán', 'kiểm toán', 'tài chính', 'accounting', 'audit', 'thuế', 'tax', 'chi phí', 'internal control'],
+    keywords: ['kế toán', 'kiểm toán', 'tài chính', 'ngân hàng', 'chứng khoán', 'đầu tư', 'finance', 'accounting', 'audit']
   },
   {
-    category: 'Nhân Sự',
+    category: "Nhân Sự / Hành Chính / Pháp Lý",
     subCategories: [
-      'Hành Chính Nhân Sự',
-      'Tuyển Dụng',
-      'Đào Tạo & Phát Triển (L&D)',
-      'Lương & Phúc Lợi (C&B)',
-      'Đối Tác Nhân Sự (HRBP)',
+      "Tuyển Dụng (Recruiter / Headhunt)",
+      "C&B / Quản Trị Nhân Sự",
+      "Đào Tạo & Phát Triển (L&D)",
+      "Hành Chính Văn Phòng / Lễ Tân",
+      "Thư Ký / Trợ Lý Giám Đốc",
+      "Pháp Chế Doanh Nghiệp / Luật Sư",
+      "Quản Lý Tòa Nhà"
     ],
-    keywords: ['nhân sự', 'hr', 'tuyển dụng', 'recruitment', 'l&d', 'đào tạo', 'c&b', 'lương', 'phúc lợi', 'hrbp'],
+    keywords: ['nhân sự', 'hr', 'tuyển dụng', 'hành chính', 'pháp lý', 'luật', 'c&b', 'đào tạo', 'admin']
   },
   {
-    category: 'Điện/Điện Tử/Năng Lượng',
+    category: "Thiết Kế / Sáng Tạo",
     subCategories: [
-      'Vận Hành - Bảo Trì - Sửa Chữa',
-      'Điện Lạnh - HVAC',
-      'Điện Tử - Vi Mạch - Bán Dẫn',
-      'Năng Lượng - Năng Lượng Tái Tạo',
-      'Điện - Điện Công Nghiệp',
-      'Điện Dân Dụng',
+      "Thiết Kế Đồ Họa (2D/3D)",
+      "Thiết Kế UI/UX",
+      "Chỉnh Sửa Video (Motion Graphic)",
+      "Thiết Kế Nội Thất / Kiến Trúc",
+      "Nhiếp Ảnh / Quay Phim",
+      "Sáng Tạo Ý Tưởng (Creative)"
     ],
-    keywords: ['điện', 'điện tử', 'năng lượng', 'bảo trì', 'sửa chữa', 'điện lạnh', 'hvac', 'vi mạch', 'bán dẫn', 'năng lượng tái tạo', 'solar'],
+    keywords: ['thiết kế', 'design', 'ui', 'ux', 'đồ họa', 'creative', 'nội thất', 'kiến trúc']
   },
   {
-    category: 'Xây Dựng/Kiến Trúc/Nội Thất',
+    category: "Kỹ Thuật / Cơ Khí / Sản Xuất",
     subCategories: [
-      'Cơ Điện - M&E',
-      'Nội Thất - Cảnh Quan',
-      'Kiến Trúc - Quy Hoạch',
-      'Thi Công - Giám Sát Công Trình',
-      'Kỹ Thuật Xây Dựng - Kết Cấu',
-      'Dự Toán - Hồ Sơ Thầu (QS)',
-      'Sales Xây Dựng - Vật Liệu',
+      "Bảo Trì / Sửa Chữa Máy Móc",
+      "Điện / Điện Tử / Điện Lạnh",
+      "Cơ Khí / Chế Tạo Máy",
+      "Tự Động Hóa (PLC/SCADA)",
+      "Quản Lý Sản Xuất / Quản Đốc",
+      "Vận Hành Máy / QC Sản Xuất"
     ],
-    keywords: ['xây dựng', 'kiến trúc', 'nội thất', 'm&e', 'cơ điện', 'cảnh quan', 'quy hoạch', 'giám sát', 'kết cấu', 'qs', 'vật liệu xây dựng'],
+    keywords: ['kỹ thuật', 'cơ khí', 'sản xuất', 'điện', 'bảo trì', 'tự động hóa', 'cnc']
   },
   {
-    category: 'Cơ Khí/Ô Tô/Tự Động Hoá',
+    category: "Xây Dựng / Kiến Trúc",
     subCategories: [
-      'Tự Động Hóa - Robot',
-      'Cơ Khí - Chế Tạo Máy',
-      'Cơ Điện Tử',
-      'Kỹ Thuật Ô Tô',
+      "Kỹ Sư Xây Dựng / Kết Cấu",
+      "Giám Sát Công Trình",
+      "Kiến Trúc Sư",
+      "Thiết Kế Nội Thất",
+      "Quản Lý Dự Án Xây Dựng",
+      "Đấu Thầu / QS"
     ],
-    keywords: ['cơ khí', 'ô tô', 'tự động hóa', 'robot', 'chế tạo máy', 'cơ điện tử', 'automotive', 'mechatronics'],
+    keywords: ['xây dựng', 'kiến trúc', 'kỹ sư', 'công trình', 'giám sát', 'nội thất']
   },
   {
-    category: 'Nhà Hàng/Khách sạn/Du Lịch',
+    category: "Vận Tải / Logistics",
     subCategories: [
-      'Du Lịch - Lữ Hành',
-      'Khách Sạn',
-      'Nhà Hàng - F&B',
+      "Xuất Nhập Khẩu / Forwarder",
+      "Quản Lý Kho Bãi / Thu mua",
+      "Điều Phối Vận Tải / Giao Nhận",
+      "Khai Báo Hải Quan",
+      "Chuỗi Cung Ứng (Supply Chain)",
+      "Lái Xe / Giao Hàng"
     ],
-    keywords: ['nhà hàng', 'khách sạn', 'du lịch', 'f&b', 'lữ hành', 'hospitality', 'tourism', 'chef', 'phục vụ'],
+    keywords: ['logistics', 'vận tải', 'kho bãi', 'xuất nhập khẩu', 'forwarder', 'chuỗi cung ứng']
   },
   {
-    category: 'Sản Xuất/Lắp Ráp/Chế Biến',
+    category: "Bán Lẻ / Tiêu Dùng",
     subCategories: [
-      'In Ấn - Chế Bản',
-      'Quản Lý Chất Lượng Sản Xuất',
-      'Quản Lý Sản Xuất',
-      'Kỹ Thuật Sản Xuất - Bảo Trì',
-      'Vận Hành Máy - Lắp Ráp - Chế Biến',
+      "Quản Lý Cửa Hàng / Siêu Thị",
+      "Tư Vấn Bán Hàng / Thu Ngân",
+      "Trưng Bày Hàng Hóa (VM)",
+      "Quản Lý Ngành Hàng",
+      "Chăm Sóc Khách Hàng"
     ],
-    keywords: ['sản xuất', 'lắp ráp', 'chế biến', 'in ấn', 'qc', 'qa', 'quản lý sản xuất', 'vận hành máy', 'bảo trì'],
+    keywords: ['bán lẻ', 'tiêu dùng', 'siêu thị', 'cửa hàng', 'thu ngân', 'retail', 'fmcg']
   },
   {
-    category: 'Chuỗi Cung Ứng/Kho Vận/Xuất Nhập Khẩu',
+    category: "Nhà Hàng / Khách Sạn / Du lịch",
     subCategories: [
-      'Quản Lý Nhà Cung Cấp - Đấu Thầu',
-      'Xuất Nhập Khẩu',
-      'Phụ Xe - Bốc Xếp',
-      'Lái Xe - Giao Nhận',
-      'Quản Lý Kho',
-      'Thu Mua',
-      'Vận Tải',
-      'Điều Phối Vận Tải',
-      'Hoạch Định Chuỗi Cung Ứng',
-      'Sales Logistics',
+      "Quản Lý Nhà Hàng / Khách Sạn",
+      "Đầu Bếp / Phụ Bếp",
+      "Pha Chế (Bartender/Barista)",
+      "Lễ Tân / Buồng Phòng",
+      "Hướng Dẫn Viên Du Lịch",
+      "Điều Hành Tour"
     ],
-    keywords: ['logistics', 'chuỗi cung ứng', 'kho vận', 'xuất nhập khẩu', 'import export', 'kho', 'warehouse', 'thu mua', 'procurement', 'vận tải', 'supply chain'],
+    keywords: ['nhà hàng', 'khách sạn', 'du lịch', 'đầu bếp', 'chef', 'bartender', 'tour']
   },
   {
-    category: 'Chăm Sóc Khách Hàng',
+    category: "Y Tế / Dược Phẩm",
     subCategories: [
-      'Dịch Vụ Khách Hàng',
-      'Quản Lý Thành Công Khách Hàng',
-      'Trải Nghiệm Khách Hàng',
+      "Bác Sĩ / Điều Dưỡng",
+      "Dược Sĩ / Trình Dược Viên",
+      "Xét Nghiệm / Chẩn Đoán Hình Ảnh",
+      "Quản Lý Bệnh Viện",
+      "Chăm Sóc Sức Khỏe Tại Nhà"
     ],
-    keywords: ['chăm sóc khách hàng', 'customer service', 'cskh', 'customer success', 'customer experience'],
+    keywords: ['y tế', 'dược phẩm', 'bác sĩ', 'điều dưỡng', 'bệnh viện', 'pharma', 'medical']
   },
   {
-    category: 'Thiết Kế',
+    category: "Giáo Dục / Đào Tạo",
     subCategories: [
-      'Thiết Kế Giao Diện - UI-UX',
-      'Thiết Kế Sản Phẩm - Công Nghiệp',
-      'Thiết Kế Đồ Họa',
-      'Thiết Kế Game',
-      'Thiết Kế Thời Trang',
+      "Giáo Viên / Giảng Viên",
+      "Gia Sư / Trợ Giảng",
+      "Tư Vấn Giáo Duyệt / Tuyển Sinh",
+      "Đào Tạo Nội Bộ",
+      "Biên Dịch / Phiên Dịch",
+      "E-Learning"
     ],
-    keywords: ['thiết kế', 'design', 'ui', 'ux', 'đồ họa', 'graphic design', 'game design', 'fashion design'],
+    keywords: ['giáo dục', 'đào tạo', 'giáo viên', 'giảng viên', 'gia sư', 'education', 'training']
   },
   {
-    category: 'An Toàn Lao Động/Môi trường (HSE)',
+    category: "Nông Nghiệp / Môi Trường",
     subCategories: [
-      'An Toàn Lao Động',
-      'Môi Trường',
-      'Phát Triển Bền Vững - ESG',
-      'Phòng Cháy Chữa Cháy',
-      'Sức Khỏe Nghề Nghiệp',
+      "Kỹ Thuật Cây Trồng / Vật Nuôi",
+      "Thủy Sản / Thức Ăn Chăn Nuôi",
+      "Công Nghệ Thực Phẩm",
+      "Quản Lý Môi Trường",
+      "Năng Lượng Tái Tạo"
     ],
-    keywords: ['hse', 'an toàn lao động', 'môi trường', 'esg', 'pccc', 'sức khỏe nghề nghiệp', 'safety'],
+    keywords: ['nông nghiệp', 'môi trường', 'thủy sản', 'chăn nuôi', 'thực phẩm', 'năng lượng']
   },
   {
-    category: 'Tài Chính/Ngân Hàng/Chứng Khoán',
+    category: "Bất Động Sản",
     subCategories: [
-      'Đầu Tư - Chứng Khoán - Quản Lý Quỹ',
-      'Ngân Hàng',
-      'Tài Chính Doanh Nghiệp',
-      'Quản Trị Rủi Ro Tài Chính',
+      "Môi Giới Bất Động Sản",
+      "Đầu Tư / Phát Triển Dự Án",
+      "Thẩm Định Giá",
+      "Quản Lý Tài Sản",
+      "Kinh Doanh Căn Hộ / Mặt Bằng"
     ],
-    keywords: ['tài chính', 'ngân hàng', 'chứng khoán', 'đầu tư', 'investment', 'banking', 'finance', 'risk management'],
+    keywords: ['bất động sản', 'môi giới', 'nhà đất', 'chung cư', 'real estate']
   },
   {
-    category: 'Y Tế/Sức khoẻ/Dược Phẩm',
+    category: "Truyền Thông / Báo Chí",
     subCategories: [
-      'Dược',
-      'Y Tá - Điều Dưỡng',
-      'Bác Sĩ',
-      'Thể Thao - Fitness',
-      'Thú Y',
-      'Sức Khỏe - Dinh Dưỡng',
-      'Kỹ Thuật Y Học - Xét Nghiệm',
-      'Sales Y Tế - Dược Phẩm',
-      'Thiết Bị Y Tế',
-      'Vật Lý Trị Liệu',
+      "Phóng Viên / Nhà Báo",
+      "Biên Tập Nội Dung",
+      "Sản Xuất Chương Trình",
+      "Quan Hệ Công Chúng (PR)",
+      "Phát Thanh / Truyền Hình"
     ],
-    keywords: ['y tế', 'sức khỏe', 'dược', 'bác sĩ', 'y tá', 'điều dưỡng', 'fitness', 'thú y', 'dinh dưỡng', 'xét nghiệm', 'thiết bị y tế'],
+    keywords: ['truyền thông', 'báo chí', 'phóng viên', 'biên tập', 'pr', 'media']
   },
   {
-    category: 'Bán Sỉ/Bán Lẻ/Quản Lý Cửa Hàng',
+    category: "Thể Thao / Làm Đẹp / Giải Trí",
     subCategories: [
-      'Bán Lẻ - Cửa Hàng',
-      'Phát Triển Kênh Phân Phối - Bán Sỉ',
-      'Quản Lý Ngành Hàng',
-      'Thương Mại Điện Tử',
+      "Huấn Luyện Viên (Gym/Yoga)",
+      "Chuyên Viên Spa / Massage",
+      "Làm Tóc / Trang Điểm",
+      "Tổ Chức Sự Kiện Giải Trí",
+      "Game / Esports"
     ],
-    keywords: ['bán lẻ', 'bán sỉ', 'retail', 'wholesale', 'e-commerce', 'thương mại điện tử', 'quản lý cửa hàng'],
+    keywords: ['thể thao', 'làm đẹp', 'giải trí', 'gym', 'yoga', 'spa', 'game', 'esports']
   },
   {
-    category: 'Viễn Thông',
+    category: "Luật / Tư Vấn Pháp Lý",
     subCategories: [
-      'Triển Khai - Vận Hành Mạng',
-      'Kỹ Thuật Mạng Lõi - Truyền Dẫn',
-      'Kỹ Thuật Vô Tuyến - Tối Ưu Mạng',
-      'Sales Viễn Thông',
+      "Luật Sư / Trợ Lý Luật",
+      "Tư Vấn Pháp Lý Doanh Nghiệp",
+      "Thừa Phát Lại / Công Chứng",
+      "Sở Hữu Trí Tuệ"
     ],
-    keywords: ['viễn thông', 'telecom', 'mạng', 'network', 'truyền dẫn', 'vô tuyến'],
+    keywords: ['luật', 'pháp lý', 'luật sư', 'pháp chế', 'legal']
   },
   {
-    category: 'Luật/Pháp Chế',
+    category: "Dệt May / Da Giày",
     subCategories: [
-      'Tư Vấn Luật',
-      'Pháp Chế Doanh Nghiệp',
-      'Sở Hữu Trí Tuệ',
-      'Tuân Thủ - Pháp Lý',
+      "Thiết Kế Thời Trang",
+      "Quản Lý May Công Nghiệp",
+      "Kỹ Thuật Rập - Cắt May",
+      "Kiểm Soát Chất Lượng (QA/QC)"
     ],
-    keywords: ['luật', 'legal', 'pháp lý', 'pháp chế', 'sở hữu trí tuệ', 'compliance'],
+    keywords: ['dệt may', 'da giày', 'may mặc', 'thời trang', 'textile', 'fashion']
   },
   {
-    category: 'Biên Phiên Dịch',
+    category: "Thực Phẩm & Đồ Uống (F&B)",
     subCategories: [
-      'Biên Dịch',
-      'Phiên Dịch',
+      "Phát Triển Sản Phẩm (R&D)",
+      "Kiểm Định Thực Phẩm",
+      "Quản Lý Chuỗi Nhà Hàng",
+      "Kinh Doanh Thực Phẩm"
     ],
-    keywords: ['biên dịch', 'phiên dịch', 'translation', 'interpretation', 'ngôn ngữ'],
+    keywords: ['f&b', 'thực phẩm', 'đồ uống', 'nhà hàng', 'food', 'beverage']
   },
   {
-    category: 'Giáo Dục/Đào Tạo',
+    category: "Viễn Thông",
     subCategories: [
-      'Giảng Dạy - Trợ Giảng',
-      'Tư Vấn Tuyển Sinh - Du Học',
-      'Quản Lý Đào Tạo - Giáo Vụ',
+      "Kỹ Thuật Viễn Thông",
+      "Phát Triển Hạ Tầng Mạng",
+      "Kinh Doanh Dịch Vụ Viễn Thông",
+      "Chăm Sóc Khách Hàng Viễn Thông"
     ],
-    keywords: ['giáo dục', 'đào tạo', 'giảng dạy', 'trợ giảng', 'du học', 'tuyển sinh', 'education', 'training'],
+    keywords: ['viễn thông', 'telecom', 'mạng', 'network']
   },
   {
-    category: 'Lao Động Phổ Thông',
+    category: "Bảo Hiểm",
     subCategories: [
-      'Bảo Vệ - An Ninh',
-      'Vệ Sinh - Tạp Vụ',
-      'Thợ Nghề',
-      'Công Nhân',
-      'Phụ Việc',
-      'Lao Động Phổ Thông Khác',
+      "Tư Vấn Bảo Hiểm Nhân Thọ",
+      "Bảo Hiểm Phi Nhân Thọ",
+      "Giám Định Bồi Thường",
+      "Quản Lý Nhóm Kinh Doanh"
     ],
-    keywords: ['lao động phổ thông', 'bảo vệ', 'vệ sinh', 'công nhân', 'thợ', 'tạp vụ'],
+    keywords: ['bảo hiểm', 'insurance']
   },
   {
-    category: 'Bảo Hiểm',
+    category: "Điện / Điện Tử / Điện Lạnh",
     subCategories: [
-      'Tư Vấn Bảo Hiểm',
-      'Định Phí - Tái Bảo Hiểm',
-      'Giám Định - Bồi Thường',
-      'Phát Triển Sản Phẩm Bảo Hiểm',
+      "Kỹ Thuật Điện Công Nghiệp",
+      "Lắp Đặt Điện Lạnh",
+      "Thiết Kế Mạch Điện Tử",
+      "Sửa Chữa Đồ Gia Dụng"
     ],
-    keywords: ['bảo hiểm', 'insurance', 'tư vấn bảo hiểm', 'bồi thường'],
+    keywords: ['điện', 'điện tử', 'điện lạnh']
   },
   {
-    category: 'Bất Động Sản',
+    category: "Hóa Học / Sinh Học",
     subCategories: [
-      'Tư Vấn Bất Động Sản',
-      'Phát Triển Dự Án - Mặt Bằng',
-      'Quản Lý - Vận Hành Tòa Nhà',
-      'Thẩm Định Giá - Đầu Tư BĐS',
+      "Kỹ Thuật Hóa Học",
+      "Công Nghệ Sinh Học",
+      "Phòng Thí Nghiệm (Lab)",
+      "Sản Xuất Mỹ Phẩm / Hóa Chất"
     ],
-    keywords: ['bất động sản', 'real estate', 'môi giới', 'đầu tư bđs', 'quản lý tòa nhà'],
+    keywords: ['hóa học', 'sinh học', 'hóa chất', 'biology', 'chemistry']
   },
   {
-    category: 'Khoa Học/Kỹ Thuật',
+    category: "Thời Trang / Mỹ Phẩm",
     subCategories: [
-      'Mỏ - Địa Chất - Khoáng Sản',
-      'Sinh Học',
-      'Hóa Học',
-      'Công Nghệ Thực Phẩm',
-      'Nghiên Cứu & Phát Triển (R&D)',
-      'Trắc Địa - Bản Đồ',
-      'Kỹ Thuật Ứng Dụng - Hiện Trường',
-      'Phòng Thí Nghiệm',
-      'Quản Lý Chất Lượng - Phòng Lab',
+      "Tư Vấn Thời Trang / Stylist",
+      "Kinh Doanh Mỹ Phẩm",
+      "Quản Lý Cửa Hàng Thời Trang",
+      "Người Mẫu / KOLs"
     ],
-    keywords: ['khoa học', 'kỹ thuật', 'r&d', 'địa chất', 'sinh học', 'hóa học', 'thực phẩm', 'lab', 'phòng thí nghiệm'],
+    keywords: ['thời trang', 'mỹ phẩm', 'fashion', 'cosmetics']
   },
   {
-    category: 'Giao Thông Vận Tải',
+    category: "Cơ Khí / Chế Tạo Máy",
     subCategories: [
-      'Hàng Không',
-      'Hàng Hải',
-      'Đường Sắt - Metro',
+      "Vận Hành Máy CNC",
+      "Hàn / Tiện / Phay",
+      "Thiết Kế Cơ Khí (Solidworks/AutoCAD)",
+      "Sửa Chữa Ô Tô / Xe Máy"
     ],
-    keywords: ['giao thông', 'vận tải', 'hàng không', 'hàng hải', 'đường sắt', 'metro', 'aviation', 'marine'],
+    keywords: ['cơ khí', 'chế tạo máy', 'cnc', 'ô tô', 'xe máy']
   },
   {
-    category: 'Mỹ Phẩm/Spa/Làm Đẹp',
+    category: "Xuất Nhập Khẩu",
     subCategories: [
-      'Tư Vấn Mỹ Phẩm - Thẩm Mỹ',
-      'Dịch Vụ Làm Đẹp - Spa',
+      "Chứng Từ Xuất Nhập Khẩu",
+      "Hiện Trường (Ops)",
+      "Thanh Toán Quốc Tế",
+      "Kinh Doanh Cước (Sales Logistics)"
     ],
-    keywords: ['mỹ phẩm', 'spa', 'làm đẹp', 'beauty', 'thẩm mỹ'],
+    keywords: ['xuất nhập khẩu', 'import', 'export', 'logistics']
   },
   {
-    category: 'Truyền Hình/Báo Chí',
+    category: "Thẩm Mỹ / Spa / Massage",
     subCategories: [
-      'Báo Chí - Phóng Viên',
-      'Biên Tập - Sản Xuất Nội Dung',
-      'Xuất Bản',
+      "Kỹ Thuật Viên Spa",
+      "Quản Lý Trung Tâm Thẩm Mỹ",
+      "Tư Vấn Làm Đẹp",
+      "Chăm Sóc Da / Body"
     ],
-    keywords: ['báo chí', 'truyền hình', 'phóng viên', 'biên tập', 'nội dung', 'media', 'journalism'],
+    keywords: ['thẩm mỹ', 'spa', 'massage', 'làm đẹp']
   },
   {
-    category: 'Sáng Tạo/Nghệ Thuật',
+    category: "Bảo Vệ / An Ninh",
     subCategories: [
-      'Hội Họa - Điêu Khắc',
-      'Nghiên Ảnh - Quay Dựng',
-      'Âm Nhạc - Biểu Diễn',
-      'Sáng Tác - Biên Kịch',
+      "Nhân Viên Bảo Vệ",
+      "Chỉ Huy Mục Tiêu",
+      "Vệ Sĩ Chuyên Nghiệp",
+      "An Ninh Tòa Nhà / Khách Sạn"
     ],
-    keywords: ['nghệ thuật', 'sáng tạo', 'âm nhạc', 'hội họa', 'quay dựng', 'biên kịch', 'art', 'creative'],
+    keywords: ['bảo vệ', 'an ninh', 'vệ sĩ']
   },
   {
-    category: 'Nông/Lâm/Ngư Nghiệp',
+    category: "Lao Động Phổ Thông",
     subCategories: [
-      'Chăn Nuôi',
-      'Trồng Trọt - Lâm Nghiệp',
-      'Thủy Sản - Ngư Nghiệp',
+      "Công Nhân Nhà Máy",
+      "Nhân Viên Đóng Gói",
+      "Phụ Kho / Bốc Xếp",
+      "Nhân Viên Vệ Sinh",
+      "Giúp Việc / Tạp Vụ"
     ],
-    keywords: ['nông nghiệp', 'lâm nghiệp', 'ngư nghiệp', 'thủy sản', 'chăn nuôi', 'trồng trọt'],
+    keywords: ['lao động phổ thông', 'công nhân', 'bốc xếp', 'tạp vụ']
   },
   {
-    category: 'Dệt May/Da Giày/Thời Trang',
+    category: "Freelance / Việc Làm Tự Do",
     subCategories: [
-      'Sản Xuất Ngành Thời Trang - May Mặc',
-      'Kỹ Thuật Rập - Cắt May',
-      'Quản Lý Chất Lượng Dệt May',
-      'Thiết Kế - Phát Triển Mẫu',
+      "Cộng Tác Viên Bán Hàng",
+      "Freelance Content / Design",
+      "Gia Sư Tự Do",
+      "Dịch Thuật Tự Do"
     ],
-    keywords: ['dệt may', 'da giày', 'thời trang', 'may mặc', 'fashion', 'textile'],
-  },
-  {
-    category: 'Ngành Nghề Khác',
-    subCategories: [
-      'Tổ Chức Phi Chính Phủ - Phi Lợi Nhuận',
-    ],
-    keywords: ['ngo', 'phi chính phủ', 'phi lợi nhuận', 'others'],
-  },
+    keywords: ['freelance', 'tự do', 'cộng tác viên']
+  }
 ];
 
 @Injectable()
@@ -398,14 +394,50 @@ export class JobPostingsService {
     private notificationsService: NotificationsService,
     private jobAlertsService: JobAlertsService,
     private searchService: SearchService,
-    private matchingService: MatchingService,
     @InjectQueue('matching') private matchingQueue: Queue,
     private aiService: AiService,
     private subscriptionsService: SubscriptionsService,
+    private matchingOrchestrator: MatchingOrchestratorService,
   ) { }
 
   private readonly VIOLATION_LIMIT = 3;
   private readonly logger = new Logger(JobPostingsService.name);
+
+  async preCheck(createJobPostingDto: CreateJobPostingDto) {
+    const { containsBadWords, foundWords } = this.validateBlacklist(
+      createJobPostingDto.title,
+      createJobPostingDto.description,
+      createJobPostingDto.requirements,
+      createJobPostingDto.benefits,
+      createJobPostingDto.hardSkills as string[],
+      createJobPostingDto.softSkills as string[],
+    );
+
+    if (containsBadWords) {
+      return {
+        score: 40,
+        safe: false,
+        reason: 'Nội dung chứa từ khóa bị cấm.',
+        flags: foundWords,
+        feedback: ['Vui lòng loại bỏ các từ ngữ không phù hợp hoặc thông tin liên hệ cá nhân (số điện thoại, link mạng xã hội) khỏi mô tả.'],
+        usedAI: false,
+      };
+    }
+
+    const modResult = await this.aiService.moderateJobContent(
+      createJobPostingDto.title,
+      createJobPostingDto.description,
+      createJobPostingDto.requirements,
+      createJobPostingDto.benefits,
+      createJobPostingDto.hardSkills as string[],
+      createJobPostingDto.jobTier || 'BASIC',
+    );
+
+    return {
+      ...modResult,
+      suggestedAction: modResult.score < 70 ? 'Sửa lại JD để được duyệt tự động, hoặc gửi Admin duyệt thủ công.' : 'JD đạt chuẩn, có thể đăng ngay.',
+    };
+  }
 
   private async enrichKeywordsInBackground(
     jobId: string,
@@ -458,10 +490,13 @@ export class JobPostingsService {
       softSkills,
       minExperienceYears,
       jobTier,
+      jobLevel,
       branchIds,
       isAiGenerated,
       ...rest
     } = createJobPostingDto as any;
+
+    const finalJobLevel = jobLevel && jobLevel !== '' ? jobLevel : 'STAFF';
 
     // Đảm bảo không còn crawlSourceId lọt vào (nếu có từ decorator cũ hoặc cache)
     delete rest.crawlSourceId;
@@ -516,6 +551,13 @@ export class JobPostingsService {
       // Blacklist hit → từ chối ngay, không cần gọi AI
       aiReliabilityScore = 40;
       finalStatus = JobStatus.REJECTED;
+      modResult = {
+        score: 40,
+        safe: false,
+        flags: foundWords,
+        reason: 'Nội dung chứa từ khóa bị cấm.',
+        feedback: ['Vui lòng loại bỏ các từ ngữ không phù hợp hoặc thông tin liên hệ cá nhân (số điện thoại, link mạng xã hội) khỏi mô tả.'],
+      };
     } else {
       // Gọi Gemini để kiểm duyệt nội dung thật
       modResult = await this.aiService.moderateJobContent(
@@ -547,30 +589,7 @@ export class JobPostingsService {
     }
 
     // Determine Industry Categories
-    const textToAnalyze = `${createJobPostingDto.title} ${hardSkills?.join(' ') || ''}`.toLowerCase();
-    const categories = new Set<string>();
-    const combinedKeywords = {
-      ...HIERARCHICAL_INDUSTRIES.reduce((acc, cat) => {
-        acc[cat.category] = cat.keywords;
-        return acc;
-      }, {} as Record<string, string[]>),
-      'Backend': ['backend', 'back-end', 'java', 'node', 'python', 'php', 'c#', '.net', 'golang', 'ruby'],
-      'Frontend': ['frontend', 'front-end', 'react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
-      'Fullstack': ['fullstack', 'full-stack', 'mern', 'mean'],
-      'Mobile': ['mobile', 'ios', 'android', 'flutter', 'react native', 'swift', 'kotlin'],
-      'DevOps/Cloud': ['devops', 'cloud', 'aws', 'docker', 'kubernetes', 'azure', 'gcp', 'ci/cd', 'jenkins'],
-      'AI/Machine Learning': ['ai ', 'machine learning', 'deep learning', 'nlp', 'computer vision', 'ai engineer'],
-      'Data': ['data engineer', 'data analyst', 'data scientist', 'sql', 'spark', 'hadoop'],
-      'QA/Tester': ['qa', 'tester', 'automation test', 'manual test', 'selenium', 'cypress'],
-      'System/Network': ['system admin', 'network', 'linux', 'sysadmin', 'it helpdesk'],
-      'UI/UX Design': ['ui/ux', 'designer', 'figma', 'design', 'graphic'],
-    };
-    for (const [cat, kws] of Object.entries(combinedKeywords)) {
-      if (kws.some(kw => textToAnalyze.includes(kw))) {
-        categories.add(cat);
-      }
-    }
-    if (categories.size === 0) categories.add('Đa lĩnh vực / Khác');
+    const categories = this.identifyCategories(createJobPostingDto.title, createJobPostingDto.description, hardSkills);
 
     const job = await this.prisma.jobPosting.create({
       data: {
@@ -579,26 +598,23 @@ export class JobPostingsService {
         salaryMax: salaryMax || null,
         recruiterId: recruiter.recruiterId,
         companyId: recruiter.companyId,
-        postType: 'MANUAL',
         status: finalStatus,
         jobTier: requestedJobTier,
+        jobLevel: finalJobLevel,
         isVerified: finalStatus === 'APPROVED',
         aiReliabilityScore,
-        originalUrl: originalUrl,
         slug: generatedSlug,
+        moderationFeedback: modResult,
         structuredRequirements: {
           hardSkills: hardSkills || [],
           softSkills: softSkills || [],
           minExperienceYears: minExperienceYears || 0,
           vacancies: createJobPostingDto.vacancies || 1,
-          aiFeedback: modResult?.feedback || null,
-          aiFlags: modResult?.flags || [],
-          aiReason: modResult?.reason || null,
           isAiGenerated: isAiGenerated === true,
-          categories: Array.from(categories),
+          categories,
         },
         branches: {
-          connect:
+          create:
             createJobPostingDto.branchIds?.map((id) => ({ branchId: id })) ||
             [],
         },
@@ -609,8 +625,8 @@ export class JobPostingsService {
       },
     });
 
-    // Nếu bị từ chối tự động do blacklist -> Cộng 1 lượt vi phạm
-    if (finalStatus === JobStatus.REJECTED && containsBadWords) {
+    // Nếu bị từ chối tự động (do blacklist hoặc AI đánh giá không an toàn) -> Cộng 1 lượt vi phạm
+    if (finalStatus === JobStatus.REJECTED) {
       await this.checkAndAutoLockRecruiter(recruiter.recruiterId);
     }
 
@@ -773,6 +789,7 @@ export class JobPostingsService {
       experience,
       salaryMin,
       salaryMax,
+      sortBy,
     } = query;
 
     // Use Elasticsearch for searching and filtering IDs
@@ -788,6 +805,7 @@ export class JobPostingsService {
         experience,
         salaryMin,
         salaryMax,
+        sortBy,
         page,
         limit,
       });
@@ -839,13 +857,23 @@ export class JobPostingsService {
       include: {
         company: true,
         recruiter: true,
-        branches: true,
+        branches: {
+          include: {
+            branch: true,
+          },
+        },
       },
     });
 
     // Sort items to match ES order (relevance or custom sort)
     let sortedItems = ids
-      .map((id) => items.find((item) => item.jobPostingId === id))
+      .map((id) => {
+        const item = items.find((it) => it.jobPostingId === id) as any;
+        if (item) {
+          item.branches = item.branches.map((b: any) => b.branch);
+        }
+        return item;
+      })
       .filter((item) => !!item) as any[];
 
     // Add hasApplied status if userId is provided
@@ -892,18 +920,19 @@ export class JobPostingsService {
 
     // Industry selection: prioritize sub-category or main category
     const { industry } = query;
+    let industriesToMatch: string[] = [];
     let industryKeywords: string[] = [];
 
     if (industry) {
       // 1. Try to find if it's a main category
       const targetCat = HIERARCHICAL_INDUSTRIES.find(c => c.category === industry);
       if (targetCat) {
+        // If it's a main category, match it and all its sub-categories
+        industriesToMatch = [targetCat.category, ...targetCat.subCategories];
         industryKeywords = targetCat.keywords;
-      }
-
-      // 2. If nothing found, it's likely a sub-category name
-      if (industryKeywords.length === 0) {
-        industryKeywords = [industry];
+      } else {
+        // If it's not a main category, it's likely a sub-category name
+        industriesToMatch = [industry];
       }
     }
 
@@ -951,17 +980,51 @@ export class JobPostingsService {
     }
 
     // Industry keyword filter
-    if (industryKeywords.length > 0) {
-      const industryConds = industryKeywords.flatMap((kw) => [
-        { title: { contains: kw, mode: 'insensitive' } },
-        { description: { contains: kw, mode: 'insensitive' } },
-        { requirements: { contains: kw, mode: 'insensitive' } },
-      ]);
+    // Industry keyword filter
+    if (industriesToMatch.length > 0 || industryKeywords.length > 0) {
+      const industryConds: any[] = [];
+
+      // 1. Match against structured categories (exact names)
+      if (industriesToMatch.length > 0) {
+        // Since structuredRequirements is a JSON, we use string matching or path matching
+        // In PostgreSQL with Prisma, we can use "path" and "string_contains" or similar
+        industriesToMatch.forEach(name => {
+          industryConds.push({
+            structuredRequirements: {
+              path: ['categories'],
+              array_contains: name
+            }
+          });
+        });
+      }
+
+      // 2. Match against keywords in text fields
+      const allKeywords = [...new Set([...industriesToMatch, ...industryKeywords])];
+      allKeywords.forEach((kw) => {
+        industryConds.push({ title: { contains: kw, mode: 'insensitive' } });
+        industryConds.push({ description: { contains: kw, mode: 'insensitive' } });
+        industryConds.push({ requirements: { contains: kw, mode: 'insensitive' } });
+      });
+
       andClauses.push({ OR: industryConds });
     }
 
     if (andClauses.length > 0) {
       where.AND = andClauses;
+    }
+
+    // Sorting logic
+    let orderBy: any = [{ jobTier: 'desc' }, { refreshedAt: 'desc' }];
+    const { sortBy } = query;
+
+    if (sortBy === 'new') {
+      orderBy = [{ createdAt: 'desc' }];
+    } else if (sortBy === 'updated') {
+      orderBy = [{ refreshedAt: 'desc' }];
+    } else if (sortBy === 'salary') {
+      orderBy = [{ salaryMax: 'desc' }];
+    } else if (sortBy === 'suitable') {
+      orderBy = [{ jobTier: 'desc' }, { refreshedAt: 'desc' }];
     }
 
     let [items, total] = (await Promise.all([
@@ -972,12 +1035,21 @@ export class JobPostingsService {
         include: {
           company: true,
           recruiter: true,
-          branches: true,
+          branches: {
+            include: {
+              branch: true,
+            },
+          },
         },
-        orderBy: [{ jobTier: 'desc' }, { refreshedAt: 'desc' }],
+        orderBy: orderBy,
       }),
       this.prisma.jobPosting.count({ where }),
     ])) as [any[], number];
+
+    items = items.map((item) => ({
+      ...item,
+      branches: item.branches.map((b: any) => b.branch),
+    }));
 
     // Add hasApplied status if userId is provided
     if (userId) {
@@ -1016,7 +1088,11 @@ export class JobPostingsService {
       where: { recruiterId: recruiter.recruiterId },
       include: {
         applications: true,
-        branches: true,
+        branches: {
+          include: {
+            branch: true,
+          },
+        },
       },
       orderBy: { refreshedAt: 'desc' },
     });
@@ -1069,6 +1145,7 @@ export class JobPostingsService {
           ...job,
           matchedCount,
           autoInvitedCandidates,
+          branches: (job as any).branches.map((b: any) => b.branch),
         };
       }),
     );
@@ -1087,7 +1164,11 @@ export class JobPostingsService {
       include: {
         company: true,
         recruiter: true,
-        branches: true,
+        branches: {
+          include: {
+            branch: true,
+          },
+        },
         applications: { select: { applicationId: true } },
       },
     });
@@ -1095,9 +1176,14 @@ export class JobPostingsService {
     if (!job)
       throw new NotFoundException(`Không tìm thấy Job với ID/Slug ${id}`);
 
+    const flattenedJob: any = {
+      ...job,
+      branches: (job as any).branches.map((b: any) => b.branch),
+    };
+
     let isRecipientCandidate = true;
     if (userId) {
-      if (job.recruiter?.userId === userId) {
+      if (flattenedJob.recruiter?.userId === userId) {
         isRecipientCandidate = false;
       } else {
         // Check if it's a recruiter
@@ -1112,15 +1198,15 @@ export class JobPostingsService {
     if (trackView && isRecipientCandidate) {
       this.prisma.jobPosting
         .update({
-          where: { jobPostingId: job.jobPostingId },
+          where: { jobPostingId: flattenedJob.jobPostingId },
           data: { viewCount: { increment: 1 } },
           select: { jobPostingId: true }, // Minimal return
         })
         .then(() => {
-          if (job.recruiter?.userId) {
+          if (flattenedJob.recruiter?.userId) {
             this.messagesGateway.server
-              .to(`user_${job.recruiter.userId}`)
-              .emit('jdViewUpdated', { jobPostingId: job.jobPostingId });
+              .to(`user_${flattenedJob.recruiter.userId}`)
+              .emit('jdViewUpdated', { jobPostingId: flattenedJob.jobPostingId });
           }
         })
         .catch(console.error);
@@ -1164,25 +1250,78 @@ export class JobPostingsService {
           },
         });
         if (match) {
-        matchScore = match.score;
+          matchScore = match.score;
         }
       }
     }
 
-    return { ...job, hasApplied, isSaved, matchScore };
+    return { ...flattenedJob, hasApplied, isSaved, matchScore };
   }
 
   getIndustries() {
     return HIERARCHICAL_INDUSTRIES;
   }
 
-  async update(id: string, updateJobPostingDto: UpdateJobPostingDto) {
+  async syncAllCategories() {
+    this.logger.log('Bắt đầu đồng bộ lại danh mục cho tất cả Job...');
+    const jobs = await this.prisma.jobPosting.findMany({
+      select: {
+        jobPostingId: true,
+        title: true,
+        description: true,
+        structuredRequirements: true,
+      },
+    });
+
+    let updatedCount = 0;
+    for (const job of jobs) {
+      const struct = (job.structuredRequirements as any) || {};
+      const currentCategories = struct.categories || [];
+
+      const newCategories = this.identifyCategories(
+        job.title,
+        job.description || '',
+        struct.hardSkills || [],
+      );
+
+      // Chỉ update nếu có sự thay đổi
+      if (
+        JSON.stringify([...currentCategories].sort()) !==
+        JSON.stringify([...newCategories].sort())
+      ) {
+        await this.prisma.jobPosting.update({
+          where: { jobPostingId: job.jobPostingId },
+          data: {
+            structuredRequirements: {
+              ...struct,
+              categories: newCategories,
+            },
+          },
+        });
+        updatedCount++;
+      }
+    }
+
+    this.logger.log(`Đã cập nhật danh mục cho ${updatedCount} jobs.`);
+    return {
+      message: `Đã đồng bộ lại danh mục cho ${updatedCount}/${jobs.length} tin tuyển dụng.`,
+      updatedCount,
+    };
+  }
+
+  async update(id: string, updateJobPostingDto: UpdateJobPostingDto, userId: string) {
     // Kiểm tra tồn tại trước khi update (dùng findUnique để không trigger trackView)
     const existingJob = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: id },
+      include: { recruiter: true }
     });
     if (!existingJob)
       throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
+
+    // Kiểm tra quyền sở hữu
+    if (existingJob.recruiter?.userId !== userId) {
+      throw new ForbiddenException('Bạn không có quyền chỉnh sửa tin này');
+    }
 
     const { branchIds, hardSkills, softSkills, minExperienceYears, isAiGenerated, expandedSkills, ...rest } =
       updateJobPostingDto as any;
@@ -1211,6 +1350,13 @@ export class JobPostingsService {
       if (containsBadWords) {
         newStatus = JobStatus.REJECTED;
         aiReliabilityScore = 40;
+        modResult = {
+          score: 40,
+          safe: false,
+          flags: foundWords,
+          reason: 'Nội dung chứa từ khóa bị cấm.',
+          feedback: ['Vui lòng loại bỏ các từ ngữ không phù hợp hoặc thông tin liên hệ cá nhân (số điện thoại, link mạng xã hội) khỏi mô tả.'],
+        };
       } else {
         // Tái kiểm duyệt bằng AI
         modResult = await this.aiService.moderateJobContent(
@@ -1236,30 +1382,12 @@ export class JobPostingsService {
     const currentStructured = (existingJob.structuredRequirements as any) || {};
 
     // Determine Industry Categories during update
-    const categoriesSet = new Set<string>();
-    const textToAnalyze = `${updateJobPostingDto.title || existingJob.title || ''} ${(hardSkills || currentStructured.hardSkills || []).join(' ')}`.toLowerCase();
-    const combinedKeywordsUpdate = {
-      ...HIERARCHICAL_INDUSTRIES.reduce((acc, cat) => {
-        acc[cat.category] = cat.keywords;
-        return acc;
-      }, {} as Record<string, string[]>),
-      'Backend': ['backend', 'back-end', 'java', 'node', 'python', 'php', 'c#', '.net', 'golang', 'ruby'],
-      'Frontend': ['frontend', 'front-end', 'react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
-      'Fullstack': ['fullstack', 'full-stack', 'mern', 'mean'],
-      'Mobile': ['mobile', 'ios', 'android', 'flutter', 'react native', 'swift', 'kotlin'],
-      'DevOps/Cloud': ['devops', 'cloud', 'aws', 'docker', 'kubernetes', 'azure', 'gcp', 'ci/cd', 'jenkins'],
-      'AI/Machine Learning': ['ai ', 'machine learning', 'deep learning', 'nlp', 'computer vision', 'ai engineer'],
-      'Data': ['data engineer', 'data analyst', 'data scientist', 'sql', 'spark', 'hadoop'],
-      'QA/Tester': ['qa', 'tester', 'automation test', 'manual test', 'selenium', 'cypress'],
-      'System/Network': ['system admin', 'network', 'linux', 'sysadmin', 'it helpdesk'],
-      'UI/UX Design': ['ui/ux', 'designer', 'figma', 'design', 'graphic'],
-    };
-    for (const [cat, kws] of Object.entries(combinedKeywordsUpdate)) {
-      if (kws.some(kw => textToAnalyze.includes(kw))) {
-        categoriesSet.add(cat);
-      }
-    }
-    if (categoriesSet.size === 0 && !isStatusOnlyUpdate) categoriesSet.add('Đa lĩnh vực / Khác');
+    const finalHardSkills = hardSkills !== undefined ? hardSkills : (currentStructured.hardSkills || []);
+    const categories = this.identifyCategories(
+      updateJobPostingDto.title || existingJob.title || '',
+      updateJobPostingDto.description || existingJob.description || '',
+      finalHardSkills
+    );
 
     const result = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
@@ -1273,17 +1401,16 @@ export class JobPostingsService {
           ...(minExperienceYears !== undefined && { minExperienceYears }),
           ...(isAiGenerated !== undefined && { isAiGenerated }),
           ...(expandedSkills !== undefined && { expandedSkills }),
-          ...(!isStatusOnlyUpdate && { categories: Array.from(categoriesSet) }),
-          ...(modResult && {
-            aiFeedback: modResult.feedback,
-            aiFlags: modResult.flags,
-            aiReason: modResult.reason
-          }),
+          ...(!isStatusOnlyUpdate && { categories }),
         },
+        ...(modResult && { moderationFeedback: modResult }),
         ...(aiReliabilityScore !== undefined && { aiReliabilityScore }),
         ...(newStatus === JobStatus.APPROVED && { isVerified: true }),
         ...(branchIds && {
-          branches: { set: branchIds.map((id: string) => ({ branchId: id })) },
+          branches: {
+            deleteMany: {},
+            create: branchIds.map((id: string) => ({ branchId: id })),
+          },
         }),
         updatedAt: new Date(),
       },
@@ -1291,11 +1418,7 @@ export class JobPostingsService {
     });
 
     // Nếu cập nhật dẫn đến vi phạm -> Cộng 1 lượt vi phạm
-    if (
-      newStatus === JobStatus.REJECTED &&
-      containsBadWords &&
-      result.recruiterId
-    ) {
+    if (newStatus === JobStatus.REJECTED && result.recruiterId) {
       await this.checkAndAutoLockRecruiter(result.recruiterId);
 
       // Thông báo cho nhà tuyển dụng
@@ -1345,20 +1468,18 @@ export class JobPostingsService {
   }
 
   async getAdminStats() {
-    const [totalPending, totalApproved, totalRejected, totalCrawled] =
+    const [totalPending, totalApproved, totalRejected] =
       await Promise.all([
         this.prisma.jobPosting.count({ where: { status: 'PENDING' } }),
         this.prisma.jobPosting.count({ where: { status: 'APPROVED' } }),
         this.prisma.jobPosting.count({ where: { status: 'REJECTED' } }),
-        this.prisma.jobPosting.count({ where: { postType: 'CRAWLED' } }),
       ]);
-    return { totalPending, totalApproved, totalRejected, totalCrawled };
+    return { totalPending, totalApproved, totalRejected };
   }
 
   async findAllAdmin(query: AdminFilterJobPostingDto) {
     const {
       status,
-      postType,
       minAiScore,
       searchTerm,
       page = 1,
@@ -1368,7 +1489,6 @@ export class JobPostingsService {
 
     const where: any = {};
     if (status) where.status = status;
-    if (postType) where.postType = postType;
     if (minAiScore !== undefined)
       where.aiReliabilityScore = { gte: minAiScore };
 
@@ -1399,7 +1519,7 @@ export class JobPostingsService {
 
     return { items, total, page, limit };
   }
-  async updateStatus(id: string, status: JobStatus, adminId: string) {
+  async updateStatus(id: string, status: JobStatus, adminId: string, reason?: string) {
     const job = await this.findOne(id);
 
     let updated = await this.prisma.jobPosting.update({
@@ -1408,6 +1528,14 @@ export class JobPostingsService {
         status,
         approvedBy: adminId,
         updatedAt: new Date(),
+        ...(status === JobStatus.REJECTED && reason && {
+          moderationFeedback: {
+            score: 0,
+            safe: false,
+            reason: reason,
+            feedback: ['Admin đã từ chối tin tuyển dụng này thủ công.'],
+          },
+        }),
       },
       include: {
         recruiter: true,
@@ -1711,6 +1839,7 @@ export class JobPostingsService {
       refreshedAt: job.refreshedAt,
       jobTier: job.jobTier,
       status: job.status,
+      industry: (job.structuredRequirements as any)?.categories?.[0] || 'Đa lĩnh vực / Khác',
     });
   }
 
@@ -1807,7 +1936,7 @@ export class JobPostingsService {
       return [];
     }
 
-    const matches = await this.matchingService.runMatchingForJob(jobId);
+    const matches = await this.matchingOrchestrator.runMatchingForJob(jobId);
 
     // We need recruiterId to check if unlocked
     let recruiterId: string | null = null;
@@ -1881,7 +2010,7 @@ export class JobPostingsService {
   }
 
   async getRecommendations(userId: string) {
-    return this.matchingService.runMatchingForCandidate(userId);
+    return this.matchingOrchestrator.runMatchingForCandidate(userId);
   }
 
   private validateBlacklist(
@@ -1915,6 +2044,12 @@ export class JobPostingsService {
     const foundBadWords = blacklist.filter((word) =>
       contentToCheck.includes(word),
     );
+
+    // Thêm kiểm tra evasion keywords (Zalo, SĐT, Social links)
+    const evasionMatch = contentToCheck.match(EVASION_REGEX);
+    if (evasionMatch && !foundBadWords.includes(evasionMatch[0])) {
+      foundBadWords.push(evasionMatch[0]);
+    }
 
     return {
       containsBadWords: foundBadWords.length > 0,
@@ -2046,17 +2181,13 @@ export class JobPostingsService {
 
     await Promise.all(
       HIERARCHICAL_INDUSTRIES.map(async (cat) => {
-        const keywords = cat.keywords || [];
-        if (keywords.length === 0) return;
-        
         const count = await this.prisma.jobPosting.count({
           where: {
             status: 'APPROVED' as JobStatus,
-            OR: keywords.flatMap((kw) => [
-              { title: { contains: kw, mode: 'insensitive' } },
-              { description: { contains: kw, mode: 'insensitive' } },
-              { requirements: { contains: kw, mode: 'insensitive' } },
-            ]),
+            structuredRequirements: {
+              path: ['categories'],
+              array_contains: [cat.category],
+            },
           },
         });
         stats[cat.category] = count;
@@ -2064,5 +2195,61 @@ export class JobPostingsService {
     );
 
     return stats;
+  }
+  async suggestCategories(title: string, description?: string, skills?: string[]) {
+    return this.identifyCategories(title, description, skills);
+  }
+
+  identifyCategories(title: string, description?: string, skills?: string[]): string[] {
+    const textToAnalyze = `${title} ${description || ''} ${skills?.join(' ') || ''}`.toLowerCase();
+    const suggestions = new Set<string>();
+
+    // 1. Phân tích dựa trên HIERARCHICAL_INDUSTRIES
+    HIERARCHICAL_INDUSTRIES.forEach(group => {
+      let matchedGroup = false;
+
+      // Check top-level keywords
+      if (group.keywords.some(kw => textToAnalyze.includes(kw.toLowerCase()))) {
+        suggestions.add(group.category);
+        matchedGroup = true;
+      }
+
+      // Check subcategories names as keywords
+      group.subCategories.forEach(sub => {
+        // Lấy phần text trong ngoặc hoặc trước ngoặc để match
+        const subClean = sub.replace(/\(.*\)/, '').trim().toLowerCase();
+        if (textToAnalyze.includes(subClean) || (sub.includes('/') && sub.split('/').some(p => textToAnalyze.includes(p.trim().toLowerCase())))) {
+          suggestions.add(sub);
+          suggestions.add(group.category); // Luôn thêm category cha nếu trúng sub
+          matchedGroup = true;
+        }
+      });
+    });
+
+    // 2. Mapping từ khóa kỹ thuật chuyên sâu vào Subcategories chuẩn
+    const techMapping: Record<string, string[]> = {
+      "Lập Trình Phần Mềm (Frontend/Backend)": ['backend', 'frontend', 'fullstack', 'java', 'node', 'python', 'php', 'c#', '.net', 'react', 'vue', 'angular'],
+      "Lập Trình Di Động (iOS/Android)": ['ios', 'android', 'flutter', 'react native', 'swift', 'kotlin'],
+      "Dữ Liệu & AI (Big Data/Machine Learning)": ['ai ', 'machine learning', 'data engineer', 'data analyst', 'big data'],
+      "Kiểm Thử Phần Mềm (QC/QA/Tester)": ['qa', 'qc', 'tester', 'automation test'],
+      "DevOps / SRE": ['devops', 'ci/cd', 'docker', 'kubernetes', 'jenkins'],
+      "Hạ Tầng / Mạng / Cloud": ['aws', 'azure', 'gcp', 'cloud', 'network', 'mạng'],
+      "Thiết Kế UI/UX": ['ui/ux', 'figma', 'sketch', 'adobe xd']
+    };
+
+    for (const [standardSub, kws] of Object.entries(techMapping)) {
+      if (kws.some(kw => textToAnalyze.includes(kw.toLowerCase()))) {
+        suggestions.add(standardSub);
+
+        // Tìm và thêm Category cha của standardSub đó
+        const parent = HIERARCHICAL_INDUSTRIES.find(g => g.subCategories.includes(standardSub));
+        if (parent) suggestions.add(parent.category);
+      }
+    }
+
+    if (suggestions.size === 0) suggestions.add('Đa lĩnh vực / Khác');
+
+    // Giới hạn số lượng gợi ý để giao diện không bị quá tải
+    return Array.from(suggestions).slice(0, 8);
   }
 }

@@ -7,7 +7,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { JobType, JobTier } from '@prisma/client';
+import { JobType, JobTier } from '@/generated/prisma';
 
 export class FilterJobPostingDto {
   @IsOptional()
@@ -60,8 +60,12 @@ export class FilterJobPostingDto {
   page?: number = 1;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
   @IsInt()
   @Min(1)
+  @Transform(({ value }) => parseInt(value, 10))
   limit?: number = 10;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: string = 'suitable';
 }

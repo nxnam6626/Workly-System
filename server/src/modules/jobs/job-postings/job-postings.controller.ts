@@ -34,6 +34,13 @@ export class JobPostingsController {
     return this.jobPostingsService.getIndustries();
   }
 
+  @Post('pre-check')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  preCheck(@Body() createJobPostingDto: CreateJobPostingDto) {
+    return this.jobPostingsService.preCheck(createJobPostingDto);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
@@ -57,6 +64,11 @@ export class JobPostingsController {
     return {
       message: 'Đồng bộ lại toàn bộ dữ liệu Job sang Elasticsearch thành công',
     };
+  }
+
+  @Get('sync-categories')
+  syncCategories() {
+    return this.jobPostingsService.syncAllCategories();
   }
 
   @Post(':id/re-parse')
@@ -99,19 +111,28 @@ export class JobPostingsController {
     @CurrentUser('userId') userId?: string,
     @Query('trackView') trackView?: string,
   ) {
-    const shouldTrack = trackView !== 'false';
-    return this.jobPostingsService.findOne(id, userId, shouldTrack);
+    return this.jobPostingsService.findOne(id, userId, trackView === 'true');
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
   update(
     @Param('id') id: string,
     @Body() updateJobPostingDto: UpdateJobPostingDto,
+    @CurrentUser('userId') userId: string,
   ) {
-    return this.jobPostingsService.update(id, updateJobPostingDto);
+    return this.jobPostingsService.update(id, updateJobPostingDto, userId);
+  }
+
+  @Post('suggest-categories')
+  suggestCategories(@Body() body: { title: string; description?: string; skills?: string[] }) {
+    return this.jobPostingsService.suggestCategories(body.title, body.description, body.skills);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
   remove(@Param('id') id: string) {
     return this.jobPostingsService.remove(id);
   }

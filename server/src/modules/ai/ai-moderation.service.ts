@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const SLEEP = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const EVASION_KEYWORDS = [
+export const EVASION_KEYWORDS = [
   '0[1-9][0-9]{8,9}',
   'zalo', 'za loo', 'za lờ', 'zzl', 'dzalo', 'zl', 'da lo', 'zá lồ', 'zép\\s*lào', 'giấy\\s*lô', 'da\\s*lô', 'za\\s*lô', 'z\\s*a\\s*l\\s*o', 'z\\.l', 'z\\.a\\.l\\.o',
   'facebook', 'fb', 'phây', 'phở\\s*bò', 'phờ\\s*bờ', 'f\\s*b', 'fesbuk', 'face\\s*book', 'fắc\\s*búc',
@@ -16,7 +16,7 @@ const EVASION_KEYWORDS = [
   '@gmail', '@yahoo', '@hotmail', '@outlook'
 ];
 
-const EVASION_REGEX = new RegExp(`(${EVASION_KEYWORDS.join('|')})`, 'i');
+export const EVASION_REGEX = new RegExp(`(${EVASION_KEYWORDS.join('|')})`, 'i');
 
 @Injectable()
 export class AiModerationService {

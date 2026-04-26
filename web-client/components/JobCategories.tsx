@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -29,18 +29,18 @@ export function JobCategories() {
   }, []);
 
   const categoryMapping: Record<string, string> = {
-    "Kinh Doanh": "Kinh doanh / CSKH",
-    "Nhân Sự": "Nhân sự / Hành / Pháp lý",
-    "Luật": "Nhân sự / Hành / Pháp lý",
-    "Kế Toán": "Tài chính / Kế toán / Ngân hàng",
-    "Công Nghệ": "CNTT / Phần mềm",
-    "Marketing": "Marketing / Truyền thông",
-    "Tài Chính": "Tài chính / Kế toán / Ngân hàng",
-    "Sản Xuất": "Kỹ thuật / Cơ khí / Sản xuất",
-    "Logistics": "Vận tải / Logistics / Cung ứng",
-    "Nhà Hàng": "Nhà hàng / Khách sạn / Du lịch",
-    "Thiết Kế": "Thiết kế / Sáng tạo",
-    "Y Tế": "Y tế / Dược phẩm / Sức khỏe",
+    "Kinh Doanh": "Kinh Doanh / Bán Hàng",
+    "Nhân Sự": "Nhân Sự / Hành Chính / Pháp Lý",
+    "Luật": "Luật / Tư Vấn Pháp Lý",
+    "Kế Toán": "Tài Chính / Kế Toán / Ngân Hàng",
+    "Công Nghệ": "Công Nghệ Thông Tin",
+    "Marketing": "Marketing / Truyền Thông",
+    "Tài Chính": "Tài Chính / Kế Toán / Ngân Hàng",
+    "Sản Xuất": "Kỹ Thuật / Cơ Khí / Sản Xuất",
+    "Logistics": "Vận Tải / Logistics",
+    "Nhà Hàng": "Nhà Hàng / Khách Sạn / Du lịch",
+    "Thiết Kế": "Thiết Kế / Sáng Tạo",
+    "Y Tế": "Y Tế / Dược Phẩm",
   };
 
   const categories = [

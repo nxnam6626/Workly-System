@@ -8,139 +8,10 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useFavoriteStore } from "@/stores/favorites";
 import { formatSalary } from "@/lib/utils";
-import { Job } from "@/components/JobCard";
+import { JobCard, Job } from "@/components/JobCard";
+import { JobCardSkeleton } from "@/components/jobs/JobCardSkeleton";
 
 const ITEMS_PER_PAGE = 12; // 3 columns x 4 rows
-
-function timeAgo(dateStr: string): string {
-  if (!dateStr) return "vừa xong";
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "vừa xong";
-  if (mins < 60) return `${mins} phút trước`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} giờ trước`;
-  return `${Math.floor(hrs / 24)} ngày trước`;
-}
-
-function FeaturedJobCard({ job }: { job: Job }) {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const { favoriteIds, toggleFavorite } = useFavoriteStore();
-  const isSaved = favoriteIds.has(job.jobPostingId);
-
-  const handleSave = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAuthenticated) { router.push("/login"); return; }
-    await toggleFavorite(job);
-  };
-
-  const isHot = job.jobTier === "PROFESSIONAL";
-  const isUrgent = job.jobTier === "URGENT";
-
-  const jobTypeLabelMap: Record<string, string> = {
-    FULLTIME: "Full-time",
-    PARTTIME: "Part-time",
-    INTERNSHIP: "Thực tập",
-    REMOTE: "Remote",
-  };
-
-  const expLabelMap: Record<string, string> = {
-    NO_EXPERIENCE: "Không yêu cầu",
-    UNDER_1_YEAR: "Dưới 1 năm",
-    "1_TO_3_YEARS": "Trên 1 năm",
-    "3_TO_5_YEARS": "Trên 3 năm",
-    OVER_5_YEARS: "Trên 5 năm",
-  };
-
-  const jobTypeLabel = job.jobType ? (jobTypeLabelMap[job.jobType] ?? job.jobType) : "Full-time";
-  const expLabel = job.experience ? (expLabelMap[job.experience] ?? job.experience) : null;
-
-  return (
-    <div
-      onClick={() => router.push(`/jobs/${job.jobPostingId}`)}
-      className="group relative bg-white rounded-lg border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden p-2 flex gap-2.5 min-h-[110px]"
-    >
-      {/* 1. Logo Section (Left) */}
-      <div className="w-[48px] h-[48px] rounded-lg border border-slate-50 flex items-center justify-center flex-shrink-0 bg-white shadow-sm mt-1">
-        {job.company?.logo ? (
-          <img
-            src={job.company.logo}
-            alt={job.company.companyName}
-            className="w-full h-full object-contain p-1"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
-            <Briefcase className="w-5 h-5" />
-          </div>
-        )}
-      </div>
-
-      {/* 2. Content Section (Right) */}
-      <div className="flex-1 flex flex-col justify-between py-0.5">
-        <div>
-          <h3 className="font-bold text-slate-800 text-[13px] leading-tight line-clamp-2 pr-6 group-hover:underline transition-all">
-            {isHot && <span className="bg-[#FF4D4D] text-white text-[10px] px-1.5 py-0.5 rounded mr-1 inline-block align-middle font-black tracking-tighter">HOT</span>}
-            {isUrgent && <span className="bg-[#E12B28] text-white text-[10px] px-1.5 py-0.5 rounded mr-1 inline-block align-middle font-black tracking-tighter">GẤP</span>}
-            {job.title}
-          </h3>
-          <p className="text-slate-400 text-[11px] mt-0.5 line-clamp-1">
-            {job.company?.companyName}
-          </p>
-
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-[#0062bd] font-bold text-[12px]">
-              {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
-            </span>
-            <span className="text-slate-200 text-[10px]">|</span>
-            <span className="text-slate-400 font-medium text-[12px]">
-              {job.locationCity || "Toàn quốc"}
-            </span>
-          </div>
-        </div>
-
-        {/* Tags Row */}
-        <div className="flex items-center gap-2 mt-auto pt-1.5 overflow-hidden">
-          <span className="px-1.5 py-0.5 bg-slate-50 rounded text-[9px] text-slate-400 font-bold whitespace-nowrap">
-            {jobTypeLabel}
-          </span>
-          {expLabel && (
-            <span className="px-1.5 py-0.5 bg-slate-50 rounded text-[9px] text-slate-400 font-bold whitespace-nowrap">
-              {expLabel}
-            </span>
-          )}
-          <span className="text-[9px] text-slate-400 font-medium whitespace-nowrap flex items-center gap-1">
-            {timeAgo(job.createdAt)}
-          </span>
-        </div>
-      </div>
-
-      {/* Favorite Button (Top Right) */}
-      <button
-        onClick={handleSave}
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
-      >
-        <Heart
-          className={`w-4 h-4 transition-colors ${isSaved ? "fill-blue-500 text-blue-500" : "text-slate-300"
-            }`}
-        />
-      </button>
-    </div>
-  );
-}
-
-function FeaturedJobSkeleton() {
-  return (
-    <div className="bg-white rounded-lg border border-slate-100 p-2 flex gap-3 h-[110px] animate-pulse">
-      <div className="w-[48px] h-[48px] rounded-lg bg-slate-50 shrink-0 mt-1" />
-      <div className="flex-1 py-1">
-        <div className="h-3.5 bg-slate-100 rounded w-4/5 mb-1.5" />
-        <div className="h-2.5 bg-slate-50 rounded w-3/5" />
-        <div className="mt-3 h-3 bg-slate-100 rounded w-1/2" />
-      </div>
-    </div>
-  );
-}
 
 export function FeaturedJobs() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -204,10 +75,10 @@ export function FeaturedJobs() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {loading ? (
-            Array.from({ length: 9 }).map((_, i) => <FeaturedJobSkeleton key={i} />)
+            Array.from({ length: 9 }).map((_, i) => <JobCardSkeleton key={i} />)
           ) : jobs.length > 0 ? (
             jobs.map((job) => (
-              <FeaturedJobCard key={job.jobPostingId} job={job} />
+              <JobCard key={job.jobPostingId} job={job} variant="horizontal" />
             ))
           ) : (
             <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-200">

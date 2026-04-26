@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { Sparkles, ArrowRight, Target, Bot, Zap, Search, UserCheck, Building2, MapPin, Briefcase } from "lucide-react";
@@ -57,7 +57,7 @@ export function MatchingSection() {
             const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
               id: c.candidateId,
               title: c.fullName,
-              subtitle: `Phù hợp cho vị trí: ${c.jobTitle}`,
+              subtitle: `Ph� h?p cho v? tr�: ${c.jobTitle}`,
               score: c.score,
               tags: c.skills || [],
               avatar: c.avatar,
@@ -84,15 +84,15 @@ const MOCK_MATCHES: MatchItem[] = [
   {
     id: "m1",
     title: "Senior Frontend Developer",
-    subtitle: "Công Ty Cổ Phần VINHOMES",
+    subtitle: "C�ng Ty C? Ph?n VINHOMES",
     score: 98,
     tags: ["React", "TypeScript", "Next.js"],
     type: "JOB",
     raw: {
       jobPostingId: "m1",
       title: "Senior Frontend Developer",
-      company: { companyName: "Công Ty Cổ Phần VINHOMES", logo: "/logos/workly-gau-logo.png" },
-      locationCity: "Hà Nội",
+      company: { companyName: "C�ng Ty C? Ph?n VINHOMES", logo: "/logos/workly-gau-logo.png" },
+      locationCity: "H� N?i",
       salaryMin: 30000000,
       salaryMax: 50000000,
       currency: "VND",
@@ -111,7 +111,7 @@ const MOCK_MATCHES: MatchItem[] = [
       jobPostingId: "m2",
       title: "Product Designer (UI/UX)",
       company: { companyName: "VNG Corporation", logo: "/logos/workly-gau-logo-2.png" },
-      locationCity: "Hồ Chí Minh",
+      locationCity: "H? Ch� Minh",
       salaryMin: 20000000,
       salaryMax: 40000000,
       currency: "VND",
@@ -124,9 +124,9 @@ const MOCK_MATCHES: MatchItem[] = [
 
   if (!isAuthenticated) return null;
 
-  const title = isCandidate ? "Việc làm Phù hợp nhất" : "Ứng viên Tiềm năng nhất";
-  const subtitle = isCandidate ? "Dựa trên kỹ năng trong CV của bạn." : "Phù hợp với các vị trí bạn đang tuyển.";
-  const linkLabel = isCandidate ? "Xem tất cả đề xuất" : "Quản lý tuyển dụng";
+  const title = isCandidate ? "Vi?c l�m Ph� h?p nh?t" : "?ng vi�n Ti?m nang nh?t";
+  const subtitle = isCandidate ? "D?a tr�n k? nang trong CV c?a b?n." : "Ph� h?p v?i c�c v? tr� b?n dang tuy?n.";
+  const linkLabel = isCandidate ? "Xem t?t c? d? xu?t" : "Qu?n l� tuy?n d?ng";
   const linkHref = isCandidate ? "/profile/jobs/matching" : "/recruiter/dashboard";
 
   return (
@@ -196,7 +196,7 @@ const MOCK_MATCHES: MatchItem[] = [
                         href={`/recruiter/candidates/${item.id}`}
                         className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors shadow-lg shadow-blue-100"
                       >
-                        Xem hồ sơ <ArrowRight className="w-3 h-3" />
+                        Xem h? so <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
                   </div>
@@ -210,13 +210,13 @@ const MOCK_MATCHES: MatchItem[] = [
               <Search className="text-slate-300 w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-slate-800">Chưa tìm thấy dữ liệu phù hợp</h3>
+              <h3 className="text-xl font-bold text-slate-800">Chua t�m th?y d? li?u ph� h?p</h3>
               <p className="text-slate-500 max-w-sm mx-auto">
-                {isCandidate ? "Hãy đảm bảo bạn đã thiết lập CV mặc định." : "Hãy đăng thêm Job để nhận đề xuất ứng viên."}
+                {isCandidate ? "H�y d?m b?o b?n d� thi?t l?p CV m?c d?nh." : "H�y dang th�m Job d? nh?n d? xu?t ?ng vi�n."}
               </p>
             </div>
             <Link href={isCandidate ? "/profile/cv-management" : "/recruiter/job-postings/create"} className="text-blue-600 font-bold hover:underline">
-              {isCandidate ? "Cập nhật CV ngay" : "Tạo Job ngay"} &rarr;
+              {isCandidate ? "C?p nh?t CV ngay" : "T?o Job ngay"} &rarr;
             </Link>
           </div>
         )}

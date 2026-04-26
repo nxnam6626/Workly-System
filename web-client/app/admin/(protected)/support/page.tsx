@@ -31,9 +31,8 @@ export default function SupportAdminPage() {
   const { socket } = useSocketStore();
   const { user } = useAuthStore();
 
-  const adminLevel = user?.admin?.adminLevel ?? 2;
   const perms: string[] = user?.admin?.permissions ?? [];
-  const canAccess = adminLevel === 1 || perms.includes('MANAGE_SUPPORT');
+  const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_SUPPORT');
 
   const fetchRequests = async () => {
     setIsLoading(true);
@@ -92,6 +91,26 @@ export default function SupportAdminPage() {
       }));
     } catch (err) {
       toast.error('Mở khóa tài khoản thất bại.');
+    }
+  };
+
+  const handleUnlockWithProbation = async (userId: string, requestId: string) => {
+    try {
+      await adminUsersApi.unlockWithProbation(userId);
+      await adminSupportApi.updateStatus(requestId, 'CLOSED');
+      toast.success('Thao tác thành công. Tài khoản đã được đưa vào danh sách Thử thách!');
+      setRequests(requests.map(req => {
+        if (req.user?.userId === userId) {
+          return { 
+            ...req, 
+            status: req.requestId === requestId ? 'CLOSED' : req.status,
+            user: { ...req.user, status: 'ACTIVE', accountLevel: 'PROBATION' } 
+          };
+        }
+        return req;
+      }));
+    } catch (err) {
+      toast.error('Thao tác thất bại.');
     }
   };
 
@@ -201,6 +220,11 @@ export default function SupportAdminPage() {
                                 Lỗi vi phạm: {req.user.recruiter.violationCount}
                               </span>
                             )}
+                            {req.user.accountLevel === 'PROBATION' && (
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-white w-fit uppercase tracking-wider">
+                                Đang thử thách
+                              </span>
+                            )}
                             {req.user.status === 'LOCKED' && (
                               <button
                                 onClick={() => handleUnlockUser(req.user!.userId, req.requestId)}
@@ -208,6 +232,15 @@ export default function SupportAdminPage() {
                               >
                                 <LockOpen className="w-3.5 h-3.5" />
                                 Mở khóa ngay
+                              </button>
+                            )}
+                            {req.user.status === 'LOCKED' && (
+                              <button
+                                onClick={() => handleUnlockWithProbation(req.user!.userId, req.requestId)}
+                                className="mt-1 flex items-center justify-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1.5 rounded-lg transition-colors w-fit shadow-sm"
+                              >
+                                <CircleDashed className="w-3.5 h-3.5" />
+                                Mở khóa (Thử thách)
                               </button>
                             )}
                           </div>

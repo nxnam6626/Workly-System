@@ -48,88 +48,94 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.push('/admin/login');
       } else if (!user?.roles?.includes('ADMIN')) {
         router.push('/admin/login');
-      } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
-        const adminLevel = user?.admin?.adminLevel || 2;
-        if (adminLevel === 1) {
-          if (pathname === '/admin') router.push('/admin/dashboard');
-        } else {
-          // Find first permissible page for Level 2 Admin
+        } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
           const perms = (user?.admin?.permissions as string[]) || [];
-          let targetPage = '/admin/login'; // Fallback if no permissions
-          
-          if (perms.includes('MANAGE_USERS')) targetPage = '/admin/users';
-          else if (perms.includes('MANAGE_JOBS')) targetPage = '/admin/jobs';
-          else if (perms.includes('MANAGE_BILLING') || perms.includes('MANAGE_REVENUE')) targetPage = '/admin/revenue';
-          else if (perms.includes('MANAGE_SUPPORT')) targetPage = '/admin/support';
+          const isSupreme = perms.includes('SUPER_ADMIN');
 
-          router.push(targetPage);
+          if (isSupreme) {
+            if (pathname === '/admin') router.push('/admin/dashboard');
+          } else {
+            // Find first permissible page for Level 2 Admin
+            let targetPage = '';
+
+            if (perms.includes('MANAGE_USERS')) targetPage = '/admin/users';
+            else if (perms.includes('MANAGE_JOBS')) targetPage = '/admin/jobs';
+            else if (perms.includes('MANAGE_BILLING') || perms.includes('MANAGE_REVENUE')) targetPage = '/admin/revenue';
+            else if (perms.includes('MANAGE_SUPPORT')) targetPage = '/admin/support';
+
+            // Chỉ chuyển hướng nếu tìm thấy trang phù hợp và khác trang hiện tại
+            // Nếu không tìm thấy trang nào, để họ ở lại dashboard (dù có thể bị giới hạn hiển thị)
+            if (targetPage && targetPage !== pathname) {
+              router.push(targetPage);
+            }
+          }
         }
       }
-    }
-  }, [isAuthenticated, isLoading, user, router, pathname]);
+    }, [isAuthenticated, isLoading, user, router, pathname]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center">
+    if (isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-950">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          </div>
+        </div>
+      );
+    }
+
+    if (!isAuthenticated || !user?.roles?.includes('ADMIN')) return null;
+
+    const SidebarContent = () => (
+      <>
+        {/* Logo */}
+        <div className={`flex items-center gap-3 px-4 py-5 border-b border-slate-800/60 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
             <Shield className="w-5 h-5 text-white" />
           </div>
-          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
+              >
+                <p className="text-sm font-black text-white tracking-tight whitespace-nowrap">Workly</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Admin Console</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
-    );
-  }
 
-  if (!isAuthenticated || !user?.roles?.includes('ADMIN')) return null;
+        {/* Nav Groups */}
+        <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2"
+                  >
+                    {group.label}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+              <div className="space-y-1">
+                {group.items.map(({ label, href, icon: Icon, perm, requireLevel1 }: any) => {
+                  const active = pathname.startsWith(href);
+                  const perms = user?.admin?.permissions || [];
+                  const isSupreme = perms.includes('SUPER_ADMIN');
 
-  const SidebarContent = () => (
-    <>
-      {/* Logo */}
-      <div className={`flex items-center gap-3 px-4 py-5 border-b border-slate-800/60 ${collapsed ? 'justify-center' : ''}`}>
-        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
-          <Shield className="w-5 h-5 text-white" />
-        </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.15 }}
-            >
-              <p className="text-sm font-black text-white tracking-tight whitespace-nowrap">Workly</p>
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Admin Console</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Nav Groups */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-        {navGroups.map((group) => (
-          <div key={group.label}>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2"
-                >
-                  {group.label}
-                </motion.p>
-              )}
-            </AnimatePresence>
-            <div className="space-y-1">
-              {group.items.map(({ label, href, icon: Icon, perm, requireLevel1 }: any) => {
-                const active = pathname.startsWith(href);
-                const adminLevel = user?.admin?.adminLevel || 2;
-                const perms = user?.admin?.permissions || [];
-                // requireLevel1: chỉ admin cấp 1 (Supreme) mới xem
-                if (requireLevel1 && adminLevel !== 1) return null;
-                // perm: kiểm tra quyền cụ thể
-                if (perm && adminLevel !== 1 && !perms.includes(perm)) return null;
+                  // requireLevel1: chỉ admin cấp 1 (Supreme) mới xem
+                  if (requireLevel1 && !isSupreme) return null;
+                  // perm: kiểm tra quyền cụ thể
+                  if (perm && !isSupreme && !perms.includes(perm)) return null;
                 
                 return (
                   <Link

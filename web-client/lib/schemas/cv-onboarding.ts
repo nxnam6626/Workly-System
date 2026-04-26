@@ -28,6 +28,7 @@ export const projectSchema = z.object({
 export const desiredJobSchema = z.object({
   jobTitle: z.string().optional(),
   jobType: z.string().optional(),
+  jobLevel: z.string().optional(),
   expectedSalary: z.string().optional(),
   location: z.string().optional(),
 });

@@ -1,11 +1,11 @@
-﻿import { Users, Briefcase, Building2, Globe } from "lucide-react";
+import { Users, Briefcase, Building2, Globe } from "lucide-react";
 
 export function StatsSection() {
   const stats = [
-    { icon: <Briefcase className="w-6 h-6" />, label: "Việc làm đang tuyển", value: "50,000+" },
-    { icon: <Building2 className="w-6 h-6" />, label: "Doanh nghiệp", value: "10,000+" },
-    { icon: <Users className="w-6 h-6" />, label: "Ứng viên", value: "1,000,000+" },
-    { icon: <Globe className="w-6 h-6" />, label: "Quốc gia", value: "25+" },
+    { icon: <Briefcase className="w-6 h-6" />, label: "Vi?c l�m dang tuy?n", value: "50,000+" },
+    { icon: <Building2 className="w-6 h-6" />, label: "Doanh nghi?p", value: "10,000+" },
+    { icon: <Users className="w-6 h-6" />, label: "?ng vi�n", value: "1,000,000+" },
+    { icon: <Globe className="w-6 h-6" />, label: "Qu?c gia", value: "25+" },
   ];
 
   return (

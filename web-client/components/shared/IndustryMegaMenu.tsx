@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import IndustryPanel from "./IndustryPanel";
+
+import { HIERARCHICAL_INDUSTRIES } from "@/lib/industries";
 
 interface IndustryItem {
   category: string;
@@ -18,28 +20,13 @@ interface IndustryMegaMenuProps {
 export default function IndustryMegaMenu({
   onSelect,
   onClose,
-  height = "480px",
+  height = "320px",
   variant = "default"
 }: IndustryMegaMenuProps) {
-  const [industries, setIndustries] = useState<IndustryItem[]>([]);
+  const industries = HIERARCHICAL_INDUSTRIES;
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const loading = false;
   const isHomepage = variant === "homepage";
-
-  useEffect(() => {
-    async function fetchIndustries() {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/job-postings/industries`);
-        const data = await res.json();
-        setIndustries(data);
-      } catch (error) {
-        console.error("Failed to fetch industries:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchIndustries();
-  }, []);
 
   return (
     <div
@@ -70,16 +57,17 @@ export default function IndustryMegaMenu({
               <button
                 key={item.category}
                 onMouseEnter={() => setActiveCategory(item.category)}
+                title={item.category}
                 className={`w-full flex items-center justify-between px-5 py-3 text-[14px] font-medium transition-all group relative ${activeCategory === item.category
-                    ? "bg-white text-[#1e60ad]"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad]"
+                  ? "bg-white text-[#1e60ad]"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad]"
                   }`}
               >
                 {activeCategory === item.category && (
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1e60ad]" />
                 )}
-                <span>{item.category}</span>
-                <ChevronRight className={`w-4 h-4 transition-all ${activeCategory === item.category ? "opacity-100 translate-x-0 text-[#1e60ad]" : "opacity-0 -translate-x-1"
+                <span className="truncate flex-1 text-left pr-2">{item.category}</span>
+                <ChevronRight className={`w-4 h-4 shrink-0 transition-all ${activeCategory === item.category ? "opacity-100 translate-x-0 text-[#1e60ad]" : "opacity-0 -translate-x-1"
                   }`} />
               </button>
             ))

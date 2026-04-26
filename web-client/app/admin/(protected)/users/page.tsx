@@ -42,9 +42,9 @@ export default function UsersPage() {
   const { user } = useAuthStore();
   const [error, setError] = useState('');
 
-  const adminLevel = user?.admin?.adminLevel ?? 2;
   const perms: string[] = user?.admin?.permissions ?? [];
-  const canAccess = adminLevel === 1 || perms.includes('MANAGE_USERS');
+  const isSupreme = perms.includes('SUPER_ADMIN');
+  const canAccess = isSupreme || perms.includes('MANAGE_USERS');
 
 
   const [page, setPage] = useState(1);
@@ -184,7 +184,7 @@ export default function UsersPage() {
     setProcessingId(id);
     try {
       await adminUsersApi.updateAdminPermissions(id, permissions);
-      const updatedUser = { ...detailUser!, admin: { ...detailUser!.admin, permissions, adminLevel: detailUser!.admin?.adminLevel || 2 } };
+      const updatedUser = { ...detailUser!, admin: { ...detailUser!.admin, permissions } };
       setUsers((prev) => prev.map((u) => (u.userId === id ? updatedUser : u)));
       if (detailUser?.userId === id) setDetailUser(updatedUser);
       toast.success('Cập nhật quyền thành công.');
@@ -254,7 +254,7 @@ export default function UsersPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          {user?.admin?.adminLevel === 1 && (
+          {isSupreme && (
             <button
               onClick={() => setIsCreateAdminOpen(true)}
               className="flex items-center gap-2 px-4 py-2 border border-transparent bg-indigo-600 rounded-xl text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shadow-sm"
