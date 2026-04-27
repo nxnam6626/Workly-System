@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MatchingStrategyFactory } from './matching-strategy.factory';
 import { DataParserService } from './data-parser.service';
+import { WEIGHT_MATRIX, PENALTY, DEFAULT_WEIGHTS } from '../matching.config';
 
 @Injectable()
 export class ScoringEngineService {
@@ -12,27 +13,112 @@ export class ScoringEngineService {
   ) {}
 
   /**
-   * Tính toán điểm tổng hợp (Weighted Score)
+   * Tính toán điểm tổng hợp (Multi-tier Weighted Score)
    */
   async calculateFinalScore(
     job: any,
     cv: any,
-    options: { isCompanyVerified?: boolean } = {},
   ): Promise<{
     finalScore: number;
     breakdown: {
-      keywordScore: number;
-      semanticScore: number;
+      locationScore: number;
+      salaryScore: number;
+      industryScore: number;
+      jobTitleScore: number;
       experienceScore: number;
+      relevantExpScore: number;
       educationScore: number;
-      hardFilterScore: number;
+      skillsScore: number;
+      languageScore: number;
     };
     details: any;
   }> {
-    // 1. Hard Skills (40% tổng) = (Keyword * 0.4) + (Semantic * 0.6)
+    const jobLevel = job.jobLevel || 'JUNIOR';
+    const weights = WEIGHT_MATRIX[jobLevel] || DEFAULT_WEIGHTS;
+
+    // --- TẦNG 1: NHÓM SÀNG LỌC TIÊN QUYẾT (HARD FILTERS) ---
+    const locationStrategy = this.strategyFactory.getStrategy('location');
+    const industryStrategy = this.strategyFactory.getStrategy('industry');
+
+    const locationRes = await locationStrategy.calculate(job, cv);
+    const industryRes = await industryStrategy.calculate(job, cv);
+
+    // --- TẦNG 2: NHÓM CHẤM ĐIỂM THÀNH PHẦN (COMPONENT SCORING) ---
+    const skillsRes = await this.calculateSkillsScore(job, cv);
+    const expRes = await this.strategyFactory.getStrategy('experience').calculate(job, cv);
+    const relExpRes = await this.strategyFactory.getStrategy('relevantExp').calculate(job, cv);
+    const eduRes = await this.strategyFactory.getStrategy('education').calculate(job, cv);
+    const langRes = await this.strategyFactory.getStrategy('language').calculate(job, cv);
+    const titleRes = await this.strategyFactory.getStrategy('jobTitle').calculate(job, cv);
+
+    // --- TẦNG 2: NHÓM TÍNH ĐIỂM (WEIGHTED SCORING) ---
+    const weightedBaseScore =
+      (skillsRes.score * weights.skills) +
+      (eduRes.score * weights.education) +
+      (relExpRes.score * weights.relevantExp) +
+      (langRes.score * weights.languages) +
+      (titleRes.score * weights.jobTitle) +
+      (expRes.score * (weights.experience || 0));
+
+    // --- TẦNG 3: NHÓM ĐIỀU CHỈNH (MODIFIERS) ---
+    const salaryStrategy = this.strategyFactory.getStrategy('salary');
+    const salaryRes = await salaryStrategy.calculate(job, cv);
+
+    // --- TÍNH TOÁN HÌNH PHẠT (PENALTIES) ---
+    let totalPenalty = 0;
+
+    // Penalty Tầng 1: Địa điểm (Trừ 40% nếu không khớp)
+    if (locationRes.score === 0) {
+      totalPenalty += PENALTY.LOCATION_MISMATCH;
+    }
+
+    // Penalty Tầng 1: Ngành nghề (Trừ 50% nếu không khớp)
+    if (industryRes.score === 0) {
+      totalPenalty += PENALTY.INDUSTRY_MISMATCH;
+    }
+
+    // Penalty Tầng 3: Lương (Trừ theo tỷ lệ vượt ngân sách, tối đa 10%)
+    if (salaryRes.score < 100) {
+      const salaryPenalty = (100 - salaryRes.score) * (PENALTY.SALARY_OVER_BUDGET / 100);
+      totalPenalty += salaryPenalty;
+    }
+
+    // --- KẾT QUẢ CUỐI CÙNG ---
+    const finalScore = Math.max(0, weightedBaseScore - totalPenalty);
+
+    return {
+      finalScore: Math.round(finalScore),
+      breakdown: {
+        locationScore: Math.round(locationRes.score),
+        salaryScore: Math.round(salaryRes.score),
+        industryScore: Math.round(industryRes.score),
+        jobTitleScore: Math.round(titleRes.score),
+        experienceScore: Math.round(expRes.score),
+        relevantExpScore: Math.round(relExpRes.score),
+        educationScore: Math.round(eduRes.score),
+        skillsScore: Math.round(skillsRes.score),
+        languageScore: Math.round(langRes.score),
+      },
+      details: {
+        weights,
+        locationDetails: locationRes.details,
+        industryDetails: industryRes.details,
+        salaryDetails: salaryRes.details,
+        skillDetails: skillsRes.details,
+        titleDetails: titleRes.details,
+        penaltyApplied: totalPenalty
+      },
+    };
+  }
+
+  /**
+   * Tính toán điểm kỹ năng (Kết hợp Keyword & Semantic)
+   */
+  private async calculateSkillsScore(job: any, cv: any) {
     const keywordStrategy = this.strategyFactory.getStrategy('keyword');
-    
-    // Normalize skills for strategy
+    const semanticStrategy = this.strategyFactory.getStrategy('semantic');
+
+    // Normalize skills
     const skillsObj = cv.parsedData?.skills;
     const flattenedSkills = Array.isArray(skillsObj)
       ? skillsObj.map(s => typeof s === 'string' ? s : (s?.skillName || ''))
@@ -48,60 +134,15 @@ export class ScoringEngineService {
       { skills: flattenedSkills, fullText: cvFullText },
     );
 
-    const semanticStrategy = this.strategyFactory.getStrategy('semantic');
     const semanticRes = await semanticStrategy.calculate(job, cv);
 
-    const hardSkillsScore = (keywordRes.score * 0.4) + (semanticRes.score * 0.6);
-
-    // 2. Experience (30% tổng)
-    const expStrategy = this.strategyFactory.getStrategy('experience');
-    const expRes = await expStrategy.calculate(job, cv);
-
-    // 3. Education (20% tổng) 
-    const eduStrategy = this.strategyFactory.getStrategy('education');
-    const eduRes = await eduStrategy.calculate(job, cv);
-
-    // 4. Soft Skills (10% tổng) - Tạm thời mô phỏng qua Semantic hoặc một phần của Keyword
-    // Trong thực tế sẽ có SoftSkillsStrategy riêng
-    const softSkillsScore = 75; // Mock score hoặc lấy từ AI analysis
-
-    // 5. Hard Filters (Penalty)
-    const filterStrategy = this.strategyFactory.getStrategy('hardFilter');
-    const filterRes = await filterStrategy.calculate(job, cv);
-    
-    // TÍNH TOÁN TỔNG HỢP
-    let finalScore = 
-      (hardSkillsScore * 0.4) + 
-      (expRes.score * 0.3) + 
-      (eduRes.score * 0.2) + 
-      (softSkillsScore * 0.1);
-
-    // Áp dụng phạt từ Hard Filter (nếu có)
-    if (filterRes.score < 100) {
-      const penalty = (100 - filterRes.score) * 0.5; // Giảm tối đa 50% điểm phạt
-      finalScore = Math.max(0, finalScore - penalty);
-    }
-
-    // Thưởng điểm công ty xác thực
-    if (options.isCompanyVerified) {
-      finalScore = Math.min(100, finalScore + 5);
-    }
-
     return {
-      finalScore: Math.round(finalScore),
-      breakdown: {
-        keywordScore: Math.round(keywordRes.score),
-        semanticScore: Math.round(semanticRes.score),
-        experienceScore: Math.round(expRes.score),
-        educationScore: Math.round(eduRes.score),
-        hardFilterScore: Math.round(filterRes.score),
-      },
+      score: (keywordRes.score * 0.4) + (semanticRes.score * 0.6),
       details: {
-        ...keywordRes.details,
-        experience: expRes.details,
-        education: eduRes.details,
-        filters: filterRes.details,
-      },
+        keywordScore: keywordRes.score,
+        semanticScore: semanticRes.score,
+        matchedSkills: keywordRes.details?.matchedSkills || []
+      }
     };
   }
 }

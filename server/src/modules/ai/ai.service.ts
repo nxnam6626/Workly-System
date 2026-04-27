@@ -92,6 +92,10 @@ export class AiService {
     return this.aiMatchingService.expandJobKeywords(jobTitle, hardSkills);
   }
 
+  async calculateSemanticSimilarity(text1: string, text2: string): Promise<number> {
+    return this.aiMatchingService.calculateSemanticSimilarity(text1, text2);
+  }
+
   // =====================================================
   // 3. RECUIRETER INSIGHTS
   // =====================================================

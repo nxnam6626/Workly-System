@@ -146,9 +146,27 @@ export class AiMatchingService {
     try {
       const parsed = await this.callAiWithFallback(prompt, 'ExpandKeywords');
       return parsed;
-    } catch(e) {
+    } catch (e) {
       this.logger.error('AI expandJobKeywords error: All models failed');
       return {};
+    }
+  }
+
+  async calculateSemanticSimilarity(text1: string, text2: string): Promise<number> {
+    if (!this.isConfigured) return 0.5;
+    if (!text1 || !text2) return 0;
+
+    const prompt = `Calculate the semantic similarity score between these two texts on a scale of 0.0 to 1.0.
+    Text 1: "${text1}"
+    Text 2: "${text2}"
+    Return ONLY a JSON object: {"similarity": <score>}`;
+
+    try {
+      const parsed = await this.callAiWithFallback(prompt, 'SemanticSimilarity');
+      return Number(parsed.similarity) || 0;
+    } catch (e) {
+      this.logger.error('Semantic Similarity Error: ' + e.message);
+      return 0.5;
     }
   }
 }
