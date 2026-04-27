@@ -7,7 +7,12 @@ import { KeywordStrategy } from './services/strategies/keyword.strategy';
 import { SemanticStrategy } from './services/strategies/semantic.strategy';
 import { ExperienceStrategy } from './services/strategies/experience.strategy';
 import { EducationStrategy } from './services/strategies/education.strategy';
-import { HardFilterStrategy } from './services/strategies/hard-filter.strategy';
+import { LocationStrategy } from './services/strategies/location.strategy';
+import { SalaryStrategy } from './services/strategies/salary.strategy';
+import { IndustryStrategy } from './services/strategies/industry.strategy';
+import { JobTitleStrategy } from './services/strategies/job-title.strategy';
+import { LanguageStrategy } from './services/strategies/language.strategy';
+import { RelevantExpStrategy } from './services/strategies/relevant-exp.strategy';
 import { MatchingOrchestratorService } from './services/matching-orchestrator.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { AiModule } from '../ai/ai.module';
@@ -23,7 +28,12 @@ import { AiModule } from '../ai/ai.module';
     SemanticStrategy,
     ExperienceStrategy,
     EducationStrategy,
-    HardFilterStrategy,
+    LocationStrategy,
+    SalaryStrategy,
+    IndustryStrategy,
+    JobTitleStrategy,
+    LanguageStrategy,
+    RelevantExpStrategy,
     MatchingOrchestratorService,
   ],
   exports: [
