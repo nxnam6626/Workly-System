@@ -89,12 +89,14 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
          
          // Check total matches for welcome popup
          api.get('/recruiters/match-summary').then(res => {
-           if (res.data.totalMatches > 0 && sessionStorage.getItem('welcome_match_popup_shown') !== 'true') {
+           if (res.data && res.data.totalMatches > 0 && sessionStorage.getItem('welcome_match_popup_shown') !== 'true') {
               setMatchStats(res.data);
               setShowMatchPopup(true);
               sessionStorage.setItem('welcome_match_popup_shown', 'true');
            }
-         }).catch(err => console.error(err));
+         }).catch(err => {
+           console.warn('Could not fetch match summary, skipping popup');
+         });
       }
     }
   }, [isAuthenticated, isLoading, user, router, pathname, fetchUnreadCount]);

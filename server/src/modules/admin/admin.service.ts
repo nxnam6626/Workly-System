@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
+import { JobStatus, StatusUser, TransactionType } from '@/generated/prisma';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getDashboardStats() {
     const [totalUsers, totalJobs, pendingJobs, totalApproved, totalRejected] =

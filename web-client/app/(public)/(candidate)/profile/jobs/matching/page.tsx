@@ -17,7 +17,8 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
-  Target
+  Target,
+  BrainCircuit
 } from "lucide-react";
 
 import api from "@/lib/api";
@@ -25,6 +26,7 @@ import Link from "next/link";
 import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
 
 interface MatchingJob {
   jobPostingId: string;
@@ -41,7 +43,6 @@ interface MatchingJob {
     logo: string | null;
   };
   jobTier?: 'BASIC' | 'PROFESSIONAL' | 'URGENT';
-  aiReliabilityScore?: number;
 }
 
 export default function MatchingJobsPage() {
@@ -53,7 +54,7 @@ export default function MatchingJobsPage() {
     const fetchMatchingJobs = async () => {
       try {
         const res = await api.get("/candidates/recommended-jobs");
-        setJobs(res.data);
+        setJobs(res.data.items || []);
       } catch (error) {
         console.error("Error fetching matching jobs:", error);
       } finally {
@@ -68,225 +69,217 @@ export default function MatchingJobsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] pt-32 pb-12 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#fcfdfe] pt-32 pb-12 flex flex-col items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full mb-4"
-        />
-        <p className="text-slate-500 font-medium animate-pulse">AI đang tìm kiếm việc làm phù hợp cho bạn...</p>
+          className="w-16 h-16 border-b-4 border-l-4 border-blue-600 rounded-full mb-6 relative"
+        >
+          <div className="absolute inset-2 border-r-2 border-t-2 border-indigo-400 rounded-full animate-spin-slow" />
+        </motion.div>
+        <p className="text-slate-500 font-black tracking-widest uppercase text-xs animate-pulse">AI đang phân tích hồ sơ của bạn...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pt-24 pb-20 font-sans">
-      <div className="max-w-7xl mx-auto px-4 lg:px-6">
-
-        {/* Page Header with AI Glow */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative bg-white rounded-3xl p-8 border border-slate-100 shadow-sm overflow-hidden mb-8"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-3 h-3" />
-                AI Matching Engine
-              </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Việc làm <span className="text-blue-600 underline decoration-blue-200 underline-offset-8">Phù hợp</span> nhất</h1>
-              <p className="text-slate-500 max-w-lg">Dựa trên kỹ năng và kinh nghiệm trong CV chính của bạn, chúng tôi đề xuất những cơ hội tốt nhất.</p>
-            </div>
-
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center gap-4">
-              <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-blue-600">
-                <Target className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter">Độ chính xác</p>
-                <p className="text-xl font-black text-slate-900">~95% <span className="text-xs font-medium text-emerald-500 font-sans">+2%</span></p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
+    <div className="min-h-screen bg-[#fcfdfe] pt-24 pb-20 font-sans">
+      <div className="max-w-6xl mx-auto px-4 lg:px-6">
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-
-          {/* Sidebar Nav */}
-          <aside className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-2">
-              <div className="p-4 mb-2 bg-slate-50 rounded-xl border border-slate-100">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Dành cho bạn</p>
-                <p className="text-sm font-bold text-slate-700">Tùy chọn hiển thị</p>
-              </div>
-              <div className="space-y-1">
-                <Link href="/profile/jobs/matching" className="flex items-center justify-between px-4 py-3 text-sm font-bold text-blue-600 bg-blue-50/50 rounded-xl transition-all">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="w-4 h-4" />
-                    Việc làm phù hợp
-                  </div>
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-                <Link href="/profile/jobs/applied" className="flex items-center justify-between px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="w-4 h-4" />
-                    Đã ứng tuyển
-                  </div>
-                </Link>
-                <Link href="/profile/jobs/saved" className="flex items-center justify-between px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-4 h-4" />
-                    Đã lưu
-                  </div>
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white relative overflow-hidden group">
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
-              <TrendingUp className="w-10 h-10 text-blue-400 mb-4" />
-              <h4 className="text-lg font-black mb-2 leading-tight">Cải thiện chỉ số Matching?</h4>
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">Cập nhật CV với từ khóa kỹ năng mới để nhận được các đề xuất chính xác hơn.</p>
-              <Link href="/profile/cv-management" className="inline-flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">
-                Cập nhật CV ngay <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
+          
+          {/* Sidebar */}
+          <aside className="lg:col-span-1">
+            <ProfileSidebar />
           </aside>
 
-          {/* Jobs List */}
-          <div className="lg:col-span-3 space-y-4">
-            <AnimatePresence mode="popLayout">
-              {jobs.length > 0 ? (
-                jobs.map((job, idx) => (
-                  <motion.div
-                    key={job.jobPostingId}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all p-6"
-                  >
-                    {/* Tier badges */}
-                    <div className="absolute -top-3 -right-2 flex flex-col gap-1 z-10 items-end">
-                      {job.jobTier === 'URGENT' && (
-                        <div className="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-red-500/30 flex items-center gap-1 animate-pulse shrink-0">
-                          <span>🔥</span>Tuyển Gấp
-                        </div>
-                      )}
-                      {job.jobTier === 'PROFESSIONAL' && (
-                        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[11px] font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/30 flex items-center gap-1 shrink-0">
-                          <span>⭐️</span>Nổi Bật
-                        </div>
-                      )}
-                    </div>
+          {/* Main Content */}
+          <div className="lg:col-span-3 space-y-8">
+            
+            {/* Page Header with AI Glow */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[48px] p-10 border border-slate-800 shadow-2xl overflow-hidden"
+            >
+              {/* Background animations */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+              
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div className="space-y-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                    <BrainCircuit className="w-3.5 h-3.5 animate-pulse" />
+                    Workly AI Matching Engine
+                  </div>
+                  <h1 className="text-4xl font-black text-white tracking-tight leading-none">
+                    Việc làm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 italic">Dành riêng</span> <br/> cho phong cách của bạn
+                  </h1>
+                  <p className="text-slate-400 max-w-lg text-[15px] leading-relaxed font-medium">
+                    Thuật toán AI của chúng tôi đã phân tích {user?.candidate?.skills?.length || 0} kỹ năng trong CV để đề xuất những vị trí có độ tương thích cao nhất.
+                  </p>
+                </div>
 
-                    <div className="flex flex-col md:flex-row gap-6">
-                      {/* Logo or Match Score */}
-                      <div className="relative shrink-0">
-                        <div className="w-20 h-20 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center p-4 group-hover:bg-white transition-colors">
-                          {job.company.logo ? (
-                            <img src={job.company.logo} alt={job.company.companyName} className="max-w-full max-h-full object-contain" />
-                          ) : (
-                            <Building2 className="w-10 h-10 text-slate-200" />
-                          )}
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-emerald-500 text-white text-[10px] font-black w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
-                          {job.score}%
+                <div className="shrink-0 bg-white/5 backdrop-blur-xl rounded-[32px] p-6 border border-white/10 flex flex-col items-center justify-center gap-2 text-center group hover:bg-white/10 transition-all">
+                  <div className="relative group-hover:scale-110 transition-transform duration-500">
+                    <svg className="w-24 h-24 transform -rotate-90">
+                      <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                      <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray="251.2" strokeDashoffset="12.5" className="text-blue-500" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-black text-white leading-none">95%</span>
+                      <span className="text-[8px] font-black text-blue-400 uppercase tracking-tighter">Accuracy</span>
+                    </div>
+                  </div>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Dựa trên Workly Core II</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Jobs List */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-4">
+                <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.15em]">Đề xuất hàng đầu ({jobs.length})</h3>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[11px] font-bold text-slate-500 italic">Đang cập nhật theo thời gian thực</span>
+                </div>
+              </div>
+
+              <AnimatePresence mode="popLayout">
+                {jobs.length > 0 ? (
+                  jobs.map((job, idx) => (
+                    <motion.div
+                      key={job.jobPostingId}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="group relative bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-blue-100 transition-all p-8"
+                    >
+                      {/* Tier badges */}
+                      <div className="absolute top-6 right-6 flex flex-col gap-2 z-10 items-end">
+                        <div className="px-4 py-1.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.1em] shadow-lg shadow-blue-200/50 flex items-center gap-1.5">
+                          <Target className="w-3 h-3" />
+                          Match {job.score}%
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className="grow space-y-4">
-                        <div className="flex justify-between items-start gap-4">
+                      <div className="flex flex-col md:flex-row gap-8">
+                        {/* Company Logo Container */}
+                        <div className="relative shrink-0 w-24 h-24">
+                          <div className="w-full h-full bg-slate-50 rounded-[28px] border border-slate-50 flex items-center justify-center p-5 group-hover:bg-white transition-all duration-500">
+                            {job.company.logo ? (
+                              <img src={job.company.logo} alt={job.company.companyName} className="max-w-full max-h-full object-contain filter group-hover:drop-shadow-md transition-all" />
+                            ) : (
+                              <Building2 className="w-12 h-12 text-slate-200" />
+                            )}
+                          </div>
+                          {job.score >= 90 && (
+                            <div className="absolute -bottom-2 -left-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white text-[10px] font-black w-10 h-10 rounded-[14px] flex items-center justify-center border-4 border-white shadow-lg">
+                              ?
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="grow space-y-5">
                           <div>
                             <Link href={`/jobs/${job.jobPostingId}`}>
-                              <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors cursor-pointer capitalize">
+                              <h3 className="text-2xl font-black text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight leading-tight mb-1">
                                 {job.title}
                               </h3>
                             </Link>
-                            <p className="text-sm font-bold text-slate-500">{job.company.companyName}</p>
+                            <p className="text-[15px] font-bold text-slate-400 flex items-center gap-2">
+                              {job.company.companyName}
+                              <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                              <span className="text-slate-300 font-medium">Bản tin đăng 2 ngày trước</span>
+                            </p>
                           </div>
-                          <div className="hidden md:flex flex-col items-end gap-1.5">
-                            {job.aiReliabilityScore !== undefined && job.aiReliabilityScore >= 80 && (
-                              <div className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
-                                ✨ Job Uy Tín
-                              </div>
-                            )}
-                          </div>
-                        </div>
 
-                        <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-400">
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg">
-                            <DollarSign className="w-3.5 h-3.5 text-blue-600" />
-                            <span className="text-slate-700">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</span>
+                          <div className="flex flex-wrap items-center gap-4 text-[13px] font-bold">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-2xl border border-blue-100 shadow-sm shadow-blue-50/50">
+                              <DollarSign className="w-4 h-4" />
+                              <span className="font-black">{formatSalary(job.salaryMin, job.salaryMax, job.currency)}</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-2xl border border-slate-100">
+                              <MapPin className="w-4 h-4 text-slate-400" />
+                              <span>{job.locationCity}</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-2xl border border-slate-100">
+                              <Briefcase className="w-4 h-4 text-slate-400" />
+                              <span className="uppercase tracking-tighter">{job.jobType}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg">
-                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="text-slate-700">{job.locationCity}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg">
-                            <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="text-slate-700 uppercase">{job.jobType}</span>
-                          </div>
-                        </div>
 
-                        {/* Matched Skills Pills */}
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {job.matchedSkills.slice(0, 4).map((skill, i) => (
-                            <span key={i} className="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-md flex items-center gap-1 lowercase">
-                              <Target className="w-2.5 h-2.5" />
-                              {skill}
-                            </span>
-                          ))}
-                          {job.matchedSkills.length > 4 && (
-                            <span className="px-2 py-1 bg-slate-50 text-slate-400 text-[10px] font-bold rounded-md">+{job.matchedSkills.length - 4} skills</span>
-                          )}
-                        </div>
+                          {/* Matching Insights */}
+                          <div className="p-5 bg-[#fcfdfe] rounded-[24px] border border-slate-50 space-y-3">
+                            <div className="flex items-center justify-between mb-1">
+                               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Sparkles className="w-3 h-3 text-blue-500" />
+                                Kỹ năng tương thích
+                               </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {job.matchedSkills?.map((skill, i) => (
+                                <span key={i} className="px-3 py-1 bg-white border border-slate-100 text-slate-600 text-[11px] font-bold rounded-xl shadow-sm lowercase">
+                                  {skill}
+                                </span>
+                              ))}
+                              {(!job.matchedSkills || job.matchedSkills.length === 0) && (
+                                <span className="text-xs text-slate-400 italic">Đang phân tích kỹ năng...</span>
+                              )}
+                            </div>
+                          </div>
 
-                        <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                          <p className="text-[10px] font-bold text-slate-400">Ứng tuyển để mở khóa mức độ tương thích chi tiết</p>
-                          <div className="flex items-center gap-3">
-                            <Link
-                              href={`/jobs/${job.jobPostingId}`}
-                              className="inline-flex items-center justify-center px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition-colors"
-                            >
-                              Chi tiết
-                            </Link>
-                            <Link
-                              href={`/jobs/${job.jobPostingId}`}
-                              className="inline-flex items-center justify-center gap-1.5 px-5 py-2 bg-slate-900 text-white text-xs font-black rounded-xl hover:bg-blue-600 transition-all shadow-lg shadow-slate-200"
-                            >
-                              Ứng tuyển <ArrowRight className="w-3 h-3" />
-                            </Link>
+                          <div className="pt-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <p className="text-[11px] font-bold text-slate-400 italic">Hệ thống gợi ý dựa trên hồ sơ chuyên sâu của bạn</p>
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                              <Link
+                                href={`/jobs/${job.jobPostingId}`}
+                                className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-slate-100 text-slate-700 text-xs font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-wider"
+                              >
+                                Chi tiết
+                              </Link>
+                              <Link
+                                href={`/jobs/${job.jobPostingId}`}
+                                className="flex-[2] sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white text-xs font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 uppercase tracking-widest group"
+                              >
+                                Ứng tuyển ngay <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-white rounded-3xl border border-slate-100 p-20 text-center space-y-6"
-                >
-                  <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-                    <Search className="w-12 h-12" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-900 leading-tight">Chưa tìm thấy Công việc Phù hợp</h3>
-                    <p className="text-sm text-slate-500 max-w-sm mx-auto font-medium">Bạn có thể cần cập nhật CV hoặc bật trạng thái tìm việc để AI có thể gợi ý chính xác nhất.</p>
-                  </div>
-                  <Link
-                    href="/profile/cv-management"
-                    className="inline-flex items-center justify-center px-10 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-white rounded-[48px] border border-slate-100 p-24 text-center space-y-8"
                   >
-                    Cập nhật CV ngay
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    <div className="relative mx-auto w-32 h-32">
+                      <div className="absolute inset-0 bg-blue-50 rounded-full animate-ping opacity-20" />
+                      <div className="relative w-full h-full bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                        <Search className="w-16 h-16" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="text-2xl font-black text-slate-900 leading-tight">Chưa tìm thấy mục <span className="text-blue-600 italic">Matching chính xác</span></h3>
+                      <p className="text-sm text-slate-400 max-w-sm mx-auto font-medium leading-relaxed">
+                        Đừng lo lắng! Hãy cập nhật thêm kỹ năng vào hồ sơ hoặc tải lên CV mới để AI có thể phân tích chính xác hơn.
+                      </p>
+                    </div>
+                    <Link
+                      href="/profile/cv-management"
+                      className="inline-flex items-center justify-center px-12 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 text-xs uppercase tracking-widest"
+                    >
+                      Cập nhật Hồ sơ/CV ngay
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 

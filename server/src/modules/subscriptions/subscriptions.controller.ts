@@ -3,12 +3,17 @@ import { SubscriptionsService } from './subscriptions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
-import { PlanType } from '@prisma/client';
+import { PlanType } from '@/generated/prisma';
 
 @Controller('subscriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
+
+  @Get('ping')
+  ping() {
+    return { status: 'ok', module: 'subscriptions' };
+  }
 
   @Get('current')
   @Roles(Role.RECRUITER)
@@ -29,5 +34,11 @@ export class SubscriptionsController {
       req.user.userId,
       body.packageType,
     );
+  }
+
+  @Post('cancel')
+  @Roles(Role.RECRUITER)
+  async cancelSubscription(@Req() req) {
+    return this.subscriptionsService.cancelSubscription(req.user.userId);
   }
 }

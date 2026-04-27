@@ -10,21 +10,51 @@
   --color-foreground: #313131;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
-  /* JobsGO Brand Palette */
+
+  /* Workly Brand Palette */
   --color-mariner: #2466c9;
   --color-primary-hover: #1e55a9;
   --color-safety-orange: #f96d15;
+  --color-workly-blue: #002B67;
+  --color-workly-blue-light: #00418E;
   --color-slate-700: #334155;
   --color-slate-500: #64748b;
+
+  /* Luminous Ether Tokens */
+  --color-momo-pink: #d82d8b;
+  --color-momo-magenta: #af2070;
+  --color-glass-white: rgba(255, 255, 255, 0.7);
+  --color-glass-border: rgba(255, 255, 255, 0.3);
+  --color-glow-pink: 0 0 20px rgba(216, 45, 139, 0.4);
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-glow-pink {
+  text-shadow: 0 0 10px rgba(216, 45, 139, 0.5);
+}
+
+.bg-momo-gradient {
+  background: linear-gradient(135deg, #d82d8b 0%, #af2070 100%);
 }
 
 /* Premium Component Shadows */
-.shadow-jobsgo {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+.shadow-workly {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
-.shadow-jobsgo-hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
+.shadow-workly-hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 body {
@@ -37,15 +67,20 @@ body {
 .scrollbar-thin::-webkit-scrollbar {
   width: 5px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd5e1; /* slate-300 */
+  background: #cbd5e1;
+  /* slate-300 */
   border-radius: 10px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; /* slate-400 */
+  background: #94a3b8;
+  /* slate-400 */
 }
 
 /* AI Chat Markdown Styling */

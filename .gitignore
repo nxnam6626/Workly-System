@@ -1,1 +1,38 @@
-server/.env.production  
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Next.js / Expo artifacts
+.next/
+.expo/
+
+# Environment variables (Security)
+.env
+.env.local
+.env.*.local
+server/.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# AI Agent (Antigravity)
+.agent/
+.agents/
+skills-lock.json
+
+# Temporary files
+git_status.txt

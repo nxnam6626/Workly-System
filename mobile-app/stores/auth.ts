@@ -9,7 +9,7 @@ interface User {
   avatar?: string;
   isEmailVerified?: boolean;
   roles?: string[];
-  admin?: { adminLevel: number; permissions: string[] };
+  admin?: { permissions: string[] };
   candidate?: { fullName?: string };
   recruiter?: any;
 }

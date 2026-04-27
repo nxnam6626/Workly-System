@@ -1,6 +1,5 @@
 import { Global, Module, forwardRef } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { MatchingService } from './matching.service';
 import { MatchingProcessor } from './matching.processor';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { BullModule } from '@nestjs/bullmq';
@@ -21,7 +20,7 @@ import { MatchingEngineModule } from '../matching-engine/matching-engine.module'
       name: 'matching',
     }),
   ],
-  providers: [SearchService, MatchingService, MatchingProcessor],
-  exports: [SearchService, MatchingService, BullModule],
+  providers: [SearchService, MatchingProcessor],
+  exports: [SearchService, BullModule],
 })
 export class SearchModule {}

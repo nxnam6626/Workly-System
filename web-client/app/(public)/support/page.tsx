@@ -149,6 +149,19 @@ export default function SupportPage() {
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm font-medium resize-none"
                     ></textarea>
                   </div>
+
+                  <div className="flex items-start gap-3 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                    <input
+                      id="commitment"
+                      type="checkbox"
+                      required
+                      className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label htmlFor="commitment" className="text-sm text-slate-600 leading-relaxed cursor-pointer select-none">
+                      Tôi cam kết tuân thủ chính sách cộng đồng và không tái phạm các hành vi đăng tin vi phạm. 
+                      Tôi hiểu rằng nếu tiếp tục vi phạm, tài khoản của tôi có thể bị <span className="font-bold text-red-600">Khóa vĩnh viễn</span>.
+                    </label>
+                  </div>
                 </div>
 
                 <div className="pt-2">

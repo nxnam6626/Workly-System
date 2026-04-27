@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PayOS } from '@payos/node';
-import { TransactionType } from '@prisma/client';
+import { TransactionType } from '@/generated/prisma';
 import { MessagesGateway } from '../messages/messages.gateway';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class WalletsService {
   }
 
   async getBalance(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
+    let recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
       include: {
         recruiterWallet: true,
@@ -33,7 +33,13 @@ export class WalletsService {
     });
 
     if (!recruiter) {
-      throw new NotFoundException('Recruiter not found');
+      recruiter = await this.prisma.recruiter.create({
+        data: { userId },
+        include: {
+          recruiterWallet: true,
+          recruiterSubscription: true,
+        },
+      });
     }
 
     if (!recruiter.recruiterWallet) {
@@ -368,9 +374,8 @@ export class WalletsService {
       return { updatedWallet, transaction, usedQuota: true, cost: 0 };
     }
 
-    // 2. Không có Quota CV -> Kiểm tra gói tháng -> Tính giá mở lẻ
-    const hasActiveSub = sub && new Date() > sub.expiryDate === false;
-    const cost = hasActiveSub ? 30 : 50;
+    // 2. Không có Quota CV -> Tính giá mở lẻ cố định
+    const cost = 30;
 
     if (wallet.balance < cost) {
       throw new BadRequestException(

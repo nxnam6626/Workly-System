@@ -8,6 +8,7 @@ import { NotificationsModule } from '../../notifications/notifications.module';
 import { JobAlertsModule } from '../../job-alerts/job-alerts.module';
 import { AiModule } from '../../ai/ai.module';
 import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
+import { MatchingEngineModule } from '../../matching-engine/matching-engine.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
     JobAlertsModule,
     AiModule,
     SubscriptionsModule,
+    MatchingEngineModule,
   ],
   controllers: [JobPostingsController, AdminJobPostingsController],
   providers: [JobPostingsService],

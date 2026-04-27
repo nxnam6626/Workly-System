@@ -81,7 +81,8 @@ export class UsersController {
   ) {
     if (createUserDto.role === Role.ADMIN) {
       const currentUser = await this.usersService.findOne(reqUserId);
-      if (currentUser.admin?.adminLevel !== 1) {
+      const isSupreme = currentUser.admin?.permissions.includes('SUPER_ADMIN') || currentUser.admin?.permissions.includes('ALL');
+      if (!isSupreme) {
         throw new ForbiddenException(
           'Chỉ Quản trị viên Toàn quyền mới được phép tạo Admin mới.',
         );
@@ -97,7 +98,7 @@ export class UsersController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('role') role?: Role,
-    @Query('status') status?: 'ACTIVE' | 'LOCKED',
+    @Query('status') status?: 'ACTIVE' | 'LOCKED' | 'BANNED',
     @Query('search') search?: string,
   ) {
     return this.usersService.findAll({
@@ -129,8 +130,11 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch(':userId/lock')
-  lock(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.usersService.lockUser(userId);
+  lock(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser('userId') reqUserId: string,
+  ) {
+    return this.usersService.lockUser(userId, reqUserId);
   }
 
   @UseGuards(RolesGuard)
@@ -138,6 +142,20 @@ export class UsersController {
   @Patch(':userId/unlock')
   unlock(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.usersService.unlockUser(userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':userId/unlock-probation')
+  unlockProbation(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.usersService.unlockWithProbation(userId);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':userId/ban')
+  ban(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.usersService.banUser(userId);
   }
 
   @UseGuards(RolesGuard)
@@ -150,8 +168,11 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Delete(':userId')
-  remove(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.usersService.remove(userId);
+  remove(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser('userId') reqUserId: string,
+  ) {
+    return this.usersService.remove(userId, reqUserId);
   }
 
   @UseGuards(RolesGuard)
@@ -160,7 +181,8 @@ export class UsersController {
   updateAdminPermissions(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body('permissions') permissions: string[],
+    @Body('fullName') fullName?: string,
   ) {
-    return this.usersService.updateAdminPermissions(userId, permissions || []);
+    return this.usersService.updateAdminPermissions(userId, permissions || [], fullName);
   }
 }

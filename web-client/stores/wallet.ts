@@ -28,8 +28,11 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   fetchWallet: async () => {
     set({ isLoadingWallet: true });
     try {
-      const response = await api.get('/recruiters/wallet');
-      set({ wallet: response.data, isLoadingWallet: false });
+      const response = await api.get('/wallets/balance');
+      set({
+        wallet: response.data,
+        isLoadingWallet: false
+      });
     } catch (error) {
       console.error('Lỗi khi tải ví nội bộ:', error);
       set({ wallet: null, isLoadingWallet: false });

@@ -2,115 +2,123 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Search, MapPin, Briefcase } from "lucide-react";
+import { LayoutGrid, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { INDUSTRY_TAG_MAP, LOCATIONS } from "@/lib/constants";
+import IndustryMegaMenu from "./shared/IndustryMegaMenu";
+import { useRef, useEffect } from "react";
 
-export function HeroSearch() {
+interface HeroSearchProps {
+  hideFilters?: boolean;
+}
+
+export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
   const router = useRouter();
   const [keyword, setKeyword] = useState("");
-  const [industry, setIndustry] = useState("");
   const [location, setLocation] = useState("");
+  const [showIndustry, setShowIndustry] = useState(false);
+  const industryRef = useRef<HTMLDivElement>(null);
 
-  const quickSearches = [
-    "Việc làm Hà Nội",
-    "Việc làm TPHCM",
-    "Việc làm Marketing",
-    "Việc làm Kế toán",
-    "Tuyển dụng nhà hàng"
-  ];
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (industryRef.current && !industryRef.current.contains(event.target as Node)) {
+        setShowIndustry(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const industries = Object.keys(INDUSTRY_TAG_MAP);
-
-  const handleSearch = () => {
+  const handleSearch = (industry?: string) => {
     const params = new URLSearchParams();
     if (keyword) params.set("search", keyword);
-    if (industry) params.set("industry", industry);
     if (location) params.set("location", location);
+    if (industry) params.set("industry", industry);
     router.push(`/jobs?${params.toString()}`);
-  };
-
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
+    setShowIndustry(false);
   };
 
   return (
-    <section className="w-full bg-[#f4f7fa] pt-12 pb-6 px-6 relative">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-7xl mx-auto flex flex-col items-center gap-8 relative z-10"
-      >
-        {/* Search Bar Container */}
-        <div className="w-full bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-200/50 flex flex-col md:flex-row items-stretch p-2 md:h-20 max-w-5xl">
+    <div className="relative">
+      <div className="bg-[#d7ecf7] rounded-[20px] p-2 shadow-sm border border-blue-50">
+        <div className="bg-white rounded-xl p-1 flex flex-col md:flex-row items-stretch gap-1 shadow-md">
           {/* Keyword Field */}
-          <div className="flex-[1.5] flex items-center px-5 gap-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-100">
-             <div className="p-2.5 bg-blue-50 rounded-xl text-mariner">
-                <Search className="w-5 h-5 stroke-[2.5px]" />
-             </div>
-             <div className="flex flex-col flex-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Vị trí tuyển dụng</span>
-                <input
-                  type="text"
-                  placeholder="Nhập tên công việc, vị trí..."
-                  className="w-full bg-transparent outline-none text-slate-800 font-bold placeholder:text-slate-300 placeholder:font-medium text-[15px]"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                />
-             </div>
+          <div className="flex-[1.5] flex items-center gap-2.5 px-4 py-2.5 group">
+            <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Từ khóa:</span>
+            <input
+              type="text"
+              placeholder="Việc, công ty, ngành nghề..."
+              className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
           </div>
 
+          {/* Separator */}
+          <div className="hidden md:block w-px h-8 bg-slate-100 self-center" />
+
           {/* Location Field */}
-          <div className="flex-1 flex items-center px-5 gap-4 py-3 md:py-0 border-b md:border-b-0 md:border-r border-slate-100">
-             <div className="p-2.5 bg-orange-50 rounded-xl text-safety-orange">
-                <MapPin className="w-5 h-5 stroke-[2.5px]" />
-             </div>
-             <div className="flex flex-col flex-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Địa điểm</span>
-                <select
-                  className="w-full bg-transparent outline-none text-slate-800 font-bold appearance-none cursor-pointer text-[15px]"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                >
-                  <option value="">Toàn quốc</option>
-                  {LOCATIONS.map((loc: string) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
-             </div>
+          <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5">
+            <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
+            <input
+              type="text"
+              placeholder="Tỉnh/thành, quận..."
+              className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
           </div>
 
           {/* Search Button */}
           <button
-            onClick={handleSearch}
-            className="md:ml-2 h-14 md:h-auto px-10 bg-mariner hover:bg-[#0047a5] text-white font-black rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-[0.97] flex items-center justify-center gap-3"
+            onClick={() => handleSearch()}
+            className="px-8 py-2 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[14px] rounded-lg transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-lg shadow-blue-900/10 uppercase"
           >
-            <Search className="w-5 h-5 stroke-[3px]" />
-            <span className="tracking-wide">TÌM KIẾM</span>
+            TÌM VIỆC
           </button>
         </div>
-      </motion.div>
-    </section>
+
+        {/* Filters Bar */}
+        {!hideFilters && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <div className="relative" ref={industryRef}>
+              <button
+                onClick={() => setShowIndustry(!showIndustry)}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all shadow-sm active:scale-[0.97] ${
+                  showIndustry ? "bg-white text-[#1e60ad]" : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
+                }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span>Ngành nghề</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showIndustry ? "rotate-180" : ""}`} />
+              </button>
+
+              {showIndustry && (
+                <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-[800px]">
+                  <IndustryMegaMenu 
+                    height="360px"
+                    onSelect={(industry) => handleSearch(industry)}
+                    onClose={() => setShowIndustry(false)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Dummy Filters for Visual Consistency */}
+            {["Loại hình", "Mức lương", "Chức vụ"].map((label) => (
+              <button
+                key={label}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-[13px] font-bold bg-[#1e60ad] text-white hover:bg-[#164a8a] transition-all shadow-sm active:scale-[0.97]"
+              >
+                <span>{label}</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

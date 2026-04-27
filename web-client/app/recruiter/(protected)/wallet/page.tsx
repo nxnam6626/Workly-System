@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus, HelpCircle, X, Crown } from 'lucide-react';
+import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus, HelpCircle, X, Crown, AlertCircle } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -30,6 +30,8 @@ function WalletContent() {
   const [supportSubject, setSupportSubject] = useState('Hỗ trợ nạp tiền/Giao dịch Recruiter');
   const [sendingSupport, setSendingSupport] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     fetchWalletData();
@@ -104,6 +106,20 @@ function WalletContent() {
       fetchWalletData(); // refresh incase it was marked cancelled
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelling(true);
+    try {
+      await api.post('/subscriptions/cancel');
+      toast.success('Gói cước của bạn sẽ không được gia hạn và sẽ kết thúc sau khi hết hạn.');
+      setShowCancelModal(false);
+      fetchWalletData();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Không thể hủy gói');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -348,6 +364,19 @@ function WalletContent() {
                       </div>
                     )}
                     <p className="text-xs text-slate-400">Hết hạn: {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}</p>
+                    {subscription.isCancelled ? (
+                      <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Trạng thái: Đã hủy</p>
+                        <p className="text-[11px] text-amber-500 font-medium leading-tight">Gói sẽ tự động kết thúc vào ngày {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}. Bạn vẫn có thể sử dụng các quyền lợi còn lại.</p>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => setShowCancelModal(true)}
+                        className="w-full mt-4 py-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl transition-all"
+                      >
+                        Hủy gói dịch vụ
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="flex flex-col justify-center h-full gap-1">
@@ -484,6 +513,40 @@ function WalletContent() {
                 </button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Cancel Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl text-center"
+          >
+            <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-800">Xác nhận hủy gói?</h3>
+            <p className="text-slate-500 mt-4 font-medium leading-relaxed">
+              Bạn vẫn có thể tiếp tục sử dụng các quyền lợi và lượt đăng tin còn lại cho đến hết ngày <strong>{new Date(subscription?.expiryDate).toLocaleDateString('vi-VN')}</strong>. Sau thời gian này, gói sẽ không được gia hạn.
+            </p>
+            <div className="flex flex-col gap-3 mt-8">
+              <button
+                onClick={handleCancelSubscription}
+                disabled={cancelling}
+                className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2"
+              >
+                {cancelling ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Xác nhận hủy'}
+              </button>
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="w-full py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all"
+              >
+                Giữ lại gói
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

@@ -2,10 +2,11 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WalletsService } from '../wallets/wallets.service';
-import { PlanType, JobTier, TransactionType } from '@prisma/client';
+import { PlanType, JobTier, TransactionType } from '@/generated/prisma';
 
 @Injectable()
 export class SubscriptionsService {
@@ -29,20 +30,24 @@ export class SubscriptionsService {
       usedBasicPosts: 0,
       usedVipPosts: 0,
       usedUrgentPosts: 0,
+      isCancelled: false,
     };
 
+    let cvQuota = 0;
     if (planType === PlanType.LITE) {
       cost = 500;
-      updateData.maxBasicPosts = 5;
+      updateData.maxBasicPosts = 3;
       updateData.maxVipPosts = 2;
       updateData.maxUrgentPosts = 0;
       updateData.canViewAIReport = true;
+      cvQuota = 10;
     } else if (planType === PlanType.GROWTH) {
       cost = 2000;
-      updateData.maxBasicPosts = 20;
+      updateData.maxBasicPosts = 15;
       updateData.maxVipPosts = 10;
       updateData.maxUrgentPosts = 3;
       updateData.canViewAIReport = true;
+      cvQuota = 50;
     } else {
       throw new BadRequestException('Gói cước không hợp lệ.');
     }
@@ -96,6 +101,14 @@ export class SubscriptionsService {
           'DEPOSIT',
         );
       }
+      // 3. Tặng kèm Quota mở khóa CV
+      if (cvQuota > 0) {
+        await this.walletsService.addCvQuota(
+          recruiter.recruiterId,
+          cvQuota,
+          `Tặng ${cvQuota} lượt mở CV khi đăng ký gói ${planType}`,
+        );
+      }
     } catch (e) {
       throw new BadRequestException(
         'Số dư Credits không đủ để mua gói này. Vui lòng nạp thêm.',
@@ -129,62 +142,67 @@ export class SubscriptionsService {
 
     const sub = recruiter.recruiterSubscription;
     const isExpired = sub ? new Date() > sub.expiryDate : true;
+    const isActive = sub && !isExpired;
 
-    // Chi phí lẻ
-    const costMap = {
-      [JobTier.BASIC]: 100,
-      [JobTier.PROFESSIONAL]: 250,
-      [JobTier.URGENT]: 450,
-    };
-    const cost = costMap[jobTier];
+    // 1. XỬ LÝ TIN BASIC (Cho phép Hybrid: Quota -> Wallet)
+    if (jobTier === JobTier.BASIC) {
+      if (isActive && sub.usedBasicPosts < sub.maxBasicPosts) {
+        await this.prisma.recruiterSubscription.update({
+          where: { subscriptionId: sub.subscriptionId },
+          data: { usedBasicPosts: { increment: 1 } },
+        });
+        return { method: 'SUBSCRIPTION_QUOTA', cost: 0 };
+      }
 
-    // Xác định xem có còn Quota trong gói không (nếu gói còn hạn)
-    let canUseQuota = false;
-    if (sub && !isExpired) {
-      if (jobTier === JobTier.BASIC && sub.usedBasicPosts < sub.maxBasicPosts)
-        canUseQuota = true;
-      if (
-        jobTier === JobTier.PROFESSIONAL &&
-        sub.usedVipPosts < sub.maxVipPosts
-      )
-        canUseQuota = true;
-      if (
-        jobTier === JobTier.URGENT &&
-        sub.usedUrgentPosts < sub.maxUrgentPosts
-      )
-        canUseQuota = true;
+      // Hết quota hoặc không có gói -> Trừ 100 xu trong ví
+      try {
+        await this.walletsService.deduct(
+          recruiter.recruiterId,
+          100,
+          'Thanh toán lẻ cho tin tuyển dụng Hạng BASIC',
+          TransactionType.POST_JOB,
+        );
+        return { method: 'WALLET_CREDIT', cost: 100 };
+      } catch (e) {
+        throw new BadRequestException('Số dư ví không đủ (Cần 100 xu cho tin BASIC).');
+      }
     }
 
-    if (canUseQuota) {
-      // Dùng quota
+    // 2. XỬ LÝ TIN CAO CẤP (PROFESSIONAL / URGENT)
+    // Chỉ cho phép dùng Quota trong gói, không cho mua lẻ bằng xu
+    if (!isActive) {
+      throw new ForbiddenException(
+        'Hạng tin PROFESSIONAL/URGENT chỉ dành cho thành viên có gói dịch vụ LITE hoặc GROWTH còn hạn.',
+      );
+    }
+
+    if (jobTier === JobTier.PROFESSIONAL) {
+      if (sub.usedVipPosts >= sub.maxVipPosts) {
+        throw new ForbiddenException(
+          'Bạn đã hết lượt đăng tin PROFESSIONAL trong gói hiện tại. Vui lòng nâng cấp gói mới để tiếp tục.',
+        );
+      }
       await this.prisma.recruiterSubscription.update({
-        where: { recruiterId: recruiter.recruiterId },
-        data: {
-          usedBasicPosts:
-            jobTier === JobTier.BASIC ? { increment: 1 } : undefined,
-          usedVipPosts:
-            jobTier === JobTier.PROFESSIONAL ? { increment: 1 } : undefined,
-          usedUrgentPosts:
-            jobTier === JobTier.URGENT ? { increment: 1 } : undefined,
-        },
+        where: { subscriptionId: sub.subscriptionId },
+        data: { usedVipPosts: { increment: 1 } },
       });
-      return { usingQuota: true, cost: 0 };
+      return { method: 'SUBSCRIPTION_QUOTA', cost: 0 };
     }
 
-    // Nếu hết quota hoặc không có gói, trừ ví thủ công (Hệ thống Pay-As-You-Go linh hoạt theo thiết kế Hybrid)
-    try {
-      await this.walletsService.deduct(
-        recruiter.recruiterId,
-        cost,
-        `Thanh toán lẻ cho tin tuyển dụng Hạng ${jobTier}`,
-        TransactionType.POST_JOB,
-      );
-      return { usingQuota: false, cost };
-    } catch (e) {
-      throw new BadRequestException(
-        `Cần ${cost} Credits để thanh toán tin loại này (Gói mua của bạn đã hết hạn mức cho loại tin này). Vui lòng nạp thêm xu!`,
-      );
+    if (jobTier === JobTier.URGENT) {
+      if (sub.usedUrgentPosts >= sub.maxUrgentPosts) {
+        throw new ForbiddenException(
+          'Bạn đã hết lượt đăng tin URGENT trong gói hiện tại. Vui lòng nâng cấp gói GROWTH để tiếp tục.',
+        );
+      }
+      await this.prisma.recruiterSubscription.update({
+        where: { subscriptionId: sub.subscriptionId },
+        data: { usedUrgentPosts: { increment: 1 } },
+      });
+      return { method: 'SUBSCRIPTION_QUOTA', cost: 0 };
     }
+
+    throw new BadRequestException('Hạng tin không hợp lệ.');
   }
 
   async getCurrentSubscription(userId: string) {
@@ -250,5 +268,25 @@ export class SubscriptionsService {
       }
       throw e;
     }
+  }
+
+  async cancelSubscription(userId: string) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+      include: { recruiterSubscription: true },
+    });
+
+    if (!recruiter || !recruiter.recruiterSubscription) {
+      throw new NotFoundException('Bạn không có gói dịch vụ nào đang hoạt động.');
+    }
+
+    if (recruiter.recruiterSubscription.isCancelled) {
+      throw new BadRequestException('Gói dịch vụ này đã được đánh dấu hủy trước đó.');
+    }
+
+    return this.prisma.recruiterSubscription.update({
+      where: { recruiterId: recruiter.recruiterId },
+      data: { isCancelled: true },
+    });
   }
 }

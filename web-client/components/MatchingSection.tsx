@@ -18,6 +18,7 @@ interface MatchItem {
   avatar?: string;
   jobTitle?: string; // For recruiters
   type: "JOB" | "CANDIDATE";
+  raw?: any;
 }
 
 export function MatchingSection() {
@@ -35,32 +36,42 @@ export function MatchingSection() {
       try {
         if (isCandidate) {
           const res = await api.get("/candidates/recommended-jobs");
-          const mapped: MatchItem[] = res.data.slice(0, 4).map((j: any) => ({
-            id: j.jobPostingId,
-            title: j.title,
-            subtitle: j.company.companyName,
-            score: j.score || 95, // Default score if not provided
-            tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
-            type: "JOB",
-            raw: j
-          }));
-          setItems(mapped);
+          const items = res.data.items || [];
+          if (items.length > 0) {
+            const mapped: MatchItem[] = items.slice(0, 4).map((j: any) => ({
+              id: j.jobPostingId,
+              title: j.title,
+              subtitle: j.company.companyName,
+              score: j.score || 95,
+              tags: j.matchedSkills || (j.requirements ? j.requirements.split(',').slice(0, 3) : []),
+              type: "JOB",
+              raw: j
+            }));
+            setItems(mapped);
+          } else {
+            setItems([]);
+          }
         } else if (isRecruiter) {
           const res = await api.get("/recruiters/top-matches");
-          const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
-            id: c.candidateId,
-            title: c.fullName,
-            subtitle: `Phù hợp cho vị trí: ${c.jobTitle}`,
-            score: c.score,
-            tags: c.skills || [],
-            avatar: c.avatar,
-            type: "CANDIDATE",
-            raw: c
-          }));
-          setItems(mapped);
+          if (res.data && res.data.length > 0) {
+            const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
+              id: c.candidateId,
+              title: c.fullName,
+              subtitle: `Ph� h?p cho v? tr�: ${c.jobTitle}`,
+              score: c.score,
+              tags: c.skills || [],
+              avatar: c.avatar,
+              type: "CANDIDATE",
+              raw: c
+            }));
+            setItems(mapped);
+          } else {
+            setItems([]);
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch matches for homepage", error);
+        console.error("Failed to fetch matches for homepage, using fallback", error);
+        setItems([]);
       } finally {
         setLoading(false);
       }
@@ -69,15 +80,57 @@ export function MatchingSection() {
     fetchMatches();
   }, [isAuthenticated, isCandidate, isRecruiter]);
 
+const MOCK_MATCHES: MatchItem[] = [
+  {
+    id: "m1",
+    title: "Senior Frontend Developer",
+    subtitle: "C�ng Ty C? Ph?n VINHOMES",
+    score: 98,
+    tags: ["React", "TypeScript", "Next.js"],
+    type: "JOB",
+    raw: {
+      jobPostingId: "m1",
+      title: "Senior Frontend Developer",
+      company: { companyName: "C�ng Ty C? Ph?n VINHOMES", logo: "/logos/workly-gau-logo.png" },
+      locationCity: "H� N?i",
+      salaryMin: 30000000,
+      salaryMax: 50000000,
+      currency: "VND",
+      createdAt: new Date().toISOString(),
+      jobTier: "URGENT"
+    } as any
+  },
+  {
+    id: "m2",
+    title: "Product Designer (UI/UX)",
+    subtitle: "VNG Corporation",
+    score: 95,
+    tags: ["Figma", "Design System", "Mobile"],
+    type: "JOB",
+    raw: {
+      jobPostingId: "m2",
+      title: "Product Designer (UI/UX)",
+      company: { companyName: "VNG Corporation", logo: "/logos/workly-gau-logo-2.png" },
+      locationCity: "H? Ch� Minh",
+      salaryMin: 20000000,
+      salaryMax: 40000000,
+      currency: "VND",
+      createdAt: new Date().toISOString(),
+      jobTier: "PROFESSIONAL"
+    } as any
+  }
+];
 
 
-  const title = isCandidate ? "Việc làm Phù hợp nhất" : "Ứng viên Tiềm năng nhất";
-  const subtitle = isCandidate ? "Dựa trên kỹ năng trong CV của bạn." : "Phù hợp với các vị trí bạn đang tuyển.";
-  const linkLabel = isCandidate ? "Xem tất cả đề xuất" : "Quản lý tuyển dụng";
+  if (!isAuthenticated) return null;
+
+  const title = isCandidate ? "Vi?c l�m Ph� h?p nh?t" : "?ng vi�n Ti?m nang nh?t";
+  const subtitle = isCandidate ? "D?a tr�n k? nang trong CV c?a b?n." : "Ph� h?p v?i c�c v? tr� b?n dang tuy?n.";
+  const linkLabel = isCandidate ? "Xem t?t c? d? xu?t" : "Qu?n l� tuy?n d?ng";
   const linkHref = isCandidate ? "/profile/jobs/matching" : "/recruiter/dashboard";
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-6 py-20 bg-white border-y border-slate-50">
+    <section className="w-full max-w-6xl mx-auto px-6 py-20 bg-white border-y border-slate-50">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12 border-l-4 border-mariner pl-6">
         <div className="space-y-3">
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#111827] tracking-tight leading-tight uppercase">
@@ -143,7 +196,7 @@ export function MatchingSection() {
                         href={`/recruiter/candidates/${item.id}`}
                         className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors shadow-lg shadow-blue-100"
                       >
-                        Xem hồ sơ <ArrowRight className="w-3 h-3" />
+                        Xem h? so <ArrowRight className="w-3 h-3" />
                       </Link>
                     </div>
                   </div>
@@ -157,13 +210,13 @@ export function MatchingSection() {
               <Search className="text-slate-300 w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-slate-800">Chưa tìm thấy dữ liệu phù hợp</h3>
+              <h3 className="text-xl font-bold text-slate-800">Chua t�m th?y d? li?u ph� h?p</h3>
               <p className="text-slate-500 max-w-sm mx-auto">
-                {isCandidate ? "Hãy đảm bảo bạn đã thiết lập CV mặc định." : "Hãy đăng thêm Job để nhận đề xuất ứng viên."}
+                {isCandidate ? "H�y d?m b?o b?n d� thi?t l?p CV m?c d?nh." : "H�y dang th�m Job d? nh?n d? xu?t ?ng vi�n."}
               </p>
             </div>
             <Link href={isCandidate ? "/profile/cv-management" : "/recruiter/job-postings/create"} className="text-blue-600 font-bold hover:underline">
-              {isCandidate ? "Cập nhật CV ngay" : "Tạo Job ngay"} &rarr;
+              {isCandidate ? "C?p nh?t CV ngay" : "T?o Job ngay"} &rarr;
             </Link>
           </div>
         )}

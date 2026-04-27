@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, ShieldCheck } from 'lucide-react';
-import { JobStatus, PostType, AdminFilterJobPostingDto } from '@/lib/admin-api';
+import { JobStatus, AdminFilterJobPostingDto } from '@/lib/admin-api';
 
 interface JobFiltersProps {
   filters: AdminFilterJobPostingDto;
@@ -32,11 +32,6 @@ export default function JobFilters({ filters, setFilters }: JobFiltersProps) {
         <option value={JobStatus.APPROVED}>Đã duyệt</option>
         <option value={JobStatus.REJECTED}>Đã từ chối</option>
       </select>
-
-
-
-
-
       <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-xl">
         <ShieldCheck className="w-4 h-4 text-slate-400" />
         <span className="text-xs font-semibold text-slate-500">Min Score:</span>

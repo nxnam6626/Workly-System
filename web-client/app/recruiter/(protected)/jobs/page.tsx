@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Plus, Search, Edit, Lock, Sparkles, Users, BarChart, RefreshCw, AlertTriangle, Bot } from 'lucide-react';
+import { Briefcase, Plus, Search, Edit, Lock, Sparkles, Users, BarChart, RefreshCw, AlertTriangle, Bot, Zap } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -70,7 +70,7 @@ export default function JobsManagementPage() {
       .catch(() => setPlanType(null));
   }, [accessToken]);
 
-  const fetchJobsRef = useRef<() => void>();
+  const fetchJobsRef = useRef<() => void>(undefined);
   useEffect(() => {
     fetchJobsRef.current = fetchJobs;
   });
@@ -368,6 +368,38 @@ export default function JobsManagementPage() {
                               </div>
                             </div>
                           </details>
+                        )}
+
+                        {/* AI Moderation Reason for Rejected Jobs */}
+                        {job.status === 'REJECTED' && job.moderationFeedback && (
+                          <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-xl w-full shadow-sm">
+                            <div className="flex items-center gap-1.5 text-red-700 mb-1">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              <span className="text-[10px] font-black uppercase tracking-wider">Lý do từ chối (AI)</span>
+                            </div>
+                            <p className="text-[11px] font-bold text-red-800 leading-relaxed">
+                              {(job.moderationFeedback as any).reason}
+                            </p>
+                            {(job.moderationFeedback as any).feedback && (job.moderationFeedback as any).feedback.length > 0 && (
+                              <ul className="mt-2 space-y-1">
+                                {(job.moderationFeedback as any).feedback.map((f: string, i: number) => (
+                                  <li key={i} className="text-[10px] text-red-600 flex items-start gap-1">
+                                    <Zap className="w-3 h-3 text-red-400 shrink-0 mt-0.5" />
+                                    {f}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            <div className="mt-2 pt-2 border-t border-red-200/50 flex justify-between items-center">
+                              <span className="text-[9px] font-black text-red-400 uppercase">System Moderation</span>
+                              <Link 
+                                href={`/recruiter/post-job?jobId=${job.jobPostingId}`}
+                                className="text-[10px] font-bold text-red-700 hover:underline flex items-center gap-1"
+                              >
+                                <Edit className="w-3 h-3" /> Sửa lại tin
+                              </Link>
+                            </div>
+                          </div>
                         )}
                       </div>
                     </td>

@@ -161,8 +161,12 @@ export class CandidatesController {
   @Get('recommended-jobs')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CANDIDATE)
-  getRecommendedJobs(@CurrentUser('userId') userId: string) {
-    return this.candidatesService.getRecommendedJobs(userId);
+  getRecommendedJobs(
+    @CurrentUser('userId') userId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.candidatesService.getRecommendedJobs(userId, page, limit);
   }
 
   @Get()

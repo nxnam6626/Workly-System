@@ -1,8 +1,20 @@
 "use client";
 
-import { Search, MapPin, X, Briefcase, LayoutGrid } from "lucide-react";
-import { motion, Variants } from "framer-motion";
-import { LOCATIONS, HOT_KEYWORDS, INDUSTRY_TAG_MAP } from "@/lib/constants";
+import { useState, useRef, useEffect } from "react";
+import { 
+  Search, 
+  MapPin, 
+  Briefcase, 
+  DollarSign, 
+  User, 
+  Star, 
+  GraduationCap, 
+  ChevronDown,
+  LayoutGrid,
+  X 
+} from "lucide-react";
+import IndustryMegaMenu from "../shared/IndustryMegaMenu";
+import LocationMegaMenu from "../shared/LocationMegaMenu";
 
 interface JobSearchHeroProps {
   searchQuery: string;
@@ -11,8 +23,52 @@ interface JobSearchHeroProps {
   setLocationParam: (val: string) => void;
   industryParam: string;
   setIndustryParam: (val: string) => void;
+  jobTypeParam: string;
+  setJobTypeParam: (val: string) => void;
+  experienceParam: string;
+  setExperienceParam: (val: string) => void;
+  salaryMinParam?: number;
+  setSalaryMinParam: (val?: number) => void;
+  salaryMaxParam?: number;
+  setSalaryMaxParam: (val?: number) => void;
+  rankParam: string;
+  setRankParam: (val: string) => void;
+  educationParam: string;
+  setEducationParam: (val: string) => void;
   handleSearch: (e?: React.FormEvent) => void;
   totalJobs: number;
+}
+
+const FILTER_OPTIONS: Record<string, string[]> = {
+  "Loại hình": ["Full-time", "Part-time", "Thời vụ", "Remote"],
+  "Mức lương": ["Dưới 5 triệu", "5 - 7 triệu", "7 - 10 triệu", "10 - 15 triệu", "15 - 20 triệu", "20 - 30 triệu", "30 - 50 triệu", "Trên 50 triệu", "Thoả thuận"],
+  "Chức vụ": ["Thực tập sinh", "Nhân viên/Chuyên viên", "Trưởng nhóm/Trưởng phòng", "Giám đốc/Cấp cao hơn"],
+  "Kinh nghiệm": ["Không yêu cầu", "Dưới 1 năm", "1 - 2 năm", "3 - 5 năm", "Trên 5 năm"],
+  "Học vấn": ["Không yêu cầu", "Trung học", "Trung cấp", "Cao đẳng", "Đại học", "Trên Đại học"]
+};
+
+const JOB_TYPE_MAP: Record<string, string> = {
+  "Full-time": "FULLTIME",
+  "Part-time": "PARTTIME",
+  "Thời vụ": "PARTTIME",
+  "Remote": "FULLTIME"
+};
+
+const SALARY_MAP: Record<string, { min?: number; max?: number }> = {
+  "Dưới 5 triệu": { max: 5000000 },
+  "5 - 7 triệu": { min: 5000000, max: 7000000 },
+  "7 - 10 triệu": { min: 7000000, max: 10000000 },
+  "10 - 15 triệu": { min: 10000000, max: 15000000 },
+  "15 - 20 triệu": { min: 15000000, max: 20000000 },
+  "20 - 30 triệu": { min: 20000000, max: 30000000 },
+  "30 - 50 triệu": { min: 30000000, max: 50000000 },
+  "Trên 50 triệu": { min: 50000000 },
+  "Thoả thuận": {}
+};
+
+interface IndustryItem {
+  category: string;
+  subCategories: string[];
 }
 
 export function JobSearchHero({
@@ -22,157 +78,204 @@ export function JobSearchHero({
   setLocationParam,
   industryParam,
   setIndustryParam,
+  jobTypeParam,
+  setJobTypeParam,
+  experienceParam,
+  setExperienceParam,
+  salaryMinParam,
+  setSalaryMinParam,
+  salaryMaxParam,
+  setSalaryMaxParam,
+  rankParam,
+  setRankParam,
+  educationParam,
+  setEducationParam,
   handleSearch,
-  totalJobs,
+  totalJobs
 }: JobSearchHeroProps) {
-  const industries = Object.keys(INDUSTRY_TAG_MAP);
+  const [openFilter, setOpenFilter] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const locationDropdownRef = useRef<HTMLDivElement>(null);
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenFilter(null);
+      }
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node)) {
+        setOpenLocation(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const [openLocation, setOpenLocation] = useState(false);
+
+  const handleSelectFilterValue = (type: string, label: string) => {
+    setOpenFilter(null);
+    if (type === "Loại hình") {
+      setJobTypeParam(JOB_TYPE_MAP[label] || "");
+    } else if (type === "Mức lương") {
+      const range = SALARY_MAP[label];
+      setSalaryMinParam(range?.min);
+      setSalaryMaxParam(range?.max);
+    } else if (type === "Kinh nghiệm") {
+      setExperienceParam(label === "Không yêu cầu" ? "" : label);
+    } else if (type === "Chức vụ") {
+      setRankParam(label);
+    } else if (type === "Học vấn") {
+      setEducationParam(label === "Không yêu cầu" ? "" : label);
+    }
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut",
-      },
-    },
+  const handleSelectIndustry = (val: string) => {
+    setIndustryParam(val);
+    setOpenFilter(null);
+    handleSearch();
   };
+
+  const filterButtons = [
+    { label: "Ngành nghề", icon: <LayoutGrid className="w-4 h-4" /> },
+    { label: "Loại hình", icon: <Briefcase className="w-4 h-4" /> },
+    { label: "Mức lương", icon: <DollarSign className="w-4 h-4" /> },
+    { label: "Chức vụ", icon: <User className="w-4 h-4" /> },
+    { label: "Kinh nghiệm", icon: <Star className="w-4 h-4" /> },
+    { label: "Học vấn", icon: <GraduationCap className="w-4 h-4" /> },
+  ];
+
+  const getJobTypeLabel = (val: string) => Object.keys(JOB_TYPE_MAP).find(k => JOB_TYPE_MAP[k] === val) || val;
 
   return (
-    <div className="bg-[#f8fafc] pt-24 pb-16 border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-6">
-        
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center text-center"
-        >
-          {/* Headline & Stats */}
-          <motion.div variants={itemVariants} className="max-w-3xl mb-12">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 mb-5 tracking-tight leading-[1.2]">
-              Tìm Kiếm <span className="text-blue-600">Cơ Hội Nghề Nghiệp</span> Mới
-            </h1>
-            <p className="text-slate-500 text-base md:text-lg font-medium leading-relaxed max-w-2xl mx-auto">
-              Hơn <span className="text-slate-900 font-bold">{totalJobs.toLocaleString()}+</span> tin tuyển dụng chất lượng cao từ các doanh nghiệp hàng đầu đang chờ bạn khám phá.
-            </p>
-          </motion.div>
-
-          {/* Master Search Card */}
-          <motion.div 
-            variants={itemVariants} 
-            className="w-full max-w-5xl"
+    <div className="w-full bg-[#f8fafc] py-4 border-b border-slate-100 relative z-40">
+      <div className="max-w-6xl mx-auto px-4 lg:px-6">
+        <div className="bg-[#d7ecf7] rounded-[16px] p-2 shadow-sm border border-blue-50 relative">
+          <form
+            onSubmit={handleSearch}
+            className="bg-white rounded-xl p-1 flex flex-col md:flex-row items-stretch gap-1 mb-2 shadow-md"
           >
-            <form
-              onSubmit={handleSearch}
-              className="bg-white rounded-2xl border border-slate-200 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col md:flex-row items-stretch md:items-center gap-1.5 transition-all duration-300 hover:shadow-[0_25px_60px_rgba(0,0,0,0.1)]"
-            >
-              {/* Keyword Group */}
-              <div className="flex-[1.8] flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 rounded-xl transition-colors group">
-                <Search className="w-5 h-5 text-blue-500 shrink-0" />
-                <div className="flex-1 text-left min-w-0">
-                  <span className="block text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-1">Bạn muốn tìm gì?</span>
-                  <input
-                    type="text"
-                    placeholder="Chức danh, kỹ năng, công ty..."
-                    className="w-full bg-transparent outline-none text-slate-900 font-bold placeholder:text-slate-400 text-[15px]"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery("")} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
-                    <X className="w-4 h-4 text-slate-400" />
+            <div className="flex-[1.5] flex items-center gap-2.5 px-4 py-2.5 group">
+              <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Từ khóa:</span>
+              <input
+                type="text"
+                placeholder="Việc, công ty, ngành nghề..."
+                className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="hidden md:block w-px h-8 bg-slate-100 self-center" />
+            <div className="flex-1 flex flex-col md:flex-row items-stretch gap-1 relative" ref={locationDropdownRef}>
+              <div 
+                className="flex-1 flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                onClick={() => setOpenLocation(!openLocation)}
+              >
+                <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
+                <input
+                  type="text"
+                  placeholder="Tỉnh/thành, quận..."
+                  className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300 pointer-events-none"
+                  value={locationParam}
+                  readOnly
+                />
+                {locationParam && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setLocationParam(""); }}
+                    className="p-1 hover:bg-slate-200 rounded-full transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-slate-400" />
                   </button>
                 )}
               </div>
 
-              <div className="hidden md:block w-px h-10 bg-slate-100" />
-
-              {/* Industry Group */}
-              <div className="flex-1 flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 rounded-xl transition-colors">
-                <Briefcase className="w-5 h-5 text-slate-400 shrink-0" />
-                <div className="flex-1 text-left min-w-0">
-                  <span className="block text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-1">Ngành nghề</span>
-                  <select
-                    className="w-full outline-none text-slate-900 font-bold text-[15px] bg-transparent cursor-pointer appearance-none truncate pr-4"
-                    value={industryParam}
-                    onChange={(e) => setIndustryParam(e.target.value)}
-                  >
-                    <option value="">Tất cả ngành nghề</option>
-                    {industries.map((ind) => (
-                      <option key={ind} value={ind}>{ind}</option>
-                    ))}
-                  </select>
+              {openLocation && (
+                <div className="absolute top-[calc(100%+8px)] left-0 right-0 md:left-auto md:right-0 md:w-[700px] z-[60]">
+                  <LocationMegaMenu 
+                    onSelect={(val) => { setLocationParam(val); setOpenLocation(false); }}
+                    onClose={() => setOpenLocation(false)}
+                  />
                 </div>
-              </div>
-
-              <div className="hidden md:block w-px h-10 bg-slate-100" />
-
-              {/* Location Group */}
-              <div className="flex-1 flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 rounded-xl transition-colors md:mr-1">
-                <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
-                <div className="flex-1 text-left min-w-0">
-                  <span className="block text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-1">Địa điểm</span>
-                  <select
-                    className="w-full outline-none text-slate-900 font-bold text-[15px] bg-transparent cursor-pointer appearance-none"
-                    value={locationParam}
-                    onChange={(e) => setLocationParam(e.target.value)}
-                  >
-                    <option value="">Toàn quốc</option>
-                    {LOCATIONS.map((l: string) => (
-                      <option key={l} value={l}>{l}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <button
-                type="submit"
-                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-[0.98] flex items-center justify-center gap-2.5 min-w-[160px]"
-              >
-                <Search className="w-5 h-5 stroke-[2.5px]" />
-                Tìm kiếm
-              </button>
-            </form>
-          </motion.div>
-
-          {/* Quick Keywords */}
-          <motion.div 
-            variants={itemVariants}
-            className="flex items-center gap-3 mt-10 flex-wrap justify-center"
-          >
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              Gợi ý từ khóa:
+              )}
             </div>
-            {HOT_KEYWORDS.map((kw) => (
-              <button
-                key={kw}
-                onClick={() => {
-                  setSearchQuery(kw);
-                  setTimeout(() => handleSearch(), 50);
-                }}
-                className="px-4 py-2 bg-white hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-xs font-bold rounded-xl transition-all border border-slate-200 hover:border-blue-200 shadow-sm"
-              >
-                {kw}
-              </button>
-            ))}
-          </motion.div>
-        </motion.div>
+            <button
+              type="submit"
+              className="px-8 py-2 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[14px] rounded-lg transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-lg shadow-blue-900/10"
+            >
+              TÌM VIỆC
+            </button>
+          </form>
+
+
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-1.5 px-0.5">
+            {filterButtons.map((btn) => {
+              const getSelectedValue = () => {
+                if (btn.label === "Ngành nghề") return industryParam;
+                if (btn.label === "Loại hình") return getJobTypeLabel(jobTypeParam);
+                if (btn.label === "Mức lương") {
+                  if (salaryMinParam && salaryMaxParam) return `${(salaryMinParam / 1000000).toFixed(0)}-${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
+                  if (salaryMinParam) return `Trên ${(salaryMinParam / 1000000).toFixed(0)} triệu`;
+                  if (salaryMaxParam) return `Dưới ${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
+                  return null;
+                }
+                if (btn.label === "Chức vụ") return rankParam;
+                if (btn.label === "Kinh nghiệm") return experienceParam;
+                if (btn.label === "Học vấn") return educationParam;
+                return null;
+              };
+
+              const displayValue = getSelectedValue() || btn.label;
+              const hasValue = !!getSelectedValue();
+
+              return (
+                <div key={btn.label} className="relative w-full">
+                  <button
+                    onClick={() => setOpenFilter(openFilter === btn.label ? null : btn.label)}
+                    className={`w-full flex items-center justify-between gap-1 px-4 py-2.5 rounded-full text-[13px] font-bold transition-all group shadow-sm active:scale-[0.97] border border-transparent ${
+                      openFilter === btn.label 
+                        ? "bg-white text-[#1e60ad] border-blue-200 shadow-md" 
+                        : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 transition-opacity ${openFilter === btn.label ? "" : "opacity-90 group-hover:opacity-100"}`}>
+                        {btn.icon && <span className="scale-95">{btn.icon}</span>}
+                      </span>
+                      <span className="truncate">{displayValue}</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 shrink-0 transition-all ${openFilter === btn.label ? "rotate-180" : "opacity-70 group-hover:translate-y-0.5"}`} />
+                  </button>
+                {openFilter === btn.label && btn.label !== "Ngành nghề" && (
+                  <div className="absolute top-[calc(100%+8px)] left-0 min-w-[200px] bg-white rounded-xl shadow-2xl border border-slate-100 z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {FILTER_OPTIONS[btn.label]?.map((val) => (
+                      <button key={val} onClick={() => handleSelectFilterValue(btn.label, val)} className="w-full text-left px-5 py-2.5 text-[13.5px] font-medium text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad] transition-all">
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                </div>
+              );
+            })}
+          </div>
+
+          {openFilter === "Ngành nghề" && (
+            <div ref={dropdownRef} className="absolute top-[calc(100%+8px)] left-4 right-4 z-50">
+              <IndustryMegaMenu 
+                height="360px"
+                onSelect={handleSelectIndustry}
+                onClose={() => setOpenFilter(null)}
+              />
+            </div>
+          )}
+        </div>
       </div>
+
+      <style jsx global>{`
+          .custom-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+          .custom-sidebar-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+          .custom-sidebar-scroll::-webkit-scrollbar-thumb { background: #1e60ad; border-radius: 10px; }
+          .custom-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #164a8a; }
+        `}</style>
     </div>
   );
 }

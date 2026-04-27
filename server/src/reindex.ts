@@ -24,7 +24,6 @@ async function bootstrap() {
       title: job.title,
       companyId: job.companyId,
       companyName: job.company.companyName,
-      originalUrl: job.originalUrl,
       locationCity: job.locationCity || '',
       jobType: job.jobType || '',
       salaryMin: job.salaryMin ? Number(job.salaryMin) : undefined,

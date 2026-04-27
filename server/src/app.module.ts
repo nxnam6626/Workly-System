@@ -28,7 +28,7 @@ import { WalletsModule } from './modules/wallets/wallets.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { SupportModule } from './modules/support/support.module';
 import { MatchingEngineModule } from './modules/matching-engine/matching-engine.module';
-import { AiLabModule } from './modules/ai-lab/ai-lab.module';
+import { DebugModule } from './modules/debug/debug.module';
 
 @Module({
   imports: [
@@ -64,7 +64,7 @@ import { AiLabModule } from './modules/ai-lab/ai-lab.module';
     SubscriptionsModule,
     SupportModule,
     MatchingEngineModule,
-    AiLabModule,
+    DebugModule,
   ],
   controllers: [AppController],
   providers: [AppService],

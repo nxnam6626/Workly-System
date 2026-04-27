@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { Role } from '../../auth/decorators/roles.decorator';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '@/generated/prisma';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -25,7 +25,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 @Roles(Role.ADMIN)
 @Controller('admin/job-postings')
 export class AdminJobPostingsController {
-  constructor(private readonly jobPostingsService: JobPostingsService) {}
+  constructor(private readonly jobPostingsService: JobPostingsService) { }
 
   @Get()
   @ApiOperation({
@@ -53,11 +53,16 @@ export class AdminJobPostingsController {
 
   @Patch(':id/reject')
   @ApiOperation({ summary: 'Từ chối một tin tuyển dụng' })
-  reject(@Param('id') id: string, @CurrentUser('userId') adminId: string) {
+  reject(
+    @Param('id') id: string,
+    @CurrentUser('userId') adminId: string,
+    @Body('reason') reason?: string,
+  ) {
     return this.jobPostingsService.updateStatus(
       id,
       JobStatus.REJECTED,
       adminId,
+      reason,
     );
   }
 

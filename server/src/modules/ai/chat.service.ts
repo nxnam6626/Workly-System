@@ -258,7 +258,7 @@ Trả về:
 
        if (message.toLowerCase().includes('thực tập')) {
            title = 'Thực tập sinh';
-           jobType = 'INTERNSHIP';
+           jobType = 'REMOTE';
        } else if (message.toLowerCase().includes('part time') || message.toLowerCase().includes('bán thời gian')) {
            jobType = 'PARTTIME';
        }
