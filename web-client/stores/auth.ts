@@ -16,6 +16,7 @@ interface User {
     university?: string;
     major?: string;
     gpa?: number;
+    isOpenToWork?: boolean;
     skills?: { skillId: string; skillName: string }[];
   };
   recruiter?: any;

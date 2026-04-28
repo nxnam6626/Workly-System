@@ -29,7 +29,7 @@ export function StepProgress({ currentStep }: StepProgressProps) {
   const currentIndex = STEPS.findIndex(s => s.id === currentStep);
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8 px-4">
+    <div className={cn("w-full transition-all duration-500 mx-auto mb-8 px-4", currentStep === 'review' ? 'max-w-4xl' : 'max-w-2xl')}>
       <div className="relative flex items-start justify-between">
         {/* Background Line */}
         <div className="absolute top-[1.25rem] sm:top-[1.5rem] left-[10%] right-[10%] h-0.5 bg-slate-200 -z-10 rounded-full" />

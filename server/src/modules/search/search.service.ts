@@ -49,6 +49,7 @@ export class SearchService implements OnModuleInit {
               refreshedAt: { type: 'date' },
               companyId: { type: 'keyword' },
               jobTier: { type: 'keyword' },
+              jobLevel: { type: 'keyword' },
               originalUrl: { type: 'keyword' },
             },
           },
@@ -100,6 +101,7 @@ export class SearchService implements OnModuleInit {
     createdAt?: Date | string;
     refreshedAt?: Date | string;
     jobTier?: string;
+    jobLevel?: string;
   }) {
     try {
       await this.client.index({
@@ -121,6 +123,7 @@ export class SearchService implements OnModuleInit {
           createdAt: job.createdAt || new Date(),
           refreshedAt: job.refreshedAt || new Date(),
           jobTier: job.jobTier || 'BASIC',
+          jobLevel: job.jobLevel || 'STAFF',
         },
       });
       console.log(`[SearchService] Indexed job ${job.id}`);
@@ -148,6 +151,7 @@ export class SearchService implements OnModuleInit {
     search?: string;
     location?: string;
     jobTier?: string;
+    jobLevel?: string;
     jobType?: string;
     industry?: string | string[];
     experience?: string;
@@ -163,6 +167,7 @@ export class SearchService implements OnModuleInit {
       search,
       location,
       jobTier,
+      jobLevel,
       jobType,
       industry,
       experience,
@@ -252,6 +257,10 @@ export class SearchService implements OnModuleInit {
 
     if (jobTier) {
       filter.push({ term: { jobTier } });
+    }
+
+    if (jobLevel) {
+      filter.push({ term: { jobLevel } });
     }
 
     if (jobType) {

@@ -15,6 +15,7 @@ export default function ImportCvPage() {
     isLoading,
     isSaving,
     parsedData,
+    currentProfile,
     handleUpload,
     handleSaveProfile,
     handleManualEntry,
@@ -33,7 +34,7 @@ export default function ImportCvPage() {
         <StepProgress currentStep={step} />
 
         {/* Main content area */}
-        <div className="w-full max-w-3xl">
+        <div className={`w-full transition-all duration-500 ${step === 'review' ? 'max-w-6xl' : 'max-w-3xl'}`}>
           <AnimatePresence mode="wait">
             {/* STEP 1: Upload */}
             {step === 'upload' && (
@@ -59,6 +60,7 @@ export default function ImportCvPage() {
               >
                 <CvReviewForm
                   initialData={parsedData}
+                  currentProfile={currentProfile}
                   onSubmit={handleSaveProfile}
                   isSaving={isSaving}
                 />

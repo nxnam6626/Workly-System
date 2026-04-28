@@ -4,15 +4,18 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { profileApi } from '@/lib/profile-api';
+import { useAuthStore } from '@/stores/auth';
 
 export type Step = 'upload' | 'review' | 'success';
 
 export function useCvImport() {
   const router = useRouter();
+  const { updateUser } = useAuthStore();
   const [step, setStep] = useState<Step>('upload');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
+  const [currentProfile, setCurrentProfile] = useState<any>(null);
 
   const handleUpload = async (file: File) => {
     setIsLoading(true);
@@ -20,6 +23,13 @@ export function useCvImport() {
       const response = await profileApi.extractCv(file);
       if (response && response.parsedData) {
         setParsedData(response.parsedData);
+        // Fetch current profile for comparison
+        try {
+          const profile = await profileApi.getMe();
+          setCurrentProfile(profile.candidate);
+        } catch (e) {
+          console.warn('Could not fetch profile for comparison', e);
+        }
         setStep('review');
         
         if (response.parsedData.aiWarning) {
@@ -82,10 +92,19 @@ export function useCvImport() {
         university: data.education?.[0]?.school,
         major: data.education?.[0]?.major,
         gpa: data.gpa,
+        certifications: data.certifications,
       });
 
       setStep('success');
       toast.success('Hồ sơ của bạn đã được cập nhật!');
+      
+      // Update global auth store to sync name in header immediately
+      try {
+        const fullProfile = await profileApi.getMe();
+        updateUser(fullProfile);
+      } catch (e) {
+        console.warn('Failed to sync auth store after profile update', e);
+      }
       
       setTimeout(() => {
         router.push('/profile');
@@ -105,6 +124,7 @@ export function useCvImport() {
     isLoading,
     isSaving,
     parsedData,
+    currentProfile,
     handleUpload,
     handleSaveProfile,
     handleManualEntry,

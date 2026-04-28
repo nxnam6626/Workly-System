@@ -1,15 +1,38 @@
 import React from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import { User, Phone, Briefcase, GraduationCap, Trash2 } from 'lucide-react';
+import { User, Phone, Briefcase, GraduationCap, Trash2, AlertCircle } from 'lucide-react';
 import { FormValues } from '@/lib/schemas/cv-onboarding';
 
-export function BasicInfoSection() {
+interface BasicInfoSectionProps {
+  currentProfile?: any;
+}
+
+export function BasicInfoSection({ currentProfile }: BasicInfoSectionProps) {
   const { register, control, formState: { errors } } = useFormContext<FormValues>();
 
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({
     control,
     name: 'education',
   });
+  
+  const { watch } = useFormContext<FormValues>();
+  const watchedName = watch('fullName');
+  const watchedPhone = watch('phone');
+  const watchedGpa = watch('gpa');
+  const watchedExp = watch('totalYearsExp');
+
+  const DiffIndicator = ({ field, current, newValue }: { field: string, current: any, newValue: any }) => {
+    if (!current || !newValue) return null;
+    const isDifferent = String(current).trim().toLowerCase() !== String(newValue).trim().toLowerCase();
+    if (!isDifferent) return null;
+
+    return (
+      <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100 animate-in fade-in slide-in-from-top-1">
+        <AlertCircle size={10} />
+        <span>Khác với hồ sơ: <b>{current}</b></span>
+      </div>
+    );
+  };
 
   return (
     <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
@@ -32,6 +55,7 @@ export function BasicInfoSection() {
             <User size={16} className="absolute left-3 top-2 text-gray-400" />
           </div>
           {errors.fullName && <p className="text-[10px] text-red-500 italic ml-1">{errors.fullName.message}</p>}
+          <DiffIndicator field="fullName" current={currentProfile?.fullName} newValue={watchedName} />
         </div>
 
         <div className="space-y-1">
@@ -45,6 +69,7 @@ export function BasicInfoSection() {
             <Phone size={16} className="absolute left-3 top-2 text-gray-400" />
           </div>
           {errors.phone && <p className="text-[10px] text-red-500 italic ml-1">{errors.phone.message}</p>}
+          <DiffIndicator field="phone" current={currentProfile?.user?.phoneNumber} newValue={watchedPhone} />
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:col-span-2 lg:col-span-2">
@@ -60,6 +85,7 @@ export function BasicInfoSection() {
               />
               <span className="absolute left-3 top-2.5 text-gray-400 font-black text-[10px]">GPA</span>
             </div>
+            <DiffIndicator field="gpa" current={currentProfile?.gpa} newValue={watchedGpa} />
           </div>
 
           <div className="space-y-1">
@@ -73,6 +99,7 @@ export function BasicInfoSection() {
               />
               <Briefcase size={16} className="absolute left-3 top-2 text-gray-400" />
             </div>
+            <DiffIndicator field="totalYearsExp" current={currentProfile?.totalYearsExp} newValue={watchedExp} />
           </div>
         </div>
       </div>

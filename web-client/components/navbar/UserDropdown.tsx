@@ -23,10 +23,10 @@ import { useAuthStore } from '@/stores/auth';
 import Image from 'next/image';
 
 export function UserDropdown() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateUser } = useAuthStore();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isLookingForJob, setIsLookingForJob] = useState(true);
+  const [isLookingForJob, setIsLookingForJob] = useState(user?.candidate?.isOpenToWork ?? true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -39,6 +39,36 @@ export function UserDropdown() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Update local state when user object changes
+  useEffect(() => {
+    if (user?.candidate?.isOpenToWork !== undefined) {
+      setIsLookingForJob(user.candidate.isOpenToWork);
+    }
+  }, [user?.candidate?.isOpenToWork]);
+
+  const handleToggleOpenToWork = async () => {
+    if (!user?.candidate) return;
+    const newValue = !isLookingForJob;
+    const toastId = (await import('react-hot-toast')).default.loading("Đang cập nhật trạng thái...");
+    
+    // Optimistic UI
+    setIsLookingForJob(newValue);
+    
+    try {
+      const { profileApi } = await import('@/lib/profile-api');
+      const updated = await profileApi.updateProfile({
+        fullName: user.candidate.fullName,
+        isOpenToWork: newValue
+      });
+      // Sync global state
+      updateUser({ candidate: updated.candidate });
+      (await import('react-hot-toast')).default.success(newValue ? "Hồ sơ đã công khai!" : "Hồ sơ đã tạm ẩn.", { id: toastId });
+    } catch (error) {
+      setIsLookingForJob(!newValue);
+      (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
+    }
+  };
 
   const handleLogout = async () => {
     setDropdownOpen(false);
@@ -58,7 +88,6 @@ export function UserDropdown() {
   if (isCandidate) {
     navItems.push(
       { icon: <User className="w-5 h-5" />, label: "Quản lý hồ sơ", href: "/profile" },
-      { icon: <Edit3 className="w-5 h-5" />, label: "Cập nhật hồ sơ", href: "/profile/edit" },
       { icon: <ClipboardCheck className="w-5 h-5" />, label: "Việc làm đã ứng tuyển", href: "/profile/jobs/applied" },
       { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
       { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
@@ -103,8 +132,8 @@ export function UserDropdown() {
         </div>
         <div className="flex flex-col items-start text-left">
           <span className="text-[14px] font-bold text-slate-800 leading-tight">{displayName}</span>
-          <span className={`text-[12px] font-medium ${isCandidate ? 'text-[#22c55e]' : 'text-indigo-500'}`}>
-            {isCandidate ? 'Đang tìm việc' : (isAdmin ? 'Quản trị viên' : 'Nhà tuyển dụng')}
+          <span className={`text-[12px] font-medium ${isCandidate ? (isLookingForJob ? 'text-[#22c55e]' : 'text-slate-400') : 'text-indigo-500'}`}>
+            {isCandidate ? (isLookingForJob ? 'Đang tìm việc' : 'Đang tạm ẩn') : (isAdmin ? 'Quản trị viên' : 'Nhà tuyển dụng')}
           </span>
         </div>
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -116,9 +145,14 @@ export function UserDropdown() {
             {/* Toggle Section */}
             {isCandidate && (
               <div className="flex items-center justify-between mb-5 px-1">
-                <span className="text-[15px] font-bold text-[#22c55e]">Đang tìm việc</span>
+                <span className={`text-[15px] font-bold ${isLookingForJob ? 'text-[#22c55e]' : 'text-slate-400'}`}>
+                  {isLookingForJob ? 'Đang tìm việc' : 'Tạm ẩn hồ sơ'}
+                </span>
                 <button
-                  onClick={() => setIsLookingForJob(!isLookingForJob)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleOpenToWork();
+                  }}
                   className={`w-12 h-6 rounded-full transition-all duration-300 relative flex items-center ${isLookingForJob ? 'bg-[#22c55e]' : 'bg-slate-200'
                     }`}
                 >

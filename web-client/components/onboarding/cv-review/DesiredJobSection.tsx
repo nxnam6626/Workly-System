@@ -1,10 +1,30 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Target } from 'lucide-react';
+import { Target, AlertCircle } from 'lucide-react';
 import { FormValues } from '@/lib/schemas/cv-onboarding';
 
-export function DesiredJobSection() {
-  const { register } = useFormContext<FormValues>();
+interface DesiredJobSectionProps {
+  currentProfile?: any;
+}
+
+export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
+  const { register, watch } = useFormContext<FormValues>();
+
+  const watchedTitle = watch('desiredJob.jobTitle');
+  const watchedLocation = watch('desiredJob.location');
+
+  const DiffIndicator = ({ current, newValue }: { current: any, newValue: any }) => {
+    if (!current || !newValue) return null;
+    const isDifferent = String(current).trim().toLowerCase() !== String(newValue).trim().toLowerCase();
+    if (!isDifferent) return null;
+
+    return (
+      <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100 animate-in fade-in slide-in-from-top-1">
+        <AlertCircle size={10} />
+        <span>Khác hồ sơ: <b>{current}</b></span>
+      </div>
+    );
+  };
 
   return (
     <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
@@ -23,6 +43,7 @@ export function DesiredJobSection() {
             className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none"
             placeholder="VD: Frontend Developer, BA..."
           />
+          <DiffIndicator current={currentProfile?.desiredJob?.jobTitle} newValue={watchedTitle} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -71,6 +92,7 @@ export function DesiredJobSection() {
               className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none"
               placeholder="VD: TP. Hồ Chí Minh..."
             />
+            <DiffIndicator current={currentProfile?.desiredJob?.location} newValue={watchedLocation} />
           </div>
         </div>
       </div>

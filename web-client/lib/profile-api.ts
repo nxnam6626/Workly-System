@@ -37,6 +37,7 @@ export interface CandidateProfile {
       createdAt: string;
       parsedData: any;
     }[];
+    certifications: { certificationId: string; name: string }[];
     applications: any[];
   };
 }
@@ -80,6 +81,7 @@ export interface UpdateProfileDto {
   languages?: { name: string; level: string }[];
   softSkills?: string[];
   interests?: string[];
+  certifications?: string[];
 }
 
 export interface ChangePasswordDto {

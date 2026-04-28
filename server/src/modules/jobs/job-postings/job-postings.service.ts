@@ -783,6 +783,7 @@ export class JobPostingsService {
       location,
       jobType,
       jobTier,
+      jobLevel,
       page = 1,
       limit = 10,
       industry,
@@ -800,6 +801,7 @@ export class JobPostingsService {
         search,
         location,
         jobTier,
+        jobLevel,
         jobType,
         industry,
         experience,
@@ -836,6 +838,7 @@ export class JobPostingsService {
       status: 'APPROVED',
     };
     if (jobTier) whereCondition.jobTier = jobTier;
+    if (jobLevel) whereCondition.jobLevel = jobLevel as any;
 
     // Apply fuzzy location filter on top of ES results to handle alias mismatches
     const locationCond = this.buildLocationCondition(location);
@@ -902,7 +905,7 @@ export class JobPostingsService {
 
   // Backup method using Prisma directly
   private async findAllPrisma(query: FilterJobPostingDto, userId?: string) {
-    const { search, location, jobType, jobTier, page = 1, limit = 10 } = query;
+    const { search, location, jobType, jobTier, jobLevel, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -945,6 +948,7 @@ export class JobPostingsService {
 
     if (jobType) where.jobType = jobType;
     if (jobTier) where.jobTier = jobTier;
+    if (jobLevel) where.jobLevel = jobLevel;
 
     // Search filter
     if (search) {
@@ -1842,6 +1846,7 @@ export class JobPostingsService {
       createdAt: job.createdAt,
       refreshedAt: job.refreshedAt,
       jobTier: job.jobTier,
+      jobLevel: job.jobLevel,
       status: job.status,
       industry: (job.structuredRequirements as any)?.categories?.length > 0 ? (job.structuredRequirements as any).categories : ['Đa lĩnh vực / Khác'],
     });

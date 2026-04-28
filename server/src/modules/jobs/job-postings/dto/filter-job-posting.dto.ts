@@ -28,6 +28,10 @@ export class FilterJobPostingDto {
 
   @IsOptional()
   @IsString()
+  jobLevel?: string;
+
+  @IsOptional()
+  @IsString()
   industry?: string;
 
   @IsOptional()

@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
+import { profileApi } from "@/lib/profile-api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const cvSchema = z.object({
@@ -37,6 +38,8 @@ const cvSchema = z.object({
   totalYearsExp: z.number().min(0).or(z.string()),
   summary: z.string().optional(),
   desiredJob: z.any().optional(),
+  certifications: z.array(z.string()).optional(),
+  gpa: z.number().min(0).max(4).optional().or(z.string()),
 });
 
 type CVFormData = z.infer<typeof cvSchema>;
@@ -52,9 +55,10 @@ interface CVReviewModalProps {
 }
 
 export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, cvId, onSuccess }: CVReviewModalProps) {
-  const { register, control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<CVFormData>({
+  const { register, control, handleSubmit, setValue, reset, watch, formState: { errors, isSubmitting } } = useForm<CVFormData>({
     resolver: zodResolver(cvSchema),
     defaultValues: {
+// ... (omitted lines for brevity, but I need to include them in the replacement)
       fullName: initialData?.personal_info?.full_name || initialData?.fullName || "",
       email: initialData?.personal_info?.email || initialData?.email || "",
       phone: initialData?.personal_info?.phone || initialData?.phone || "",
@@ -79,6 +83,7 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
       summary: initialData?.summary || "",
       projects: initialData?.projects || [],
       desiredJob: initialData?.desired_job || initialData?.desiredJob || {},
+      certifications: initialData?.certifications || [],
     },
   });
 
@@ -136,6 +141,7 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
         summary: initialData?.summary || "",
         projects: initialData?.projects || [],
         desiredJob: initialData?.desired_job || initialData?.desiredJob || {},
+        certifications: initialData?.certifications || [],
       });
       setSkills(normalizedSkills);
     }
@@ -144,7 +150,37 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
   if (!isOpen) return null;
 
   const onFormSubmit = async (data: CVFormData) => {
+    const toastId = toast.loading("Đang đồng bộ hồ sơ...");
     try {
+      // 1. Cập nhật hồ sơ chính (Candidate Profile)
+      // Chú ý: Mapping lại dữ liệu cho khớp với API hồ sơ
+      await profileApi.updateProfile({
+        fullName: data.fullName,
+        phone: data.phone,
+        summary: data.summary,
+        desiredJob: data.desiredJob,
+        skills: skills.map((s: any) => ({
+          skillName: typeof s === "string" ? s : s.skillName,
+          level: (typeof s === "string" ? "BEGINNER" : s.level) || "BEGINNER",
+        })),
+        experiences: data.experience.map((exp: any) => ({
+          company: exp.company,
+          role: exp.role,
+          duration: exp.duration || `${exp.years || 0} năm`,
+          description: exp.description || "",
+        })),
+        projects: data.projects.map((p: any) => ({
+          projectName: p.projectName,
+          role: p.role || "",
+          description: p.description || "",
+          technology: p.technology || "",
+        })),
+        university: data.education?.[0]?.school,
+        major: data.education?.[0]?.major,
+        gpa: Number(data.gpa || 0),
+      });
+
+      // 2. Cập nhật bản ghi CV (Lưu lại dữ liệu đã chỉnh sửa vào CV)
       let response;
       if (cvId) {
         response = await api.patch(`/candidates/cv/${cvId}`, {
@@ -161,11 +197,12 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
           parsedData: { ...data, skills },
         });
       }
-      toast.success("Hồ sơ đã được xác nhận và cập nhật thành công!");
+
+      toast.success("Hồ sơ đã được xác nhận và cập nhật thành công!", { id: toastId });
       onSuccess(response.data);
       onClose();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Lỗi khi lưu hồ sơ.");
+      toast.error(error.response?.data?.message || "Lỗi khi lưu hồ sơ.", { id: toastId });
     }
   };
 
@@ -449,6 +486,35 @@ export function CVReviewModal({ isOpen, onClose, initialData, fileUrl, cvTitle, 
                 </AnimatePresence>
               </div>
             </div>
+
+            {/* Phase 5: Certifications */}
+            {watch("certifications") && watch("certifications")!.length > 0 && (
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100">
+                    <Award className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Chứng chỉ & Bằng cấp</h3>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {watch("certifications")?.map((cert: string, index: number) => (
+                    <div key={index} className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 group">
+                      <span className="text-sm font-bold text-slate-700">{cert}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const current = watch("certifications") || [];
+                          setValue("certifications", current.filter((_, i) => i !== index));
+                        }}
+                        className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </form>
         </div>
 

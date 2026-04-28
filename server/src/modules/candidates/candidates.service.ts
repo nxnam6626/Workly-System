@@ -28,6 +28,29 @@ export class CandidatesService {
 
   private readonly logger = new Logger(CandidatesService.name);
 
+  private mapToSkillLevel(level: string): any {
+    if (!level) return 'BEGINNER';
+    const normalized = level.toUpperCase().trim();
+    
+    // Exact matches
+    if (['BEGINNER', 'INTERMEDIATE', 'ADVANCED'].includes(normalized)) {
+      return normalized;
+    }
+
+    // Vietnamese mapping
+    if (normalized.includes('CƠ BẢN') || normalized.includes('MỚI') || normalized === 'TỐT' || normalized === 'KHÁ') {
+      return 'BEGINNER';
+    }
+    if (normalized.includes('TRUNG CẤP') || normalized.includes('KHOẢNG') || normalized.includes('THÀNH THẠO')) {
+      return 'INTERMEDIATE';
+    }
+    if (normalized.includes('CAO CẤP') || normalized.includes('CHUYÊN GIA') || normalized.includes('XUẤT SẮC')) {
+      return 'ADVANCED';
+    }
+
+    return 'BEGINNER'; // Default fallback
+  }
+
   async findAll(query: any, recruiterUserId?: string) {
     const { skip = 0, take = 50, search, skills, major } = query;
     const where: any = {
@@ -241,7 +264,7 @@ export class CandidatesService {
     if (candidate) {
       const duplicate = await this.findByHash(candidate.candidateId, fileHash);
       if (duplicate) {
-        throw new ConflictException('CV này đã có trong danh sách của bạn.');
+        return duplicate;
       }
     }
 
@@ -354,46 +377,6 @@ export class CandidatesService {
       const isMajorEmpty = !candidate.major;
       const isUniversityEmpty = !candidate.university;
       const isLocationEmpty = !candidate.location;
-      const isSkillsEmpty = !candidate.skills || candidate.skills.length === 0;
-
-      const updateData: any = {};
-      if (isNameEmpty && fullName) updateData.fullName = fullName;
-      if (isPhoneEmpty && personal.phone) updateData.phone = personal.phone;
-      if (isLocationEmpty && personal.location) updateData.location = personal.location;
-      if (!candidate.gpa && personal.gpa) updateData.gpa = personal.gpa;
-      if (!candidate.summary && extractedData.summary) updateData.summary = extractedData.summary;
-      if (!candidate.desiredJob && extractedData.desired_job) updateData.desiredJob = extractedData.desired_job;
-
-      if (isMajorEmpty && extractedData.education?.major) {
-        updateData.major = extractedData.education.major;
-      }
-      if (isUniversityEmpty && extractedData.education?.institution) {
-        updateData.university = extractedData.education.institution;
-      }
-
-      // Mapping Skills
-      if (isSkillsEmpty && extractedData.skills) {
-        const skills: any[] = [];
-        if (extractedData.skills.hard_skills?.length > 0) {
-          skills.push(...extractedData.skills.hard_skills.map(s => ({ ...s, category: 'Hard Skill' })));
-        }
-        if (extractedData.skills.soft_skills?.length > 0) {
-          skills.push(...extractedData.skills.soft_skills.map(s => ({ ...s, category: 'Soft Skill' })));
-        }
-        if (skills.length > 0) updateData.skills = skills;
-      }
-
-      // Certifications
-      if (extractedData.certifications && extractedData.certifications.length > 0) {
-        updateData.certifications = extractedData.certifications;
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        await this.update(candidate.candidateId, updateData).catch((e) =>
-          this.logger.error(`Failed to auto-fill candidate: ${e.message}`),
-        );
-      }
-
       // 6. Cập nhật dữ liệu bóc tách vào bản ghi CV
       return this.updateCv(userId, cv.cvId, {
         parsedData: extractedData,
@@ -474,7 +457,7 @@ export class CandidatesService {
               candidateId,
               skillName: typeof s === 'string' ? s : s.skillName,
               category: typeof s === 'string' ? 'Khác' : s.category || 'Khác',
-              level: typeof s === 'string' ? 'BEGINNER' : s.level || 'BEGINNER',
+              level: typeof s === 'string' ? 'BEGINNER' : this.mapToSkillLevel(s.level),
             })),
           });
         }

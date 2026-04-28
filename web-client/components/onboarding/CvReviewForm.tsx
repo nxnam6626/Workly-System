@@ -17,11 +17,12 @@ import { DesiredJobSection } from './cv-review/DesiredJobSection';
 
 interface CvReviewFormProps {
   initialData: any;
+  currentProfile?: any;
   onSubmit: (data: FormValues) => void;
   isSaving: boolean;
 }
 
-export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, onSubmit: onSubmitProp, isSaving }) => {
+export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, currentProfile, onSubmit: onSubmitProp, isSaving }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'experience'>('profile');
 
   const methods = useForm<FormValues>({
@@ -179,8 +180,8 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, onSubmi
               className="space-y-4"
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <BasicInfoSection />
-                <DesiredJobSection />
+                <BasicInfoSection currentProfile={currentProfile} />
+                <DesiredJobSection currentProfile={currentProfile} />
               </div>
               <SummarySection />
               <SkillsSection />

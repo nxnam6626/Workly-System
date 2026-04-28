@@ -26,6 +26,7 @@ import {
   CircleDot,
   Trash2,
   Camera,
+  Award,
 } from "lucide-react";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
 import api from "@/lib/api";
@@ -96,11 +97,15 @@ export default function ProfileDashboard() {
     setIsOpenToWork(newValue);
     try {
       if (!profile) throw new Error("Profile chưa load");
-      await profileApi.updateProfile({
+      const updated = await profileApi.updateProfile({
         fullName: profile.candidate?.fullName || user?.name || "Người dùng",
         phone: profile.phoneNumber || "",
         isOpenToWork: newValue
       });
+      setProfile(updated);
+      setIsOpenToWork(updated.candidate?.isOpenToWork ?? newValue);
+      // Sync with global auth store
+      updateUser({ candidate: updated.candidate });
       toast.success(newValue ? "Hồ sơ của bạn đã được hiển thị với Nhà tuyển dụng!" : "Đã tắt. Hồ sơ của bạn đang được ẩn khỏi kết quả tìm kiếm.", { id: toastId });
     } catch (error: any) {
       // Revert if error
@@ -322,10 +327,9 @@ export default function ProfileDashboard() {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-2 mt-5 w-full">
-              <Link href="/profile/edit" className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 text-white text-[13px] font-semibold rounded-xl hover:bg-blue-700 transition shadow-sm">
-                <Edit className="w-3.5 h-3.5" /> Cập nhật hồ sơ
-              </Link>
-
+              <button disabled className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-slate-100 text-slate-400 text-[13px] font-semibold rounded-xl cursor-not-allowed">
+                <Edit className="w-3.5 h-3.5" /> Tính năng tạm khóa
+              </button>
             </div>
           </div>
 
@@ -546,9 +550,6 @@ export default function ProfileDashboard() {
             <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <h3 className="text-lg font-bold text-slate-900">Kinh nghiệm làm việc</h3>
-                <Link href="/profile/edit" className="text-blue-600 hover:text-blue-700">
-                  <Edit className="w-4 h-4" />
-                </Link>
               </div>
               <div className="space-y-6">
                 {profile?.candidate?.experiences?.length ? (
@@ -577,9 +578,6 @@ export default function ProfileDashboard() {
             <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <h3 className="text-lg font-bold text-slate-900">Dự án tiêu biểu</h3>
-                <Link href="/profile/edit" className="text-blue-600 hover:text-blue-700">
-                  <Edit className="w-4 h-4" />
-                </Link>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {profile?.candidate?.projects?.length ? (
@@ -588,7 +586,7 @@ export default function ProfileDashboard() {
                       <h4 className="font-bold text-slate-800 text-[14px]">{p.projectName}</h4>
                       {p.role && <p className="text-blue-600 text-[11px] font-bold uppercase mt-1">{p.role}</p>}
                       {p.description && <p className="text-slate-600 text-[12px] mt-2 line-clamp-2">{p.description}</p>}
-                      {p.technology && (
+                      {p.technology && typeof p.technology === 'string' && (
                         <div className="flex flex-wrap gap-1 mt-3">
                           {p.technology.split(',').map((tech, i) => (
                             <span key={i} className="text-[9px] bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-500">
@@ -654,12 +652,20 @@ export default function ProfileDashboard() {
           <div className="bg-white border border-slate-100 rounded-2xl shadow-sm px-6 py-4 ">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[20px] font-bold text-[#1f2937]">Chứng chỉ/bằng cấp</h3>
-              <button className="flex items-center gap-1.5 text-[#5c4cf5] font-semibold text-[16px] hover:opacity-80 transition">
-                <PlusCircle className="w-[18px] h-[18px]" strokeWidth={2} /> Thêm
-              </button>
             </div>
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-[#6b7280] text-[15px]">Thêm thông tin khả năng ngoại ngữ để tăng tỷ lệ cạnh tranh</p>
+            <div className="border-t border-slate-100 pt-4 space-y-3">
+              {profile?.candidate?.certifications?.length ? (
+                profile.candidate.certifications.map((cert: any, idx: number) => (
+                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                      <Award className="w-4 h-4" />
+                    </div>
+                    <span className="text-[15px] font-bold text-slate-800">{cert.name}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[#6b7280] text-[15px]">Chưa có chứng chỉ/bằng cấp nào.</p>
+              )}
             </div>
           </div>
         </div>

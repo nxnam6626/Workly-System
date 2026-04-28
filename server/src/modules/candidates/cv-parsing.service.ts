@@ -1,12 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  GoogleGenerativeAI,
-  SchemaType,
-  GenerativeModel,
-} from '@google/generative-ai';
 import { CvParsedData } from './interfaces/cv-parsing.interface';
 import * as mammoth from 'mammoth';
+import { PDFParse } from 'pdf-parse';
+import axios from 'axios';
 
 const CV_EXTRACTION_PROMPT = `
 Nhiệm vụ: Trích xuất thông tin từ CV thành JSON.
@@ -19,198 +16,55 @@ Quy tắc:
    - experience: Lịch sử làm việc tại công ty/tổ chức.
    - projects: Các sản phẩm cá nhân, đồ án.
    - categories: Phân loại mảng chuyên môn/ngành nghề của UV (VD: Backend, Frontend, Marketing, Kế toán, Nhân sự, Sales, Xây dựng, Bán lẻ...). Gán 1-3 thẻ.
-6. Trả về đúng JSON Schema yêu cầu. Bắt buộc duy nhất khối JSON.
+6. Skill Levels: Chỉ được phép trả về một trong các giá trị sau: 'BEGINNER' (Cơ bản), 'INTERMEDIATE' (Trung cấp), 'ADVANCED' (Cao cấp/Chuyên gia).
+7. Trả về đúng JSON Schema yêu cầu. Bắt buộc duy nhất khối JSON.
 `.trim();
 
-const CV_SCHEMA = {
-  type: SchemaType.OBJECT,
-  properties: {
-    personal_info: {
-      type: SchemaType.OBJECT,
-      properties: {
-        full_name: { type: SchemaType.STRING },
-        email: { type: SchemaType.STRING },
-        phone: { type: SchemaType.STRING },
-        location: { type: SchemaType.STRING },
-        gpa: { type: SchemaType.NUMBER },
-      },
-      required: ['full_name', 'email', 'phone'],
-    },
-    summary: { type: SchemaType.STRING },
-    desired_job: {
-      type: SchemaType.OBJECT,
-      properties: {
-        jobTitle: { type: SchemaType.STRING },
-        jobType: { type: SchemaType.STRING },
-        expectedSalary: { type: SchemaType.STRING },
-        location: { type: SchemaType.STRING },
-      },
-    },
-    categories: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-      description: "Danh mục/mảng chuyên môn/ngành nghề chính của ứng viên (ví dụ: Backend, Marketing, Kế toán, Sales)",
-    },
-    education: {
-      type: SchemaType.OBJECT,
-      properties: {
-        degree: { type: SchemaType.STRING },
-        major: { type: SchemaType.STRING },
-        institution: { type: SchemaType.STRING },
-      },
-    },
-    certifications: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    skills: {
-      type: SchemaType.OBJECT,
-      properties: {
-        hard_skills: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              skillName: { type: SchemaType.STRING },
-              level: { type: SchemaType.STRING },
-            },
-            required: ['skillName', 'level'],
-          },
-        },
-        soft_skills: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              skillName: { type: SchemaType.STRING },
-              level: { type: SchemaType.STRING },
-            },
-            required: ['skillName', 'level'],
-          },
-        },
-      },
-    },
-    experience: {
-      type: SchemaType.OBJECT,
-      properties: {
-        total_months: { type: SchemaType.NUMBER },
-        roles: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              job_title: { type: SchemaType.STRING },
-              company_or_project: { type: SchemaType.STRING },
-              duration: { type: SchemaType.STRING },
-              description: { type: SchemaType.STRING },
-            },
-            required: ['job_title', 'company_or_project'],
-          },
-        },
-      },
-    },
-    projects: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          projectName: { type: SchemaType.STRING },
-          description: { type: SchemaType.STRING },
-          role: { type: SchemaType.STRING },
-          technology: { type: SchemaType.STRING },
-        },
-        required: ['projectName', 'description'],
-      },
-    },
+const CV_SCHEMA_TEXT = `
+JSON Schema yêu cầu:
+{
+  "personal_info": { "full_name": "string", "email": "string", "phone": "string", "location": "string", "gpa": "number" },
+  "summary": "string",
+  "desired_job": { "jobTitle": "string", "jobType": "string", "expectedSalary": "string", "location": "string" },
+  "categories": ["string"],
+  "education": { "degree": "string", "major": "string", "institution": "string" },
+  "certifications": ["string"],
+  "skills": {
+    "hard_skills": [{ "skillName": "string", "level": "BEGINNER | INTERMEDIATE | ADVANCED" }],
+    "soft_skills": [{ "skillName": "string", "level": "BEGINNER | INTERMEDIATE | ADVANCED" }]
   },
-  required: ['personal_info', 'skills', 'experience'],
-};
+  "experience": {
+    "total_months": "number",
+    "roles": [{ "job_title": "string", "company_or_project": "string", "duration": "string", "description": "string" }]
+  },
+  "projects": [{ "projectName": "string", "description": "string", "role": "string", "technology": "string" }]
+}
+`;
+
 
 @Injectable()
 export class CvParsingService {
   private readonly logger = new Logger(CvParsingService.name);
-  private genAI: GoogleGenerativeAI | null = null;
-  private model: GenerativeModel | null = null;
+  private groqApiKey: string | null = null;
 
   constructor(private readonly configService: ConfigService) {
     require('dotenv').config({ override: true });
-    let apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (!apiKey) apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-      this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel(
-        {
-          model: 'gemini-3.1-flash-lite-preview',
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: CV_SCHEMA as any,
-            maxOutputTokens: 8192,
-            temperature: 0.1,
-          },
-        },
-        { apiVersion: 'v1beta' },
-      );
-      this.logger.log(
-        'Đã khởi tạo thành công Gemini 3.1 Flash-Lite cho CV Parsing.',
-      );
+
+
+    // Config Groq
+    this.groqApiKey = this.configService.get<string>('GROQ_API_KEY') || process.env.GROQ_API_KEY || null;
+    if (this.groqApiKey) {
+      this.logger.log('Đã cấu hình Groq API cho CV Parsing (Tăng tốc độ).');
     }
   }
 
-  async extractTextFromPdf(buffer: Buffer): Promise<string> {
-    if (!this.genAI) throw new Error('Gemini API is not configured.');
-    const modelsToTry = ['gemini-3.1-flash-lite-preview', 'gemini-2.5-flash-lite'];
-    let lastError: any = null;
-
-    for (const modelName of modelsToTry) {
-      try {
-        const targetModel = this.genAI.getGenerativeModel(
-          { model: modelName },
-          { apiVersion: 'v1beta' },
-        );
-        const filePart = {
-          inlineData: {
-            data: buffer.toString('base64'),
-            mimeType: 'application/pdf',
-          },
-        };
-
-        const result = await targetModel.generateContent([
-          'Trích xuất toàn bộ văn bản (text) từ file PDF này một cách rõ ràng và chính xác. Trả về nội dung thuần túy, không thêm lời chào, bình luận hay định dạng markdown không cần thiết.',
-          filePart,
-        ]);
-        const response = await result.response;
-        const cleanText = response.text().trim();
-
-        this.logger.log(
-          `Extracted raw text using ${modelName}, length: ${cleanText.length} characters`,
-        );
-
-        if (cleanText.length < 20) {
-          throw new Error('PDF_NO_TEXT');
-        }
-
-        return cleanText;
-      } catch (error: any) {
-        lastError = error;
-        const msg = error.message || '';
-        this.logger.warn(`Model ${modelName} failed (${msg}). Trying next...`);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    }
-
-    this.logger.error(
-      `Tất cả model Gemini đều lỗi khi extract text từ PDF: ${lastError?.message}`,
-    );
-    throw new Error(
-      `Failed to parse PDF using all Gemini models. Lỗi: ${lastError?.message}`,
-    );
-  }
 
   async extractTextLocal(buffer: Buffer, mimeType: string): Promise<string> {
     try {
       if (mimeType === 'application/pdf') {
-        // pdf-parse removed as requested. Local PDF text extraction is disabled.
-        return '';
+        const parser = new PDFParse(new Uint8Array(buffer));
+        const data = await parser.getText();
+        return data.text || '';
       }
       if (
         mimeType ===
@@ -232,10 +86,48 @@ export class CvParsingService {
     }
   }
 
+  private async parseWithGroq(text: string): Promise<CvParsedData | null> {
+    if (!this.groqApiKey) return null;
+
+    try {
+      this.logger.log('[CV Parsing] Đang phân tích bằng Groq (Llama-3.3-70b)...');
+      const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            {
+              role: 'system',
+              content: `${CV_EXTRACTION_PROMPT}\n\n${CV_SCHEMA_TEXT}`,
+            },
+            {
+              role: 'user',
+              content: `NỘI DUNG VĂN BẢN CV:\n${text}`,
+            },
+          ],
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.groqApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const parsedData = response.data.choices[0].message.content;
+      return this.cleanAndParseJson(parsedData) as CvParsedData;
+    } catch (error: any) {
+      this.logger.warn(`[CV Parsing] Groq parsing thất bại: ${error.message}`);
+      return null;
+    }
+  }
+
   private cleanAndParseJson(text: string): any {
     // Tiền xử lý để loại bỏ các ký tự điều khiển lỗi hoặc khoảng trắng thừa
     let cleanText = text.trim();
-    
+
     try {
       // 1. Thử parse trực tiếp
       return JSON.parse(cleanText);
@@ -243,16 +135,16 @@ export class CvParsingService {
       try {
         // 2. Loại bỏ code blocks nếu có (```json ... ``` hoặc ``` ... ```)
         cleanText = cleanText.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim();
-        
+
         // 3. Tìm khối JSON bằng regex (từ { đầu tiên đến } cuối cùng)
         const firstBrace = cleanText.indexOf('{');
         const lastBrace = cleanText.lastIndexOf('}');
-        
+
         if (firstBrace !== -1 && lastBrace !== -1) {
           const jsonPotential = cleanText.substring(firstBrace, lastBrace + 1);
           return JSON.parse(jsonPotential);
         }
-        
+
         throw new Error('No JSON structure found');
       } catch (innerError) {
         this.logger.error(`Parse JSON failed. Raw response length: ${text.length}`);
@@ -267,111 +159,40 @@ export class CvParsingService {
     buffer: Buffer,
     mimeType: string = 'application/pdf',
   ): Promise<CvParsedData | null> {
-    if (!this.genAI || !buffer) return null;
+    if (!buffer) return null;
 
-    const tiers = [
-      {
-        name: 'Layer 1: Gemini 3.0 Flash (Preview)',
-        model: 'gemini-3-flash-preview',
-      },
-      { name: 'Layer 2: Gemini Flash Latest (Stable)', model: 'gemini-flash-latest' },
-      {
-        name: 'Layer 3: Gemini 3.1 Flash-Lite (Preview)',
-        model: 'gemini-3.1-flash-lite-preview',
-      },
-    ];
-
-    const isWord =
-      mimeType.includes('officedocument.wordprocessingml.document') ||
-      mimeType.includes('msword');
-    let rawText: string | null = null;
-
-    // --- PHASE 1: DIRECT BINARY ATTEMPTS (Only for PDF) ---
-    if (!isWord) {
-      for (const tier of tiers) {
-        this.logger.log(`[CV Parsing] Thử ${tier.name} (Direct Binary)...`);
-
-        try {
-          const genModel = this.genAI.getGenerativeModel(
-            {
-              model: tier.model,
-              generationConfig: {
-                responseMimeType: 'application/json',
-                responseSchema: CV_SCHEMA as any,
-                maxOutputTokens: 8192,
-                temperature: 0.1,
-              },
-            },
-            { apiVersion: 'v1beta' },
-          );
-
-          const filePart = {
-            inlineData: {
-              data: buffer.toString('base64'),
-              mimeType: 'application/pdf',
-            },
-          };
-
-          const result = await genModel.generateContent([
-            CV_EXTRACTION_PROMPT,
-            filePart,
-          ]);
-          const response = await result.response;
-          const parsedData = this.cleanAndParseJson(response.text());
-
-          this.logger.log(`✅ Thành công tại ${tier.name} (Direct)`);
-          return parsedData as CvParsedData;
-        } catch (error: any) {
-          this.logger.warn(`❌ ${tier.name} (Direct) thất bại: ${error.message}`);
-          if (error.status === 429)
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-      }
-    }
-
-    // --- PHASE 2: TEXT-ONLY FALLBACK (For Word or after PDF Direct fails) ---
-    this.logger.log(
-      `[CV Parsing] Chuyển đổi sang luồng bóc tách văn bản thô (Text-only)...`,
-    );
-
-    rawText = await this.extractTextLocal(buffer, mimeType);
-    if (!rawText || rawText.length < 20) {
-      this.logger.error('Không thể bóc tách nội dung văn bản từ file.');
+    if (!this.groqApiKey) {
+      this.logger.error('Groq API Key is not configured. Cannot parse CV.');
       return null;
     }
 
-    // Thử lại với các model Gemini bằng văn bản thô
-    for (const tier of tiers) {
-      this.logger.log(`[CV Parsing] Thử ${tier.name} (Text Mode)...`);
-      try {
-        const genModel = this.genAI.getGenerativeModel(
-          {
-            model: tier.model,
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: CV_SCHEMA as any,
-              maxOutputTokens: 8192,
-              temperature: 0.1,
-            },
-          },
-          { apiVersion: 'v1beta' },
-        );
+    this.logger.log(`[CV Parsing] Bắt đầu luồng siêu tốc với Groq API...`);
 
-        const promptWithText = `${CV_EXTRACTION_PROMPT}\n\nNỘI DUNG VĂN BẢN CV:\n${rawText}`;
-        const result = await genModel.generateContent(promptWithText);
-        const response = await result.response;
-        const parsedData = this.cleanAndParseJson(response.text());
+    try {
+      // 1. Bóc tách văn bản thô local (Cực nhanh cho PDF digital và Word)
+      const rawText = await this.extractTextLocal(buffer, mimeType);
 
-        this.logger.log(`✅ Thành công tại ${tier.name} (Text Mode)`);
-        return parsedData as CvParsedData;
-      } catch (error: any) {
-        this.logger.warn(`❌ ${tier.name} (Text Mode) thất bại: ${error.message}`);
-        if (error.status === 429)
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (!rawText || rawText.length < 50) {
+        this.logger.warn(`[CV Parsing] Không thể bóc tách đủ văn bản từ file (Có thể là file scan hoặc ảnh).`);
+        return null;
       }
-    }
 
-    this.logger.error('Tất cả các phương pháp bóc tách CV đều thất bại.');
-    return null;
+      this.logger.log(`[CV Parsing] Bóc tách thành công (${rawText.length} kí tự). Gửi tới Groq...`);
+
+      // 2. Gửi tới Groq để phân tích cấu trúc JSON
+      const groqResult = await this.parseWithGroq(rawText);
+
+      if (groqResult) {
+        this.logger.log('✅ Thành công tại Groq API (Luồng siêu tốc)');
+        return groqResult;
+      }
+
+      this.logger.error('[CV Parsing] Groq parsing không trả về kết quả.');
+      return null;
+
+    } catch (error: any) {
+      this.logger.error(`[CV Parsing] Lỗi trong quá trình phân tích: ${error.message}`);
+      return null;
+    }
   }
 }

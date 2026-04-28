@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -18,9 +19,12 @@ import { SearchService } from '../search/search.service';
 import { MessagesGateway } from '../messages/messages.gateway';
 import { SupabaseService } from '../../common/supabase/supabase.service';
 import { AiService } from '../ai/ai.service';
+import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
@@ -425,8 +429,29 @@ export class UsersService {
         provider: true,
         userRoles: { include: { role: true } },
         candidate: {
-          include: {
+          select: {
+            candidateId: true,
+            fullName: true,
+            university: true,
+            major: true,
+            gpa: true,
+            summary: true,
+            desiredJob: true,
+            isOpenToWork: true,
+            gender: true,
+            birthYear: true,
+            currentSalary: true,
+            degree: true,
+            industries: true,
+            languages: true,
+            softSkills: true,
+            interests: true,
             skills: true,
+            experiences: {
+              orderBy: { duration: 'desc' },
+            },
+            projects: true,
+            certifications: true,
             cvs: {
               select: {
                 cvId: true,
@@ -722,15 +747,7 @@ export class UsersService {
   /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills, isOpenToWork). */
   async updateCandidateProfile(
     userId: string,
-    dto: {
-      fullName: string;
-      phone: string;
-      university?: string;
-      major?: string;
-      gpa?: number;
-      skills?: { skillName: string; level: string }[];
-      isOpenToWork?: boolean;
-    },
+    dto: UpdateCandidateProfileDto,
   ) {
     const user = await this.prisma.user.findUnique({
       where: { userId },
@@ -741,29 +758,35 @@ export class UsersService {
     }
 
     const candidateId = user.candidate.candidateId;
+    this.logger.log(`Updating candidate profile for candidateId: ${candidateId}`);
+    // console.log('Update DTO:', JSON.stringify(dto, null, 2));
 
     await this.prisma.$transaction(async (tx) => {
-      // Update Candidate core fields
+      // 1. Update Candidate core fields
       await tx.candidate.update({
         where: { candidateId },
         data: {
-          fullName: dto.fullName,
-          university: dto.university ?? null,
-          major: dto.major ?? null,
-          gpa: dto.gpa ?? null,
-          ...(dto.isOpenToWork !== undefined && {
-            isOpenToWork: dto.isOpenToWork,
-          }),
+          ...(dto.fullName && { fullName: dto.fullName }),
+          ...(dto.university !== undefined && { university: dto.university }),
+          ...(dto.major !== undefined && { major: dto.major }),
+          ...(dto.gpa !== undefined && { gpa: dto.gpa }),
+          ...(dto.summary !== undefined && { summary: dto.summary }),
+          ...(dto.desiredJob !== undefined && { desiredJob: dto.desiredJob }),
+          ...(dto.isOpenToWork !== undefined && { isOpenToWork: dto.isOpenToWork }),
         },
       });
 
-      // Update User.phoneNumber directly
-      await tx.user.update({
-        where: { userId },
-        data: { phoneNumber: dto.phone },
-      });
+      // 2. Update User fields (phoneNumber)
+      if (dto.phone) {
+        await tx.user.update({
+          where: { userId },
+          data: { 
+            phoneNumber: dto.phone,
+          },
+        });
+      }
 
-      // Replace skills atomically (now with levels)
+      // 3. Update Skills
       if (dto.skills !== undefined) {
         await tx.skill.deleteMany({ where: { candidateId } });
         if (dto.skills.length > 0) {
@@ -771,6 +794,45 @@ export class UsersService {
             data: dto.skills.map((s) => ({
               skillName: s.skillName,
               level: (s.level as any) || 'BEGINNER',
+              candidateId,
+            })),
+          });
+        }
+      }
+
+      // 4. Update Experiences
+      if (dto.experiences !== undefined) {
+        await tx.experience.deleteMany({ where: { candidateId } });
+        if (dto.experiences.length > 0) {
+          await tx.experience.createMany({
+            data: dto.experiences.map((exp) => ({
+              ...exp,
+              candidateId,
+            })),
+          });
+        }
+      }
+
+      // 5. Update Projects
+      if (dto.projects !== undefined) {
+        await tx.project.deleteMany({ where: { candidateId } });
+        if (dto.projects.length > 0) {
+          await tx.project.createMany({
+            data: dto.projects.map((p) => ({
+              ...p,
+              candidateId,
+            })),
+          });
+        }
+      }
+
+      // 6. Update Certifications
+      if (dto.certifications !== undefined) {
+        await tx.certification.deleteMany({ where: { candidateId } });
+        if (dto.certifications.length > 0) {
+          await tx.certification.createMany({
+            data: dto.certifications.map((cert) => ({
+              name: cert,
               candidateId,
             })),
           });

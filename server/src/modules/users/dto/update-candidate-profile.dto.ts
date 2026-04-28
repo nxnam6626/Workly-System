@@ -25,6 +25,38 @@ class SkillDto {
   level: SkillLevel;
 }
 
+class ExperienceDto {
+  @IsString()
+  company: string;
+
+  @IsString()
+  role: string;
+
+  @IsString()
+  duration: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+class ProjectDto {
+  @IsString()
+  projectName: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsOptional()
+  @IsString()
+  technology?: string;
+}
+
 export class UpdateCandidateProfileDto {
   @IsString()
   fullName: string;
@@ -47,10 +79,34 @@ export class UpdateCandidateProfileDto {
   gpa?: number;
 
   @IsOptional()
+  @IsString()
+  summary?: string;
+
+  @IsOptional()
+  desiredJob?: any;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SkillDto)
   skills?: SkillDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ExperienceDto)
+  experiences?: ExperienceDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProjectDto)
+  projects?: ProjectDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  certifications?: string[];
 
   @IsOptional()
   @IsBoolean()
