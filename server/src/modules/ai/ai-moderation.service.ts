@@ -4,16 +4,37 @@ import axios from 'axios';
 
 const SLEEP = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// ✅ HARD EVASION — chỉ block khi có dấu hiệu rõ ràng của evasion, không block từ nghiệp vụ
 export const EVASION_KEYWORDS = [
-  '0[1-9][0-9]{8,9}',
-  'zalo', 'za loo', 'za lờ', 'zzl', 'dzalo', 'zl', 'da lo', 'zá lồ', 'zép\\s*lào', 'giấy\\s*lô', 'da\\s*lô', 'za\\s*lô', 'z\\s*a\\s*l\\s*o', 'z\\.l', 'z\\.a\\.l\\.o',
-  'facebook', 'fb', 'phây', 'phở\\s*bò', 'phờ\\s*bờ', 'f\\s*b', 'fesbuk', 'face\\s*book', 'fắc\\s*búc',
-  'telegram', 'tele', 'tê\\s*lê\\s*gram', 'whatsapp', 'viber', 'wechat', 'skype', 'discord', 'messenger', 'mess ',
-  'tiktok', 'tóp\\s*tóp', 'tik\\s*tok', 'tíc\\s*tóc', 'tok\\s*tok', 'ig', 'insta', 'instagram', 'ins', 'youtube', 'linkedin',
-  'stk', 'số\\s*tài\\s*khoản', 'chuyển\\s*khoản', 'vietcombank', 'vcb', 'techcombank', 'mbbank', 'vpbank', 'momo', 'zalopay', 'vnpay', 'chuyển\\s*tiền',
-  'drive\\.google', '1drv\\.ms', 'dropbox', 'notion\\.site', 'onedrive', 'googledrive',
-  'không\\s*chín', 'không\\s*ba', 'không\\s*bảy', 'không\\s*tám', 'không\\s*năm', 'sđt', 'số\\s*điện\\s*thoại', 'gọi\\s*số',
-  '@gmail', '@yahoo', '@hotmail', '@outlook'
+  // --- SĐT / Số điện thoại ---
+  '0[1-9][0-9]{8,9}',                        // Số điện thoại Việt Nam dạng chuẩn
+  '\\bsđt\\b', 'số\\s*điện\\s*thoại', 'gọi\\s*số',
+  'không\\s*chín', 'không\\s*ba', 'không\\s*bảy', 'không\\s*tám', 'không\\s*năm',
+
+  // --- Zalo (chỉ dạng obfuscated — "Zalo" viết thường trong mô tả kênh CSKH là hợp lệ) ---
+  'za\\s+loo', 'za\\s+lờ', 'zzl', 'dzalo', 'zá\\s+lồ', 'zép\\s*lào',
+  'giấy\\s+lô', 'da\\s+lô', 'za\\s+lô', 'z\\s+a\\s*l\\s*o', 'z\\.l', 'z\\.a\\.l\\.o',
+
+  // --- Facebook (dạng obfuscated — 'fb' và 'facebook' thông thường không block vì quá chung) ---
+  'phây', 'phở\\s*bò', 'phờ\\s*bờ', 'fesbuk', 'face\\s+book', 'fắc\\s*búc',
+  '\\bf\\s+b\\b',                             // Chỉ "f b" đứng riêng với khoảng trắng ở giữa
+
+  // --- Các mạng xã hội / liên lạc (chỉ dạng full word rõ ràng là evasion) ---
+  '\\btelegram\\b', 'tê\\s*lê\\s*gram',
+  '\\bwhatsapp\\b', '\\bviber\\b', '\\bwechat\\b', '\\bskype\\b', '\\bdiscord\\b',
+  '\\bmessenger\\b',                          // "messenger" standalone - không match "mess" trong văn bản
+  'tóp\\s*tóp', 'tik\\s*tok', 'tíc\\s*tóc', 'tok\\s*tok',
+
+  // --- Chuyển tiền / Ngân hàng (dấu hiệu evasion tài chính) ---
+  '\\bstk\\b', 'số\\s*tài\\s*khoản', 'chuyển\\s*khoản',
+  '\\bvietcombank\\b', '\\bvcb\\b', '\\btechcombank\\b', '\\bmbbank\\b',
+  '\\bvpbank\\b', '\\bzalopay\\b', '\\bvnpay\\b', 'chuyển\\s*tiền',
+
+  // --- Link lưu trữ / cloud (evasion bằng file share) ---
+  'drive\\.google', '1drv\\.ms', '\\bdropbox\\b', 'notion\\.site', '\\bonedrive\\b', 'googledrive',
+
+  // --- Email cá nhân (dấu hiệu bypass nền tảng) ---
+  '@gmail', '@yahoo', '@hotmail', '@outlook',
 ];
 
 export const EVASION_REGEX = new RegExp(`(${EVASION_KEYWORDS.join('|')})`, 'i');
@@ -233,7 +254,7 @@ CẤU TRÚC JSON PHẢI TRẢ VỀ CHÍNH XÁC NHƯ SAU:
         'Lưu ý: ảnh đại diện cá nhân chuyên nghiệp, logo công ty đều là HỢP LỆ.';
       if (expectedType === 'face_only') {
         ruleText =
-          'RẤT QUAN TRỌNG: Đây là ảnh đại diện của Ứng viên xin việc. Bắt buộc MỘT TRONG HAI yêu cầu: (a) Phải có KHUÔN MẶT NGƯỜI rõ ràng. Hoặc (b) nếu không có khuôn mặt thì phải là một bức ảnh rất trang trọng/lịch sự để xin việc. NẾU là ảnh động vật, phong cảnh, ảnh troll, ảnh anime khiêu khích... KHÔNG CÓ MẶT NGƯỜI -> đánh dấu là KHÔNG AN TOÀN (safe: false) và ghi reason "Ảnh đại diện ứng viên nên có khuôn mặt hoặc là ảnh lịch sự!".';
+          'QUAN TRỌNG: Đây là ảnh đại diện của Ứng viên xin việc. Yêu cầu ảnh phải lịch sự, phù hợp với môi trường công sở. Ưu tiên ảnh có khuôn mặt người, nhưng vẫn chấp nhận các ảnh nghệ thuật, phong cảnh hoặc ảnh trừu tượng nếu chúng mang tính chất nghiêm túc và không gây phản cảm. CHỈ đánh dấu là KHÔNG AN TOÀN (safe: false) nếu ảnh là: (1) Ảnh troll/chế cợt nhả, (2) Ảnh anime/cartoon mang tính khiêu khích hoặc trẻ con quá mức, (3) Ảnh có chất lượng quá thấp hoặc không thể xác định nội dung.';
       } else if (expectedType === 'face_or_logo') {
         ruleText =
           'Lưu ý: ảnh đại diện cá nhân chuyên nghiệp, khuông mặt người, logo công ty, logo doanh nghiệp đều là HỢP LỆ.';

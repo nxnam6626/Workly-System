@@ -2,179 +2,191 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { 
-  User, 
-  ClipboardCheck, 
-  Heart, 
-  FileText, 
-  Briefcase, 
-  RefreshCcw, 
-  Eye, 
+import {
+  User,
+  ClipboardCheck,
+  Heart,
+  FileText,
+  Briefcase,
+  RefreshCcw,
+  Eye,
   LogOut,
   ChevronRight,
   Sparkles,
-  Award
+  Camera,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 export const ProfileSidebar = React.memo(function ProfileSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  
+
   const displayName = user?.name || user?.candidate?.fullName || user?.email || 'Người dùng';
+  const jobTitle = (user as any)?.candidate?.major || 'Ứng viên';
   const initial = displayName.charAt(0).toUpperCase();
 
   const menuItems = [
-    { 
-      icon: <User className="w-5 h-5" />, 
-      label: "Thông tin cá nhân", 
-      href: "/profile",
-      isActive: pathname === "/profile"
+    {
+      icon: User,
+      label: 'Thông tin cá nhân',
+      href: '/profile',
+      isActive: pathname === '/profile',
+      accent: 'text-blue-600 bg-blue-50',
     },
-    { 
-      icon: <ClipboardCheck className="w-5 h-5" />, 
-      label: "Việc làm đã ứng tuyển", 
-      href: "/profile/jobs/applied",
-      isActive: pathname === "/profile/jobs/applied"
+    {
+      icon: ClipboardCheck,
+      label: 'Việc làm ứng tuyển',
+      href: '/profile/jobs/applied',
+      isActive: pathname === '/profile/jobs/applied',
+      accent: 'text-amber-600 bg-amber-50',
     },
-    { 
-      icon: <Heart className="w-5 h-5" />, 
-      label: "Việc làm đã lưu", 
-      href: "/profile/jobs/saved",
-      isActive: pathname === "/profile/jobs/saved"
+    {
+      icon: Heart,
+      label: 'Việc làm đã lưu',
+      href: '/profile/jobs/saved',
+      isActive: pathname === '/profile/jobs/saved',
+      accent: 'text-rose-500 bg-rose-50',
     },
-    { 
-      icon: <FileText className="w-5 h-5" />, 
-      label: "Việc làm đã xem", 
-      href: "/profile/jobs/viewed",
-      isActive: pathname === "/profile/jobs/viewed"
+    {
+      icon: Eye,
+      label: 'Việc làm đã xem',
+      href: '/profile/jobs/viewed',
+      isActive: pathname === '/profile/jobs/viewed',
+      accent: 'text-slate-500 bg-slate-50',
     },
-    { 
-      icon: <Briefcase className="w-5 h-5" />, 
-      label: "Việc làm phù hợp", 
-      href: "/profile/jobs/matching",
-      isActive: pathname === "/profile/jobs/matching",
-      badge: "AI"
+    {
+      icon: Sparkles,
+      label: 'Việc làm phù hợp',
+      href: '/profile/jobs/matching',
+      isActive: pathname === '/profile/jobs/matching',
+      badge: 'AI',
+      accent: 'text-indigo-600 bg-indigo-50',
     },
-    { 
-      icon: <RefreshCcw className="w-5 h-5" />, 
-      label: "NTD yêu cầu kết nối", 
-      href: "/profile/messages",
-      isActive: pathname === "/profile/messages"
+    {
+      icon: RefreshCcw,
+      label: 'NTD yêu cầu kết nối',
+      href: '/profile/messages',
+      isActive: pathname === '/profile/messages',
+      accent: 'text-emerald-600 bg-emerald-50',
     },
   ];
 
   return (
-    <aside className="w-full space-y-6">
-      {/* Profile Summary Card */}
-      <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 pb-4 border-b border-slate-50 bg-gradient-to-br from-[#f8fafc] to-white">
-          <div className="flex items-center gap-4">
-            <div className="relative group">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-100 overflow-hidden shrink-0">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt={displayName} className="w-full h-full object-cover" />
-                ) : (
-                  initial
-                )}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center shadow-sm">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-lg font-bold text-slate-900 truncate leading-tight">{displayName}</h3>
-              <p className="text-xs text-slate-400 mt-1 font-medium truncate italic">{user?.email}</p>
-              <div className="flex items-center gap-1.5 mt-2">
-                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-black rounded-md uppercase tracking-wider">Cơ bản</span>
-                <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                <span className="text-[10px] text-slate-400 font-bold">#102938</span>
-              </div>
-            </div>
+    <aside className="w-full space-y-4">
+      {/* Profile Card — nhất quán với trang /profile */}
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-5 flex flex-col items-center text-center overflow-hidden relative">
+        {/* Ambient top gradient */}
+        <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-[0.04]" />
+
+        {/* Avatar */}
+        <div className="relative w-20 h-20 mb-3 mt-1">
+          <div className="w-full h-full rounded-2xl bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center border border-slate-100 overflow-hidden">
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={displayName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-slate-400">{initial}</span>
+            )}
+          </div>
+          {/* Online indicator */}
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+            <div className="w-1.5 h-1.5 bg-white rounded-full" />
           </div>
         </div>
 
-        {/* Level Progress */}
-        <div className="px-6 py-4 bg-[#fcfdfe]">
-          <div className="flex items-center justify-between mb-2">
-             <div className="flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-amber-500" />
-                <span className="text-[11px] font-bold text-slate-700">Độ tin cậy hồ sơ</span>
-             </div>
-             <span className="text-[11px] font-black text-blue-600">85%</span>
-          </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-             <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-[85%] rounded-full shadow-[0_0_8px_rgba(59,130,246,0.3)]" />
-          </div>
-        </div>
+        <h3 className="font-bold text-slate-900 text-base leading-tight truncate w-full px-2">{displayName}</h3>
+        <p className="text-blue-600 text-xs font-semibold mt-1 px-3 py-0.5 bg-blue-50 rounded-full truncate max-w-full">{jobTitle}</p>
 
-        {/* Navigation Menu */}
-        <nav className="p-3 space-y-1">
-          {menuItems.map((item) => (
-            <Link 
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "group flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300",
-                item.isActive 
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-100 translate-x-1" 
-                  : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "flex items-center justify-center w-5 h-5 transition-transform duration-300 group-hover:scale-110",
-                  item.isActive ? "text-white" : "text-slate-400 group-hover:text-blue-600"
-                )}>
-                  {item.icon}
-                </div>
-                <span className="text-[14px] font-bold tracking-tight">{item.label}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {item.badge && (
-                  <span className={cn(
-                    "px-1.5 py-0.5 rounded-md text-[10px] font-black tracking-tighter",
-                    item.isActive ? "bg-white/20 text-white" : "bg-blue-50 text-blue-600"
-                  )}>
-                    {item.badge}
-                  </span>
-                )}
-                <ChevronRight className={cn(
-                  "w-4 h-4 transition-transform duration-300",
-                  item.isActive ? "text-white/70" : "text-slate-300 group-hover:translate-x-1"
-                )} />
-              </div>
-            </Link>
-          ))}
-
-          <div className="mt-4 pt-4 border-t border-slate-50">
-            <button 
-              onClick={() => logout()}
-              className="w-full group flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all duration-300"
-            >
-              <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-              <span className="text-[14px] font-bold tracking-tight">Đăng xuất</span>
-            </button>
-          </div>
-        </nav>
+        {/* Link về profile chính */}
+        <Link href="/profile"
+          className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl text-xs font-bold text-slate-500 border border-slate-100 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-100 transition-all">
+          <User className="w-3.5 h-3.5" />
+          Xem hồ sơ đầy đủ
+        </Link>
       </div>
 
-      {/* Ad Banner Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-6 text-white group shadow-xl shadow-blue-100">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl group-hover:scale-125 transition-transform duration-700" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full -translate-x-1/2 translate-y-1/2 blur-2xl" />
-        
-        <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center animate-bounce">
-            <Sparkles className="w-6 h-6 text-blue-100" />
+      {/* Navigation Menu */}
+      <nav className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-3 space-y-1">
+        {menuItems.map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <motion.div key={item.href}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.22 }}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'group flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200',
+                  item.isActive
+                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={cn(
+                    'flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-all',
+                    item.isActive ? 'bg-white/10' : item.accent
+                  )}>
+                    <Icon className={cn('w-4 h-4', item.isActive ? 'text-white' : '')} />
+                  </div>
+                  <span className="text-[13px] font-semibold truncate">{item.label}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {item.badge && (
+                    <span className={cn(
+                      'px-1.5 py-0.5 rounded-md text-[9px] font-black tracking-wide',
+                      item.isActive ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'
+                    )}>
+                      {item.badge}
+                    </span>
+                  )}
+                  <ChevronRight className={cn(
+                    'w-3.5 h-3.5 transition-transform duration-200',
+                    item.isActive ? 'text-white/60 translate-x-0.5' : 'text-slate-300 group-hover:translate-x-0.5'
+                  )} />
+                </div>
+              </Link>
+            </motion.div>
+          );
+        })}
+
+        <div className="pt-2 mt-2 border-t border-slate-50">
+          <button
+            onClick={() => logout()}
+            className="w-full group flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200"
+          >
+            <div className="w-7 h-7 rounded-xl bg-slate-50 group-hover:bg-red-50 flex items-center justify-center flex-shrink-0">
+              <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+            </div>
+            <span className="text-[13px] font-semibold">Đăng xuất</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Promo card */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl shadow-slate-900/10">
+        <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-500/10 rounded-full -translate-x-1/2 translate-y-1/2 blur-2xl" />
+        <div className="relative z-10 text-center space-y-3">
+          <div className="w-10 h-10 mx-auto bg-white/10 rounded-2xl flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-blue-300" />
           </div>
-          <div className="space-y-1">
-            <h4 className="text-lg font-black leading-tight">Workly AI App</h4>
-            <p className="text-[11px] text-blue-100 leading-relaxed font-medium">Bật thông báo để không bỏ lỡ <br/> việc làm phù hợp nhất!</p>
+          <div>
+            <h4 className="font-bold text-sm leading-tight">Workly AI</h4>
+            <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+              Bật thông báo để không bỏ lỡ việc làm phù hợp nhất với bạn!
+            </p>
           </div>
-          <button className="w-full py-3 bg-white text-blue-600 font-black rounded-xl text-xs hover:bg-blue-50 transition-all shadow-lg active:scale-95">
+          <button className="w-full py-2 bg-white text-slate-900 font-bold rounded-xl text-[11px] hover:bg-blue-50 transition-all">
             Tải App ngay
           </button>
         </div>

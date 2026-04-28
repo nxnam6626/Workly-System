@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 import { LOCATIONS } from '@/lib/constants';
+import { AutoResizeTextarea } from '@/components/ui/auto-resize-textarea';
 
 const defaultForm = {
   title: '',
@@ -530,54 +531,139 @@ function PostJobForm() {
       </div>
 
       {aiModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-[2.5rem] w-full max-w-4xl overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] border border-white/20 relative"
           >
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-indigo-50 to-purple-50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg shadow-sm">
-                  <Sparkles className="w-6 h-6 text-purple-600" />
+            {/* Subtle Texture/Grain Overlay */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/p6.png')]" />
+
+            <div className="relative flex flex-col md:flex-row h-full min-h-[520px]">
+              {/* Left Panel - Branding & Context */}
+              <div className="w-full md:w-80 bg-[#F9F9F7] p-10 border-r border-slate-100 flex flex-col justify-between relative overflow-hidden">
+                {/* Decorative circles */}
+                <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-60" />
+                
+                <div className="relative z-10">
+                  <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-8 transform -rotate-3">
+                    <Sparkles className="w-7 h-7 text-indigo-600" />
+                  </div>
+                  <h3 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-3xl text-[#111110] leading-[1.1] mb-5">
+                    Trợ lý <em className="text-indigo-600 not-italic">Sáng tạo</em> JD
+                  </h3>
+                  <p className="text-sm text-[#666660] leading-relaxed mb-8 font-medium">
+                    Cung cấp cho AI những ý chính về công việc, chúng tôi sẽ biến chúng thành một bản JD chuyên nghiệp, chuẩn SEO và thu hút nhân tài.
+                  </p>
+
+                  <div className="space-y-5">
+                    {[
+                      'Tự động đề xuất kỹ năng chuyên sâu',
+                      'Tối ưu từ khóa chuẩn SEO ngành',
+                      'Cấu trúc văn bản thu hút & hiện đại'
+                    ].map((text, idx) => (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-white shadow-sm border border-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle2 className="w-3 h-3 text-indigo-600" />
+                        </div>
+                        <p className="text-[11px] text-[#444440] font-bold uppercase tracking-wider">{text}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-800">Trợ Lý AI Tự Động Viết JD</h3>
-                  <p className="text-sm text-slate-500">Mô tả ngắn gọn yêu cầu, AI sẽ tự động viết một bản JD hoàn chỉnh chuẩn SEO.</p>
+
+                <div className={`relative z-10 mt-10 p-5 rounded-2xl border backdrop-blur-sm transition-all duration-500 ${
+                  userPlan === 'GROWTH' ? 'bg-amber-50/80 border-amber-200 shadow-sm' :
+                  userPlan === 'LITE' ? 'bg-indigo-50/80 border-indigo-200 shadow-sm' :
+                  'bg-slate-100 border-slate-200'
+                }`}>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Crown className={`w-4 h-4 ${userPlan === 'GROWTH' ? 'text-amber-600' : userPlan === 'LITE' ? 'text-indigo-600' : 'text-slate-500'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#111110]">
+                      {userPlan === 'GROWTH' ? 'Growth Engine' : userPlan === 'LITE' ? 'Lite Engine' : 'Basic Engine'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#666660] leading-snug font-medium">
+                    {userPlan === 'GROWTH' ? 'Đang kích hoạt mô hình AI cao cấp nhất để tối ưu hóa tỷ lệ chuyển đổi JD.' :
+                     userPlan === 'LITE' ? 'Hỗ trợ viết JD cơ bản và tự động hóa trích xuất kỹ năng chuyên môn.' :
+                     'Nâng cấp để mở khóa toàn bộ sức mạnh AI và tối ưu hóa SEO chuyên sâu.'}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setAiModalOpen(false)} className="text-slate-400 hover:text-slate-600"><CloseIcon className="w-5 h-5" /></button>
-            </div>
-            <div className="p-6 space-y-4 shadow-inner bg-slate-50">
-              <textarea
-                className="w-full h-32 p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none resize-none bg-white"
-                placeholder="Ví dụ: Cần tuyển 2 bạn lập trình viên ReactJS, yêu cầu 2 năm kinh nghiệm, làm việc tại TPHCM. Mức lương từ 15-20 triệu. Yêu cầu thành thạo Typescript, Next.js và Tailwind CSS..."
-                value={aiPrompt}
-                onChange={e => setAiPrompt(e.target.value)}
-                disabled={aiGenerating}
-              />
-              <div className="flex bg-indigo-50/50 p-4 rounded-2xl flex items-start gap-3 text-indigo-900 text-sm border border-indigo-100">
-                <div className={`p-2 rounded-lg ${userPlan === 'GROWTH' ? 'bg-amber-500 text-white' : userPlan === 'LITE' ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                  <Crown className="w-4 h-4" />
+
+              {/* Right Panel - Input Workspace */}
+              <div className="flex-1 p-10 flex flex-col bg-white">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A0A090] mb-1">Input Workspace</h4>
+                    <p className="text-[11px] text-[#BEBDB5] font-medium italic">Dán mô tả thô hoặc các ý chính vào đây...</p>
+                  </div>
+                  <button onClick={() => setAiModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 transition-all hover:rotate-90">
+                    <CloseIcon className="w-5 h-5" />
+                  </button>
                 </div>
-                <div>
-                  <p className="font-black text-[10px] uppercase tracking-widest mb-1">
-                    {userPlan === 'GROWTH' ? 'GROWTH AI ENGINE' : userPlan === 'LITE' ? 'LITE AI ENGINE' : 'FREE AI ENGINE'}
-                  </p>
-                  <p className="font-medium text-xs leading-relaxed">
-                    {userPlan === 'GROWTH' ? 'Đang kích hoạt mô hình AI cao cấp nhất: Tối ưu hóa SEO, tăng tỷ lệ chuyển đổi và tự động hóa trích xuất kỹ năng chuyên sâu.' :
-                      userPlan === 'LITE' ? 'Đang kích hoạt mô hình LITE: Gợi ý kỹ năng chuyên môn và tóm tắt yêu cầu cơ bản.' :
-                        'Đang sử dụng AI cơ bản. Nâng cấp để AI có thể gợi ý kỹ năng chuyên sâu và tối ưu hóa SEO cho tin đăng của bạn.'}
-                  </p>
+
+                <div className="flex-1 relative group">
+                  {/* Subtle Background Pattern for Input */}
+                  <div className="absolute inset-0 bg-[#FAF9F6] rounded-[2rem] opacity-40 pointer-events-none border border-slate-100" />
+                  
+                  <textarea
+                    className="relative w-full h-full min-h-[320px] p-8 bg-transparent outline-none resize-none transition-all text-[#111110] placeholder-[#D0CFCA] font-medium leading-relaxed text-base"
+                    placeholder="Ví dụ: [FPT SHOP] Cần tuyển Nhân viên tư vấn bán hàng tại Đà Nẵng...\n📍 Địa điểm: Hải Châu, Thanh Khê\n💻 Mô tả: Tư vấn sản phẩm, hướng dẫn khách hàng...\n🎯 Yêu cầu: 18-28 tuổi, thân thiện...\n🎁 Quyền lợi: Lương 8-15tr, đầy đủ BHXH..."
+                    value={aiPrompt}
+                    onChange={e => setAiPrompt(e.target.value)}
+                    disabled={aiGenerating}
+                    style={{ fontFamily: "'DM Sans', sans-serif" }}
+                  />
+                  
+                  {/* Floating Metadata */}
+                  <div className="absolute bottom-6 right-6 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                    <span className="px-3 py-1.5 bg-white border border-[#E8E8E2] rounded-xl text-[10px] text-[#999890] font-black uppercase tracking-widest shadow-sm">
+                      {aiPrompt.length} chars
+                    </span>
+                    <span className="px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl text-[10px] text-indigo-600 font-black uppercase tracking-widest shadow-sm">
+                      {aiPrompt.split(/\s+/).filter(Boolean).length} words
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-6">
+                    <button 
+                      type="button" 
+                      onClick={() => setAiPrompt(prev => prev + (prev ? "\n\n" : "") + "📍 Địa điểm: \n💻 Mô tả: \n🎯 Yêu cầu: \n🎁 Quyền lợi: ")}
+                      className="flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-[0.2em] group"
+                    >
+                      <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90" />
+                      Thêm cấu trúc mẫu
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-5 w-full sm:w-auto">
+                    <button 
+                      disabled={aiGenerating} 
+                      onClick={() => setAiModalOpen(false)} 
+                      className="flex-1 sm:flex-none text-[11px] font-black uppercase tracking-[0.2em] text-[#BEBDB5] hover:text-[#111110] transition-colors"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button 
+                      onClick={handleAiGenerate} 
+                      disabled={aiGenerating || !aiPrompt.trim()} 
+                      className="flex-1 sm:flex-none relative overflow-hidden group bg-[#111110] text-white px-10 py-4 rounded-2xl font-bold text-xs uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 shadow-xl shadow-slate-200"
+                    >
+                      {/* Gradient Hover Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_100%] animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                      
+                      <div className="relative flex items-center justify-center gap-3">
+                        {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        <span>{aiGenerating ? 'AI đang soạn thảo...' : 'Phát sinh JD ngay'}</span>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-white">
-              <button disabled={aiGenerating} onClick={() => setAiModalOpen(false)} className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-slate-100 transition-colors">Đóng lại</button>
-              <button onClick={handleAiGenerate} disabled={aiGenerating || !aiPrompt.trim()} className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:opacity-90 disabled:opacity-50 transition-all">
-                {aiGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                {aiGenerating ? 'AI đang viết JD...' : 'Viết JD Ngay'}
-              </button>
             </div>
           </motion.div>
         </div>
@@ -624,8 +710,8 @@ function PostJobForm() {
         <div className="h-6" /> {/* Spacer for labels */}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 p-8 space-y-8 min-h-[500px] flex flex-col">
+      <div className="relative">
+        <form onSubmit={handleSubmit} className="w-full bg-white rounded-[2.5rem] shadow-xl shadow-slate-100/50 border border-slate-100 p-10 space-y-10 min-h-[600px] flex flex-col relative overflow-hidden">
           <div className="flex-1">
             {currentStep === 1 && (
               <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
@@ -1016,11 +1102,15 @@ function PostJobForm() {
               <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Mô tả công việc</label>
-                  <textarea name="description" value={formData.description} onChange={handleChange} rows={5} className="w-full p-4 rounded-xl border border-slate-200 outline-none resize-none" placeholder="..." />
+                  <AutoResizeTextarea name="description" value={formData.description} onChange={handleChange} className="w-full p-4 rounded-xl border border-slate-200 outline-none" placeholder="..." />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Yêu cầu ứng viên</label>
-                  <textarea name="requirements" value={formData.requirements} onChange={handleChange} rows={4} className="w-full p-4 rounded-xl border border-slate-200 outline-none resize-none" placeholder="..." />
+                  <AutoResizeTextarea name="requirements" value={formData.requirements} onChange={handleChange} className="w-full p-4 rounded-xl border border-slate-200 outline-none" placeholder="..." />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Quyền lợi được hưởng</label>
+                  <AutoResizeTextarea name="benefits" value={formData.benefits} onChange={handleChange} className="w-full p-4 rounded-xl border border-slate-200 outline-none" placeholder="..." />
                 </div>
 
                 <div className="pt-4">
@@ -1087,65 +1177,163 @@ function PostJobForm() {
             )}
 
             {currentStep === 4 && (
-              <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                <div className="space-y-4">
-                  <label className="text-base font-black text-slate-800 flex items-center gap-3">Hạng tin đăng</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
+                <div className="space-y-6">
+                  <div className="flex items-end justify-between">
+                    <div>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A0A090] mb-2">Service Selection</h4>
+                      <h3 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-3xl text-[#111110]">Hạng tin đăng</h3>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Gói hiện tại</p>
+                      <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[11px] font-black uppercase tracking-widest border border-indigo-100">
+                        {userPlan} Plan
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                      { 
-                        id: 'BASIC', 
-                        label: 'BASIC', 
-                        hasQuota: subscription && subscription.maxBasicPosts > subscription.usedBasicPosts,
-                        quotaText: '1 lượt (Miễn phí từ gói)',
-                        priceText: '100 xu',
-                        disabled: false
+                      {
+                        id: 'BASIC',
+                        label: 'Standard',
+                        description: 'Hiển thị cơ bản, tiếp cận ứng viên tự nhiên.',
+                        remaining: subscription ? Math.max(0, subscription.maxBasicPosts - subscription.usedBasicPosts) : 0,
+                        total: subscription?.maxBasicPosts || 0,
+                        icon: <Zap className="w-6 h-6" />,
+                        bgSelected: 'bg-indigo-50/30',
+                        borderSelected: 'border-indigo-600',
+                        accentColor: 'bg-indigo-600',
+                        glowColor: 'bg-indigo-500/10',
+                        textColor: 'text-indigo-600',
+                        shadowSelected: 'shadow-indigo-900/5'
                       },
-                      { 
-                        id: 'PROFESSIONAL', 
-                        label: 'PROFESSIONAL', 
-                        hasQuota: subscription && subscription.maxVipPosts > subscription.usedVipPosts,
-                        quotaText: '1 lượt (Miễn phí từ gói)',
-                        priceText: 'Yêu cầu nâng cấp gói LITE/GROWTH',
-                        disabled: !(subscription && subscription.maxVipPosts > subscription.usedVipPosts)
+                      {
+                        id: 'PROFESSIONAL',
+                        label: 'Professional',
+                        description: 'Ưu tiên hiển thị, tăng 2x lượt tiếp cận.',
+                        remaining: subscription ? Math.max(0, subscription.maxVipPosts - subscription.usedVipPosts) : 0,
+                        total: subscription?.maxVipPosts || 0,
+                        icon: <Crown className="w-6 h-6" />,
+                        bgSelected: 'bg-amber-50/30',
+                        borderSelected: 'border-amber-600',
+                        accentColor: 'bg-amber-600',
+                        glowColor: 'bg-amber-500/10',
+                        textColor: 'text-amber-600',
+                        shadowSelected: 'shadow-amber-900/5'
                       },
-                      { 
-                        id: 'URGENT', 
-                        label: 'URGENT', 
-                        hasQuota: subscription && subscription.maxUrgentPosts > subscription.usedUrgentPosts,
-                        quotaText: '1 lượt (Miễn phí từ gói)',
-                        priceText: 'Yêu cầu nâng cấp gói GROWTH',
-                        disabled: !(subscription && subscription.maxUrgentPosts > subscription.usedUrgentPosts)
+                      {
+                        id: 'URGENT',
+                        label: 'Urgent',
+                        description: 'Ghim top đầu, AI Matching mạnh nhất.',
+                        remaining: subscription ? Math.max(0, subscription.maxUrgentPosts - subscription.usedUrgentPosts) : 0,
+                        total: subscription?.maxUrgentPosts || 0,
+                        icon: <Shield className="w-6 h-6" />,
+                        bgSelected: 'bg-rose-50/30',
+                        borderSelected: 'border-rose-600',
+                        accentColor: 'bg-rose-600',
+                        glowColor: 'bg-rose-500/10',
+                        textColor: 'text-rose-600',
+                        shadowSelected: 'shadow-rose-900/5'
                       }
-                    ].map(t => (
-                      <div 
-                        key={t.id} 
-                        onClick={() => !t.disabled && setFormData(p => ({ ...p, jobTier: t.id as any }))} 
-                        className={`p-4 rounded-2xl border-2 transition-all ${
-                          t.disabled 
-                            ? 'opacity-50 cursor-not-allowed bg-slate-50 border-transparent' 
-                            : formData.jobTier === t.id 
-                              ? 'bg-indigo-50 border-indigo-600 cursor-pointer shadow-md' 
-                              : 'bg-white border-slate-200 hover:border-indigo-300 cursor-pointer'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <h4 className="font-black text-slate-800">{t.label}</h4>
-                          {t.disabled && <Lock className="w-4 h-4 text-slate-400" />}
-                        </div>
-                        <p className={`text-xs font-semibold ${t.hasQuota ? 'text-emerald-600' : 'text-slate-500'}`}>
-                          {t.hasQuota ? t.quotaText : t.priceText}
-                        </p>
-                      </div>
-                    ))}
+                    ].map((tier, idx) => {
+                      const isSelected = formData.jobTier === tier.id;
+                      const hasQuota = tier.remaining > 0;
+                      const isDisabled = !hasQuota && tier.id !== 'BASIC';
+                      
+                      return (
+                        <motion.div
+                          key={tier.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                          onClick={() => !isDisabled && setFormData(p => ({ ...p, jobTier: tier.id as any }))}
+                          className={`relative group p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[300px] ${
+                            isSelected 
+                              ? `${tier.borderSelected} ${tier.bgSelected} shadow-xl ${tier.shadowSelected}`
+                              : 'border-slate-100 bg-white hover:border-slate-200 shadow-sm'
+                          } ${isDisabled ? 'opacity-50 grayscale bg-slate-50' : ''}`}
+                        >
+                          {/* Accent Glow */}
+                          {isSelected && (
+                            <div className={`absolute -top-24 -right-24 w-48 h-48 ${tier.glowColor} rounded-full blur-3xl`} />
+                          )}
+
+                          <div className="relative z-10">
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${
+                              isSelected ? `${tier.accentColor} text-white shadow-lg` : 'bg-slate-50 text-slate-400'
+                            }`}>
+                              {tier.icon}
+                            </div>
+                            <h4 className="text-xl font-bold text-[#111110] mb-3">{tier.label}</h4>
+                            <p className="text-xs text-[#666660] leading-relaxed mb-8 font-medium">
+                              {tier.description}
+                            </p>
+                          </div>
+
+                          <div className="relative z-10 space-y-5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-[#A0A090]">Quota Status</span>
+                              <span className={`text-[10px] font-black tracking-widest ${hasQuota ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                {hasQuota ? 'ACTIVE' : 'EXHAUSTED'}
+                              </span>
+                            </div>
+                            
+                            <div className="h-1.5 w-full bg-slate-100/50 rounded-full overflow-hidden border border-slate-100/50">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(tier.remaining / Math.max(1, tier.total)) * 100}%` }}
+                                transition={{ duration: 1, ease: "circOut" }}
+                                className={`h-full rounded-full ${tier.accentColor}`}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <p className="text-[11px] font-black text-[#111110] tracking-tight">
+                                {tier.remaining} <span className="text-[#A0A090] font-medium italic">/ {tier.total} turns left</span>
+                              </p>
+                              {isSelected && (
+                                <div className={`w-6 h-6 rounded-full ${tier.accentColor} flex items-center justify-center text-white shadow-sm transform scale-110`}>
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                </div>
+                              )}
+                              {!hasQuota && !isSelected && (
+                                <Lock className="w-3.5 h-3.5 text-slate-300" />
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
+
                 {userPlan === 'GROWTH' && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-4">
-                    <div className={`w-12 h-6 rounded-full p-1 cursor-pointer relative flex items-center ${formData.autoInviteMatches ? 'bg-amber-500' : 'bg-slate-300'}`} onClick={() => setFormData(p => ({ ...p, autoInviteMatches: !p.autoInviteMatches }))}>
-                      <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${formData.autoInviteMatches ? 'translate-x-6' : 'translate-x-0'}`} />
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-[#F9F9F7] border border-slate-100 rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group"
+                  >
+                    {/* Subtle background glow */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl opacity-40 -translate-y-1/2 translate-x-1/4 group-hover:scale-110 transition-transform duration-1000" />
+                    
+                    <div className="flex items-center gap-7 relative z-10">
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center flex-shrink-0 transform -rotate-3 group-hover:rotate-0 transition-transform">
+                        <Zap className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <div>
+                        <h5 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-xl text-[#111110] mb-2">Tự động mời ứng viên <em className="text-amber-500 not-italic">(Auto-Invite)</em></h5>
+                        <p className="text-xs text-[#666660] font-medium leading-relaxed max-w-md">AI sẽ tự động phân tích và gửi lời mời ứng tuyển đến các ứng viên phù hợp nhất ngay sau khi bạn đăng tin.</p>
+                      </div>
                     </div>
-                    <p className="text-xs font-bold text-slate-700">Tự Động Mời Ứng Viên (Auto-Invite)</p>
-                  </div>
+                    <div 
+                      className={`w-20 h-10 rounded-full p-1.5 cursor-pointer relative flex items-center transition-all duration-500 shadow-inner ${formData.autoInviteMatches ? 'bg-amber-500' : 'bg-[#E8E8E2]'}`} 
+                      onClick={() => setFormData(p => ({ ...p, autoInviteMatches: !p.autoInviteMatches }))}
+                    >
+                      <div className={`bg-white w-7 h-7 rounded-full shadow-lg transform transition-transform duration-500 ${formData.autoInviteMatches ? 'translate-x-10' : 'translate-x-0'}`} />
+                    </div>
+                  </motion.div>
                 )}
               </motion.div>
             )}
@@ -1284,7 +1472,7 @@ function PostJobForm() {
               {currentStep < totalSteps ? (
                 <button type="button" onClick={(e) => handleNextStep(e)} className="px-8 py-2 rounded-xl bg-indigo-600 text-white font-black hover:bg-indigo-700 shadow-lg">Tiếp tục</button>
               ) : (
-                <button type="submit" disabled={saving || !isFormValid} className="px-8 py-2 rounded-xl bg-momo-gradient text-white font-black shadow-lg disabled:opacity-50">
+                <button type="submit" disabled={saving || !isFormValid} className="px-10 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-black shadow-xl shadow-indigo-200 disabled:opacity-50 transition-all hover:scale-[1.02] active:scale-[0.98]">
                   {saving ? 'Đang lưu...' : (editJobId ? 'Cập nhật tin' : 'Đăng tin ngay')}
                 </button>
               )}
@@ -1292,49 +1480,6 @@ function PostJobForm() {
           </div>
         </form>
 
-        <div className={`hidden lg:block transition-all duration-500 ${currentStep === 5 ? 'opacity-0 pointer-events-none translate-x-10' : 'opacity-100'}`}>
-          <div className="sticky top-24 space-y-4">
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6">
-              <div className="text-indigo-600 font-black text-[10px] uppercase mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> Live Preview
-              </div>
-              <h4 className="text-lg font-black text-slate-800 leading-tight">
-                {formData.title || 'Tiêu đề...'}
-              </h4>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.categories.slice(0, 2).map(c => (
-                  <span key={c} className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded-md">{c}</span>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-4">
-                <div className="p-2 bg-slate-50 rounded-xl">
-                  <p className="text-[8px] font-bold text-slate-400 uppercase">Lương</p>
-                  <p className="text-xs font-black text-slate-700">
-                    {formData.salaryMin ? `${Number(formData.salaryMin).toLocaleString()} VNĐ` : 'Thỏa thuận'}
-                  </p>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-xl">
-                  <p className="text-[8px] font-bold text-slate-400 uppercase">Hạng tin</p>
-                  <p className="text-xs font-black text-indigo-600">{formData.jobTier}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-indigo-900 rounded-3xl p-6 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Crown className="w-20 h-20 rotate-12" />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-2 text-xs">Mẹo nhỏ từ AI</p>
-              <p className="text-xs font-medium leading-relaxed italic">
-                {currentStep === 1 ? 'Tiêu đề ngắn gọn giúp ứng viên dễ tìm thấy tin của bạn hơn.' :
-                  currentStep === 2 ? 'Mức lương minh bạch giúp tăng 40% tỷ lệ ứng tuyển.' :
-                    currentStep === 3 ? 'Đừng quên sử dụng Trợ lý AI để viết mô tả chuyên nghiệp hơn.' :
-                      currentStep === 4 ? 'Hạng tin càng cao, tin của bạn càng được ưu tiên hiển thị và AI Matching mạnh hơn.' :
-                        'Hãy kiểm tra kỹ mọi thông tin trước khi nhấn Đăng tin!'}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </motion.div>
   );

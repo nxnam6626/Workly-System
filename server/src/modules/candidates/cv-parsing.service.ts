@@ -90,6 +90,10 @@ export class CvParsingService {
     if (!this.groqApiKey) return null;
 
     try {
+      // Llama models sometimes loop or generate invalid JSON if control characters (like null bytes) are present.
+      // We sanitize the text to remove invalid control characters (except newlines/tabs).
+      const sanitizedText = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+
       this.logger.log('[CV Parsing] Đang phân tích bằng Groq (Llama-3.3-70b)...');
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
@@ -102,10 +106,11 @@ export class CvParsingService {
             },
             {
               role: 'user',
-              content: `NỘI DUNG VĂN BẢN CV:\n${text}`,
+              content: `NỘI DUNG VĂN BẢN CV:\n${sanitizedText}`,
             },
           ],
           temperature: 0.1,
+          max_tokens: 8192, // Explicitly set max_tokens to prevent truncation leading to invalid JSON
           response_format: { type: 'json_object' },
         },
         {
@@ -119,7 +124,8 @@ export class CvParsingService {
       const parsedData = response.data.choices[0].message.content;
       return this.cleanAndParseJson(parsedData) as CvParsedData;
     } catch (error: any) {
-      this.logger.warn(`[CV Parsing] Groq parsing thất bại: ${error.message}`);
+      const groqErrorDetail = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+      this.logger.warn(`[CV Parsing] Groq parsing thất bại: ${groqErrorDetail}`);
       return null;
     }
   }

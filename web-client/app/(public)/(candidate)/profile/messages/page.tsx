@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Search, Send, Loader2, ChevronLeft, EyeOff, X, Paperclip, File, Image as ImageIcon } from 'lucide-react';
+import { MessageSquare, Search, Send, Loader2, ChevronLeft, X, Paperclip, File } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { ProfileSidebar } from '@/components/candidates/ProfileSidebar';
 
 export default function CandidateMessagesPage() {
   const { user, logout } = useAuthStore();
@@ -237,23 +238,32 @@ export default function CandidateMessagesPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="h-[calc(100vh-250px)] flex flex-col pt-0"
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
-              <MessageSquare className="h-8 w-8 text-indigo-600" />
-              Tin nhắn từ Nhà tuyển dụng
-            </h1>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#f8fafc] py-8 px-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');`}</style>
+      <div className="max-w-[1300px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-0">
+          <aside className="lg:col-span-3">
+            <ProfileSidebar />
+          </aside>
+
+          <main className="lg:col-span-9">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col h-[calc(100vh-120px)] min-h-[600px]"
+            >
+              {/* Page Header */}
+              <div className="mb-5">
+                <p className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-1">Kết nối & Hợp tác</p>
+                <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 700 }}
+                  className="text-3xl text-slate-900 leading-none">
+                  Tin nhắn <em className="text-emerald-600">nhà tuyển dụng</em>
+                </h1>
+              </div>
+
+              <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col md:flex-row min-h-0">
 
           <div className={`w-full md:w-80 border-r border-slate-100 flex-col shrink-0 flex-1 md:flex-none ${activeChat ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 border-b border-slate-100">
@@ -449,8 +459,11 @@ export default function CandidateMessagesPage() {
               </div>
             )}
           </div>
+            </div>
+          </motion.div>
+          </main>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

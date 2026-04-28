@@ -26,6 +26,14 @@
   --color-glass-white: rgba(255, 255, 255, 0.7);
   --color-glass-border: rgba(255, 255, 255, 0.3);
   --color-glow-pink: 0 0 20px rgba(216, 45, 139, 0.4);
+
+  /* Animations */
+  --animate-shimmer: shimmer 3s linear infinite;
+  
+  @keyframes shimmer {
+    from { background-position: 0% 0%; }
+    to { background-position: 200% 0%; }
+  }
 }
 
 .glass-morphism {

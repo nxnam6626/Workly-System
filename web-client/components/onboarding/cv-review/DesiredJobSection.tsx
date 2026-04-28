@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Target, AlertCircle } from 'lucide-react';
 import { FormValues } from '@/lib/schemas/cv-onboarding';
+import { LOCATIONS } from '@/lib/constants';
 
 interface DesiredJobSectionProps {
   currentProfile?: any;
@@ -87,14 +88,26 @@ export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-tight">Địa điểm làm việc</label>
-            <input
-              {...register('desiredJob.location')}
-              className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none"
-              placeholder="VD: TP. Hồ Chí Minh..."
-            />
+            <div className="relative">
+              <select
+                {...register('desiredJob.location')}
+                className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none"
+              >
+                <option value="">Chọn địa điểm</option>
+                {LOCATIONS.map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
             <DiffIndicator current={currentProfile?.desiredJob?.location} newValue={watchedLocation} />
           </div>
         </div>
+
       </div>
     </section>
   );

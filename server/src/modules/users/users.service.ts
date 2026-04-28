@@ -573,22 +573,8 @@ export class UsersService {
       file.mimetype,
     );
 
-    // 2. Kiểm duyệt ảnh bằng Gemini Vision (fail-open nếu AI không khả dụng)
-    const expectedType = isCandidateOnly ? 'face_only' : 'face_or_logo';
-    const modResult = await this.aiService.moderateImage(
-      avatarUrl,
-      file.mimetype,
-      expectedType,
-    );
-    if (!modResult.safe) {
-      // Xóa ảnh vừa upload khỏi Supabase (đảm bảo không để lại rác)
-      const uploadedPath = this.supabaseService.extractPathFromUrl(avatarUrl);
-      if (uploadedPath)
-        await this.supabaseService.deleteFile(uploadedPath).catch(() => {});
-      throw new BadRequestException(
-        `Ảnh không phù hợp: ${modResult.reason}. Vui lòng chọn ảnh khác.`,
-      );
-    }
+    // 2. Bỏ qua bước kiểm duyệt AI (Theo yêu cầu người dùng)
+    // AI moderation skipped to avoid false positives and reduce latency.
 
     // 3. Cập nhật URL vào DB
     await this.prisma.user.update({
