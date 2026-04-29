@@ -7,7 +7,7 @@ export class RecruitersService {
   constructor(
     private prisma: PrismaService,
     private messagesService: MessagesService,
-  ) {}
+  ) { }
 
   private async ensureRecruiter(userId: string) {
     let recruiter = await this.prisma.recruiter.findUnique({
@@ -45,7 +45,8 @@ export class RecruitersService {
       candidateId: m.candidateId,
       score: m.score,
       matchedSkills: m.matchedSkills,
-      cvId: m.candidate?.cvs?.[0]?.cvId
+      cvId: m.candidate?.cvs?.[0]?.cvId,
+      matchDetails: m.details as any
     }));
 
     // Lấy danh sách đã mở khóa
@@ -101,10 +102,10 @@ export class RecruitersService {
 
         const jobReqs = (job?.structuredRequirements as any) || {};
         const hardSkills = Array.isArray(jobReqs?.hardSkills) ? jobReqs.hardSkills : [];
-        const missingSkills = hardSkills.filter((s: string) => 
+        const missingSkills = hardSkills.filter((s: string) =>
           !m.matchedSkills.some((ms: string) => ms.toLowerCase().includes(s.toLowerCase()))
         );
-        const cvExp = (cv?.parsedData as any)?.totalYearsExp || 0;
+        const cvExp = candidate?.totalYearsExp || 0;
         const requiredExp = jobReqs?.minExperienceYears || 0;
 
         return {
@@ -125,7 +126,8 @@ export class RecruitersService {
             missingCount: missingSkills.length,
             experienceMatch: cvExp >= requiredExp,
             totalYearsExp: cvExp,
-            requiredExp: requiredExp
+            requiredExp: requiredExp,
+            ...(m.matchDetails || {})
           }
         };
       }),
@@ -258,7 +260,7 @@ export class RecruitersService {
       const matches = dbMatches.map(m => {
         const jobReqs = (job?.structuredRequirements as any) || {};
         const hardSkills = Array.isArray(jobReqs?.hardSkills) ? jobReqs.hardSkills : [];
-        const missingSkills = hardSkills.filter((s: string) => 
+        const missingSkills = hardSkills.filter((s: string) =>
           !m.matchedSkills.some((ms: string) => ms.toLowerCase().includes(s.toLowerCase()))
         );
         const cvExp = (m.candidate?.cvs?.[0]?.parsedData as any)?.totalYearsExp || 0;
@@ -276,7 +278,8 @@ export class RecruitersService {
             missingCount: missingSkills.length,
             experienceMatch: cvExp >= requiredExp,
             totalYearsExp: cvExp,
-            requiredExp: requiredExp
+            requiredExp: requiredExp,
+            ...(m.details as any || {})
           }
         };
       });

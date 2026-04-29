@@ -10779,11 +10779,13 @@ export namespace Prisma {
   export type CandidateAvgAggregateOutputType = {
     gpa: number | null
     birthYear: number | null
+    totalYearsExp: number | null
   }
 
   export type CandidateSumAggregateOutputType = {
     gpa: number | null
     birthYear: number | null
+    totalYearsExp: number | null
   }
 
   export type CandidateMinAggregateOutputType = {
@@ -10799,6 +10801,7 @@ export namespace Prisma {
     summary: string | null
     birthYear: number | null
     currentSalary: string | null
+    totalYearsExp: number | null
     degree: string | null
     gender: string | null
   }
@@ -10816,6 +10819,7 @@ export namespace Prisma {
     summary: string | null
     birthYear: number | null
     currentSalary: string | null
+    totalYearsExp: number | null
     degree: string | null
     gender: string | null
   }
@@ -10834,6 +10838,7 @@ export namespace Prisma {
     summary: number
     birthYear: number
     currentSalary: number
+    totalYearsExp: number
     degree: number
     gender: number
     industries: number
@@ -10847,11 +10852,13 @@ export namespace Prisma {
   export type CandidateAvgAggregateInputType = {
     gpa?: true
     birthYear?: true
+    totalYearsExp?: true
   }
 
   export type CandidateSumAggregateInputType = {
     gpa?: true
     birthYear?: true
+    totalYearsExp?: true
   }
 
   export type CandidateMinAggregateInputType = {
@@ -10867,6 +10874,7 @@ export namespace Prisma {
     summary?: true
     birthYear?: true
     currentSalary?: true
+    totalYearsExp?: true
     degree?: true
     gender?: true
   }
@@ -10884,6 +10892,7 @@ export namespace Prisma {
     summary?: true
     birthYear?: true
     currentSalary?: true
+    totalYearsExp?: true
     degree?: true
     gender?: true
   }
@@ -10902,6 +10911,7 @@ export namespace Prisma {
     summary?: true
     birthYear?: true
     currentSalary?: true
+    totalYearsExp?: true
     degree?: true
     gender?: true
     industries?: true
@@ -11011,6 +11021,7 @@ export namespace Prisma {
     summary: string | null
     birthYear: number | null
     currentSalary: string | null
+    totalYearsExp: number | null
     degree: string | null
     gender: string | null
     industries: string[]
@@ -11052,6 +11063,7 @@ export namespace Prisma {
     summary?: boolean
     birthYear?: boolean
     currentSalary?: boolean
+    totalYearsExp?: boolean
     degree?: boolean
     gender?: boolean
     industries?: boolean
@@ -11085,6 +11097,7 @@ export namespace Prisma {
     summary?: boolean
     birthYear?: boolean
     currentSalary?: boolean
+    totalYearsExp?: boolean
     degree?: boolean
     gender?: boolean
     industries?: boolean
@@ -11108,6 +11121,7 @@ export namespace Prisma {
     summary?: boolean
     birthYear?: boolean
     currentSalary?: boolean
+    totalYearsExp?: boolean
     degree?: boolean
     gender?: boolean
     industries?: boolean
@@ -11131,6 +11145,7 @@ export namespace Prisma {
     summary?: boolean
     birthYear?: boolean
     currentSalary?: boolean
+    totalYearsExp?: boolean
     degree?: boolean
     gender?: boolean
     industries?: boolean
@@ -11139,7 +11154,7 @@ export namespace Prisma {
     softSkills?: boolean
   }
 
-  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "degree" | "gender" | "industries" | "interests" | "languages" | "softSkills", ExtArgs["result"]["candidate"]>
+  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "totalYearsExp" | "degree" | "gender" | "industries" | "interests" | "languages" | "softSkills", ExtArgs["result"]["candidate"]>
   export type CandidateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
@@ -11188,6 +11203,7 @@ export namespace Prisma {
       summary: string | null
       birthYear: number | null
       currentSalary: string | null
+      totalYearsExp: number | null
       degree: string | null
       gender: string | null
       industries: string[]
@@ -11640,6 +11656,7 @@ export namespace Prisma {
     readonly summary: FieldRef<"Candidate", 'String'>
     readonly birthYear: FieldRef<"Candidate", 'Int'>
     readonly currentSalary: FieldRef<"Candidate", 'String'>
+    readonly totalYearsExp: FieldRef<"Candidate", 'Float'>
     readonly degree: FieldRef<"Candidate", 'String'>
     readonly gender: FieldRef<"Candidate", 'String'>
     readonly industries: FieldRef<"Candidate", 'String[]'>
@@ -24204,6 +24221,7 @@ export namespace Prisma {
     matchId: number
     score: number
     matchedSkills: number
+    details: number
     candidateId: number
     jobPostingId: number
     createdAt: number
@@ -24242,6 +24260,7 @@ export namespace Prisma {
     matchId?: true
     score?: true
     matchedSkills?: true
+    details?: true
     candidateId?: true
     jobPostingId?: true
     createdAt?: true
@@ -24339,6 +24358,7 @@ export namespace Prisma {
     matchId: string
     score: number
     matchedSkills: string[]
+    details: JsonValue | null
     candidateId: string
     jobPostingId: string
     createdAt: Date
@@ -24368,6 +24388,7 @@ export namespace Prisma {
     matchId?: boolean
     score?: boolean
     matchedSkills?: boolean
+    details?: boolean
     candidateId?: boolean
     jobPostingId?: boolean
     createdAt?: boolean
@@ -24380,6 +24401,7 @@ export namespace Prisma {
     matchId?: boolean
     score?: boolean
     matchedSkills?: boolean
+    details?: boolean
     candidateId?: boolean
     jobPostingId?: boolean
     createdAt?: boolean
@@ -24392,6 +24414,7 @@ export namespace Prisma {
     matchId?: boolean
     score?: boolean
     matchedSkills?: boolean
+    details?: boolean
     candidateId?: boolean
     jobPostingId?: boolean
     createdAt?: boolean
@@ -24404,13 +24427,14 @@ export namespace Prisma {
     matchId?: boolean
     score?: boolean
     matchedSkills?: boolean
+    details?: boolean
     candidateId?: boolean
     jobPostingId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type JobMatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"matchId" | "score" | "matchedSkills" | "candidateId" | "jobPostingId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobMatch"]>
+  export type JobMatchOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"matchId" | "score" | "matchedSkills" | "details" | "candidateId" | "jobPostingId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobMatch"]>
   export type JobMatchInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
     jobPosting?: boolean | JobPostingDefaultArgs<ExtArgs>
@@ -24434,6 +24458,7 @@ export namespace Prisma {
       matchId: string
       score: number
       matchedSkills: string[]
+      details: Prisma.JsonValue | null
       candidateId: string
       jobPostingId: string
       createdAt: Date
@@ -24866,6 +24891,7 @@ export namespace Prisma {
     readonly matchId: FieldRef<"JobMatch", 'String'>
     readonly score: FieldRef<"JobMatch", 'Float'>
     readonly matchedSkills: FieldRef<"JobMatch", 'String[]'>
+    readonly details: FieldRef<"JobMatch", 'Json'>
     readonly candidateId: FieldRef<"JobMatch", 'String'>
     readonly jobPostingId: FieldRef<"JobMatch", 'String'>
     readonly createdAt: FieldRef<"JobMatch", 'DateTime'>
@@ -36753,6 +36779,7 @@ export namespace Prisma {
     summary: 'summary',
     birthYear: 'birthYear',
     currentSalary: 'currentSalary',
+    totalYearsExp: 'totalYearsExp',
     degree: 'degree',
     gender: 'gender',
     industries: 'industries',
@@ -36928,6 +36955,7 @@ export namespace Prisma {
     matchId: 'matchId',
     score: 'score',
     matchedSkills: 'matchedSkills',
+    details: 'details',
     candidateId: 'candidateId',
     jobPostingId: 'jobPostingId',
     createdAt: 'createdAt',
@@ -37817,6 +37845,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Candidate"> | string | null
     birthYear?: IntNullableFilter<"Candidate"> | number | null
     currentSalary?: StringNullableFilter<"Candidate"> | string | null
+    totalYearsExp?: FloatNullableFilter<"Candidate"> | number | null
     degree?: StringNullableFilter<"Candidate"> | string | null
     gender?: StringNullableFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -37849,6 +37878,7 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     birthYear?: SortOrderInput | SortOrder
     currentSalary?: SortOrderInput | SortOrder
+    totalYearsExp?: SortOrderInput | SortOrder
     degree?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     industries?: SortOrder
@@ -37884,6 +37914,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Candidate"> | string | null
     birthYear?: IntNullableFilter<"Candidate"> | number | null
     currentSalary?: StringNullableFilter<"Candidate"> | string | null
+    totalYearsExp?: FloatNullableFilter<"Candidate"> | number | null
     degree?: StringNullableFilter<"Candidate"> | string | null
     gender?: StringNullableFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -37916,6 +37947,7 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     birthYear?: SortOrderInput | SortOrder
     currentSalary?: SortOrderInput | SortOrder
+    totalYearsExp?: SortOrderInput | SortOrder
     degree?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     industries?: SortOrder
@@ -37946,6 +37978,7 @@ export namespace Prisma {
     summary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     birthYear?: IntNullableWithAggregatesFilter<"Candidate"> | number | null
     currentSalary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    totalYearsExp?: FloatNullableWithAggregatesFilter<"Candidate"> | number | null
     degree?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     gender?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -38817,6 +38850,7 @@ export namespace Prisma {
     matchId?: StringFilter<"JobMatch"> | string
     score?: FloatFilter<"JobMatch"> | number
     matchedSkills?: StringNullableListFilter<"JobMatch">
+    details?: JsonNullableFilter<"JobMatch">
     candidateId?: StringFilter<"JobMatch"> | string
     jobPostingId?: StringFilter<"JobMatch"> | string
     createdAt?: DateTimeFilter<"JobMatch"> | Date | string
@@ -38829,6 +38863,7 @@ export namespace Prisma {
     matchId?: SortOrder
     score?: SortOrder
     matchedSkills?: SortOrder
+    details?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     jobPostingId?: SortOrder
     createdAt?: SortOrder
@@ -38845,6 +38880,7 @@ export namespace Prisma {
     NOT?: JobMatchWhereInput | JobMatchWhereInput[]
     score?: FloatFilter<"JobMatch"> | number
     matchedSkills?: StringNullableListFilter<"JobMatch">
+    details?: JsonNullableFilter<"JobMatch">
     candidateId?: StringFilter<"JobMatch"> | string
     jobPostingId?: StringFilter<"JobMatch"> | string
     createdAt?: DateTimeFilter<"JobMatch"> | Date | string
@@ -38857,6 +38893,7 @@ export namespace Prisma {
     matchId?: SortOrder
     score?: SortOrder
     matchedSkills?: SortOrder
+    details?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     jobPostingId?: SortOrder
     createdAt?: SortOrder
@@ -38875,6 +38912,7 @@ export namespace Prisma {
     matchId?: StringWithAggregatesFilter<"JobMatch"> | string
     score?: FloatWithAggregatesFilter<"JobMatch"> | number
     matchedSkills?: StringNullableListFilter<"JobMatch">
+    details?: JsonNullableWithAggregatesFilter<"JobMatch">
     candidateId?: StringWithAggregatesFilter<"JobMatch"> | string
     jobPostingId?: StringWithAggregatesFilter<"JobMatch"> | string
     createdAt?: DateTimeWithAggregatesFilter<"JobMatch"> | Date | string
@@ -40086,6 +40124,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -40118,6 +40157,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -40148,6 +40188,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -40180,6 +40221,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -40211,6 +40253,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -40232,6 +40275,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -40254,6 +40298,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -41212,6 +41257,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     candidate: CandidateCreateNestedOneWithoutJobMatchesInput
@@ -41222,6 +41268,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
     jobPostingId: string
     createdAt?: Date | string
@@ -41232,6 +41279,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     candidate?: CandidateUpdateOneRequiredWithoutJobMatchesNestedInput
@@ -41242,6 +41290,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
     jobPostingId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -41252,6 +41301,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
     jobPostingId: string
     createdAt?: Date | string
@@ -41262,6 +41312,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -41270,6 +41321,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
     jobPostingId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -42726,6 +42778,7 @@ export namespace Prisma {
     summary?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
+    totalYearsExp?: SortOrder
     degree?: SortOrder
     gender?: SortOrder
     industries?: SortOrder
@@ -42737,6 +42790,7 @@ export namespace Prisma {
   export type CandidateAvgOrderByAggregateInput = {
     gpa?: SortOrder
     birthYear?: SortOrder
+    totalYearsExp?: SortOrder
   }
 
   export type CandidateMaxOrderByAggregateInput = {
@@ -42752,6 +42806,7 @@ export namespace Prisma {
     summary?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
+    totalYearsExp?: SortOrder
     degree?: SortOrder
     gender?: SortOrder
   }
@@ -42769,6 +42824,7 @@ export namespace Prisma {
     summary?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
+    totalYearsExp?: SortOrder
     degree?: SortOrder
     gender?: SortOrder
   }
@@ -42776,6 +42832,7 @@ export namespace Prisma {
   export type CandidateSumOrderByAggregateInput = {
     gpa?: SortOrder
     birthYear?: SortOrder
+    totalYearsExp?: SortOrder
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -43482,6 +43539,7 @@ export namespace Prisma {
     matchId?: SortOrder
     score?: SortOrder
     matchedSkills?: SortOrder
+    details?: SortOrder
     candidateId?: SortOrder
     jobPostingId?: SortOrder
     createdAt?: SortOrder
@@ -46578,6 +46636,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -46608,6 +46667,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -46832,6 +46892,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -46862,6 +46923,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -47914,6 +47976,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     jobPosting: JobPostingCreateNestedOneWithoutJobMatchesInput
@@ -47923,6 +47986,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     jobPostingId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -48244,6 +48308,7 @@ export namespace Prisma {
     matchId?: StringFilter<"JobMatch"> | string
     score?: FloatFilter<"JobMatch"> | number
     matchedSkills?: StringNullableListFilter<"JobMatch">
+    details?: JsonNullableFilter<"JobMatch">
     candidateId?: StringFilter<"JobMatch"> | string
     jobPostingId?: StringFilter<"JobMatch"> | string
     createdAt?: DateTimeFilter<"JobMatch"> | Date | string
@@ -48344,6 +48409,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48375,6 +48441,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48420,6 +48487,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48451,6 +48519,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48480,6 +48549,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48511,6 +48581,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48556,6 +48627,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48587,6 +48659,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48616,6 +48689,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48647,6 +48721,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48692,6 +48767,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48723,6 +48799,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48752,6 +48829,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48783,6 +48861,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -48828,6 +48907,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -48859,6 +48939,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -49965,6 +50046,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     candidate: CandidateCreateNestedOneWithoutJobMatchesInput
@@ -49974,6 +50056,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -50526,6 +50609,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -50557,6 +50641,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -50675,6 +50760,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -50706,6 +50792,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -50856,6 +50943,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -50887,6 +50975,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -50976,6 +51065,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51007,6 +51097,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51065,6 +51156,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51096,6 +51188,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51243,6 +51336,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51274,6 +51368,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51417,6 +51512,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51448,6 +51544,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51566,6 +51663,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51597,6 +51695,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51705,6 +51804,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51736,6 +51836,7 @@ export namespace Prisma {
     summary?: string | null
     birthYear?: number | null
     currentSalary?: string | null
+    totalYearsExp?: number | null
     degree?: string | null
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -51858,6 +51959,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -51889,6 +51991,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     degree?: NullableStringFieldUpdateOperationsInput | string | null
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -52783,6 +52886,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     jobPostingId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -52963,6 +53067,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     jobPosting?: JobPostingUpdateOneRequiredWithoutJobMatchesNestedInput
@@ -52972,6 +53077,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     jobPostingId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -52981,6 +53087,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     jobPostingId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -53485,6 +53592,7 @@ export namespace Prisma {
     matchId?: string
     score: number
     matchedSkills?: JobMatchCreatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -53552,6 +53660,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     candidate?: CandidateUpdateOneRequiredWithoutJobMatchesNestedInput
@@ -53561,6 +53670,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -53570,6 +53680,7 @@ export namespace Prisma {
     matchId?: StringFieldUpdateOperationsInput | string
     score?: FloatFieldUpdateOperationsInput | number
     matchedSkills?: JobMatchUpdatematchedSkillsInput | string[]
+    details?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

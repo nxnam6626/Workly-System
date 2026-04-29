@@ -7,7 +7,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { JobType, JobTier } from '@/generated/prisma';
+import { JobType, JobTier } from '@prisma/client';
 
 export class FilterJobPostingDto {
   @IsOptional()

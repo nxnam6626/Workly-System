@@ -17,7 +17,7 @@ export class LocationStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedCv = (cv.parsedData as any) || {};
-      const candLocation = (parsedCv.location || '').toLowerCase().trim();
+      const candLocation = (cv.candidate?.location || parsedCv.location || '').toLowerCase().trim();
       const jobLocation = (job.locationCity || '').toLowerCase().trim();
       
       // 1. Công việc từ xa (Remote)

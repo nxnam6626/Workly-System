@@ -41,6 +41,7 @@ import { BasicInfoModal } from "@/components/candidates/profile-edit/BasicInfoMo
 import { ExperienceModal } from "@/components/candidates/profile-edit/ExperienceModal";
 import { ProjectsModal } from "@/components/candidates/profile-edit/ProjectsModal";
 import { SkillsModal } from "@/components/candidates/profile-edit/SkillsModal";
+import { LanguagesModal } from "@/components/candidates/profile-edit/LanguagesModal";
 import { CertificationsModal } from "@/components/candidates/profile-edit/CertificationsModal";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ConfirmDialog";
@@ -139,6 +140,7 @@ export default function ProfileDashboard() {
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
   const [isSkillsOpen, setIsSkillsOpen] = useState(false);
+  const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
   const [isCertificationsOpen, setIsCertificationsOpen] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -394,24 +396,28 @@ export default function ProfileDashboard() {
                 {activeTab === "OVERVIEW" && (
                   <div className="space-y-6">
                     {/* Basic Info Card */}
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8 group relative">
-                      <div className="flex items-center justify-between mb-6">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
+                      <div className="flex items-center justify-between mb-5">
                         <h3 className="text-xl font-bold text-slate-900">Thông tin chung</h3>
                         <button onClick={() => setIsBasicInfoOpen(true)}
                           className="p-2 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100">
                           <Edit className="w-4 h-4" />
                         </button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                         {[
                           { label: "Email", value: profile?.email },
                           { label: "Số điện thoại", value: profile?.phoneNumber },
+                          { label: "Địa điểm làm việc", value: profile?.candidate?.location },
                           { label: "Trường học", value: profile?.candidate?.university },
                           { label: "Chuyên ngành", value: profile?.candidate?.major },
                           { label: "GPA", value: profile?.candidate?.gpa ? `${profile.candidate.gpa}/4.0` : null },
-                          { label: "Vị trí mong muốn", value: profile?.candidate?.desiredJob?.jobTitle },
+                          { label: "Vị trí mong muốn", value: profile?.candidate?.desiredJob?.title },
+                          { label: "Mức lương kỳ vọng", value: profile?.candidate?.desiredJob?.salary },
+                          { label: "Ngành nghề", value: profile?.candidate?.industries?.join(", ") },
+                          { label: "Kinh nghiệm", value: profile?.candidate?.totalYearsExp != null ? `${profile.candidate.totalYearsExp} năm` : null },
                         ].map((item, idx) => (
-                          <div key={idx} className="flex flex-col gap-1">
+                          <div key={idx} className="flex flex-col gap-0.5">
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{item.label}</span>
                             <span className="text-[15px] font-semibold text-slate-800">{item.value || "Chưa cập nhật"}</span>
                           </div>
@@ -419,15 +425,15 @@ export default function ProfileDashboard() {
                       </div>
 
                       {profile?.candidate?.summary && (
-                        <div className="mt-8 pt-8 border-t border-slate-100">
+                        <div className="mt-6 pt-6 border-t border-slate-100">
                           <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Giới thiệu bản thân</h4>
-                          <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">{profile.candidate.summary}</p>
+                          <p className="text-slate-600 leading-snug whitespace-pre-wrap">{profile.candidate.summary}</p>
                         </div>
                       )}
                     </section>
 
                     {/* CV Management Card */}
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-bold text-slate-900">Danh sách CV</h3>
                         <Link href="/profile/cv-management" className="text-blue-600 text-[13px] font-bold hover:underline">Xem tất cả</Link>
@@ -483,7 +489,7 @@ export default function ProfileDashboard() {
                 {/* PORTFOLIO TAB */}
                 {activeTab === "PORTFOLIO" && (
                   <div className="space-y-6">
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8 group relative">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
                       <div className="flex items-center justify-between mb-8">
                         <h3 className="text-xl font-bold text-slate-900">Kinh nghiệm làm việc</h3>
                         <button onClick={() => setIsExperienceOpen(true)}
@@ -515,7 +521,7 @@ export default function ProfileDashboard() {
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8 group relative">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
                       <div className="flex items-center justify-between mb-8">
                         <h3 className="text-xl font-bold text-slate-900">Dự án tiêu biểu</h3>
                         <button onClick={() => setIsProjectsOpen(true)}
@@ -552,7 +558,7 @@ export default function ProfileDashboard() {
                 {/* SKILLS TAB */}
                 {activeTab === "SKILLS" && (
                   <div className="space-y-6">
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8 group relative">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
                       <div className="flex items-center justify-between mb-8">
                         <h3 className="text-xl font-bold text-slate-900">Kỹ năng & Chuyên môn</h3>
                         <button onClick={() => setIsSkillsOpen(true)}
@@ -597,7 +603,37 @@ export default function ProfileDashboard() {
                       </div>
                     </section>
 
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8 group relative">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
+                      <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-xl font-bold text-slate-900">Ngoại ngữ</h3>
+                        <button onClick={() => setIsLanguagesOpen(true)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl text-emerald-600 hover:bg-emerald-50 font-bold text-xs transition-all border border-emerald-100 opacity-0 group-hover:opacity-100">
+                          <Edit className="w-4 h-4" /> Chỉnh sửa
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-3">
+                        {profile?.candidate?.languages?.length ? (
+                          profile.candidate.languages.map((lang: any, idx: number) => {
+                            const levelColors: Record<string, string> = {
+                              ADVANCED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                              INTERMEDIATE: 'bg-amber-50 text-amber-700 border-amber-200',
+                              BEGINNER: 'bg-slate-50 text-slate-600 border-slate-200',
+                            };
+                            return (
+                              <div key={idx} className={`px-4 py-2 rounded-2xl border text-sm font-bold shadow-sm flex items-center gap-2 ${levelColors[lang.level] || levelColors.BEGINNER}`}>
+                                <span>{lang.name}</span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
+                                <span className="text-[10px] uppercase font-bold opacity-80">{lang.level === "ADVANCED" ? "Thành thạo" : lang.level === "INTERMEDIATE" ? "Trung bình" : "Cơ bản"}</span>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <p className="text-slate-400 italic">Chưa có thông tin ngoại ngữ.</p>
+                        )}
+                      </div>
+                    </section>
+
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 group relative">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-bold text-slate-900">Chứng chỉ & Bằng cấp</h3>
                         <button onClick={() => setIsCertificationsOpen(true)}
@@ -626,7 +662,7 @@ export default function ProfileDashboard() {
                 {/* JOBS TAB */}
                 {activeTab === "JOBS" && (
                   <div className="space-y-6">
-                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-8">
+                    <section className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>
                           <h3 className="text-xl font-bold text-slate-900">Việc làm gợi ý cho bạn</h3>
@@ -699,6 +735,12 @@ export default function ProfileDashboard() {
           <SkillsModal
             isOpen={isSkillsOpen}
             onClose={() => setIsSkillsOpen(false)}
+            initialData={profile}
+            onSuccess={(updated) => setProfile(updated)}
+          />
+          <LanguagesModal
+            isOpen={isLanguagesOpen}
+            onClose={() => setIsLanguagesOpen(false)}
             initialData={profile}
             onSuccess={(updated) => setProfile(updated)}
           />

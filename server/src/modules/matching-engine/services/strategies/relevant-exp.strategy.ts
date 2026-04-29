@@ -10,27 +10,56 @@ export class RelevantExpStrategy implements IMatchingStrategy {
 
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
-      const jobDesc = `${job.description} ${job.requirements}`;
-      const workHistory = (cv.parsedData?.workHistory || [])
-        .map((exp: any) => `${exp.role} ${exp.description} ${exp.achievements || ''}`)
+      const jobDesc = `${job.title} ${job.description} ${job.requirements}`;
+      
+      // 1. Thu thập kinh nghiệm từ nhiều nguồn (Ưu tiên Profile thủ công)
+      const candidateObj = (cv as any).candidate;
+      
+      const profileExps = (candidateObj?.experiences || [])
+        .map((exp: any) => `${exp.role} tại ${exp.company}: ${exp.description || ''}`)
         .join('\n');
       
-      const projects = (cv.parsedData?.projects || [])
-        .map((proj: any) => `${proj.projectName} ${proj.description}`)
+      const profileProjects = (candidateObj?.projects || [])
+        .map((proj: any) => `${proj.projectName} (${proj.role || ''}): ${proj.description || ''}`)
         .join('\n');
 
-      const fullCvExp = `${workHistory}\n${projects}`;
+      const parsedExps = (cv.parsedData?.workHistory || cv.parsedData?.experiences || [])
+        .map((exp: any) => `${exp.role || ''} ${exp.description || ''}`)
+        .join('\n');
 
-      if (!fullCvExp.trim()) {
-        return { score: 0, details: { message: 'Ứng viên chưa có kinh nghiệm làm việc hoặc dự án' } };
+      const fullCvExp = `${profileExps}\n${profileProjects}\n${parsedExps}`.trim();
+
+      if (!fullCvExp) {
+        return { 
+          score: 0, 
+          details: { message: 'Ứng viên chưa cập nhật thông tin kinh nghiệm hoặc dự án' } 
+        };
       }
 
-      // Sử dụng AI để so khớp độ liên quan giữa yêu cầu công việc và kinh nghiệm thực tế
-      const similarity = await this.aiService.calculateSemanticSimilarity(jobDesc, fullCvExp);
+      let similarity = 0;
+      try {
+        // 2. Sử dụng AI để đánh giá độ liên quan ngữ nghĩa
+        similarity = await this.aiService.calculateSemanticSimilarity(jobDesc, fullCvExp);
+        
+        // Boosting cho các trường hợp rất khớp (như ví dụ CSKH của khách hàng)
+        if (similarity > 0.6) {
+          similarity = Math.min(1, similarity + 0.25);
+        }
+      } catch (e) {
+        this.logger.warn(`AI Relevant Experience similarity failed, using keyword fallback`);
+        // Fallback: Keyword count simple logic
+        const keyTerms = job.title.toLowerCase().split(' ').filter(w => w.length > 3);
+        const matchCount = keyTerms.filter(t => fullCvExp.toLowerCase().includes(t)).length;
+        similarity = Math.min(0.8, (matchCount / keyTerms.length) + 0.2);
+      }
 
       return {
-        score: similarity * 100,
-        details: { similarity, message: 'Phân tích độ tương đồng dự án và trách nhiệm công việc' }
+        score: Math.round(similarity * 100),
+        details: { 
+          similarity: Math.round(similarity * 100) / 100, 
+          cvEvidence: fullCvExp,
+          message: 'Phân tích chiều sâu giữa trách nhiệm đã làm và yêu cầu công việc' 
+        }
       };
     } catch (error) {
       this.logger.error(`RelevantExp Match Error: ${error.message}`);

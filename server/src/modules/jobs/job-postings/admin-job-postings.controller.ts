@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { Role } from '../../auth/decorators/roles.decorator';
-import { JobStatus } from '@/generated/prisma';
+import { JobStatus } from '@prisma/client';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 

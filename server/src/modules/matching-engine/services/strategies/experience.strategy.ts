@@ -11,39 +11,27 @@ export class ExperienceStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedData = (cv.parsedData as any) || {};
-      const candidateYears = parsedData.yearsOfExperience || 0;
+      const candidateYears = cv.candidate?.totalYearsExp ?? parsedData.yearsOfExperience ?? 0;
       const requiredYears = parseInt(job.experience) || 0;
 
-      // 1. Tính điểm Số năm kinh nghiệm (50% của Strategy này)
+      // 1. Tính điểm Số năm kinh nghiệm (100% của Strategy này)
       let yearScore = 0;
       if (requiredYears === 0) {
         yearScore = 100;
       } else {
         const ratio = candidateYears / requiredYears;
-        if (ratio < 1) {
-          yearScore = Math.min(100, ratio * 100);
-        } else if (ratio <= 2.5) {
-          yearScore = 100;
-        } else if (ratio <= 4) {
-          yearScore = 85; // Overqualified penalty
+        if (ratio >= 1) {
+          yearScore = 100; // Đạt hoặc vượt yêu cầu
         } else {
-          yearScore = 70; // Highly overqualified penalty
+          // Nếu thiếu năm, tính điểm theo tỷ lệ nhưng tối thiểu 10 điểm nếu có kinh nghiệm
+          yearScore = Math.max(10, Math.round(ratio * 100));
         }
       }
 
-      // 2. Tính điểm tương đồng Chức danh (50% của Strategy này)
-      // Sử dụng SQL Vector similarity để so khớp Chức danh (nếu có embedding cho title)
-      // Ở đây ta sử dụng một logic so khớp đơn giản hoặc Semantic Search nếu Title được lưu Vector
-      // Tạm thời sử dụng logic so khớp text hoặc bạn có thể nâng cấp lên dùng Embedding Title riêng
-      const titleMatchScore = this.calculateTitleSimilarity(job.title, cv.cvTitle || '');
-
-      const finalScore = (yearScore * 0.4) + (titleMatchScore * 0.6);
-
       return {
-        score: finalScore,
+        score: yearScore,
         details: {
           yearsScore: yearScore,
-          titleScore: titleMatchScore,
           candidateYears,
           requiredYears
         }
@@ -54,6 +42,7 @@ export class ExperienceStrategy implements IMatchingStrategy {
     }
   }
 
+  // Phương thức này giờ không còn được gọi từ calculate để tránh dư thừa
   private calculateTitleSimilarity(jobTitle: string, cvTitle: string): number {
     const jt = jobTitle.toLowerCase();
     const ct = cvTitle.toLowerCase();

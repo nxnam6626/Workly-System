@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WalletsService } from '../wallets/wallets.service';
-import { PlanType, JobTier, TransactionType } from '@/generated/prisma';
+import { PlanType, JobTier, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class SubscriptionsService {

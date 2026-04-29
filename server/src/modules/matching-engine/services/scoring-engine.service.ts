@@ -106,6 +106,10 @@ export class ScoringEngineService {
         salaryDetails: salaryRes.details,
         skillDetails: skillsRes.details,
         titleDetails: titleRes.details,
+        educationDetails: eduRes.details,
+        experienceDetails: expRes.details,
+        relevantExpDetails: relExpRes.details,
+        languageDetails: langRes.details,
         penaltyApplied: totalPenalty
       },
     };
@@ -136,11 +140,18 @@ export class ScoringEngineService {
 
     const semanticRes = await semanticStrategy.calculate(job, cv);
 
+    let finalSkillScore = keywordRes.score;
+    // Điểm Semantic chỉ dùng để cộng điểm thưởng (vớt) cho phần trăm còn thiếu
+    if (keywordRes.score < 100) {
+      const bonus = (100 - keywordRes.score) * (semanticRes.score / 100);
+      finalSkillScore += bonus;
+    }
+
     return {
-      score: (keywordRes.score * 0.4) + (semanticRes.score * 0.6),
+      score: Math.round(finalSkillScore),
       details: {
-        keywordScore: keywordRes.score,
-        semanticScore: semanticRes.score,
+        keywordScore: Math.round(keywordRes.score),
+        semanticScore: Math.round(semanticRes.score),
         matchedSkills: keywordRes.details?.matchedSkills || []
       }
     };

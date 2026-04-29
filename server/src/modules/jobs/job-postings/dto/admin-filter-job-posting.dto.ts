@@ -1,5 +1,5 @@
 import { IsOptional, IsEnum, IsNumber, IsString } from 'class-validator';
-import { JobStatus } from '@/generated/prisma';
+import { JobStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
 
 export class AdminFilterJobPostingDto {

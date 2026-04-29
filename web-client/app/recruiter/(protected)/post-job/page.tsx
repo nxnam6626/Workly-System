@@ -315,7 +315,7 @@ function PostJobForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submit triggered at step:", currentStep);
-    
+
     // Chỉ cho phép submit khi đang ở bước cuối cùng (Xem trước)
     if (currentStep !== totalSteps) {
       console.warn("Prevented submission from step:", currentStep);
@@ -545,7 +545,7 @@ function PostJobForm() {
               <div className="w-full md:w-80 bg-[#F9F9F7] p-10 border-r border-slate-100 flex flex-col justify-between relative overflow-hidden">
                 {/* Decorative circles */}
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-60" />
-                
+
                 <div className="relative z-10">
                   <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-8 transform -rotate-3">
                     <Sparkles className="w-7 h-7 text-indigo-600" />
@@ -573,11 +573,10 @@ function PostJobForm() {
                   </div>
                 </div>
 
-                <div className={`relative z-10 mt-10 p-5 rounded-2xl border backdrop-blur-sm transition-all duration-500 ${
-                  userPlan === 'GROWTH' ? 'bg-amber-50/80 border-amber-200 shadow-sm' :
-                  userPlan === 'LITE' ? 'bg-indigo-50/80 border-indigo-200 shadow-sm' :
-                  'bg-slate-100 border-slate-200'
-                }`}>
+                <div className={`relative z-10 mt-10 p-5 rounded-2xl border backdrop-blur-sm transition-all duration-500 ${userPlan === 'GROWTH' ? 'bg-amber-50/80 border-amber-200 shadow-sm' :
+                    userPlan === 'LITE' ? 'bg-indigo-50/80 border-indigo-200 shadow-sm' :
+                      'bg-slate-100 border-slate-200'
+                  }`}>
                   <div className="flex items-center gap-2 mb-2.5">
                     <Crown className={`w-4 h-4 ${userPlan === 'GROWTH' ? 'text-amber-600' : userPlan === 'LITE' ? 'text-indigo-600' : 'text-slate-500'}`} />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#111110]">
@@ -586,8 +585,8 @@ function PostJobForm() {
                   </div>
                   <p className="text-[11px] text-[#666660] leading-snug font-medium">
                     {userPlan === 'GROWTH' ? 'Đang kích hoạt mô hình AI cao cấp nhất để tối ưu hóa tỷ lệ chuyển đổi JD.' :
-                     userPlan === 'LITE' ? 'Hỗ trợ viết JD cơ bản và tự động hóa trích xuất kỹ năng chuyên môn.' :
-                     'Nâng cấp để mở khóa toàn bộ sức mạnh AI và tối ưu hóa SEO chuyên sâu.'}
+                      userPlan === 'LITE' ? 'Hỗ trợ viết JD cơ bản và tự động hóa trích xuất kỹ năng chuyên môn.' :
+                        'Nâng cấp để mở khóa toàn bộ sức mạnh AI và tối ưu hóa SEO chuyên sâu.'}
                   </p>
                 </div>
               </div>
@@ -607,7 +606,7 @@ function PostJobForm() {
                 <div className="flex-1 relative group">
                   {/* Subtle Background Pattern for Input */}
                   <div className="absolute inset-0 bg-[#FAF9F6] rounded-[2rem] opacity-40 pointer-events-none border border-slate-100" />
-                  
+
                   <textarea
                     className="relative w-full h-full min-h-[320px] p-8 bg-transparent outline-none resize-none transition-all text-[#111110] placeholder-[#D0CFCA] font-medium leading-relaxed text-base"
                     placeholder="Ví dụ: [FPT SHOP] Cần tuyển Nhân viên tư vấn bán hàng tại Đà Nẵng...\n📍 Địa điểm: Hải Châu, Thanh Khê\n💻 Mô tả: Tư vấn sản phẩm, hướng dẫn khách hàng...\n🎯 Yêu cầu: 18-28 tuổi, thân thiện...\n🎁 Quyền lợi: Lương 8-15tr, đầy đủ BHXH..."
@@ -616,7 +615,7 @@ function PostJobForm() {
                     disabled={aiGenerating}
                     style={{ fontFamily: "'DM Sans', sans-serif" }}
                   />
-                  
+
                   {/* Floating Metadata */}
                   <div className="absolute bottom-6 right-6 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                     <span className="px-3 py-1.5 bg-white border border-[#E8E8E2] rounded-xl text-[10px] text-[#999890] font-black uppercase tracking-widest shadow-sm">
@@ -630,8 +629,8 @@ function PostJobForm() {
 
                 <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-6">
                   <div className="flex items-center gap-6">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setAiPrompt(prev => prev + (prev ? "\n\n" : "") + "📍 Địa điểm: \n💻 Mô tả: \n🎯 Yêu cầu: \n🎁 Quyền lợi: ")}
                       className="flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-[0.2em] group"
                     >
@@ -641,21 +640,21 @@ function PostJobForm() {
                   </div>
 
                   <div className="flex items-center gap-5 w-full sm:w-auto">
-                    <button 
-                      disabled={aiGenerating} 
-                      onClick={() => setAiModalOpen(false)} 
+                    <button
+                      disabled={aiGenerating}
+                      onClick={() => setAiModalOpen(false)}
                       className="flex-1 sm:flex-none text-[11px] font-black uppercase tracking-[0.2em] text-[#BEBDB5] hover:text-[#111110] transition-colors"
                     >
                       Hủy bỏ
                     </button>
-                    <button 
-                      onClick={handleAiGenerate} 
-                      disabled={aiGenerating || !aiPrompt.trim()} 
+                    <button
+                      onClick={handleAiGenerate}
+                      disabled={aiGenerating || !aiPrompt.trim()}
                       className="flex-1 sm:flex-none relative overflow-hidden group bg-[#111110] text-white px-10 py-4 rounded-2xl font-bold text-xs uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100 shadow-xl shadow-slate-200"
                     >
                       {/* Gradient Hover Effect */}
                       <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_100%] animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                      
+
                       <div className="relative flex items-center justify-center gap-3">
                         {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                         <span>{aiGenerating ? 'AI đang soạn thảo...' : 'Phát sinh JD ngay'}</span>
@@ -1240,7 +1239,7 @@ function PostJobForm() {
                       const isSelected = formData.jobTier === tier.id;
                       const hasQuota = tier.remaining > 0;
                       const isDisabled = !hasQuota && tier.id !== 'BASIC';
-                      
+
                       return (
                         <motion.div
                           key={tier.id}
@@ -1248,11 +1247,10 @@ function PostJobForm() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.1 }}
                           onClick={() => !isDisabled && setFormData(p => ({ ...p, jobTier: tier.id as any }))}
-                          className={`relative group p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[300px] ${
-                            isSelected 
+                          className={`relative group p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[300px] ${isSelected
                               ? `${tier.borderSelected} ${tier.bgSelected} shadow-xl ${tier.shadowSelected}`
                               : 'border-slate-100 bg-white hover:border-slate-200 shadow-sm'
-                          } ${isDisabled ? 'opacity-50 grayscale bg-slate-50' : ''}`}
+                            } ${isDisabled ? 'opacity-50 grayscale bg-slate-50' : ''}`}
                         >
                           {/* Accent Glow */}
                           {isSelected && (
@@ -1260,9 +1258,8 @@ function PostJobForm() {
                           )}
 
                           <div className="relative z-10">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${
-                              isSelected ? `${tier.accentColor} text-white shadow-lg` : 'bg-slate-50 text-slate-400'
-                            }`}>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${isSelected ? `${tier.accentColor} text-white shadow-lg` : 'bg-slate-50 text-slate-400'
+                              }`}>
                               {tier.icon}
                             </div>
                             <h4 className="text-xl font-bold text-[#111110] mb-3">{tier.label}</h4>
@@ -1278,9 +1275,9 @@ function PostJobForm() {
                                 {hasQuota ? 'ACTIVE' : 'EXHAUSTED'}
                               </span>
                             </div>
-                            
+
                             <div className="h-1.5 w-full bg-slate-100/50 rounded-full overflow-hidden border border-slate-100/50">
-                              <motion.div 
+                              <motion.div
                                 initial={{ width: 0 }}
                                 animate={{ width: `${(tier.remaining / Math.max(1, tier.total)) * 100}%` }}
                                 transition={{ duration: 1, ease: "circOut" }}
@@ -1309,7 +1306,7 @@ function PostJobForm() {
                 </div>
 
                 {userPlan === 'GROWTH' && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
@@ -1317,7 +1314,7 @@ function PostJobForm() {
                   >
                     {/* Subtle background glow */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl opacity-40 -translate-y-1/2 translate-x-1/4 group-hover:scale-110 transition-transform duration-1000" />
-                    
+
                     <div className="flex items-center gap-7 relative z-10">
                       <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center flex-shrink-0 transform -rotate-3 group-hover:rotate-0 transition-transform">
                         <Zap className="w-8 h-8 text-amber-500" />
@@ -1327,8 +1324,8 @@ function PostJobForm() {
                         <p className="text-xs text-[#666660] font-medium leading-relaxed max-w-md">AI sẽ tự động phân tích và gửi lời mời ứng tuyển đến các ứng viên phù hợp nhất ngay sau khi bạn đăng tin.</p>
                       </div>
                     </div>
-                    <div 
-                      className={`w-20 h-10 rounded-full p-1.5 cursor-pointer relative flex items-center transition-all duration-500 shadow-inner ${formData.autoInviteMatches ? 'bg-amber-500' : 'bg-[#E8E8E2]'}`} 
+                    <div
+                      className={`w-20 h-10 rounded-full p-1.5 cursor-pointer relative flex items-center transition-all duration-500 shadow-inner ${formData.autoInviteMatches ? 'bg-amber-500' : 'bg-[#E8E8E2]'}`}
                       onClick={() => setFormData(p => ({ ...p, autoInviteMatches: !p.autoInviteMatches }))}
                     >
                       <div className={`bg-white w-7 h-7 rounded-full shadow-lg transform transition-transform duration-500 ${formData.autoInviteMatches ? 'translate-x-10' : 'translate-x-0'}`} />

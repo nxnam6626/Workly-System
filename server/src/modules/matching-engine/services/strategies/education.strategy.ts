@@ -25,33 +25,46 @@ export class EducationStrategy implements IMatchingStrategy {
       const parsedCv = (cv.parsedData as any) || {};
       const structuredJob = (job.structuredRequirements as any) || {};
 
-      const candidateDegree = (parsedCv.education?.level || 'none').toLowerCase();
+      const candidateDegree = (cv.candidate?.degree || parsedCv.education?.level || 'none').toLowerCase();
       const requiredDegree = (structuredJob.minEducation || 'none').toLowerCase();
       
-      const candidateMajor = (parsedCv.education?.major || '').toLowerCase();
+      const candidateMajor = (cv.candidate?.major || parsedCv.education?.major || '').toLowerCase();
       const requiredMajor = (structuredJob.requiredMajor || '').toLowerCase();
 
+      const certifications = (cv.candidate?.certifications || []).map((c: any) => c.name.toLowerCase());
+
       // 1. Chấm điểm cấp bậc (60% tỷ trọng strategy)
-      const candLevel = this.getDegreeLevel(candidateDegree);
+      let candLevel = this.getDegreeLevel(candidateDegree);
+      
+      // Nếu không có bằng cấp chính quy, kiểm tra chứng chỉ
+      if (candLevel < 50 && certifications.length > 0) {
+        candLevel = 40; // Có chứng chỉ nghề nghiệp tương đương Associate/Cao đẳng nhẹ
+      }
+
       const reqLevel = this.getDegreeLevel(requiredDegree);
       
       let levelScore = 0;
       if (reqLevel === 0) {
-        levelScore = 100; // Không yêu cầu bằng cấp
+        levelScore = 100; 
       } else if (candLevel >= reqLevel) {
-        levelScore = 100; // Đạt hoặc vượt chuẩn
+        levelScore = 100; 
       } else {
-        levelScore = Math.max(0, (candLevel / reqLevel) * 100 - 20);
+        levelScore = Math.max(10, (candLevel / reqLevel) * 100);
       }
 
-      // 2. Chấm điểm chuyên ngành (40% tỷ trọng strategy)
+      // 2. Chấm điểm chuyên ngành & GPA (40% tỷ trọng strategy)
       let majorScore = 0;
-      if (!requiredMajor || candidateMajor.includes(requiredMajor) || requiredMajor.includes(candidateMajor)) {
+      const isMajorMatch = !requiredMajor || candidateMajor.includes(requiredMajor) || requiredMajor.includes(candidateMajor);
+      
+      if (isMajorMatch) {
         majorScore = 100;
       } else {
-        // Có thể mở rộng dùng semantic similarity cho Major ở đây
-        majorScore = 50; // Khác ngành nhưng vẫn có bằng cấp liên quan
+        majorScore = 40; 
       }
+
+      // Bonus điểm GPA nếu có (tối đa +10 điểm vào majorScore)
+      const gpa = parseFloat(cv.candidate?.gpa || parsedCv.education?.gpa || '0');
+      if (gpa > 3.2) majorScore = Math.min(100, majorScore + 10);
 
       const finalScore = (levelScore * 0.6) + (majorScore * 0.4);
 
@@ -60,8 +73,11 @@ export class EducationStrategy implements IMatchingStrategy {
         details: {
           levelScore,
           majorScore,
-          candidateDegree,
-          requiredDegree
+          candidateDegree: cv.candidate?.degree || parsedCv.education?.level || 'Chưa cập nhật',
+          requiredDegree: structuredJob.minEducation || 'Không yêu cầu',
+          university: cv.candidate?.university || parsedCv.education?.school || 'N/A',
+          major: cv.candidate?.major || parsedCv.education?.major || 'N/A',
+          gpa: gpa || 0
         }
       };
     } catch (error) {

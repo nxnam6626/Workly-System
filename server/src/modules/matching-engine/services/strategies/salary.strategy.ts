@@ -8,7 +8,8 @@ export class SalaryStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedCv = (cv.parsedData as any) || {};
-      const expectedSalary = parsedCv.expectedSalary || 0;
+      const profileSalaryStr = cv.candidate?.desiredJob?.salary || '';
+      const expectedSalary = profileSalaryStr ? this.parseSalary(profileSalaryStr) : (parsedCv.expectedSalary || 0);
       const salaryMax = Number(job.salaryMax) || 0;
       
       let score = 100;
@@ -31,5 +32,11 @@ export class SalaryStrategy implements IMatchingStrategy {
       this.logger.error(`Salary Match Error: ${error.message}`);
       return { score: 100 };
     }
+  }
+
+  private parseSalary(salaryStr: string): number {
+    // Loại bỏ các ký tự không phải số (VND, dấu chấm, dấu phẩy, khoảng trắng)
+    const normalized = salaryStr.replace(/[^0-9]/g, '');
+    return Number(normalized) || 0;
   }
 }

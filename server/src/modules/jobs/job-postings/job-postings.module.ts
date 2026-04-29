@@ -10,6 +10,14 @@ import { AiModule } from '../../ai/ai.module';
 import { SubscriptionsModule } from '../../subscriptions/subscriptions.module';
 import { MatchingEngineModule } from '../../matching-engine/matching-engine.module';
 
+import { JobCategoryService } from './services/job-category.service';
+import { JobModerationService } from './services/job-moderation.service';
+import { JobSearchService } from './services/job-search.service';
+import { JobNotificationService } from './services/job-notification.service';
+import { JobLifecycleService } from './services/job-lifecycle.service';
+import { JobRecommendationService } from './services/job-recommendation.service';
+import { JobAdminService } from './services/job-admin.service';
+
 @Module({
   imports: [
     PrismaModule,
@@ -21,6 +29,25 @@ import { MatchingEngineModule } from '../../matching-engine/matching-engine.modu
     MatchingEngineModule,
   ],
   controllers: [JobPostingsController, AdminJobPostingsController],
-  providers: [JobPostingsService],
+  providers: [
+    JobPostingsService,
+    JobCategoryService,
+    JobModerationService,
+    JobSearchService,
+    JobNotificationService,
+    JobLifecycleService,
+    JobRecommendationService,
+    JobAdminService,
+  ],
+  exports: [
+    JobPostingsService,
+    JobCategoryService,
+    JobModerationService,
+    JobSearchService,
+    JobNotificationService,
+    JobLifecycleService,
+    JobRecommendationService,
+    JobAdminService,
+  ],
 })
-export class JobPostingsModule {}
+export class JobPostingsModule { }

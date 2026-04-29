@@ -98,6 +98,7 @@ model Candidate {
   summary        String?
   birthYear      Int?
   currentSalary  String?
+  totalYearsExp  Float?          @default(0)
   degree         String?
   gender         String?
   industries     String[]        @default([])
@@ -278,6 +279,7 @@ model JobMatch {
   matchId       String     @id @default(uuid())
   score         Float
   matchedSkills String[]
+  details       Json?
   candidateId   String
   jobPostingId  String
   createdAt     DateTime   @default(now())

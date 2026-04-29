@@ -28,7 +28,6 @@ export class MatchingProcessor extends WorkerHost {
     const { jobId, userId } = job.data;
 
     if (jobId) {
-      this.logger.log(`[Matching] Processing job ${jobId}`);
       try {
         const topMatches = await this.matchingOrchestrator.runMatchingForJob(jobId);
 
@@ -45,9 +44,6 @@ export class MatchingProcessor extends WorkerHost {
 
         // Lọc ứng viên đạt ngưỡng ≥ 70%
         const highMatches = topMatches.filter(m => m.score >= 70);
-        this.logger.log(
-          `[Matching] Job ${jobId}: total=${topMatches.length}, high(>=70%)=${highMatches.length}, status=${jobPosting.status}`,
-        );
 
         // Luôn emit realtime matchedCount để UI cập nhật không cần F5
         this.messagesGateway.server
@@ -66,16 +62,9 @@ export class MatchingProcessor extends WorkerHost {
           jobPosting.autoInviteMatches === true &&
           jobPosting.status === 'APPROVED'; // Chỉ auto-invite khi bài đã được duyệt
 
-        this.logger.log(
-          `[AutoInvite] Job ${jobId}: autoInviteMatches=${jobPosting.autoInviteMatches}, status=${jobPosting.status}, willRun=${shouldAutoInvite}`,
-        );
-
         if (shouldAutoInvite) {
           const limit = jobPosting.vacancies || 1;
           const autoInviteCandidates = highMatches.slice(0, limit);
-          this.logger.log(
-            `[AutoInvite] Processing ${autoInviteCandidates.length} candidates (limit=${limit} từ vacancies)`,
-          );
 
           for (const match of autoInviteCandidates) {
             try {
@@ -85,9 +74,6 @@ export class MatchingProcessor extends WorkerHost {
                 include: { cvs: { where: { isMain: true } } },
               });
               const cvId = candidateInfo?.cvs?.[0]?.cvId;
-              this.logger.log(
-                `[AutoInvite] Candidate ${match.candidateId.slice(0, 8)}: score=${match.score}, cvId=${cvId?.slice(0, 8) || 'NONE'}`,
-              );
 
               if (!cvId) {
                 this.logger.warn(
@@ -105,9 +91,6 @@ export class MatchingProcessor extends WorkerHost {
               ) as any;
 
               if (unlockResult?.status === 'ALREADY_UNLOCKED') {
-                this.logger.log(
-                  `[AutoInvite] Candidate ${match.candidateId.slice(0, 8)} đã được mở khoá trước đó → bỏ qua gửi lời mời`,
-                );
                 continue;
               }
 
@@ -119,9 +102,6 @@ export class MatchingProcessor extends WorkerHost {
               );
 
               autoUnlockCount++;
-              this.logger.log(
-                `[AutoInvite] ✅ Mở khoá & gửi lời mời thành công cho candidate ${match.candidateId.slice(0, 8)} (score=${match.score}%)`,
-              );
             } catch (e: any) {
               // Nếu không đủ quota/xu → log warning và tiếp tục với ứng viên tiếp theo
               if (e?.status === 400 || e?.response?.statusCode === 400) {
@@ -171,7 +151,6 @@ export class MatchingProcessor extends WorkerHost {
         throw error;
       }
     } else if (userId) {
-      this.logger.log(`[Matching] Processing candidate ${userId}`);
       try {
         const response = await this.matchingOrchestrator.runMatchingForCandidate(userId);
         return { success: true, count: (response as any[]).length };

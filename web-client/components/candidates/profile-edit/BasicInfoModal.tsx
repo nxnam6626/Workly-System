@@ -12,12 +12,16 @@ import { profileApi, type CandidateProfile } from "@/lib/profile-api";
 const schema = z.object({
   fullName: z.string().min(2, "Tên cần ít nhất 2 ký tự"),
   phone: z.string().optional(),
+  location: z.string().optional(),
   university: z.string().optional(),
   major: z.string().optional(),
   gpa: z.string().optional(),
   summary: z.string().optional(),
   desiredJobTitle: z.string().optional(),
   desiredJobSalary: z.string().optional(),
+  industries: z.string().optional(),
+  totalYearsExp: z.string().optional(),
+  degree: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -44,12 +48,16 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
     defaultValues: {
       fullName: initialData.candidate?.fullName || "",
       phone: initialData.phoneNumber || "",
+      location: initialData.candidate?.location || "",
       university: initialData.candidate?.university || "",
       major: initialData.candidate?.major || "",
       gpa: initialData.candidate?.gpa != null ? String(initialData.candidate.gpa) : "",
       summary: initialData.candidate?.summary || "",
       desiredJobTitle: initialData.candidate?.desiredJob?.title || "",
       desiredJobSalary: initialData.candidate?.desiredJob?.salary || "",
+      industries: initialData.candidate?.industries?.join(", ") || "",
+      totalYearsExp: initialData.candidate?.totalYearsExp != null ? String(initialData.candidate.totalYearsExp) : "",
+      degree: initialData.candidate?.degree || "",
     },
   });
 
@@ -58,12 +66,16 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
       reset({
         fullName: initialData.candidate?.fullName || "",
         phone: initialData.phoneNumber || "",
+        location: initialData.candidate?.location || "",
         university: initialData.candidate?.university || "",
         major: initialData.candidate?.major || "",
         gpa: initialData.candidate?.gpa != null ? String(initialData.candidate.gpa) : "",
         summary: initialData.candidate?.summary || "",
         desiredJobTitle: initialData.candidate?.desiredJob?.title || "",
         desiredJobSalary: initialData.candidate?.desiredJob?.salary || "",
+        industries: initialData.candidate?.industries?.join(", ") || "",
+        totalYearsExp: initialData.candidate?.totalYearsExp != null ? String(initialData.candidate.totalYearsExp) : "",
+        degree: initialData.candidate?.degree || "",
       });
     }
   }, [isOpen, initialData, reset]);
@@ -74,10 +86,14 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
       const updated = await profileApi.updateProfile({
         fullName: data.fullName,
         phone: data.phone,
+        location: data.location,
         university: data.university,
         major: data.major,
         gpa: gpaNum,
         summary: data.summary,
+        industries: data.industries ? data.industries.split(",").map(i => i.trim()).filter(Boolean) : [],
+        totalYearsExp: data.totalYearsExp ? parseFloat(data.totalYearsExp) : undefined,
+        degree: data.degree,
         desiredJob: {
           ...(initialData.candidate?.desiredJob || {}),
           title: data.desiredJobTitle,
@@ -150,9 +166,15 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                       <input {...register("fullName")} className={inputCls} placeholder="Nguyễn Văn A" />
                       {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>}
                     </div>
-                    <div className="space-y-1.5">
-                      <label className={labelCls}>Số điện thoại</label>
-                      <input {...register("phone")} className={inputCls} placeholder="0987 xxx xxx" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className={labelCls}>Số điện thoại</label>
+                        <input {...register("phone")} className={inputCls} placeholder="0987 xxx xxx" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className={labelCls}>Địa điểm làm việc</label>
+                        <input {...register("location")} className={inputCls} placeholder="TP.HCM, Hà Nội..." />
+                      </div>
                     </div>
                     <div className="space-y-1.5">
                       <label className={labelCls}>Giới thiệu bản thân</label>
@@ -185,6 +207,10 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                       <input {...register("major")} className={inputCls} placeholder="Kỹ thuật phần mềm" />
                     </div>
                     <div className="space-y-1.5">
+                      <label className={labelCls}>Trình độ / Bằng cấp</label>
+                      <input {...register("degree")} className={inputCls} placeholder="Đại học, Thạc sĩ, Associate..." />
+                    </div>
+                    <div className="space-y-1.5">
                       <label className={labelCls}>GPA (/ 4.0)</label>
                       <input {...register("gpa")} type="number" step="0.01" min="0" max="4" className={inputCls} placeholder="3.50" />
                     </div>
@@ -212,6 +238,14 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                     <div className="space-y-1.5">
                       <label className={labelCls}>Mức lương kỳ vọng</label>
                       <input {...register("desiredJobSalary")} className={inputCls} placeholder="20 – 30 triệu" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelCls}>Ngành nghề</label>
+                      <input {...register("industries")} className={inputCls} placeholder="IT Phần mềm, Thiết kế..." />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className={labelCls}>Số năm kinh nghiệm</label>
+                      <input {...register("totalYearsExp")} type="number" step="0.5" min="0" className={inputCls} placeholder="2.5" />
                     </div>
                   </div>
                 </div>

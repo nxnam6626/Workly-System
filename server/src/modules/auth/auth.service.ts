@@ -4,6 +4,8 @@ import {
   BadRequestException,
   ForbiddenException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
@@ -14,6 +16,7 @@ import { SecurityService } from './security.service';
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
     private tokenService: TokenService,
     private securityService: SecurityService,

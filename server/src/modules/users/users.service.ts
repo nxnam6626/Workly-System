@@ -1,24 +1,13 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { Injectable, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Role } from '../auth/decorators/roles.decorator';
-import type { StatusUser } from '@/generated/prisma';
-
-import { MailService } from '../../mail/mail.service';
-import { SearchService } from '../search/search.service';
-import { MessagesGateway } from '../messages/messages.gateway';
-import { SupabaseService } from '../../common/supabase/supabase.service';
-import { AiService } from '../ai/ai.service';
+import { UserCreationService } from './services/user-creation.service';
+import { CandidateProfileService } from './services/candidate-profile.service';
+import { UserAvatarService } from './services/user-avatar.service';
+import { UserModerationService } from './services/user-moderation.service';
+import { UserDataService } from './services/user-data.service';
 import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 
 @Injectable()
@@ -27,456 +16,68 @@ export class UsersService {
 
   constructor(
     private prisma: PrismaService,
-    private mailService: MailService,
-    private searchService: SearchService,
-    private moduleRef: ModuleRef,
-    private readonly supabaseService: SupabaseService,
-    private readonly aiService: AiService,
-  ) {}
+    private userCreationService: UserCreationService,
+    private candidateProfileService: CandidateProfileService,
+    private userAvatarService: UserAvatarService,
+    private moderationService: UserModerationService,
+    private userDataService: UserDataService,
+  ) { }
 
-  // ==========================================
-  // INGESTION & OAUTH (Nhóm Khởi tạo & OAuth)
-  // ==========================================
-
-  /** Tạo user (dùng cho đăng ký hoặc admin tạo). passwordAlreadyHashed = true khi gọi từ Auth (đã hash). */
-  async create(
-    data: CreateUserDto | RegisterDto,
-    options?: { passwordAlreadyHashed?: boolean },
-  ) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: data.email },
-      include: { userRoles: { include: { role: true } } },
-    });
-
-    if (existingUser) {
-      const hasRole = existingUser.userRoles.some(
-        (ur) => ur.role.roleName === data.role,
-      );
-      if (hasRole) {
-        throw new ConflictException(
-          `Email này đã được đăng ký với vai trò ${data.role}.`,
-        );
-      }
-      return this.addRoleToUser(existingUser.userId, data as RegisterDto);
-    }
-
-    const hashedPassword =
-      options?.passwordAlreadyHashed === true
-        ? data.password
-        : await bcrypt.hash(data.password, 10);
-
-    const result = await this.prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          email: data.email,
-          password: hashedPassword,
-          status: 'ACTIVE',
-        },
-      });
-
-      // Find or connect to the primary requested role
-      const primaryRoleRecord = await tx.role.upsert({
-        where: { roleName: data.role },
-        update: {},
-        create: { roleName: data.role },
-      });
-      await tx.userRole.create({
-        data: { userId: newUser.userId, roleId: primaryRoleRecord.roleId },
-      });
-
-      // Create profiles based on requested role
-      if (data.role === 'CANDIDATE') {
-        await tx.candidate.create({
-          data: {
-            userId: newUser.userId,
-            fullName:
-              'fullName' in data && data.fullName
-                ? data.fullName
-                : 'Người dùng',
-          },
-        });
-      }
-
-      if (data.role === 'RECRUITER') {
-        let companyId: string | null = null;
-        if ('companyName' in data && data.companyName) {
-          let existingCompany: any = null;
-          if ('taxCode' in data && data.taxCode) {
-            existingCompany = await tx.company.findFirst({
-              where: { taxCode: data.taxCode },
-            });
-          }
-          if (existingCompany) {
-            companyId = existingCompany.companyId;
-          } else {
-            let companyDataFromApi: any = null;
-            if ('taxCode' in data && data.taxCode) {
-              try {
-                const res = await fetch(
-                  `https://esgoo.net/api-mst/${data.taxCode}.htm`,
-                );
-                const apiData = await res.json();
-                if (apiData.error === 0 && apiData.data) {
-                  companyDataFromApi = apiData.data;
-                }
-              } catch (e) {
-                console.error('Failed to fetch tax code data', e);
-              }
-            }
-
-            const newCompany = await tx.company.create({
-              data: {
-                companyName: companyDataFromApi?.ten || data.companyName,
-                taxCode:
-                  'taxCode' in data && data.taxCode ? data.taxCode : null,
-                address: companyDataFromApi?.dc || null,
-                websiteUrl:
-                  'websiteUrl' in data && data.websiteUrl
-                    ? data.websiteUrl
-                    : null,
-                taxAddress: companyDataFromApi?.dc || null,
-                status: companyDataFromApi?.tinhtrang || null,
-                internationalName:
-                  companyDataFromApi?.internationalName || null,
-                shortName: companyDataFromApi?.shortName || null,
-                verifyStatus:
-                  companyDataFromApi ||
-                  ('verifyStatus' in data && data.verifyStatus)
-                    ? 1
-                    : 0,
-                branches: {
-                  create: {
-                    name: 'Trụ sở chính',
-                    address: companyDataFromApi?.dc || 'Đang cập nhật',
-                    isVerified: !!companyDataFromApi,
-                  },
-                },
-              },
-            });
-            companyId = newCompany.companyId;
-          }
-        }
-
-        await tx.recruiter.create({
-          data: {
-            userId: newUser.userId,
-            fullName: 'fullName' in data && data.fullName ? data.fullName : 'Nhà tuyển dụng',
-            ...(companyId ? { companyId } : {}),
-          },
-        });
-      } else if (data.role === 'ADMIN') {
-        const permissions = 'permissions' in data ? data.permissions : [];
-        const isSupreme = permissions?.includes('ALL') || permissions?.includes('SUPER_ADMIN');
-        await tx.admin.create({
-          // Removed legacy field
-          data: {
-            userId: newUser.userId,
-            fullName: 'fullName' in data && data.fullName ? data.fullName : 'Quản trị viên',
-            permissions: isSupreme ? ['SUPER_ADMIN'] : permissions || [],
-          },
-        });
-      }
-
-      return { message: 'Tạo user thành công', userId: newUser.userId };
-    });
-
-    let displayName = data.email.split('@')[0];
-    if ('fullName' in data && data.fullName) displayName = data.fullName;
-
-    // Fire and forget integration events
-    this.mailService
-      .sendWelcomeEmail(data.email, displayName)
-      .catch(console.error);
-    this.searchService
-      .indexUser({
-        id: result.userId,
-        email: data.email,
-        roles: [data.role as string],
-      })
-      .catch(console.error);
-
-    return result;
+  // --- Registration & OAuth ---
+  async create(data: any, options?: any) {
+    return this.userCreationService.create(data, options);
   }
 
-  /** Đăng ký (gọi từ Auth sau khi đã hash mật khẩu). */
   async register(data: RegisterDto) {
-    return this.create(data, { passwordAlreadyHashed: true });
+    return this.userCreationService.create(data, { passwordAlreadyHashed: true });
   }
 
-  /** Xử lý login từ OAuth (Google/LinkedIn): Tìm User bằng Email hoặc tạo mới Role CANDIDATE. */
-  async findOrCreateOAuthUser(data: {
-    email: string;
-    provider: any;
-    providerId: string;
-    fullName: string;
-    avatar?: string;
-  }) {
-    let user = await this.findByEmail(data.email);
-    if (!user) {
-      // Create new CANDIDATE user without password
-      user = await this.prisma.$transaction(async (tx) => {
-        const newUser = await tx.user.create({
-          data: {
-            email: data.email,
-            provider: data.provider,
-            providerId: data.providerId,
-            avatar: data.avatar,
-            status: 'ACTIVE',
-          },
-          include: {
-            candidate: true,
-            recruiter: true,
-            userRoles: { include: { role: true } },
-          },
-        });
-
-        const roleRecord = await tx.role.upsert({
-          where: { roleName: 'CANDIDATE' },
-          update: {},
-          create: { roleName: 'CANDIDATE' },
-        });
-
-        await tx.userRole.create({
-          data: {
-            userId: newUser.userId,
-            roleId: roleRecord.roleId,
-          },
-        });
-
-        await tx.candidate.create({
-          data: {
-            userId: newUser.userId,
-            fullName: data.fullName,
-          },
-        });
-
-        return tx.user.findUnique({
-          where: { userId: newUser.userId },
-          include: {
-            candidate: true,
-            recruiter: true,
-            userRoles: { include: { role: true } },
-          },
-        }) as any;
-      });
-
-      // Fire and forget integration events
-      this.mailService
-        .sendWelcomeEmail(data.email, data.fullName)
-        .catch(console.error);
-      if (user) {
-        this.searchService
-          .indexUser({
-            id: user.userId,
-            email: data.email,
-            roles: ['CANDIDATE'],
-          })
-          .catch(console.error);
-      }
-    } else {
-      // If user exists but no provider, update the provider
-      const anyUser = user as any;
-      if (!anyUser.provider || anyUser.provider === 'LOCAL') {
-        user = (await this.prisma.user.update({
-          where: { userId: user.userId },
-          data: {
-            provider: data.provider,
-            providerId: data.providerId,
-            ...(data.avatar && !user.avatar ? { avatar: data.avatar } : {}),
-          },
-          include: {
-            candidate: true,
-            recruiter: true,
-            userRoles: { include: { role: true } },
-          },
-        })) as any;
-      }
-    }
-    return user;
+  async findOrCreateOAuthUser(data: any) {
+    return this.userCreationService.findOrCreateOAuthUser(data);
   }
 
-  // ==========================================
-  // DATA RETRIEVAL (Nhóm Truy vấn dữ liệu)
-  // ==========================================
+  async addRoleToUser(userId: string, data: RegisterDto) {
+    return this.userCreationService.addRoleToUser(userId, data);
+  }
 
-  async findAll(params?: {
-    skip?: number;
-    take?: number;
-    role?: Role;
-    status?: StatusUser;
-    search?: string;
-  }) {
-    const { skip = 0, take = 20, role, status, search } = params ?? {};
-    const where: any = {};
-    if (role) {
-      where.userRoles = {
-        some: {
-          role: {
-            roleName: role,
-          },
-        },
-      };
-    }
-    if (status) where.status = status;
-    if (search) where.email = { contains: search, mode: 'insensitive' };
+  // --- Profile Management ---
+  async updateCandidateProfile(userId: string, dto: UpdateCandidateProfileDto) {
+    return this.candidateProfileService.updateCandidateProfile(userId, dto);
+  }
 
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          userId: true,
-          email: true,
-          status: true,
-          violations: true,
-          phoneNumber: true,
-          avatar: true,
-          createdAt: true,
-          lastLogin: true,
-          userRoles: {
-            include: { role: true },
-          },
-          candidate: { select: { fullName: true } },
-          recruiter: {
-            select: {
-              position: true,
-              bio: true,
-              violationCount: true,
-              recruiterSubscription: true,
-              recruiterWallet: true,
-            },
-          },
-          admin: { select: { permissions: true } },
-        },
-      }),
-      this.prisma.user.count({ where }),
-    ]);
+  async updateAvatar(userId: string, file: Express.Multer.File) {
+    return this.userAvatarService.updateAvatar(userId, file);
+  }
 
-    return { data: users, total, skip, take };
+  // --- Data Retrieval ---
+  async findAll(params?: any) {
+    return this.userDataService.findAll(params);
   }
 
   async findOne(userId: string) {
-    if (!userId) throw new NotFoundException('ID user không hợp lệ.');
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-      select: {
-        userId: true,
-        email: true,
-        status: true,
-        violations: true,
-        phoneNumber: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-        userRoles: {
-          include: { role: true },
-        },
-        candidate: true,
-        recruiter: {
-          include: { recruiterSubscription: true, recruiterWallet: true },
-        },
-        admin: { select: { permissions: true } },
-      },
-    });
-    if (!user) throw new NotFoundException('Không tìm thấy user.');
-    return user;
+    return this.userDataService.findOne(userId);
   }
 
   async findByEmail(email: string) {
     if (!email) return null;
     return this.prisma.user.findUnique({
       where: { email },
-      include: {
-        candidate: true,
-        recruiter: true,
-        admin: { select: { permissions: true } },
-        userRoles: {
-          include: { role: true },
-        },
-      },
+      include: { candidate: true, recruiter: true, admin: { select: { permissions: true } }, userRoles: { include: { role: true } } },
     });
   }
 
   async findOneWithPassword(userId: string) {
     return this.prisma.user.findUnique({
       where: { userId },
-      include: {
-        candidate: true,
-        recruiter: true,
-        admin: { select: { permissions: true } },
-        userRoles: {
-          include: { role: true },
-        },
-      },
+      include: { candidate: true, recruiter: true, admin: { select: { permissions: true } }, userRoles: { include: { role: true } } },
     });
   }
 
-  /** Lấy thông tin user hiện tại (dùng cho /users/me). */
   async getMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-      select: {
-        userId: true,
-        email: true,
-        status: true,
-        phoneNumber: true,
-        avatar: true,
-        createdAt: true,
-        lastLogin: true,
-        provider: true,
-        userRoles: { include: { role: true } },
-        candidate: {
-          select: {
-            candidateId: true,
-            fullName: true,
-            university: true,
-            major: true,
-            gpa: true,
-            summary: true,
-            desiredJob: true,
-            isOpenToWork: true,
-            gender: true,
-            birthYear: true,
-            currentSalary: true,
-            degree: true,
-            industries: true,
-            languages: true,
-            softSkills: true,
-            interests: true,
-            skills: true,
-            experiences: {
-              orderBy: { duration: 'desc' },
-            },
-            projects: true,
-            certifications: true,
-            cvs: {
-              select: {
-                cvId: true,
-                cvTitle: true,
-                fileUrl: true,
-                isMain: true,
-                createdAt: true,
-                parsedData: true,
-              },
-              orderBy: { createdAt: 'desc' },
-            },
-          },
-        },
-        recruiter: true,
-        admin: { select: { permissions: true } },
-      },
-    });
-    if (!user) throw new NotFoundException('Không tìm thấy user.');
-    return user;
+    return this.userDataService.getMe(userId);
   }
 
-  // ==========================================
-  // UPDATE & ROLES (Nhóm Cập nhật & Vai trò)
-  // ==========================================
-
+  // --- Update ---
   async update(userId: string, dto: UpdateUserDto) {
     await this.findOne(userId);
 
@@ -496,32 +97,17 @@ export class UsersService {
     };
 
     await this.prisma.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { userId },
-        data: updateData,
-      });
+      await tx.user.update({ where: { userId }, data: updateData });
 
       if (dto.role) {
-        // Delete all existing roles for this user
-        await tx.userRole.deleteMany({
-          where: { userId },
-        });
-
-        // Add the new primary role
+        await tx.userRole.deleteMany({ where: { userId } });
         const roleRecord = await tx.role.upsert({
           where: { roleName: dto.role },
           update: {},
           create: { roleName: dto.role },
         });
+        await tx.userRole.create({ data: { userId, roleId: roleRecord.roleId } });
 
-        await tx.userRole.create({
-          data: {
-            userId,
-            roleId: roleRecord.roleId,
-          },
-        });
-
-        // Ensure profile exists for the new role if Admin/Recruiter
         if (dto.role === 'RECRUITER') {
           const ext = await tx.recruiter.findUnique({ where: { userId } });
           if (!ext) await tx.recruiter.create({ data: { userId } });
@@ -548,422 +134,45 @@ export class UsersService {
     return this.findOne(userId);
   }
 
-  /** Cập nhật ảnh đại diện của user (có kiểm duyệt AI Vision). */
-  async updateAvatar(userId: string, file: Express.Multer.File) {
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-      include: { userRoles: { include: { role: true } } },
-    });
-    if (!user) throw new NotFoundException('Không tìm thấy người dùng.');
-
-    const roles = user.userRoles?.map((ur) => ur.role.roleName) || [];
-    const isCandidateOnly =
-      roles.includes('CANDIDATE') &&
-      !roles.includes('RECRUITER') &&
-      !roles.includes('ADMIN');
-
-    // 1. Upload ảnh mới lên Supabase
-    const fileExt = file.originalname.split('.').pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const path = `avatars/${userId}/${fileName}`;
-
-    const avatarUrl = await this.supabaseService.uploadFile(
-      file.buffer,
-      path,
-      file.mimetype,
-    );
-
-    // 2. Bỏ qua bước kiểm duyệt AI (Theo yêu cầu người dùng)
-    // AI moderation skipped to avoid false positives and reduce latency.
-
-    // 3. Cập nhật URL vào DB
-    await this.prisma.user.update({
-      where: { userId },
-      data: { avatar: avatarUrl },
-    });
-
-    // 4. Dọn dẹp ảnh cũ nếu có trên Supabase
-    if (user.avatar) {
-      const oldPath = this.supabaseService.extractPathFromUrl(user.avatar);
-      if (oldPath) {
-        try {
-          await this.supabaseService.deleteFile(oldPath);
-        } catch (e) {
-          console.error('[UsersService] Failed to delete old avatar:', e);
-        }
-      }
-    }
-
-    return { avatarUrl };
-  }
-
-  /** Thêm vai trò mới cho user đã tồn tại (Multi-role). */
-  async addRoleToUser(userId: string, data: RegisterDto) {
-    const result = await this.prisma.$transaction(async (tx) => {
-      // Find or connect to the role
-      const roleRecord = await tx.role.upsert({
-        where: { roleName: data.role },
-        update: {},
-        create: { roleName: data.role },
-      });
-
-      // Create UserRole link
-      await tx.userRole.create({
-        data: {
-          userId,
-          roleId: roleRecord.roleId,
-        },
-      });
-
-      if (data.role === 'CANDIDATE') {
-        const existingCandidate = await tx.candidate.findUnique({
-          where: { userId },
-        });
-        if (!existingCandidate) {
-          await tx.candidate.create({
-            data: {
-              userId,
-              fullName: (data as any).fullName || 'Người dùng',
-            },
-          });
-        }
-      } else if (data.role === 'RECRUITER') {
-        const existingRecruiter = await tx.recruiter.findUnique({
-          where: { userId },
-        });
-        if (!existingRecruiter) {
-          let companyId: string | null = null;
-          if ('companyName' in data && data.companyName) {
-            let existingCompany: any = null;
-            if ('taxCode' in data && data.taxCode) {
-              existingCompany = await tx.company.findFirst({
-                where: { taxCode: data.taxCode },
-              });
-            }
-            if (existingCompany) {
-              companyId = existingCompany.companyId;
-            } else {
-              let companyDataFromApi: any = null;
-              if ('taxCode' in data && data.taxCode) {
-                try {
-                  const res = await fetch(
-                    `https://esgoo.net/api-mst/${data.taxCode}.htm`,
-                  );
-                  const apiData = await res.json();
-                  if (apiData.error === 0 && apiData.data) {
-                    companyDataFromApi = apiData.data;
-                  }
-                } catch (e) {
-                  console.error('Failed to fetch tax code data', e);
-                }
-              }
-
-              const newCompany = await tx.company.create({
-                data: {
-                  companyName: companyDataFromApi?.ten || data.companyName,
-                  taxCode:
-                    'taxCode' in data && data.taxCode ? data.taxCode : null,
-                  address: companyDataFromApi?.dc || null,
-                  websiteUrl:
-                    'websiteUrl' in data && data.websiteUrl
-                      ? data.websiteUrl
-                      : null,
-                  taxAddress: companyDataFromApi?.dc || null,
-                  status: companyDataFromApi?.tinhtrang || null,
-                  internationalName:
-                    companyDataFromApi?.internationalName || null,
-                  shortName: companyDataFromApi?.shortName || null,
-                  verifyStatus:
-                    companyDataFromApi ||
-                    ('verifyStatus' in data && data.verifyStatus)
-                      ? 1
-                      : 0,
-                  branches: {
-                    create: {
-                      name: 'Trụ sở chính',
-                      address: companyDataFromApi?.dc || 'Đang cập nhật',
-                      isVerified: !!companyDataFromApi,
-                    },
-                  },
-                },
-              });
-              companyId = newCompany.companyId;
-            }
-          }
-
-          await tx.recruiter.create({
-            data: {
-              userId,
-              fullName: (data as any).fullName || 'Nhà tuyển dụng',
-              ...(companyId ? { companyId } : {}),
-            },
-          });
-        }
-      } else if (data.role === 'ADMIN') {
-        const existingAdmin = await tx.admin.findUnique({ where: { userId } });
-        if (!existingAdmin) {
-          await tx.admin.create({
-            data: {
-              userId,
-              fullName: (data as any).fullName || 'Quản trị viên',
-              permissions: ['SUPER_ADMIN'],
-            },
-          });
-        }
-      }
-
-      return { message: 'Đăng ký thêm vai trò thành công', userId };
-    });
-
-    try {
-      const user = await this.findOne(userId);
-      const roles = user.userRoles.map((ur: any) => ur.role.roleName);
-      await this.searchService.indexUser({
-        id: user.userId,
-        email: user.email,
-        roles,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
-    return result;
-  }
-
-  /** Cập nhật thông tin hồ sơ ứng viên (fullName, phone, university, major, gpa, skills, isOpenToWork). */
-  async updateCandidateProfile(
-    userId: string,
-    dto: UpdateCandidateProfileDto,
-  ) {
-    const user = await this.prisma.user.findUnique({
-      where: { userId },
-      include: { candidate: true },
-    });
-    if (!user || !user.candidate) {
-      throw new NotFoundException('Không tìm thấy hồ sơ ứng viên.');
-    }
-
-    const candidateId = user.candidate.candidateId;
-    this.logger.log(`Updating candidate profile for candidateId: ${candidateId}`);
-    // console.log('Update DTO:', JSON.stringify(dto, null, 2));
-
-    await this.prisma.$transaction(async (tx) => {
-      // 1. Update Candidate core fields
-      await tx.candidate.update({
-        where: { candidateId },
-        data: {
-          ...(dto.fullName && { fullName: dto.fullName }),
-          ...(dto.university !== undefined && { university: dto.university }),
-          ...(dto.major !== undefined && { major: dto.major }),
-          ...(dto.gpa !== undefined && { gpa: dto.gpa }),
-          ...(dto.summary !== undefined && { summary: dto.summary }),
-          ...(dto.desiredJob !== undefined && { desiredJob: dto.desiredJob }),
-          ...(dto.isOpenToWork !== undefined && { isOpenToWork: dto.isOpenToWork }),
-        },
-      });
-
-      // 2. Update User fields (phoneNumber)
-      if (dto.phone) {
-        await tx.user.update({
-          where: { userId },
-          data: { 
-            phoneNumber: dto.phone,
-          },
-        });
-      }
-
-      // 3. Update Skills
-      if (dto.skills !== undefined) {
-        await tx.skill.deleteMany({ where: { candidateId } });
-        if (dto.skills.length > 0) {
-          await tx.skill.createMany({
-            data: dto.skills.map((s) => ({
-              skillName: s.skillName,
-              level: (s.level as any) || 'BEGINNER',
-              candidateId,
-            })),
-          });
-        }
-      }
-
-      // 4. Update Experiences
-      if (dto.experiences !== undefined) {
-        await tx.experience.deleteMany({ where: { candidateId } });
-        if (dto.experiences.length > 0) {
-          await tx.experience.createMany({
-            data: dto.experiences.map((exp) => ({
-              ...exp,
-              candidateId,
-            })),
-          });
-        }
-      }
-
-      // 5. Update Projects
-      if (dto.projects !== undefined) {
-        await tx.project.deleteMany({ where: { candidateId } });
-        if (dto.projects.length > 0) {
-          await tx.project.createMany({
-            data: dto.projects.map((p) => ({
-              ...p,
-              candidateId,
-            })),
-          });
-        }
-      }
-
-      // 6. Update Certifications
-      if (dto.certifications !== undefined) {
-        await tx.certification.deleteMany({ where: { candidateId } });
-        if (dto.certifications.length > 0) {
-          await tx.certification.createMany({
-            data: dto.certifications.map((cert) => ({
-              name: cert,
-              candidateId,
-            })),
-          });
-        }
-      }
-    });
-
-    return this.getMe(userId);
-  }
-
-  // ==========================================
-  // ADMIN & MODERATION (Nhóm Quản trị & Xóa)
-  // ==========================================
-
+  // --- Admin & Moderation ---
   async lockUser(userId: string, reqUserId?: string) {
-    if (userId === reqUserId) {
-      throw new BadRequestException('Bạn không thể tự khóa tài khoản của chính mình.');
-    }
-    
-    const userToLock = await this.findOne(userId);
-    if (userToLock.email === 'admin@workly.com') {
-      throw new BadRequestException('Không thể khóa tài khoản Quản trị viên tối cao.');
-    }
-
-    await this.prisma.user.update({
-      where: { userId },
-      data: { status: 'LOCKED' },
-    });
-
-    try {
-      const gateway = this.moduleRef.get(MessagesGateway, { strict: false });
-      if (gateway) {
-        gateway.server.to(`user_${userId}`).emit('accountLocked');
-      }
-    } catch (error: any) {
-      console.error('Could not get MessagesGateway:', error.message);
-    }
-
-    return { message: 'Tài khoản đã bị khóa.' };
+    return this.moderationService.lockUser(userId, reqUserId);
   }
 
   async unlockUser(userId: string) {
-    await this.findOne(userId);
-    await this.resetViolationCount(userId);
-    await this.prisma.user.update({
-      where: { userId },
-      data: { status: 'ACTIVE', accountLevel: 'NORMAL' },
-    });
-    return { message: 'Tài khoản đã được mở khóa và reset số lần vi phạm.' };
+    return this.moderationService.unlockUser(userId);
   }
 
   async unlockWithProbation(userId: string) {
-    await this.findOne(userId);
-    await this.resetViolationCount(userId);
-    await this.prisma.user.update({
-      where: { userId },
-      data: { status: 'ACTIVE', accountLevel: 'PROBATION' },
-    });
-    return { message: 'Đã mở khóa tài khoản và đưa vào danh sách Thử thách (Reset vi phạm).' };
+    return this.moderationService.unlockWithProbation(userId);
   }
 
   async banUser(userId: string) {
-    const user = await this.findOne(userId);
-    if (user.email === 'admin@workly.com') {
-      throw new BadRequestException('Không thể ban tài khoản Quản trị viên tối cao.');
-    }
-    
-    await this.prisma.user.update({
-      where: { userId },
-      data: { status: 'BANNED' },
-    });
-    return { message: 'Đã cấm vĩnh viễn tài khoản người dùng.' };
+    return this.moderationService.banUser(userId);
   }
 
   async resetViolationCount(userId: string) {
-    const user = await this.findOne(userId);
-    
-    await this.prisma.$transaction(async (tx) => {
-      // Reset global chat violations
-      await tx.user.update({
-        where: { userId },
-        data: { violations: 0 },
-      });
-
-      // Reset recruiter specific violations if they exist
-      if (user.recruiter) {
-        await tx.recruiter.update({
-          where: { userId },
-          data: { violationCount: 0 },
-        });
-      }
-    });
-
-    return { message: 'Đã đặt lại toàn bộ số lần vi phạm về 0.' };
+    return this.moderationService.resetViolationCount(userId);
   }
 
   async remove(userId: string, reqUserId?: string) {
-    if (userId === reqUserId) {
-      throw new BadRequestException('Bạn không thể tự xóa tài khoản của chính mình.');
-    }
-
-    const userToDelete = await this.findOne(userId);
-    if (userToDelete.email === 'admin@workly.com') {
-      throw new BadRequestException('Không thể xóa tài khoản Quản trị viên tối cao.');
-    }
-
+    if (userId === reqUserId) throw new ConflictException('Bạn không thể tự xóa tài khoản của chính mình.');
+    const user = await this.findOne(userId);
+    if (user.email === 'admin@workly.com') throw new ConflictException('Không thể xóa tài khoản Quản trị viên tối cao.');
     await this.prisma.user.delete({ where: { userId } });
     return { message: 'Đã xóa user.' };
   }
 
-  // ==========================================
-  // SECURITY UTILS (Nhóm Tiện ích bảo mật)
-  // ==========================================
-
+  // --- Utils ---
   async setRefreshToken(userId: string, refreshToken: string | null) {
-    return this.prisma.user.update({
-      where: { userId },
-      data: { refreshToken },
-    });
+    return this.prisma.user.update({ where: { userId }, data: { refreshToken } });
   }
 
   async updateLastLogin(userId: string) {
-    return this.prisma.user.update({
-      where: { userId },
-      data: { lastLogin: new Date() },
-    });
+    return this.prisma.user.update({ where: { userId }, data: { lastLogin: new Date() } });
   }
 
   async updateAdminPermissions(userId: string, permissions: string[], fullName?: string) {
-    const user = await this.findOne(userId);
-    if (!user.admin) {
-      throw new NotFoundException(
-        'Người dùng này không phải là quản trị viên.',
-      );
-    }
-    const isSupreme = permissions.includes('ALL') || permissions.includes('SUPER_ADMIN');
-    await this.prisma.admin.update({
-      where: { userId },
-      data: {
-        permissions: isSupreme ? ['SUPER_ADMIN'] : permissions,
-        ...(fullName && { fullName }),
-      },
-    });
-
-    return { message: 'Đã cập nhật quyền hạn quản trị viên.' };
+    return this.moderationService.updateAdminPermissions(userId, permissions, fullName);
   }
 }
-// Trigger restart 2

@@ -18,7 +18,7 @@ export class KeywordStrategy implements IMatchingStrategy {
     const missingSkills: string[] = [];
 
     const COMMON_SKILLS = ['word', 'excel', 'powerpoint', 'teamwork', 'communication', 'english', 'giao tiếp', 'làm việc nhóm', 'tiếng anh'];
-    
+
     let totalWeight = 0;
     let earnedWeight = 0;
 
@@ -32,14 +32,14 @@ export class KeywordStrategy implements IMatchingStrategy {
       // 1. Tìm trong mảng skills đã bóc tách
       if (cvSkillsLower.some((cvS: string) => typeof cvS === 'string' && (cvS.includes(lowerSkill) || lowerSkill.includes(cvS)))) {
         found = true;
-      } 
+      }
       // 2. Tìm quét qua toàn bộ text của CV (dự phòng trường hợp bộ thu thập bỏ sót)
       else if (cvProps.fullText) {
         if (lowerSkill.length <= 2) {
-           const regex = new RegExp(`\\b${lowerSkill.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\b`, 'i');
-           if (regex.test(cvProps.fullText)) found = true;
+          const regex = new RegExp(`\\b${lowerSkill.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\b`, 'i');
+          if (regex.test(cvProps.fullText)) found = true;
         } else {
-           if (cvProps.fullText.includes(lowerSkill)) found = true;
+          if (cvProps.fullText.includes(lowerSkill)) found = true;
         }
       }
 

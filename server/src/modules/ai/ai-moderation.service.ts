@@ -59,7 +59,7 @@ export class AiModerationService {
     try {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       const prompt = `Trích xuất toàn bộ văn bản (text), số điện thoại, chữ viết tay, mã QR, link ứng dụng trong bức ảnh này. Liệt kê rõ ràng tất cả.`;
-      
+
       const result = await model.generateContent([
         prompt,
         {
@@ -71,7 +71,7 @@ export class AiModerationService {
       ]);
       const extracted = result.response.text().trim();
       const normalized = extracted.replace(/[\s\.\-\_]/g, '');
-      
+
       const isEvasion = EVASION_REGEX.test(extracted) || EVASION_REGEX.test(normalized);
 
       return { isEvasion, textExtracted: extracted };

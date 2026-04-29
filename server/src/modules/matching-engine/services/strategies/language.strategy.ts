@@ -15,7 +15,9 @@ export class LanguageStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const requiredLang = job.structuredRequirements?.languages || [];
-      const cvLangs = cv.parsedData?.languages || [];
+      const parsedCvLangs = cv.parsedData?.languages || [];
+      const candidateLangs = (cv.candidate?.languages as any[]) || [];
+      const cvLangs = candidateLangs.length > 0 ? candidateLangs : parsedCvLangs;
 
       if (requiredLang.length === 0) return { score: 100 };
 

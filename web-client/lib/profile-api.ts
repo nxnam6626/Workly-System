@@ -20,6 +20,8 @@ export interface CandidateProfile {
     isOpenToWork: boolean;
     gender?: string;
     birthYear?: number;
+    location?: string;
+    totalYearsExp?: number;
     currentSalary?: string;
     degree?: string;
     industries?: string[];
@@ -72,6 +74,8 @@ export interface UpdateProfileDto {
   skills?: SkillInput[];
   experiences?: ExperienceInput[];
   projects?: ProjectInput[];
+  location?: string;
+  totalYearsExp?: number;
   isOpenToWork?: boolean;
   gender?: string;
   birthYear?: number;

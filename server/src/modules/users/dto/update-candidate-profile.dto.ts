@@ -25,6 +25,14 @@ class SkillDto {
   level: SkillLevel;
 }
 
+class LanguageDto {
+  @IsString()
+  name: string;
+
+  @IsString()
+  level: string;
+}
+
 class ExperienceDto {
   @IsString()
   company: string;
@@ -58,11 +66,33 @@ class ProjectDto {
 }
 
 export class UpdateCandidateProfileDto {
+  @IsOptional()
   @IsString()
-  fullName: string;
+  fullName?: string;
 
+  @IsOptional()
   @IsString()
-  phone: string;
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  industries?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  totalYearsExp?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LanguageDto)
+  languages?: LanguageDto[];
 
   @IsOptional()
   @IsString()
@@ -71,6 +101,10 @@ export class UpdateCandidateProfileDto {
   @IsOptional()
   @IsString()
   major?: string;
+
+  @IsOptional()
+  @IsString()
+  degree?: string;
 
   @IsOptional()
   @IsNumber()

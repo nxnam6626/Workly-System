@@ -14,14 +14,12 @@ export class MatchingOrchestratorService {
     private readonly scoringEngine: ScoringEngineService,
     private readonly dataParser: DataParserService,
     private readonly matchAnalysis: MatchAnalysisService,
-  ) {}
+  ) { }
 
   /**
    * Chạy Matching cho một Job mới đăng/được duyệt
    */
   async runMatchingForJob(jobId: string) {
-    this.logger.log(`Starting Orchestrator matching for Job: ${jobId}`);
-
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
       include: { company: true },
@@ -49,9 +47,12 @@ export class MatchingOrchestratorService {
     // 2. Lấy danh sách ứng viên (Có thể tối ưu phân trang)
     const candidates = await this.prisma.candidate.findMany({
       where: { user: { status: 'ACTIVE' } },
-      include: { 
-        cvs: { where: { isMain: true } },
-        user: true 
+      include: {
+        cvs: { 
+          where: { isMain: true },
+          include: { candidate: true }
+        },
+        user: true
       },
     });
 
@@ -86,14 +87,15 @@ export class MatchingOrchestratorService {
       // 6. Lưu vào DB
       const matchRecord = await this.prisma.jobMatch.upsert({
         where: {
-          candidateId_jobPostingId: { 
-            candidateId: candidate.candidateId, 
-            jobPostingId: jobId 
+          candidateId_jobPostingId: {
+            candidateId: candidate.candidateId,
+            jobPostingId: jobId
           },
         },
         update: {
           score: finalScore,
           matchedSkills: analysis.skillsAnalysis.matchedSkills,
+          details: { breakdown, details } as any,
           updatedAt: new Date(),
         },
         create: {
@@ -101,6 +103,7 @@ export class MatchingOrchestratorService {
           candidateId: candidate.candidateId,
           score: finalScore,
           matchedSkills: analysis.skillsAnalysis.matchedSkills,
+          details: { breakdown, details } as any,
         },
       });
 
@@ -116,25 +119,42 @@ export class MatchingOrchestratorService {
   async runMatchingForCandidate(userId: string) {
     const candidate = await this.prisma.candidate.findFirst({
       where: { userId },
-      include: { 
-        cvs: { where: { isMain: true } },
-        user: true 
+      include: {
+        cvs: { 
+          where: { isMain: true },
+          include: { 
+            candidate: {
+              include: {
+                experiences: true,
+                projects: true,
+                skills: true
+              }
+            } 
+          }
+        },
+        user: true,
+        skills: true,
+        experiences: true,
+        projects: true
       },
     });
 
     if (!candidate || !candidate.cvs[0]) return [];
     const mainCv = candidate.cvs[0];
 
-    // 1. Embedding
-    if (!(mainCv as any).embedding) {
-      const parsedData = (mainCv.parsedData as any) || {};
-      const vector = await this.dataParser.getEmbedding(`${parsedData.summary || ''}`);
+    // 1. Embedding (Always regenerate to reflect profile updates)
+    const skillList = (candidate.skills || []).map(s => s.skillName).join(', ');
+    const desiredJob = candidate.desiredJob as any;
+    const textForEmbedding = `${candidate.fullName} ${candidate.summary || ''} ${skillList} ${desiredJob?.title || ''}`.trim();
+    
+    if (textForEmbedding) {
+      const vector = await this.dataParser.getEmbedding(textForEmbedding);
       const vectorSql = `[${vector.join(',')}]`;
       try {
         await this.prisma.$executeRaw`
           UPDATE "CV" SET "embedding" = ${vectorSql}::vector WHERE "cvId" = ${mainCv.cvId}
         `;
-      } catch (e) {}
+      } catch (e) { }
       (mainCv as any).embedding = vector;
     }
 
@@ -153,7 +173,7 @@ export class MatchingOrchestratorService {
           await this.prisma.$executeRaw`
             UPDATE "JobPosting" SET "embedding" = ${vectorSql}::vector WHERE "jobPostingId" = ${job.jobPostingId}
           `;
-        } catch (e) {}
+        } catch (e) { }
         (job as any).embedding = vector;
       }
 
@@ -162,15 +182,16 @@ export class MatchingOrchestratorService {
       const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
 
       const matchRecord = await this.prisma.jobMatch.upsert({
-        where: { 
-          candidateId_jobPostingId: { 
-            candidateId: candidate.candidateId, 
-            jobPostingId: job.jobPostingId 
-          } 
+        where: {
+          candidateId_jobPostingId: {
+            candidateId: candidate.candidateId,
+            jobPostingId: job.jobPostingId
+          }
         },
-        update: { 
-          score: finalScore, 
+        update: {
+          score: finalScore,
           matchedSkills: analysis.skillsAnalysis.matchedSkills,
+          details: { breakdown, details } as any,
           updatedAt: new Date(),
         },
         create: {
@@ -178,6 +199,7 @@ export class MatchingOrchestratorService {
           candidateId: candidate.candidateId,
           score: finalScore,
           matchedSkills: analysis.skillsAnalysis.matchedSkills,
+          details: { breakdown, details } as any,
         },
       });
       matchResults.push(matchRecord);

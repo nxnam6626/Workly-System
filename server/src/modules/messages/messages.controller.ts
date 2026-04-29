@@ -29,17 +29,7 @@ export class MessagesController {
 
   @Get('debug')
   async debugCounts() {
-    const msgs = await this.messagesService.prisma.message.findMany();
-    const counts: Record<string, number> = {};
-    msgs.forEach((m) => {
-      counts[m.content] = (counts[m.content] || 0) + 1;
-    });
-    return {
-      totalMessages: msgs.length,
-      duplicates: Object.entries(counts)
-        .filter(([k, v]) => v > 1)
-        .map(([k, v]) => ({ [k]: v })),
-    };
+    return this.messagesService.getDebugCounts();
   }
 
   @Get('conversations')

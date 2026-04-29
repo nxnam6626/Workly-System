@@ -49,9 +49,6 @@ export class MessagesGateway
       client.data.userId = userId;
 
       client.join(`user_${userId}`);
-      console.log(
-        `Client connected: ${client.id}, joined room: user_${userId}`,
-      );
 
       const count = this.activeUsers.get(userId) || 0;
       this.activeUsers.set(userId, count + 1);
@@ -76,7 +73,6 @@ export class MessagesGateway
   }
 
   async handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
 
     const userId = client.data?.userId;
     if (!userId) return;

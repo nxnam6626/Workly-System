@@ -36,7 +36,6 @@ export class AiMatchingService {
         
         const text = groqRes.data.choices[0].message.content;
         const clean = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
-        this.logger.log(`[${contextName}] Success via Groq Llama-3.3`);
         return JSON.parse(clean);
       } catch (e: any) {
         this.logger.warn(`[${contextName}] Groq AI failed: ${e.message}. Falling back...`);
@@ -49,7 +48,6 @@ export class AiMatchingService {
           const model = this.genAI.getGenerativeModel({ model: modelName, generationConfig: { responseMimeType: 'application/json', temperature: 0.0 } });
           const result = await model.generateContent(prompt);
           const clean = result.response.text().replace(/```json/gi, '').replace(/```/gi, '').trim();
-          this.logger.log(`[${contextName}] Success via Gemini (${modelName})`);
           return JSON.parse(clean);
        } catch (e: any) {
           this.logger.warn(`[${contextName}] Gemini ${modelName} failed: ${e.message}`);

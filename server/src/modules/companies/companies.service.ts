@@ -260,4 +260,55 @@ export class CompaniesService {
         isRegistered: c.isRegistered,
       }));
   }
+
+  async findOrCreateCompanyFromTaxCode(tx: any, data: { companyName: string, taxCode?: string, websiteUrl?: string, verifyStatus?: number }) {
+    if (!data.companyName) return null;
+
+    let existingCompany: any = null;
+    if (data.taxCode) {
+      existingCompany = await tx.company.findFirst({
+        where: { taxCode: data.taxCode },
+      });
+    }
+
+    if (existingCompany) {
+      return existingCompany.companyId;
+    }
+
+    let companyDataFromApi: any = null;
+    if (data.taxCode) {
+      try {
+        const res = await fetch(`https://esgoo.net/api-mst/${data.taxCode}.htm`);
+        const apiData = await res.json();
+        if (apiData.error === 0 && apiData.data) {
+          companyDataFromApi = apiData.data;
+        }
+      } catch (e) {
+        console.error('Failed to fetch tax code data', e);
+      }
+    }
+
+    const newCompany = await tx.company.create({
+      data: {
+        companyName: companyDataFromApi?.ten || data.companyName,
+        taxCode: data.taxCode || null,
+        address: companyDataFromApi?.dc || null,
+        websiteUrl: data.websiteUrl || null,
+        taxAddress: companyDataFromApi?.dc || null,
+        status: companyDataFromApi?.tinhtrang || null,
+        internationalName: companyDataFromApi?.internationalName || null,
+        shortName: companyDataFromApi?.shortName || null,
+        verifyStatus: companyDataFromApi || data.verifyStatus ? 1 : 0,
+        branches: {
+          create: {
+            name: 'Trụ sở chính',
+            address: companyDataFromApi?.dc || 'Đang cập nhật',
+            isVerified: !!companyDataFromApi,
+          },
+        },
+      },
+    });
+
+    return newCompany.companyId;
+  }
 }
