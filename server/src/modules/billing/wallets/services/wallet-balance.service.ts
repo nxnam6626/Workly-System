@@ -15,26 +15,21 @@ export class WalletBalanceService {
   ) {}
 
   async getBalance(userId: string) {
-    let recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-      include: {
-        recruiterWallet: true,
-        recruiterSubscription: true,
-      },
-    });
-
-    if (!recruiter) {
-      recruiter = await this.prisma.recruiter.create({
+    const recruiter =
+      (await this.prisma.recruiter.findUnique({
+        where: { userId },
+        include: { recruiterWallet: true, recruiterSubscription: true },
+      })) ||
+      (await this.prisma.recruiter.create({
         data: { userId },
         include: { recruiterWallet: true, recruiterSubscription: true },
-      });
-    }
+      }));
 
     if (!recruiter.recruiterWallet) {
-      const newWallet = await this.prisma.recruiterWallet.create({
+      const wallet = await this.prisma.recruiterWallet.create({
         data: { recruiterId: recruiter.recruiterId, balance: 0 },
       });
-      return { ...newWallet, subscription: recruiter.recruiterSubscription };
+      return { ...wallet, subscription: recruiter.recruiterSubscription };
     }
 
     return {
@@ -43,10 +38,9 @@ export class WalletBalanceService {
     };
   }
 
-  async getTransactions(userId: string, skip: number = 0, take: number = 20) {
+  async getTransactions(userId: string, skip = 0, take = 20) {
     const wallet = await this.getBalance(userId);
 
-    // Auto-cancel old pending transactions in bulk instead of mapping
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
     await this.prisma.transaction.updateMany({
       where: {
@@ -131,7 +125,7 @@ export class WalletBalanceService {
       this.prisma.transaction.create({
         data: {
           amount,
-          type: TransactionType.REFUND,
+          type: TransactionType.DEPOSIT,
           description,
           walletId: wallet.walletId,
         },
@@ -179,7 +173,7 @@ export class WalletBalanceService {
       include: { recruiterWallet: true },
     });
 
-    if (!recruiter || !recruiter.recruiterWallet)
+    if (!recruiter?.recruiterWallet)
       throw new NotFoundException('Wallet not found');
     const wallet = recruiter.recruiterWallet;
 
@@ -202,11 +196,10 @@ export class WalletBalanceService {
     }
 
     const cost = 30;
-    if (wallet.balance < cost) {
+    if (wallet.balance < cost)
       throw new BadRequestException(
         `Cần ${cost} Xu để mở khóa liên hệ. Vui lòng nạp thêm Xu!`,
       );
-    }
 
     const [updatedWallet, transaction] = await this.prisma.$transaction([
       this.prisma.recruiterWallet.update({

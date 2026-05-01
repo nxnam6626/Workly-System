@@ -52,7 +52,7 @@ export class WalletPaymentService {
 
     try {
       const paymentLink = await this.payos.paymentRequests.create(paymentData);
-      const checkoutUrl = (paymentLink as any).checkoutUrl;
+      const checkoutUrl = (paymentLink as { checkoutUrl: string }).checkoutUrl;
 
       await this.prisma.transaction.update({
         where: { transactionId: tx.transactionId },
@@ -60,14 +60,12 @@ export class WalletPaymentService {
       });
 
       return { checkoutUrl };
-    } catch (err) {
+    } catch {
       await this.prisma.transaction.update({
         where: { transactionId: tx.transactionId },
         data: { status: 'CANCELLED' },
       });
-      throw new BadRequestException(
-        'Không thể tạo link thanh toán: ' + (err.message || err),
-      );
+      throw new BadRequestException('Không thể tạo link thanh toán.');
     }
   }
 
@@ -102,7 +100,7 @@ export class WalletPaymentService {
 
     try {
       const paymentLink = await this.payos.paymentRequests.create(paymentData);
-      const checkoutUrl = (paymentLink as any).checkoutUrl;
+      const checkoutUrl = (paymentLink as { checkoutUrl: string }).checkoutUrl;
 
       await this.prisma.transaction.update({
         where: { transactionId },
@@ -110,7 +108,7 @@ export class WalletPaymentService {
       });
 
       return { checkoutUrl };
-    } catch (err) {
+    } catch {
       throw new BadRequestException('Không thể tạo lại link thanh toán');
     }
   }
@@ -139,19 +137,25 @@ export class WalletPaymentService {
         }),
       ]);
 
-      const userId = (transaction as any).wallet?.recruiter?.user?.userId;
+      const tx = transaction as unknown as {
+        wallet: { recruiter: { user: { userId: string } } };
+        transactionId: string;
+        amount: number;
+      };
+      const userId = tx?.wallet?.recruiter?.user?.userId;
+
       if (userId) {
         this.messagesGateway.server
           .to(`user_${userId}`)
           .emit('wallet_updated', {
-            newBalance: (updatedWallet as any).balance,
+            newBalance: (updatedWallet as { balance: number }).balance,
             transactionId: transaction.transactionId,
             amount: transaction.amount,
           });
       }
 
       return { status: 'success' };
-    } catch (err) {
+    } catch {
       throw new BadRequestException('Webhook signature invalid');
     }
   }

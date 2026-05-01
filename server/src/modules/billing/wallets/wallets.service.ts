@@ -10,7 +10,6 @@ export class WalletsService {
     private readonly paymentService: WalletPaymentService,
   ) {}
 
-  // --- Balance & Transaction History ---
   async getBalance(userId: string) {
     return this.balanceService.getBalance(userId);
   }
@@ -53,16 +52,15 @@ export class WalletsService {
     return this.balanceService.deductCvUnlock(recruiterId, description);
   }
 
-  // --- Payment Gateway (PayOS) ---
-  async createPaymentLink(userId: string, targetXu: number) {
-    return this.paymentService.createPaymentLink(userId, targetXu);
+  async topUp(userId: string, amount: number) {
+    return this.paymentService.createPaymentLink(userId, amount);
   }
 
-  async resumePaymentLink(userId: string, transactionId: string) {
+  async resumePayment(userId: string, transactionId: string) {
     return this.paymentService.resumePaymentLink(userId, transactionId);
   }
 
-  async verifyWebhook(body: any) {
+  async handleWebhook(body: any) {
     return this.paymentService.verifyWebhook(body);
   }
 }

@@ -1,12 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { WalletsService } from '@/modules/billing/wallets/wallets.service';
-import { TransactionType } from '@prisma/client';
 
 @Injectable()
 export class UnlockService {
@@ -18,7 +12,6 @@ export class UnlockService {
   ) {}
 
   async getWallet(userId: string) {
-    // Return Wallet through WalletsService instead of RecruiterWallet
     return this.walletsService.getBalance(userId);
   }
 

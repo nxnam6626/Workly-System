@@ -15,23 +15,30 @@ import {
   Role,
   Roles,
 } from '@/modules/identity/auth/decorators/roles.decorator';
+import { Request } from 'express';
+
+interface AuthRequest extends Request {
+  user: {
+    userId: string;
+    roles: string[];
+  };
+}
 
 @Controller('wallets')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class WalletsController {
   constructor(private readonly walletsService: WalletsService) {}
 
   @Get('balance')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
-  async getBalance(@Req() req) {
+  async getBalance(@Req() req: AuthRequest) {
     return this.walletsService.getBalance(req.user.userId);
   }
 
   @Get('transactions')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
   async getTransactions(
-    @Req() req,
+    @Req() req: AuthRequest,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
   ) {
@@ -43,21 +50,19 @@ export class WalletsController {
   }
 
   @Post('top-up')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
-  async topUp(@Req() req, @Body() body: { amount: number }) {
-    return this.walletsService.createPaymentLink(req.user.userId, body.amount);
+  async topUp(@Req() req: AuthRequest, @Body() body: { amount: number }) {
+    return this.walletsService.topUp(req.user.userId, body.amount);
   }
 
   @Post('transactions/:id/resume')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
-  async resumeTopUp(@Req() req, @Param('id') id: string) {
-    return this.walletsService.resumePaymentLink(req.user.userId, id);
+  async resumePayment(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.walletsService.resumePayment(req.user.userId, id);
   }
 
   @Post('payos-webhook')
-  async payosWebhook(@Body() body: any) {
-    return this.walletsService.verifyWebhook(body);
+  async handleWebhook(@Body() body: any) {
+    return this.walletsService.handleWebhook(body);
   }
 }
