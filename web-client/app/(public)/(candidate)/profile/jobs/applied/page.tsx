@@ -13,7 +13,7 @@ import { formatSalary } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth";
 import { useSocketStore } from "@/stores/socket";
 import toast from "react-hot-toast";
-import { useConfirm } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
 import { AppliedJobsPageSkeleton } from "@/components/candidates/AppliedJobSkeleton";
 import { motion, AnimatePresence } from "framer-motion";

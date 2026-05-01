@@ -1,4 +1,4 @@
-import { Job } from "@/components/JobCard";
+import { Job } from "@/components/jobs/JobCard";
 
 const MOCK_DESC = "Chúng tôi đang tìm kiếm ứng viên năng động cho vị trí này. Bạn sẽ được làm việc trong môi trường chuyên nghiệp, trẻ trung và đầy cơ hội thăng tiến.";
 const MOCK_REQS = "* Tốt nghiệp đại học chuyên ngành liên quan\n* Có kinh nghiệm là một lợi thế\n* Kỹ năng làm việc nhóm tốt\n* Chịu được áp lực công việc cao";

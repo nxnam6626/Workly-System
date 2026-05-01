@@ -255,6 +255,7 @@ model JobPosting {
   viewCount              Int                    @default(0)
   jobTier                JobTier                @default(BASIC)
   refreshedAt            DateTime               @default(now()) @db.Timestamp(6)
+  pausedAt               DateTime?              @db.Timestamp(6)
   slug                   String?                @unique
   autoInviteMatches      Boolean                @default(false)
   embedding              Unsupported("vector")?
@@ -474,6 +475,7 @@ enum JobStatus {
   REJECTED
   EXPIRED
   CLOSED
+  PAUSED
 }
 
 enum SkillLevel {

@@ -6,7 +6,7 @@ import { Check, Star, Zap, Crown, ArrowRight, Clock, Plus, Loader2, Wallet as Wa
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
-import { useConfirm } from '@/components/ConfirmDialog';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 function TopUpModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [amount, setAmount] = useState('');
@@ -184,7 +184,7 @@ export default function PlansPage() {
 
     try {
       setLoading(planId);
-      await api.post('/subscriptions/buy', { planType: planId });
+      await api.post('/subscriptions/purchase-plan', { planType: planId });
       toast.success(`Đăng ký thành công ${planId === 'LITE' ? 'Gói LITE' : 'Gói GROWTH'}!`);
       await fetchWallet();
       await fetchCurrentSubscription();
@@ -341,7 +341,7 @@ export default function PlansPage() {
                   if (!ok) return;
                   try {
                     setLoading(pack.id);
-                    await api.post('/subscriptions/buy-cv-hunter', { packageType: pack.id });
+                    await api.post('/subscriptions/purchase-cv-quota', { packageType: pack.id });
                     toast.success(`Đăng ký thành công ${pack.name}!`);
                     await fetchWallet();
                   } catch (error: any) {

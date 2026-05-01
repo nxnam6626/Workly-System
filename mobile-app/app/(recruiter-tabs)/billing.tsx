@@ -90,7 +90,7 @@ export default function BillingScreen() {
           onPress: async () => {
             setPurchasing(plan.planType);
             try {
-              const { data } = await api.post('/subscriptions/buy', { planType: plan.planType });
+              const { data } = await api.post('/subscriptions/purchase-plan', { planType: plan.planType });
               if (data.checkoutUrl) {
                 setPayUrl(data.checkoutUrl);
               } else {
@@ -121,7 +121,7 @@ export default function BillingScreen() {
           onPress: async () => {
             setPurchasing(pack.id);
             try {
-              await api.post('/subscriptions/buy-cv-hunter', { packageType: pack.id });
+              await api.post('/subscriptions/purchase-cv-quota', { packageType: pack.id });
               Alert.alert('✅ Thành công!', `Đã nhận được ${pack.quota} lượt xem hồ sơ CV.`);
             } catch (err: any) {
               const msg = err.response?.data?.message || 'Không thể mua gói do số dư ví.';

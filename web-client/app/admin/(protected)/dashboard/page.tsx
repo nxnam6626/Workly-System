@@ -5,7 +5,8 @@ import Link from 'next/link';
 import {
   Users, Briefcase, Clock, XCircle, TrendingUp,
   ArrowUpRight, Loader2, RefreshCw, DollarSign,
-  Activity, ShieldAlert, BarChart3, Zap
+  Activity, ShieldAlert, BarChart3, Zap, Building2,
+  UserCheck, GraduationCap
 } from 'lucide-react';
 import { adminDashboardApi, DashboardStats, RevenueStats } from '@/lib/admin-api';
 import { AdminAnalyticsChat } from '@/components/admin/AdminAnalyticsChat';
@@ -54,7 +55,7 @@ function StatCard({
   );
 }
 
-export default function DashboardPage() {
+export default function AdminDashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -95,25 +96,35 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: 'Tổng Người Dùng', value: stats?.totalUsers || 0, icon: Users,
+      label: 'Tổng Ứng Viên', value: stats?.totalCandidates || 0, icon: GraduationCap,
       gradient: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
-      href: '/admin/users', description: 'Tài khoản đã đăng ký',
+      href: '/admin/candidates', description: 'Người tìm việc',
+    },
+    {
+      label: 'Nhà Tuyển Dụng', value: stats?.totalRecruiters || 0, icon: UserCheck,
+      gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)',
+      href: '/admin/recruiters', description: 'Đơn vị tuyển dụng',
+    },
+    {
+      label: 'Tổng Doanh Nghiệp', value: stats?.totalCompanies || 0, icon: Building2,
+      gradient: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+      href: '/admin/companies', description: 'Công ty trên hệ thống',
     },
     {
       label: 'Tin Đang Hoạt Động', value: stats?.totalJobs || 0, icon: Briefcase,
       gradient: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
-      href: '/admin/jobs', description: 'Đã được phê duyệt',
+      href: '/admin/jobs?status=APPROVED', description: 'Đã được phê duyệt',
     },
     {
       label: 'Chờ Duyệt', value: stats?.pendingJobs || 0, icon: Clock,
       gradient: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)',
-      href: '/admin/jobs', description: 'Cần xử lý',
+      href: '/admin/jobs?status=PENDING', description: 'Cần xử lý gấp',
       urgent: (stats?.pendingJobs || 0) > 0,
     },
     {
       label: 'Tin Bị Từ Chối', value: stats?.totalRejected || 0, icon: XCircle,
       gradient: 'linear-gradient(135deg, #4c0519 0%, #e11d48 100%)',
-      href: '/admin/jobs', description: 'Vi phạm hoặc chưa đạt',
+      href: '/admin/jobs?status=REJECTED', description: 'Vi phạm hoặc chưa đạt',
     },
   ];
 
@@ -141,7 +152,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statCards.map((card, i) => (
           <StatCard key={i} {...card} isLoading={isLoading} />
         ))}
@@ -207,7 +218,7 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 {[
                   { label: 'Duyệt Tin Tuyển Dụng', href: '/admin/jobs', icon: Briefcase, color: 'blue', desc: 'Xem & phê duyệt JD' },
-                  { label: 'Quản Lý Người Dùng', href: '/admin/users', icon: Users, color: 'indigo', desc: 'Khóa / mở khóa tài khoản' },
+                  { label: 'Quản Lý Ứng Viên', href: '/admin/candidates', icon: Users, color: 'indigo', desc: 'Khóa / mở khóa tài khoản' },
                   { label: 'Báo Cáo Doanh Thu', href: '/admin/revenue', icon: DollarSign, color: 'emerald', desc: 'Thống kê tài chính' },
                   { label: 'Hỗ Trợ & Vi Phạm', href: '/admin/support', icon: ShieldAlert, color: 'rose', desc: 'Báo cáo vi phạm' },
                 ].map(action => {

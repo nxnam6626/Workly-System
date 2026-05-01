@@ -1,11 +1,11 @@
-import { HeroSearch } from "@/components/HeroSearch";
-import { BannerSlider } from "@/components/BannerSlider";
-import { RecommendedJobsSection } from "@/components/RecommendedJobsSection";
-import { UrgentJobsSection } from "@/components/UrgentJobsSection";
-import { InternshipJobsSection as InternshipJobs } from "@/components/InternshipJobs";
-import { JobCategories } from "@/components/JobCategories";
-import { FeaturedJobs } from "@/components/FeaturedJobs";
-import { TopEmployers } from "@/components/TopEmployers";
+import { HeroSearch } from "@/components/landing/HeroSearch";
+import { BannerSlider } from "@/components/landing/BannerSlider";
+import { RecommendedJobsSection } from "@/components/jobs/RecommendedJobsSection";
+import { UrgentJobsSection } from "@/components/jobs/UrgentJobsSection";
+import { InternshipJobsSection as InternshipJobs } from "@/components/jobs/InternshipJobs";
+import { JobCategories } from "@/components/jobs/JobCategories";
+import { FeaturedJobs } from "@/components/jobs/FeaturedJobs";
+import { TopEmployers } from "@/components/shared/TopEmployers";
 import IndustryMegaMenu from "@/components/shared/IndustryMegaMenu";
 
 export default function Home() {

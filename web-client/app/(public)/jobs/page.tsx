@@ -5,10 +5,10 @@ import { Search, BellRing, Check, ChevronRight } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import api from "@/lib/api";
-import { JobCard, Job } from "@/components/JobCard";
+import { JobCard, Job } from "@/components/jobs/JobCard";
 import { JobSearchHero } from "@/components/jobs/JobSearchHero";
 import { CareerSidebar } from "@/components/jobs/CareerSidebar";
-import { Pagination } from "@/components/Pagination";
+import { Pagination } from "@/components/shared/Pagination";
 import { JobCardSkeleton } from "@/components/jobs/JobCardSkeleton";
 
 function JobSearchContent() {

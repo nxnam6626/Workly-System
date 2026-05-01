@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/auth';
 import {
   ChevronLeft,
@@ -13,20 +12,24 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
+  Building,
   TrendingUp,
   Shield,
   Menu,
-  X,
   HelpCircle,
 } from 'lucide-react';
-import { NotificationMenu } from '@/components/NotificationMenu';
+import { NotificationMenu } from '@/components/navbar/NotificationMenu';
+import { checkIsAdmin } from '@/lib/admin-auth';
 
-const navGroups = [
+const NAV_GROUPS = [
   {
     label: 'Quản lý',
     items: [
       { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard, requireLevel1: true },
-      { label: 'Người Dùng', href: '/admin/users', icon: Users, perm: 'MANAGE_USERS' },
+      { label: 'Quản Trị Viên', href: '/admin/admins', icon: Shield, requireLevel1: true },
+      { label: 'Ứng Viên', href: '/admin/candidates', icon: Users, perm: 'MANAGE_USERS' },
+      { label: 'Nhà Tuyển Dụng', href: '/admin/recruiters', icon: Briefcase, perm: 'MANAGE_USERS' },
+      { label: 'Doanh Nghiệp', href: '/admin/companies', icon: Building, perm: 'MANAGE_USERS' },
       { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
       { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, perm: 'MANAGE_BILLING' },
       { label: 'Hỗ Trợ', href: '/admin/support', icon: HelpCircle, perm: 'MANAGE_SUPPORT' },
@@ -34,136 +37,109 @@ const navGroups = [
   },
 ];
 
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function ProtectedAdminConsoleLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, logout, user } = useAuthStore();
+  const { isAuthenticated, isInitialized, isLoading, logout, user } = useAuthStore();
+  
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isAdmin = useMemo(() => checkIsAdmin(user), [user]);
+
+  // Auth & Role Guard — only runs after checkAuth() has completed at least once
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.push('/admin/login');
-      } else if (!user?.roles?.includes('ADMIN')) {
-        router.push('/admin/login');
-        } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
-          const perms = (user?.admin?.permissions as string[]) || [];
-          const isSupreme = perms.includes('SUPER_ADMIN');
+    if (!isInitialized) return;
 
-          if (isSupreme) {
-            if (pathname === '/admin') router.push('/admin/dashboard');
-          } else {
-            // Find first permissible page for Level 2 Admin
-            let targetPage = '';
-
-            if (perms.includes('MANAGE_USERS')) targetPage = '/admin/users';
-            else if (perms.includes('MANAGE_JOBS')) targetPage = '/admin/jobs';
-            else if (perms.includes('MANAGE_BILLING') || perms.includes('MANAGE_REVENUE')) targetPage = '/admin/revenue';
-            else if (perms.includes('MANAGE_SUPPORT')) targetPage = '/admin/support';
-
-            // Chỉ chuyển hướng nếu tìm thấy trang phù hợp và khác trang hiện tại
-            // Nếu không tìm thấy trang nào, để họ ở lại dashboard (dù có thể bị giới hạn hiển thị)
-            if (targetPage && targetPage !== pathname) {
-              router.push(targetPage);
-            }
-          }
-        }
-      }
-    }, [isAuthenticated, isLoading, user, router, pathname]);
-
-    if (isLoading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-950">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-          </div>
-        </div>
-      );
+    if (!isAuthenticated || !isAdmin) {
+      router.replace('/admin/login');
+      return;
     }
 
-    if (!isAuthenticated || !user?.roles?.includes('ADMIN')) return null;
+    // Role-based Redirect Logic (Level 2 Admin)
+    const isAtRootOrDashboard = pathname === '/admin' || pathname === '/admin/dashboard';
+    if (!isAtRootOrDashboard) return;
 
-    const SidebarContent = () => (
-      <>
-        {/* Logo */}
-        <div className={`flex items-center gap-3 px-4 py-5 border-b border-slate-800/60 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.15 }}
-              >
-                <p className="text-sm font-black text-white tracking-tight whitespace-nowrap">Workly</p>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Admin Console</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+    const perms = (user?.admin?.permissions as string[]) || [];
+    const isSupreme = perms.includes('SUPER_ADMIN');
+
+    if (isSupreme) {
+      if (pathname === '/admin') router.replace('/admin/dashboard');
+      return;
+    }
+
+    // Redirect Level 2 Admin to their first allowed module
+    let targetPage = '';
+    if (perms.includes('MANAGE_USERS')) targetPage = '/admin/candidates';
+    else if (perms.includes('MANAGE_JOBS')) targetPage = '/admin/jobs';
+    else if (perms.includes('MANAGE_BILLING') || perms.includes('MANAGE_REVENUE')) targetPage = '/admin/revenue';
+    else if (perms.includes('MANAGE_SUPPORT')) targetPage = '/admin/support';
+
+    if (targetPage) {
+      router.replace(targetPage);
+    }
+  }, [isAuthenticated, isInitialized, isAdmin, user, router, pathname]);
+
+  // 1. Block render until initial auth check is done
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      </div>
+    );
+  }
+
+  // 2. Auth Guard Render
+  if (!isAuthenticated || !isAdmin) return null;
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full bg-slate-900 border-r border-slate-800">
+      {/* Brand */}
+      <div className={`flex items-center gap-3 px-4 py-6 border-b border-slate-800/60 ${collapsed ? 'justify-center' : ''}`}>
+        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/40">
+          <Shield className="w-5 h-5 text-white" />
         </div>
+        {!collapsed && (
+          <div className="overflow-hidden">
+            <p className="text-sm font-black text-white tracking-tighter">WORKLY</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Admin Console</p>
+          </div>
+        )}
+      </div>
 
-        {/* Nav Groups */}
-        <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-          {navGroups.map((group) => (
-            <div key={group.label}>
-              <AnimatePresence>
-                {!collapsed && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 mb-2"
-                  >
-                    {group.label}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-              <div className="space-y-1">
-                {group.items.map(({ label, href, icon: Icon, perm, requireLevel1 }: any) => {
-                  const active = pathname.startsWith(href);
-                  const perms = user?.admin?.permissions || [];
-                  const isSupreme = perms.includes('SUPER_ADMIN');
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-6 space-y-8 overflow-y-auto custom-scrollbar">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-3">
+            {!collapsed && (
+              <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] px-3">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-1">
+              {group.items.map((item: any) => {
+                const active = pathname.startsWith(item.href);
+                const perms = user?.admin?.permissions || [];
+                const isSupreme = perms.includes('SUPER_ADMIN');
 
-                  // requireLevel1: chỉ admin cấp 1 (Supreme) mới xem
-                  if (requireLevel1 && !isSupreme) return null;
-                  // perm: kiểm tra quyền cụ thể
-                  if (perm && !isSupreme && !perms.includes(perm)) return null;
+                if (item.requireLevel1 && !isSupreme) return null;
+                if (item.perm && !isSupreme && !perms.includes(item.perm)) return null;
                 
                 return (
                   <Link
-                    key={href}
-                    href={href}
+                    key={item.href}
+                    href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    title={collapsed ? label : undefined}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group relative ${active
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
+                      active 
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
                     } ${collapsed ? 'justify-center' : ''}`}
+                    title={collapsed ? item.label : ''}
                   >
-                    <Icon className="w-4.5 h-4.5 shrink-0" />
-                    <AnimatePresence>
-                      {!collapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -8 }}
-                          transition={{ duration: 0.12 }}
-                          className="text-sm font-medium whitespace-nowrap"
-                        >
-                          {label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    {active && !collapsed && (
-                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />
+                    <item.icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`} />
+                    {!collapsed && (
+                      <span className="text-sm font-semibold truncate">{item.label}</span>
                     )}
                   </Link>
                 );
@@ -173,117 +149,89 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ))}
       </nav>
 
-      {/* User + Logout */}
-      <div className="border-t border-slate-800/60 px-3 py-3 space-y-1">
-        {!collapsed && (
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-sm shrink-0">
-              {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.name || 'Admin'}</p>
-              <p className="text-[10px] text-slate-500 truncate">{user?.email}</p>
-            </div>
+      {/* User Footer */}
+      <div className="p-3 border-t border-slate-800/60 bg-slate-900/50">
+        <div className={`flex items-center gap-3 p-3 rounded-2xl bg-slate-800/30 mb-2 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+            {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
           </div>
-        )}
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-xs font-black text-white truncate">{user?.name || 'Admin'}</p>
+              <p className="text-[10px] font-medium text-slate-500 truncate">{user?.email}</p>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => logout()}
-          title="Đăng xuất"
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all ${collapsed ? 'justify-center' : ''}`}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-colors ${collapsed ? 'justify-center' : ''}`}
         >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-sm font-medium whitespace-nowrap"
-              >
-                Đăng xuất
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <LogOut className="w-4 h-4" />
+          {!collapsed && <span className="text-sm font-bold">Đăng xuất</span>}
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-
-      {/* Mobile backdrop */}
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900">
+      {/* Mobile Overlay */}
       {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Mobile sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 flex flex-col transition-transform duration-300 lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Mobile Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 transition-transform duration-300 lg:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <SidebarContent />
-      </div>
+      </aside>
 
-      {/* Desktop sidebar */}
-      <motion.aside
-        animate={{ width: collapsed ? 68 : 240 }}
-        transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="sticky top-0 hidden lg:flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen"
-      >
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:flex flex-col transition-all duration-300 bg-slate-900 relative ${collapsed ? 'w-20' : 'w-64'}`}>
         <SidebarContent />
-
-        {/* Collapse toggle */}
         <button
-          onClick={() => setCollapsed((c) => !c)}
-          className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-300 hover:bg-blue-600 hover:text-white transition-colors z-10 shadow-md"
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all shadow-xl z-10"
         >
           {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
         </button>
-      </motion.aside>
+      </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top header */}
-        <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-          {/* Left: mobile menu + breadcrumb */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors lg:hidden"
-            >
-              <Menu className="w-5 h-5" />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
+        <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setMobileOpen(true)} className="p-2 lg:hidden text-slate-500 hover:bg-slate-100 rounded-xl">
+              <Menu className="w-6 h-6" />
             </button>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
               <Shield className="w-4 h-4 text-blue-600" />
-              <span className="font-bold text-slate-800">Admin Console</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-500 font-medium capitalize">
-                {pathname.split('/').filter(Boolean).pop()?.replace('-', ' ')}
+              <span>Admin Console</span>
+              <span className="text-slate-300 mx-1">/</span>
+              <span className="text-blue-600 capitalize">
+                {pathname.split('/').pop()?.replace('-', ' ')}
               </span>
             </div>
           </div>
 
-          {/* Right: notifications + user */}
-          {user && (
+          <div className="flex items-center gap-4">
+            <NotificationMenu />
+            <div className="w-px h-6 bg-slate-200 mx-2" />
             <div className="flex items-center gap-3">
-              <NotificationMenu />
-              <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shadow-sm">
-                  {(user.name || user.email || 'A').charAt(0).toUpperCase()}
-                </div>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-bold text-slate-800 leading-tight">{user.name || 'Admin'}</p>
-                  <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Administrator</p>
-                </div>
+              <div className="hidden sm:text-right">
+                <p className="text-sm font-black text-slate-900">{user?.name || 'Admin'}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Administrator</p>
+              </div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-600 font-black text-sm">
+                {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
               </div>
             </div>
-          )}
+          </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
-          {children}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

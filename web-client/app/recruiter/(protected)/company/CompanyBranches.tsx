@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MapPin, Plus, Trash2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { useConfirm } from '@/components/ConfirmDialog';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 import dynamic from 'next/dynamic';
 

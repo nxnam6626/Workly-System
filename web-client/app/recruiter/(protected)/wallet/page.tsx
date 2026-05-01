@@ -10,20 +10,48 @@ import { useWalletStore } from '@/stores/wallet';
 import { useAuthStore } from '@/stores/auth';
 
 
+import useSWR from 'swr';
+
 function WalletContent() {
   const { wallet: globalWallet, fetchWallet } = useWalletStore();
   const balance = globalWallet?.balance || 0;
   
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [cvUnlockQuota, setCvUnlockQuota] = useState(0);
-  const [cvUnlockQuotaMax, setCvUnlockQuotaMax] = useState(0);
-  const [subscription, setSubscription] = useState<any>(null);
-  const [topUpAmount, setTopUpAmount] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const { accessToken } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // SWR for Balance & Subscription
+  const { data: balanceData, mutate: mutateBalance } = useSWR(
+    accessToken ? '/wallets/balance' : null,
+    async (url) => {
+      const res = await api.get(url);
+      fetchWallet(); // Sync with navbar
+      return res.data;
+    },
+    { revalidateOnFocus: false, dedupingInterval: 5000 }
+  );
+
+  // SWR for Transactions
+  const { data: transactions = [], isLoading: loading, mutate: mutateTrans } = useSWR(
+    accessToken ? '/wallets/transactions' : null,
+    async (url) => {
+      const res = await api.get(url);
+      return res.data;
+    },
+    { revalidateOnFocus: false, dedupingInterval: 5000 }
+  );
+
+  const cvUnlockQuota = balanceData?.cvUnlockQuota || 0;
+  const cvUnlockQuotaMax = balanceData?.cvUnlockQuotaMax || 0;
+  const subscription = balanceData?.subscription || null;
+
+  const fetchWalletData = () => {
+    mutateBalance();
+    mutateTrans();
+  };
+
+  const [topUpAmount, setTopUpAmount] = useState('');
+  const [processing, setProcessing] = useState(false);
   const { user } = useAuthStore();
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [supportMessage, setSupportMessage] = useState('');
@@ -32,10 +60,6 @@ function WalletContent() {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
-
-  useEffect(() => {
-    fetchWalletData();
-  }, []);
 
   useEffect(() => {
     const status = searchParams.get('status');
@@ -47,27 +71,6 @@ function WalletContent() {
       router.replace('/recruiter/wallet');
     }
   }, [searchParams, router]);
-
-  const fetchWalletData = async () => {
-    setLoading(true);
-    try {
-      const [balanceRes, transRes] = await Promise.all([
-        api.get('/wallets/balance'),
-        api.get('/wallets/transactions')
-      ]);
-      await fetchWallet(); // Tự động sync với top navbar
-      
-      setCvUnlockQuota(balanceRes.data.cvUnlockQuota || 0);
-      setCvUnlockQuotaMax(balanceRes.data.cvUnlockQuotaMax || 0);
-      setTransactions(transRes.data || []);
-      setSubscription(balanceRes.data.subscription || null);
-    } catch (error) {
-      console.error('Failed to load wallet data', error);
-      toast.error('Không thể tải dữ liệu ví');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleTopUp = async (e: React.FormEvent) => {
     e.preventDefault();
