@@ -15,12 +15,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MessagesService } from './messages.service';
 import { MessagesGateway } from './messages.gateway';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Roles,
   Role,
-} from '@/modules/identity/auth/decorators/roles.decorator';
+} from '@/common/decorators/roles.decorator';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard, RolesGuard)

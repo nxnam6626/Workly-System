@@ -14,8 +14,8 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { LinkedinStrategy } from './strategies/linkedin.strategy';
 
 // Guards
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 
 @Module({
   imports: [

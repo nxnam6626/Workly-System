@@ -23,10 +23,10 @@ import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 import {
   Role,
   Roles,
-} from '@/modules/identity/auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+} from '@/common/decorators/roles.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 // ─── Routes NOT requiring ADMIN ───────────────────────────────────────────────
 @UseGuards(JwtAuthGuard)

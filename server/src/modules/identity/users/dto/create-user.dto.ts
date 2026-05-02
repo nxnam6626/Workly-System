@@ -7,7 +7,7 @@ import {
   IsArray,
   IsOptional,
 } from 'class-validator';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Email không hợp lệ' })

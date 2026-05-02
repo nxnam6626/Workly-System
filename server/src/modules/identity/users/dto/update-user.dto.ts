@@ -5,7 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
 import { StatusUser } from '@prisma/client';
 
 export class UpdateUserDto {

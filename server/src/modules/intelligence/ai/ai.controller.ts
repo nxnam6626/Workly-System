@@ -11,13 +11,13 @@ import {
 import { AiService } from './ai.service';
 import { AdminAiService } from './admin-ai.service';
 import { Observable, from, map } from 'rxjs';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Roles,
   Role,
-} from '@/modules/identity/auth/decorators/roles.decorator';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+} from '@/common/decorators/roles.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { ChatService } from './chat.service';
 

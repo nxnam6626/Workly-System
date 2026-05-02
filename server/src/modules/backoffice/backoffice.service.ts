@@ -3,7 +3,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
 
 @Injectable()
-export class AdminService {
+export class BackofficeService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboardStats() {

@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { CurrentUserPayload } from '../decorators/current-user.decorator';
 

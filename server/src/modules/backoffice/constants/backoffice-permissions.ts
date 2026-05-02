@@ -1,4 +1,4 @@
-export const ADMIN_PERMISSIONS = {
+export const BACKOFFICE_PERMISSIONS = {
   // 1. Nhóm Quản lý Tin tuyển dụng (MANAGE_JOBS)
   MANAGE_JOBS: {
     APPROVE_JOB: 'APPROVE_JOB',
@@ -28,4 +28,4 @@ export const ADMIN_PERMISSIONS = {
   },
 } as const;
 
-export type AdminPermission = string;
+export type BackofficePermission = string;

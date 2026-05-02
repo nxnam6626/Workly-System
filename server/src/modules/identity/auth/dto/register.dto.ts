@@ -7,7 +7,7 @@ import {
   IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com', description: 'Email đăng ký' })

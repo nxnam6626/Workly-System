@@ -9,15 +9,15 @@ import {
 } from '@nestjs/common';
 import { SupportService } from './support.service';
 import { CreateSupportDto } from './dto/create-support.dto';
-import { OptionalJwtAuthGuard } from '@/modules/identity/auth/guards/optional-jwt-auth.guard';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Roles,
   Role,
-} from '@/modules/identity/auth/decorators/roles.decorator';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
-import type { CurrentUserPayload } from '@/modules/identity/auth/decorators/current-user.decorator';
+} from '@/common/decorators/roles.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import type { CurrentUserPayload } from '@/common/decorators/current-user.decorator';
 
 @Controller('support')
 export class SupportController {

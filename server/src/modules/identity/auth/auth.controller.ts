@@ -26,9 +26,9 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
-import { Public } from './decorators/public.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -37,7 +37,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly securityService: SecurityService,
-  ) {}
+  ) { }
 
   @Public()
   @Post('register')
@@ -54,19 +54,8 @@ export class AuthController {
   }
 
   @Public()
-  @Post('verify-registration')
-  @ApiOperation({
-    summary: 'Xác nhận đăng ký từ link Email (Bước 2: Hoàn tất)',
-  })
-  @ApiResponse({ status: 200, description: 'Đăng ký thành công' })
-  async verifyRegistration(@Body('token') token: string) {
-    return this.authService.processRegistrationLink(token);
-  }
-
-  // Alias for Frontend Stage 3
-  @Public()
   @Post('verify')
-  @ApiOperation({ summary: 'Xác nhận đăng ký (Alias cho Frontend Stage 3)' })
+  @ApiOperation({ summary: 'Xác nhận đăng ký từ link Email' })
   async verify(@Body('token') token: string) {
     return this.authService.processRegistrationLink(token);
   }
@@ -120,10 +109,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Xử lý callback từ Google' })
   async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(
-      `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}&is_first_login=${result.isFirstLogin}`,
-    );
+    this.handleOAuthRedirect(result, res);
   }
 
   @Public()
@@ -140,6 +126,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Xử lý callback từ LinkedIn' })
   async linkedinAuthCallback(@Req() req: Request, @Res() res: Response) {
     const result = await this.authService.oauthLogin(req.user);
+    this.handleOAuthRedirect(result, res);
+  }
+
+  private handleOAuthRedirect(result: any, res: Response) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     res.redirect(
       `${frontendUrl}/callback?token=${result.accessToken}&refresh_token=${result.refreshToken}&is_first_login=${result.isFirstLogin}`,

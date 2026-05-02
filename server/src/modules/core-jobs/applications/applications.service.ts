@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { type CurrentUserPayload } from '@/modules/identity/auth/decorators/current-user.decorator';
+import { type CurrentUserPayload } from '@/common/decorators/current-user.decorator';
 import { AiService } from '@/modules/intelligence/ai/ai.service';
 import { ApplicationsNotificationService } from './services/applications-notification.service';
 import { ApplicationStatusService } from './services/application-status.service';

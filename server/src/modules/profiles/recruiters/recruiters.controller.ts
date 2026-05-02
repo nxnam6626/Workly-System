@@ -10,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { UnlockService } from './unlock.service';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Role,
   Roles,
-} from '@/modules/identity/auth/decorators/roles.decorator';
+} from '@/common/decorators/roles.decorator';
 
 @Controller('recruiters')
 @UseGuards(JwtAuthGuard, RolesGuard)

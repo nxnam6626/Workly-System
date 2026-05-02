@@ -16,8 +16,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { CompaniesService } from './companies.service';
 import { FilterCompanyDto } from './dto/filter-company.dto';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 @Controller('companies')
 export class CompaniesController {

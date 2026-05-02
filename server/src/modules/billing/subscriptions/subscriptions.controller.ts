@@ -1,11 +1,11 @@
 import { Controller, Post, Get, Body, Req, UseGuards } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Role,
   Roles,
-} from '@/modules/identity/auth/decorators/roles.decorator';
+} from '@/common/decorators/roles.decorator';
 import { PlanType, JobTier } from '@prisma/client';
 import { Request } from 'express';
 

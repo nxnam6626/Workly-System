@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { AdminFilterJobPostingDto } from './dto/admin-filter-job-posting.dto';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
-import { Roles } from '@/modules/identity/auth/decorators/roles.decorator';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
 import { JobStatus } from '@prisma/client';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Admin Job Postings')

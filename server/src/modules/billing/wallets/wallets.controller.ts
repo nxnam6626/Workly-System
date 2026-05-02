@@ -9,12 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { WalletsService } from './wallets.service';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
 import {
   Role,
   Roles,
-} from '@/modules/identity/auth/decorators/roles.decorator';
+} from '@/common/decorators/roles.decorator';
 import { Request } from 'express';
 
 interface AuthRequest extends Request {

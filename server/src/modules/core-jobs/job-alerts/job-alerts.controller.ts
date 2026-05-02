@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JobAlertsService } from './job-alerts.service';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Job Alerts')

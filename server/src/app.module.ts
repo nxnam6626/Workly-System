@@ -14,7 +14,7 @@ import { SupabaseModule } from '@/common/supabase/supabase.module';
 // Identity
 import { UsersModule } from '@/modules/identity/users/users.module';
 import { AuthModule } from '@/modules/identity/auth/auth.module';
-import { AdminModule } from '@/modules/identity/admin/admin.module';
+import { BackofficeModule } from '@/modules/backoffice/backoffice.module';
 
 // Profiles
 import { CandidatesModule } from '@/modules/profiles/candidates/candidates.module';
@@ -68,7 +68,7 @@ import { SupportModule } from '@/modules/support/support/support.module';
     AiModule,
     CandidatesModule,
     MessagesModule,
-    AdminModule,
+    BackofficeModule,
     NotificationsModule,
     RecruitersModule,
     WalletsModule,

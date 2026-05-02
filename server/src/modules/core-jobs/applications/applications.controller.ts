@@ -15,12 +15,12 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '@/modules/identity/auth/guards/optional-jwt-auth.guard';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
 import {
   CurrentUser,
   type CurrentUserPayload,
-} from '@/modules/identity/auth/decorators/current-user.decorator';
+} from '@/common/decorators/current-user.decorator';
 
 @Controller('applications')
 export class ApplicationsController {

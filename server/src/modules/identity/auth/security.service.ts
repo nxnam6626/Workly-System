@@ -18,7 +18,7 @@ export class SecurityService {
     private usersService: UsersService,
     private redisService: RedisService,
     private mailService: MailService,
-  ) {}
+  ) { }
 
   // ==========================================
   // PASSWORD MANAGEMENT

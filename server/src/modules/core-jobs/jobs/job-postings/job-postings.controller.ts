@@ -13,12 +13,12 @@ import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
-import { JwtAuthGuard } from '@/modules/identity/auth/guards/jwt-auth.guard';
-import { OptionalJwtAuthGuard } from '@/modules/identity/auth/guards/optional-jwt-auth.guard';
-import { RolesGuard } from '@/modules/identity/auth/guards/roles.guard';
-import { Roles } from '@/modules/identity/auth/decorators/roles.decorator';
-import { Role } from '@/modules/identity/auth/decorators/roles.decorator';
-import { CurrentUser } from '@/modules/identity/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 @Controller('job-postings')
 export class JobPostingsController {
