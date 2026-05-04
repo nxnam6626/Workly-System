@@ -3,103 +3,189 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Heart, Image as ImageIcon, Plus, Trash2, Edit3, 
-  History, Layout, Save, X, Sparkles, CheckCircle,
-  Zap, Trophy, Target, Users2, Rocket
+  Heart, Plus, Trash2, Edit3, 
+  History as HistoryIcon, Layout, Save, X, Zap, Trophy, Target, Users2, Rocket, 
+  ShieldCheck, Coffee, Laptop, Palmtree, Gift, Globe
 } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Company, CompanySection, CompanyHistory, CompanyBenefit } from '@/types/company';
 
 interface CultureTabProps {
-  company: any;
+  company: Company;
   onUpdate: () => void;
 }
 
-const SECTION_TYPE_ICONS: Record<string, any> = {
-  INTRODUCTION: Rocket,
-  HR_POLICY: Target,
-  ADVANCEMENT: Trophy,
-  SALARY: Zap,
-  INSURANCE: Heart,
-  ACTIVITIES: Users2,
-  GENERAL: Layout
+const SECTION_TYPE_INFO: Record<string, { icon: React.ElementType; color: string; label: string; placeholder: string }> = {
+  HR_POLICY: { 
+    icon: Target, 
+    color: 'text-purple-500', 
+    label: 'Chính sách nhân sự',
+    placeholder: 'Các chính sách về con người, môi trường làm việc...'
+  },
+  ADVANCEMENT: { 
+    icon: Trophy, 
+    color: 'text-amber-500', 
+    label: 'Cơ hội thăng tiến',
+    placeholder: 'Lộ trình phát triển sự nghiệp, đào tạo...'
+  },
+  SALARY: { 
+    icon: Zap, 
+    color: 'text-orange-500', 
+    label: 'Lương & Thưởng',
+    placeholder: 'Chế độ lương thưởng, review lương, bonus...'
+  },
+  INSURANCE: { 
+    icon: Heart, 
+    color: 'text-red-500', 
+    label: 'Bảo hiểm',
+    placeholder: 'Chi tiết về BHXH, bảo hiểm sức khỏe PVI/Liberty...'
+  },
+  ACTIVITIES: { 
+    icon: Users2, 
+    color: 'text-emerald-500', 
+    label: 'Hoạt động',
+    placeholder: 'Team building, du lịch, các câu lạc bộ thể thao...'
+  },
+  GENERAL: { 
+    icon: Layout, 
+    color: 'text-slate-500', 
+    label: 'Khác',
+    placeholder: 'Nội dung bổ sung khác...'
+  }
 };
 
+const BENEFIT_SUGGESTIONS = [
+  { title: 'Bảo hiểm sức khỏe', icon: ShieldCheck },
+  { title: 'Team building', icon: Users2 },
+  { title: 'Du lịch hàng năm', icon: Palmtree },
+  { title: 'Thưởng tháng 13', icon: Gift },
+  { title: 'Đào tạo chuyên sâu', icon: Trophy },
+  { title: 'Trà & Cafe miễn phí', icon: Coffee },
+  { title: 'Thiết bị làm việc hiện đại', icon: Laptop },
+  { title: 'Chế độ Hybrid/Remote', icon: Zap },
+];
+
 export default function CultureTab({ company, onUpdate }: CultureTabProps) {
-  const [editingSection, setEditingSection] = useState<any>(null);
-  const [editingHistory, setEditingHistory] = useState<any>(null);
+  const [editingSection, setEditingSection] = useState<CompanySection | Omit<CompanySection, 'id'> | null>(null);
+  const [editingHistory, setEditingHistory] = useState<CompanyHistory | Omit<CompanyHistory, 'id'> | null>(null);
   const [newBenefit, setNewBenefit] = useState('');
   const [loading, setLoading] = useState<string | null>(null);
+  
+  // New state for additional social/video info
+  const [socialInfo, setSocialInfo] = useState({
+    websiteUrl: company.websiteUrl || ''
+  });
+
+  const handleUpdateSocial = async () => {
+    setLoading('social');
+    try {
+      await api.patch('/companies/my-company', socialInfo);
+      toast.success('Đã cập nhật thông tin liên kết!');
+      onUpdate();
+    } catch {
+      toast.error('Lỗi khi cập nhật thông tin');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const handleUpsertSection = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingSection) return;
+
     setLoading('section');
     try {
-      await api.post('/companies/my-company/sections', editingSection);
-      toast.success('Đã lưu mục giới thiệu!');
+      if ('id' in editingSection) {
+        await api.patch(`/companies/${company.companyId}/sections/${editingSection.id}`, editingSection);
+      } else {
+        await api.post(`/companies/${company.companyId}/sections`, editingSection);
+      }
       setEditingSection(null);
       onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi lưu mục giới thiệu');
+      toast.success('Đã lưu nội dung!');
+    } catch {
+      toast.error('Không thể lưu nội dung');
     } finally {
       setLoading(null);
     }
   };
 
   const handleDeleteSection = async (id: string) => {
-    if (!confirm('Bạn có chắc muốn xóa mục này?')) return;
+    if (!confirm('Bạn có chắc chắn muốn xóa phần này?')) return;
+    setLoading('section');
     try {
-      await api.delete(`/companies/my-company/sections/${id}`);
-      toast.success('Đã xóa mục giới thiệu');
+      await api.delete(`/companies/${company.companyId}/sections/${id}`);
       onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi xóa');
-    }
-  };
-
-  const handleAddBenefit = async () => {
-    if (!newBenefit.trim()) return;
-    setLoading('benefit');
-    try {
-      await api.post('/companies/my-company/benefits', { title: newBenefit });
-      setNewBenefit('');
-      onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi thêm phúc lợi');
+      toast.success('Đã xóa nội dung!');
+    } catch {
+      toast.error('Không thể xóa nội dung');
     } finally {
       setLoading(null);
     }
   };
 
-  const handleDeleteBenefit = async (id: string) => {
+  const handleAddBenefit = async (title?: string) => {
+    const benefitTitle = title || newBenefit;
+    if (!benefitTitle.trim()) return;
+
+    setLoading('benefit');
     try {
-      await api.delete(`/companies/my-company/benefits/${id}`);
+      await api.post(`/companies/${company.companyId}/benefits`, { title: benefitTitle });
+      setNewBenefit('');
       onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi xóa');
+      toast.success('Đã thêm quyền lợi!');
+    } catch {
+      toast.error('Không thể thêm quyền lợi');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleDeleteBenefit = async (benefitId: string) => {
+    setLoading('benefit');
+    try {
+      await api.delete(`/companies/${company.companyId}/benefits/${benefitId}`);
+      onUpdate();
+      toast.success('Đã xóa quyền lợi!');
+    } catch {
+      toast.error('Không thể xóa quyền lợi');
+    } finally {
+      setLoading(null);
     }
   };
 
   const handleUpsertHistory = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingHistory) return;
+
     setLoading('history');
     try {
-      await api.post('/companies/my-company/history', editingHistory);
+      if ('id' in editingHistory) {
+        await api.patch(`/companies/${company.companyId}/history/${editingHistory.id}`, editingHistory);
+      } else {
+        await api.post(`/companies/${company.companyId}/history`, editingHistory);
+      }
       setEditingHistory(null);
       onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi lưu lịch sử');
+      toast.success('Đã lưu cột mốc!');
+    } catch {
+      toast.error('Không thể lưu cột mốc');
     } finally {
       setLoading(null);
     }
   };
 
   const handleDeleteHistory = async (id: string) => {
+    setLoading('history');
     try {
-      await api.delete(`/companies/my-company/history/${id}`);
+      await api.delete(`/companies/${company.companyId}/history/${id}`);
       onUpdate();
-    } catch (error) {
-      toast.error('Lỗi khi xóa');
+      toast.success('Đã xóa cột mốc!');
+    } catch {
+      toast.error('Không thể xóa cột mốc');
+    } finally {
+      setLoading(null);
     }
   };
 
@@ -110,41 +196,64 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
       animate={{ opacity: 1 }}
       className="space-y-12 pb-32"
     >
-      {/* 1. Header Section - Premium Editorial Look */}
-      <section className="relative py-12 px-8 overflow-hidden rounded-[3rem] bg-slate-900 text-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-mariner/20 to-transparent"></div>
-        <div className="absolute -right-20 -top-20 w-80 h-80 bg-mariner/10 rounded-full blur-[100px]"></div>
+      <section className="relative py-12 px-10 overflow-hidden rounded-[3rem] bg-[#0f172a] text-white group shadow-xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-mariner/20 via-transparent to-purple-500/5 opacity-60"></div>
         
-        <div className="relative z-10 max-w-3xl">
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="flex items-center gap-2 text-mariner font-black uppercase tracking-[0.3em] text-xs mb-4"
-          >
-            <Sparkles className="w-4 h-4" /> Employer Branding
-          </motion.div>
-          <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-[0.9] mb-6">
-            Kiến tạo <span className="text-mariner">Văn hóa</span> <br />Chinh phục <span className="italic">Nhân tài</span>
-          </h2>
-          <p className="text-slate-400 text-lg font-medium leading-relaxed max-w-xl">
-            Một hồ sơ văn hóa tốt giúp tăng 60% tỉ lệ ứng tuyển tự nhiên. Hãy kể câu chuyện của bạn một cách chân thực nhất.
-          </p>
+        <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+              Hồ sơ <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-mariner to-blue-400">Truyền thông & Văn hóa</span>
+            </h2>
+            <div className="space-y-4 max-w-md">
+               <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                 Cung cấp các liên kết truyền thông để ứng viên có cái nhìn trực quan nhất về doanh nghiệp của bạn.
+               </p>
+               
+               <div className="grid grid-cols-1 gap-3">
+                  <SocialInput 
+                    icon={<Globe className="w-4 h-4" />} 
+                    placeholder="Website URL (Trang chủ công ty)" 
+                    value={socialInfo.websiteUrl}
+                    onChange={val => setSocialInfo({...socialInfo, websiteUrl: val})}
+                  />
+                  <button 
+                    onClick={handleUpdateSocial}
+                    disabled={loading === 'social'}
+                    className="w-full py-3 bg-mariner hover:bg-blue-600 text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                  >
+                    {loading === 'social' ? 'Đang cập nhật...' : 'Cập nhật liên kết'}
+                  </button>
+               </div>
+            </div>
+          </div>
+          
+          <div className="hidden md:grid grid-cols-2 gap-4">
+             <StatCard icon={<Rocket className="text-blue-400" />} label="Giới thiệu" />
+             <StatCard icon={<Heart className="text-red-400" />} label="Quyền lợi" />
+             <StatCard icon={<HistoryIcon className="text-amber-400" />} label="Lịch sử" />
+             <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 flex flex-col justify-center">
+                <div className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Hoàn thiện</div>
+                <div className="text-2xl font-black">85%</div>
+             </div>
+          </div>
         </div>
       </section>
 
-      {/* 2. Sections Management - Asymmetric Grid */}
       <section className="space-y-8">
-        <div className="flex items-end justify-between px-4">
-          <div>
-            <h3 className="text-3xl font-black text-slate-800 tracking-tight">Câu chuyện doanh nghiệp</h3>
-            <p className="text-slate-500 font-bold">Các mục nội dung chi tiết về định hướng và chính sách.</p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+               <h3 className="text-3xl font-black text-slate-900 tracking-tight">Câu chuyện doanh nghiệp</h3>
+            </div>
+            <p className="text-slate-500 font-bold text-sm">Chia sẻ những nét đặc sắc về môi trường và văn hóa làm việc.</p>
           </div>
           {!editingSection && (
             <button 
-              onClick={() => setEditingSection({ title: '', content: '', type: 'GENERAL', displayOrder: company.sections.length })}
-              className="group flex items-center gap-3 px-6 py-3 bg-slate-900 text-white font-black rounded-2xl hover:bg-mariner transition-all shadow-xl shadow-slate-900/10 active:scale-95"
+              onClick={() => setEditingSection({ title: '', content: '', type: 'GENERAL', displayOrder: company.sections?.length || 0 })}
+              className="group flex items-center gap-2 px-6 py-3 bg-mariner text-white font-black rounded-xl hover:shadow-lg transition-all active:scale-95 whitespace-nowrap text-sm"
             >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> Thêm chương mới
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> Thêm nội dung
             </button>
           )}
         </div>
@@ -152,125 +261,139 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
         <AnimatePresence mode="wait">
           {editingSection ? (
             <motion.form 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
               onSubmit={handleUpsertSection}
-              className="bg-white rounded-[3rem] p-10 border-2 border-mariner/20 shadow-2xl shadow-mariner/5 space-y-8"
+              className="bg-white rounded-[2.5rem] p-10 border border-slate-200 shadow-2xl space-y-8 relative overflow-hidden"
             >
-              <div className="grid gap-8">
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Tiêu đề chương</label>
-                  <input 
-                    type="text"
-                    placeholder="VD: Tầm nhìn & Sứ mệnh"
-                    value={editingSection.title}
-                    onChange={e => setEditingSection({...editingSection, title: e.target.value})}
-                    className="w-full text-3xl font-black bg-slate-50 border-none rounded-2xl py-4 px-6 focus:ring-4 focus:ring-mariner/10 outline-none transition-all placeholder:text-slate-300"
-                    required
-                  />
+              <div className="relative z-10 space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-xl bg-slate-50 ${SECTION_TYPE_INFO[editingSection.type]?.color || 'text-slate-500'}`}>
+                      {(() => {
+                        const Icon = SECTION_TYPE_INFO[editingSection.type]?.icon || Layout;
+                        return <Icon className="w-6 h-6" />;
+                      })()}
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black text-slate-800">Biên tập chương</h4>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{SECTION_TYPE_INFO[editingSection.type]?.label}</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setEditingSection(null)} className="p-2 hover:bg-slate-50 rounded-lg text-slate-400 transition-all"><X className="w-5 h-5" /></button>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Nội dung chi tiết</label>
-                    <textarea 
-                      placeholder="Hãy mô tả một cách lôi cuốn..."
-                      value={editingSection.content}
-                      onChange={e => setEditingSection({...editingSection, content: e.target.value})}
-                      className="w-full h-64 bg-slate-50 border-none rounded-3xl py-4 px-6 focus:ring-4 focus:ring-mariner/10 outline-none transition-all font-medium leading-relaxed resize-none"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-6">
+                <div className="grid lg:grid-cols-3 gap-10">
+                  <div className="lg:col-span-2 space-y-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Phân loại</label>
-                      <select 
-                        value={editingSection.type}
-                        onChange={e => setEditingSection({...editingSection, type: e.target.value})}
-                        className="w-full bg-slate-50 border-none rounded-2xl py-4 px-6 font-bold text-slate-600 outline-none focus:ring-4 focus:ring-mariner/10 transition-all appearance-none"
-                      >
-                        <option value="GENERAL">Chung</option>
-                        <option value="INTRODUCTION">Giới thiệu</option>
-                        <option value="HR_POLICY">Chính sách nhân sự</option>
-                        <option value="ADVANCEMENT">Cơ hội thăng tiến</option>
-                        <option value="SALARY">Lương & Thưởng</option>
-                        <option value="INSURANCE">Bảo hiểm</option>
-                        <option value="ACTIVITIES">Hoạt động</option>
-                      </select>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tiêu đề chương</label>
+                      <input 
+                        type="text"
+                        placeholder="VD: Giới thiệu chung về công ty"
+                        value={editingSection.title}
+                        onChange={e => setEditingSection({...editingSection, title: e.target.value})}
+                        className="w-full text-lg font-black bg-slate-50 border-2 border-transparent focus:border-mariner/20 focus:bg-white rounded-xl py-4 px-6 outline-none transition-all placeholder:text-slate-200"
+                        required
+                      />
                     </div>
-                    <div className="p-6 bg-mariner/5 rounded-3xl border border-mariner/10">
-                      <p className="text-xs font-bold text-mariner/60 leading-relaxed italic">
-                        "Mẹo: Các mục như 'Lương & Thưởng' hoặc 'Cơ hội thăng tiến' thường thu hút nhiều lượt xem nhất từ ứng viên tiềm năng."
-                      </p>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nội dung</label>
+                      <textarea 
+                        placeholder={SECTION_TYPE_INFO[editingSection.type]?.placeholder}
+                        value={editingSection.content}
+                        onChange={e => setEditingSection({...editingSection, content: e.target.value})}
+                        className="w-full h-64 bg-slate-50 border-2 border-transparent focus:border-mariner/20 focus:bg-white rounded-2xl py-5 px-6 outline-none transition-all font-medium leading-relaxed resize-none text-xs placeholder:text-slate-200"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loại chương</label>
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {Object.entries(SECTION_TYPE_INFO).map(([key, info]) => (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              const existing = company.sections?.find((s: CompanySection) => s.type === key);
+                              if (existing) {
+                                setEditingSection(existing);
+                              } else {
+                                setEditingSection({
+                                  title: '',
+                                  content: '',
+                                  type: key,
+                                  displayOrder: company.sections?.length || 0
+                                } as CompanySection);
+                              }
+                            }}
+                            className={`flex items-center gap-3 p-3 rounded-lg border transition-all text-left ${
+                              editingSection.type === key 
+                                ? 'border-mariner bg-mariner/5 text-mariner' 
+                                : 'border-slate-100 hover:border-slate-200 text-slate-500'
+                            }`}
+                          >
+                            <info.icon className={`w-4 h-4 ${editingSection.type === key ? 'text-mariner' : 'text-slate-400'}`} />
+                            <div className="flex items-center gap-2">
+                               <span className="font-black text-[11px] uppercase tracking-tight">{info.label}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
-                <button 
-                  type="button"
-                  onClick={() => setEditingSection(null)}
-                  className="px-8 py-4 text-slate-400 font-black hover:text-slate-600 transition-all"
-                >
-                  Hủy bỏ
-                </button>
-                <button 
-                  type="submit"
-                  disabled={loading === 'section'}
-                  className="px-10 py-4 bg-mariner text-white font-black rounded-2xl hover:brightness-110 shadow-xl shadow-mariner/20 flex items-center gap-3 active:scale-95 transition-all"
-                >
-                  {loading === 'section' ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-                  Lưu chương này
-                </button>
+                <div className="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                  <button type="button" onClick={() => setEditingSection(null)} className="px-6 py-3 text-slate-400 font-black hover:text-slate-900 transition-all text-xs tracking-widest">HỦY BỎ</button>
+                  <button 
+                    type="submit"
+                    disabled={loading === 'section'}
+                    className="px-10 py-3 bg-slate-900 text-white font-black rounded-xl hover:bg-mariner shadow-lg flex items-center gap-2 active:scale-95 transition-all text-sm uppercase tracking-widest"
+                  >
+                    {loading === 'section' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                    Lưu nội dung
+                  </button>
+                </div>
               </div>
             </motion.form>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {company.sections.length === 0 ? (
-                <div className="md:col-span-2 py-24 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center text-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                    <Layout className="w-8 h-8 text-slate-300" />
-                  </div>
-                  <p className="text-slate-400 font-black text-xl">Chưa có chương nội dung nào</p>
-                  <p className="text-slate-400 font-medium max-w-xs mt-2">Nhấp vào "Thêm chương mới" để bắt đầu xây dựng thương hiệu tuyển dụng của bạn.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(!company.sections || company.sections.length === 0) ? (
+                <div className="lg:col-span-3 py-24 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center text-center">
+                  <Plus className="w-10 h-10 text-slate-200 mb-4" />
+                  <h4 className="text-xl font-black text-slate-400 uppercase tracking-widest">Chưa có nội dung</h4>
                 </div>
               ) : (
-                company.sections.map((section: any, idx: number) => {
-                  const Icon = SECTION_TYPE_ICONS[section.type] || Layout;
+                company.sections.map((section: CompanySection) => {
+                  const info = SECTION_TYPE_INFO[section.type] || SECTION_TYPE_INFO.GENERAL;
                   return (
                     <motion.div 
+                      layout
                       key={section.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className="group relative bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-500"
+                      className="group relative bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
                     >
-                      <div className="flex items-start justify-between mb-6">
-                        <div className="p-4 bg-mariner/5 rounded-2xl text-mariner group-hover:bg-mariner group-hover:text-white transition-all duration-500">
-                          <Icon className="w-6 h-6" />
+                      <div className="flex items-center justify-between mb-6">
+                        <div className={`p-3 rounded-xl bg-slate-50 ${info.color} group-hover:bg-white group-hover:shadow-md transition-all`}>
+                          <info.icon className="w-5 h-5" />
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                          <button 
-                            onClick={() => setEditingSection(section)}
-                            className="p-3 bg-white text-slate-400 hover:text-mariner rounded-xl border border-slate-100 shadow-sm transition-all"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteSection(section.id)}
-                            className="p-3 bg-white text-slate-400 hover:text-red-500 rounded-xl border border-slate-100 shadow-sm transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="flex gap-1">
+                          <button onClick={() => setEditingSection(section)} className="p-2.5 text-slate-400 hover:text-mariner transition-all"><Edit3 className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteSection(section.id)} className="p-2.5 text-slate-400 hover:text-red-500 transition-all"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
-                      <h4 className="text-2xl font-black text-slate-800 mb-3 tracking-tight">{section.title}</h4>
-                      <p className="text-slate-500 font-medium leading-relaxed line-clamp-3 text-sm">{section.content}</p>
+                      <div className="flex-1 space-y-3">
+                        <h4 className="text-xl font-black text-slate-800 leading-tight group-hover:text-mariner transition-colors">{section.title}</h4>
+                        <p className="text-slate-500 font-medium leading-relaxed line-clamp-3 text-xs">{section.content}</p>
+                      </div>
                       <div className="mt-6 pt-6 border-t border-slate-50">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 group-hover:text-mariner transition-colors">
-                          Category: {section.type}
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${info.color}`}>
+                          {info.label}
                         </span>
                       </div>
                     </motion.div>
@@ -282,143 +405,196 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
         </AnimatePresence>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* 3. Benefit Management - Creative Card */}
-        <div className="lg:col-span-3 bg-white rounded-[3rem] shadow-xl border border-slate-100 p-10 overflow-hidden relative">
-          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-red-50 rounded-full blur-3xl opacity-50"></div>
-          
-          <div className="relative z-10">
-            <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3 mb-8">
-              <div className="p-2 bg-red-50 rounded-lg"><Heart className="w-6 h-6 text-red-500" /></div> Chế độ đãi ngộ & Phúc lợi
-            </h3>
-            
-            <div className="flex gap-3 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <section className="bg-white rounded-[3rem] shadow-xl border border-slate-100 p-10 space-y-8">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+               <h3 className="text-2xl font-black text-slate-900 flex items-center gap-2">
+                 <div className="p-1.5 bg-red-50 rounded-lg"><Heart className="w-5 h-5 text-red-500" /></div> Quyền lợi & Đãi ngộ
+               </h3>
+            </div>
+            <p className="text-slate-400 font-bold text-xs uppercase tracking-wider">Đặc quyền dành cho nhân tài</p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="relative group">
               <input 
                 type="text"
-                placeholder="VD: Macbook Pro cho mọi nhân viên..."
+                placeholder="Thêm quyền lợi mới..."
                 value={newBenefit}
                 onChange={e => setNewBenefit(e.target.value)}
-                className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold outline-none focus:ring-4 focus:ring-red-500/5 transition-all"
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-red-100 focus:bg-white rounded-2xl px-6 py-4 font-bold text-sm outline-none transition-all placeholder:text-slate-200"
                 onKeyDown={e => e.key === 'Enter' && handleAddBenefit()}
               />
               <button 
-                onClick={handleAddBenefit}
+                onClick={() => handleAddBenefit()}
                 disabled={loading === 'benefit'}
-                className="px-6 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-red-500 transition-all shadow-xl shadow-slate-900/10"
+                className="absolute right-2 top-2 bottom-2 px-6 bg-slate-900 text-white rounded-xl font-black hover:bg-red-500 transition-all shadow-md flex items-center gap-2 active:scale-95 text-xs"
               >
-                {loading === 'benefit' ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus className="w-5 h-5" />}
+                {loading === 'benefit' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Plus className="w-4 h-4" />}
+                THÊM
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              {company.benefits.map((benefit: any) => (
-                <motion.div 
-                  layout
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  key={benefit.id} 
-                  className="group flex items-center gap-3 bg-white border border-slate-100 px-5 py-3 rounded-2xl shadow-sm hover:border-red-200 transition-all cursor-default"
+            <div className="flex flex-wrap gap-2">
+              {BENEFIT_SUGGESTIONS.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleAddBenefit(suggestion.title)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-red-500 rounded-full text-[10px] font-black border border-transparent hover:border-red-100 transition-all"
                 >
-                  <div className="w-2 h-2 rounded-full bg-red-500 group-hover:scale-150 transition-transform"></div>
-                  <span className="text-sm font-black text-slate-700">{benefit.title}</span>
-                  <button 
-                    onClick={() => handleDeleteBenefit(benefit.id)}
-                    className="ml-2 text-slate-300 hover:text-red-500 transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </motion.div>
+                  <suggestion.icon className="w-3 h-3" />
+                  {suggestion.title}
+                </button>
               ))}
             </div>
-          </div>
-        </div>
 
-        {/* 4. History Management - Vertical Timeline */}
-        <div className="lg:col-span-2 bg-slate-900 rounded-[3rem] shadow-xl p-10 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <History className="w-32 h-32" />
+            <div className="pt-6 border-t border-slate-50">
+              <div className="flex flex-wrap gap-2">
+                <AnimatePresence>
+                  {company.benefits?.map((benefit: CompanyBenefit) => (
+                    <motion.div 
+                      layout
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      key={benefit.id} 
+                      className="group flex items-center gap-2.5 bg-white border border-slate-100 px-4 py-2 rounded-xl hover:border-red-200 transition-all shadow-sm"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                      <span className="text-xs font-bold text-slate-700">{benefit.title}</span>
+                      <button onClick={() => handleDeleteBenefit(benefit.id)} className="p-0.5 hover:bg-red-50 rounded text-slate-300 hover:text-red-500 transition-all"><X className="w-3 h-3" /></button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
-          
-          <div className="relative z-10">
+        </section>
+
+        <section className="bg-[#0f172a] rounded-[3rem] shadow-xl p-10 text-white relative overflow-hidden flex flex-col">
+          <div className="relative z-10 flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-10">
-              <h3 className="text-2xl font-black flex items-center gap-3">
-                <History className="w-6 h-6 text-amber-500" /> Cột mốc vàng
-              </h3>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                   <h3 className="text-2xl font-black flex items-center gap-2">
+                     <div className="p-1.5 bg-white/5 rounded-lg border border-white/10"><HistoryIcon className="w-5 h-5 text-amber-400" /></div> Lịch sử phát triển
+                   </h3>
+                </div>
+                <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">Cột mốc vàng</p>
+              </div>
               {!editingHistory && (
                 <button 
-                  onClick={() => setEditingHistory({ year: new Date().getFullYear(), event: '' })}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all"
+                  onClick={() => setEditingHistory({ year: '', event: '' } as CompanyHistory)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-lg border border-white/10 transition-all active:scale-95"
                 >
-                  <Plus className="w-3 h-3 inline mr-1" /> Thêm mốc
+                  <Plus className="w-3.5 h-3.5 inline mr-1.5" /> THÊM MỐC
                 </button>
               )}
             </div>
 
             <AnimatePresence mode="wait">
-              {editingHistory && (
+              {editingHistory ? (
                 <motion.form 
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   onSubmit={handleUpsertHistory}
-                  className="bg-white/5 rounded-[2rem] p-6 border border-white/10 mb-8 space-y-4"
+                  className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-8 space-y-4"
                 >
                   <div className="space-y-4">
-                    <input 
-                      type="number"
-                      value={editingHistory.year}
-                      onChange={e => setEditingHistory({...editingHistory, year: parseInt(e.target.value)})}
-                      className="w-full bg-white/5 border-none rounded-xl px-4 py-3 font-black text-amber-500 outline-none focus:ring-2 focus:ring-amber-500/50"
-                      placeholder="Năm"
-                      required
-                    />
-                    <textarea 
-                      value={editingHistory.event}
-                      onChange={e => setEditingHistory({...editingHistory, event: e.target.value})}
-                      className="w-full h-24 bg-white/5 border-none rounded-xl px-4 py-3 font-bold text-white outline-none focus:ring-2 focus:ring-amber-500/50 resize-none"
-                      placeholder="Sự kiện tiêu biểu..."
-                      required
-                    />
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Thời gian (Ngày-Tháng-Năm)</label>
+                       <input 
+                        type="text"
+                        value={editingHistory.year}
+                        onChange={e => setEditingHistory({...editingHistory, year: e.target.value})}
+                        className="w-full bg-white/5 border-none rounded-lg px-4 py-3 font-black text-amber-400 text-base outline-none focus:ring-1 focus:ring-amber-500/50"
+                        placeholder="VD: 2007-10-10"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Sự kiện chính</label>
+                      <input 
+                        type="text"
+                        value={editingHistory.event}
+                        onChange={e => setEditingHistory({...editingHistory, event: e.target.value})}
+                        className="w-full bg-white/5 border-none rounded-lg px-4 py-3 font-bold text-white text-sm outline-none focus:ring-1 focus:ring-amber-500/50"
+                        placeholder="VD: Công ty chính thức hoạt động."
+                        required
+                      />
+                    </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-2">
-                    <button type="button" onClick={() => setEditingHistory(null)} className="text-[10px] font-black text-white/40 uppercase hover:text-white transition-colors">Hủy bỏ</button>
-                    <button type="submit" disabled={loading === 'history'} className="px-6 py-2 bg-amber-500 text-slate-900 font-black rounded-lg text-xs active:scale-95 transition-all">
-                      Xác nhận
+                    <button type="button" onClick={() => setEditingHistory(null)} className="text-[9px] font-black text-white/40 uppercase hover:text-white transition-colors tracking-widest">HỦY BỎ</button>
+                    <button type="submit" disabled={loading === 'history'} className="px-6 py-2.5 bg-amber-500 text-slate-950 font-black rounded-lg text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">
+                       {loading === 'history' ? 'ĐANG LƯU...' : 'XÁC NHẬN'}
                     </button>
                   </div>
                 </motion.form>
-              )}
+              ) : null}
             </AnimatePresence>
 
-            <div className="space-y-8 relative">
-              <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-white/10" />
-              {company.history.length === 0 ? (
-                <p className="text-white/30 font-bold italic text-sm text-center py-10">Kể lại hành trình của bạn...</p>
+            <div className="flex-1 overflow-y-auto max-h-[300px] pr-4 custom-scrollbar">
+              {(!company.history || company.history.length === 0) ? (
+                <div className="h-full flex flex-col items-center justify-center text-slate-600 opacity-50 py-10">
+                  <HistoryIcon className="w-12 h-12 mb-4" />
+                  <p className="text-sm font-bold">Chưa có cột mốc nào</p>
+                </div>
               ) : (
-                company.history.map((h: any) => (
-                  <div key={h.id} className="group flex gap-6 relative">
-                    <div className="w-6 h-6 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center shrink-0 z-10 group-hover:scale-125 transition-transform duration-300">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-                    </div>
-                    <div className="flex-1 pb-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xl font-black text-amber-500">{h.year}</span>
-                        <button 
-                          onClick={() => handleDeleteHistory(h.id)}
-                          className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                <ul className="space-y-4">
+                  {company.history.map((h: CompanyHistory) => (
+                    <li key={h.id} className="group flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-transparent hover:border-white/10 transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                        <p className="text-xs font-bold text-slate-300">
+                          <span className="text-amber-500 mr-2">{h.year}:</span>
+                          {h.event}
+                        </p>
                       </div>
-                      <p className="text-slate-300 font-bold leading-relaxed text-sm">{h.event}</p>
-                    </div>
-                  </div>
-                ))
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                        <button onClick={() => setEditingHistory(h)} className="p-1.5 text-white/20 hover:text-white"><Edit3 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDeleteHistory(h.id)} className="p-1.5 text-white/20 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </motion.div>
+  );
+}
+
+function SocialInput({ icon, placeholder, value, onChange }: { icon: React.ReactNode; placeholder: string; value: string; onChange: (val: string) => void }) {
+  return (
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-mariner transition-colors">
+        {icon}
+      </div>
+      <input 
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-xs font-medium focus:border-mariner transition-all outline-none"
+      />
+    </div>
+  );
+}
+
+function StatCard({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 hover:bg-white/10 transition-all group cursor-default">
+      <div className="mb-3">{icon}</div>
+      <div className="flex items-center gap-2">
+         <span className="text-sm font-black text-white">{label}</span>
+      </div>
+      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Thông tin cốt lõi</div>
+    </div>
   );
 }

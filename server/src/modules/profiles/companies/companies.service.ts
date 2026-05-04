@@ -125,7 +125,33 @@ export class CompaniesService {
   }
 
   private async createNewCompany(recruiterId: string, data: any) {
-    const company = await this.prisma.company.create({ data });
+    const { sections, benefits, history, ...basicData } = data;
+
+    const createPayload: any = {
+      ...basicData,
+      sections: sections?.length > 0 ? {
+        create: sections.map(s => ({
+          title: s.title,
+          content: s.content,
+          type: s.type,
+          displayOrder: s.displayOrder
+        }))
+      } : undefined,
+      benefits: benefits?.length > 0 ? {
+        create: benefits.map(b => ({
+          title: b.title,
+          icon: b.icon
+        }))
+      } : undefined,
+      history: history?.length > 0 ? {
+        create: history.map(h => ({
+          year: h.year,
+          event: h.event
+        }))
+      } : undefined,
+    };
+
+    const company = await this.prisma.company.create({ data: createPayload });
     await this.prisma.recruiter.update({
       where: { recruiterId },
       data: { companyId: company.companyId },
@@ -134,9 +160,45 @@ export class CompaniesService {
   }
 
   private async updateExistingCompany(companyId: string, data: any) {
+    const { sections, benefits, history, ...basicData } = data;
+
+    const updatePayload: any = { ...basicData };
+
+    if (sections) {
+      updatePayload.sections = {
+        deleteMany: {},
+        create: sections.map(s => ({
+          title: s.title,
+          content: s.content,
+          type: s.type,
+          displayOrder: s.displayOrder
+        }))
+      };
+    }
+
+    if (benefits) {
+      updatePayload.benefits = {
+        deleteMany: {},
+        create: benefits.map(b => ({
+          title: b.title,
+          icon: b.icon
+        }))
+      };
+    }
+
+    if (history) {
+      updatePayload.history = {
+        deleteMany: {},
+        create: history.map(h => ({
+          year: h.year,
+          event: h.event
+        }))
+      };
+    }
+
     const company = await this.prisma.company.update({
       where: { companyId },
-      data,
+      data: updatePayload,
       include: { branches: true },
     });
 

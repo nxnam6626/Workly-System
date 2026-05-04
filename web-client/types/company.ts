@@ -2,6 +2,8 @@ export interface CompanySection {
   id: string;
   title: string;
   content: string;
+  type: string;
+  displayOrder: number;
 }
 
 export interface CompanyBenefit {
@@ -37,5 +39,6 @@ export interface Company {
   sections?: CompanySection[];
   benefits?: CompanyBenefit[];
   history?: CompanyHistory[];
-  jobPostings?: any[]; // We can refine this later if needed
+  cultureContent?: any; 
+  jobPostings?: any[];
 }

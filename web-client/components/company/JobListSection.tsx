@@ -15,9 +15,9 @@ export function JobListSection({ company, isPreview }: JobListSectionProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
       <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
-        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+        <h2 className="text-[15px] font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
           Việc đang tuyển
-          <span className="text-mariner bg-blue-50 px-2 py-0.5 rounded text-sm">
+          <span className="text-mariner bg-blue-50 px-2 py-0.5 rounded text-[12px]">
             {jobsCount}
           </span>
         </h2>

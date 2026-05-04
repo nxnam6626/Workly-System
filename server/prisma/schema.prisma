@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
+  output          = "../src/generated/prisma"
 }
 
 datasource db {
@@ -246,7 +247,7 @@ model CompanyBenefit {
 
 model CompanyHistory {
   id        String   @id @default(uuid())
-  year      Int
+  year      String
   event     String   @db.Text
   companyId String
   company   Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)

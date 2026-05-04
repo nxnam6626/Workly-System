@@ -283,7 +283,31 @@ exports.Prisma.CompanyScalarFieldEnum = {
   shortName: 'shortName',
   slug: 'slug',
   status: 'status',
-  taxAddress: 'taxAddress'
+  taxAddress: 'taxAddress',
+  cultureContent: 'cultureContent'
+};
+
+exports.Prisma.CompanySectionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  type: 'type',
+  displayOrder: 'displayOrder',
+  companyId: 'companyId'
+};
+
+exports.Prisma.CompanyBenefitScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  companyId: 'companyId'
+};
+
+exports.Prisma.CompanyHistoryScalarFieldEnum = {
+  id: 'id',
+  year: 'year',
+  event: 'event',
+  companyId: 'companyId'
 };
 
 exports.Prisma.CompanyBranchScalarFieldEnum = {
@@ -574,6 +598,9 @@ exports.Prisma.ModelName = {
   Recruiter: 'Recruiter',
   Transaction: 'Transaction',
   Company: 'Company',
+  CompanySection: 'CompanySection',
+  CompanyBenefit: 'CompanyBenefit',
+  CompanyHistory: 'CompanyHistory',
   CompanyBranch: 'CompanyBranch',
   JobPosting: 'JobPosting',
   JobPostingBranch: 'JobPostingBranch',
