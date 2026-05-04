@@ -20,10 +20,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
-import {
-  Role,
-  Roles,
-} from '@/common/decorators/roles.decorator';
+import { Role, Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -55,13 +52,6 @@ export class UsersController {
       throw new BadRequestException('Vui lòng tải lên tệp ảnh.');
     }
     return this.usersService.updateAvatar(userId, file);
-  }
-
-  @Get('test-me-debug')
-  async testMeDebug() {
-    const firstUser = await this.usersService['prisma'].user.findFirst();
-    if (!firstUser) return 'No user';
-    return this.usersService.getMe(firstUser.userId);
   }
 
   /** Cập nhật hồ sơ ứng viên (dành cho CANDIDATE). */

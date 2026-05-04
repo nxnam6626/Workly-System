@@ -217,9 +217,39 @@ model Company {
   branches           CompanyBranch[]
   jobPostings        JobPosting[]
   recruiters         Recruiter[]
+  sections           CompanySection[]
+  benefits           CompanyBenefit[]
+  history            CompanyHistory[]
+  cultureContent     Json?
 
   @@index([verifyStatus])
   @@index([companyName])
+}
+
+model CompanySection {
+  id           String   @id @default(uuid())
+  title        String
+  content      String   @db.Text
+  type         String   @default("GENERAL") // INTRODUCTION, HR_POLICY, ADVANCEMENT, SALARY, INSURANCE, ACTIVITIES
+  displayOrder Int      @default(0)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+}
+
+model CompanyBenefit {
+  id        String   @id @default(uuid())
+  title     String
+  icon      String?
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+}
+
+model CompanyHistory {
+  id        String   @id @default(uuid())
+  year      Int
+  event     String   @db.Text
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
 }
 
 model CompanyBranch {

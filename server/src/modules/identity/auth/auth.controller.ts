@@ -37,7 +37,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
     private readonly securityService: SecurityService,
-  ) { }
+  ) {}
 
   @Public()
   @Post('register')

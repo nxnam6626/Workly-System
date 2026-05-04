@@ -89,6 +89,55 @@ export class CompaniesController {
     return this.companiesService.deleteBranch(userId, branchId);
   }
 
+  // --- Rich Profile Endpoints ---
+
+  @Post('my-company/sections')
+  @UseGuards(JwtAuthGuard)
+  saveSection(@CurrentUser('userId') userId: string, @Body() data: any) {
+    return this.companiesService.saveSection(userId, data);
+  }
+
+  @Delete('my-company/sections/:id')
+  @UseGuards(JwtAuthGuard)
+  deleteSection(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.companiesService.deleteSection(userId, id);
+  }
+
+  @Post('my-company/benefits')
+  @UseGuards(JwtAuthGuard)
+  saveBenefit(@CurrentUser('userId') userId: string, @Body() data: any) {
+    return this.companiesService.saveBenefit(userId, data);
+  }
+
+  @Delete('my-company/benefits/:id')
+  @UseGuards(JwtAuthGuard)
+  deleteBenefit(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.companiesService.deleteBenefit(userId, id);
+  }
+
+  @Post('my-company/history')
+  @UseGuards(JwtAuthGuard)
+  saveHistory(@CurrentUser('userId') userId: string, @Body() data: any) {
+    return this.companiesService.saveHistory(userId, data);
+  }
+
+  @Delete('my-company/history/:id')
+  @UseGuards(JwtAuthGuard)
+  deleteHistory(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.companiesService.deleteHistory(userId, id);
+  }
+
+  // --- End Rich Profile Endpoints ---
+
   @Get()
   findAll(@Query() query: FilterCompanyDto) {
     return this.companiesService.findAll(query);

@@ -28,13 +28,23 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
   },
 };
 
-export const CV_PACKAGES: Record<string, { cost: number; quota: number; label: string }> = {
+export const CV_PACKAGES: Record<
+  string,
+  { cost: number; quota: number; label: string }
+> = {
   XEM_NHANH: { cost: 150, quota: 6, label: '"Quick View" (6 Unlocks)' },
   SAN_TAI: { cost: 400, quota: 20, label: '"Talent Hunter" (20 Unlocks)' },
 };
 
 export const SLOT_PRICING: Partial<
-  Record<JobTier, { single: number; bundle: number; slots: { single: number; bundle: number } }>
+  Record<
+    JobTier,
+    {
+      single: number;
+      bundle: number;
+      slots: { single: number; bundle: number };
+    }
+  >
 > = {
   [JobTier.PROFESSIONAL]: {
     single: 160,

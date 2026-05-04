@@ -12,10 +12,7 @@ import { CreateSupportDto } from './dto/create-support.dto';
 import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Roles,
-  Role,
-} from '@/common/decorators/roles.decorator';
+import { Roles, Role } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from '@/common/decorators/current-user.decorator';
 

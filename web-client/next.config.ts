@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "masanhightechmaterials.com" },
       { protocol: "https", hostname: "viettelpost.com.vn" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "ui-avatars.com" },
     ],
   },
   async rewrites() {

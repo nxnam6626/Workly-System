@@ -17,10 +17,7 @@ import { MessagesService } from './messages.service';
 import { MessagesGateway } from './messages.gateway';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Roles,
-  Role,
-} from '@/common/decorators/roles.decorator';
+import { Roles, Role } from '@/common/decorators/roles.decorator';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard, RolesGuard)

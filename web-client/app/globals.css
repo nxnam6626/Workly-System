@@ -56,6 +56,10 @@
   background: linear-gradient(135deg, #d82d8b 0%, #af2070 100%);
 }
 
+.bg-workly-gradient {
+  background: linear-gradient(135deg, #2466c9 0%, #002B67 100%);
+}
+
 /* Premium Component Shadows */
 .shadow-workly {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);

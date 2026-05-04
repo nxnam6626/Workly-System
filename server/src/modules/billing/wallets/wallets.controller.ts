@@ -11,10 +11,7 @@ import {
 import { WalletsService } from './wallets.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Role,
-  Roles,
-} from '@/common/decorators/roles.decorator';
+import { Role, Roles } from '@/common/decorators/roles.decorator';
 import { Request } from 'express';
 
 interface AuthRequest extends Request {
