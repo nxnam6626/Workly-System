@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { PrismaService } from './prisma/prisma.service';
-import { SearchService } from './modules/search/search.service';
+import { AppModule } from '@/app.module';
+import { PrismaService } from '@/prisma/prisma.service';
+import { SearchService } from '@/modules/intelligence/search/search.service';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);

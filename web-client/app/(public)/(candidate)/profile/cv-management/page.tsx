@@ -24,7 +24,7 @@ import { profileApi, type CandidateProfile } from '@/lib/profile-api';
 import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { useConfirm } from '@/components/ConfirmDialog';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import api from '@/lib/api';
 import { CVReviewModal } from '@/components/candidates/CVReviewModal';
 

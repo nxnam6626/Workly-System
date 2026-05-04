@@ -1,0 +1,85 @@
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
+import { JobType, JobLevel } from '@/generated/prisma';
+console.log('DEBUG: JobLevel enum object:', JobLevel);
+
+export class CreateJobPostingDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Tiêu đề không được để trống' })
+  title: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Mô tả công việc không được để trống' })
+  description: string;
+
+  @IsOptional()
+  @IsString()
+  requirements?: string;
+
+  @IsOptional()
+  @IsString()
+  benefits?: string;
+
+  @IsOptional()
+  @IsNumber()
+  salaryMin?: number;
+
+  @IsOptional()
+  @IsNumber()
+  salaryMax?: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsEnum(JobType, { message: 'Loại công việc không hợp lệ' })
+  @IsOptional()
+  jobType?: JobType;
+
+  @IsEnum(JobLevel, { message: 'Chức vụ không hợp lệ' })
+  @IsOptional()
+  jobLevel?: JobLevel;
+
+  @IsString()
+  @IsOptional()
+  experience?: string;
+
+  @IsNumber()
+  @IsOptional()
+  vacancies?: number;
+
+  @IsString()
+  @IsOptional()
+  locationCity?: string;
+
+  @IsOptional()
+  branchIds?: string[];
+
+  @IsOptional()
+  hardSkills?: string[];
+
+  @IsOptional()
+  softSkills?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  minExperienceYears?: number;
+
+  @IsOptional()
+  @IsEnum(['BASIC', 'PROFESSIONAL', 'URGENT'])
+  jobTier?: any;
+
+  @IsOptional()
+  autoInviteMatches?: boolean;
+
+  @IsOptional()
+  isAiGenerated?: boolean;
+
+  @IsOptional()
+  categories?: string[];
+}

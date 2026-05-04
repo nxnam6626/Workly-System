@@ -11,7 +11,7 @@ import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatSalary } from "@/lib/utils";
 import toast from "react-hot-toast";
-import { useConfirm } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 interface SavedJob {
   jobPostingId: string;

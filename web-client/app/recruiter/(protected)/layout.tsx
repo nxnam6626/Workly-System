@@ -26,7 +26,7 @@ import {
   PartyPopper,
   X
 } from 'lucide-react';
-import { NotificationMenu } from '@/components/NotificationMenu';
+import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
 import { useSocketStore } from '@/stores/socket';
 import { useWalletStore } from '@/stores/wallet';
@@ -35,8 +35,7 @@ import toast from 'react-hot-toast';
 const navItems = [
   { label: 'Bảng Điều Khiển', href: '/recruiter/dashboard', icon: LayoutDashboard },
   { label: 'Công Ty', href: '/recruiter/company', icon: Building },
-  { label: 'Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
-  { label: 'Yêu Cầu Tuyển Dụng', href: '/recruiter/post-job', icon: PlusCircle },
+  { label: 'Quản Lý Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
   { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
   { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
   { label: 'AI Insights', href: '/recruiter/ai-report', icon: Brain },

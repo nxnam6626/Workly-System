@@ -131,7 +131,10 @@ export class MailService {
       });
       console.log(`[MailService] Registration link sent to ${email}`);
     } catch (error) {
-      console.error('[MailService] Error sending registration link email:', error);
+      console.error(
+        '[MailService] Error sending registration link email:',
+        error,
+      );
     }
   }
 
@@ -181,7 +184,10 @@ export class MailService {
       });
       console.log(`[MailService] Recruiter registration link sent to ${email}`);
     } catch (error) {
-      console.error('[MailService] Error sending recruiter registration link email:', error);
+      console.error(
+        '[MailService] Error sending recruiter registration link email:',
+        error,
+      );
     }
   }
 

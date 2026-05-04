@@ -229,10 +229,48 @@ export const adminUsersApi = {
     api.get(`/messages/violations/${id}`).then((r) => r.data),
 };
 
+// ─── Admin Company Management ──────────────────────────────────────────────────
+
+export interface AdminCompanyFilters {
+  skip?: number;
+  take?: number;
+  search?: string;
+}
+
+export interface AdminCompany {
+  companyId: string;
+  companyName: string;
+  taxCode?: string;
+  isRegistered: boolean;
+  verifyStatus: number;
+  logo?: string;
+  address?: string;
+  _count?: {
+    recruiters: number;
+    jobPostings: number;
+  };
+}
+
+export interface PaginatedCompanies {
+  data: AdminCompany[];
+  total: number;
+}
+
+export const adminCompaniesApi = {
+  getAll: (filters: AdminCompanyFilters): Promise<PaginatedCompanies> =>
+    api.get('/admin/companies', { params: filters }).then((r) => r.data),
+
+  getOne: (id: string): Promise<any> =>
+    api.get(`/admin/companies/${id}`).then((r) => r.data),
+};
+
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 
 export interface DashboardStats {
   totalUsers: number;
+  totalCandidates: number;
+  totalRecruiters: number;
+  totalCompanies: number;
   totalJobs: number;
   pendingJobs: number;
   crawlCount: number;

@@ -35,7 +35,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
-import { JobCard, type Job } from "@/components/JobCard";
+import { JobCard, type Job } from "@/components/jobs/JobCard";
 import { CVReviewModal } from "@/components/candidates/CVReviewModal";
 import { BasicInfoModal } from "@/components/candidates/profile-edit/BasicInfoModal";
 import { ExperienceModal } from "@/components/candidates/profile-edit/ExperienceModal";
@@ -44,7 +44,7 @@ import { SkillsModal } from "@/components/candidates/profile-edit/SkillsModal";
 import { LanguagesModal } from "@/components/candidates/profile-edit/LanguagesModal";
 import { CertificationsModal } from "@/components/candidates/profile-edit/CertificationsModal";
 import toast from "react-hot-toast";
-import { useConfirm } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 const TABS = [
   { id: "OVERVIEW", label: "Tổng quan", icon: LayoutDashboard },
@@ -265,7 +265,7 @@ export default function ProfileDashboard() {
 
                 <div className="absolute inset-2 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-inner">
                   {profile?.avatar ? (
-                    <Image src={profile.avatar} alt={fullName} fill className="object-cover transition-transform group-hover:scale-110" />
+                    <Image src={profile.avatar} alt={fullName} fill sizes="128px" className="object-cover transition-transform group-hover:scale-110" />
                   ) : (
                     <span className="text-4xl font-bold text-slate-400">{avatarLetter}</span>
                   )}

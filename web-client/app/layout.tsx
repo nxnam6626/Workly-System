@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AuthProvider from "@/components/AuthProvider";
-import { NotificationListener } from "@/components/NotificationListener";
+import AuthProvider from "@/components/auth/AuthProvider";
+import { NotificationListener } from "@/components/navbar/NotificationListener";
 import { Toaster } from 'react-hot-toast';
-import { ConfirmProvider } from "@/components/ConfirmDialog";
+import { ConfirmProvider } from "@/components/ui/ConfirmDialog";
 import { AlertPopup } from "@/components/ui/AlertPopup";
-import ConditionalAiChat from "@/components/ConditionalAiChat";
-import ScrollToTop from "@/components/ScrollToTop";
+import ConditionalAiChat from "@/components/chat/ConditionalAiChat";
+import ScrollToTop from "@/components/navbar/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"] });
 

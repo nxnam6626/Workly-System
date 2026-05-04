@@ -17,7 +17,7 @@ import JobStats from './components/JobStats';
 import JobFilters from './components/JobFilters';
 import JobTable from './components/JobTable';
 import BulkActionsBar from './components/BulkActionsBar';
-import { useConfirm } from '@/components/ConfirmDialog';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { useSocketStore } from '@/stores/socket';
 import toast from 'react-hot-toast';
 

@@ -323,6 +323,7 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   viewCount: 'viewCount',
   jobTier: 'jobTier',
   refreshedAt: 'refreshedAt',
+  pausedAt: 'pausedAt',
   slug: 'slug',
   autoInviteMatches: 'autoInviteMatches'
 };
@@ -529,7 +530,8 @@ exports.JobStatus = exports.$Enums.JobStatus = {
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
   EXPIRED: 'EXPIRED',
-  CLOSED: 'CLOSED'
+  CLOSED: 'CLOSED',
+  PAUSED: 'PAUSED'
 };
 
 exports.JobTier = exports.$Enums.JobTier = {

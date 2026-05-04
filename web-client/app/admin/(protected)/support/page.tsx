@@ -22,7 +22,7 @@ function AccessDenied({ perm }: { perm: string }) {
   );
 }
 
-export default function SupportAdminPage() {
+export default function SupportManagementPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');

@@ -17,7 +17,7 @@ import {
 import { jobAlertsApi, type JobAlert } from '@/lib/job-alerts-api';
 import { useAuthStore } from '@/stores/auth';
 import toast from 'react-hot-toast';
-import { useConfirm } from '@/components/ConfirmDialog';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 export default function SettingsPage() {
   const router = useRouter();

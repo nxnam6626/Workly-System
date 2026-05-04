@@ -1,0 +1,190 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
+import { JobPostingsService } from './job-postings.service';
+import { CreateJobPostingDto } from './dto/create-job-posting.dto';
+import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
+import { FilterJobPostingDto } from './dto/filter-job-posting.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@/common/decorators/roles.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+
+@Controller('job-postings')
+export class JobPostingsController {
+  constructor(private readonly jobPostingsService: JobPostingsService) {}
+
+  @Get('stats/categories')
+  getCategoryStats() {
+    return this.jobPostingsService.getCategoryStats();
+  }
+
+  @Get('industries')
+  getIndustries() {
+    return this.jobPostingsService.getIndustries();
+  }
+
+  @Post('pre-check')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  preCheck(@Body() createJobPostingDto: CreateJobPostingDto) {
+    return this.jobPostingsService.preCheck(createJobPostingDto);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  create(
+    @Body() createJobPostingDto: CreateJobPostingDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.jobPostingsService.create(createJobPostingDto, userId);
+  }
+
+  @Get('my-jobs')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  findMyJobs(@CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.findMyJobs(userId);
+  }
+
+  @Get('resync-es')
+  async resyncES() {
+    await this.jobPostingsService.syncAllJobsToES();
+    return {
+      message: 'Đồng bộ lại toàn bộ dữ liệu Job sang Elasticsearch thành công',
+    };
+  }
+
+  @Get('sync-categories')
+  syncCategories() {
+    return this.jobPostingsService.syncAllCategories();
+  }
+
+  @Post(':id/re-parse')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  reparseJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.reparse(id, userId);
+  }
+
+  @Get(':id/suggested-candidates')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  getSuggestedCandidates(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.jobPostingsService.getSuggestedCandidates(id, userId);
+  }
+
+  @Post(':id/renew')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  renewJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.renew(id, userId);
+  }
+
+  @Get()
+  @UseGuards(OptionalJwtAuthGuard)
+  findAll(
+    @Query() query: FilterJobPostingDto,
+    @CurrentUser('userId') userId?: string,
+  ) {
+    return this.jobPostingsService.findAll(query, userId);
+  }
+
+  @Post('bulk/pause')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  bulkPause(@Body('ids') ids: string[], @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.bulkPause(ids, userId);
+  }
+
+  @Post('bulk/resume')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  bulkResume(
+    @Body('ids') ids: string[],
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.jobPostingsService.bulkResume(ids, userId);
+  }
+
+  @Post('bulk/close')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  bulkClose(@Body('ids') ids: string[], @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.bulkClose(ids, userId);
+  }
+
+  @Post(':id/pause')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  pauseJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.pause(id, userId);
+  }
+
+  @Post(':id/resume')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  resumeJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.resume(id, userId);
+  }
+
+  @Post(':id/close')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  closeJob(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+    return this.jobPostingsService.close(id, userId);
+  }
+
+  @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId?: string,
+    @Query('trackView') trackView?: string,
+  ) {
+    return this.jobPostingsService.findOne(id, userId, trackView === 'true');
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  update(
+    @Param('id') id: string,
+    @Body() updateJobPostingDto: UpdateJobPostingDto,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.jobPostingsService.update(id, updateJobPostingDto, userId);
+  }
+
+  @Post('suggest-categories')
+  suggestCategories(
+    @Body() body: { title: string; description?: string; skills?: string[] },
+  ) {
+    return this.jobPostingsService.suggestCategories(
+      body.title,
+      body.description,
+      body.skills,
+    );
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  remove(@Param('id') id: string) {
+    return this.jobPostingsService.remove(id);
+  }
+}

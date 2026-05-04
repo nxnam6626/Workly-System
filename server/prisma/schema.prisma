@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  output          = "../src/generated/prisma"
   previewFeatures = ["postgresqlExtensions"]
 }
 
@@ -34,6 +33,9 @@ model User {
   supportRequests SupportRequest[]
   userRoles       UserRole[]
   accountLevel    AccountLevel     @default(NORMAL)
+  
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Role {
@@ -215,6 +217,9 @@ model Company {
   branches           CompanyBranch[]
   jobPostings        JobPosting[]
   recruiters         Recruiter[]
+
+  @@index([verifyStatus])
+  @@index([companyName])
 }
 
 model CompanyBranch {
@@ -256,6 +261,7 @@ model JobPosting {
   viewCount              Int                    @default(0)
   jobTier                JobTier                @default(BASIC)
   refreshedAt            DateTime               @default(now()) @db.Timestamp(6)
+  pausedAt               DateTime?              @db.Timestamp(6)
   slug                   String?                @unique
   autoInviteMatches      Boolean                @default(false)
   embedding              Unsupported("vector")?
@@ -265,6 +271,12 @@ model JobPosting {
   recruiter              Recruiter?             @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
   branches               JobPostingBranch[]
+
+  @@index([status])
+  @@index([companyId])
+  @@index([recruiterId])
+  @@index([createdAt])
+  @@index([jobTier])
 }
 
 model JobPostingBranch {
@@ -476,6 +488,7 @@ enum JobStatus {
   REJECTED
   EXPIRED
   CLOSED
+  PAUSED
 }
 
 enum SkillLevel {

@@ -30,6 +30,7 @@ interface AuthState {
   accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean; // true sau khi checkAuth() chạy xong lần đầu
   setTokens: (accessToken: string) => void;
   login: (credentials: any) => Promise<User>;
   register: (data: any) => Promise<void>;
@@ -46,7 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
+  isInitialized: false, // Bắt đầu là false, set thành true sau checkAuth
 
   setTokens: (accessToken: string) => {
     set({ accessToken, isAuthenticated: true });
@@ -147,16 +149,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkAuth: async () => {
-    set({ isLoading: true }); // Block renders until auth is resolved
     const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
 
     if (!refreshToken) {
-      set({ isLoading: false, isAuthenticated: false });
+      set({ isLoading: false, isAuthenticated: false, isInitialized: true });
       return;
     }
 
+    set({ isLoading: true });
     try {
-      // Dùng refreshToken để lấy accessToken mới, đồng thời lấy thông tin user
       const { data } = await api.post('/auth/refresh', { refreshToken });
       const { accessToken, refreshToken: newRefreshToken } = data;
 
@@ -164,30 +165,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         localStorage.setItem('refreshToken', newRefreshToken);
       }
 
-      // Dùng accessToken mới để lấy thông tin user (bao gồm role)
       const { data: validateData } = await api.get('/auth/validate', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      console.log('[checkAuth] user from validate:', validateData.user);
-      
       const user = validateData.user;
-      // Map candidate name if exists
       if (user && user.candidate?.fullName) {
         user.name = user.candidate.fullName;
       }
 
       set({
         accessToken,
-        user: user,
+        user,
         isAuthenticated: true,
         isLoading: false,
+        isInitialized: true,
       });
     } catch (error) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('refreshToken');
       }
-      set({ isLoading: false, isAuthenticated: false, user: null, accessToken: null });
+      set({ isLoading: false, isAuthenticated: false, user: null, accessToken: null, isInitialized: true });
     }
   },
 
