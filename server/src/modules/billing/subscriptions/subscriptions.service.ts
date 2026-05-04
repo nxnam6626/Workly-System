@@ -31,7 +31,12 @@ export class SubscriptionsService {
     const config = this.getPlanConfig(planType);
 
     const refundInfo = await this.calculateUpgradeRefund(recruiter.recruiterId);
-    await this.executePayment(recruiter.recruiterId, planType, config.cost, refundInfo);
+    await this.executePayment(
+      recruiter.recruiterId,
+      planType,
+      config.cost,
+      refundInfo,
+    );
 
     if (config.cvQuota > 0) {
       await this.walletsService.addCvQuota(
@@ -41,8 +46,15 @@ export class SubscriptionsService {
       );
     }
 
-    const subscription = await this.upsertSubscription(recruiter.recruiterId, planType, config);
-    return { message: `Successfully subscribed to ${planType} plan.`, subscription };
+    const subscription = await this.upsertSubscription(
+      recruiter.recruiterId,
+      planType,
+      config,
+    );
+    return {
+      message: `Successfully subscribed to ${planType} plan.`,
+      subscription,
+    };
   }
 
   async checkPermissionAndDeduct(userId: string, jobTier: JobTier) {
@@ -97,9 +109,16 @@ export class SubscriptionsService {
         `Added ${pkg.quota} CV unlocks from ${packageType} package`,
       );
 
-      return { success: true, message: `Successfully purchased ${packageType} package`, quotaReceived: pkg.quota };
+      return {
+        success: true,
+        message: `Successfully purchased ${packageType} package`,
+        quotaReceived: pkg.quota,
+      };
     } catch (e) {
-      if (e instanceof BadRequestException) throw new BadRequestException(`Insufficient Credits. ${pkg.cost} Xu required.`);
+      if (e instanceof BadRequestException)
+        throw new BadRequestException(
+          `Insufficient Credits. ${pkg.cost} Xu required.`,
+        );
       throw e;
     }
   }
@@ -111,15 +130,22 @@ export class SubscriptionsService {
     });
 
     if (!recruiter?.recruiterSubscription) {
-      throw new BadRequestException('You need an active subscription before purchasing extra slots.');
+      throw new BadRequestException(
+        'You need an active subscription before purchasing extra slots.',
+      );
     }
 
     if (new Date() > recruiter.recruiterSubscription.expiryDate) {
-      throw new BadRequestException('Your subscription has expired. Please renew first.');
+      throw new BadRequestException(
+        'Your subscription has expired. Please renew first.',
+      );
     }
 
     const pricing = SLOT_PRICING[tier];
-    if (!pricing) throw new BadRequestException('Extra slots are only available for PROFESSIONAL or URGENT tiers.');
+    if (!pricing)
+      throw new BadRequestException(
+        'Extra slots are only available for PROFESSIONAL or URGENT tiers.',
+      );
 
     const cost = isBundle ? pricing.bundle : pricing.single;
     const slots = isBundle ? pricing.slots.bundle : pricing.slots.single;
@@ -132,16 +158,24 @@ export class SubscriptionsService {
         TransactionType.BUY_PACKAGE,
       );
 
-      const updateField = tier === JobTier.PROFESSIONAL ? 'maxVipPosts' : 'maxUrgentPosts';
-      const updatedSubscription = await this.prisma.recruiterSubscription.update({
-        where: { recruiterId: recruiter.recruiterId },
-        data: { [updateField]: { increment: slots } },
-      });
+      const updateField =
+        tier === JobTier.PROFESSIONAL ? 'maxVipPosts' : 'maxUrgentPosts';
+      const updatedSubscription =
+        await this.prisma.recruiterSubscription.update({
+          where: { recruiterId: recruiter.recruiterId },
+          data: { [updateField]: { increment: slots } },
+        });
 
-      return { success: true, message: `Successfully purchased ${slots} ${tier} job slots.`, newMaxSlots: updatedSubscription[updateField] };
+      return {
+        success: true,
+        message: `Successfully purchased ${slots} ${tier} job slots.`,
+        newMaxSlots: updatedSubscription[updateField],
+      };
     } catch (e) {
       if (e instanceof BadRequestException) throw e;
-      throw new BadRequestException(`Insufficient Credits. ${cost} Xu required.`);
+      throw new BadRequestException(
+        `Insufficient Credits. ${cost} Xu required.`,
+      );
     }
   }
 
@@ -151,8 +185,12 @@ export class SubscriptionsService {
       include: { recruiterSubscription: true },
     });
 
-    if (!recruiter?.recruiterSubscription) throw new NotFoundException('No active subscription found.');
-    if (recruiter.recruiterSubscription.isCancelled) throw new BadRequestException('Subscription is already marked for cancellation.');
+    if (!recruiter?.recruiterSubscription)
+      throw new NotFoundException('No active subscription found.');
+    if (recruiter.recruiterSubscription.isCancelled)
+      throw new BadRequestException(
+        'Subscription is already marked for cancellation.',
+      );
 
     return this.prisma.recruiterSubscription.update({
       where: { recruiterId: recruiter.recruiterId },
@@ -161,7 +199,9 @@ export class SubscriptionsService {
   }
 
   private async getRecruiterOrThrow(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
     if (!recruiter) throw new NotFoundException('Recruiter not found.');
     return recruiter;
   }
@@ -173,32 +213,59 @@ export class SubscriptionsService {
   }
 
   private async calculateUpgradeRefund(recruiterId: string) {
-    const oldSub = await this.prisma.recruiterSubscription.findUnique({ where: { recruiterId } });
-    if (!oldSub || new Date(oldSub.expiryDate) <= new Date()) return { amount: 0, planName: '' };
+    const oldSub = await this.prisma.recruiterSubscription.findUnique({
+      where: { recruiterId },
+    });
+    if (!oldSub || new Date(oldSub.expiryDate) <= new Date())
+      return { amount: 0, planName: '' };
 
     const oldCost = oldSub.planType === PlanType.GROWTH ? 2000 : 500;
-    const calcPoints = (sub: RecruiterSubscription) => sub.maxBasicPosts * 1 + sub.maxVipPosts * 2 + sub.maxUrgentPosts * 4;
-    const calcUsed = (sub: RecruiterSubscription) => sub.usedBasicPosts * 1 + sub.usedVipPosts * 2 + sub.usedUrgentPosts * 4;
+    const calcPoints = (sub: RecruiterSubscription) =>
+      sub.maxBasicPosts * 1 + sub.maxVipPosts * 2 + sub.maxUrgentPosts * 4;
+    const calcUsed = (sub: RecruiterSubscription) =>
+      sub.usedBasicPosts * 1 + sub.usedVipPosts * 2 + sub.usedUrgentPosts * 4;
 
     const totalMax = calcPoints(oldSub);
     if (totalMax === 0) return { amount: 0, planName: oldSub.planType };
 
     const unusedRatio = Math.max(0, (totalMax - calcUsed(oldSub)) / totalMax);
-    return { amount: Math.floor(oldCost * unusedRatio), planName: oldSub.planType };
+    return {
+      amount: Math.floor(oldCost * unusedRatio),
+      planName: oldSub.planType,
+    };
   }
 
-  private async executePayment(recruiterId: string, planType: PlanType, cost: number, refund: { amount: number; planName: string }) {
+  private async executePayment(
+    recruiterId: string,
+    planType: PlanType,
+    cost: number,
+    refund: { amount: number; planName: string },
+  ) {
     try {
-      await this.walletsService.deduct(recruiterId, cost, `Purchase service plan: ${planType}`, TransactionType.BUY_PACKAGE);
+      await this.walletsService.deduct(
+        recruiterId,
+        cost,
+        `Purchase service plan: ${planType}`,
+        TransactionType.BUY_PACKAGE,
+      );
       if (refund.amount > 0) {
-        await this.walletsService.add(recruiterId, refund.amount, `Refund remaining Credits from old ${refund.planName} Plan`, TransactionType.DEPOSIT);
+        await this.walletsService.add(
+          recruiterId,
+          refund.amount,
+          `Refund remaining Credits from old ${refund.planName} Plan`,
+          TransactionType.DEPOSIT,
+        );
       }
     } catch {
       throw new BadRequestException('Insufficient Credits. Please top up.');
     }
   }
 
-  private async upsertSubscription(recruiterId: string, planType: PlanType, config: PlanConfig) {
+  private async upsertSubscription(
+    recruiterId: string,
+    planType: PlanType,
+    config: PlanConfig,
+  ) {
     const data = {
       planType,
       expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -219,7 +286,11 @@ export class SubscriptionsService {
     });
   }
 
-  private async handleBasicPost(recruiterId: string, sub: RecruiterSubscription, isActive: boolean) {
+  private async handleBasicPost(
+    recruiterId: string,
+    sub: RecruiterSubscription,
+    isActive: boolean,
+  ) {
     if (isActive && sub.usedBasicPosts < sub.maxBasicPosts) {
       await this.prisma.recruiterSubscription.update({
         where: { subscriptionId: sub.subscriptionId },
@@ -229,20 +300,32 @@ export class SubscriptionsService {
     }
 
     try {
-      await this.walletsService.deduct(recruiterId, 100, 'Single payment for BASIC job posting', TransactionType.POST_JOB);
+      await this.walletsService.deduct(
+        recruiterId,
+        100,
+        'Single payment for BASIC job posting',
+        TransactionType.POST_JOB,
+      );
       return { method: 'WALLET_CREDIT', cost: 100 };
     } catch {
-      throw new BadRequestException('Insufficient balance (100 Credits required for BASIC post).');
+      throw new BadRequestException(
+        'Insufficient balance (100 Credits required for BASIC post).',
+      );
     }
   }
 
-  private async handlePremiumPost(sub: RecruiterSubscription, jobTier: JobTier) {
+  private async handlePremiumPost(
+    sub: RecruiterSubscription,
+    jobTier: JobTier,
+  ) {
     const isProfessional = jobTier === JobTier.PROFESSIONAL;
     const usedField = isProfessional ? 'usedVipPosts' : 'usedUrgentPosts';
     const maxField = isProfessional ? 'maxVipPosts' : 'maxUrgentPosts';
 
     if (sub[usedField] >= sub[maxField]) {
-      throw new ForbiddenException(`You have used up your ${jobTier} post quota in the current plan. Please purchase more slots.`);
+      throw new ForbiddenException(
+        `You have used up your ${jobTier} post quota in the current plan. Please purchase more slots.`,
+      );
     }
 
     await this.prisma.recruiterSubscription.update({

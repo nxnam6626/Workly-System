@@ -13,10 +13,7 @@ import { AdminAiService } from './admin-ai.service';
 import { Observable, from, map } from 'rxjs';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Roles,
-  Role,
-} from '@/common/decorators/roles.decorator';
+import { Roles, Role } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 import { ChatService } from './chat.service';

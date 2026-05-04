@@ -160,3 +160,4 @@ export function MatchingAnalysisModal({
     </div>
   );
 }
+export default MatchingAnalysisModal;

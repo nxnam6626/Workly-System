@@ -2,10 +2,7 @@ import { Controller, Post, Get, Param, UseGuards } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Roles,
-  Role,
-} from '@/common/decorators/roles.decorator';
+import { Roles, Role } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
 @Controller('favorites')

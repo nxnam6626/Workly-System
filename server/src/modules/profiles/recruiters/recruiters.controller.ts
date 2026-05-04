@@ -12,10 +12,7 @@ import { RecruitersService } from './recruiters.service';
 import { UnlockService } from './unlock.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
-import {
-  Role,
-  Roles,
-} from '@/common/decorators/roles.decorator';
+import { Role, Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('recruiters')
 @UseGuards(JwtAuthGuard, RolesGuard)

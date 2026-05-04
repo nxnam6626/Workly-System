@@ -1,7 +1,30 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { FilterCompanyDto } from './dto/filter-company.dto';
 import { SupabaseService } from '@/common/supabase/supabase.service';
+
+const COMPLETENESS_WEIGHTS: Record<string, number> = {
+  companyName: 5,
+  taxCode: 10,
+  logo: 10,
+  banner: 10,
+  address: 5,
+  description: 10,
+  websiteUrl: 5,
+  companySize: 5,
+  mainIndustry: 10,
+  workLocations: 10,
+  sections: 10,
+  benefits: 5,
+  history: 5,
+};
+
+const ESGOO_API_URL = 'https://esgoo.net/api-mst';
+const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org/search';
 
 @Injectable()
 export class CompaniesService {
@@ -14,10 +37,9 @@ export class CompaniesService {
     const { search, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = {};
-    if (search) {
-      where.companyName = { contains: search, mode: 'insensitive' };
-    }
+    const where = search
+      ? { companyName: { contains: search, mode: 'insensitive' as const } }
+      : {};
 
     const [items, total] = await Promise.all([
       this.prisma.company.findMany({
@@ -36,12 +58,12 @@ export class CompaniesService {
       this.prisma.company.count({ where }),
     ]);
 
-    const formattedItems = items.map((c) => ({
-      ...c,
-      activeJobs: c._count.jobPostings,
-    }));
-
-    return { items: formattedItems, total, page, limit };
+    return {
+      items: items.map((c) => ({ ...c, activeJobs: c._count.jobPostings })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: string) {
@@ -50,95 +72,116 @@ export class CompaniesService {
       include: {
         jobPostings: { where: { status: 'APPROVED' } },
         branches: true,
-      },
+        sections: { orderBy: { displayOrder: 'asc' } },
+        benefits: true,
+        history: { orderBy: { year: 'desc' } },
+      } as any,
     });
 
     if (!company) {
       throw new NotFoundException(`Không tìm thấy công ty với ID ${id}`);
     }
 
-    return company;
+    return {
+      ...company,
+      completeness: this.calculateCompleteness(company),
+    };
   }
 
   async getMyCompany(userId: string) {
-    const recruiter = await this.prisma.recruiter.findUnique({
+    const recruiter: any = await this.prisma.recruiter.findUnique({
       where: { userId },
       include: {
         company: {
-          include: { branches: true },
+          include: {
+            branches: true,
+            sections: { orderBy: { displayOrder: 'asc' } },
+            benefits: true,
+            history: { orderBy: { year: 'desc' } },
+          } as any,
         },
       },
     });
-    if (!recruiter || !recruiter.company) {
-      return {};
-    }
-    return recruiter.company;
+
+    if (!recruiter?.company) return {};
+
+    return {
+      ...recruiter.company,
+      completeness: this.calculateCompleteness(recruiter.company),
+    };
   }
 
   async updateMyCompany(userId: string, updateData: any) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
-    if (!recruiter) {
-      throw new NotFoundException('Recruiter not found');
-    }
+    if (!recruiter) throw new NotFoundException('Nhà tuyển dụng không tồn tại');
 
     if (!recruiter.companyId) {
-      // Create a new company
-      const newCompany = await this.prisma.company.create({
-        data: updateData,
-      });
-
-      // Connect it manually to avoid nested syntax errors
-      await this.prisma.recruiter.update({
-        where: { recruiterId: recruiter.recruiterId },
-        data: { companyId: newCompany.companyId },
-      });
-
-      return newCompany;
+      return this.createNewCompany(recruiter.recruiterId, updateData);
     }
 
-    return this.prisma.company.update({
-      where: { companyId: recruiter.companyId },
-      data: updateData,
+    return this.updateExistingCompany(recruiter.companyId, updateData);
+  }
+
+  private async createNewCompany(recruiterId: string, data: any) {
+    const company = await this.prisma.company.create({ data });
+    await this.prisma.recruiter.update({
+      where: { recruiterId },
+      data: { companyId: company.companyId },
+    });
+    return company;
+  }
+
+  private async updateExistingCompany(companyId: string, data: any) {
+    const company = await this.prisma.company.update({
+      where: { companyId },
+      data,
+      include: { branches: true },
+    });
+
+    if (data.address && company.branches.length === 0) {
+      await this.createDefaultBranch(companyId, data.address);
+    }
+
+    return company;
+  }
+
+  private async createDefaultBranch(companyId: string, address: string) {
+    return this.prisma.companyBranch.create({
+      data: {
+        name: 'Trụ sở chính',
+        address,
+        companyId,
+        isVerified: true,
+      },
     });
   }
 
   async uploadLogo(userId: string, file: Express.Multer.File) {
-    const recruiter = await this.prisma.recruiter.findUnique({
-      where: { userId },
-    });
-    if (!recruiter || !recruiter.companyId) {
-      throw new NotFoundException('Chưa có thông tin công ty.');
-    }
-
-    const fileExt = file.originalname.split('.').pop();
-    const fileName = `logo-${recruiter.companyId}-${Date.now()}.${fileExt}`;
-    const path = `companies/logos/${fileName}`;
-    const url = await this.supabaseService.uploadFile(
-      file.buffer,
-      path,
-      file.mimetype,
-    );
-
-    await this.prisma.company.update({
-      where: { companyId: recruiter.companyId },
-      data: { logo: url },
-    });
-    return { url };
+    return this.uploadCompanyAsset(userId, file, 'logo', 'logos');
   }
 
   async uploadBanner(userId: string, file: Express.Multer.File) {
+    return this.uploadCompanyAsset(userId, file, 'banner', 'banners');
+  }
+
+  private async uploadCompanyAsset(
+    userId: string,
+    file: Express.Multer.File,
+    field: 'logo' | 'banner',
+    folder: string,
+  ) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
-    if (!recruiter || !recruiter.companyId) {
+    if (!recruiter?.companyId)
       throw new NotFoundException('Chưa có thông tin công ty.');
-    }
 
     const fileExt = file.originalname.split('.').pop();
-    const fileName = `banner-${recruiter.companyId}-${Date.now()}.${fileExt}`;
-    const path = `companies/banners/${fileName}`;
+    const fileName = `${field}-${recruiter.companyId}-${Date.now()}.${fileExt}`;
+    const path = `companies/${folder}/${fileName}`;
+
     const url = await this.supabaseService.uploadFile(
       file.buffer,
       path,
@@ -147,8 +190,9 @@ export class CompaniesService {
 
     await this.prisma.company.update({
       where: { companyId: recruiter.companyId },
-      data: { banner: url },
+      data: { [field]: url },
     });
+
     return { url };
   }
 
@@ -164,64 +208,24 @@ export class CompaniesService {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
-    if (!recruiter || !recruiter.companyId) {
-      throw new NotFoundException('Recruiter or company not found');
-    }
+    if (!recruiter?.companyId)
+      throw new NotFoundException('Không tìm thấy thông tin công ty');
 
-    let latitude: number | null = data.latitude ?? null;
-    let longitude: number | null = data.longitude ?? null;
-    let isVerified = latitude !== null && longitude !== null;
+    let { latitude, longitude } = data;
+    let isVerified = !!(latitude && longitude);
 
     if (!isVerified) {
-      try {
-        let query = encodeURIComponent(data.address);
-        let res = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-          {
-            headers: { 'User-Agent': 'Workly-System' },
-          },
-        );
-        if (res.ok) {
-          let json = await res.json();
-          if (json && json.length > 0) {
-            latitude = parseFloat(json[0].lat);
-            longitude = parseFloat(json[0].lon);
-            isVerified = true;
-          } else {
-            // Fallback: Try with an extracting just the administrative divisions (last 3 comma-separated parts)
-            const parts = data.address.split(',');
-            if (parts.length > 2) {
-              const simplifiedAddress = parts
-                .slice(Math.max(parts.length - 3, 0))
-                .join(',')
-                .trim();
-              query = encodeURIComponent(simplifiedAddress);
-              res = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-                {
-                  headers: { 'User-Agent': 'Workly-System' },
-                },
-              );
-              if (res.ok) {
-                json = await res.json();
-                if (json && json.length > 0) {
-                  latitude = parseFloat(json[0].lat);
-                  longitude = parseFloat(json[0].lon);
-                  isVerified = true;
-                }
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.error('Nominatim search error:', e);
+      const geo = await this.geocodeAddress(data.address);
+      if (geo) {
+        latitude = geo.lat;
+        longitude = geo.lon;
+        isVerified = true;
       }
     }
 
     return this.prisma.companyBranch.create({
       data: {
-        name: data.name,
-        address: data.address,
+        ...data,
         latitude,
         longitude,
         isVerified,
@@ -230,19 +234,135 @@ export class CompaniesService {
     });
   }
 
+  private async geocodeAddress(
+    address: string,
+  ): Promise<{ lat: number; lon: number } | null> {
+    const fetchCoords = async (query: string) => {
+      try {
+        const res = await fetch(
+          `${NOMINATIM_API_URL}?q=${encodeURIComponent(query)}&format=json&limit=1`,
+          {
+            headers: { 'User-Agent': 'Workly-System' },
+          },
+        );
+        if (!res.ok) return null;
+        const json = await res.json();
+        return json?.[0]
+          ? { lat: parseFloat(json[0].lat), lon: parseFloat(json[0].lon) }
+          : null;
+      } catch {
+        return null;
+      }
+    };
+
+    // Try full address
+    const coords = await fetchCoords(address);
+    if (coords) return coords;
+
+    // Fallback: Try simplified address (last 3 segments)
+    const parts = address.split(',');
+    if (parts.length > 2) {
+      const simplified = parts.slice(-3).join(',').trim();
+      return fetchCoords(simplified);
+    }
+
+    return null;
+  }
+
   async deleteBranch(userId: string, branchId: string) {
     const recruiter = await this.prisma.recruiter.findUnique({
       where: { userId },
     });
-    if (!recruiter || !recruiter.companyId) throw new NotFoundException();
+    if (!recruiter?.companyId) throw new NotFoundException();
 
     return this.prisma.companyBranch.deleteMany({
-      where: {
-        branchId,
-        companyId: recruiter.companyId,
-      },
+      where: { branchId, companyId: recruiter.companyId },
     });
   }
+
+  // --- Rich Profile Methods ---
+
+  async saveSection(userId: string, data: any) {
+    const companyId = await this.getCompanyId(userId);
+
+    if (data.id) {
+      return (this.prisma as any).companySection.update({
+        where: { id: data.id, companyId },
+        data: {
+          title: data.title,
+          content: data.content,
+          type: data.type,
+          displayOrder: data.displayOrder,
+        },
+      });
+    }
+
+    return (this.prisma as any).companySection.create({
+      data: { ...data, companyId },
+    });
+  }
+
+  async deleteSection(userId: string, id: string) {
+    const companyId = await this.getCompanyId(userId);
+    return (this.prisma as any).companySection.delete({
+      where: { id, companyId },
+    });
+  }
+
+  async saveBenefit(userId: string, data: any) {
+    const companyId = await this.getCompanyId(userId);
+
+    if (data.id) {
+      return (this.prisma as any).companyBenefit.update({
+        where: { id: data.id, companyId },
+        data: { title: data.title, icon: data.icon },
+      });
+    }
+
+    return (this.prisma as any).companyBenefit.create({
+      data: { ...data, companyId },
+    });
+  }
+
+  async deleteBenefit(userId: string, id: string) {
+    const companyId = await this.getCompanyId(userId);
+    return (this.prisma as any).companyBenefit.delete({
+      where: { id, companyId },
+    });
+  }
+
+  async saveHistory(userId: string, data: any) {
+    const companyId = await this.getCompanyId(userId);
+
+    if (data.id) {
+      return (this.prisma as any).companyHistory.update({
+        where: { id: data.id, companyId },
+        data: { year: data.year, event: data.event },
+      });
+    }
+
+    return (this.prisma as any).companyHistory.create({
+      data: { ...data, companyId },
+    });
+  }
+
+  async deleteHistory(userId: string, id: string) {
+    const companyId = await this.getCompanyId(userId);
+    return (this.prisma as any).companyHistory.delete({
+      where: { id, companyId },
+    });
+  }
+
+  private async getCompanyId(userId: string): Promise<string> {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter?.companyId)
+      throw new NotFoundException('Công ty không tồn tại');
+    return recruiter.companyId;
+  }
+
+  // --- End Rich Profile Methods ---
 
   async getTopEmployers(limit = 10) {
     const companies = await this.prisma.company.findMany({
@@ -252,11 +372,7 @@ export class CompaniesService {
           select: { jobPostings: { where: { status: 'APPROVED' } } },
         },
       },
-      orderBy: {
-        jobPostings: {
-          _count: 'desc',
-        },
-      },
+      orderBy: { jobPostings: { _count: 'desc' } },
     });
 
     return companies
@@ -283,53 +399,74 @@ export class CompaniesService {
   ) {
     if (!data.companyName) return null;
 
-    let existingCompany: any = null;
     if (data.taxCode) {
-      existingCompany = await tx.company.findFirst({
+      const existing = await tx.company.findFirst({
         where: { taxCode: data.taxCode },
       });
+      if (existing) return existing.companyId;
     }
 
-    if (existingCompany) {
-      return existingCompany.companyId;
-    }
-
-    let companyDataFromApi: any = null;
+    let apiData: any = null;
     if (data.taxCode) {
       try {
-        const res = await fetch(
-          `https://esgoo.net/api-mst/${data.taxCode}.htm`,
-        );
-        const apiData = await res.json();
-        if (apiData.error === 0 && apiData.data) {
-          companyDataFromApi = apiData.data;
-        }
+        const res = await fetch(`${ESGOO_API_URL}/${data.taxCode}.htm`);
+        const json = await res.json();
+        if (json.error === 0) apiData = json.data;
       } catch (e) {
         console.error('Failed to fetch tax code data', e);
       }
     }
 
-    const newCompany = await tx.company.create({
+    const company = await tx.company.create({
       data: {
-        companyName: companyDataFromApi?.ten || data.companyName,
+        companyName: apiData?.ten || data.companyName,
         taxCode: data.taxCode || null,
-        address: companyDataFromApi?.dc || null,
+        address: apiData?.dc || null,
         websiteUrl: data.websiteUrl || null,
-        taxAddress: companyDataFromApi?.dc || null,
-        status: companyDataFromApi?.tinhtrang || null,
-        internationalName: companyDataFromApi?.internationalName || null,
-        shortName: companyDataFromApi?.shortName || null,
-        verifyStatus: companyDataFromApi || data.verifyStatus ? 1 : 0,
+        taxAddress: apiData?.dc || null,
+        status: apiData?.tinhtrang || null,
+        internationalName: apiData?.internationalName || null,
+        shortName: apiData?.shortName || null,
+        verifyStatus: apiData || data.verifyStatus ? 1 : 0,
         branches: {
           create: {
             name: 'Trụ sở chính',
-            address: companyDataFromApi?.dc || 'Đang cập nhật',
-            isVerified: !!companyDataFromApi,
+            address: apiData?.dc || 'Đang cập nhật',
+            isVerified: !!apiData,
           },
         },
       },
     });
 
-    return newCompany.companyId;
+    return company.companyId;
+  }
+
+  private calculateCompleteness(company: any) {
+    const breakdown = {
+      companyName: !!company.companyName,
+      taxCode: !!company.taxCode,
+      logo: !!company.logo,
+      banner: !!company.banner,
+      address: !!company.address,
+      description: !!company.description && company.description.length > 50,
+      websiteUrl: !!company.websiteUrl,
+      companySize: !!company.companySize,
+      mainIndustry: !!company.mainIndustry,
+      workLocations:
+        (Array.isArray(company.branches) && company.branches.length > 0) ||
+        !!company.address,
+      sections: Array.isArray(company.sections) && company.sections.length > 0,
+      benefits: Array.isArray(company.benefits) && company.benefits.length > 0,
+      history: Array.isArray(company.history) && company.history.length > 0,
+    };
+
+    let total = 0;
+    Object.keys(COMPLETENESS_WEIGHTS).forEach((key) => {
+      if (breakdown[key as keyof typeof breakdown]) {
+        total += COMPLETENESS_WEIGHTS[key];
+      }
+    });
+
+    return { total, breakdown };
   }
 }
