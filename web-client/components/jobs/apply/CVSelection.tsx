@@ -18,7 +18,7 @@ interface CVSelectionProps {
   fetchingProfile: boolean;
   isParsing: boolean;
   file: File | null;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 

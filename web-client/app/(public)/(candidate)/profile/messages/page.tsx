@@ -8,6 +8,7 @@ import { useSocketStore } from '@/stores/socket';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { ProfileSidebar } from '@/components/candidates/ProfileSidebar';
+import { ScheduleInterviewModal } from '@/components/candidate/messages/ScheduleInterviewModal';
 
 export default function CandidateMessagesPage() {
   const { user, logout } = useAuthStore();
@@ -19,6 +20,8 @@ export default function CandidateMessagesPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
+  const [candidateApplications, setCandidateApplications] = useState<any[]>([]);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,7 +45,17 @@ export default function CandidateMessagesPage() {
 
   useEffect(() => {
     fetchConversations();
+    fetchCandidateApplications();
   }, []);
+
+  const fetchCandidateApplications = async () => {
+    try {
+      const { data } = await api.get('/applications/me');
+      setCandidateApplications(data);
+    } catch (error) {
+      console.error('Failed to fetch candidate applications', error);
+    }
+  };
 
   useEffect(() => {
     if (activeChat) {
@@ -100,10 +113,12 @@ export default function CandidateMessagesPage() {
 
     socket.on('newMessage', handleNewMessage);
     socket.on('userStatusChanged', handleUserStatusChanged);
+    socket.on('notification', fetchCandidateApplications);
 
     return () => {
       socket.off('newMessage', handleNewMessage);
       socket.off('userStatusChanged', handleUserStatusChanged);
+      socket.off('notification', fetchCandidateApplications);
     };
   }, [socket, activeChat, user?.userId, logout]);
 
@@ -340,6 +355,44 @@ export default function CandidateMessagesPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Banner Schedule Interview */}
+                {(() => {
+                  const activeApp = candidateApplications.find(app => 
+                    app.jobPosting.recruiterId === activeChat?.recruiter?.recruiterId && 
+                    ((app.appStatus === 'INTERVIEWING' && !app.interviewDate) || app.appStatus === 'RESCHEDULE_REQUESTED')
+                  );
+                  
+                  if (!activeApp) return null;
+                  
+                  return (
+                    <div className="bg-indigo-50 border-b border-indigo-100 p-3 px-4 flex items-center justify-between shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                          <span className="text-xl">📅</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-indigo-900">Chúc mừng! Bạn đã nhận được lời mời phỏng vấn.</p>
+                          <p className="text-xs text-indigo-700">Vị trí: <span className="font-semibold">{activeApp.jobPosting.title}</span></p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setIsScheduleModalOpen(true)}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-sm transition-all"
+                      >
+                        Chọn lịch ngay
+                      </button>
+                      <ScheduleInterviewModal 
+                        isOpen={isScheduleModalOpen} 
+                        onClose={() => setIsScheduleModalOpen(false)} 
+                        applicationId={activeApp.applicationId} 
+                        onSuccess={() => {
+                          fetchCandidateApplications(); // Refresh applications to hide banner
+                        }}
+                      />
+                    </div>
+                  );
+                })()}
 
                 <div
                   className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"

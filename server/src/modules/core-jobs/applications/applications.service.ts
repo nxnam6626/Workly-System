@@ -12,6 +12,7 @@ import { ApplicationsNotificationService } from './services/applications-notific
 import { ApplicationStatusService } from './services/application-status.service';
 import { ApplicationInterviewService } from './services/application-interview.service';
 import { ApplicationStatsService } from './services/application-stats.service';
+import { MessagesService } from '@/modules/communication/messages/messages.service';
 
 @Injectable()
 export class ApplicationsService {
@@ -22,6 +23,7 @@ export class ApplicationsService {
     private statusService: ApplicationStatusService,
     private interviewService: ApplicationInterviewService,
     private statsService: ApplicationStatsService,
+    private messagesService: MessagesService,
   ) {}
 
   async create(
@@ -130,16 +132,15 @@ export class ApplicationsService {
         let autoInterviewTime: string | null = null;
         let autoInterviewLocation: string | null = null;
 
-        if (aiMatchScore >= 80) {
+        const rejectThreshold = job.autoRejectThreshold ?? 40;
+        if (aiMatchScore < rejectThreshold) {
+          targetAppStatus = 'REJECTED';
+        } else if (job.autoInviteMatches && aiMatchScore >= 85) {
           targetAppStatus = 'INTERVIEWING';
-          const slot =
-            await this.interviewService.findAvailableInterviewSlot(
-              jobPostingId,
-            );
-          autoInterviewDate = slot.date;
-          autoInterviewTime = slot.time;
+          autoInterviewDate = null;
+          autoInterviewTime = null;
           autoInterviewLocation =
-            'Workly System tự động xếp lịch. Vui lòng đợi HR liên hệ ấn định chi tiết (Phỏng vấn qua Meet/Trực tiếp).';
+            'Hệ thống tự động đề xuất phỏng vấn. Bộ phận nhân sự sẽ liên hệ trực tiếp với bạn để thống nhất lịch phỏng vấn phù hợp nhất.';
         }
 
         const application = await tx.application.create({
@@ -166,11 +167,7 @@ export class ApplicationsService {
           application,
         );
 
-        if (
-          targetAppStatus === 'INTERVIEWING' &&
-          autoInterviewDate &&
-          autoInterviewTime
-        ) {
+        if (targetAppStatus === 'INTERVIEWING') {
           const candidateUser = await tx.candidate.findUnique({
             where: { candidateId },
             select: { userId: true },
@@ -180,15 +177,24 @@ export class ApplicationsService {
             application.jobPosting.recruiter?.userId &&
             application.jobPosting.recruiterId
           ) {
-            await this.notificationService.notifyCandidateOfAutoSchedule(
-              candidateUser.userId,
-              application.jobPosting.recruiter.userId,
-              application.jobPosting.recruiterId,
-              candidateId,
-              application.jobPosting.title,
-              autoInterviewTime,
-              autoInterviewDate,
-            );
+            if (autoInterviewDate && autoInterviewTime) {
+              await this.notificationService.notifyCandidateOfAutoSchedule(
+                candidateUser.userId,
+                application.jobPosting.recruiter.userId,
+                application.jobPosting.recruiterId,
+                candidateId,
+                application.jobPosting.title,
+                autoInterviewTime,
+                autoInterviewDate,
+              );
+            } else {
+              // Gửi tin nhắn mời phỏng vấn trực tiếp
+              await this.messagesService.sendJobInvitationMessage(
+                application.jobPosting.recruiter.userId,
+                candidateId,
+                jobPostingId,
+              ).catch(err => console.error('Failed to send auto-invite message', err));
+            }
           }
         }
 
@@ -286,6 +292,24 @@ export class ApplicationsService {
     );
   }
 
+  async updateBulkStatus(
+    actionUserId: string,
+    applicationIds: string[],
+    status: any,
+    interviewDate?: string,
+    interviewTime?: string,
+    interviewLocation?: string,
+  ) {
+    return this.statusService.updateBulkStatus(
+      actionUserId,
+      applicationIds,
+      status,
+      interviewDate,
+      interviewTime,
+      interviewLocation,
+    );
+  }
+
   async unlockApplication(applicationId: string, recruiterUserId: string) {
     return this.statusService.unlockApplication(applicationId, recruiterUserId);
   }
@@ -300,6 +324,69 @@ export class ApplicationsService {
       throw new ConflictException('Unauthorized to delete this application');
 
     return this.prisma.application.delete({ where: { applicationId } });
+  }
+
+  async confirmInterview(applicationId: string, candidateUserId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { applicationId },
+      include: { candidate: true, jobPosting: { include: { recruiter: true } } },
+    });
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.candidate?.userId !== candidateUserId)
+      throw new ForbiddenException('Unauthorized');
+
+    const updated = await this.prisma.application.update({
+      where: { applicationId },
+      data: { appStatus: 'INTERVIEW_CONFIRMED' },
+    });
+
+    // Notify Recruiter
+    if (application.jobPosting.recruiter?.userId) {
+      await this.notificationService.notifyRecruiterOfCandidateAction(
+        application.jobPosting.recruiter.userId,
+        application.jobPosting.title,
+        application.candidate.fullName,
+        'CONFIRM',
+      );
+    }
+    return updated;
+  }
+
+  async requestReschedule(
+    applicationId: string, 
+    candidateUserId: string, 
+    proposedDate: string, 
+    proposedTime: string, 
+    reason: string
+  ) {
+    const application = await this.prisma.application.findUnique({
+      where: { applicationId },
+      include: { candidate: true, jobPosting: { include: { recruiter: true } } },
+    });
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.candidate?.userId !== candidateUserId)
+      throw new ForbiddenException('Unauthorized');
+
+    const updated = await this.prisma.application.update({
+      where: { applicationId },
+      data: { 
+        appStatus: 'RESCHEDULE_REQUESTED',
+        // Optional: save proposed details in a note/feedback field or create a new field
+        feedback: `Ứng viên xin dời lịch: ${proposedDate} lúc ${proposedTime}. Lý do: ${reason}` 
+      },
+    });
+
+    // Notify Recruiter
+    if (application.jobPosting.recruiter?.userId) {
+      await this.notificationService.notifyRecruiterOfCandidateAction(
+        application.jobPosting.recruiter.userId,
+        application.jobPosting.title,
+        application.candidate.fullName,
+        'RESCHEDULE',
+        `${proposedDate} lúc ${proposedTime} - Lý do: ${reason}`
+      );
+    }
+    return updated;
   }
 
   async getRecruiterStats(userId: string) {

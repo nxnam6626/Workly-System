@@ -24,6 +24,8 @@ export function NotificationListener() {
     if (!socket || !isConnected) return;
 
     const handleNotification = (data: { title: string; message: string; type: string; link?: string }) => {
+      if (!data || !data.title) return;
+      
       const handleToastClick = (t: Toast) => {
          toast.dismiss(t.id);
          if (data.link) router.push(data.link);

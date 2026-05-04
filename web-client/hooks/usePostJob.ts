@@ -21,7 +21,8 @@ export const defaultForm: JobFormData = {
   minExperienceYears: 0,
   jobLevel: 'STAFF',
   jobTier: 'BASIC',
-  autoInviteMatches: false,
+  autoInviteMatches: true,
+  autoRejectThreshold: 50,
   isAiGenerated: false,
   categories: [],
 };
@@ -98,6 +99,7 @@ export function usePostJob(editJobId?: string | null) {
         minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
         jobTier: data.jobTier || 'BASIC',
         autoInviteMatches: data.autoInviteMatches || false,
+        autoRejectThreshold: data.autoRejectThreshold || '',
         isAiGenerated: data.structuredRequirements?.isAiGenerated || false,
         categories: data.structuredRequirements?.categories || [],
       };
@@ -193,6 +195,7 @@ export function usePostJob(editJobId?: string | null) {
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : null,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : null,
         vacancies: Number(formData.vacancies),
+        autoRejectThreshold: formData.autoRejectThreshold ? Number(formData.autoRejectThreshold) : null,
       };
 
       if (editJobId) {

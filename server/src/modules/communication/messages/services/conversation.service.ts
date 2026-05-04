@@ -130,11 +130,10 @@ export class ConversationService {
     return conversation;
   }
 
-  async sendMessage(senderId: string, conversationId: string, content: string) {
+  async sendMessage(senderId: string, conversationId: string, content: string, isSystemMessage: boolean = false) {
     const normalizedContent = content.replace(/[\s\.\-\_]/g, '');
-    const isEvasion =
-      EVASION_REGEX.test(content) || EVASION_REGEX.test(normalizedContent);
-    const isProfanity = PROFANITY_REGEX.test(content);
+    const isEvasion = !isSystemMessage && (EVASION_REGEX.test(content) || EVASION_REGEX.test(normalizedContent));
+    const isProfanity = !isSystemMessage && PROFANITY_REGEX.test(content);
 
     let finalContent = content;
     let exceptionToThrow: any = null;
@@ -315,6 +314,7 @@ export class ConversationService {
       recruiterUserId,
       conv.conversationId,
       content,
+      true
     );
 
     try {

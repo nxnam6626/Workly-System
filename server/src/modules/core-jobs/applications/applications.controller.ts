@@ -14,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { ApplicationsService } from './applications.service';
+import { ApplicationInterviewService } from './services/application-interview.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
@@ -24,7 +25,10 @@ import {
 
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private readonly applicationsService: ApplicationsService) {}
+  constructor(
+    private readonly applicationsService: ApplicationsService,
+    private readonly interviewService: ApplicationInterviewService,
+  ) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -72,6 +76,26 @@ export class ApplicationsController {
     return this.applicationsService.findAllForRecruiter(userId);
   }
 
+  @Patch('bulk-status')
+  @UseGuards(JwtAuthGuard)
+  async updateBulkStatus(
+    @CurrentUser('userId') userId: string,
+    @Body('applicationIds') applicationIds: string[],
+    @Body('status') status: string,
+    @Body('interviewDate') interviewDate?: string,
+    @Body('interviewTime') interviewTime?: string,
+    @Body('interviewLocation') interviewLocation?: string,
+  ) {
+    return this.applicationsService.updateBulkStatus(
+      userId,
+      applicationIds,
+      status,
+      interviewDate,
+      interviewTime,
+      interviewLocation,
+    );
+  }
+
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
   async updateStatus(
@@ -105,5 +129,43 @@ export class ApplicationsController {
   @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.applicationsService.remove(id, userId);
+  }
+
+  @Get(':id/available-slots')
+  @UseGuards(JwtAuthGuard)
+  async getAvailableSlots(@Param('id') id: string) {
+    return this.interviewService.getAvailableSlots(id);
+  }
+
+  @Post(':id/schedule')
+  @UseGuards(JwtAuthGuard)
+  async scheduleInterview(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @Body('date') date: string,
+    @Body('time') time: string,
+  ) {
+    return this.interviewService.candidateScheduleInterview(id, userId, date, time);
+  }
+
+  @Patch(':id/confirm-interview')
+  @UseGuards(JwtAuthGuard)
+  async confirmInterview(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.applicationsService.confirmInterview(id, userId);
+  }
+
+  @Patch(':id/reschedule-interview')
+  @UseGuards(JwtAuthGuard)
+  async requestReschedule(
+    @CurrentUser('userId') userId: string,
+    @Param('id') id: string,
+    @Body('proposedDate') proposedDate: string,
+    @Body('proposedTime') proposedTime: string,
+    @Body('reason') reason: string,
+  ) {
+    return this.applicationsService.requestReschedule(id, userId, proposedDate, proposedTime, reason);
   }
 }

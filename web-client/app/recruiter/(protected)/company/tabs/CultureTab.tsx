@@ -96,11 +96,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
 
     setLoading('section');
     try {
-      if ('id' in editingSection) {
-        await api.patch(`/companies/${company.companyId}/sections/${editingSection.id}`, editingSection);
-      } else {
-        await api.post(`/companies/${company.companyId}/sections`, editingSection);
-      }
+      await api.post(`/companies/my-company/sections`, editingSection);
       setEditingSection(null);
       onUpdate();
       toast.success('Đã lưu nội dung!');
@@ -115,7 +111,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
     if (!confirm('Bạn có chắc chắn muốn xóa phần này?')) return;
     setLoading('section');
     try {
-      await api.delete(`/companies/${company.companyId}/sections/${id}`);
+      await api.delete(`/companies/my-company/sections/${id}`);
       onUpdate();
       toast.success('Đã xóa nội dung!');
     } catch {
@@ -131,7 +127,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
 
     setLoading('benefit');
     try {
-      await api.post(`/companies/${company.companyId}/benefits`, { title: benefitTitle });
+      await api.post(`/companies/my-company/benefits`, { title: benefitTitle });
       setNewBenefit('');
       onUpdate();
       toast.success('Đã thêm quyền lợi!');
@@ -145,7 +141,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
   const handleDeleteBenefit = async (benefitId: string) => {
     setLoading('benefit');
     try {
-      await api.delete(`/companies/${company.companyId}/benefits/${benefitId}`);
+      await api.delete(`/companies/my-company/benefits/${benefitId}`);
       onUpdate();
       toast.success('Đã xóa quyền lợi!');
     } catch {
@@ -161,11 +157,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
 
     setLoading('history');
     try {
-      if ('id' in editingHistory) {
-        await api.patch(`/companies/${company.companyId}/history/${editingHistory.id}`, editingHistory);
-      } else {
-        await api.post(`/companies/${company.companyId}/history`, editingHistory);
-      }
+      await api.post(`/companies/my-company/history`, editingHistory);
       setEditingHistory(null);
       onUpdate();
       toast.success('Đã lưu cột mốc!');
@@ -179,7 +171,7 @@ export default function CultureTab({ company, onUpdate }: CultureTabProps) {
   const handleDeleteHistory = async (id: string) => {
     setLoading('history');
     try {
-      await api.delete(`/companies/${company.companyId}/history/${id}`);
+      await api.delete(`/companies/my-company/history/${id}`);
       onUpdate();
       toast.success('Đã xóa cột mốc!');
     } catch {

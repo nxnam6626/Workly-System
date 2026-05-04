@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MessagesService } from '@/modules/communication/messages/messages.service';
+import { MessagesGateway } from '@/modules/communication/messages/messages.gateway';
+import { MailService } from '@/mail/mail.service';
 
 @Injectable()
 export class RecruitersService {
   constructor(
     private prisma: PrismaService,
     private messagesService: MessagesService,
+    private messagesGateway: MessagesGateway,
+    private mailService: MailService,
   ) {}
 
   private async ensureRecruiter(userId: string) {
@@ -21,6 +25,119 @@ export class RecruitersService {
     }
 
     return recruiter;
+  }
+
+  async getInterviewSettings(userId: string) {
+    const recruiter = await this.ensureRecruiter(userId);
+    return (recruiter as any).interviewSettings || {
+      defaultLocation: '',
+      timeSlots: ['08:00', '10:00', '14:00', '16:00'],
+      blockedDates: [],
+      maxCandidatesPerSlot: 1,
+      minNoticeHours: 24,
+      maxAdvanceDays: 14
+    };
+  }
+
+  async updateInterviewSettings(userId: string, settings: any) {
+    const recruiter = await this.ensureRecruiter(userId);
+    
+    // Validate and merge settings
+    const currentSettings: any = (recruiter as any).interviewSettings || {};
+    const newSettings = {
+      defaultLocation: settings.defaultLocation ?? currentSettings.defaultLocation ?? '',
+      timeSlots: settings.timeSlots ?? currentSettings.timeSlots ?? ['08:00', '10:00', '14:00', '16:00'],
+      blockedDates: settings.blockedDates ?? currentSettings.blockedDates ?? [],
+      maxCandidatesPerSlot: settings.maxCandidatesPerSlot ?? currentSettings.maxCandidatesPerSlot ?? 1,
+      minNoticeHours: settings.minNoticeHours ?? currentSettings.minNoticeHours ?? 24,
+      maxAdvanceDays: settings.maxAdvanceDays ?? currentSettings.maxAdvanceDays ?? 14
+    };
+
+    // Update recruiter
+    await this.prisma.recruiter.update({
+      where: { recruiterId: recruiter.recruiterId },
+      data: { interviewSettings: newSettings } as any
+    });
+
+    // Check if we need to cancel interviews due to blocked dates
+    if (settings.blockedDates && Array.isArray(settings.blockedDates)) {
+      await this.cancelInterviewsOnBlockedDates(recruiter.recruiterId, settings.blockedDates);
+    }
+
+    return { success: true, settings: newSettings };
+  }
+
+  private async cancelInterviewsOnBlockedDates(recruiterId: string, blockedDates: string[]) {
+    if (!blockedDates.length) return;
+
+    for (const dateStr of blockedDates) {
+      const blockDate = new Date(dateStr);
+      if (isNaN(blockDate.getTime())) continue;
+
+      const startOfDay = new Date(blockDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(blockDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Find all interviewing applications on this date for this recruiter
+      const affectedApps = await this.prisma.application.findMany({
+        where: {
+          appStatus: { in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED'] },
+          jobPosting: { recruiterId },
+          interviewDate: { gte: startOfDay, lte: endOfDay }
+        },
+        include: { candidate: { include: { user: true } }, jobPosting: { include: { recruiter: true } } }
+      });
+
+      for (const app of affectedApps) {
+        await this.prisma.application.update({
+          where: { applicationId: app.applicationId },
+          data: {
+            appStatus: 'RESCHEDULE_REQUESTED'
+          }
+        });
+
+        // Send a message to the candidate
+        if (app.jobPosting.recruiter?.userId) {
+          try {
+            const content = `[Hệ thống Workly] Xin lỗi bạn, nhà tuyển dụng có việc đột xuất nên không thể phỏng vấn vào ngày ${dateStr.split('-').reverse().join('/')}. Bạn vui lòng chọn lại một lịch phỏng vấn khác nhé!`;
+            
+            const conv = await this.messagesService.createConversation(
+              app.candidateId,
+              app.jobPosting.recruiterId!
+            );
+            
+            const savedMessage = await this.messagesService.sendMessage(
+              app.jobPosting.recruiter.userId, 
+              conv.conversationId,
+              content,
+              true
+            );
+
+            // Emit newMessage to both parties
+            this.messagesGateway.server.to(`user_${app.candidate.userId}`).emit('newMessage', savedMessage);
+            this.messagesGateway.server.to(`user_${app.jobPosting.recruiter.userId}`).emit('newMessage', savedMessage);
+
+            // Emit notification to candidate to refresh applications and show "Chọn lịch ngay" banner
+            this.messagesGateway.server.to(`user_${app.candidate.userId}`).emit('notification');
+
+            
+            const userEmail = (app.candidate as any).user?.email;
+            if (userEmail) {
+              const formattedDateStr = dateStr.split('-').reverse().join('/');
+              await this.mailService.sendInterviewRescheduleRequest(
+                userEmail,
+                app.candidate.fullName,
+                formattedDateStr
+              );
+            }
+          } catch (err) {
+            // Ignore error
+          }
+        }
+      }
+    }
   }
 
   async getMatchedCandidates(userId: string, jobId: string) {
@@ -193,18 +310,27 @@ export class RecruitersService {
       },
     });
 
-    // 6. Lấy lịch phỏng vấn sắp tới
+    // 6. Lấy lịch phỏng vấn sắp tới (Mặc định 7 ngày tới)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const next7Days = new Date(startOfToday);
+    next7Days.setDate(next7Days.getDate() + 7);
+    next7Days.setHours(23, 59, 59, 999);
+
     let interviewDateCondition: any = {
-      gte: new Date(new Date().setHours(0, 0, 0, 0)),
+      gte: startOfToday,
+      lte: next7Days,
     };
+
     if (targetDate) {
       const startOfDay = new Date(targetDate);
       startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(targetDate);
-      endOfDay.setHours(23, 59, 59, 999);
+      const endOf7Days = new Date(startOfDay);
+      endOf7Days.setDate(endOf7Days.getDate() + 6);
+      endOf7Days.setHours(23, 59, 59, 999);
       interviewDateCondition = {
         gte: startOfDay,
-        lte: endOfDay,
+        lte: endOf7Days,
       };
     }
 
@@ -215,7 +341,7 @@ export class RecruitersService {
         interviewDate: interviewDateCondition,
       },
       orderBy: [{ interviewDate: 'asc' }, { interviewTime: 'asc' }],
-      take: 5,
+      take: 20,
       include: {
         candidate: { select: { fullName: true, candidateId: true } },
         jobPosting: { select: { title: true } },

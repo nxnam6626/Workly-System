@@ -187,8 +187,8 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
       });
 
       toast.success("Ứng tuyển thành công!");
-      setIsSuccess(true);
       if (onSuccess) onSuccess();
+      onClose();
     } catch (error: any) {
       console.error("Apply error:", error);
       toast.error(error.response?.data?.message || "Đã có lỗi xảy ra khi ứng tuyển!");

@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
 import { useWalletStore } from '@/stores/wallet';
-import { InterviewScheduleModal } from './InterviewScheduleModal';
 import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
 
 export default function ApplicationsPage() {
@@ -23,9 +22,9 @@ export default function ApplicationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [unlockingAppId, setUnlockingAppId] = useState<string | null>(null);
+  const [unlockingAppIds, setUnlockingAppIds] = useState<string[]>([]);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
-  const [selectedUnlockCandidate, setSelectedUnlockCandidate] = useState<{ id: string, name: string } | null>(null);
+  const [selectedUnlockCandidateName, setSelectedUnlockCandidateName] = useState<string>('');
   const [isUnlocking, setIsUnlocking] = useState(false);
 
   const wallet = useWalletStore((state) => state.wallet);
@@ -49,13 +48,18 @@ export default function ApplicationsPage() {
   useEffect(() => {
     if (!socket) return;
     const handleNotification = (msg: any) => {
-      if (msg.title?.includes('Hồ sơ') || msg.title?.includes('Đơn ứng tuyển') || msg.title?.includes('Tin tuyển dụng')) {
+      if (msg.title?.includes('Hồ sơ') || msg.title?.includes('Đơn ứng tuyển') || msg.title?.includes('Tin tuyển dụng') || msg.title?.includes('Phỏng vấn')) {
         fetchApplications();
       }
     };
+    const handleSync = () => {
+      fetchApplications();
+    };
     socket.on('notification', handleNotification);
+    socket.on('dashboard.sync', handleSync);
     return () => {
       socket.off('notification', handleNotification);
+      socket.off('dashboard.sync', handleSync);
     };
   }, [socket]);
 
@@ -91,47 +95,82 @@ export default function ApplicationsPage() {
     }
   };
 
+  const [selectedAppIds, setSelectedAppIds] = useState<string[]>([]);
+
+  const toggleSelection = (appId: string) => {
+    setSelectedAppIds(prev =>
+      prev.includes(appId) ? prev.filter(id => id !== appId) : [...prev, appId]
+    );
+  };
+
+  const updateBulkStatus = async (status: string, interviewDetails?: any) => {
+    if (selectedAppIds.length === 0) return;
+    try {
+      setIsSubmitting(true);
+      await api.patch('/applications/bulk-status', {
+        applicationIds: selectedAppIds,
+        status,
+        ...interviewDetails
+      });
+      setApplications(applications.map(app =>
+        selectedAppIds.includes(app.applicationId) ? { ...app, appStatus: status } : app
+      ));
+      toast.success(status === 'INTERVIEWING' ? `Đã hẹn phỏng vấn ${selectedAppIds.length} ứng viên!` : `Đã từ chối ${selectedAppIds.length} ứng viên!`);
+      setSelectedAppIds([]);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Thao tác hàng loạt thất bại');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleUnlockClick = (appId: string, candidateName: string) => {
-    setUnlockingAppId(appId);
-    setSelectedUnlockCandidate({ id: appId, name: candidateName });
+    setUnlockingAppIds([appId]);
+    setSelectedUnlockCandidateName(candidateName);
     setShowUnlockModal(true);
   };
 
   const confirmUnlock = async () => {
-    if (!unlockingAppId) return;
+    if (unlockingAppIds.length === 0) return;
     try {
       setIsUnlocking(true);
       const toastId = toast.loading('Đang xử lý mở khóa...');
-      const { data } = await api.post(`/applications/${unlockingAppId}/unlock`);
+      for (const id of unlockingAppIds) {
+        await api.post(`/applications/${id}/unlock`);
+      }
       await fetchApplications();
       await fetchWallet();
       setShowUnlockModal(false);
       toast.success('Mở khóa ứng viên thành công!', { id: toastId });
+      setUnlockingAppIds([]);
     } catch (error: any) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Không thể mở khóa ứng viên');
     } finally {
       setIsUnlocking(false);
-      setUnlockingAppId(null);
+      setUnlockingAppIds([]);
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, app?: any) => {
     switch (status) {
       case 'ACCEPTED': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
       case 'REJECTED': return 'bg-red-100 text-red-700 border-red-200';
       case 'REVIEWED': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'INTERVIEWING': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'INTERVIEWING': return app?.interviewDate ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-orange-100 text-orange-700 border-orange-200';
       default: return 'bg-amber-100 text-amber-700 border-amber-200';
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, app?: any) => {
     switch (status) {
       case 'ACCEPTED': return 'Đã Tuyển';
       case 'REJECTED': return 'Từ Chối';
       case 'REVIEWED': return 'Đã Xem';
-      case 'INTERVIEWING': return 'Đang Phỏng Vấn';
+      case 'INTERVIEW_CONFIRMED': return 'Đã Chốt Lịch';
+      case 'INTERVIEWING': return app?.interviewDate ? 'Đang Phỏng Vấn' : 'Chờ Phản Hồi';
       default: return 'Chờ Duyệt';
     }
   };
@@ -197,9 +236,14 @@ export default function ApplicationsPage() {
           ) : filteredApps.length === 0 ? (
             <div className="p-8 text-center text-slate-400">Không có hồ sơ nào phù hợp với bộ lọc này.</div>
           ) : filteredApps.map((app) => (
-            <div key={app.applicationId} className="p-6 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group">
+            <div key={app.applicationId} className={`p-6 hover:bg-slate-50/50 transition-colors flex flex-col md:flex-row gap-6 items-start md:items-center justify-between group ${selectedAppIds.includes(app.applicationId) ? 'bg-indigo-50/30' : ''}`}>
 
               <div className="flex gap-4 items-start flex-1 min-w-0">
+                {app.appStatus !== 'REJECTED' && app.appStatus !== 'INTERVIEWING' && app.appStatus !== 'ACCEPTED' && (
+                  <div className="pt-3">
+                    <input type="checkbox" checked={selectedAppIds.includes(app.applicationId)} onChange={() => toggleSelection(app.applicationId)} className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
+                  </div>
+                )}
                 <div className="w-12 h-12 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center shrink-0">
                   {app.isUnlocked && app.candidate?.user?.avatar ? (
                     <img src={app.candidate.user.avatar} className="w-full h-full rounded-full object-cover" />
@@ -233,33 +277,33 @@ export default function ApplicationsPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-                <span className={`px-3 py-1.5 rounded-lg border text-sm font-medium ${getStatusColor(app.appStatus)}`}>
-                  {getStatusLabel(app.appStatus)}
+                <span className={`px-3 py-1.5 rounded-lg border text-sm font-medium ${getStatusColor(app.appStatus, app)}`}>
+                  {getStatusLabel(app.appStatus, app)}
                 </span>
 
                 {app.appStatus === 'INTERVIEWING' && app.interviewDate && (
-                  <button 
+                  <button
                     onClick={() => {
-                       toast.custom((t) => (
-                         <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
-                           <div className="p-4 w-full">
-                             <div className="flex items-start">
-                               <div className="flex-shrink-0 pt-0.5">
-                                 <Calendar className="h-10 w-10 text-indigo-500 bg-indigo-50 p-2 rounded-full" />
-                               </div>
-                               <div className="ml-3 w-0 flex-1">
-                                 <p className="text-sm font-bold text-slate-900">Lịch phỏng vấn: {app.candidate?.fullName}</p>
-                                 <p className="mt-1 text-sm text-slate-500">
-                                   <b>Thời gian:</b> {app.interviewTime} ngày {new Date(app.interviewDate).toLocaleDateString('vi-VN')}
-                                 </p>
-                                 <p className="mt-1 text-sm text-slate-500">
-                                   <b>Địa điểm:</b> {app.interviewLocation || 'Chưa cập nhật'}
-                                 </p>
-                               </div>
-                             </div>
-                           </div>
-                         </div>
-                       ), { duration: 5000 });
+                      toast.custom((t) => (
+                        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
+                          <div className="p-4 w-full">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 pt-0.5">
+                                <Calendar className="h-10 w-10 text-indigo-500 bg-indigo-50 p-2 rounded-full" />
+                              </div>
+                              <div className="ml-3 w-0 flex-1">
+                                <p className="text-sm font-bold text-slate-900">Lịch phỏng vấn: {app.candidate?.fullName}</p>
+                                <p className="mt-1 text-sm text-slate-500">
+                                  <b>Thời gian:</b> {app.interviewTime} ngày {new Date(app.interviewDate).toLocaleDateString('vi-VN')}
+                                </p>
+                                <p className="mt-1 text-sm text-slate-500">
+                                  <b>Địa điểm:</b> {app.interviewLocation || 'Chưa cập nhật'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ), { duration: 5000 });
                     }}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg border border-indigo-100 text-sm font-semibold hover:bg-indigo-100 transition-colors"
                   >
@@ -290,7 +334,7 @@ export default function ApplicationsPage() {
                 {app.appStatus === 'PENDING' && (
                   <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                     {app.isUnlocked && (
-                      <button onClick={() => { setSelectedApp(app); setIsModalOpen(true); }} title="Hẹn phỏng vấn" className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 flex items-center justify-center transition-colors">
+                      <button onClick={() => updateStatus(app.applicationId, 'INTERVIEWING')} title="Hẹn phỏng vấn" className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 flex items-center justify-center transition-colors">
                         <Clock className="w-5 h-5" />
                       </button>
                     )}
@@ -302,13 +346,6 @@ export default function ApplicationsPage() {
 
                 {app.appStatus === 'INTERVIEWING' && (
                   <div className="flex items-center gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => { setSelectedApp(app); setIsModalOpen(true); }}
-                      title="Dời Lịch"
-                      className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 flex items-center justify-center transition-colors"
-                    >
-                      <Calendar className="w-5 h-5" />
-                    </button>
                     <button onClick={() => updateStatus(app.applicationId, 'ACCEPTED')} title="Đã Tuyển" className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 flex items-center justify-center transition-colors">
                       <CheckCircle className="w-5 h-5" />
                     </button>
@@ -323,32 +360,38 @@ export default function ApplicationsPage() {
         </div>
       </div>
 
-      <InterviewScheduleModal
-        isOpen={isModalOpen}
-        candidateName={selectedApp?.candidate?.fullName || ''}
-        isSubmitting={isSubmitting}
-        initialData={selectedApp?.interviewDate ? {
-          date: new Date(selectedApp.interviewDate).toISOString().split('T')[0],
-          time: selectedApp.interviewTime || '',
-          location: selectedApp.interviewLocation || ''
-        } : undefined}
-        onClose={() => { setIsModalOpen(false); setSelectedApp(null); }}
-        onSubmit={(date, time, location) => {
-          if (selectedApp) {
-            updateStatus(selectedApp.applicationId, 'INTERVIEWING', { interviewDate: date, interviewTime: time, interviewLocation: location });
-          }
-        }}
-      />
-
       <UnlockConfirmModal
-        isOpen={showUnlockModal && selectedUnlockCandidate !== null}
+        isOpen={showUnlockModal && unlockingAppIds.length > 0}
         onClose={() => setShowUnlockModal(false)}
         onConfirm={confirmUnlock}
         isUnlocking={isUnlocking}
-        candidateName={selectedUnlockCandidate?.name || ''}
+        candidateName={selectedUnlockCandidateName}
+        unlockCount={unlockingAppIds.length}
         wallet={wallet}
         subscription={subscription}
       />
+
+      {selectedAppIds.length > 0 && (
+        <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur text-white px-6 py-4 rounded-full shadow-2xl flex items-center gap-6 border border-slate-700">
+          <span className="font-bold text-sm tracking-wide">Đã chọn <span className="text-indigo-400">{selectedAppIds.length}</span></span>
+          <div className="w-px h-6 bg-slate-700"></div>
+          <button onClick={() => updateBulkStatus('REJECTED')} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 font-bold text-sm transition-colors uppercase tracking-widest">
+            <XCircle className="w-4 h-4" /> Từ chối
+          </button>
+          <button onClick={() => {
+            const lockedApps = applications.filter(app => selectedAppIds.includes(app.applicationId) && !app.isUnlocked);
+            if (lockedApps.length > 0) {
+              setUnlockingAppIds(lockedApps.map(a => a.applicationId));
+              setSelectedUnlockCandidateName(`${lockedApps.length} ứng viên`);
+              setShowUnlockModal(true);
+              return;
+            }
+            updateBulkStatus('INTERVIEWING');
+          }} className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-bold text-sm transition-colors uppercase tracking-widest">
+            <Clock className="w-4 h-4" /> Hẹn phỏng vấn
+          </button>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

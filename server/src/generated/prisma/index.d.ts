@@ -231,7 +231,9 @@ export const AppStatus: {
   REVIEWED: 'REVIEWED',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
-  INTERVIEWING: 'INTERVIEWING'
+  INTERVIEWING: 'INTERVIEWING',
+  INTERVIEW_CONFIRMED: 'INTERVIEW_CONFIRMED',
+  RESCHEDULE_REQUESTED: 'RESCHEDULE_REQUESTED'
 };
 
 export type AppStatus = (typeof AppStatus)[keyof typeof AppStatus]
@@ -16910,6 +16912,7 @@ export namespace Prisma {
     aiInsightsCache: number
     aiInsightsCacheKey: number
     aiInsightsCachedAt: number
+    interviewSettings: number
     createdAt: number
     updatedAt: number
     violationCount: number
@@ -16964,6 +16967,7 @@ export namespace Prisma {
     aiInsightsCache?: true
     aiInsightsCacheKey?: true
     aiInsightsCachedAt?: true
+    interviewSettings?: true
     createdAt?: true
     updatedAt?: true
     violationCount?: true
@@ -17067,6 +17071,7 @@ export namespace Prisma {
     aiInsightsCache: JsonValue | null
     aiInsightsCacheKey: string | null
     aiInsightsCachedAt: Date | null
+    interviewSettings: JsonValue | null
     createdAt: Date
     updatedAt: Date
     violationCount: number
@@ -17102,6 +17107,7 @@ export namespace Prisma {
     aiInsightsCache?: boolean
     aiInsightsCacheKey?: boolean
     aiInsightsCachedAt?: boolean
+    interviewSettings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     violationCount?: boolean
@@ -17125,6 +17131,7 @@ export namespace Prisma {
     aiInsightsCache?: boolean
     aiInsightsCacheKey?: boolean
     aiInsightsCachedAt?: boolean
+    interviewSettings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     violationCount?: boolean
@@ -17143,6 +17150,7 @@ export namespace Prisma {
     aiInsightsCache?: boolean
     aiInsightsCacheKey?: boolean
     aiInsightsCachedAt?: boolean
+    interviewSettings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     violationCount?: boolean
@@ -17161,12 +17169,13 @@ export namespace Prisma {
     aiInsightsCache?: boolean
     aiInsightsCacheKey?: boolean
     aiInsightsCachedAt?: boolean
+    interviewSettings?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     violationCount?: boolean
   }
 
-  export type RecruiterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"recruiterId" | "fullName" | "bio" | "position" | "userId" | "companyId" | "savedCandidateIds" | "aiInsightsCache" | "aiInsightsCacheKey" | "aiInsightsCachedAt" | "createdAt" | "updatedAt" | "violationCount", ExtArgs["result"]["recruiter"]>
+  export type RecruiterOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"recruiterId" | "fullName" | "bio" | "position" | "userId" | "companyId" | "savedCandidateIds" | "aiInsightsCache" | "aiInsightsCacheKey" | "aiInsightsCachedAt" | "interviewSettings" | "createdAt" | "updatedAt" | "violationCount", ExtArgs["result"]["recruiter"]>
   export type RecruiterInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     conversations?: boolean | Recruiter$conversationsArgs<ExtArgs>
     jobPostings?: boolean | Recruiter$jobPostingsArgs<ExtArgs>
@@ -17206,6 +17215,7 @@ export namespace Prisma {
       aiInsightsCache: Prisma.JsonValue | null
       aiInsightsCacheKey: string | null
       aiInsightsCachedAt: Date | null
+      interviewSettings: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
       violationCount: number
@@ -17648,6 +17658,7 @@ export namespace Prisma {
     readonly aiInsightsCache: FieldRef<"Recruiter", 'Json'>
     readonly aiInsightsCacheKey: FieldRef<"Recruiter", 'String'>
     readonly aiInsightsCachedAt: FieldRef<"Recruiter", 'DateTime'>
+    readonly interviewSettings: FieldRef<"Recruiter", 'Json'>
     readonly createdAt: FieldRef<"Recruiter", 'DateTime'>
     readonly updatedAt: FieldRef<"Recruiter", 'DateTime'>
     readonly violationCount: FieldRef<"Recruiter", 'Int'>
@@ -25224,6 +25235,7 @@ export namespace Prisma {
     vacancies: number | null
     aiReliabilityScore: number | null
     viewCount: number | null
+    autoRejectThreshold: number | null
   }
 
   export type JobPostingSumAggregateOutputType = {
@@ -25232,6 +25244,7 @@ export namespace Prisma {
     vacancies: number | null
     aiReliabilityScore: number | null
     viewCount: number | null
+    autoRejectThreshold: number | null
   }
 
   export type JobPostingMinAggregateOutputType = {
@@ -25262,6 +25275,7 @@ export namespace Prisma {
     pausedAt: Date | null
     slug: string | null
     autoInviteMatches: boolean | null
+    autoRejectThreshold: number | null
   }
 
   export type JobPostingMaxAggregateOutputType = {
@@ -25292,6 +25306,7 @@ export namespace Prisma {
     pausedAt: Date | null
     slug: string | null
     autoInviteMatches: boolean | null
+    autoRejectThreshold: number | null
   }
 
   export type JobPostingCountAggregateOutputType = {
@@ -25324,6 +25339,7 @@ export namespace Prisma {
     pausedAt: number
     slug: number
     autoInviteMatches: number
+    autoRejectThreshold: number
     _all: number
   }
 
@@ -25334,6 +25350,7 @@ export namespace Prisma {
     vacancies?: true
     aiReliabilityScore?: true
     viewCount?: true
+    autoRejectThreshold?: true
   }
 
   export type JobPostingSumAggregateInputType = {
@@ -25342,6 +25359,7 @@ export namespace Prisma {
     vacancies?: true
     aiReliabilityScore?: true
     viewCount?: true
+    autoRejectThreshold?: true
   }
 
   export type JobPostingMinAggregateInputType = {
@@ -25372,6 +25390,7 @@ export namespace Prisma {
     pausedAt?: true
     slug?: true
     autoInviteMatches?: true
+    autoRejectThreshold?: true
   }
 
   export type JobPostingMaxAggregateInputType = {
@@ -25402,6 +25421,7 @@ export namespace Prisma {
     pausedAt?: true
     slug?: true
     autoInviteMatches?: true
+    autoRejectThreshold?: true
   }
 
   export type JobPostingCountAggregateInputType = {
@@ -25434,6 +25454,7 @@ export namespace Prisma {
     pausedAt?: true
     slug?: true
     autoInviteMatches?: true
+    autoRejectThreshold?: true
     _all?: true
   }
 
@@ -25553,6 +25574,7 @@ export namespace Prisma {
     pausedAt: Date | null
     slug: string | null
     autoInviteMatches: boolean
+    autoRejectThreshold: number | null
     _count: JobPostingCountAggregateOutputType | null
     _avg: JobPostingAvgAggregateOutputType | null
     _sum: JobPostingSumAggregateOutputType | null
@@ -25604,6 +25626,7 @@ export namespace Prisma {
     pausedAt?: boolean
     slug?: boolean
     autoInviteMatches?: boolean
+    autoRejectThreshold?: boolean
     applications?: boolean | JobPosting$applicationsArgs<ExtArgs>
     jobMatches?: boolean | JobPosting$jobMatchesArgs<ExtArgs>
     company?: boolean | CompanyDefaultArgs<ExtArgs>
@@ -25643,6 +25666,7 @@ export namespace Prisma {
     pausedAt?: boolean
     slug?: boolean
     autoInviteMatches?: boolean
+    autoRejectThreshold?: boolean
     company?: boolean | CompanyDefaultArgs<ExtArgs>
     recruiter?: boolean | JobPosting$recruiterArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
@@ -25677,6 +25701,7 @@ export namespace Prisma {
     pausedAt?: boolean
     slug?: boolean
     autoInviteMatches?: boolean
+    autoRejectThreshold?: boolean
     company?: boolean | CompanyDefaultArgs<ExtArgs>
     recruiter?: boolean | JobPosting$recruiterArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
@@ -25711,9 +25736,10 @@ export namespace Prisma {
     pausedAt?: boolean
     slug?: boolean
     autoInviteMatches?: boolean
+    autoRejectThreshold?: boolean
   }
 
-  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"jobPostingId" | "title" | "description" | "requirements" | "benefits" | "salaryMin" | "salaryMax" | "currency" | "jobType" | "jobLevel" | "experience" | "vacancies" | "locationCity" | "status" | "isVerified" | "aiReliabilityScore" | "createdAt" | "updatedAt" | "approvedBy" | "moderationFeedback" | "recruiterId" | "companyId" | "structuredRequirements" | "viewCount" | "jobTier" | "refreshedAt" | "pausedAt" | "slug" | "autoInviteMatches", ExtArgs["result"]["jobPosting"]>
+  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"jobPostingId" | "title" | "description" | "requirements" | "benefits" | "salaryMin" | "salaryMax" | "currency" | "jobType" | "jobLevel" | "experience" | "vacancies" | "locationCity" | "status" | "isVerified" | "aiReliabilityScore" | "createdAt" | "updatedAt" | "approvedBy" | "moderationFeedback" | "recruiterId" | "companyId" | "structuredRequirements" | "viewCount" | "jobTier" | "refreshedAt" | "pausedAt" | "slug" | "autoInviteMatches" | "autoRejectThreshold", ExtArgs["result"]["jobPosting"]>
   export type JobPostingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | JobPosting$applicationsArgs<ExtArgs>
     jobMatches?: boolean | JobPosting$jobMatchesArgs<ExtArgs>
@@ -25772,6 +25798,7 @@ export namespace Prisma {
       pausedAt: Date | null
       slug: string | null
       autoInviteMatches: boolean
+      autoRejectThreshold: number | null
     }, ExtArgs["result"]["jobPosting"]>
     composites: {}
   }
@@ -26230,6 +26257,7 @@ export namespace Prisma {
     readonly pausedAt: FieldRef<"JobPosting", 'DateTime'>
     readonly slug: FieldRef<"JobPosting", 'String'>
     readonly autoInviteMatches: FieldRef<"JobPosting", 'Boolean'>
+    readonly autoRejectThreshold: FieldRef<"JobPosting", 'Int'>
   }
     
 
@@ -40463,6 +40491,7 @@ export namespace Prisma {
     aiInsightsCache: 'aiInsightsCache',
     aiInsightsCacheKey: 'aiInsightsCacheKey',
     aiInsightsCachedAt: 'aiInsightsCachedAt',
+    interviewSettings: 'interviewSettings',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     violationCount: 'violationCount'
@@ -40588,7 +40617,8 @@ export namespace Prisma {
     refreshedAt: 'refreshedAt',
     pausedAt: 'pausedAt',
     slug: 'slug',
-    autoInviteMatches: 'autoInviteMatches'
+    autoInviteMatches: 'autoInviteMatches',
+    autoRejectThreshold: 'autoRejectThreshold'
   };
 
   export type JobPostingScalarFieldEnum = (typeof JobPostingScalarFieldEnum)[keyof typeof JobPostingScalarFieldEnum]
@@ -41872,6 +41902,7 @@ export namespace Prisma {
     aiInsightsCache?: JsonNullableFilter<"Recruiter">
     aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
     aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
+    interviewSettings?: JsonNullableFilter<"Recruiter">
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     violationCount?: IntFilter<"Recruiter"> | number
@@ -41894,6 +41925,7 @@ export namespace Prisma {
     aiInsightsCache?: SortOrderInput | SortOrder
     aiInsightsCacheKey?: SortOrderInput | SortOrder
     aiInsightsCachedAt?: SortOrderInput | SortOrder
+    interviewSettings?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     violationCount?: SortOrder
@@ -41919,6 +41951,7 @@ export namespace Prisma {
     aiInsightsCache?: JsonNullableFilter<"Recruiter">
     aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
     aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
+    interviewSettings?: JsonNullableFilter<"Recruiter">
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     violationCount?: IntFilter<"Recruiter"> | number
@@ -41941,6 +41974,7 @@ export namespace Prisma {
     aiInsightsCache?: SortOrderInput | SortOrder
     aiInsightsCacheKey?: SortOrderInput | SortOrder
     aiInsightsCachedAt?: SortOrderInput | SortOrder
+    interviewSettings?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     violationCount?: SortOrder
@@ -41965,6 +41999,7 @@ export namespace Prisma {
     aiInsightsCache?: JsonNullableWithAggregatesFilter<"Recruiter">
     aiInsightsCacheKey?: StringNullableWithAggregatesFilter<"Recruiter"> | string | null
     aiInsightsCachedAt?: DateTimeNullableWithAggregatesFilter<"Recruiter"> | Date | string | null
+    interviewSettings?: JsonNullableWithAggregatesFilter<"Recruiter">
     createdAt?: DateTimeWithAggregatesFilter<"Recruiter"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Recruiter"> | Date | string
     violationCount?: IntWithAggregatesFilter<"Recruiter"> | number
@@ -42472,6 +42507,7 @@ export namespace Prisma {
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     slug?: StringNullableFilter<"JobPosting"> | string | null
     autoInviteMatches?: BoolFilter<"JobPosting"> | boolean
+    autoRejectThreshold?: IntNullableFilter<"JobPosting"> | number | null
     applications?: ApplicationListRelationFilter
     jobMatches?: JobMatchListRelationFilter
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
@@ -42510,6 +42546,7 @@ export namespace Prisma {
     pausedAt?: SortOrderInput | SortOrder
     slug?: SortOrderInput | SortOrder
     autoInviteMatches?: SortOrder
+    autoRejectThreshold?: SortOrderInput | SortOrder
     applications?: ApplicationOrderByRelationAggregateInput
     jobMatches?: JobMatchOrderByRelationAggregateInput
     company?: CompanyOrderByWithRelationInput
@@ -42551,6 +42588,7 @@ export namespace Prisma {
     refreshedAt?: DateTimeFilter<"JobPosting"> | Date | string
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     autoInviteMatches?: BoolFilter<"JobPosting"> | boolean
+    autoRejectThreshold?: IntNullableFilter<"JobPosting"> | number | null
     applications?: ApplicationListRelationFilter
     jobMatches?: JobMatchListRelationFilter
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
@@ -42589,6 +42627,7 @@ export namespace Prisma {
     pausedAt?: SortOrderInput | SortOrder
     slug?: SortOrderInput | SortOrder
     autoInviteMatches?: SortOrder
+    autoRejectThreshold?: SortOrderInput | SortOrder
     _count?: JobPostingCountOrderByAggregateInput
     _avg?: JobPostingAvgOrderByAggregateInput
     _max?: JobPostingMaxOrderByAggregateInput
@@ -42629,6 +42668,7 @@ export namespace Prisma {
     pausedAt?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
     slug?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
     autoInviteMatches?: BoolWithAggregatesFilter<"JobPosting"> | boolean
+    autoRejectThreshold?: IntNullableWithAggregatesFilter<"JobPosting"> | number | null
   }
 
   export type JobPostingBranchWhereInput = {
@@ -44368,6 +44408,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -44390,6 +44431,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -44408,6 +44450,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -44430,6 +44473,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -44450,6 +44494,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -44464,6 +44509,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -44480,6 +44526,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -45025,6 +45072,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -45063,6 +45111,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
@@ -45097,6 +45146,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -45135,6 +45185,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -45171,6 +45222,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
   }
 
   export type JobPostingUpdateManyMutationInput = {
@@ -45201,6 +45253,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type JobPostingUncheckedUpdateManyInput = {
@@ -45233,6 +45286,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type JobPostingBranchCreateInput = {
@@ -47037,6 +47091,7 @@ export namespace Prisma {
     aiInsightsCache?: SortOrder
     aiInsightsCacheKey?: SortOrder
     aiInsightsCachedAt?: SortOrder
+    interviewSettings?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     violationCount?: SortOrder
@@ -47482,6 +47537,7 @@ export namespace Prisma {
     pausedAt?: SortOrder
     slug?: SortOrder
     autoInviteMatches?: SortOrder
+    autoRejectThreshold?: SortOrder
   }
 
   export type JobPostingAvgOrderByAggregateInput = {
@@ -47490,6 +47546,7 @@ export namespace Prisma {
     vacancies?: SortOrder
     aiReliabilityScore?: SortOrder
     viewCount?: SortOrder
+    autoRejectThreshold?: SortOrder
   }
 
   export type JobPostingMaxOrderByAggregateInput = {
@@ -47520,6 +47577,7 @@ export namespace Prisma {
     pausedAt?: SortOrder
     slug?: SortOrder
     autoInviteMatches?: SortOrder
+    autoRejectThreshold?: SortOrder
   }
 
   export type JobPostingMinOrderByAggregateInput = {
@@ -47550,6 +47608,7 @@ export namespace Prisma {
     pausedAt?: SortOrder
     slug?: SortOrder
     autoInviteMatches?: SortOrder
+    autoRejectThreshold?: SortOrder
   }
 
   export type JobPostingSumOrderByAggregateInput = {
@@ -47558,6 +47617,7 @@ export namespace Prisma {
     vacancies?: SortOrder
     aiReliabilityScore?: SortOrder
     viewCount?: SortOrder
+    autoRejectThreshold?: SortOrder
   }
 
   export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -51048,6 +51108,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -51068,6 +51129,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -51313,6 +51375,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -51333,6 +51396,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -53318,6 +53382,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -53354,6 +53419,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
@@ -53617,6 +53683,7 @@ export namespace Prisma {
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     slug?: StringNullableFilter<"JobPosting"> | string | null
     autoInviteMatches?: BoolFilter<"JobPosting"> | boolean
+    autoRejectThreshold?: IntNullableFilter<"JobPosting"> | number | null
   }
 
   export type CompanyUpsertWithoutRecruitersInput = {
@@ -53956,6 +54023,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     recruiter?: RecruiterCreateNestedOneWithoutJobPostingsInput
@@ -53992,6 +54060,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
@@ -54017,6 +54086,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -54037,6 +54107,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -54228,6 +54299,7 @@ export namespace Prisma {
     aiInsightsCache?: JsonNullableFilter<"Recruiter">
     aiInsightsCacheKey?: StringNullableFilter<"Recruiter"> | string | null
     aiInsightsCachedAt?: DateTimeNullableFilter<"Recruiter"> | Date | string | null
+    interviewSettings?: JsonNullableFilter<"Recruiter">
     createdAt?: DateTimeFilter<"Recruiter"> | Date | string
     updatedAt?: DateTimeFilter<"Recruiter"> | Date | string
     violationCount?: IntFilter<"Recruiter"> | number
@@ -55045,6 +55117,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -55066,6 +55139,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -55242,6 +55316,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -55263,6 +55338,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -55331,6 +55407,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -55368,6 +55445,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
@@ -55442,6 +55520,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -55479,6 +55558,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -55610,6 +55690,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
     recruiter?: RecruiterCreateNestedOneWithoutJobPostingsInput
@@ -55647,6 +55728,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     branches?: JobPostingBranchUncheckedCreateNestedManyWithoutJobPostingInput
@@ -55769,6 +55851,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
     recruiter?: RecruiterUpdateOneWithoutJobPostingsNestedInput
@@ -55806,6 +55889,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     branches?: JobPostingBranchUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -56190,6 +56274,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
     recruiter?: RecruiterCreateNestedOneWithoutJobPostingsInput
@@ -56227,6 +56312,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     branches?: JobPostingBranchUncheckedCreateNestedManyWithoutJobPostingInput
@@ -56384,6 +56470,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
     recruiter?: RecruiterUpdateOneWithoutJobPostingsNestedInput
@@ -56421,6 +56508,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     branches?: JobPostingBranchUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -56521,6 +56609,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -56558,6 +56647,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
     applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput
     branches?: JobPostingBranchUncheckedCreateNestedManyWithoutJobPostingInput
@@ -56680,6 +56770,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -56717,6 +56808,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     branches?: JobPostingBranchUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -56798,6 +56890,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -56819,6 +56912,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -56959,6 +57053,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -56980,6 +57075,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -57085,6 +57181,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -57106,6 +57203,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -57171,6 +57269,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -57192,6 +57291,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -57304,6 +57404,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -57325,6 +57426,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -57358,6 +57460,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -57379,6 +57482,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -58135,6 +58239,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
   }
 
   export type ConversationUpdateWithoutRecruiterInput = {
@@ -58194,6 +58299,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -58230,6 +58336,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -58265,6 +58372,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type CompanyBranchCreateManyCompanyInput = {
@@ -58305,6 +58413,7 @@ export namespace Prisma {
     pausedAt?: Date | string | null
     slug?: string | null
     autoInviteMatches?: boolean
+    autoRejectThreshold?: number | null
   }
 
   export type RecruiterCreateManyCompanyInput = {
@@ -58317,6 +58426,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: string | null
     aiInsightsCachedAt?: Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     violationCount?: number
@@ -58399,6 +58509,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput
     recruiter?: RecruiterUpdateOneWithoutJobPostingsNestedInput
@@ -58435,6 +58546,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
     applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput
     savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -58470,6 +58582,7 @@ export namespace Prisma {
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     slug?: NullableStringFieldUpdateOperationsInput | string | null
     autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean
+    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type RecruiterUpdateWithoutCompanyInput = {
@@ -58481,6 +58594,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -58501,6 +58615,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number
@@ -58520,6 +58635,7 @@ export namespace Prisma {
     aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue
     aiInsightsCacheKey?: NullableStringFieldUpdateOperationsInput | string | null
     aiInsightsCachedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    interviewSettings?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     violationCount?: IntFieldUpdateOperationsInput | number

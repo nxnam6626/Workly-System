@@ -127,7 +127,7 @@ export const Step4_JobTier = ({
             </div>
             <div className="space-y-1">
               <h5 className="text-sm font-black text-slate-800 uppercase tracking-widest">Tự động mời ứng viên phù hợp</h5>
-              <p className="text-[11px] text-slate-400 font-bold max-w-md">AI sẽ tự động gửi thông báo đến các ứng viên có điểm Matching &gt; 80% với tin này.</p>
+              <p className="text-[11px] text-slate-400 font-bold max-w-md">AI sẽ tự động gửi thông báo hẹn lịch phỏng vấn đến các ứng viên có điểm Matching &gt;= 85%.</p>
             </div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer scale-125 mr-2">
@@ -140,6 +140,31 @@ export const Step4_JobTier = ({
             />
             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
           </label>
+        </div>
+
+        {/* Auto Reject Setting */}
+        <div className="p-8 bg-white/80 backdrop-blur-sm rounded-[2rem] border-2 border-white shadow-xl shadow-slate-200/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mt-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center shrink-0 border border-rose-100 shadow-sm">
+               <Shield className="w-6 h-6 text-rose-500" />
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-black text-slate-800 uppercase tracking-widest">Tự động từ chối hồ sơ kém</h5>
+              <p className="text-[11px] text-slate-400 font-bold max-w-md">Điểm tối thiểu. Hệ thống sẽ đánh rớt ngay lập tức nếu AI Matching của hồ sơ dưới mức này.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input 
+              type="number"
+              min="0"
+              max="100"
+              placeholder="VD: 50"
+              value={formData.autoRejectThreshold}
+              onChange={(e) => setFormData(prev => ({ ...prev, autoRejectThreshold: e.target.value === '' ? '' : Number(e.target.value) }))}
+              className="w-24 h-12 px-4 rounded-xl border-2 border-slate-200 focus:border-rose-500 outline-none text-center font-bold text-slate-700 bg-white"
+            />
+            <span className="text-sm font-bold text-slate-400">%</span>
+          </div>
         </div>
       </div>
     </motion.div>

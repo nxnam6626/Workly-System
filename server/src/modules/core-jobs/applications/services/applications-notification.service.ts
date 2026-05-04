@@ -38,6 +38,34 @@ export class ApplicationsNotificationService {
       .emit('dashboardUpdated');
   }
 
+  async notifyRecruiterOfCandidateAction(
+    recruiterId: string,
+    jobTitle: string,
+    candidateName: string,
+    action: 'CONFIRM' | 'RESCHEDULE',
+    details?: string
+  ) {
+    const title = action === 'CONFIRM' ? 'Ứng viên xác nhận phỏng vấn' : 'Ứng viên xin dời lịch phỏng vấn';
+    const message = action === 'CONFIRM' 
+      ? `Ứng viên ${candidateName} đã xác nhận tham gia phỏng vấn cho vị trí "${jobTitle}".`
+      : `Ứng viên ${candidateName} xin dời lịch phỏng vấn cho vị trí "${jobTitle}". Chi tiết: ${details}`;
+
+    await this.notificationsService.create(
+      recruiterId,
+      title,
+      message,
+      action === 'CONFIRM' ? 'success' : 'warning',
+      '/recruiter/interviews',
+    );
+
+    this.messagesGateway.server.to(`user_${recruiterId}`).emit('notification', {
+      title,
+      message,
+      type: action === 'CONFIRM' ? 'success' : 'warning',
+      link: '/recruiter/interviews',
+    });
+  }
+
   async notifyCandidateOfAutoSchedule(
     candidateUserId: string,
     recruiterUserId: string,
@@ -94,14 +122,19 @@ export class ApplicationsNotificationService {
 
     if (status === 'INTERVIEWING') {
       const isReschedule = details?.isReschedule;
-      title = isReschedule ? 'Lịch Phỏng Vấn Đã Dời' : 'Lịch Phỏng Vấn Mới';
-      const dateStr = details?.interviewDate
-        ? new Date(details.interviewDate).toLocaleDateString('vi-VN')
-        : '';
-      if (isReschedule) {
-        message = `Lịch phỏng vấn cho vị trí "${jobTitle}" đã được dời sang ${details?.interviewTime || ''} ngày ${dateStr}. Địa điểm/Link: ${details?.interviewLocation || 'Đang cập nhật'}.`;
+      if (!details?.interviewDate) {
+        title = 'Yêu cầu chọn lịch phỏng vấn';
+        message = `Nhà tuyển dụng ${companyName} đã gửi yêu cầu phỏng vấn cho vị trí "${jobTitle}". Vui lòng chọn lịch phỏng vấn phù hợp ở phía trên để xác nhận.`;
       } else {
-        message = `Bạn có lịch phỏng vấn cho vị trí "${jobTitle}" vào ${details?.interviewTime || ''} ngày ${dateStr}. Địa điểm/Link: ${details?.interviewLocation || 'Đang cập nhật'}.`;
+        title = isReschedule ? 'Lịch Phỏng Vấn Đã Dời' : 'Lịch Phỏng Vấn Mới';
+        const dateStr = details?.interviewDate
+          ? new Date(details.interviewDate).toLocaleDateString('vi-VN')
+          : '';
+        if (isReschedule) {
+          message = `Lịch phỏng vấn cho vị trí "${jobTitle}" đã được dời sang ${details?.interviewTime || ''} ngày ${dateStr}. Địa điểm/Link: ${details?.interviewLocation || 'Đang cập nhật'}.`;
+        } else {
+          message = `Bạn có lịch phỏng vấn cho vị trí "${jobTitle}" vào ${details?.interviewTime || ''} ngày ${dateStr}. Địa điểm/Link: ${details?.interviewLocation || 'Đang cập nhật'}.`;
+        }
       }
     } else if (status === 'ACCEPTED') {
       title = 'Chúc Mừng Trúng Tuyển!';
