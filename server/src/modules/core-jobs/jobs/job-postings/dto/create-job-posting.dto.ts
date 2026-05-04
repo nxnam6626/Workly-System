@@ -5,8 +5,7 @@ import {
   IsNumber,
   IsEnum,
 } from 'class-validator';
-import { JobType, JobLevel } from '@/generated/prisma';
-console.log('DEBUG: JobLevel enum object:', JobLevel);
+import { JobType, JobLevel } from '@prisma/client';
 
 export class CreateJobPostingDto {
   @IsString()
@@ -76,6 +75,10 @@ export class CreateJobPostingDto {
 
   @IsOptional()
   autoInviteMatches?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  autoRejectThreshold?: number;
 
   @IsOptional()
   isAiGenerated?: boolean;

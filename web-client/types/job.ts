@@ -34,6 +34,7 @@ export interface JobFormData {
   jobLevel: string;
   jobTier: string;
   autoInviteMatches: boolean;
+  autoRejectThreshold: number | '';
   isAiGenerated: boolean;
   categories: string[];
 }

@@ -24,7 +24,8 @@ import {
   Brain,
   Menu,
   PartyPopper,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
@@ -40,6 +41,7 @@ const navItems = [
   { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
   { label: 'AI Insights', href: '/recruiter/ai-report', icon: Brain },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
+  { label: 'Quản Lý Phỏng Vấn', href: '/recruiter/interviews', icon: Calendar },
   { label: 'Ứng Viên Tiềm Năng', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },
   { label: 'Nhắn Tin', href: '/recruiter/messages', icon: MessageSquare },

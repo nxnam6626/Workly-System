@@ -42,11 +42,12 @@ export class MessagesService {
     );
   }
 
-  sendMessage(senderId: string, conversationId: string, content: string) {
+  sendMessage(senderId: string, conversationId: string, content: string, isSystemMessage: boolean = false) {
     return this.conversationService.sendMessage(
       senderId,
       conversationId,
       content,
+      isSystemMessage,
     );
   }
 

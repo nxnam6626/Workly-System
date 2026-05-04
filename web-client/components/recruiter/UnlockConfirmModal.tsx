@@ -8,6 +8,7 @@ export interface UnlockConfirmModalProps {
   onConfirm: () => void;
   isUnlocking: boolean;
   candidateName: string;
+  unlockCount?: number;
   wallet: any;
   subscription: any;
 }
@@ -18,6 +19,7 @@ export const UnlockConfirmModal = ({
   onConfirm,
   isUnlocking,
   candidateName,
+  unlockCount = 1,
   wallet,
   subscription
 }: UnlockConfirmModalProps) => {
@@ -44,14 +46,14 @@ export const UnlockConfirmModal = ({
           </p>
 
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6 space-y-3">
-            {wallet?.cvUnlockQuota > 0 ? (
+            {wallet?.cvUnlockQuota >= unlockCount ? (
               <>
                  <div className="flex justify-between items-center text-sm font-medium">
                    <span className="text-slate-600">Gói CV Hunter</span>
                    <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Còn {wallet.cvUnlockQuota} lượt</span>
                  </div>
                  <div className="flex justify-between items-center text-sm font-medium border-t border-slate-200 pt-3">
-                   <span className="text-slate-600">Phí mở khóa lần này</span>
+                   <span className="text-slate-600">Phí mở khóa ({unlockCount} CV)</span>
                    <span className="text-emerald-600 font-bold">0 Xu</span>
                  </div>
               </>
@@ -63,19 +65,21 @@ export const UnlockConfirmModal = ({
                  </div>
                  <div className="flex justify-between items-center text-sm font-medium">
                    <span className="text-slate-600 line-through">Lượt mở miễn phí</span>
-                   <span className="text-rose-500 font-bold">Hết lượt</span>
+                   <span className="text-rose-500 font-bold">
+                     {wallet?.cvUnlockQuota > 0 ? `Chỉ còn ${wallet.cvUnlockQuota} lượt` : 'Hết lượt'}
+                   </span>
                  </div>
                  <div className="flex justify-between items-center text-sm font-medium border-t border-slate-200 pt-3">
-                   <span className="text-slate-600">Giá mở khóa tiêu chuẩn</span>
+                   <span className="text-slate-600">Tổng phí mở khóa ({unlockCount} CV)</span>
                    <span className="text-indigo-600 font-bold">
-                     {subscription && new Date() <= new Date(subscription.expiryDate) ? '30 Xu (Giá ưu đãi TV)' : '50 Xu'}
+                     {subscription && new Date() <= new Date(subscription.expiryDate) ? `${30 * unlockCount} Xu` : `${50 * unlockCount} Xu`}
                    </span>
                  </div>
               </>
             )}
           </div>
 
-          {(!wallet?.cvUnlockQuota || wallet.cvUnlockQuota === 0) && (wallet?.balance || 0) < (subscription && new Date() <= new Date(subscription.expiryDate) ? 30 : 50) ? (
+          {((wallet?.cvUnlockQuota || 0) < unlockCount) && (wallet?.balance || 0) < (subscription && new Date() <= new Date(subscription.expiryDate) ? 30 * unlockCount : 50 * unlockCount) ? (
              <div className="space-y-3">
                <p className="text-sm text-rose-500 font-medium text-center mb-4">Số dư ví không đủ để thực hiện giao dịch này.</p>
                <button 

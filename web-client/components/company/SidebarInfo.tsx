@@ -41,13 +41,13 @@ export function SidebarInfo({ company, isPreview }: SidebarInfoProps) {
             <InfoItem 
               icon={<Phone className="w-5 h-5 text-mariner" />} 
               label="Điện thoại"
-              value="024 3xxx xxxx" 
+              value="Chưa cập nhật" 
               isPlaceholder
             />
             <InfoItem 
               icon={<Mail className="w-5 h-5 text-mariner" />} 
               label="Email"
-              value="hr@company.com" 
+              value="Chưa cập nhật" 
               isPlaceholder
             />
             
@@ -76,12 +76,12 @@ export function SidebarInfo({ company, isPreview }: SidebarInfoProps) {
              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <Users className="w-5 h-5 text-mariner mb-2" />
                 <p className="text-[10px] font-black text-slate-400 uppercase">Quy mô</p>
-                <p className="text-sm font-black text-slate-800">{company.companySize || "100-500"} nhân viên</p>
+                <p className="text-sm font-black text-slate-800">{company.companySize ? `${company.companySize} nhân viên` : "Chưa cập nhật"}</p>
              </div>
              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <Briefcase className="w-5 h-5 text-mariner mb-2" />
                 <p className="text-[10px] font-black text-slate-400 uppercase">Lĩnh vực</p>
-                <p className="text-sm font-black text-slate-800 truncate">{company.mainIndustry || "CNTT"}</p>
+                <p className="text-sm font-black text-slate-800 truncate">{company.mainIndustry || "Chưa cập nhật"}</p>
              </div>
           </div>
 

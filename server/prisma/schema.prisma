@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  output          = "../src/generated/prisma"
+  // output          = "../src/generated/prisma"
 }
 
 datasource db {
@@ -167,6 +167,7 @@ model Recruiter {
   aiInsightsCache       Json?
   aiInsightsCacheKey    String?
   aiInsightsCachedAt    DateTime?
+  interviewSettings     Json?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @default(now()) @updatedAt
   violationCount        Int                    @default(0)
@@ -295,7 +296,8 @@ model JobPosting {
   pausedAt               DateTime?              @db.Timestamp(6)
   slug                   String?                @unique
   autoInviteMatches      Boolean                @default(false)
-  embedding              Unsupported("vector")?
+  autoRejectThreshold    Int?
+// embedding              Unsupported("vector")?
   applications           Application[]
   jobMatches             JobMatch[]
   company                Company                @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
@@ -343,7 +345,7 @@ model CV {
   candidateId      String
   fileHash         String?
   parsedData       Json?
-  embedding        Unsupported("vector")?
+// embedding        Unsupported("vector")?
   applications     Application[]
   candidate        Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
@@ -511,6 +513,8 @@ enum AppStatus {
   ACCEPTED
   REJECTED
   INTERVIEWING
+  INTERVIEW_CONFIRMED
+  RESCHEDULE_REQUESTED
 }
 
 enum JobStatus {

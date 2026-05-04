@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { WalletsService } from '@/modules/billing/wallets/wallets.service';
 import { ApplicationsNotificationService } from './applications-notification.service';
+import { MailService } from '@/mail/mail.service';
 
 @Injectable()
 export class ApplicationStatusService {
@@ -9,6 +10,7 @@ export class ApplicationStatusService {
     private prisma: PrismaService,
     private walletsService: WalletsService,
     private notificationService: ApplicationsNotificationService,
+    private mailService: MailService,
   ) {}
 
   async updateStatus(
@@ -62,7 +64,7 @@ export class ApplicationStatusService {
           },
         },
         candidate: {
-          select: { userId: true, fullName: true, candidateId: true },
+          select: { userId: true, fullName: true, candidateId: true, user: { select: { email: true } } },
         },
       },
     });
@@ -100,9 +102,51 @@ export class ApplicationStatusService {
           );
         }
       }
+
+      if (status === 'INTERVIEWING' && interviewDate && interviewTime) {
+        const candidateEmail = application.candidate.user?.email;
+        if (candidateEmail) {
+          await this.mailService.sendInterviewInviteICS(
+            candidateEmail,
+            application.candidate.fullName,
+            companyName,
+            jobTitle,
+            interviewDate,
+            interviewTime,
+            interviewLocation || 'Đang cập nhật',
+          );
+        }
+      }
     }
 
     return application;
+  }
+
+  async updateBulkStatus(
+    actionUserId: string,
+    applicationIds: string[],
+    status: any,
+    interviewDate?: string,
+    interviewTime?: string,
+    interviewLocation?: string,
+  ) {
+    const results: any[] = [];
+    for (const id of applicationIds) {
+      try {
+        const result = await this.updateStatus(
+          id,
+          actionUserId,
+          status,
+          interviewDate,
+          interviewTime,
+          interviewLocation,
+        );
+        results.push(result);
+      } catch (err) {
+        console.error(`Failed to update status for application ${id}:`, err);
+      }
+    }
+    return { success: true, updatedCount: results.length };
   }
 
   async unlockApplication(applicationId: string, recruiterUserId: string) {

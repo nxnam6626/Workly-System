@@ -167,6 +167,7 @@ model Recruiter {
   aiInsightsCache       Json?
   aiInsightsCacheKey    String?
   aiInsightsCachedAt    DateTime?
+  interviewSettings     Json?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @default(now()) @updatedAt
   violationCount        Int                    @default(0)
@@ -265,40 +266,41 @@ model CompanyBranch {
 }
 
 model JobPosting {
-  jobPostingId           String                 @id @default(uuid())
+  jobPostingId           String             @id @default(uuid())
   title                  String
   description            String?
   requirements           String?
   benefits               String?
-  salaryMin              Decimal?               @db.Decimal(19, 0)
-  salaryMax              Decimal?               @db.Decimal(19, 0)
-  currency               String?                @default("VND")
+  salaryMin              Decimal?           @db.Decimal(19, 0)
+  salaryMax              Decimal?           @db.Decimal(19, 0)
+  currency               String?            @default("VND")
   jobType                JobType?
-  jobLevel               JobLevel?              @default(STAFF)
+  jobLevel               JobLevel?          @default(STAFF)
   experience             String?
-  vacancies              Int                    @default(1)
+  vacancies              Int                @default(1)
   locationCity           String?
-  status                 JobStatus              @default(PENDING)
-  isVerified             Boolean                @default(false)
+  status                 JobStatus          @default(PENDING)
+  isVerified             Boolean            @default(false)
   aiReliabilityScore     Float?
-  createdAt              DateTime               @default(now()) @db.Timestamp(6)
-  updatedAt              DateTime               @updatedAt @db.Timestamp(6)
+  createdAt              DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt              DateTime           @updatedAt @db.Timestamp(6)
   approvedBy             String?
   moderationFeedback     Json?
   recruiterId            String?
   companyId              String
   structuredRequirements Json?
-  viewCount              Int                    @default(0)
-  jobTier                JobTier                @default(BASIC)
-  refreshedAt            DateTime               @default(now()) @db.Timestamp(6)
-  pausedAt               DateTime?              @db.Timestamp(6)
-  slug                   String?                @unique
-  autoInviteMatches      Boolean                @default(false)
-  embedding              Unsupported("vector")?
+  viewCount              Int                @default(0)
+  jobTier                JobTier            @default(BASIC)
+  refreshedAt            DateTime           @default(now()) @db.Timestamp(6)
+  pausedAt               DateTime?          @db.Timestamp(6)
+  slug                   String?            @unique
+  autoInviteMatches      Boolean            @default(false)
+  autoRejectThreshold    Int?
+  // embedding              Unsupported("vector")?
   applications           Application[]
   jobMatches             JobMatch[]
-  company                Company                @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  recruiter              Recruiter?             @relation(fields: [recruiterId], references: [recruiterId])
+  company                Company            @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  recruiter              Recruiter?         @relation(fields: [recruiterId], references: [recruiterId])
   savedJobs              SavedJob[]
   branches               JobPostingBranch[]
 
@@ -334,17 +336,17 @@ model JobMatch {
 }
 
 model CV {
-  cvId             String                 @id @default(uuid())
+  cvId             String            @id @default(uuid())
   cvTitle          String
   fileUrl          String?
-  isMain           Boolean                @default(false)
-  createdAt        DateTime               @default(now())
+  isMain           Boolean           @default(false)
+  createdAt        DateTime          @default(now())
   candidateId      String
   fileHash         String?
   parsedData       Json?
-  embedding        Unsupported("vector")?
+  // embedding        Unsupported("vector")?
   applications     Application[]
-  candidate        Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
 }
 
@@ -509,6 +511,8 @@ enum AppStatus {
   ACCEPTED
   REJECTED
   INTERVIEWING
+  INTERVIEW_CONFIRMED
+  RESCHEDULE_REQUESTED
 }
 
 enum JobStatus {

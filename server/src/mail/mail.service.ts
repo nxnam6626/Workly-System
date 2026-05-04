@@ -63,6 +63,19 @@ export class MailService {
     }
   }
 
+  async sendInterviewRescheduleRequest(email: string, candidateName: string, dateStr: string) {
+    try {
+      await this.transporter.sendMail({
+        from: `"Workly" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: 'Workly - Thông báo thay đổi lịch phỏng vấn',
+        html: `<p>Chào ${candidateName},</p><p>Nhà tuyển dụng có việc đột xuất nên không thể phỏng vấn vào ngày ${dateStr}. Bạn vui lòng truy cập hệ thống để chọn lại một lịch phỏng vấn khác nhé!</p>`,
+      });
+    } catch (error) {
+      console.error('[MailService] Error sending reschedule request email:', error);
+    }
+  }
+
   async sendVerificationEmail(email: string, token: string) {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -220,6 +233,81 @@ export class MailService {
       console.log(`[MailService] Job invitation email sent to ${email}`);
     } catch (error) {
       console.error('[MailService] Error sending job invitation email:', error);
+    }
+  }
+
+  async sendInterviewInviteICS(
+    email: string,
+    candidateName: string,
+    companyName: string,
+    jobTitle: string,
+    dateStr: string, // YYYY-MM-DD or valid date string
+    timeStr: string, // HH:mm
+    location: string,
+  ) {
+    try {
+      // Create ICS content
+      const startDateTime = new Date(dateStr);
+      if (timeStr) {
+        const [hours, mins] = timeStr.split(':').map(Number);
+        startDateTime.setHours(hours, mins, 0, 0);
+      }
+      
+      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // +1 hour
+
+      const formatICSDate = (date: Date) => {
+        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      };
+
+      const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Workly//Interview//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:${Date.now()}@workly.com
+DTSTAMP:${formatICSDate(new Date())}
+DTSTART:${formatICSDate(startDateTime)}
+DTEND:${formatICSDate(endDateTime)}
+SUMMARY:Phỏng vấn vị trí ${jobTitle} tại ${companyName}
+DESCRIPTION:Lịch phỏng vấn cho vị trí ${jobTitle}. Địa điểm/Link: ${location}
+LOCATION:${location}
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Sắp tới giờ phỏng vấn!
+END:VALARM
+END:VEVENT
+END:VCALENDAR`;
+
+      await this.transporter.sendMail({
+        from: `"Workly - ${companyName}" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: `[Workly] Lịch phỏng vấn vị trí ${jobTitle} tại ${companyName}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155; line-height: 1.6;">
+            <p>Chào <strong>${candidateName}</strong>,</p>
+            <p>Nhà tuyển dụng <strong>${companyName}</strong> đã xếp lịch phỏng vấn cho bạn:</p>
+            <ul style="background: #f1f5f9; padding: 15px 30px; border-radius: 8px; margin: 20px 0;">
+              <li><strong>Vị trí:</strong> ${jobTitle}</li>
+              <li><strong>Thời gian:</strong> ${timeStr} ngày ${new Date(dateStr).toLocaleDateString('vi-VN')}</li>
+              <li><strong>Địa điểm/Link:</strong> ${location}</li>
+            </ul>
+            <p>Vui lòng đăng nhập vào Workly để <strong>Xác nhận tham gia</strong> hoặc <strong>Xin dời lịch</strong> nếu cần.</p>
+            <p><em>Ghi chú: Lịch phỏng vấn (.ics) đã được đính kèm trong email này để bạn dễ dàng lưu vào Google Calendar hoặc Apple Calendar.</em></p>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: 'interview-invite.ics',
+            content: icsContent,
+            contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+          },
+        ],
+      });
+      console.log(`[MailService] Interview ICS sent to ${email}`);
+    } catch (error) {
+      console.error('[MailService] Error sending ICS email:', error);
     }
   }
 }

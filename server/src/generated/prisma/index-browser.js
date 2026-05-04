@@ -245,6 +245,7 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   aiInsightsCache: 'aiInsightsCache',
   aiInsightsCacheKey: 'aiInsightsCacheKey',
   aiInsightsCachedAt: 'aiInsightsCachedAt',
+  interviewSettings: 'interviewSettings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   violationCount: 'violationCount'
@@ -349,7 +350,8 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   refreshedAt: 'refreshedAt',
   pausedAt: 'pausedAt',
   slug: 'slug',
-  autoInviteMatches: 'autoInviteMatches'
+  autoInviteMatches: 'autoInviteMatches',
+  autoRejectThreshold: 'autoRejectThreshold'
 };
 
 exports.Prisma.JobPostingBranchScalarFieldEnum = {
@@ -569,7 +571,9 @@ exports.AppStatus = exports.$Enums.AppStatus = {
   REVIEWED: 'REVIEWED',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
-  INTERVIEWING: 'INTERVIEWING'
+  INTERVIEWING: 'INTERVIEWING',
+  INTERVIEW_CONFIRMED: 'INTERVIEW_CONFIRMED',
+  RESCHEDULE_REQUESTED: 'RESCHEDULE_REQUESTED'
 };
 
 exports.PlanType = exports.$Enums.PlanType = {

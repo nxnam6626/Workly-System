@@ -10,6 +10,7 @@ import { MessagesModule } from '@/modules/communication/messages/messages.module
 import { NotificationsModule } from '@/modules/communication/notifications/notifications.module';
 import { WalletsModule } from '@/modules/billing/wallets/wallets.module';
 import { AiModule } from '@/modules/intelligence/ai/ai.module';
+import { MailModule } from '@/mail/mail.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AiModule } from '@/modules/intelligence/ai/ai.module';
     NotificationsModule,
     WalletsModule,
     AiModule,
+    MailModule,
   ],
   controllers: [ApplicationsController],
   providers: [

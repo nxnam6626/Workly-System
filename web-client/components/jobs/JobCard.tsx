@@ -9,7 +9,7 @@ import { useFavoriteStore } from "@/stores/favorites";
 export interface Job {
   jobPostingId: string;
   title: string;
-  company: { companyName: string; logo: string | null; address?: string | null };
+  company: { companyId?: string; companyName: string; logo: string | null; address?: string | null };
   locationCity: string | null;
   jobType: string | null;
   experience: string | null;

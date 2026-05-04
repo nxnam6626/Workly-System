@@ -7,6 +7,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { RecruitersService } from './recruiters.service';
 import { UnlockService } from './unlock.service';
@@ -71,5 +72,20 @@ export class RecruitersController {
       jobPostingId,
       cvId,
     );
+  }
+
+  @Get('me/interview-settings')
+  @Roles(Role.RECRUITER)
+  getInterviewSettings(@Req() req: any) {
+    return this.recruitersService.getInterviewSettings(req.user.userId);
+  }
+
+  @Patch('me/interview-settings')
+  @Roles(Role.RECRUITER)
+  updateInterviewSettings(
+    @Req() req: any,
+    @Body() settings: any,
+  ) {
+    return this.recruitersService.updateInterviewSettings(req.user.userId, settings);
   }
 }

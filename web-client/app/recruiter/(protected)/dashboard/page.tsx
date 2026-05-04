@@ -465,78 +465,92 @@ export default function RecruiterDashboard() {
                 )}
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-white text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
-                    <th className="px-6 py-4">Ứng viên</th>
-                    <th className="px-6 py-4">Vị trí</th>
-                    <th className="px-6 py-4">Thời gian</th>
-                    <th className="px-6 py-4">Địa điểm</th>
-                    <th className="px-6 py-4 text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {upcomingInterviews.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
-                        Chưa có lịch phỏng vấn nào sắp tới.
-                      </td>
-                    </tr>
-                  ) : upcomingInterviews.map((interview: any) => (
-                    <tr key={interview.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 font-semibold text-slate-900">
-                        {interview.candidateName}
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="line-clamp-1 max-w-[200px] text-slate-700">{interview.jobTitle}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-indigo-600">{interview.time}</p>
-                        <p className="text-xs text-slate-500">{new Date(interview.date).toLocaleDateString('vi-VN')}</p>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 text-sm max-w-[200px] truncate">
-                        {interview.location || 'Chưa cập nhật'}
-                      </td>
-                      <td className="px-6 py-4 text-right flex items-center justify-end gap-1">
-                        {interview.status === 'ACCEPTED' ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold cursor-default" title="Ứng viên đã đậu phỏng vấn">
-                            <CheckCircle className="w-4 h-4" /> Đã duyệt
+            <div className="p-5 space-y-3 bg-slate-50/30">
+              {upcomingInterviews.length === 0 ? (
+                <div className="py-12 text-center text-slate-500 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                    <Calendar className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-medium">Chưa có lịch phỏng vấn nào sắp tới.</p>
+                </div>
+              ) : upcomingInterviews.map((interview: any) => {
+                const dateObj = new Date(interview.date);
+                const isAccept = interview.status === 'ACCEPTED';
+                const isReject = interview.status === 'REJECTED';
+                const isConfirmed = interview.status === 'INTERVIEW_CONFIRMED';
+                const isReschedule = interview.status === 'RESCHEDULE_REQUESTED';
+
+                return (
+                  <div key={interview.id} className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100/50 transition-all duration-300 gap-4">
+                    <div className="flex items-start sm:items-center gap-4">
+                      {/* Calendar Date Box */}
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 flex flex-col items-center justify-center shrink-0 border border-indigo-100/50 shadow-inner">
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-0.5">Th {dateObj.getMonth() + 1}</span>
+                        <span className="text-xl font-black leading-none">{dateObj.getDate()}</span>
+                      </div>
+                      
+                      {/* Info */}
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors flex items-center gap-2">
+                          {interview.candidateName}
+                          {isConfirmed && <span className="flex w-2 h-2 rounded-full bg-blue-500" title="Đã xác nhận"></span>}
+                          {isReschedule && <span className="flex w-2 h-2 rounded-full bg-orange-500" title="Xin dời lịch"></span>}
+                        </h4>
+                        <p className="text-sm text-slate-500 font-medium line-clamp-1 mb-1.5">{interview.jobTitle}</p>
+                        
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                            {interview.time}
                           </span>
-                        ) : interview.status === 'REJECTED' ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 text-xs font-bold cursor-default" title="Đã từ chối ứng viên">
-                            <XCircle className="w-4 h-4" /> Từ chối
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 max-w-[200px] truncate">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{interview.location || 'Chưa cập nhật địa điểm'}</span>
                           </span>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => setConfirmStatusData({ id: interview.id, status: 'ACCEPTED' })}
-                              className="inline-flex items-center justify-center p-2 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100"
-                              title="Đậu phỏng vấn (Chấp nhận)"
-                            >
-                              <CheckCircle className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={() => setConfirmStatusData({ id: interview.id, status: 'REJECTED' })}
-                              className="inline-flex items-center justify-center p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100"
-                              title="Rớt phỏng vấn (Từ chối)"
-                            >
-                              <XCircle className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={() => setEditingInterview(interview)}
-                              className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-transparent hover:border-indigo-100"
-                              title="Đổi lịch phỏng vấn"
-                            >
-                              <Clock className="w-5 h-5" />
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right side Actions & Status */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
+                      {/* Status Badge */}
+                      {isAccept ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
+                          <CheckCircle className="w-4 h-4" /> Đã duyệt
+                        </span>
+                      ) : isReject ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 text-xs font-bold border border-rose-100">
+                          <XCircle className="w-4 h-4" /> Đã từ chối
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1 sm:opacity-0 sm:-translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                          <button
+                            onClick={() => setConfirmStatusData({ id: interview.id, status: 'ACCEPTED' })}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:text-white hover:bg-emerald-500 rounded-lg transition-colors border border-emerald-200 hover:border-emerald-500"
+                            title="Chấp nhận"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" /> Đậu
+                          </button>
+                          <button
+                            onClick={() => setConfirmStatusData({ id: interview.id, status: 'REJECTED' })}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-500 rounded-lg transition-colors border border-rose-200 hover:border-rose-500"
+                            title="Từ chối"
+                          >
+                            <XCircle className="w-3.5 h-3.5" /> Rớt
+                          </button>
+                          <button
+                            onClick={() => setEditingInterview(interview)}
+                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors ml-1"
+                            title="Đổi lịch phỏng vấn"
+                          >
+                            <Clock className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

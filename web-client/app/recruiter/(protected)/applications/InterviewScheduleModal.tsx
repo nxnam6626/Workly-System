@@ -34,8 +34,10 @@ export function InterviewScheduleModal({
         setTime(initialData.time);
         setLocation(initialData.location);
       } else {
-        setDate('');
-        setTime('');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        setDate(tomorrow.toISOString().split('T')[0]);
+        setTime('09:00');
         setLocation('');
       }
     }
