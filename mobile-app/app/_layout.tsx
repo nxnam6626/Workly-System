@@ -22,6 +22,7 @@ export default function RootLayout() {
       <RealtimeProvider />
       <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(recruiter-tabs)" />

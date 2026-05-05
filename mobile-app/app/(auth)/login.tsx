@@ -1,28 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { IS_RECRUITER_APP, APP_NAME } from '../../lib/config';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
+  TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/auth';
 import { COLORS, SPACING, RADIUS } from '../../lib/constants';
+import { Input } from '../../components/ui/Input';
+import { Button } from '../../components/ui/Button';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -33,154 +34,207 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const user = await login({ email: email.trim(), password });
-      const isAdmin = user?.roles?.includes('ADMIN') || user?.admin;
-      const isRecruiter = user?.recruiter;
+      
+      const isAdmin = !!(user?.roles?.includes('ADMIN') || user?.admin);
+      const isRecruiter = !!(user?.recruiter || user?.roles?.includes('RECRUITER'));
 
-      if (isAdmin) {
-        router.replace('/(admin)' as any);
-      } else if (isRecruiter) {
+      // Role check based on app variant
+      if (IS_RECRUITER_APP) {
+        if (!isRecruiter && !isAdmin) {
+          throw new Error('Tài khoản này không có quyền truy cập vào ứng dụng Nhà tuyển dụng');
+        }
         router.replace('/(recruiter-tabs)' as any);
       } else {
-        router.replace('/(tabs)' as any);
+        // Candidate App
+        if (isAdmin) {
+          router.replace('/(admin)' as any);
+        } else {
+          router.replace('/(tabs)' as any);
+        }
       }
     } catch (e: any) {
-      Alert.alert('Đăng nhập thất bại', e?.response?.data?.message || 'Sai email hoặc mật khẩu');
+      let msg = 'Sai email hoặc mật khẩu';
+      
+      if (!e.response) {
+        // Lỗi kết nối (Network Error)
+        msg = `Không thể kết nối tới máy chủ.\n\nĐịa chỉ hiện tại: ${process.env.EXPO_PUBLIC_API_URL}\n\nHướng dẫn: Đảm bảo IP máy tính chính xác trong file .env và server đang chạy.`;
+      } else if (e.message === 'Tài khoản này không có quyền truy cập vào ứng dụng Nhà tuyển dụng') {
+        msg = e.message;
+      } else if (e.response.data?.message) {
+        msg = e.response.data.message;
+      }
+      
+      Alert.alert('Đăng nhập thất bại', msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <StatusBar style="dark" />
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Header - Logo */}
         <View style={styles.header}>
-          <View style={styles.logoWrap}>
-            <Ionicons name="briefcase" size={32} color="#fff" />
+          <View style={styles.logoContainer}>
+             <Ionicons name={IS_RECRUITER_APP ? "briefcase-outline" : "people-outline"} size={50} color={COLORS.primary} />
+             <Text style={styles.brandName}>Work<Text style={{color: COLORS.text}}>ly</Text> {IS_RECRUITER_APP && <Text style={{fontSize: 20}}>(Recruit)</Text>}</Text>
+             <Text style={styles.tagline}>{IS_RECRUITER_APP ? 'Dashboard Tuyển Dụng Thông Minh' : 'Smart Recruitment Platform'}</Text>
           </View>
-          <Text style={styles.brand}>Workly</Text>
-          <Text style={styles.tagline}>Tìm việc dễ dàng hơn</Text>
         </View>
 
-        {/* Card */}
-        <View style={styles.card}>
-          <Text style={styles.title}>Đăng nhập</Text>
-
-          {/* Email */}
-          <View style={styles.inputWrap}>
-            <Ionicons name="mail-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor={COLORS.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-
-          {/* Password */}
-          <View style={styles.inputWrap}>
-            <Ionicons name="lock-closed-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Mật khẩu"
-              placeholderTextColor={COLORS.textMuted}
-              secureTextEntry={!showPw}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPw(!showPw)} style={styles.eyeBtn} hitSlop={8}>
-              <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textMuted} />
+        <View style={styles.formContainer}>
+          <Text style={styles.sectionTitle}>Đăng nhập nhanh bằng</Text>
+          
+          {/* Social Logins */}
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialCircle}>
+              <Ionicons name="logo-facebook" size={32} color={COLORS.facebook} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialCircle}>
+              <Ionicons name="logo-google" size={30} color={COLORS.google} />
             </TouchableOpacity>
           </View>
 
-          {/* Login Button */}
-          <TouchableOpacity
-            style={[styles.btn, loading && styles.btnDisabled]}
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.btnText}>Đăng nhập</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>hoặc</Text>
-            <View style={styles.dividerLine} />
+          <View style={styles.inputs}>
+            <Input
+              placeholder="Email"
+              icon="person-outline"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <Input
+              placeholder="Nhập mật khẩu"
+              icon="lock-closed-outline"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
           </View>
 
-          <TouchableOpacity
-            style={styles.registerBtn}
-            onPress={() => router.push('/(auth)/register')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.registerText}>
-              Chưa có tài khoản? <Text style={styles.registerLink}>Đăng ký ngay</Text>
-            </Text>
+          <TouchableOpacity style={styles.forgotBtn}>
+            <Text style={styles.forgotText}>Quên mật khẩu?</Text>
           </TouchableOpacity>
+
+          <Button
+            title="Đăng nhập"
+            onPress={handleLogin}
+            loading={loading}
+            style={styles.loginBtn}
+          />
+
+
+
+          <Button
+            title="Trải nghiệm không cần đăng ký"
+            variant="ghost"
+            textStyle={styles.guestText}
+          />
+
+          <View style={styles.footer}>
+             <Text style={styles.footerText}>Bạn chưa có tài khoản? </Text>
+             <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+               <Text style={styles.registerLink}>Đăng ký ngay</Text>
+             </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bgDark },
-  scroll: { flexGrow: 1, paddingBottom: SPACING.xxl },
-  header: { alignItems: 'center', paddingTop: 80, paddingBottom: SPACING.xl },
-  logoWrap: {
-    width: 72, height: 72, borderRadius: RADIUS.xl,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center', alignItems: 'center',
+  container: { flex: 1, backgroundColor: COLORS.bg },
+  scroll: { flexGrow: 1, paddingBottom: SPACING.xl },
+  header: {
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingBottom: SPACING.lg,
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  brandName: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 8,
+  },
+  tagline: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  formContainer: {
+    paddingHorizontal: SPACING.xl,
+  },
+  sectionTitle: {
+    textAlign: 'center',
+    fontSize: 14,
+    color: COLORS.textSecondary,
     marginBottom: SPACING.md,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5, shadowRadius: 16, elevation: 12,
   },
-  brand: { fontSize: 32, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
-  tagline: { fontSize: 15, color: COLORS.textMuted, marginTop: 6 },
-  card: {
-    marginHorizontal: SPACING.md,
-    backgroundColor: COLORS.cardDark,
-    borderRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+  socialRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
-  title: { fontSize: 22, fontWeight: '700', color: '#fff', marginBottom: SPACING.lg },
-  inputWrap: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: RADIUS.md, paddingHorizontal: SPACING.sm,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
-    marginBottom: SPACING.sm, height: 52,
+  socialCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  inputIcon: { marginRight: SPACING.xs },
-  input: { flex: 1, color: '#fff', fontSize: 15, height: 52 },
-  eyeBtn: { padding: SPACING.xs },
-  btn: {
-    height: 52, backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center',
-    marginTop: SPACING.sm,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4, shadowRadius: 12, elevation: 8,
+  inputs: {
+    marginBottom: SPACING.sm,
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: SPACING.md },
-  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.1)' },
-  dividerText: { color: COLORS.textMuted, marginHorizontal: SPACING.sm, fontSize: 13 },
-  registerBtn: { alignItems: 'center', paddingVertical: SPACING.xs },
-  registerText: { color: COLORS.textMuted, fontSize: 14 },
-  registerLink: { color: COLORS.primary, fontWeight: '700' },
+  forgotBtn: {
+    alignSelf: 'flex-start',
+    marginBottom: SPACING.xl,
+  },
+  forgotText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  loginBtn: {
+    marginTop: SPACING.md,
+  },
+
+  guestText: {
+    color: COLORS.primary,
+    fontSize: 14,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: SPACING.xxl,
+  },
+  footerText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+  },
+  registerLink: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
 });

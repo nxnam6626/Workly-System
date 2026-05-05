@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
 import api, { setAccessToken } from '../lib/api';
+import { storage } from '../lib/storage';
 
 interface User {
   userId: string;
@@ -25,6 +25,16 @@ interface AuthState {
   updateUser: (partial: Partial<User>) => void;
 }
 
+/**
+ * Normalizes user data from different roles/schema structures
+ */
+const normalizeUser = (user: User): User => {
+  if (user?.candidate?.fullName) {
+    return { ...user, name: user.candidate.fullName };
+  }
+  return user;
+};
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
@@ -39,14 +49,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data } = await api.post('/auth/login', credentials);
       const { accessToken, refreshToken, user } = data;
 
-      // Store refresh token securely (no localStorage on mobile!)
-      await SecureStore.setItemAsync('refreshToken', refreshToken);
+      await storage.setItem('refreshToken', refreshToken);
       setAccessToken(accessToken);
 
-      if (user?.candidate?.fullName) user.name = user.candidate.fullName;
-
-      set({ user, isAuthenticated: true, isLoading: false });
-      return user;
+      const normalizedUser = normalizeUser(user);
+      set({ user: normalizedUser, isAuthenticated: true, isLoading: false });
+      return normalizedUser;
     } catch (e) {
       set({ isLoading: false });
       throw e;
@@ -65,34 +73,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    try { await api.post('/auth/logout'); } catch {}
-    await SecureStore.deleteItemAsync('refreshToken');
-    setAccessToken(null);
+    // 1. Update UI state immediately to trigger redirect
     set({ user: null, isAuthenticated: false, isLoading: false });
+
+    // 2. Call server-side logout BEFORE clearing the token from memory/storage
+    // but after UI update. This ensures the request has the Authorization header.
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.warn('[Auth] Remote logout notification failed', err);
+    } finally {
+      // 3. Finally clear storage and memory token
+      await storage.deleteItem('refreshToken');
+      setAccessToken(null);
+    }
   },
 
   checkAuth: async () => {
-    set({ isLoading: true });
-    const refreshToken = await SecureStore.getItemAsync('refreshToken');
+    const refreshToken = await storage.getItem('refreshToken');
+    
     if (!refreshToken) {
       set({ isLoading: false, isAuthenticated: false });
       return;
     }
+
     try {
-      const { data } = await api.post('/auth/refresh', { refreshToken });
-      const { accessToken, refreshToken: newRefresh } = data;
-      if (newRefresh) await SecureStore.setItemAsync('refreshToken', newRefresh);
+      // 1. Refresh Access Token
+      const { data: refreshData } = await api.post('/auth/refresh', { refreshToken });
+      const { accessToken, refreshToken: newRefresh } = refreshData;
+      
+      if (newRefresh) await storage.setItem('refreshToken', newRefresh);
       setAccessToken(accessToken);
 
-      const { data: val } = await api.get('/auth/validate', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const user = val.user;
-      if (user?.candidate?.fullName) user.name = user.candidate.fullName;
+      // 2. Validate & Get User Data
+      const { data: valData } = await api.get('/auth/validate');
+      const normalizedUser = normalizeUser(valData.user);
 
-      set({ user, isAuthenticated: true, isLoading: false });
-    } catch {
-      await SecureStore.deleteItemAsync('refreshToken');
+      set({ user: normalizedUser, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+      console.error('[Auth] Background check failed', error);
+      await storage.deleteItem('refreshToken');
       setAccessToken(null);
       set({ isLoading: false, isAuthenticated: false, user: null });
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, FlatList,
+  View, Text, StyleSheet, ActivityIndicator, RefreshControl, FlatList, ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,6 +26,31 @@ interface Transaction {
   wallet?: { recruiter?: { user?: { name?: string; email: string } } };
 }
 
+const TransactionItem = React.memo(({ tx }: { tx: Transaction }) => {
+  const name = tx.wallet?.recruiter?.user?.name || tx.wallet?.recruiter?.user?.email || 'Người dùng';
+  const isDeposit = tx.type === 'DEPOSIT';
+  
+  return (
+    <View style={styles.txRow}>
+      <View style={[styles.txIcon, { backgroundColor: isDeposit ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }]}>
+        <Ionicons name={isDeposit ? 'arrow-down' : 'arrow-up'} size={18} color={isDeposit ? COLORS.success : COLORS.error} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.txName} numberOfLines={1}>{name}</Text>
+        <Text style={styles.txDate}>{new Date(tx.createdAt).toLocaleDateString('vi-VN')}</Text>
+      </View>
+      <View style={{ alignItems: 'flex-end' }}>
+        <Text style={[styles.txAmount, { color: isDeposit ? COLORS.success : COLORS.error }]}>
+          {isDeposit ? '+' : '-'}{tx.amount} xu
+        </Text>
+        {tx.realMoney && (
+          <Text style={styles.txReal}>{tx.realMoney.toLocaleString('vi-VN')}đ</Text>
+        )}
+      </View>
+    </View>
+  );
+});
+
 export default function AdminRevenueScreen() {
   const { socket } = useSocketStore();
   const [stats, setStats] = useState<RevenueStats | null>(null);
@@ -45,7 +70,8 @@ export default function AdminRevenueScreen() {
         const data = txRes.value.data;
         setTransactions(Array.isArray(data) ? data : (data.transactions || []));
       }
-    } catch {
+    } catch (error) {
+      console.error('[Revenue] Fetch failed', error);
     } finally {
       setLoading(false);
     }
@@ -53,7 +79,6 @@ export default function AdminRevenueScreen() {
 
   useEffect(() => { fetchRevenue(); }, [fetchRevenue]);
 
-  // Realtime: khi có giao dịch mới (từ webhook)
   useEffect(() => {
     if (!socket) return;
     const handler = () => fetchRevenue();
@@ -74,6 +99,25 @@ export default function AdminRevenueScreen() {
     { icon: 'calendar', label: 'Tháng này', value: `${stats.periodRevenue?.toLocaleString('vi-VN') ?? 0} xu`, color: COLORS.accent },
   ] : [];
 
+  const renderTransaction: ListRenderItem<Transaction> = ({ item }) => <TransactionItem tx={item} />;
+
+  const ListHeader = () => (
+    <>
+      <View style={styles.statsGrid}>
+        {STAT_ITEMS.map((item) => (
+          <View key={item.label} style={[styles.statCard, { borderTopColor: item.color, borderTopWidth: 3 }]}>
+            <View style={[styles.statIcon, { backgroundColor: `${item.color}15` }]}>
+              <Ionicons name={item.icon as any} size={20} color={item.color} />
+            </View>
+            <Text style={styles.statLabel}>{item.label}</Text>
+            <Text style={styles.statValue} numberOfLines={1}>{item.value}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={styles.sectionTitle}>Giao dịch gần đây</Text>
+    </>
+  );
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -91,57 +135,26 @@ export default function AdminRevenueScreen() {
         <Text style={styles.subtitle}>Realtime</Text>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
+      <FlatList
+        data={transactions}
+        renderItem={renderTransaction}
+        keyExtractor={(item) => item.transactionId}
         contentContainerStyle={styles.content}
-      >
-        {/* Stats grid */}
-        <View style={styles.statsGrid}>
-          {STAT_ITEMS.map((item) => (
-            <View key={item.label} style={[styles.statCard, { borderTopColor: item.color, borderTopWidth: 3 }]}>
-              <View style={[styles.statIcon, { backgroundColor: `${item.color}15` }]}>
-                <Ionicons name={item.icon as any} size={20} color={item.color} />
-              </View>
-              <Text style={styles.statLabel}>{item.label}</Text>
-              <Text style={styles.statValue} numberOfLines={1}>{item.value}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Recent transactions */}
-        <Text style={styles.sectionTitle}>Giao dịch gần đây</Text>
-        {transactions.length === 0 ? (
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+        }
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="receipt-outline" size={40} color={COLORS.textMuted} />
             <Text style={styles.emptyText}>Chưa có giao dịch</Text>
           </View>
-        ) : (
-          transactions.map((tx) => {
-            const name = tx.wallet?.recruiter?.user?.name || tx.wallet?.recruiter?.user?.email || 'Người dùng';
-            const isDeposit = tx.type === 'DEPOSIT';
-            return (
-              <View key={tx.transactionId} style={styles.txRow}>
-                <View style={[styles.txIcon, { backgroundColor: isDeposit ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }]}>
-                  <Ionicons name={isDeposit ? 'arrow-down' : 'arrow-up'} size={16} color={isDeposit ? COLORS.success : COLORS.error} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.txName} numberOfLines={1}>{name}</Text>
-                  <Text style={styles.txDate}>{new Date(tx.createdAt).toLocaleDateString('vi-VN')}</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={[styles.txAmount, { color: isDeposit ? COLORS.success : COLORS.error }]}>
-                    {isDeposit ? '+' : '-'}{tx.amount} xu
-                  </Text>
-                  {tx.realMoney && (
-                    <Text style={styles.txReal}>{tx.realMoney.toLocaleString('vi-VN')}đ</Text>
-                  )}
-                </View>
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
+        }
+        removeClippedSubviews
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+      />
     </SafeAreaView>
   );
 }
@@ -158,16 +171,16 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg, padding: SPACING.md,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)', gap: 8,
   },
-  statIcon: { width: 40, height: 40, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
+  statIcon: { width: 44, height: 44, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
   statLabel: { color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
   statValue: { color: '#fff', fontSize: 18, fontWeight: '800' },
   sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: SPACING.sm },
   txRow: {
     flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
-    backgroundColor: COLORS.cardDark, borderRadius: RADIUS.lg, padding: SPACING.sm + 2,
+    backgroundColor: COLORS.cardDark, borderRadius: RADIUS.lg, padding: SPACING.sm + 4,
     marginBottom: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)',
   },
-  txIcon: { width: 38, height: 38, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
+  txIcon: { width: 44, height: 44, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
   txName: { color: '#fff', fontWeight: '600', fontSize: 14 },
   txDate: { color: COLORS.textMuted, fontSize: 12 },
   txAmount: { fontSize: 14, fontWeight: '800' },

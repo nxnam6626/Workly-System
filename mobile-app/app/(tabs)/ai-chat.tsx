@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '../../stores/auth';
 import { connectAiSocket, disconnectAiSocket } from '../../lib/ai-socket';
 import { COLORS, SPACING, RADIUS } from '../../lib/constants';
@@ -28,10 +29,10 @@ interface Message {
 }
 
 const CANDIDATE_SUGGESTIONS = [
-  '💼 Tìm việc lập trình Front-end tại Hà Nội',
-  '📄 Bạn có thể review CV của tôi không?',
-  '💡 Lộ trình phát triển cho lập trình viên Junior?',
-  '💰 Mức lương cho React Developer 2 năm kinh nghiệm?',
+  '💼 Tìm việc IT tại Hà Nội',
+  '📄 Review CV của tôi',
+  '💡 Lộ trình Junior Developer',
+  '💰 Mức lương React Native',
 ];
 
 // Typing indicator dots animation
@@ -105,7 +106,7 @@ export default function CandidateAiChatScreen() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: `Xin chào ${user?.candidate?.fullName || user?.name || 'bạn'}! 👋 Tôi là trợ lý AI của Workly. Tôi có thể giúp bạn tìm việc làm, review CV, tư vấn lộ trình nghề nghiệp và mức lương phù hợp. Hỏi tôi bất cứ điều gì!`,
+      content: `Xin chào ${user?.candidate?.fullName || user?.name || 'bạn'}! 👋 Tôi là trợ lý AI của Workly. Tôi có thể giúp bạn tìm việc làm, review CV, tư vấn lộ trình nghề nghiệp. Hỏi tôi bất cứ điều gì!`,
     },
   ]);
   const [inputText, setInputText] = useState('');
@@ -189,7 +190,6 @@ export default function CandidateAiChatScreen() {
       },
     });
 
-    // Auto scroll
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [inputText, isStreaming, user]);
 
@@ -205,6 +205,7 @@ export default function CandidateAiChatScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar style="dark" />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
@@ -226,7 +227,6 @@ export default function CandidateAiChatScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        {/* Messages */}
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -234,10 +234,10 @@ export default function CandidateAiChatScreen() {
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.messageList}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          ListFooterComponent={<View style={{ height: 8 }} />}
+          ListFooterComponent={<View style={{ height: 16 }} />}
         />
 
-        {/* Suggestions (only when empty input) */}
+        {/* Suggestions */}
         {messages.length <= 1 && !inputText && (
           <View style={styles.suggestions}>
             <FlatList
@@ -257,29 +257,31 @@ export default function CandidateAiChatScreen() {
 
         {/* Input */}
         <View style={styles.inputArea}>
-          <TextInput
-            style={styles.input}
-            placeholder="Hỏi tôi về việc làm, CV, lương..."
-            placeholderTextColor={COLORS.textMuted}
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-            maxLength={500}
-            returnKeyType="send"
-            onSubmitEditing={sendMessage}
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, (!inputText.trim() || isStreaming || !isConnected) && styles.sendBtnDisabled]}
-            onPress={sendMessage}
-            disabled={!inputText.trim() || isStreaming || !isConnected}
-            activeOpacity={0.8}
-          >
-            {isStreaming ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="send" size={18} color="#fff" />
-            )}
-          </TouchableOpacity>
+          <View style={styles.inputWrap}>
+            <TextInput
+              style={styles.input}
+              placeholder="Hỏi AI bất cứ điều gì..."
+              placeholderTextColor={COLORS.textMuted}
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+              maxLength={500}
+              returnKeyType="send"
+              onSubmitEditing={sendMessage}
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, (!inputText.trim() || isStreaming || !isConnected) && styles.sendBtnDisabled]}
+              onPress={sendMessage}
+              disabled={!inputText.trim() || isStreaming || !isConnected}
+              activeOpacity={0.8}
+            >
+              {isStreaming ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="send" size={18} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -287,13 +289,16 @@ export default function CandidateAiChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0a1628' },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
   header: {
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 4,
-    backgroundColor: '#0f172a',
+    paddingVertical: SPACING.md,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.07)',
+    borderBottomColor: '#f0f0f0',
   },
   headerContent: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   aiAvatarLarge: {
@@ -303,18 +308,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 6,
   },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.text },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
   statusDot: { width: 7, height: 7, borderRadius: 4 },
-  statusText: { fontSize: 12, color: COLORS.textMuted },
-  messageList: { padding: SPACING.md, gap: 12 },
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  statusText: { fontSize: 12, color: COLORS.textSecondary, fontWeight: '500' },
+  messageList: { padding: SPACING.md, gap: 16 },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10 },
   messageRowUser: { justifyContent: 'flex-end' },
   messageRowAI: { justifyContent: 'flex-start' },
   aiAvatar: {
@@ -324,83 +324,91 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 4,
   },
   bubble: {
-    maxWidth: '78%',
+    maxWidth: '82%',
     borderRadius: RADIUS.lg,
-    padding: SPACING.sm + 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   bubbleUser: {
     backgroundColor: COLORS.primary,
     borderBottomRightRadius: 4,
   },
   bubbleAI: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#F2F2F7',
     borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
   },
-  bubbleText: { fontSize: 15, lineHeight: 22 },
+  bubbleText: { fontSize: 16, lineHeight: 24 },
   bubbleTextUser: { color: '#fff' },
-  bubbleTextAI: { color: '#e2e8f0' },
-  typingDots: { flexDirection: 'row', gap: 5, paddingVertical: 4, paddingHorizontal: 2 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.textMuted },
-  jobCardsContainer: { marginTop: SPACING.sm, gap: 8 },
+  bubbleTextAI: { color: COLORS.text },
+  typingDots: { flexDirection: 'row', gap: 5, paddingVertical: 8, paddingHorizontal: 4 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.textMuted },
+  jobCardsContainer: { marginTop: 12, gap: 10 },
   jobCard: {
-    backgroundColor: 'rgba(30,90,255,0.12)',
+    backgroundColor: '#fff',
     borderRadius: RADIUS.md,
-    padding: SPACING.sm,
+    padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(30,90,255,0.25)',
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  jobCardTitle: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  jobCardCompany: { color: COLORS.textMuted, fontSize: 12, marginTop: 2 },
-  jobCardSalary: { color: COLORS.success, fontSize: 12, marginTop: 4 },
-  suggestions: { paddingVertical: SPACING.sm },
+  jobCardTitle: { color: COLORS.text, fontWeight: '700', fontSize: 14 },
+  jobCardCompany: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
+  jobCardSalary: { color: COLORS.primary, fontSize: 12, fontWeight: '700', marginTop: 6 },
+  suggestions: { paddingVertical: SPACING.md },
   suggestionChip: {
-    backgroundColor: 'rgba(30,90,255,0.12)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    backgroundColor: 'rgba(25, 103, 210, 0.06)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'rgba(30,90,255,0.3)',
+    borderColor: 'rgba(25, 103, 210, 0.15)',
   },
-  suggestionText: { color: COLORS.primary, fontSize: 13, fontWeight: '600' },
+  suggestionText: { color: COLORS.primary, fontSize: 14, fontWeight: '600' },
   inputArea: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: Platform.OS === 'ios' ? 10 : SPACING.sm,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  inputWrap: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    backgroundColor: '#0f172a',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.07)',
     gap: 8,
+    backgroundColor: '#f8f9fa',
+    borderRadius: RADIUS.xl,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   input: {
     flex: 1,
-    backgroundColor: '#1e293b',
-    borderRadius: RADIUS.lg,
-    paddingHorizontal: SPACING.md,
-    paddingTop: 12,
-    paddingBottom: 12,
-    color: '#fff',
-    fontSize: 15,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
+    color: COLORS.text,
+    fontSize: 16,
     maxHeight: 120,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
   sendBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
   },
-  sendBtnDisabled: { opacity: 0.4 },
+  sendBtnDisabled: {
+    backgroundColor: COLORS.textMuted,
+    opacity: 0.5,
+  },
 });

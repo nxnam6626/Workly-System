@@ -101,27 +101,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async (localOnly = false) => {
+    // 1. Update UI state immediately
+    set({
+      user: null,
+      accessToken: null, // Note: Web store uses accessToken in state, unlike Mobile which uses a local variable in api.ts
+      isAuthenticated: false,
+      isLoading: false,
+    });
+    
+    useFavoriteStore.getState().clearFavorites();
+
+    // 2. Revoke remotely
     if (!localOnly) {
       try {
         await api.post('/auth/logout');
       } catch (e) {
-        // Ignore remote logout errors
+        console.warn('[Auth] Remote logout failed', e);
       }
     }
 
-    // Clear favorites on logout
+    // 3. Clear persistent storage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('refreshToken');
     }
-
-    useFavoriteStore.getState().clearFavorites();
-
-    set({
-      user: null,
-      accessToken: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
   },
 
   forgotPassword: async (email) => {
