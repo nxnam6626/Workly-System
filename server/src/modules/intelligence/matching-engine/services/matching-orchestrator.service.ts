@@ -51,9 +51,20 @@ export class MatchingOrchestratorService {
       include: {
         cvs: {
           where: { isMain: true },
-          include: { candidate: true },
+          include: {
+            candidate: {
+              include: {
+                experiences: true,
+                projects: true,
+                skills: true,
+              },
+            },
+          },
         },
         user: true,
+        experiences: true,
+        projects: true,
+        skills: true,
       },
     });
 

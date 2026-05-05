@@ -27,7 +27,7 @@ export const Step2_JobDetails = ({
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-4">
       {/* Kinh nghiệm */}
-      <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
              <Star className="w-5 h-5 text-indigo-600" />
@@ -37,15 +37,14 @@ export const Step2_JobDetails = ({
             <p className="text-xs text-slate-400 font-medium">Xác định tiêu chuẩn kinh nghiệm tối thiểu</p>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 ml-1">Mức kinh nghiệm</label>
             <select 
               name="experience" 
               value={formData.experience} 
               onChange={handleChange} 
-              className="w-full h-14 px-5 rounded-2xl border-2 border-slate-100 bg-white outline-none focus:border-indigo-500 transition-all font-semibold text-slate-700"
+              className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-semibold text-slate-700"
             >
               <option value="Không yêu cầu">Không yêu cầu kinh nghiệm</option>
               <option value="Dưới 1 năm">Dưới 1 năm</option>
@@ -56,18 +55,6 @@ export const Step2_JobDetails = ({
               <option value="5 năm">5 năm</option>
               <option value="Trên 5 năm">Trên 5 năm</option>
             </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 ml-1">Số năm cụ thể (Yêu cầu lọc)</label>
-            <input 
-              type="number" 
-              name="minExperienceYears" 
-              value={formData.minExperienceYears} 
-              onChange={handleChange} 
-              min={0} 
-              className="w-full h-14 px-5 rounded-2xl border-2 border-slate-100 bg-white outline-none focus:border-indigo-500 transition-all font-semibold text-slate-700" 
-              placeholder="VD: 2"
-            />
           </div>
         </div>
       </div>
@@ -95,7 +82,7 @@ export const Step2_JobDetails = ({
                 setHardSkillInput('');
               }
             }}
-            className="w-full h-16 pl-6 pr-20 rounded-[1.5rem] border-2 border-slate-100 bg-slate-50 outline-none focus:bg-white focus:border-indigo-500 shadow-sm transition-all font-semibold text-slate-700"
+            className="w-full h-16 pl-6 pr-20 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:bg-white focus:border-indigo-500 shadow-sm transition-all font-semibold text-slate-700"
             placeholder="Nhập kỹ năng (VD: ReactJS, Figma, SQL...) và nhấn Enter"
           />
           <button

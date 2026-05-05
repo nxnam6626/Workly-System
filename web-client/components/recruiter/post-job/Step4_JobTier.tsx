@@ -36,10 +36,10 @@ export const Step4_JobTier = ({
                 key={branch.branchId}
                 type="button"
                 onClick={() => handleBranchToggle(branch.branchId)}
-                className={`p-6 rounded-3xl border-2 text-left transition-all relative overflow-hidden group shadow-sm ${
+                className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group shadow-sm ${
                   formData.branchIds.includes(branch.branchId)
-                    ? 'border-indigo-600 bg-indigo-50/40 ring-4 ring-indigo-500/5'
-                    : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-slate-50'
+                    ? 'border-indigo-600 bg-indigo-50/30'
+                    : 'border-slate-100 bg-white hover:border-indigo-200'
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -64,7 +64,7 @@ export const Step4_JobTier = ({
             ))}
           </div>
         ) : (
-          <div className="p-10 text-center bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+          <div className="p-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
             <MapPin className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Bạn chưa có thông tin chi nhánh.</p>
             <p className="text-[10px] text-slate-400 mt-1">Vui lòng cập nhật "Hồ sơ công ty" trước khi đăng tin.</p>
@@ -73,7 +73,7 @@ export const Step4_JobTier = ({
       </div>
 
       {/* Job Tier Selection */}
-      <div className="space-y-8 bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100 shadow-inner">
+      <div className="space-y-8 bg-slate-50/40 p-6 rounded-3xl border border-slate-100 shadow-inner">
         <div className="space-y-1.5 text-center">
           <h4 className="text-xl font-black text-slate-800 uppercase tracking-[0.2em]">Hạng tin tuyển dụng</h4>
           <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Tăng hiệu quả tiếp cận với các gói ưu tiên</p>
@@ -89,9 +89,9 @@ export const Step4_JobTier = ({
               key={tier.id}
               type="button"
               onClick={() => setFormData(prev => ({ ...prev, jobTier: tier.id }))}
-              className={`p-6 rounded-[2.5rem] border-2 text-left transition-all relative flex flex-col gap-6 h-full group ${
+              className={`p-6 rounded-3xl border-2 text-left transition-all relative flex flex-col gap-6 h-full group ${
                 formData.jobTier === tier.id
-                  ? 'border-white bg-white shadow-2xl shadow-slate-200/50 scale-[1.05] z-10'
+                  ? 'border-white bg-white shadow-xl scale-[1.03] z-10'
                   : 'border-transparent bg-transparent opacity-60 grayscale hover:opacity-100 hover:grayscale-0'
               }`}
             >
@@ -120,7 +120,7 @@ export const Step4_JobTier = ({
         </div>
 
         {/* Auto Invite Checkbox */}
-        <div className="p-8 bg-white/80 backdrop-blur-sm rounded-[2rem] border-2 border-white shadow-xl shadow-slate-200/20 flex items-center justify-between gap-6">
+        <div className="p-6 bg-white/80 rounded-2xl border-2 border-white shadow-lg shadow-slate-200/10 flex items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0 border border-amber-100 shadow-sm">
                <Zap className="w-6 h-6 text-amber-500 animate-pulse" />
@@ -130,7 +130,7 @@ export const Step4_JobTier = ({
               <p className="text-[11px] text-slate-400 font-bold max-w-md">AI sẽ tự động gửi thông báo hẹn lịch phỏng vấn đến các ứng viên có điểm Matching &gt;= 85%.</p>
             </div>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer scale-125 mr-2">
+          <label className="relative inline-flex items-center cursor-pointer scale-110 mr-2">
             <input
               type="checkbox"
               name="autoInviteMatches"
@@ -143,7 +143,7 @@ export const Step4_JobTier = ({
         </div>
 
         {/* Auto Reject Setting */}
-        <div className="p-8 bg-white/80 backdrop-blur-sm rounded-[2rem] border-2 border-white shadow-xl shadow-slate-200/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mt-4">
+        <div className="p-6 bg-white/80 rounded-2xl border-2 border-white shadow-lg shadow-slate-200/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mt-4">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center shrink-0 border border-rose-100 shadow-sm">
                <Shield className="w-6 h-6 text-rose-500" />

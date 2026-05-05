@@ -36,7 +36,7 @@ export const Step3_Content = ({
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="w-full min-h-[180px] p-6 rounded-[1.5rem] border-2 border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
+            className="w-full min-h-[180px] p-6 rounded-2xl border-2 border-slate-100 outline-none focus:border-indigo-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
             placeholder="Nhiệm vụ hàng ngày, trách nhiệm chính của vị trí này là gì?..."
             required
           />
@@ -50,7 +50,7 @@ export const Step3_Content = ({
             name="requirements"
             value={formData.requirements}
             onChange={handleChange}
-            className="w-full min-h-[180px] p-6 rounded-[1.5rem] border-2 border-slate-100 outline-none focus:border-purple-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
+            className="w-full min-h-[180px] p-6 rounded-2xl border-2 border-slate-100 outline-none focus:border-purple-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
             placeholder="Những kỹ năng, bằng cấp hoặc tố chất nào là bắt buộc?..."
             required
           />
@@ -64,17 +64,17 @@ export const Step3_Content = ({
             name="benefits"
             value={formData.benefits}
             onChange={handleChange}
-            className="w-full min-h-[120px] p-6 rounded-[1.5rem] border-2 border-slate-100 outline-none focus:border-emerald-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
+            className="w-full min-h-[120px] p-6 rounded-2xl border-2 border-slate-100 outline-none focus:border-emerald-500 transition-all text-sm leading-relaxed font-medium text-slate-700 shadow-sm"
             placeholder="Lương thưởng, BHXH, du lịch, môi trường làm việc..."
           />
         </div>
       </div>
 
       {/* AI Moderation Pre-check Card */}
-      <div className={`p-8 rounded-[2.5rem] border-2 transition-all duration-500 relative overflow-hidden ${
+      <div className={`p-6 rounded-3xl border-2 transition-all duration-500 relative overflow-hidden ${
         modResult 
-          ? modResult.safe ? 'bg-emerald-50/30 border-emerald-100' : 'bg-rose-50/30 border-rose-100'
-          : 'bg-slate-50/50 border-slate-100 shadow-inner'
+          ? modResult.safe ? 'bg-emerald-50/20 border-emerald-100' : 'bg-rose-50/20 border-rose-100'
+          : 'bg-slate-50/40 border-slate-100 shadow-inner'
       }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-1.5">

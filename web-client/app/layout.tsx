@@ -29,7 +29,7 @@ export default function RootLayout({
             {children}
             <NotificationListener />
             <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-            <ConditionalAiChat />
+            {/* <ConditionalAiChat /> */}
             <AlertPopup />
             <ScrollToTop />
           </ConfirmProvider>

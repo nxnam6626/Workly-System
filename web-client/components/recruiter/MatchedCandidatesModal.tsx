@@ -248,8 +248,10 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
           isOpen={!!analysisTarget}
           onClose={() => setAnalysisTarget(null)}
           candidateName={analysisTarget.fullName}
-          analysisData={analysisTarget.analysis}
-          jobTitle="Vị trí tuyển dụng"
+          score={analysisTarget.score ?? 0}
+          matchedSkills={analysisTarget.matchedSkills ?? []}
+          missingSkills={analysisTarget.missingSkills ?? []}
+          analysis={analysisTarget.analysis}
         />
       )}
     </div>

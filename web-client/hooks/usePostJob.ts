@@ -137,6 +137,15 @@ export function usePostJob(editJobId?: string | null) {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.title.trim().length > 3) {
+        handleSuggestCategories();
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [formData.title]);
+
   const toggleCategory = (cat: string) => {
     setFormData(prev => {
       const exists = prev.categories.includes(cat);
@@ -163,7 +172,22 @@ export function usePostJob(editJobId?: string | null) {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: name === 'minExperienceYears' ? Number(value) : value }));
+      setFormData(prev => {
+        const newData = { ...prev, [name]: name === 'minExperienceYears' ? Number(value) : value };
+        
+        // Auto-sync minExperienceYears if experience dropdown changes
+        if (name === 'experience') {
+          if (value === 'Không yêu cầu' || value === 'Dưới 1 năm') newData.minExperienceYears = 0;
+          else if (value === '1 năm') newData.minExperienceYears = 1;
+          else if (value === '2 năm') newData.minExperienceYears = 2;
+          else if (value === '3 năm') newData.minExperienceYears = 3;
+          else if (value === '4 năm') newData.minExperienceYears = 4;
+          else if (value === '5 năm') newData.minExperienceYears = 5;
+          else if (value === 'Trên 5 năm') newData.minExperienceYears = 5;
+        }
+        
+        return newData;
+      });
     }
   };
 

@@ -41,6 +41,10 @@ export class DataParserService {
       });
 
       const cleanedText = this.cleanText(text).substring(0, 10000);
+      if (!cleanedText) {
+        return new Array(768).fill(0);
+      }
+
       // Ép kiểu đầu ra về 768 chiều (Sử dụng any để vượt qua lỗi types cũ của SDK)
       const result = await model.embedContent({
         content: { parts: [{ text: cleanedText }], role: 'user' },

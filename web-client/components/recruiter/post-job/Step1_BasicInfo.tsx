@@ -35,7 +35,7 @@ export const Step1_BasicInfo = ({
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-4">
       {/* Tiêu đề & Lĩnh vực */}
-      <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+      <div className="bg-slate-50/40 p-6 rounded-3xl border border-slate-100 space-y-6">
         <div className="space-y-2">
           <label className="text-sm font-bold text-slate-700 ml-1">Tiêu đề công việc <span className="text-red-500">*</span></label>
           <input
@@ -43,8 +43,7 @@ export const Step1_BasicInfo = ({
             name="title"
             value={formData.title}
             onChange={handleChange}
-            required
-            className="w-full h-14 px-6 rounded-2xl border-2 border-slate-100 outline-none focus:border-indigo-500 bg-white transition-all font-semibold text-slate-800 placeholder:text-slate-300 shadow-sm"
+            className="w-full h-14 px-6 rounded-2xl border-2 border-slate-200 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 bg-white transition-all font-semibold text-slate-800 placeholder:text-slate-400 shadow-sm"
             placeholder="VD: Senior Frontend Developer (ReactJS)"
           />
         </div>
@@ -56,7 +55,7 @@ export const Step1_BasicInfo = ({
           </label>
 
           {suggestedCategories.length > 0 && (
-            <div className="flex flex-wrap gap-2 items-center bg-white/80 p-4 rounded-[1.5rem] border border-dashed border-indigo-100">
+            <div className="flex flex-wrap gap-2 items-center bg-white/60 p-3 rounded-2xl border border-dashed border-indigo-100">
               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mr-1 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" /> Gợi ý:
               </span>
@@ -104,7 +103,7 @@ export const Step1_BasicInfo = ({
             </button>
 
             {industryMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 z-50 p-8 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 p-6 animate-in fade-in slide-in-from-top-4 duration-300">
                 <div className="relative mb-6">
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
@@ -219,7 +218,7 @@ export const Step1_BasicInfo = ({
       </div>
 
       {/* Mức lương */}
-      <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-emerald-500" /> Ngân sách mức lương (VNĐ)

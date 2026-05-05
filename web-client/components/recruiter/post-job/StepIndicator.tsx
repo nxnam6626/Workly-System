@@ -19,8 +19,8 @@ export const StepIndicator = ({ currentStep, totalSteps, setCurrentStep, isDirec
   ];
 
   return (
-    <div className="bg-white/80 backdrop-blur-md rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-white p-8 mb-8 sticky top-6 z-40">
-      <div className="max-w-3xl mx-auto relative px-4">
+    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 mb-8 sticky top-4 z-40">
+      <div className="max-w-3xl mx-auto relative px-2">
         {/* Background Line */}
         <div className="absolute top-5 left-10 right-10 h-1 bg-slate-100 rounded-full -translate-y-1/2 z-0" />
         

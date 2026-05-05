@@ -64,11 +64,8 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
         isDirectEdit={isDirectEdit}
       />
 
-      <div className="relative group">
-        {/* Decorative shadow background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 blur-3xl -z-10 rounded-[4rem]" />
-        
-        <form onSubmit={handleSubmit} className="w-full bg-white/90 backdrop-blur-sm rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white p-6 md:p-12 space-y-12 min-h-[650px] flex flex-col relative overflow-hidden">
+      <div className="relative">
+        <form onSubmit={handleSubmit} className="w-full bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 p-6 md:p-10 space-y-10 min-h-[600px] flex flex-col relative overflow-hidden">
           <div className="flex-1">
             <AnimatePresence mode="wait">
               {currentStep === 1 && (

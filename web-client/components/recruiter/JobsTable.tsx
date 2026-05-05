@@ -1,8 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { 
-  Eye, Edit, Users, BarChart, Bot, Sparkles, 
-  RefreshCw, AlertTriangle, Clock, Lock, XCircle, CheckCircle2 
+import {
+  Eye, Edit, Users, BarChart, Bot, Sparkles,
+  RefreshCw, AlertTriangle, Clock, Lock, XCircle, CheckCircle2
 } from 'lucide-react';
 import { Job, TabType, ActionType } from '@/types/job';
 
@@ -102,20 +102,22 @@ export const JobsTable = ({
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-6 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="flex items-center -space-x-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-50 border-2 border-white flex items-center justify-center text-indigo-600 shadow-sm">
-                          <Users className="w-4 h-4" />
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-emerald-50 border-2 border-white flex items-center justify-center text-emerald-600 shadow-sm">
-                          <Eye className="w-4 h-4" />
-                        </div>
+                  <td className="px-6 py-6">
+                    <div className="flex items-center justify-center gap-3">
+                      <div
+                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl"
+                        title="Số lượng ứng viên phù hợp"
+                      >
+                        <Users className="w-4 h-4 text-indigo-600" />
+                        <span className="text-indigo-700 font-black text-xs">{job.matchedCount} Match</span>
                       </div>
-                      <div className="flex items-center gap-2 font-black text-xs">
-                        <span className="text-indigo-600">{job.matchedCount} Match</span>
-                        <span className="text-slate-200">|</span>
-                        <span className="text-slate-500">{job.viewCount} View</span>
+
+                      <div
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl"
+                        title="Số lượt xem tin tuyển dụng"
+                      >
+                        <Eye className="w-4 h-4 text-emerald-600" />
+                        <span className="text-emerald-700 font-black text-xs">{job.viewCount} View</span>
                       </div>
                     </div>
                   </td>
@@ -205,7 +207,7 @@ export const JobsTable = ({
 // Helper for row icon (Briefcase used in empty state)
 const Briefcase = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
-    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
   </svg>
 );

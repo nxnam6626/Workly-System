@@ -31,8 +31,8 @@ export default function Home() {
 
          {/* 2. Main Page Content (White/Gray Sections) */}
          <div className="w-full flex flex-col items-center">
-            <UrgentJobsSection />
             <RecommendedJobsSection />
+            <UrgentJobsSection />
             <FeaturedJobs />
             <JobCategories />
             <InternshipJobs />
