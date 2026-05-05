@@ -1,19 +1,21 @@
 export const COLORS = {
-  primary: '#1e5aff',
+  primary: '#1967D2', // Workly Blue
   primaryDark: '#1248d4',
   accent: '#f59e0b',
   urgent: '#ef4444',
   professional: '#f59e0b',
-  bg: '#f4f7f6',
+  bg: '#ffffff', // Light background
   bgDark: '#0f172a',
   card: '#ffffff',
   cardDark: '#1e293b',
-  text: '#0f172a',
+  text: '#333333', // Darker text for readability
   textSecondary: '#64748b',
   textMuted: '#94a3b8',
   border: '#e2e8f0',
   success: '#22c55e',
   error: '#ef4444',
+  facebook: '#1877F2',
+  google: '#DB4437',
 };
 
 export const FONTS = {

@@ -63,10 +63,21 @@ export default function RecruiterProfileScreen() {
   }, [fetchCompany]);
 
   const handleLogout = () => {
-    Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
-      { text: 'Hủy', style: 'cancel' },
-      { text: 'Đăng xuất', style: 'destructive', onPress: async () => { await logout(); router.replace('/(auth)/login'); } },
-    ]);
+    const performLogout = async () => {
+      await logout();
+      router.replace('/(auth)/login');
+    };
+
+    if (Platform.OS === 'web') {
+      if (confirm('Bạn có chắc muốn đăng xuất?')) {
+        performLogout();
+      }
+    } else {
+      Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Đăng xuất', style: 'destructive', onPress: performLogout },
+      ]);
+    }
   };
 
   const pickImage = async (type: 'logo' | 'banner') => {

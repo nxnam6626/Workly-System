@@ -40,8 +40,9 @@ const UserRow = React.memo(({ item, onToggle }: { item: User; onToggle: () => vo
       <TouchableOpacity
         style={[styles.toggleBtn, isActive ? styles.toggleActive : styles.toggleInactive]}
         onPress={onToggle}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name={isActive ? 'lock-open' : 'lock-closed'} size={16} color="#fff" />
+        <Ionicons name={isActive ? 'lock-open' : 'lock-closed'} size={18} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -144,8 +145,8 @@ export default function AdminUsersScreen() {
           />
         </View>
         {isSupremeAdmin && (
-          <TouchableOpacity style={styles.createBtn} onPress={() => setIsCreateModalOpen(true)}>
-            <Ionicons name="add" size={24} color="#fff" />
+          <TouchableOpacity style={styles.createBtn} onPress={() => setIsCreateModalOpen(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="add" size={26} color="#fff" />
           </TouchableOpacity>
         )}
       </View>
@@ -221,7 +222,14 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   searchInput: { flex: 1, color: '#fff', fontSize: 14 },
-  createBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center', shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
+  createBtn: { 
+    width: 46, height: 46, borderRadius: 23, backgroundColor: COLORS.primary, 
+    justifyContent: 'center', alignItems: 'center',
+    ...Platform.select({
+      web: { boxShadow: `0px 4px 8px rgba(25, 103, 210, 0.3)` },
+      default: { shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }
+    })
+  },
   
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -239,7 +247,7 @@ const styles = StyleSheet.create({
   rolePill: { backgroundColor: 'rgba(30,90,255,0.1)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: RADIUS.full },
   roleText: { fontSize: 10, color: COLORS.primary, fontWeight: '700' },
   
-  toggleBtn: { width: 36, height: 36, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
+  toggleBtn: { width: 44, height: 44, borderRadius: RADIUS.md, justifyContent: 'center', alignItems: 'center' },
   toggleActive: { backgroundColor: 'rgba(255,255,255,0.05)' },
   toggleInactive: { backgroundColor: COLORS.error },
 

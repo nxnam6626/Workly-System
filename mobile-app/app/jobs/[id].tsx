@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Alert,
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -9,6 +15,9 @@ import { Image } from 'expo-image';
 import api from '../../lib/api';
 import { COLORS, SPACING, RADIUS, formatSalary, JOB_TYPE_LABEL } from '../../lib/constants';
 import { useAuthStore } from '../../stores/auth';
+import { DetailSection } from '../../components/ui/DetailSection';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 
 interface JobDetail {
   jobPostingId: string;
@@ -41,8 +50,11 @@ export default function JobDetailScreen() {
       try {
         const { data } = await api.get(`/job-postings/${id}`);
         setJob(data);
-      } catch {}
-      finally { setLoading(false); }
+      } catch {
+        // Silent error
+      } finally {
+        setLoading(false);
+      }
     };
     fetch();
   }, [id]);
@@ -64,7 +76,10 @@ export default function JobDetailScreen() {
   };
 
   const toggleSave = async () => {
-    if (!isAuthenticated) { router.push('/(auth)/login'); return; }
+    if (!isAuthenticated) {
+      router.push('/(auth)/login');
+      return;
+    }
     try {
       if (isSaved) {
         await api.delete(`/favorites/${job?.jobPostingId}`);
@@ -72,12 +87,14 @@ export default function JobDetailScreen() {
         await api.post(`/favorites`, { jobPostingId: job?.jobPostingId });
       }
       setIsSaved(!isSaved);
-    } catch {}
+    } catch {
+      // Silent error
+    }
   };
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bgDark }}>
+      <View style={styles.centerContainer}>
         <ActivityIndicator color={COLORS.primary} size="large" />
       </View>
     );
@@ -85,8 +102,8 @@ export default function JobDetailScreen() {
 
   if (!job) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.bgDark }}>
-        <Text style={{ color: COLORS.textMuted }}>Không tìm thấy tin tuyển dụng</Text>
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Không tìm thấy tin tuyển dụng</Text>
       </View>
     );
   }
@@ -96,147 +113,289 @@ export default function JobDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      {/* Custom header */}
+      <StatusBar style="dark" />
+      {/* Top Navigation */}
       <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.navBtn}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleSave} style={styles.saveBtn}>
-          <Ionicons name={isSaved ? 'bookmark' : 'bookmark-outline'} size={24} color={isSaved ? COLORS.primary : '#fff'} />
+        <TouchableOpacity onPress={toggleSave} style={styles.navBtn}>
+          <Ionicons
+            name={isSaved ? 'bookmark' : 'bookmark-outline'}
+            size={24}
+            color={isSaved ? COLORS.primary : COLORS.text}
+          />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Header Card */}
-        <View style={[styles.headerCard, isUrgent && styles.headerCardUrgent, isPro && styles.headerCardPro]}>
-          {(isUrgent || isPro) && (
-            <View style={[styles.tierBadge, { backgroundColor: isUrgent ? COLORS.urgent : COLORS.professional }]}>
-              <Text style={styles.tierBadgeText}>{isUrgent ? '🔥 Tuyển Gấp' : '⭐ Nổi Bật'}</Text>
-            </View>
-          )}
+      <ScrollView
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header Section */}
+        <View style={styles.header}>
           <View style={styles.logoWrap}>
             {job.company?.logo ? (
-              <Image source={{ uri: job.company.logo || undefined }} style={{ width: 64, height: 64 }} contentFit="contain" />
+              <Image
+                source={{ uri: job.company.logo }}
+                style={styles.logo}
+                contentFit="contain"
+              />
             ) : (
-              <Text style={styles.logoText}>{job.company?.companyName?.slice(0, 2).toUpperCase()}</Text>
+              <View style={styles.logoPlaceholder}>
+                <Text style={styles.logoText}>
+                  {job.company?.companyName?.slice(0, 2).toUpperCase()}
+                </Text>
+              </View>
             )}
           </View>
+
           <Text style={styles.jobTitle}>{job.title}</Text>
           <Text style={styles.companyName}>{job.company?.companyName}</Text>
 
-          {/* Tags Row */}
-          <View style={styles.tagRow}>
-            {job.locationCity && (
-              <View style={styles.tag}>
-                <Ionicons name="location-outline" size={13} color={COLORS.textMuted} />
-                <Text style={styles.tagText}>{job.locationCity}</Text>
-              </View>
-            )}
+          <View style={styles.badgeRow}>
+            {isUrgent && <Badge label="Tuyển gấp" color={COLORS.urgent} backgroundColor="rgba(239,68,68,0.1)" />}
+            {isPro && <Badge label="Nổi bật" color={COLORS.accent} backgroundColor="rgba(245,158,11,0.1)" />}
             {job.jobType && (
-              <View style={styles.tag}>
-                <Ionicons name="briefcase-outline" size={13} color={COLORS.textMuted} />
-                <Text style={styles.tagText}>{JOB_TYPE_LABEL[job.jobType] || job.jobType}</Text>
-              </View>
+              <Badge
+                label={JOB_TYPE_LABEL[job.jobType] || job.jobType}
+                color={COLORS.primary}
+                backgroundColor="rgba(25, 103, 210, 0.1)"
+              />
             )}
-            <View style={[styles.tag, styles.salaryTag]}>
-              <Ionicons name="cash-outline" size={13} color={COLORS.success} />
-              <Text style={[styles.tagText, { color: COLORS.success, fontWeight: '700' }]}>
+          </View>
+          
+          <View style={styles.salaryContainer}>
+             <Text style={styles.salaryText}>
                 {formatSalary(job.salaryMin, job.salaryMax, job.currency ?? undefined)}
-              </Text>
+             </Text>
+          </View>
+
+          <View style={styles.divider} />
+          
+          <View style={styles.quickInfoRow}>
+             <View style={styles.quickInfoItem}>
+                <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+                <Text style={styles.quickInfoText}>{job.locationCity || 'Toàn quốc'}</Text>
+             </View>
+             <View style={styles.quickInfoItem}>
+                <Ionicons name="calendar-outline" size={18} color={COLORS.primary} />
+                <Text style={styles.quickInfoText}>Hạn nộp: 30 ngày tới</Text>
+             </View>
+          </View>
+        </View>
+
+        {/* Content Sections */}
+        <View style={styles.sectionsContainer}>
+          <DetailSection title="Mô tả công việc">
+            <Text style={styles.bodyText}>{job.description}</Text>
+          </DetailSection>
+
+          {job.requirements && (
+            <DetailSection title="Yêu cầu ứng viên">
+              <Text style={styles.bodyText}>{job.requirements}</Text>
+            </DetailSection>
+          )}
+
+          <DetailSection title="Thông tin công ty">
+            <View style={styles.companyInfoBox}>
+              <Text style={styles.companyInfoName}>{job.company?.companyName}</Text>
+              {job.company?.website && (
+                <Text style={styles.companyWebsite}>{job.company.website}</Text>
+              )}
+              <TouchableOpacity style={styles.viewCompanyBtn}>
+                <Text style={styles.viewCompanyText}>Xem trang công ty</Text>
+              </TouchableOpacity>
             </View>
-          </View>
+          </DetailSection>
         </View>
-
-        {/* Description */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mô tả công việc</Text>
-          <Text style={styles.body}>{job.description}</Text>
-        </View>
-
-        {job.requirements && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Yêu cầu ứng viên</Text>
-            <Text style={styles.body}>{job.requirements}</Text>
-          </View>
-        )}
       </ScrollView>
 
-      {/* Apply CTA — fixed at bottom */}
-      <View style={styles.applyBar}>
-        <TouchableOpacity
-          style={[
-            styles.applyBtn,
-            isUrgent && styles.applyBtnUrgent,
-            isPro && styles.applyBtnPro,
-            applying && styles.applyBtnDisabled,
-          ]}
+      {/* Fixed Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <Button
+          title="Ứng tuyển ngay"
           onPress={handleApply}
-          disabled={applying}
-          activeOpacity={0.85}
-        >
-          {applying ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Ionicons name="send" size={18} color="#fff" />
-              <Text style={styles.applyBtnText}>Ứng tuyển ngay</Text>
-            </>
-          )}
-        </TouchableOpacity>
+          loading={applying}
+          style={styles.applyBtn}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
+import { StatusBar } from 'expo-status-bar';
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bgDark },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.bg,
+  },
+  errorText: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+  },
   topBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: SPACING.md, paddingTop: 56, paddingBottom: SPACING.sm,
-    position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    height: 60,
   },
-  backBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-  saveBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-  headerCard: {
-    backgroundColor: COLORS.cardDark, marginHorizontal: SPACING.md,
-    marginTop: 106, borderRadius: RADIUS.xl, padding: SPACING.lg, alignItems: 'center',
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8,
+  navBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerCardUrgent: { borderColor: 'rgba(239,68,68,0.3)' },
-  headerCardPro: { borderColor: 'rgba(245,158,11,0.3)' },
-  tierBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: RADIUS.full, marginBottom: SPACING.sm },
-  tierBadgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xl,
+    backgroundColor: '#fff',
+  },
   logoWrap: {
-    width: 72, height: 72, borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(255,255,255,0.06)', justifyContent: 'center', alignItems: 'center',
-    marginBottom: SPACING.md, overflow: 'hidden',
+    width: 90,
+    height: 90,
+    borderRadius: RADIUS.lg,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    marginBottom: SPACING.md,
+    overflow: 'hidden',
   },
-  logoText: { color: '#fff', fontWeight: '800', fontSize: 24 },
-  jobTitle: { fontSize: 20, fontWeight: '800', color: '#fff', textAlign: 'center', marginBottom: 6 },
-  companyName: { fontSize: 14, color: COLORS.textMuted, marginBottom: SPACING.md },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
-  tag: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: 'rgba(255,255,255,0.07)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: RADIUS.full,
+  logo: {
+    width: 70,
+    height: 70,
   },
-  salaryTag: { backgroundColor: 'rgba(34,197,94,0.1)' },
-  tagText: { fontSize: 12, color: COLORS.textMuted, fontWeight: '500' },
-  section: { margin: SPACING.md, backgroundColor: COLORS.cardDark, borderRadius: RADIUS.xl, padding: SPACING.md, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: SPACING.sm },
-  body: { fontSize: 14, color: COLORS.textMuted, lineHeight: 22 },
-  applyBar: {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    backgroundColor: COLORS.bgDark, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: SPACING.md, paddingBottom: 36, paddingTop: SPACING.sm,
+  logoPlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+  },
+  logoText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 28,
+  },
+  jobTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  companyName: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: SPACING.md,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: SPACING.md,
+  },
+  salaryContainer: {
+    backgroundColor: 'rgba(34, 197, 94, 0.08)',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
+    marginBottom: SPACING.lg,
+  },
+  salaryText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.success,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    width: '100%',
+    marginBottom: SPACING.lg,
+  },
+  quickInfoRow: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-around',
+  },
+  quickInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickInfoText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  sectionsContainer: {
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  bodyText: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 24,
+  },
+  companyInfoBox: {
+    paddingVertical: SPACING.xs,
+  },
+  companyInfoName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  companyWebsite: {
+    fontSize: 14,
+    color: COLORS.primary,
+    marginBottom: SPACING.md,
+  },
+  viewCompanyBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    alignSelf: 'flex-start',
+  },
+  viewCompanyText: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: 30, // iOS handle space
   },
   applyBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm,
-    height: 54, backgroundColor: COLORS.primary, borderRadius: RADIUS.lg,
-    shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 14, elevation: 10,
+    height: 54,
   },
-  applyBtnUrgent: { backgroundColor: COLORS.urgent, shadowColor: COLORS.urgent },
-  applyBtnPro: { backgroundColor: COLORS.professional, shadowColor: COLORS.professional },
-  applyBtnDisabled: { opacity: 0.6 },
-  applyBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
 });

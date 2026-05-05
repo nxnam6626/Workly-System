@@ -1,15 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet,
-  RefreshControl, ActivityIndicator, TextInput, Platform,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import api from '../../lib/api';
-import { COLORS, SPACING, RADIUS, formatSalary, JOB_TYPE_LABEL } from '../../lib/constants';
+import { COLORS, SPACING, RADIUS } from '../../lib/constants';
 import { useAuthStore } from '../../stores/auth';
+import { JobCard } from '../../components/JobCard';
 
 interface Job {
   jobPostingId: string;
@@ -24,68 +30,6 @@ interface Job {
 }
 
 const ITEM_HEIGHT = 110;
-
-const JobItem = React.memo(({ item, onPress }: { item: Job; onPress: () => void }) => {
-  const isUrgent = item.jobTier === 'URGENT';
-  const isPro = item.jobTier === 'PROFESSIONAL';
-
-  return (
-    <TouchableOpacity
-      style={[styles.card, isUrgent && styles.cardUrgent, isPro && styles.cardPro]}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      {/* Tier badge */}
-      {isUrgent && (
-        <View style={styles.badgeUrgent}>
-          <Text style={styles.badgeText}>Tuyển Gấp</Text>
-        </View>
-      )}
-      {isPro && (
-        <View style={styles.badgePro}>
-          <Text style={styles.badgeText}>Nổi Bật</Text>
-        </View>
-      )}
-
-      <View style={styles.cardInner}>
-        {/* Logo */}
-        <View style={styles.logoWrap}>
-          {item.company?.logoUrl ? (
-            <Image source={{ uri: item.company.logoUrl || undefined }} style={styles.logo} contentFit="contain" />
-          ) : (
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>
-                {item.company?.companyName?.slice(0, 2).toUpperCase() || 'TC'}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Info */}
-        <View style={styles.info}>
-          <Text style={styles.jobTitle} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.company} numberOfLines={1}>{item.company?.companyName}</Text>
-          <View style={styles.tags}>
-            {item.locationCity && (
-              <View style={styles.tag}>
-                <Ionicons name="location-outline" size={11} color={COLORS.textMuted} />
-                <Text style={styles.tagText}>{item.locationCity}</Text>
-              </View>
-            )}
-            <View style={[styles.tag, styles.salaryTag]}>
-              <Ionicons name="cash-outline" size={11} color={COLORS.success} />
-              <Text style={[styles.tagText, { color: COLORS.success }]}>
-                {formatSalary(item.salaryMin, item.salaryMax, item.currency || undefined)}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-});
-
-import React from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -112,15 +56,18 @@ export default function HomeScreen() {
       }
       setHasMore(items.length === 10);
       setPage(pageNum);
-    } catch {}
-    finally {
+    } catch {
+      // Silent error handling for feed
+    } finally {
       setLoading(false);
       setRefreshing(false);
       loadingMore.current = false;
     }
   }, []);
 
-  useEffect(() => { fetchJobs(1, true); }, [fetchJobs]);
+  useEffect(() => {
+    fetchJobs(1, true);
+  }, [fetchJobs]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -133,7 +80,7 @@ export default function HomeScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Job }) => (
-      <JobItem
+      <JobCard
         item={item}
         onPress={() => router.push(`/jobs/${item.slug || item.jobPostingId}`)}
       />
@@ -144,7 +91,11 @@ export default function HomeScreen() {
   const keyExtractor = useCallback((item: Job) => item.jobPostingId, []);
 
   const getItemLayout = useCallback(
-    (_: any, index: number) => ({ length: ITEM_HEIGHT + 12, offset: (ITEM_HEIGHT + 12) * index, index }),
+    (_: any, index: number) => ({
+      length: ITEM_HEIGHT + 12,
+      offset: (ITEM_HEIGHT + 12) * index,
+      index,
+    }),
     []
   );
 
@@ -153,23 +104,39 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Xin chào, {user?.name?.split(' ').pop() || 'bạn'} 👋</Text>
-          <Text style={styles.subtitle}>Tìm công việc phù hợp với bạn</Text>
+          <Text style={styles.greeting}>
+            Xin chào, <Text style={styles.userName}>{user?.name?.split(' ').pop() || 'bạn'}</Text> 👋
+          </Text>
+          <Text style={styles.subtitle}>Tìm công việc mơ ước của bạn</Text>
         </View>
-        <TouchableOpacity onPress={() => router.push('/(tabs)/notifications')} style={styles.bellBtn}>
-          <Ionicons name="notifications-outline" size={24} color="#fff" />
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/notifications')}
+          style={styles.bellBtn}
+        >
+          <View style={styles.bellIconWrap}>
+            <Ionicons name="notifications-outline" size={24} color={COLORS.text} />
+            <View style={styles.dot} />
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* Search shortcut */}
-      <TouchableOpacity style={styles.searchBar} onPress={() => router.push('/(tabs)/jobs')} activeOpacity={0.8}>
-        <Ionicons name="search" size={18} color={COLORS.textMuted} />
-        <Text style={styles.searchPlaceholder}>Tìm kiếm việc làm...</Text>
-      </TouchableOpacity>
+      {/* Search Bar - Workly Style */}
+      <View style={styles.searchContainer}>
+        <TouchableOpacity
+          style={styles.searchBar}
+          onPress={() => router.push('/(tabs)/jobs')}
+          activeOpacity={0.9}
+        >
+          <Ionicons name="search" size={20} color={COLORS.textMuted} />
+          <Text style={styles.searchPlaceholder}>Tìm kiếm việc làm, công ty...</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Job Feed */}
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 60 }} color={COLORS.primary} size="large" />
+        <View style={styles.loader}>
+          <ActivityIndicator color={COLORS.primary} size="large" />
+        </View>
       ) : (
         <FlatList
           data={jobs}
@@ -180,8 +147,33 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           onEndReached={onEndReached}
           onEndReachedThreshold={0.4}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
-          ListFooterComponent={hasMore ? <ActivityIndicator color={COLORS.primary} style={{ paddingVertical: 20 }} /> : null}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              <Text style={styles.sectionTitle}>Việc làm mới nhất</Text>
+              <TouchableOpacity>
+                <Text style={styles.viewAll}>Xem tất cả</Text>
+              </TouchableOpacity>
+            </View>
+          }
+          ListFooterComponent={
+            hasMore ? (
+              <ActivityIndicator
+                color={COLORS.primary}
+                style={{ paddingVertical: 20 }}
+              />
+            ) : (
+              <View style={styles.endList}>
+                <Text style={styles.endListText}>Bạn đã xem hết việc làm mới nhất ✨</Text>
+              </View>
+            )
+          }
           removeClippedSubviews
           maxToRenderPerBatch={10}
           windowSize={5}
@@ -192,49 +184,107 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.bgDark },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
   header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: SPACING.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
-  greeting: { fontSize: 20, fontWeight: '800', color: '#fff' },
-  subtitle: { fontSize: 13, color: COLORS.textMuted, marginTop: 2 },
-  bellBtn: { width: 44, height: 44, justifyContent: 'center', alignItems: 'center' },
+  greeting: {
+    fontSize: 18,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
+  },
+  userName: {
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  bellBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bellIconWrap: {
+    position: 'relative',
+  },
+  dot: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.error,
+    borderWidth: 1.5,
+    borderColor: COLORS.bg,
+  },
+  searchContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
   searchBar: {
-    flexDirection: 'row', alignItems: 'center', gap: SPACING.sm,
-    marginHorizontal: SPACING.md, marginBottom: SPACING.md,
-    backgroundColor: COLORS.cardDark, borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md, height: 48,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.xl,
+    paddingHorizontal: SPACING.md,
+    height: 52,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 4px rgba(0,0,0,0.05)' },
+      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }
+    })
   },
-  searchPlaceholder: { color: COLORS.textMuted, fontSize: 14 },
-  list: { paddingHorizontal: SPACING.md, paddingBottom: 20 },
-  card: {
-    backgroundColor: COLORS.cardDark, borderRadius: RADIUS.lg, marginBottom: 12,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
-    overflow: 'hidden',
+  searchPlaceholder: {
+    color: COLORS.textMuted,
+    fontSize: 15,
   },
-  cardUrgent: { borderColor: 'rgba(239,68,68,0.4)', borderWidth: 1.5 },
-  cardPro: { borderColor: 'rgba(245,158,11,0.4)', borderWidth: 1.5 },
-  badgeUrgent: {
-    backgroundColor: '#ef4444', paddingHorizontal: 10, paddingVertical: 3,
-    alignSelf: 'flex-start', borderBottomRightRadius: RADIUS.md,
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  badgePro: {
-    backgroundColor: '#f59e0b', paddingHorizontal: 10, paddingVertical: 3,
-    alignSelf: 'flex-start', borderBottomRightRadius: RADIUS.md,
+  list: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.xl,
   },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  cardInner: { flexDirection: 'row', padding: SPACING.sm, alignItems: 'center', gap: SPACING.sm },
-  logoWrap: { width: 52, height: 52, borderRadius: RADIUS.md, overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.06)' },
-  logo: { width: 52, height: 52 },
-  logoPlaceholder: { width: 52, height: 52, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.primary },
-  logoText: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  info: { flex: 1 },
-  jobTitle: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: 3 },
-  company: { fontSize: 13, color: COLORS.textMuted, marginBottom: 6 },
-  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  tag: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.06)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: RADIUS.full },
-  salaryTag: { backgroundColor: 'rgba(34,197,94,0.1)' },
-  tagText: { fontSize: 11, color: COLORS.textMuted, fontWeight: '500' },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  viewAll: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  endList: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+  },
+  endListText: {
+    color: COLORS.textMuted,
+    fontSize: 13,
+  },
 });
