@@ -31,11 +31,13 @@ export class UserDataService {
           candidate: { select: { fullName: true } },
           recruiter: {
             select: {
+              fullName: true,
+              companyRole: true,
               position: true,
               bio: true,
               violationCount: true,
               recruiterSubscription: true,
-              recruiterWallet: true,
+              company: { include: { wallet: true } },
             },
           },
           admin: { select: { permissions: true } },
@@ -64,7 +66,7 @@ export class UserDataService {
         userRoles: { include: { role: true } },
         candidate: true,
         recruiter: {
-          include: { recruiterSubscription: true, recruiterWallet: true },
+          include: { recruiterSubscription: true, company: { include: { wallet: true } } },
         },
         admin: { select: { permissions: true } },
       },

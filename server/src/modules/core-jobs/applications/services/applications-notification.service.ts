@@ -212,4 +212,48 @@ export class ApplicationsNotificationService {
         .emit('newMessage', chatMsg);
     }
   }
+
+  async notifySlaReminder(userId: string, jobTitle: string, candidateName: string, deadline: Date, type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW') {
+    let title = 'Nhắc nhở hạn phản hồi (SLA)';
+    let message = '';
+    let link = '';
+
+    const dateStr = deadline.toLocaleDateString('vi-VN');
+
+    if (type === 'RECRUITER_RESPONSE') {
+      message = `Bạn cần phản hồi hồ sơ của ${candidateName} cho vị trí "${jobTitle}" trước ngày ${dateStr}.`;
+      link = '/recruiter/applications';
+    } else if (type === 'RECRUITER_RESULT') {
+      message = `Bạn cần thông báo kết quả phỏng vấn cho ${candidateName} ("${jobTitle}") trước ngày ${dateStr}.`;
+      link = '/recruiter/interviews';
+    } else if (type === 'CANDIDATE_INTERVIEW') {
+      title = 'Nhắc nhở xác nhận lịch hẹn';
+      message = `Bạn có yêu cầu phỏng vấn cho vị trí "${jobTitle}" cần xác nhận trước ngày ${dateStr}.`;
+      link = '/profile/jobs/applied';
+    }
+
+    await this.notificationsService.create(userId, title, message, 'warning', link);
+    this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'warning', link });
+  }
+
+  async notifySlaBreach(userId: string, jobTitle: string, candidateName: string, type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW') {
+    let title = '⚠️ CẢNH BÁO QUÁ HẠN (SLA)';
+    let message = '';
+    let link = '';
+
+    if (type === 'RECRUITER_RESPONSE') {
+      message = `Hồ sơ của ${candidateName} ("${jobTitle}") đã quá hạn phản hồi. Điểm uy tín của bạn có thể bị ảnh hưởng.`;
+      link = '/recruiter/applications';
+    } else if (type === 'RECRUITER_RESULT') {
+      message = `Kết quả phỏng vấn của ${candidateName} ("${jobTitle}") đã quá hạn thông báo.`;
+      link = '/recruiter/interviews';
+    } else if (type === 'CANDIDATE_INTERVIEW') {
+      title = 'Lịch hẹn đã bị hủy do quá hạn';
+      message = `Yêu cầu phỏng vấn cho vị trí "${jobTitle}" đã tự động bị hủy do bạn không phản hồi đúng hạn.`;
+      link = '/profile/jobs/applied';
+    }
+
+    await this.notificationsService.create(userId, title, message, 'danger', link);
+    this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'danger', link });
+  }
 }

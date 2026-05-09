@@ -84,7 +84,13 @@ const EditInterviewModal = ({ isOpen, onClose, onSave, interview, isSubmitting }
 
   useEffect(() => {
     if (interview && isOpen) {
-      setDate(interview.date ? new Date(interview.date).toISOString().split('T')[0] : '');
+      if (interview.date) {
+        const d = new Date(interview.date);
+        const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        setDate(dStr);
+      } else {
+        setDate('');
+      }
       setTime(interview.time || '');
       setLocation(interview.location || '');
     }

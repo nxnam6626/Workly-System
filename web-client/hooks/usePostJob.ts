@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
+import { useSocketStore } from '@/stores/socket';
 import { JobFormData } from '@/types/job';
 
 export const defaultForm: JobFormData = {
@@ -22,9 +23,13 @@ export const defaultForm: JobFormData = {
   jobLevel: 'STAFF',
   jobTier: 'BASIC',
   autoInviteMatches: true,
+  autoInviteThreshold: 70,
   autoRejectThreshold: 50,
+  matchMode: 'BALANCED',
   isAiGenerated: false,
   categories: [],
+  slaApplicationDays: 3,
+  slaInterviewDays: 5,
 };
 
 export function usePostJob(editJobId?: string | null) {
@@ -50,7 +55,71 @@ export function usePostJob(editJobId?: string | null) {
   const [modResult, setModResult] = useState<any>(null);
   const [isChecking, setIsChecking] = useState(false);
 
+  const [processingState, setProcessingState] = useState<{
+    isOpen: boolean;
+    jobId: string | null;
+    status: 'moderating' | 'matching' | 'inviting' | 'done';
+    matchedCount: number;
+    invitedCount: number;
+  }>({
+    isOpen: false,
+    jobId: null,
+    status: 'moderating',
+    matchedCount: 0,
+    invitedCount: 0,
+  });
+
   const { accessToken } = useAuthStore();
+  const { socket } = useSocketStore();
+
+  useEffect(() => {
+    if (!socket || !processingState.isOpen || !processingState.jobId) return;
+
+    const handleJobMatchUpdated = (payload: { jobId: string; matchedCount: number; autoInvitedCount?: number; status?: string }) => {
+      if (payload.jobId === processingState.jobId) {
+        const willInvite = formData.autoInviteMatches && (payload.autoInvitedCount ?? 0) > 0;
+        
+        setProcessingState(prev => {
+          // Nếu backend gửi event completed, chúng ta set status là done luôn
+          if (payload.status === 'completed') {
+             return {
+               ...prev,
+               status: 'done',
+               matchedCount: payload.matchedCount,
+               invitedCount: payload.autoInvitedCount ?? prev.invitedCount
+             };
+          }
+          
+          // Trạng thái đang inviting
+          return {
+            ...prev,
+            status: willInvite ? 'inviting' : 'done',
+            matchedCount: payload.matchedCount
+          };
+        });
+      }
+    };
+
+    const handleNotification = (msg: { title?: string; type?: string }) => {
+      if (msg.title?.includes('Đã mời tự động') || msg.title?.includes('AI đã gửi')) {
+         const countStr = msg.title.replace(/\D/g, '');
+         const count = parseInt(countStr) || 0;
+         setProcessingState(prev => ({
+            ...prev,
+            status: 'done',
+            invitedCount: count
+         }));
+      }
+    };
+
+    socket.on('job_match_updated', handleJobMatchUpdated);
+    socket.on('notification', handleNotification);
+
+    return () => {
+      socket.off('job_match_updated', handleJobMatchUpdated);
+      socket.off('notification', handleNotification);
+    };
+  }, [socket, processingState.isOpen, processingState.jobId, formData.autoInviteMatches]);
 
   const fetchInitialData = useCallback(async () => {
     try {
@@ -99,9 +168,13 @@ export function usePostJob(editJobId?: string | null) {
         minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
         jobTier: data.jobTier || 'BASIC',
         autoInviteMatches: data.autoInviteMatches || false,
+        autoInviteThreshold: data.autoInviteThreshold || 70,
         autoRejectThreshold: data.autoRejectThreshold || '',
+        matchMode: data.matchMode || 'BALANCED',
         isAiGenerated: data.structuredRequirements?.isAiGenerated || false,
         categories: data.structuredRequirements?.categories || [],
+        slaApplicationDays: data.slaApplicationDays || 3,
+        slaInterviewDays: data.slaInterviewDays || 5,
       };
       setFormData(mappedData);
       setInitialFormData(mappedData);
@@ -214,24 +287,66 @@ export function usePostJob(editJobId?: string | null) {
 
     setSaving(true);
     try {
+      const VALID_JOB_TYPES = ['FULLTIME', 'PARTTIME', 'REMOTE'];
+      const VALID_JOB_LEVELS = ['INTERN', 'STAFF', 'MANAGER', 'DIRECTOR'];
+
       const payload = {
         ...formData,
-        salaryMin: formData.salaryMin ? Number(formData.salaryMin) : null,
-        salaryMax: formData.salaryMax ? Number(formData.salaryMax) : null,
-        vacancies: Number(formData.vacancies),
-        autoRejectThreshold: formData.autoRejectThreshold ? Number(formData.autoRejectThreshold) : null,
+        // Số — chuyển null nếu rỗng
+        salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
+        salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
+        vacancies: Number(formData.vacancies) || 1,
+        // autoRejectThreshold = 0 là hợp lệ (không từ chối ai), cần undefined khi chưa set
+        autoRejectThreshold:
+          formData.autoRejectThreshold !== '' && formData.autoRejectThreshold !== undefined
+            ? Number(formData.autoRejectThreshold)
+            : undefined,
+        autoInviteThreshold: Number(formData.autoInviteThreshold) || 70,
+        // Xử lý requirements và benefits: AI có thể trả về Array, cần ép về String
+        requirements: Array.isArray(formData.requirements)
+          ? formData.requirements.join('\n- ')
+          : typeof formData.requirements === 'string' && formData.requirements.trim()
+            ? formData.requirements.trim()
+            : undefined,
+        benefits: Array.isArray(formData.benefits)
+          ? formData.benefits.join('\n- ')
+          : typeof formData.benefits === 'string' && formData.benefits.trim()
+            ? formData.benefits.trim()
+            : undefined,
+        // Enum — guard lại nếu AI generate trả về sai giá trị
+        jobType: VALID_JOB_TYPES.includes(formData.jobType) ? formData.jobType : undefined,
+        jobLevel: VALID_JOB_LEVELS.includes(formData.jobLevel) ? formData.jobLevel : undefined,
       };
 
       if (editJobId) {
         await api.patch(`/job-postings/${editJobId}`, payload);
         toast.success('Cập nhật thành công!');
+        router.push('/recruiter/jobs');
       } else {
-        await api.post('/job-postings', payload);
-        toast.success('Gửi yêu cầu thành công! Đang chờ phê duyệt.');
+        const res = await api.post('/job-postings', payload);
+        const createdJob = res.data;
+        if (createdJob.status === 'APPROVED' || createdJob.status === 'PENDING') {
+          toast.success('Đăng tin thành công! AI đang xử lý ngầm và tìm ứng viên...');
+          router.push('/recruiter/jobs');
+        } else {
+          toast.success('Gửi yêu cầu thành công!');
+          router.push('/recruiter/jobs');
+        }
       }
-      router.push('/recruiter/jobs');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+      const responseData = error.response?.data;
+      const msg = responseData?.message;
+      const status = error.response?.status;
+      console.warn('[PostJob] Submit error:', { status, data: responseData, raw: error.message });
+      if (Array.isArray(msg)) {
+        toast.error(msg.join(' · '));
+      } else if (msg) {
+        toast.error(msg);
+      } else if (status) {
+        toast.error(`Lỗi ${status}: ${error.message}`);
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra!');
+      }
     } finally {
       setSaving(false);
     }
@@ -246,6 +361,9 @@ export function usePostJob(editJobId?: string | null) {
         setFormData(prev => ({
           ...prev,
           ...data.data,
+          // Format arrays to strings so Textarea displays correctly
+          requirements: Array.isArray(data.data.requirements) ? data.data.requirements.join('\n- ') : data.data.requirements,
+          benefits: Array.isArray(data.data.benefits) ? data.data.benefits.join('\n- ') : data.data.benefits,
           salaryMin: data.data.salaryMin ? String(data.data.salaryMin) : prev.salaryMin,
           salaryMax: data.data.salaryMax ? String(data.data.salaryMax) : prev.salaryMax,
           isAiGenerated: true,
@@ -299,6 +417,7 @@ export function usePostJob(editJobId?: string | null) {
     suggestedCategories, isSuggesting, allIndustries, branches, companyProfile, modResult, isChecking,
     toggleCategory, handleBranchToggle, handleChange, addSkill, removeSkill,
     handleSubmit, handleAiGenerate, handlePreCheck, handleNextStep, handlePrevStep,
-    handleSuggestCategories, userPlan, subscription
+    handleSuggestCategories, userPlan, subscription,
+    processingState, setProcessingState
   };
 }

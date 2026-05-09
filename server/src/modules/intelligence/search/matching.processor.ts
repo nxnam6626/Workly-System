@@ -42,19 +42,22 @@ export class MatchingProcessor extends WorkerHost {
         }
 
         const recruiterUserId = jobPosting.recruiter.userId;
+        const threshold = jobPosting.autoInviteThreshold || 70;
 
-        // Lọc ứng viên đạt ngưỡng ≥ 70%
-        const highMatches = topMatches.filter((m) => m.score >= 70);
+        // Số ứng viên phù hợp dựa THEO ĐÚNG cấu hình của user
+        const matchedCandidates = topMatches.filter((m) => m.score >= threshold);
 
         // Luôn emit realtime matchedCount để UI cập nhật không cần F5
         this.messagesGateway.server
           .to(`user_${recruiterUserId}`)
           .emit('job_match_updated', {
             jobId,
-            matchedCount: highMatches.length,
+            status: matchedCandidates.length > 0 ? 'inviting' : 'completed',
+            matchedCount: matchedCandidates.length,
+            autoInvitedCount: matchedCandidates.length,
           });
 
-        if (highMatches.length === 0) {
+        if (matchedCandidates.length === 0) {
           return { success: true, count: topMatches.length };
         }
 
@@ -65,7 +68,7 @@ export class MatchingProcessor extends WorkerHost {
 
         if (shouldAutoInvite) {
           const limit = jobPosting.vacancies || 1;
-          const autoInviteCandidates = highMatches.slice(0, limit);
+          const autoInviteCandidates = matchedCandidates.slice(0, limit);
 
           for (const match of autoInviteCandidates) {
             try {
@@ -126,8 +129,8 @@ export class MatchingProcessor extends WorkerHost {
             : 'Tìm thấy ứng viên phù hợp!';
         const message =
           autoUnlockCount > 0
-            ? `AI đã tự động mở khoá và gửi lời mời đến ${autoUnlockCount} ứng viên nổi bật nhất cho "${jobPosting.title}". Tổng cộng ${highMatches.length} ứng viên phù hợp ≥70%.`
-            : `Hệ thống tìm thấy ${highMatches.length} ứng viên phù hợp ≥70% với vị trí "${jobPosting.title}".`;
+            ? `AI đã tự động mở khoá và gửi lời mời đến ${autoUnlockCount} ứng viên nổi bật nhất cho "${jobPosting.title}". Tổng cộng ${matchedCandidates.length} ứng viên phù hợp ≥${threshold}%.`
+            : `Hệ thống tìm thấy ${matchedCandidates.length} ứng viên phù hợp ≥${threshold}% với vị trí "${jobPosting.title}".`;
 
         await this.notificationsService.create(
           recruiterUserId,
@@ -144,6 +147,15 @@ export class MatchingProcessor extends WorkerHost {
             message,
             type: 'candidate_match',
             link: `/recruiter/jobs?matchJobId=${jobId}`,
+          });
+
+        this.messagesGateway.server
+          .to(`user_${recruiterUserId}`)
+          .emit('job_match_updated', {
+            jobId,
+            status: 'completed',
+            matchedCount: matchedCandidates.length,
+            autoInvitedCount: autoUnlockCount,
           });
 
         return { success: true, count: topMatches.length };

@@ -198,7 +198,8 @@ export class ApplicationInterviewService {
         interviewDate,
         interviewTime: time,
         interviewLocation: interviewLocation,
-        appStatus: 'INTERVIEW_CONFIRMED'
+        appStatus: 'INTERVIEW_CONFIRMED',
+        candidateResponseAt: null
       }
     });
 

@@ -11,7 +11,7 @@ export class RecruitersService {
     private messagesService: MessagesService,
     private messagesGateway: MessagesGateway,
     private mailService: MailService,
-  ) {}
+  ) { }
 
   private async ensureRecruiter(userId: string) {
     let recruiter = await this.prisma.recruiter.findUnique({
@@ -41,7 +41,7 @@ export class RecruitersService {
 
   async updateInterviewSettings(userId: string, settings: any) {
     const recruiter = await this.ensureRecruiter(userId);
-    
+
     // Validate and merge settings
     const currentSettings: any = (recruiter as any).interviewSettings || {};
     const newSettings = {
@@ -76,7 +76,7 @@ export class RecruitersService {
 
       const startOfDay = new Date(blockDate);
       startOfDay.setHours(0, 0, 0, 0);
-      
+
       const endOfDay = new Date(blockDate);
       endOfDay.setHours(23, 59, 59, 999);
 
@@ -102,14 +102,14 @@ export class RecruitersService {
         if (app.jobPosting.recruiter?.userId) {
           try {
             const content = `[Hệ thống Workly] Xin lỗi bạn, nhà tuyển dụng có việc đột xuất nên không thể phỏng vấn vào ngày ${dateStr.split('-').reverse().join('/')}. Bạn vui lòng chọn lại một lịch phỏng vấn khác nhé!`;
-            
+
             const conv = await this.messagesService.createConversation(
               app.candidateId,
               app.jobPosting.recruiterId!
             );
-            
+
             const savedMessage = await this.messagesService.sendMessage(
-              app.jobPosting.recruiter.userId, 
+              app.jobPosting.recruiter.userId,
               conv.conversationId,
               content,
               true
@@ -122,7 +122,7 @@ export class RecruitersService {
             // Emit notification to candidate to refresh applications and show "Chọn lịch ngay" banner
             this.messagesGateway.server.to(`user_${app.candidate.userId}`).emit('notification');
 
-            
+
             const userEmail = (app.candidate as any).user?.email;
             if (userEmail) {
               const formattedDateStr = dateStr.split('-').reverse().join('/');
@@ -145,15 +145,20 @@ export class RecruitersService {
 
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      select: { status: true, structuredRequirements: true },
+      select: { status: true, structuredRequirements: true, autoInviteThreshold: true },
     });
 
     if (job?.status === 'REJECTED') {
       return [];
     }
 
+    const threshold = job?.autoInviteThreshold || 70;
+
     const dbMatches = await this.prisma.jobMatch.findMany({
-      where: { jobPostingId: jobId },
+      where: {
+        jobPostingId: jobId,
+        score: { gte: threshold }
+      },
       orderBy: { score: 'desc' },
       include: {
         candidate: {
@@ -244,6 +249,7 @@ export class RecruitersService {
           phone: isUnlocked ? candidate?.user?.phoneNumber : '****-***-***',
           isUnlocked,
           cvUrl: isUnlocked ? backendCvUrl : null,
+          parsedData: cv?.parsedData || {},
           skills: (cv?.parsedData as any)?.skills || [],
           missingSkills,
           analysis: {
@@ -364,6 +370,7 @@ export class RecruitersService {
       })),
       upcomingInterviews: upcomingInterviews.map((app) => ({
         id: app.applicationId,
+        jobPostingId: app.jobPostingId,
         candidateName: app.candidate?.fullName || 'Ứng viên',
         jobTitle: app.jobPosting?.title || 'Công việc',
         time: app.interviewTime,

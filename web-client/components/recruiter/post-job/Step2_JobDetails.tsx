@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, X as CloseIcon, Brain, Cpu, Star, Info } from 'lucide-react';
+import { Plus, X as CloseIcon, Brain, Cpu, Star, Info, Clock } from 'lucide-react';
 import { JobFormData } from '@/types/job';
 
 interface Step2Props {
@@ -172,6 +172,67 @@ export const Step2_JobDetails = ({
               </button>
             </motion.span>
           ))}
+        </div>
+      </div>
+
+      {/* Ràng buộc thời gian (SLA) */}
+      <div className="bg-slate-900 p-8 rounded-[2rem] text-white space-y-6 shadow-xl shadow-slate-200">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+             <Clock className="w-6 h-6 text-sky-400" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold">Cam kết phản hồi (SLA)</h3>
+            <p className="text-xs text-slate-400 font-medium">Tăng uy tín công ty bằng cách cam kết thời gian phản hồi</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold text-slate-200 ml-1">Hạn phản hồi hồ sơ</label>
+              <span className="text-[10px] font-black text-sky-400 uppercase bg-sky-400/10 px-2 py-0.5 rounded-md">Sau khi ứng tuyển</span>
+            </div>
+            <div className="relative">
+              <input 
+                type="number"
+                name="slaApplicationDays"
+                value={formData.slaApplicationDays}
+                onChange={handleChange}
+                min={1}
+                max={30}
+                className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-sky-500 focus:bg-white/10 transition-all font-bold text-lg"
+              />
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold text-slate-200 ml-1">Hạn thông báo kết quả</label>
+              <span className="text-[10px] font-black text-emerald-400 uppercase bg-emerald-400/10 px-2 py-0.5 rounded-md">Sau khi phỏng vấn</span>
+            </div>
+            <div className="relative">
+              <input 
+                type="number"
+                name="slaInterviewDays"
+                value={formData.slaInterviewDays}
+                onChange={handleChange}
+                min={1}
+                max={30}
+                className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-emerald-500 focus:bg-white/10 transition-all font-bold text-lg"
+              />
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex gap-4 items-start">
+           <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+           <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+             Hệ thống sẽ tự động hiển thị thời gian dự kiến phản hồi cho ứng viên. 
+             <span className="text-white font-bold mx-1">Lưu ý:</span> Việc quá hạn phản hồi thường xuyên có thể làm giảm điểm uy tín của công ty trên nền tảng.
+           </p>
         </div>
       </div>
     </motion.div>

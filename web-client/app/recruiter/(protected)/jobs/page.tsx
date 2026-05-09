@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { RefreshCw, ChevronRight, Clock, AlertTriangle, CheckCircle2, XCircle, Lock, Calendar } from 'lucide-react';
 import { JobsHeader } from '@/components/recruiter/JobsHeader';
 import { JobsTabs } from '@/components/recruiter/JobsTabs';
@@ -46,6 +47,9 @@ const formatText = (text: string) => {
 };
 
 export default function JobsManagementPage() {
+  const searchParams = useSearchParams();
+  const matchJobId = searchParams.get('matchJobId');
+
   const {
     loading, actionState, setActionState, acting, selectedIds, setSelectedIds, isBulk, setIsBulk,
     currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, searchQuery, setSearchQuery,
@@ -55,6 +59,12 @@ export default function JobsManagementPage() {
   } = useJobs();
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (matchJobId) {
+      setSelectedJobId(matchJobId);
+    }
+  }, [matchJobId]);
 
   const tabs: { id: TabType; label: string; icon: any; count: number }[] = [
     { id: 'PENDING', label: 'Chờ duyệt', icon: Clock, count: jobs.filter(j => j.status === 'PENDING').length },

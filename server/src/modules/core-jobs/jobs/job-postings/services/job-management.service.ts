@@ -45,7 +45,6 @@ export class JobManagementService {
     }
 
     const {
-      deadline,
       salaryMin,
       salaryMax,
       hardSkills,
@@ -181,8 +180,15 @@ export class JobManagementService {
     });
     if (!existingJob)
       throw new NotFoundException(`Không tìm thấy Job với ID ${id}`);
-    if (existingJob.recruiter?.userId !== userId)
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter) throw new NotFoundException('Recruiter not found');
+
+    const isOwner = existingJob.recruiter?.userId === userId;
+    const isMasterOfCompany = recruiter.companyRole === 'MASTER' && recruiter.companyId === existingJob.companyId;
+
+    if (!isOwner && !isMasterOfCompany) {
       throw new ForbiddenException('Bạn không có quyền chỉnh sửa tin này');
+    }
 
     const {
       branchIds,

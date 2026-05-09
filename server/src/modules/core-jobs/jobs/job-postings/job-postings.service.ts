@@ -63,8 +63,15 @@ export class JobPostingsService {
     });
     if (!recruiter) throw new NotFoundException('Recruiter not found');
 
+    const whereClause: any = {};
+    if (recruiter.companyRole === 'MASTER' && recruiter.companyId) {
+      whereClause.companyId = recruiter.companyId;
+    } else {
+      whereClause.recruiterId = recruiter.recruiterId;
+    }
+
     const jobs = await this.prisma.jobPosting.findMany({
-      where: { recruiterId: recruiter.recruiterId },
+      where: whereClause,
       include: {
         applications: true,
         branches: { include: { branch: true } },
@@ -75,7 +82,7 @@ export class JobPostingsService {
     const jobIds = jobs.map((j) => j.jobPostingId);
     const [allMatches, allUnlocks] = await Promise.all([
       this.prisma.jobMatch.findMany({
-        where: { jobPostingId: { in: jobIds }, score: { gte: 60 } },
+        where: { jobPostingId: { in: jobIds }, score: { gte: 40 } },
         select: { jobPostingId: true, score: true },
       }),
       this.prisma.candidateUnlock.findMany({
@@ -96,7 +103,12 @@ export class JobPostingsService {
 
     const matchesByJob = allMatches.reduce(
       (acc, m) => {
-        acc[m.jobPostingId] = (acc[m.jobPostingId] || 0) + 1;
+        const job = jobs.find((j) => j.jobPostingId === m.jobPostingId);
+        const threshold = job?.autoInviteThreshold || 70;
+        // Lấy đúng số ứng viên thoả mãn mức % mà HR cấu hình
+        if (m.score >= threshold) {
+          acc[m.jobPostingId] = (acc[m.jobPostingId] || 0) + 1;
+        }
         return acc;
       },
       {} as Record<string, number>,
@@ -108,8 +120,8 @@ export class JobPostingsService {
         if (acc[u.jobPostingId].length < 5) {
           acc[u.jobPostingId].push({
             candidateId: u.candidateId,
-            fullName: u.cv.candidate.fullName,
-            avatar: u.cv.candidate.user.avatar,
+            fullName: u.cv?.candidate.fullName || 'Ứng viên',
+            avatar: u.cv?.candidate.user.avatar || null,
             unlockedAt: u.unlockedAt,
           });
         }

@@ -280,7 +280,7 @@ function WalletContent() {
               {/* CV Hunter Quota */}
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-slate-600">🔓 CV Hunter</p>
+                  <p className="text-sm font-bold text-slate-600">CV Hunter</p>
                   {cvUnlockQuotaMax > 0 ? (
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cvUnlockQuota === 0 ? 'bg-rose-100 text-rose-600' :
                         cvUnlockQuota / cvUnlockQuotaMax < 0.3 ? 'bg-amber-100 text-amber-600' :
@@ -323,7 +323,7 @@ function WalletContent() {
 
               {/* Monthly Plan */}
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                <p className="text-sm font-bold text-slate-600 mb-3">📋 Gói cước tháng</p>
+                <p className="text-sm font-bold text-slate-600 mb-3">Gói cước tháng</p>
                 {subscription && new Date() <= new Date(subscription.expiryDate) ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
@@ -420,8 +420,11 @@ function WalletContent() {
                         <div>
                           <div className="font-bold text-slate-800 flex flex-wrap items-center gap-2">
                             <span>{(tx.description || '').split('|')[0]}</span>
-                            {tx.status === 'PENDING' && <span className="text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Đang chờ xử lý</span>}
-                            {tx.status === 'CANCELLED' && <span className="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Đã huỷ</span>}
+                            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full ml-1 whitespace-nowrap">
+                              bởi {tx.recruiter ? (tx.recruiter.fullName || tx.recruiter.user?.email) : 'Hệ thống'}
+                            </span>
+                            {tx.status === 'PENDING' && <span className="text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 whitespace-nowrap">Đang chờ xử lý</span>}
+                            {tx.status === 'CANCELLED' && <span className="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 whitespace-nowrap">Đã huỷ</span>}
                           </div>
                           <div className="flex items-center gap-3 mt-1">
                             <p className="text-xs text-slate-500 font-medium">{new Date(tx.createdAt).toLocaleString('vi-VN')}</p>

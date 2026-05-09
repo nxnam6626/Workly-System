@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { AnimatePresence } from 'framer-motion';
-import { Building, Loader2, Settings, Heart, Eye } from 'lucide-react';
+import { Building, Loader2, Settings, Heart, Eye, Users } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
 
 // Types
 interface CompanyData {
+  companyId: string;
   companyName: string;
   taxCode: string;
   address: string;
@@ -38,6 +39,9 @@ const EditTab = dynamic(() => import('./tabs/EditTab'), {
 const CultureTab = dynamic(() => import('./tabs/CultureTab'), { 
   loading: () => <TabLoader /> 
 });
+const MembersTab = dynamic(() => import('./tabs/MembersTab'), { 
+  loading: () => <TabLoader /> 
+});
 const PreviewTab = dynamic(() => import('./tabs/PreviewTab'), { 
   loading: () => <TabLoader /> 
 });
@@ -49,6 +53,7 @@ const TabLoader = () => (
 );
 
 const DEFAULT_FORM: CompanyData = {
+  companyId: '',
   companyName: '',
   taxCode: '',
   address: '',
@@ -65,7 +70,7 @@ const DEFAULT_FORM: CompanyData = {
   mainIndustry: '',
 };
 
-type TabType = 'edit' | 'culture' | 'preview';
+type TabType = 'edit' | 'culture' | 'members' | 'preview';
 
 export default function CompanyProfilePage() {
   const [formData, setFormData] = useState<CompanyData>(DEFAULT_FORM);
@@ -83,6 +88,7 @@ export default function CompanyProfilePage() {
     try {
       const { data } = await api.get('/companies/my-company');
       const fetchedData: CompanyData = {
+        companyId: data.companyId || '',
         companyName: data.companyName || '',
         taxCode: data.taxCode || '',
         address: data.address || '',
@@ -241,10 +247,11 @@ export default function CompanyProfilePage() {
         )}
         {activeTab === 'culture' && (
           <CultureTab 
-            company={formData} 
+            company={formData as any} 
             onUpdate={fetchCompany} 
           />
         )}
+        {activeTab === 'members' && <MembersTab />}
         {activeTab === 'preview' && <PreviewTab formData={formData} />}
       </AnimatePresence>
     </div>
@@ -275,9 +282,10 @@ const HeaderSection = ({ activeTab, setActiveTab }: { activeTab: TabType, setAct
       <p className="text-slate-500 mt-2 text-lg font-medium">Nâng tầm thương hiệu tuyển dụng của bạn trên Workly.</p>
     </div>
 
-    <div className="flex p-1 bg-slate-100 rounded-2xl border border-slate-200">
+    <div className="flex p-1 bg-slate-100 rounded-2xl border border-slate-200 overflow-x-auto">
       <TabButton active={activeTab === 'edit'} onClick={() => setActiveTab('edit')} icon={<Settings className="w-4 h-4" />}>Chỉnh sửa</TabButton>
       <TabButton active={activeTab === 'culture'} onClick={() => setActiveTab('culture')} icon={<Heart className="w-4 h-4" />}>Văn hóa</TabButton>
+      <TabButton active={activeTab === 'members'} onClick={() => setActiveTab('members')} icon={<Users className="w-4 h-4" />}>Thành viên</TabButton>
       <TabButton 
         active={activeTab === 'preview'} 
         onClick={() => setActiveTab('preview')} 

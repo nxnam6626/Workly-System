@@ -70,6 +70,12 @@ export class ApplicationsController {
     return this.applicationsService.findAllByJob(id);
   }
 
+  @Get('kanban/:jobId')
+  @UseGuards(JwtAuthGuard)
+  async getKanbanApplications(@Param('jobId') jobId: string) {
+    return this.applicationsService.getKanbanApplications(jobId);
+  }
+
   @Get('recruiter')
   @UseGuards(JwtAuthGuard)
   async findAllForRecruiter(@CurrentUser('userId') userId: string) {

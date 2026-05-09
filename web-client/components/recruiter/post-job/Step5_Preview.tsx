@@ -40,7 +40,13 @@ export const Step5_Preview = ({
               </span>
             </div>
             <div className="flex flex-wrap gap-6 text-sm font-bold text-indigo-100">
-              <span className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {selectedBranches.length > 0 ? `${selectedBranches[0].city} (+${selectedBranches.length - 1} địa điểm)` : 'Chưa chọn địa điểm'}</span>
+              <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />
+                {selectedBranches.length === 0
+                  ? 'Chưa chọn địa điểm'
+                  : selectedBranches.length === 1
+                    ? selectedBranches[0].name
+                    : `${selectedBranches[0].name} (+${selectedBranches.length - 1} địa điểm)`}
+              </span>
               <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" /> {formData.salaryMin && formData.salaryMax ? `${formData.salaryMin.toLocaleString()} - ${formData.salaryMax.toLocaleString()} VNĐ` : 'Thỏa thuận'}</span>
               <span className="flex items-center gap-2"><Calendar className="w-4 h-4" /> {formData.jobType}</span>
             </div>

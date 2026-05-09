@@ -71,10 +71,20 @@ export class UserCreationService {
           },
         });
       } else if (data.role === 'RECRUITER') {
+        const taxCode = (data as any).taxCode;
+        if (taxCode) {
+          const existingCompany = await tx.company.findFirst({
+            where: { taxCode }
+          });
+          if (existingCompany) {
+            throw new ConflictException("Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên của công ty để được cấp tài khoản.");
+          }
+        }
+
         const companyId =
           await this.companiesService.findOrCreateCompanyFromTaxCode(tx, {
             companyName: (data as any).companyName,
-            taxCode: (data as any).taxCode,
+            taxCode: taxCode,
             websiteUrl: (data as any).websiteUrl,
             verifyStatus: (data as any).verifyStatus,
           });
@@ -86,9 +96,16 @@ export class UserCreationService {
               'fullName' in data && data.fullName
                 ? data.fullName
                 : 'Nhà tuyển dụng',
+            companyRole: 'MASTER',
             ...(companyId ? { companyId } : {}),
           },
         });
+
+        if (companyId) {
+          await tx.companyWallet.create({
+            data: { companyId, balance: 0 }
+          });
+        }
       } else if (data.role === 'ADMIN') {
         const permissions =
           'permissions' in data ? (data as any).permissions : [];
@@ -236,18 +253,36 @@ export class UserCreationService {
       } else if (data.role === 'RECRUITER') {
         const existing = await tx.recruiter.findUnique({ where: { userId } });
         if (!existing) {
+          const taxCode = (data as any).taxCode;
+          if (taxCode) {
+            const existingCompany = await tx.company.findFirst({
+              where: { taxCode }
+            });
+            if (existingCompany) {
+              throw new ConflictException("Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên để được cấp tài khoản.");
+            }
+          }
+
           const companyId =
             await this.companiesService.findOrCreateCompanyFromTaxCode(tx, {
               companyName: (data as any).companyName,
-              taxCode: (data as any).taxCode,
+              taxCode: taxCode,
             });
+            
           await tx.recruiter.create({
             data: {
               userId,
               fullName: (data as any).fullName || 'Nhà tuyển dụng',
+              companyRole: 'MASTER',
               ...(companyId ? { companyId } : {}),
             },
           });
+
+          if (companyId) {
+            await tx.companyWallet.create({
+              data: { companyId, balance: 0 }
+            });
+          }
         }
       } else if (data.role === 'ADMIN') {
         const existing = await tx.admin.findUnique({ where: { userId } });

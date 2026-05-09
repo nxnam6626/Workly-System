@@ -248,7 +248,8 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   interviewSettings: 'interviewSettings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  violationCount: 'violationCount'
+  violationCount: 'violationCount',
+  companyRole: 'companyRole'
 };
 
 exports.Prisma.TransactionScalarFieldEnum = {
@@ -257,6 +258,7 @@ exports.Prisma.TransactionScalarFieldEnum = {
   description: 'description',
   createdAt: 'createdAt',
   walletId: 'walletId',
+  recruiterId: 'recruiterId',
   orderCode: 'orderCode',
   status: 'status',
   realMoney: 'realMoney',
@@ -351,7 +353,11 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   pausedAt: 'pausedAt',
   slug: 'slug',
   autoInviteMatches: 'autoInviteMatches',
-  autoRejectThreshold: 'autoRejectThreshold'
+  autoRejectThreshold: 'autoRejectThreshold',
+  autoInviteThreshold: 'autoInviteThreshold',
+  matchMode: 'matchMode',
+  slaApplicationDays: 'slaApplicationDays',
+  slaInterviewDays: 'slaInterviewDays'
 };
 
 exports.Prisma.JobPostingBranchScalarFieldEnum = {
@@ -395,7 +401,10 @@ exports.Prisma.ApplicationScalarFieldEnum = {
   interviewLocation: 'interviewLocation',
   interviewTime: 'interviewTime',
   aiMatchScore: 'aiMatchScore',
-  isUnlocked: 'isUnlocked'
+  isUnlocked: 'isUnlocked',
+  expectedResponseAt: 'expectedResponseAt',
+  expectedResultAt: 'expectedResultAt',
+  candidateResponseAt: 'candidateResponseAt'
 };
 
 exports.Prisma.SavedJobScalarFieldEnum = {
@@ -428,23 +437,13 @@ exports.Prisma.MessageScalarFieldEnum = {
   fileUrl: 'fileUrl'
 };
 
-exports.Prisma.RecruiterWalletScalarFieldEnum = {
+exports.Prisma.CompanyWalletScalarFieldEnum = {
   walletId: 'walletId',
-  recruiterId: 'recruiterId',
+  companyId: 'companyId',
   balance: 'balance',
   updatedAt: 'updatedAt',
   cvUnlockQuota: 'cvUnlockQuota',
   cvUnlockQuotaMax: 'cvUnlockQuotaMax'
-};
-
-exports.Prisma.CandidateUnlockScalarFieldEnum = {
-  unlockId: 'unlockId',
-  recruiterId: 'recruiterId',
-  candidateId: 'candidateId',
-  jobPostingId: 'jobPostingId',
-  unlockedAt: 'unlockedAt',
-  creditSpent: 'creditSpent',
-  cvId: 'cvId'
 };
 
 exports.Prisma.RecruiterSubscriptionScalarFieldEnum = {
@@ -483,6 +482,71 @@ exports.Prisma.AiQueryCacheScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CandidateUnlockScalarFieldEnum = {
+  unlockId: 'unlockId',
+  recruiterId: 'recruiterId',
+  candidateId: 'candidateId',
+  jobPostingId: 'jobPostingId',
+  cvId: 'cvId',
+  creditSpent: 'creditSpent',
+  unlockedAt: 'unlockedAt',
+  companyCompanyId: 'companyCompanyId'
+};
+
+exports.Prisma.CandidateReviewScalarFieldEnum = {
+  reviewId: 'reviewId',
+  candidateId: 'candidateId',
+  recruiterId: 'recruiterId',
+  jobPostingId: 'jobPostingId',
+  rating: 'rating',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InterviewEvaluationScalarFieldEnum = {
+  evaluationId: 'evaluationId',
+  applicationId: 'applicationId',
+  recruiterId: 'recruiterId',
+  roundNumber: 'roundNumber',
+  roundName: 'roundName',
+  sessionDate: 'sessionDate',
+  criteriaScores: 'criteriaScores',
+  overallRating: 'overallRating',
+  notes: 'notes',
+  result: 'result',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CompanyReviewScalarFieldEnum = {
+  reviewId: 'reviewId',
+  companyId: 'companyId',
+  candidateId: 'candidateId',
+  applicationId: 'applicationId',
+  ratingProcess: 'ratingProcess',
+  ratingInterviewer: 'ratingInterviewer',
+  ratingOffice: 'ratingOffice',
+  content: 'content',
+  isAnonymous: 'isAnonymous',
+  isVerified: 'isVerified',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CandidateReportScalarFieldEnum = {
+  reportId: 'reportId',
+  recruiterId: 'recruiterId',
+  candidateId: 'candidateId',
+  applicationId: 'applicationId',
+  reason: 'reason',
+  content: 'content',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -490,6 +554,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -587,6 +655,12 @@ exports.SupportStatus = exports.$Enums.SupportStatus = {
   CLOSED: 'CLOSED'
 };
 
+exports.EvalResult = exports.$Enums.EvalResult = {
+  PENDING: 'PENDING',
+  PASS: 'PASS',
+  FAIL: 'FAIL'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Role: 'Role',
@@ -614,11 +688,15 @@ exports.Prisma.ModelName = {
   SavedJob: 'SavedJob',
   Conversation: 'Conversation',
   Message: 'Message',
-  RecruiterWallet: 'RecruiterWallet',
-  CandidateUnlock: 'CandidateUnlock',
+  CompanyWallet: 'CompanyWallet',
   RecruiterSubscription: 'RecruiterSubscription',
   SupportRequest: 'SupportRequest',
-  AiQueryCache: 'AiQueryCache'
+  AiQueryCache: 'AiQueryCache',
+  CandidateUnlock: 'CandidateUnlock',
+  CandidateReview: 'CandidateReview',
+  InterviewEvaluation: 'InterviewEvaluation',
+  CompanyReview: 'CompanyReview',
+  CandidateReport: 'CandidateReport'
 };
 
 /**

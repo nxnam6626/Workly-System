@@ -220,11 +220,11 @@ Trả về:
       try {
         const recruiterRecord = await this.prisma.recruiter.findUnique({
           where: { userId },
-          include: { recruiterWallet: true },
+          include: { company: { include: { wallet: true } } },
         });
-        if (recruiterRecord?.recruiterWallet) {
+        if (recruiterRecord?.company?.wallet) {
           return {
-            text: `Tài khoản ví của bạn hiện đang có: **${new Intl.NumberFormat('vi-VN').format(recruiterRecord.recruiterWallet.balance)} Xu**.\nSố lượt mở khóa CV hiện còn: **${recruiterRecord.recruiterWallet.cvUnlockQuota}** lượt.`,
+            text: `Tài khoản ví của bạn hiện đang có: **${new Intl.NumberFormat('vi-VN').format(recruiterRecord.company.wallet.balance)} Xu**.\nSố lượt mở khóa CV hiện còn: **${recruiterRecord.company.wallet.cvUnlockQuota}** lượt.`,
           };
         }
       } catch (e) {

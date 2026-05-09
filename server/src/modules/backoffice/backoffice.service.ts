@@ -120,25 +120,15 @@ export class BackofficeService {
 
     const topSpendersData = await Promise.all(
       topSpendersAgg.map(async (agg) => {
-        const wallet = await this.prisma.recruiterWallet.findUnique({
+        const wallet = await this.prisma.companyWallet.findUnique({
           where: { walletId: agg.walletId },
-          include: {
-            recruiter: {
-              include: {
-                user: { select: { email: true } },
-                company: { select: { companyName: true } },
-              },
-            },
-          },
+          include: { company: { select: { companyName: true } } },
         });
         return {
-          companyName:
-            wallet?.recruiter?.company?.companyName ||
-            wallet?.recruiter?.user?.email ||
-            'N/A',
+          companyName: wallet?.company?.companyName || 'N/A',
           balance: wallet?.balance || 0,
           spentAmount: agg._sum.amount || 0,
-          recruiterId: wallet?.recruiterId || '',
+          recruiterId: wallet?.companyId || '',
         };
       }),
     );

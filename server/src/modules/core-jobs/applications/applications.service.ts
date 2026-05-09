@@ -156,6 +156,7 @@ export class ApplicationsService {
             interviewLocation: autoInterviewLocation,
             aiMatchScore,
             isUnlocked: true,
+            expectedResponseAt: new Date(Date.now() + (job.slaApplicationDays || 3) * 24 * 60 * 60 * 1000),
           },
           include: {
             jobPosting: { include: { recruiter: true } },
@@ -211,6 +212,27 @@ export class ApplicationsService {
     });
   }
 
+  async getKanbanApplications(jobPostingId: string) {
+    return this.prisma.application.findMany({
+      where: { jobPostingId },
+      include: { 
+        candidate: {
+          include: {
+            user: { select: { avatar: true, email: true, phoneNumber: true, violations: true } },
+            skills: true,
+            experiences: true,
+            candidateReviews: {
+              orderBy: { createdAt: 'desc' },
+              include: { recruiter: { select: { fullName: true } } }
+            }
+          }
+        }, 
+        cv: true 
+      },
+      orderBy: { applyDate: 'desc' },
+    });
+  }
+
   async findAllByCandidate(candidateId: string) {
     return this.prisma.application.findMany({
       where: { candidateId },
@@ -233,8 +255,15 @@ export class ApplicationsService {
     });
     if (!recruiter) throw new NotFoundException('Recruiter not found');
 
+    const jobFilter: any = {};
+    if (recruiter.companyRole === 'MASTER' && recruiter.companyId) {
+      jobFilter.companyId = recruiter.companyId;
+    } else {
+      jobFilter.recruiterId = recruiter.recruiterId;
+    }
+
     const applications = await this.prisma.application.findMany({
-      where: { jobPosting: { recruiterId: recruiter.recruiterId } },
+      where: { jobPosting: jobFilter },
       include: {
         candidate: { include: { user: true, skills: true } },
         jobPosting: { select: { title: true, company: true } },
@@ -244,14 +273,14 @@ export class ApplicationsService {
     });
 
     const unlocks = await this.prisma.candidateUnlock.findMany({
-      where: { recruiterId: recruiter.recruiterId },
+      where: { jobPosting: jobFilter },
     });
     const unlockedSet = new Set(
       unlocks.map((u) => `${u.candidateId}_${u.jobPostingId}`),
     );
 
     const jobMatches = await this.prisma.jobMatch.findMany({
-      where: { jobPosting: { recruiterId: recruiter.recruiterId } },
+      where: { jobPosting: jobFilter },
     });
     const matchMap = new Map(
       jobMatches.map((m) => [`${m.candidateId}_${m.jobPostingId}`, m]),
@@ -337,7 +366,10 @@ export class ApplicationsService {
 
     const updated = await this.prisma.application.update({
       where: { applicationId },
-      data: { appStatus: 'INTERVIEW_CONFIRMED' },
+      data: { 
+        appStatus: 'INTERVIEW_CONFIRMED',
+        candidateResponseAt: null 
+      },
     });
 
     // Notify Recruiter
@@ -371,6 +403,7 @@ export class ApplicationsService {
       where: { applicationId },
       data: { 
         appStatus: 'RESCHEDULE_REQUESTED',
+        candidateResponseAt: null,
         // Optional: save proposed details in a note/feedback field or create a new field
         feedback: `Ứng viên xin dời lịch: ${proposedDate} lúc ${proposedTime}. Lý do: ${reason}` 
       },

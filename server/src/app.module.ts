@@ -41,6 +41,9 @@ import { SubscriptionsModule } from '@/modules/billing/subscriptions/subscriptio
 
 // Support
 import { SupportModule } from '@/modules/support/support/support.module';
+import { ReviewsModule } from './modules/core-jobs/reviews/reviews.module';
+import { EvaluationsModule } from './modules/core-jobs/evaluations/evaluations.module';
+import { ReportsModule } from '@/modules/communication/reports/reports.module';
 
 @Module({
   imports: [
@@ -76,6 +79,9 @@ import { SupportModule } from '@/modules/support/support/support.module';
     SubscriptionsModule,
     SupportModule,
     MatchingEngineModule,
+    ReviewsModule,
+    EvaluationsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

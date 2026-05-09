@@ -5,6 +5,7 @@ import { ApplicationsNotificationService } from './services/applications-notific
 import { ApplicationStatusService } from './services/application-status.service';
 import { ApplicationInterviewService } from './services/application-interview.service';
 import { ApplicationStatsService } from './services/application-stats.service';
+import { SlaCleanupService } from './services/sla-cleanup.service';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { MessagesModule } from '@/modules/communication/messages/messages.module';
 import { NotificationsModule } from '@/modules/communication/notifications/notifications.module';
@@ -28,6 +29,7 @@ import { MailModule } from '@/mail/mail.module';
     ApplicationStatusService,
     ApplicationInterviewService,
     ApplicationStatsService,
+    SlaCleanupService,
   ],
   exports: [
     ApplicationsService,
