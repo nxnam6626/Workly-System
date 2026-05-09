@@ -25,6 +25,13 @@ export class JobLifecycleService {
     @InjectQueue('matching') private matchingQueue: Queue,
   ) {}
 
+  private async checkPermission(job: any, userId: string) {
+    if (job.recruiter?.userId === userId) return true;
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (recruiter?.companyRole === 'MASTER' && recruiter.companyId === job.companyId) return true;
+    throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+  }
+
   async reparse(id: string, userId: string) {
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: id },
@@ -32,8 +39,7 @@ export class JobLifecycleService {
     });
 
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng');
-    if (job.recruiter?.userId !== userId)
-      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    await this.checkPermission(job, userId);
 
     try {
       const hardSkills = await this.aiService.extractFocusSkills(
@@ -84,8 +90,7 @@ export class JobLifecycleService {
     });
 
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng');
-    if (job.recruiter?.userId !== userId)
-      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    await this.checkPermission(job, userId);
 
     const updatedJob = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
@@ -104,8 +109,7 @@ export class JobLifecycleService {
     });
 
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng');
-    if (job.recruiter?.userId !== userId)
-      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    await this.checkPermission(job, userId);
 
     let newCreatedAt = job.createdAt;
     if (job.pausedAt) {
@@ -137,8 +141,7 @@ export class JobLifecycleService {
     });
 
     if (!job) throw new NotFoundException('Không tìm thấy tin tuyển dụng');
-    if (job.recruiter?.userId !== userId)
-      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    await this.checkPermission(job, userId);
 
     const updatedJob = await this.prisma.jobPosting.update({
       where: { jobPostingId: id },
@@ -156,8 +159,7 @@ export class JobLifecycleService {
     });
 
     if (!job) throw new NotFoundException('Tin tuyển dụng không tồn tại');
-    if (job.recruiter?.userId !== userId)
-      throw new ForbiddenException('Bạn không có quyền gia hạn tin này');
+    await this.checkPermission(job, userId);
 
     await this.subscriptionsService.checkPermissionAndDeduct(
       userId,

@@ -5,7 +5,7 @@ import {
   Briefcase, Building2, Calendar, ChevronRight, Clock,
   DollarSign, FileText, MapPin, Search, ArrowRight,
   Sparkles, ExternalLink, CheckCircle2, XCircle, Eye,
-  Timer, Star, TrendingUp, X
+  Timer, Star, TrendingUp, X, AlertTriangle
 } from "lucide-react";
 import api, { getFileUrl } from "@/lib/api";
 import Link from "next/link";
@@ -35,6 +35,9 @@ interface AppliedJob {
     locationCity: string;
     company: { companyName: string; logo: string | null };
   };
+  expectedResponseAt?: string;
+  expectedResultAt?: string;
+  candidateResponseAt?: string;
 }
 
 const STATUS_CONFIG: Record<string, {
@@ -281,6 +284,30 @@ export default function AppliedJobsPage() {
                                     <StatusIcon className="w-3.5 h-3.5" />
                                     {status.label}
                                   </div>
+                                </div>
+                                
+                                {/* SLA Info for Candidate */}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {(app.appStatus === 'PENDING' || app.appStatus === 'REVIEWED') && app.expectedResponseAt && (
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[10px] font-bold">
+                                      <Clock className="w-3 h-3" />
+                                      DỰ KIẾN PHẢN HỒI TRƯỚC: {new Date(app.expectedResponseAt).toLocaleDateString('vi-VN')}
+                                    </div>
+                                  )}
+
+                                  {app.appStatus === 'INTERVIEWING' && app.candidateResponseAt && (
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-50 text-red-600 border border-red-100 rounded-lg text-[10px] font-black animate-pulse">
+                                      <AlertTriangle className="w-3 h-3" />
+                                      VUI LÒNG PHẢN HỒI LỊCH PV TRƯỚC: {new Date(app.candidateResponseAt).toLocaleDateString('vi-VN')}
+                                    </div>
+                                  )}
+
+                                  {app.appStatus === 'INTERVIEWING' && !app.candidateResponseAt && app.expectedResultAt && (
+                                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-sky-50 text-sky-700 border border-sky-100 rounded-lg text-[10px] font-bold">
+                                      <Clock className="w-3 h-3" />
+                                      DỰ KIẾN CÓ KẾT QUẢ TRƯỚC: {new Date(app.expectedResultAt).toLocaleDateString('vi-VN')}
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Meta row */}

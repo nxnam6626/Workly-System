@@ -136,7 +136,47 @@ export class CompaniesController {
     return this.companiesService.deleteHistory(userId, id);
   }
 
-  // --- End Rich Profile Endpoints ---
+  // --- Member Management Endpoints ---
+
+  @Get('my-company/members')
+  @UseGuards(JwtAuthGuard)
+  async getMembers(@CurrentUser('userId') userId: string) {
+    const members = await this.companiesService.getMembers(userId);
+    const recruiter = await this.companiesService.getRecruiterInfo(userId);
+    return {
+      members,
+      isMaster: recruiter?.companyRole === 'MASTER'
+    };
+  }
+
+  @Post('my-company/members')
+  @UseGuards(JwtAuthGuard)
+  addMember(@CurrentUser('userId') userId: string, @Body() data: any) {
+    return this.companiesService.addMember(userId, data);
+  }
+
+  @Post('my-company/members/bulk')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
+  addMembersBulk(
+    @CurrentUser('userId') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('Vui lòng tải lên file CSV.');
+    return this.companiesService.addMembersBulk(userId, file);
+  }
+
+  @Patch('my-company/members/:recruiterId/block')
+  @UseGuards(JwtAuthGuard)
+  blockMember(
+    @CurrentUser('userId') userId: string,
+    @Param('recruiterId') targetRecruiterId: string,
+    @Body() data: { isBlocked: boolean }
+  ) {
+    return this.companiesService.blockMember(userId, targetRecruiterId, data.isBlocked);
+  }
+
+  // --- End Member Management Endpoints ---
 
   @Get()
   findAll(@Query() query: FilterCompanyDto) {

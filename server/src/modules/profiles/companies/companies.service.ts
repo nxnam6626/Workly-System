@@ -2,10 +2,15 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { FilterCompanyDto } from './dto/filter-company.dto';
 import { SupabaseService } from '@/common/supabase/supabase.service';
+import * as bcrypt from 'bcrypt';
+import * as xlsx from 'xlsx';
+import { MessagesGateway } from '@/modules/communication/messages/messages.gateway';
+import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
 
 const COMPLETENESS_WEIGHTS: Record<string, number> = {
   companyName: 5,
@@ -31,7 +36,9 @@ export class CompaniesService {
   constructor(
     private prisma: PrismaService,
     private supabaseService: SupabaseService,
-  ) {}
+    private messagesGateway: MessagesGateway,
+    private notificationsService: NotificationsService,
+  ) { }
 
   async findAll(query: FilterCompanyDto) {
     const { search, page = 1, limit = 10 } = query;
@@ -424,7 +431,215 @@ export class CompaniesService {
     return recruiter.companyId;
   }
 
-  // --- End Rich Profile Methods ---
+  // --- Member Management Methods ---
+
+  async getRecruiterInfo(userId: string) {
+    return this.prisma.recruiter.findUnique({ where: { userId } });
+  }
+
+  async getMembers(userId: string) {
+    const companyId = await this.getCompanyId(userId);
+    return this.prisma.recruiter.findMany({
+      where: { companyId },
+      include: { user: { select: { email: true, status: true, avatar: true } } },
+      orderBy: { createdAt: 'asc' }
+    });
+  }
+
+  private async notifyCompanyMembers(companyId: string, eventName: string, data?: any) {
+    const members = await this.prisma.recruiter.findMany({ where: { companyId } });
+    for (const member of members) {
+      if (this.messagesGateway?.server) {
+        // Emit for UI update (e.g. refresh list)
+        this.messagesGateway.server.to(`user_${member.userId}`).emit(eventName, data);
+
+        // Create persistent notification and emit for bell icon
+        if (data?.message) {
+          const notification = await this.notificationsService.create(
+            member.userId,
+            'Quản lý nhân sự',
+            data.message,
+            'info',
+            '/recruiter/company?tab=members'
+          );
+          this.messagesGateway.server.to(`user_${member.userId}`).emit('notification', notification);
+        }
+      }
+    }
+  }
+
+  async addMember(userId: string, data: { fullName: string; email: string }) {
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter?.companyId) throw new NotFoundException('Công ty không tồn tại');
+    if (recruiter.companyRole !== 'MASTER') throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
+
+    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+    if (existingUser) throw new BadRequestException('Email đã tồn tại trong hệ thống');
+
+    const hashedPassword = await bcrypt.hash('123456', 10);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          email: data.email,
+          password: hashedPassword,
+          status: 'ACTIVE',
+        },
+      });
+
+      const roleRecord = await tx.role.upsert({
+        where: { roleName: 'RECRUITER' },
+        update: {},
+        create: { roleName: 'RECRUITER' },
+      });
+
+      await tx.userRole.create({
+        data: { userId: newUser.userId, roleId: roleRecord.roleId },
+      });
+
+      return tx.recruiter.create({
+        data: {
+          userId: newUser.userId,
+          fullName: data.fullName,
+          companyId: recruiter.companyId,
+          companyRole: 'MEMBER'
+        }
+      });
+    });
+
+    // Notify after transaction
+    await this.notifyCompanyMembers(recruiter.companyId, 'companyMembersUpdated', {
+      type: 'ADD',
+      message: `Thành viên mới ${data.fullName} vừa được thêm vào công ty.`
+    });
+
+    return result;
+  }
+
+  async addMembersBulk(userId: string, file: Express.Multer.File) {
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter?.companyId) throw new NotFoundException('Công ty không tồn tại');
+    if (recruiter.companyRole !== 'MASTER') throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
+
+    let lines: any[] = [];
+    try {
+      const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      lines = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+    } catch (e) {
+      throw new BadRequestException('Không thể đọc file. Vui lòng tải lên file Excel (.xlsx, .xls) hoặc CSV hợp lệ.');
+    }
+
+    const hasEmailColumn = lines.some(row => Array.isArray(row) && row.some(cell => String(cell).includes('@')));
+    if (!hasEmailColumn) {
+      throw new BadRequestException('File không đúng định dạng. File cần chứa thông tin Email của nhân sự.');
+    }
+
+    const results = { success: 0, failed: 0, errors: [] as string[] };
+    const hashedPassword = await bcrypt.hash('123456', 10);
+
+    for (let i = 0; i < lines.length; i++) {
+      const parts = lines[i];
+      if (Array.isArray(parts) && parts.length >= 1) {
+        let fullName = '';
+        let email = '';
+
+        for (const cell of parts) {
+          const str = String(cell).trim();
+          if (str.includes('@')) {
+            email = str;
+          } else if (!fullName && str.length > 0) {
+            fullName = str;
+          }
+        }
+
+        if (!email) continue;
+        if (!fullName) fullName = email.split('@')[0];
+
+
+        try {
+          const existingUser = await this.prisma.user.findUnique({ where: { email } });
+          if (existingUser) {
+            results.failed++;
+            results.errors.push(`Email ${email} đã tồn tại`);
+            continue;
+          }
+
+          await this.prisma.$transaction(async (tx) => {
+            const newUser = await tx.user.create({
+              data: { email, password: hashedPassword, status: 'ACTIVE' },
+            });
+            const roleRecord = await tx.role.upsert({
+              where: { roleName: 'RECRUITER' },
+              update: {},
+              create: { roleName: 'RECRUITER' },
+            });
+            await tx.userRole.create({
+              data: { userId: newUser.userId, roleId: roleRecord.roleId },
+            });
+            await tx.recruiter.create({
+              data: { userId: newUser.userId, fullName, companyId: recruiter.companyId, companyRole: 'MEMBER' },
+            });
+          });
+          results.success++;
+        } catch (e) {
+          results.failed++;
+          results.errors.push(`Lỗi tạo user ${email}`);
+        }
+      }
+    }
+
+    if (results.success > 0) {
+      await this.notifyCompanyMembers(recruiter.companyId, 'companyMembersUpdated', {
+        type: 'BULK_ADD',
+        message: `Đã thêm ${results.success} thành viên vào công ty.`
+      });
+    }
+
+    return results;
+  }
+
+  async blockMember(userId: string, targetRecruiterId: string, isBlocked: boolean) {
+    const master = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!master?.companyId || master.companyRole !== 'MASTER') {
+      throw new BadRequestException('Không có quyền thao tác');
+    }
+
+    const target = await this.prisma.recruiter.findUnique({ where: { recruiterId: targetRecruiterId } });
+    if (!target || target.companyId !== master.companyId || target.companyRole === 'MASTER') {
+      throw new BadRequestException('Không thể khóa tài khoản này');
+    }
+
+    await this.prisma.user.update({
+      where: { userId: target.userId },
+      data: { status: isBlocked ? 'LOCKED' : 'ACTIVE' }
+    });
+
+    // Realtime notification for the bell icon
+    this.notificationsService.emitToUser(target.userId, 'notification', {
+      title: 'Quản lý nhân sự',
+      message: `Tài khoản ${target.fullName} ${isBlocked ? 'đã bị khóa' : 'đã được mở khóa'}.`,
+      type: isBlocked ? 'error' : 'success',
+    });
+
+    // Force logout if blocked
+    if (isBlocked) {
+      this.notificationsService.emitToUser(target.userId, 'accountLocked', {
+        message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+      });
+    }
+
+    await this.notifyCompanyMembers(master.companyId, 'companyMembersUpdated', {
+      type: isBlocked ? 'BLOCK' : 'UNBLOCK',
+      message: `Tài khoản ${target.fullName} ${isBlocked ? 'đã bị khóa' : 'đã được mở khóa'}.`,
+      targetUserId: target.userId
+    });
+
+    return { success: true };
+  }
+
+  // --- End Member Management Methods ---
 
   async getTopEmployers(limit = 10) {
     const companies = await this.prisma.company.findMany({

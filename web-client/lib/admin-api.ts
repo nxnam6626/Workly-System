@@ -170,6 +170,7 @@ export interface AdminUser {
   userRoles: { role: { roleName: string } }[];
   candidate?: { fullName: string; phone: string };
   recruiter?: { 
+    fullName?: string;
     position?: string; 
     bio?: string; 
     violationCount: number;

@@ -73,10 +73,10 @@ export class UsersController {
     @CurrentUser('userId') reqUserId: string,
   ) {
     if (createUserDto.role === Role.ADMIN) {
-      const currentUser = await this.usersService.findOne(reqUserId);
+      const currentUser = await this.usersService.findOne(reqUserId) as any;
       const isSupreme =
-        currentUser.admin?.permissions.includes('SUPER_ADMIN') ||
-        currentUser.admin?.permissions.includes('ALL');
+        currentUser.admin?.permissions?.includes('SUPER_ADMIN') ||
+        currentUser.admin?.permissions?.includes('ALL');
       if (!isSupreme) {
         throw new ForbiddenException(
           'Chỉ Quản trị viên Toàn quyền mới được phép tạo Admin mới.',

@@ -95,7 +95,7 @@ export const AiAdvisorModal = ({
               <div className="absolute inset-0 bg-[#FAF9F6] rounded-[2rem] opacity-40 pointer-events-none border border-slate-100" />
               <textarea
                 className="relative w-full h-full min-h-[320px] p-8 bg-transparent outline-none resize-none transition-all text-[#111110] placeholder-[#D0CFCA] font-medium leading-relaxed text-base"
-                placeholder="Ví dụ: [FPT SHOP] Cần tuyển Nhân viên tư vấn bán hàng tại Đà Nẵng...\n📍 Địa điểm: Hải Châu, Thanh Khê\n💻 Mô tả: Tư vấn sản phẩm, hướng dẫn khách hàng...\n🎯 Yêu cầu: 18-28 tuổi, thân thiện...\n🎁 Quyền lợi: Lương 8-15tr, đầy đủ BHXH..."
+                placeholder={"Ví dụ: [FPT SHOP] Cần tuyển Nhân viên tư vấn bán hàng tại Đà Nẵng...\nĐịa điểm: Hải Châu, Thanh Khê\nMô tả: Tư vấn sản phẩm, hướng dẫn khách hàng...\nYêu cầu: 18-28 tuổi, thân thiện...\nQuyền lợi: Lương 8-15tr, đầy đủ BHXH..."}
                 value={aiPrompt}
                 onChange={e => setAiPrompt(e.target.value)}
                 disabled={aiGenerating}

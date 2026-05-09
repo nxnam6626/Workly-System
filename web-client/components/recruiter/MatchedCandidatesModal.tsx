@@ -8,7 +8,8 @@ import toast from 'react-hot-toast';
 import { useWalletStore } from '@/stores/wallet';
 import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
 import MatchingAnalysisModal from '@/components/recruiter/MatchingAnalysisModal';
-import { BarChart3 } from 'lucide-react';
+import { WebCvPreviewModal } from '@/components/recruiter/WebCvPreviewModal';
+import { BarChart3, Eye } from 'lucide-react';
 
 interface MatchedCandidatesModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<{ id: string; cvId: string; name: string } | null>(null);
   const [analysisTarget, setAnalysisTarget] = useState<any | null>(null);
+  const [previewCandidate, setPreviewCandidate] = useState<any>(null);
 
   const fetchWallet = useWalletStore((state) => state.fetchWallet);
   const wallet = useWalletStore((state) => state.wallet);
@@ -72,10 +74,15 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
         jobPostingId: jobId,
         cvId: selectedCandidate.cvId,
       });
-      toast.success('Mở khóa thành công');
-      setShowUnlockModal(false);
-      await fetchWallet();
-      await fetchMatches();
+      toast.success(`Đã mở khóa thành công ứng viên ${selectedCandidate.name}`);
+      await fetchMatches(); // Reload lại danh sách
+      // Nếu đang mở CV preview thì cập nhật previewCandidate với dữ liệu mới
+      setPreviewCandidate((prev: any) => {
+        if (prev && prev.candidateId === selectedCandidate.id) {
+          return { ...prev, isUnlocked: true };
+        }
+        return prev;
+      });
     } catch (error: any) {
       const msg = error.response?.data?.message || 'Mở khóa thất bại do số dư không đủ hoặc lỗi hệ thống.';
       toast.error(msg);
@@ -215,15 +222,24 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
                         </a>
                       </>
                     ) : (
-                      <button
-                        onClick={() => handleUnlockClick(candidate.candidateId, candidate.cvId, candidate.fullName)}
-                        disabled={unlockingId === candidate.candidateId}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-sm font-medium shadow-sm"
-                      >
-                        {unlockingId === candidate.candidateId
-                          ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          : <><Lock className="w-4 h-4" /> Mở khóa ({(wallet?.cvUnlockQuota ?? 0) > 0 ? '1 Lượt' : (subscription && new Date() <= new Date(subscription.expiryDate) ? '30 Xu' : '50 Xu')})</>}
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setPreviewCandidate(candidate)}
+                          className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          Xem CV
+                        </button>
+                        <button
+                          onClick={() => handleUnlockClick(candidate.candidateId, candidate.cvId, candidate.fullName)}
+                          disabled={unlockingId === candidate.candidateId}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white rounded-lg text-sm font-medium shadow-sm transition-colors"
+                        >
+                          {unlockingId === candidate.candidateId
+                            ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            : <><Lock className="w-4 h-4" /> Mở khóa ({(wallet?.cvUnlockQuota ?? 0) > 0 ? '1 Lượt' : (subscription && new Date() <= new Date(subscription.expiryDate) ? '30 Xu' : '50 Xu')})</>}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -254,6 +270,16 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
           analysis={analysisTarget.analysis}
         />
       )}
+
+      <WebCvPreviewModal
+        isOpen={!!previewCandidate}
+        onClose={() => setPreviewCandidate(null)}
+        candidate={previewCandidate}
+        onUnlock={handleUnlockClick}
+        wallet={wallet}
+        subscription={subscription}
+        isUnlocking={unlockingId === previewCandidate?.candidateId}
+      />
     </div>
   );
 };

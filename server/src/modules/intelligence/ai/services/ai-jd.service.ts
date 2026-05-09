@@ -175,8 +175,23 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn:
       );
     }
 
-    const extractionPrompt = `Bạn là hệ thống trích xuất thông tin tuyển dụng. Phân tích và chuyển thành JSON: "${promptInfo}"... [Rules for JD generation]`;
-
+    const extractionPrompt = `Bạn là chuyên gia nhân sự tuyển dụng. Dựa vào yêu cầu ngắn gọn sau: "${promptInfo}"
+Hãy tạo ra một bản Mô tả công việc (Job Description) thật chuyên nghiệp, chi tiết và hấp dẫn.
+TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (không kèm markdown):
+{
+  "title": "Tên vị trí công việc (ngắn gọn, chuẩn xác)",
+  "description": "Mô tả chi tiết công việc, nhiệm vụ hàng ngày (dài, chi tiết)",
+  "requirements": ["Yêu cầu 1", "Yêu cầu 2", "Yêu cầu 3"],
+  "benefits": ["Quyền lợi 1", "Quyền lợi 2", "Quyền lợi 3"],
+  "hardSkills": ["Kỹ năng 1", "Kỹ năng 2"],
+  "softSkills": ["Kỹ năng mềm 1", "Kỹ năng mềm 2"],
+  "salaryMin": "Lương tối thiểu (chỉ ghi số nguyên, ví dụ 10000000, hoặc null)",
+  "salaryMax": "Lương tối đa (chỉ ghi số nguyên, hoặc null)",
+  "experience": "Yêu cầu kinh nghiệm (vd: Dưới 1 năm, 1 năm, 2 năm...)",
+  "vacancies": "Số lượng cần tuyển (ghi số nguyên, mặc định là 1 nếu không rõ)",
+  "jobType": "Loại công việc (chỉ chọn 1 trong: FULLTIME, PARTTIME, REMOTE)",
+  "jobLevel": "Cấp bậc (chỉ chọn 1 trong: INTERN, STAFF, MANAGER, DIRECTOR)"
+}`;
     let jobData: any = null;
     let success = false;
 

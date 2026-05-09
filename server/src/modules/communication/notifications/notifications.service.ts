@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => NotificationsGateway))
+    private gateway: NotificationsGateway,
+  ) {}
 
   async create(
     userId: string,
@@ -21,6 +26,14 @@ export class NotificationsService {
         ...(link && { link }),
       },
     });
+  }
+
+  emitToUser(userId: string, event: string, data: any) {
+    this.gateway.emitToUser(userId, event, data);
+  }
+
+  emitToCompany(companyId: string, event: string, data: any) {
+    this.gateway.emitToCompany(companyId, event, data);
   }
 
   async findAllForUser(userId: string) {

@@ -29,6 +29,9 @@ export class WalletPaymentService {
     const amountVND = targetXu * 1000;
     const orderCode = Number(String(Date.now()).slice(-6));
 
+    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
+    if (!recruiter) throw new BadRequestException('Nhà tuyển dụng không tồn tại');
+
     const tx = await this.prisma.transaction.create({
       data: {
         amount: targetXu,
@@ -36,6 +39,7 @@ export class WalletPaymentService {
         type: TransactionType.DEPOSIT,
         description: `Nạp ${targetXu} xu`,
         walletId: wallet.walletId,
+        recruiterId: recruiter.recruiterId,
         status: 'PENDING',
         orderCode,
       },
@@ -119,7 +123,8 @@ export class WalletPaymentService {
       const transaction = await this.prisma.transaction.findUnique({
         where: { orderCode: Number(webhookData.orderCode) },
         include: {
-          wallet: { include: { recruiter: { include: { user: true } } } },
+          wallet: { include: { company: true } },
+          recruiter: { include: { user: true } }
         },
       });
 
@@ -127,7 +132,7 @@ export class WalletPaymentService {
         return { status: 'ignored' };
 
       const [updatedWallet] = await this.prisma.$transaction([
-        this.prisma.recruiterWallet.update({
+        this.prisma.companyWallet.update({
           where: { walletId: transaction.walletId },
           data: { balance: { increment: transaction.amount } },
         }),
@@ -137,12 +142,7 @@ export class WalletPaymentService {
         }),
       ]);
 
-      const tx = transaction as unknown as {
-        wallet: { recruiter: { user: { userId: string } } };
-        transactionId: string;
-        amount: number;
-      };
-      const userId = tx?.wallet?.recruiter?.user?.userId;
+      const userId = transaction.recruiter?.user?.userId;
 
       if (userId) {
         this.messagesGateway.server

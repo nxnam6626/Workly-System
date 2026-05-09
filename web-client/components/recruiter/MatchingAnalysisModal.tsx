@@ -149,15 +149,15 @@ const MatchingAnalysisModal: React.FC<Props> = ({
       },
       yearsExp: {
         title: 'Số năm kinh nghiệm',
-        description: `Yêu cầu: ${analysis?.requiredExp || d?.experienceDetails?.requiredYears || '?'} năm — Ứng viên: ${analysis?.totalYearsExp || d?.experienceDetails?.candidateYears || '?'} năm.`,
+        description: `Yêu cầu: ${analysis?.requiredExp ?? d?.experienceDetails?.requiredYears ?? '?'} năm — Ứng viên: ${analysis?.totalYearsExp ?? d?.experienceDetails?.candidateYears ?? '?'} năm.`,
         pct: val('yearsExp'),
         sections: [
           {
             label: 'So khớp chi tiết',
             color: val('yearsExp') >= 70 ? 'emerald' : 'rose',
             items: [
-              `Yêu cầu tối thiểu: ${analysis?.requiredExp || d?.experienceDetails?.requiredYears || 0} năm`,
-              `Ứng viên có: ${analysis?.totalYearsExp || d?.experienceDetails?.candidateYears || 0} năm`,
+              `Yêu cầu tối thiểu: ${analysis?.requiredExp ?? d?.experienceDetails?.requiredYears ?? 0} năm`,
+              `Ứng viên có: ${analysis?.totalYearsExp ?? d?.experienceDetails?.candidateYears ?? 0} năm`,
             ],
             empty: false,
           },
@@ -301,7 +301,7 @@ const MatchingAnalysisModal: React.FC<Props> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center px-4 pb-4 pt-20 sm:pt-24 bg-slate-900/70 backdrop-blur-md">
           <motion.div
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -310,23 +310,25 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden border border-slate-100"
           >
             {/* ── Header ── */}
-            <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-slate-50/60">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 lg:px-8 py-5 border-b border-slate-100 bg-slate-50/60 gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md shadow-sky-200">
+                <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md shadow-sky-200 flex-shrink-0">
                   <ShieldCheck size={20} className="text-white" />
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-500">Phân tích độ phù hợp</p>
-                  <h2 className="text-lg font-black text-slate-900 leading-tight">{candidateName}</h2>
+                  <h2 className="text-lg font-black text-slate-900 leading-tight truncate max-w-[200px] sm:max-w-xs">{candidateName}</h2>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
+              <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-end">
+                <div className="text-right flex-shrink-0">
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tổng điểm</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-slate-900 leading-none">{score}</span>
-                    <span className="text-lg font-black text-sky-500">%</span>
-                    <span className={`ml-2 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-baseline">
+                      <span className="text-3xl font-black text-slate-900 leading-none">{score}</span>
+                      <span className="text-lg font-black text-sky-500 ml-0.5">%</span>
+                    </div>
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md whitespace-nowrap
                       ${statusColor === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
                         statusColor === 'sky' ? 'bg-sky-50 text-sky-600' :
                           statusColor === 'amber' ? 'bg-amber-50 text-amber-600' :
@@ -336,7 +338,7 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                   </div>
                 </div>
                 <button onClick={onClose}
-                  className="p-2.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all active:scale-95">
+                  className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-all active:scale-95 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-slate-300">
                   <X size={20} />
                 </button>
               </div>
@@ -472,23 +474,23 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             </div>
 
             {/* ── Footer ── */}
-            <div className="flex items-center justify-between px-8 py-4 border-t border-slate-100 bg-slate-50/60">
-              <div className="flex gap-2">
+            <div className="flex flex-wrap items-center justify-between px-6 lg:px-8 py-4 border-t border-slate-100 bg-slate-50/60 gap-4">
+              <div className="flex flex-wrap gap-2 flex-1">
                 {['skills', 'yearsExp', 'relevantExp'].map(k => {
                   const meta = CRITERIA_META.find(c => c.key === k)!;
                   const Icon = meta.icon;
                   return (
                     <button key={k} onClick={() => setActiveCriterion(k)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap
                         ${activeCriterion === k ? 'bg-sky-500 text-white shadow-md shadow-sky-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                      <Icon size={11} />
+                      <Icon size={11} className="flex-shrink-0" />
                       {meta.label}
                     </button>
                   );
                 })}
               </div>
               <button onClick={onClose}
-                className="px-8 py-2.5 bg-slate-900 hover:bg-slate-700 text-white font-black rounded-xl text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg">
+                className="px-8 py-2.5 bg-slate-900 hover:bg-slate-700 text-white font-black rounded-xl text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg flex-shrink-0">
                 Đóng
               </button>
             </div>

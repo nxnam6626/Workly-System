@@ -20,6 +20,7 @@ import { Step2_JobDetails } from '@/components/recruiter/post-job/Step2_JobDetai
 import { Step3_Content } from '@/components/recruiter/post-job/Step3_Content';
 import { Step4_JobTier } from '@/components/recruiter/post-job/Step4_JobTier';
 import { Step5_Preview } from '@/components/recruiter/post-job/Step5_Preview';
+import { ProcessingModal } from '@/components/recruiter/post-job/ProcessingModal';
 
 export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?: string; isDirectEdit?: boolean }) {
   const searchParams = useSearchParams();
@@ -32,7 +33,7 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
     suggestedCategories, isSuggesting, allIndustries, branches, companyProfile, modResult, isChecking,
     toggleCategory, handleBranchToggle, handleChange, addSkill, removeSkill,
     handleSubmit, handleAiGenerate, handlePreCheck, handleNextStep, handlePrevStep,
-    userPlan
+    userPlan, processingState, setProcessingState
   } = usePostJob(editJobId);
 
   if (loadingData) {
@@ -146,7 +147,8 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={saving}
                   className="flex items-center gap-4 px-12 py-4.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-[1.75rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-indigo-200 hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50"
                 >

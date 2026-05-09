@@ -34,7 +34,11 @@ export interface JobFormData {
   jobLevel: string;
   jobTier: string;
   autoInviteMatches: boolean;
+  autoInviteThreshold: number;
   autoRejectThreshold: number | '';
+  matchMode: 'STRICT' | 'BALANCED' | 'BROAD';
   isAiGenerated: boolean;
   categories: string[];
+  slaApplicationDays: number;
+  slaInterviewDays: number;
 }

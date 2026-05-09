@@ -4,7 +4,9 @@ import {
   IsOptional,
   IsNumber,
   IsEnum,
+  IsArray,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { JobType, JobLevel } from '@prisma/client';
 
 export class CreateJobPostingDto {
@@ -17,10 +19,12 @@ export class CreateJobPostingDto {
   description: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === null || value === '' ? undefined : value))
   @IsString()
   requirements?: string;
 
   @IsOptional()
+  @Transform(({ value }) => (value === null || value === '' ? undefined : value))
   @IsString()
   benefits?: string;
 
@@ -57,12 +61,18 @@ export class CreateJobPostingDto {
   locationCity?: string;
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   branchIds?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   hardSkills?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   softSkills?: string[];
 
   @IsOptional()
@@ -81,8 +91,18 @@ export class CreateJobPostingDto {
   autoRejectThreshold?: number;
 
   @IsOptional()
+  @IsNumber()
+  autoInviteThreshold?: number;
+
+  @IsOptional()
+  @IsEnum(['STRICT', 'BALANCED', 'BROAD'], { message: 'Mức độ khắt khe không hợp lệ' })
+  matchMode?: 'STRICT' | 'BALANCED' | 'BROAD';
+
+  @IsOptional()
   isAiGenerated?: boolean;
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   categories?: string[];
 }

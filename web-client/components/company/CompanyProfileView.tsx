@@ -7,6 +7,7 @@ import { JobListSection } from "./JobListSection";
 import { AboutSection } from "./AboutSection";
 import { SidebarInfo } from "./SidebarInfo";
 import { motion, AnimatePresence } from "framer-motion";
+import ReviewSection from "./ReviewSection";
 
 interface CompanyProfileViewProps {
   company: Company;
@@ -69,9 +70,7 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
               {activeTab === 'about' && <AboutSection company={company} />}
               {activeTab === 'jobs' && <JobListSection company={company} isPreview={isPreview} />}
               {activeTab === 'reviews' && (
-                <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
-                   <p className="text-slate-400 font-bold italic">Chưa có đánh giá nào cho công ty này.</p>
-                </div>
+                <ReviewSection companyId={company.companyId} />
               )}
             </motion.div>
           </AnimatePresence>
