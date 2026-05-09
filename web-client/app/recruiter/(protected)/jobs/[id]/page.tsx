@@ -159,7 +159,7 @@ export default function RecruiterJobDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 {[
                   { icon: DollarSign, label: 'Lương', value: formatSalary(job.salaryMin, job.salaryMax, job.currency), color: 'text-blue-600 bg-blue-50' },
-                  { icon: MapPin, label: 'Địa điểm', value: job.locationCity || 'Toàn quốc', color: 'text-emerald-600 bg-emerald-50' },
+                  { icon: MapPin, label: 'Địa điểm', value: job.branches?.length > 0 ? job.branches.map((b: any) => b.branch?.city || b.branch?.address || b.city || b.address || 'Trụ sở').join(', ') : (job.locationCity || 'Toàn quốc'), color: 'text-emerald-600 bg-emerald-50' },
                   { icon: Briefcase, label: 'Hình thức', value: JOB_TYPE[job.jobType] || 'Toàn thời gian', color: 'text-amber-600 bg-amber-50' },
                   { icon: Star, label: 'Cấp bậc', value: JOB_LEVEL[job.jobLevel] || 'Nhân viên', color: 'text-indigo-600 bg-indigo-50' },
                 ].map(({ icon: Icon, label, value, color }) => (

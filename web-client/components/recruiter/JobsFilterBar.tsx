@@ -47,7 +47,7 @@ export const JobsFilterBar = ({
                 setCurrentPage(1);
               }}
               placeholder="Tìm kiếm theo chức danh hoặc từ khóa..."
-              className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-slate-50 border-2 border-transparent focus:bg-white focus:border-indigo-500/20 transition-all outline-none font-bold text-sm text-slate-800 placeholder:text-slate-400 placeholder:font-medium"
+              className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-slate-50 border-2 border-transparent focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none font-bold text-sm text-slate-800 placeholder:text-slate-400 placeholder:font-medium shadow-sm"
             />
           </div>
 
@@ -75,7 +75,7 @@ export const JobsFilterBar = ({
 
           <button
             onClick={() => fetchJobs()}
-            className="w-full lg:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-black text-sm transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 uppercase tracking-wider whitespace-nowrap active:scale-95 shrink-0"
+            className="w-full lg:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-2xl font-black text-sm transition-all shadow-md shadow-indigo-200 flex items-center justify-center gap-2 uppercase tracking-wider whitespace-nowrap active:scale-95 shrink-0"
           >
             <Search className="w-4 h-4" /> TÌM KIẾM
           </button>

@@ -78,12 +78,14 @@ export class CandidateMatchingService {
     }
 
     return {
-      items: matches.map((m) => ({
-        ...m.jobPosting,
-        branches: m.jobPosting.branches.map((b) => b.branch),
-        score: m.score,
-        matchedSkills: m.matchedSkills,
-      })),
+      items: matches
+        .filter((m) => m.jobPosting)
+        .map((m) => ({
+          ...m.jobPosting,
+          branches: m.jobPosting.branches?.map((b) => b.branch) || [],
+          score: m.score,
+          matchedSkills: m.matchedSkills,
+        })),
       total,
       page: Number(page),
       limit: Number(limit),

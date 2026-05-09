@@ -131,6 +131,8 @@ export class TokenService {
       user: {
         userId: user.userId,
         email: user.email,
+        avatar: user.avatar,
+        phoneNumber: user.phoneNumber,
         roles: roles,
         candidate: user.candidate,
         recruiter: user.recruiter,

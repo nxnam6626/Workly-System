@@ -28,7 +28,7 @@ export default function RootLayout({
           <ConfirmProvider>
             {children}
             <NotificationListener />
-            <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+            <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
             {/* <ConditionalAiChat /> */}
             <AlertPopup />
             <ScrollToTop />

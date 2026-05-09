@@ -354,18 +354,18 @@ export default function RecruiterDashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-[28px] font-black text-slate-900 tracking-tight">
             Chào mừng trở lại, {user?.name || 'Nhà tuyển dụng'}!
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-[15px] font-medium text-slate-500 mt-1.5">
             Dưới đây là tổng quan về hoạt động tuyển dụng của bạn.
           </p>
         </div>
         <Link
           href="/recruiter/post-job"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95"
         >
           <PlusCircle className="w-5 h-5" />
           Đăng tin mới
@@ -380,15 +380,15 @@ export default function RecruiterDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group"
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                <stat.icon className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-5">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform ${stat.bg} ${stat.color}`}>
+                <stat.icon className="w-7 h-7" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-slate-900 mb-1">{stat.value.toLocaleString()}</p>
-            <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+            <p className="text-3xl font-black text-slate-900 tracking-tight mb-1">{stat.value.toLocaleString()}</p>
+            <p className="text-[13px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -396,21 +396,23 @@ export default function RecruiterDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 flex flex-col gap-8">
           {/* Recent Jobs Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h3 className="font-bold text-slate-900">Tin tuyển dụng gần đây</h3>
-              <Link href="/recruiter/jobs" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg flex items-center transition-colors">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-7 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="font-bold text-[17px] text-slate-900 flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-indigo-600" /> Tin tuyển dụng gần đây
+              </h3>
+              <Link href="/recruiter/jobs" className="text-[13px] font-bold text-indigo-600 hover:text-white hover:bg-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl flex items-center transition-all active:scale-95 shadow-sm hover:shadow-md">
                 Xem tất cả <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
-                    <th className="px-6 py-4">Vị trí</th>
-                    <th className="px-6 py-4">Ứng viên</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4 text-right">Thao tác</th>
+                  <tr className="bg-slate-50/80 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
+                    <th className="px-7 py-4">Vị trí</th>
+                    <th className="px-7 py-4">Ứng viên</th>
+                    <th className="px-7 py-4">Trạng thái</th>
+                    <th className="px-7 py-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -421,19 +423,19 @@ export default function RecruiterDashboard() {
                       </td>
                     </tr>
                   ) : recentJobs.map((job: any) => (
-                    <tr key={job.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-slate-900 line-clamp-1 max-w-[200px]">{job.title}</p>
-                        <p className="text-xs text-slate-500">{timeAgo(job.date)}</p>
+                    <tr key={job.id} className="hover:bg-slate-50/80 transition-colors group">
+                      <td className="px-7 py-5">
+                        <Link href={`/recruiter/jobs/${job.id}`} className="font-bold text-[15px] text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1 max-w-[200px] hover:underline underline-offset-4 decoration-2">{job.title}</Link>
+                        <p className="text-[13px] text-slate-500 font-medium mt-0.5">{timeAgo(job.date)}</p>
                       </td>
-                      <td className="px-6 py-4 font-medium text-slate-700">{job.applicants}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${getStatusConfig(job.status).className}`}>
+                      <td className="px-7 py-5 font-black text-slate-700 text-[15px]">{job.applicants}</td>
+                      <td className="px-7 py-5">
+                        <span className={`inline-flex px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest shadow-sm ${getStatusConfig(job.status).className}`}>
                           {getStatusConfig(job.status).label}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link href={`/recruiter/jobs/${job.id}`} className="inline-block p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all">
+                      <td className="px-7 py-5 text-right">
+                        <Link href={`/recruiter/jobs/${job.id}`} className="inline-flex p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
                           <ChevronRight className="w-5 h-5" />
                         </Link>
                       </td>
@@ -445,20 +447,20 @@ export default function RecruiterDashboard() {
           </div>
 
           {/* Upcoming Interviews */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between bg-slate-50/50 gap-4">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-7 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between bg-slate-50/50 gap-4">
+              <h3 className="font-bold text-[17px] text-slate-900 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-indigo-600" />
                 Lịch phỏng vấn sắp tới
               </h3>
               <div className="flex items-center gap-2">
-                <label htmlFor="interview-date-filter" className="text-sm text-slate-600 font-medium">Chọn ngày:</label>
+                <label htmlFor="interview-date-filter" className="text-[13px] text-slate-500 font-bold uppercase tracking-widest">Lọc:</label>
                 <input
                   id="interview-date-filter"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-700 bg-white"
+                  className="px-3 py-2 text-[13px] font-bold rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none text-slate-700 bg-white transition-all shadow-sm cursor-pointer"
                 />
                 {selectedDate && (
                   <button
@@ -562,66 +564,47 @@ export default function RecruiterDashboard() {
         </div>
 
         {/* Quick Tips/Resources */}
-        <div className="space-y-6">
-          <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-100 overflow-hidden relative">
-            <Sparkles className="absolute -top-4 -right-4 w-24 h-24 text-white/10" />
-            <h3 className="font-bold text-lg mb-2 relative z-10">Phân Tích AI</h3>
-            <p className="text-indigo-100 text-sm mb-4 relative z-10">
+        <div className="space-y-8">
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-7 text-white shadow-xl shadow-slate-900/10 overflow-hidden relative">
+            <Sparkles className="absolute -top-4 -right-4 w-32 h-32 text-indigo-400/10" />
+            <h3 className="font-black text-xl mb-2.5 relative z-10 flex items-center gap-2">Phân Tích AI</h3>
+            <p className="text-indigo-200 text-[13px] leading-relaxed mb-5 relative z-10 font-medium">
               Công nghệ AI sẽ giúp bạn tìm ra những điểm yếu trong JD (tin tuyển dụng) của mình, từ đó sửa đổi để thu hút đúng ứng viên tiềm năng!
             </p>
             {subInfo?.canViewAIReport ? (
-              <Link href="/recruiter/ai-report" className="w-full inline-block text-center py-2.5 bg-white text-indigo-600 font-bold rounded-xl text-sm hover:bg-slate-50 transition-colors relative z-10">
-                Mở Báo Cáo AI
+              <Link href="/recruiter/ai-report" className="w-full flex items-center justify-center py-3 bg-white text-slate-900 font-bold rounded-2xl text-[14px] hover:bg-slate-50 transition-all shadow-md active:scale-95 relative z-10">
+                Mở Báo Cáo AI <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             ) : (
-              <Link href="/recruiter/billing/plans" className="w-full inline-block text-center py-2.5 bg-amber-400 text-amber-900 font-bold rounded-xl text-sm hover:bg-amber-500 transition-colors relative z-10">
+              <Link href="/recruiter/billing/plans" className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold rounded-2xl text-[14px] hover:opacity-90 transition-all shadow-md active:scale-95 relative z-10">
                 Nâng cấp gói Growth để dùng
               </Link>
             )}
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5">
-              <Wallet className="w-24 h-24 text-indigo-600" />
+          <div className="bg-white rounded-3xl border border-slate-200 p-7 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-5 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+              <Wallet className="w-32 h-32 text-indigo-600" />
             </div>
-            <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+            <h3 className="font-black text-slate-900 text-[17px] mb-1.5 flex items-center gap-2">
               <Wallet className="w-5 h-5 text-indigo-600" /> Ví Nội Bộ
             </h3>
-            <p className="text-slate-500 text-sm mb-4">Dùng để mở khóa thông tin ứng viên tiềm năng.</p>
-            <div className="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100 flex items-end justify-between">
+            <p className="text-slate-500 text-[13px] font-medium mb-5">Dùng để mở khóa thông tin ứng viên tiềm năng.</p>
+            <div className="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-5 mb-5 border border-indigo-100 shadow-inner flex items-end justify-between">
               <div>
-                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Số dư khả dụng</p>
-                <p className="text-2xl font-black text-indigo-700">{walletInfo?.balance || 0} Xu</p>
+                <p className="text-[11px] text-indigo-500 font-black uppercase tracking-widest mb-1.5">Số dư khả dụng</p>
+                <p className="text-3xl font-black text-indigo-600 tracking-tight">{walletInfo?.balance || 0} <span className="text-xl">Xu</span></p>
               </div>
             </div>
             <Link
               href="/recruiter/wallet"
-              className="w-full py-2.5 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition-colors inline-block text-center"
+              className="w-full flex items-center justify-center py-3 bg-slate-900 text-white font-bold rounded-2xl text-[14px] hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95"
             >
               Quản lý Ví
             </Link>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4">Tài nguyên</h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Quy trình phỏng vấn chuẩn', url: '#' },
-                { label: 'Mẫu JD chuyên nghiệp', url: '#' },
-                { label: 'Báo cáo lương 2024', url: '#' },
-              ].map((link, i) => (
-                <li key={i}>
-                  <Link
-                    href={link.url}
-                    className="flex items-center gap-3 text-sm text-slate-600 hover:text-indigo-600 transition-colors group"
-                  >
-                    <FileText className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+
         </div>
       </div>
       <TopUpModal

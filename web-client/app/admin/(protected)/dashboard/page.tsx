@@ -21,7 +21,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4 transition-all hover:-translate-y-1 hover:shadow-xl shadow-md"
+      className="group relative overflow-hidden rounded-3xl p-4 flex flex-col gap-3 transition-all hover:-translate-y-1 hover:shadow-2xl shadow-xl border border-white/10"
       style={{ background: gradient }}
     >
       {/* Glow circle */}
@@ -38,11 +38,11 @@ function StatCard({
       </div>
 
       <div className="relative">
-        <p className="text-3xl font-black text-white tracking-tight">
-          {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-white/60" /> : value.toLocaleString()}
+        <p className="text-2xl font-black text-white tracking-tight leading-none">
+          {isLoading ? <Loader2 className="w-5 h-5 animate-spin text-white/60" /> : value.toLocaleString()}
         </p>
-        <p className="text-sm font-bold text-white/90 mt-0.5">{label}</p>
-        <p className="text-xs text-white/60 mt-0.5">{description}</p>
+        <p className="text-[11px] font-black text-white/90 mt-1.5 uppercase tracking-widest">{label}</p>
+        <p className="text-[10px] font-medium text-white/60 mt-0.5">{description}</p>
       </div>
 
       {urgent && (
@@ -97,45 +97,45 @@ export default function AdminDashboardOverview() {
   const statCards = [
     {
       label: 'Tổng Ứng Viên', value: stats?.totalCandidates || 0, icon: GraduationCap,
-      gradient: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
+      gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
       href: '/admin/candidates', description: 'Người tìm việc',
     },
     {
       label: 'Nhà Tuyển Dụng', value: stats?.totalRecruiters || 0, icon: UserCheck,
-      gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)',
+      gradient: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
       href: '/admin/recruiters', description: 'Đơn vị tuyển dụng',
     },
     {
       label: 'Tổng Doanh Nghiệp', value: stats?.totalCompanies || 0, icon: Building2,
-      gradient: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+      gradient: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
       href: '/admin/companies', description: 'Công ty trên hệ thống',
     },
     {
-      label: 'Tin Đang Hoạt Động', value: stats?.totalJobs || 0, icon: Briefcase,
-      gradient: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
+      label: 'Đang Hoạt Động', value: stats?.totalJobs || 0, icon: Briefcase,
+      gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
       href: '/admin/jobs?status=APPROVED', description: 'Đã được phê duyệt',
     },
     {
       label: 'Chờ Duyệt', value: stats?.pendingJobs || 0, icon: Clock,
-      gradient: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)',
+      gradient: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
       href: '/admin/jobs?status=PENDING', description: 'Cần xử lý gấp',
       urgent: (stats?.pendingJobs || 0) > 0,
     },
     {
-      label: 'Tin Bị Từ Chối', value: stats?.totalRejected || 0, icon: XCircle,
-      gradient: 'linear-gradient(135deg, #4c0519 0%, #e11d48 100%)',
+      label: 'Bị Từ Chối', value: stats?.totalRejected || 0, icon: XCircle,
+      gradient: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
       href: '/admin/jobs?status=REJECTED', description: 'Vi phạm hoặc chưa đạt',
     },
   ];
 
   return (
-    <div className="space-y-6 min-h-screen">
+    <div className="space-y-4 min-h-screen pb-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Tổng Quan Hệ Thống</h1>
-          <p className="text-sm text-slate-400 mt-1 flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5" />
+          <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1.5">
+            <Activity className="w-4 h-4 text-slate-400" />
             {lastUpdated
               ? `Cập nhật lúc ${lastUpdated.toLocaleTimeString('vi-VN')}`
               : 'Đang tải dữ liệu...'}
@@ -144,10 +144,10 @@ export default function AdminDashboardOverview() {
         <button
           onClick={fetchStats}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm disabled:opacity-50 active:scale-95"
+          className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl font-black text-sm text-slate-600 hover:text-slate-900 hover:border-slate-300 hover:shadow-md transition-all active:scale-95 disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Làm mới
+          LÀM MỚI
         </button>
       </div>
 
@@ -164,45 +164,45 @@ export default function AdminDashboardOverview() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: Charts */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-4">
           {/* Revenue + Approval row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Approval Rate */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <div className="flex items-center justify-between mb-5">
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-5 hover:shadow-2xl transition-all duration-300">
+              <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="font-bold text-slate-800 text-sm">Tỷ Lệ Duyệt JD</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Tỷ lệ tin được phê duyệt</p>
+                  <h3 className="font-black text-slate-900 text-[15px] tracking-tight">Tỷ Lệ Duyệt JD</h3>
+                  <p className="text-[11px] font-medium text-slate-500 mt-0.5">Tỷ lệ tin được phê duyệt</p>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shadow-sm">
+                  <TrendingUp className="w-5 h-5 text-emerald-600" />
                 </div>
               </div>
               {isLoading ? (
                 <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
               ) : (
                 <>
-                  <div className="flex items-baseline gap-1 mb-3">
-                    <span className="text-4xl font-black text-slate-900">{stats?.approvalRate ?? 0}</span>
-                    <span className="text-lg font-bold text-slate-400">%</span>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-[2rem] leading-none font-black text-slate-900 tracking-tight">{stats?.approvalRate ?? 0}</span>
+                    <span className="text-sm font-bold text-slate-400">%</span>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 mb-3 overflow-hidden shadow-inner">
                     <div
-                      className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2 rounded-full transition-all duration-1000"
+                      className="bg-emerald-500 h-full rounded-full transition-all duration-1000"
                       style={{ width: `${stats?.approvalRate ?? 0}%` }}
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3">
                     {[
-                      { label: 'Duyệt', value: stats?.totalApproved ?? 0, cls: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
-                      { label: 'Chờ', value: stats?.pendingJobs ?? 0, cls: 'text-amber-700 bg-amber-50 border-amber-100' },
-                      { label: 'Từ chối', value: stats?.totalRejected ?? 0, cls: 'text-rose-700 bg-rose-50 border-rose-100' },
+                      { label: 'Đã Duyệt', value: stats?.totalApproved ?? 0, cls: 'text-emerald-700 bg-emerald-50 border-emerald-200/60' },
+                      { label: 'Chờ Xử Lý', value: stats?.pendingJobs ?? 0, cls: 'text-amber-700 bg-amber-50 border-amber-200/60' },
+                      { label: 'Từ Chối', value: stats?.totalRejected ?? 0, cls: 'text-rose-700 bg-rose-50 border-rose-200/60' },
                     ].map(item => (
-                      <div key={item.label} className={`rounded-xl p-2.5 text-center border ${item.cls}`}>
+                      <div key={item.label} className={`rounded-2xl p-3 text-center border shadow-sm ${item.cls}`}>
                         <p className="text-xl font-black">{item.value}</p>
-                        <p className="text-[10px] font-semibold mt-0.5">{item.label}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest mt-1 opacity-80">{item.label}</p>
                       </div>
                     ))}
                   </div>
@@ -211,9 +211,9 @@ export default function AdminDashboardOverview() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-indigo-500" /> Truy Cập Nhanh
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-5 hover:shadow-2xl transition-all duration-300 flex flex-col justify-center">
+              <h3 className="font-black text-slate-900 text-[15px] mb-3 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-500" /> Truy Cập Nhanh
               </h3>
               <div className="space-y-2">
                 {[
@@ -224,23 +224,23 @@ export default function AdminDashboardOverview() {
                 ].map(action => {
                   const Icon = action.icon;
                   const colorMap: Record<string, string> = {
-                    blue: 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100',
-                    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100',
-                    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100',
-                    rose: 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100',
+                    blue: 'bg-blue-50 text-blue-600 border-blue-200/60 shadow-blue-100/50',
+                    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-200/60 shadow-indigo-100/50',
+                    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-200/60 shadow-emerald-100/50',
+                    rose: 'bg-rose-50 text-rose-600 border-rose-200/60 shadow-rose-100/50',
                   };
                   return (
                     <Link
                       key={action.href}
                       href={action.href}
-                      className="group flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 transition-all"
+                      className="group flex items-center gap-3 p-2.5 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 transition-all"
                     >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-colors ${colorMap[action.color]}`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-sm transition-transform group-hover:scale-110 ${colorMap[action.color]}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-slate-700 truncate">{action.label}</p>
-                        <p className="text-[10px] text-slate-400">{action.desc}</p>
+                        <p className="text-[13px] font-black text-slate-800 truncate">{action.label}</p>
+                        <p className="text-[10px] font-medium text-slate-400 mt-0.5">{action.desc}</p>
                       </div>
                       <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition-colors" />
                     </Link>
@@ -251,40 +251,40 @@ export default function AdminDashboardOverview() {
           </div>
 
           {/* Revenue Bar Chart */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-            <div className="flex items-center justify-between mb-5">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 p-5 hover:shadow-2xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="font-bold text-slate-800 text-sm">Doanh Thu 14 Ngày</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Thống kê nạp xu & thanh toán dịch vụ</p>
+                <h3 className="font-black text-slate-900 text-[15px] tracking-tight">Doanh Thu 14 Ngày</h3>
+                <p className="text-[11px] font-medium text-slate-500 mt-0.5">Thống kê nạp xu & thanh toán dịch vụ</p>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-black text-slate-900">{formatVnd(totalRevenue)}</p>
-                <p className="text-[10px] text-slate-400">Tổng 14 ngày</p>
+              <div className="text-right bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 shadow-inner">
+                <p className="text-base font-black text-slate-900 tracking-tight">{formatVnd(totalRevenue)}</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Tổng 14 ngày</p>
               </div>
             </div>
             {isLoading ? (
               <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
             ) : (
-              <div className="flex items-end gap-1 h-40">
+              <div className="flex items-end gap-1.5 h-36">
                 {chartDays.map(day => {
                   const pct = (day.value / maxRevenue) * 100;
                   return (
-                    <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative">
+                    <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
                       {day.value > 0 && (
-                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
                           {formatVnd(day.value)}
                         </div>
                       )}
                       <div
-                        className="w-full rounded-t-md transition-all duration-500"
+                        className="w-full rounded-t-xl transition-all duration-500 shadow-sm hover:opacity-80"
                         style={{
                           height: `${Math.max(pct, day.value > 0 ? 4 : 1)}%`,
                           background: day.value > 0
-                            ? 'linear-gradient(180deg, #6366f1 0%, #4338ca 100%)'
-                            : '#e2e8f0'
+                            ? 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
+                            : '#f1f5f9'
                         }}
                       />
-                      <span className="text-[8px] text-slate-400 shrink-0">{day.label}</span>
+                      <span className="text-[9px] font-bold text-slate-400 shrink-0 uppercase tracking-widest">{day.label}</span>
                     </div>
                   );
                 })}
@@ -294,7 +294,7 @@ export default function AdminDashboardOverview() {
         </div>
 
         {/* Right: Violations */}
-        <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-1 bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden hover:shadow-2xl transition-all duration-300">
           <ViolationsList />
         </div>
       </div>

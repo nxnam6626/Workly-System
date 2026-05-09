@@ -4,6 +4,7 @@ import { SearchService } from '@/modules/intelligence/search/search.service';
 import { AiChatContextService } from './services/ai-chat-context.service';
 import { AiChatIntentService } from './services/ai-chat-intent.service';
 import { AiChatResponseService } from './services/ai-chat-response.service';
+import { AiResilienceUtil } from './utils/ai-resilience.util';
 
 @Injectable()
 export class AiChatService {
@@ -146,6 +147,7 @@ export class AiChatService {
     for (const modelId of models) {
       if (success) break;
       try {
+        const startTime = Date.now();
         const model = this.responseService
           .getGenAI()
           .getGenerativeModel({ model: modelId });
@@ -188,7 +190,19 @@ export class AiChatService {
           history: [],
           systemInstruction: systemPrompt,
         });
-        const result = await chat.sendMessageStream(message);
+
+        // Use Resilience Util
+        const result = await AiResilienceUtil.withRetry(
+          () =>
+            AiResilienceUtil.withTimeout(
+              () => chat.sendMessageStream(message),
+              15000, // 15 seconds timeout
+              `AIChatStream-${modelId}`
+            ),
+          2, // Max 2 retries per model
+          1000, // 1s base delay
+          `AIChatRetry-${modelId}`
+        );
 
         let fullText = '';
         for await (const chunk of result.stream) {
@@ -199,17 +213,21 @@ export class AiChatService {
 
         if (fullText) {
           success = true;
+          const duration = Date.now() - startTime;
+          this.logger.log(`[AI Chat] Successfully generated response using ${modelId} in ${duration}ms`);
           this.prisma.aiQueryCache
             .create({ data: { query: normalizedMsg, response: fullText } })
             .catch(() => {});
         }
-      } catch (e) {
-        this.logger.warn(`Model ${modelId} failed, trying next...`);
+      } catch (e: any) {
+        this.logger.warn(`[AI Chat] Model ${modelId} failed: ${e.message}. Trying next...`);
       }
     }
 
-    if (!success)
-      yield 'Hệ thống AI đang quá tải hoặc gặp lỗi. Vui lòng thử lại sau.';
+    if (!success) {
+      this.logger.error(`[AI Chat] All models failed for query: "${normalizedMsg}"`);
+      yield 'Hệ thống AI đang xử lý quá nhiều yêu cầu hoặc gặp sự cố kết nối. Vui lòng thử lại sau vài giây.';
+    }
   }
 
   async getCandidateRagContext(userId: string) {

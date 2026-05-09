@@ -143,7 +143,9 @@ export default function JobDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Địa điểm</p>
-                    <p className="font-bold text-slate-900 mt-0.5">{job.locationCity || "Toàn quốc"}</p>
+                    <p className="font-bold text-slate-900 mt-0.5 line-clamp-1" title={job.locationCity || job.company?.address || "Toàn quốc"}>
+                      {job.locationCity || job.company?.address || "Toàn quốc"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -152,7 +154,7 @@ export default function JobDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Kinh nghiệm</p>
-                    <p className="font-bold text-slate-900 mt-0.5">{job.experience ? expLabelMap[job.experience] : "Thỏa thuận"}</p>
+                    <p className="font-bold text-slate-900 mt-0.5">{job.experience ? (expLabelMap[job.experience] || job.experience) : "Thỏa thuận"}</p>
                   </div>
                 </div>
               </div>
@@ -300,6 +302,16 @@ export default function JobDetailPage() {
                   <div>
                     <p className="text-xs font-bold text-slate-400">Ngành nghề</p>
                     <p className="font-bold text-slate-900 line-clamp-1">{job.category || "IT - Phần mềm"}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                    <Briefcase className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400">Kinh nghiệm</p>
+                    <p className="font-bold text-slate-900 line-clamp-1">{job.experience ? (expLabelMap[job.experience] || job.experience) : "Không yêu cầu"}</p>
                   </div>
                 </div>
               </div>

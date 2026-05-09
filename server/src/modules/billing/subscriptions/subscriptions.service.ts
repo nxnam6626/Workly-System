@@ -87,6 +87,21 @@ export class SubscriptionsService {
       include: { recruiterSubscription: true },
     });
     if (!recruiter) throw new NotFoundException('Recruiter not found.');
+
+    // Nếu recruiter là MEMBER và thuộc một công ty, lấy subscription của MASTER công ty đó
+    if (recruiter.companyRole === 'MEMBER' && recruiter.companyId) {
+      const masterRecruiter = await this.prisma.recruiter.findFirst({
+        where: {
+          companyId: recruiter.companyId,
+          companyRole: 'MASTER',
+        },
+        include: { recruiterSubscription: true },
+      });
+      if (masterRecruiter && masterRecruiter.recruiterSubscription) {
+        return masterRecruiter.recruiterSubscription;
+      }
+    }
+
     return recruiter.recruiterSubscription;
   }
 

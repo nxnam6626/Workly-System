@@ -137,7 +137,7 @@ export default function UserTable({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className={`text-sm font-bold text-slate-900 truncate group-hover:${theme.text} transition-colors`}>{displayName}</p>
+                          <p className={`text-[14px] font-black tracking-tight text-slate-900 truncate group-hover:${theme.text} transition-colors`}>{displayName}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <Mail className="w-3 h-3 text-slate-400" />
                             <p className="text-[11px] font-medium text-slate-400 truncate max-w-[180px]">{u.email}</p>
@@ -155,9 +155,9 @@ export default function UserTable({
                             return (
                               <span
                                 key={r}
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border ${config.color}`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${config.color}`}
                               >
-                                <config.icon className="w-3 h-3" />
+                                <config.icon className="w-3.5 h-3.5" />
                                 {config.label}
                               </span>
                             );

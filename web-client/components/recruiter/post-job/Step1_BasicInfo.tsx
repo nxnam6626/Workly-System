@@ -178,8 +178,6 @@ export const Step1_BasicInfo = ({
             <option value="FULLTIME">Toàn thời gian</option>
             <option value="PARTTIME">Bán thời gian</option>
             <option value="REMOTE">Làm việc từ xa</option>
-            <option value="INTERN">Thực tập sinh</option>
-            <option value="CONTRACT">Hợp đồng</option>
           </select>
         </div>
 

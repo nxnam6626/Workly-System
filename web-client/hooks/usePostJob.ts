@@ -129,8 +129,19 @@ export function usePostJob(editJobId?: string | null) {
         api.get('/wallets/balance').catch(() => ({ data: null }))
       ]);
       setAllIndustries(Array.isArray(industriesRes.data) ? industriesRes.data : []);
-      setBranches(companyRes.data.branches || []);
+      
+      const companyBranches = companyRes.data.branches || [];
+      setBranches(companyBranches);
       setCompanyProfile(companyRes.data);
+      
+      if (!editJobId && companyBranches.length > 0) {
+        const hq = companyBranches.find((b: any) => b.isHeadquarters) || companyBranches[0];
+        setFormData(prev => ({
+          ...prev,
+          branchIds: prev.branchIds.length > 0 ? prev.branchIds : [hq.branchId]
+        }));
+      }
+
       if (walletRes.data) {
         setUserPlan(walletRes.data.subscription?.planType || 'FREE');
         setSubscription(walletRes.data.subscription || null);
@@ -138,7 +149,7 @@ export function usePostJob(editJobId?: string | null) {
     } catch (error) {
       console.error('Failed to fetch initial data', error);
     }
-  }, []);
+  }, [editJobId]);
 
   useEffect(() => {
     if (accessToken) {
@@ -326,7 +337,7 @@ export function usePostJob(editJobId?: string | null) {
         const res = await api.post('/job-postings', payload);
         const createdJob = res.data;
         if (createdJob.status === 'APPROVED' || createdJob.status === 'PENDING') {
-          toast.success('Đăng tin thành công! AI đang xử lý ngầm và tìm ứng viên...');
+          toast.success('Đăng tin thành công!');
           router.push('/recruiter/jobs');
         } else {
           toast.success('Gửi yêu cầu thành công!');
