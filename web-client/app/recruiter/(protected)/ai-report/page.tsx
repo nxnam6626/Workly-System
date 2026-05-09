@@ -105,24 +105,24 @@ function AiChatMini() {
   return (
     <>
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[420px]">
-        <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-600 to-indigo-700 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
-            <BotMessageSquare className="w-5 h-5 text-white" />
+        <div className="px-6 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-inner">
+            <BotMessageSquare className="w-5 h-5 text-indigo-300" />
           </div>
           <div>
-            <p className="font-bold text-white text-sm">AI Recruiter Assistant</p>
-            <p className="text-indigo-200 text-xs">Powered by Gemini</p>
+            <p className="font-bold text-white text-sm tracking-wide">AI Recruiter Assistant</p>
+            <p className="text-indigo-300/80 text-[10px] font-medium tracking-widest uppercase mt-0.5">Powered by Gemini</p>
           </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-indigo-100 font-medium">Online</span>
+          <div className="ml-auto flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span className="text-[10px] text-emerald-300 font-bold tracking-wider uppercase">Online</span>
           </div>
         </div>
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
           <AnimatePresence initial={false}>
             {messages.map((m, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed overflow-hidden ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white border border-slate-100 text-slate-700 shadow-sm rounded-bl-sm [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mt-2 [&_strong]:font-bold [&_strong]:text-slate-900'}`}>
+                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed overflow-hidden shadow-sm ${m.role === 'user' ? 'bg-slate-900 text-white rounded-tr-sm border border-slate-800' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-base [&_h1]:font-bold [&_h1]:mt-2 [&_h2]:text-sm [&_h2]:font-bold [&_h2]:mt-2 [&_strong]:font-bold [&_strong]:text-slate-900'}`}>
                   {m.role === 'user' ? (
                     m.text
                   ) : (
@@ -142,24 +142,26 @@ function AiChatMini() {
         </div>
         <div className="p-3 border-t border-slate-100 bg-white">
           <div className="flex gap-2">
-            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Hỏi AI về chiến lược tuyển dụng..." className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 text-sm transition-all" />
-            <button onClick={() => send()} disabled={!input.trim() || loading} className="w-10 h-10 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl flex items-center justify-center transition-all shrink-0">
-              <Send className="w-4 h-4" />
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Hỏi AI về chiến lược tuyển dụng..." className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-500/10 text-sm transition-all" />
+            <button onClick={() => send()} disabled={!input.trim() || loading} className="w-11 h-11 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl flex items-center justify-center transition-all shrink-0 shadow-md shadow-slate-900/20 active:scale-95">
+              <Send className="w-4 h-4 ml-0.5" />
             </button>
           </div>
         </div>
       </div>
-      <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm mt-4">
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Câu hỏi gợi ý</p>
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mt-4 hover:border-indigo-200 transition-colors group">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+          <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Câu hỏi gợi ý
+        </p>
         <div className="flex flex-col gap-2">
           {['Phân tích JD đang có ít ứng viên nhất', 'Gợi ý cách viết mô tả JD hấp dẫn hơn', 'Làm thế nào để tăng tỉ lệ apply/view?'].map((q, i) => (
             <button
               key={i}
               onClick={() => send(q)}
               disabled={loading}
-              className="text-left text-xs text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors border border-transparent hover:border-indigo-100 font-medium disabled:opacity-50"
+              className="text-left text-[13px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3.5 py-2.5 rounded-xl transition-all border border-slate-100 hover:border-slate-300 font-medium disabled:opacity-50 shadow-sm hover:shadow active:scale-[0.98]"
             >
-              💡 {q}
+              {q}
             </button>
           ))}
         </div>
@@ -204,35 +206,38 @@ function InsightCard({ insight, index, jdScores, planType }: { insight: any; ind
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 + index * 0.1 }}
-        className={`bg-white border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex gap-4 items-start ${cfg.borderClass}`}
+        className={`bg-white border rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex gap-4 items-start ${cfg.borderClass}`}
       >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.labelBg} ${cfg.colorClass}`}>
-          <Icon className="w-5 h-5" />
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${cfg.labelBg} ${cfg.colorClass}`}>
+          <Icon className="w-6 h-6" />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <p className="font-bold text-slate-900 text-sm">{insight.title}</p>
-            {insight.priority === 'high' && <span className="text-[10px] font-black uppercase tracking-wider text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">Ưu tiên</span>}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <div className="flex items-center gap-2 mb-1.5">
+            <p className="font-bold text-slate-900 text-[15px]">{insight.title}</p>
+            {insight.priority === 'high' && <span className="text-[9px] font-black uppercase tracking-widest text-white bg-red-500 px-2 py-0.5 rounded-full shadow-sm shadow-red-500/30">Ưu tiên</span>}
           </div>
-          <p className="text-slate-500 text-xs leading-relaxed">{insight.desc}</p>
+          <p className="text-slate-600 text-[13px] leading-relaxed">{insight.desc}</p>
           {hasAffectedJds && (
-            <p className="text-xs text-slate-400 mt-1">{affectedJds.length} JD cần cải thiện</p>
+            <p className="text-xs font-semibold text-indigo-600/80 mt-2 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              {affectedJds.length} JD cần cải thiện
+            </p>
           )}
         </div>
-        <div className="shrink-0 flex flex-col items-end gap-2 text-right">
+        <div className="shrink-0 flex flex-col items-end gap-3 pt-0.5">
           <button
             onClick={() => hasAffectedJds ? setShowModal(true) : undefined}
-            className={`flex items-center gap-0.5 text-xs font-bold ${cfg.labelText} hover:underline`}
+            className={`flex items-center gap-1 text-[13px] font-bold ${cfg.labelText} hover:underline decoration-2 underline-offset-4`}
           >
-            {hasAffectedJds ? 'Xem danh sách' : 'Xem'} <ChevronRight className="w-3.5 h-3.5" />
+            {hasAffectedJds ? 'Xem chi tiết' : 'Xem'} <ChevronRight className="w-4 h-4" />
           </button>
 
           {hasAffectedJds && (
             <button
               onClick={() => setShowModal(true)}
-              className="mt-1 flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-[10px] font-bold rounded-lg transition-all shadow-sm"
+              className="mt-auto flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 to-orange-500 hover:opacity-90 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-orange-500/20 active:scale-95"
             >
-              <Sparkles className="w-3 h-3" /> Sửa Tự Động
+              <Sparkles className="w-4 h-4" /> Sửa Tự Động
             </button>
           )}
         </div>
@@ -508,19 +513,19 @@ export default function AiReportPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {statCards.map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-            className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 group hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${s.color}-50 text-${s.color}-600 group-hover:scale-110 transition-transform`}>
-                <s.icon className="w-5 h-5" />
+            className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 group hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300">
+            <div className="flex items-start justify-between mb-4">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-${s.color}-50 text-${s.color}-600 group-hover:scale-110 group-hover:bg-${s.color}-100 transition-all shadow-inner`}>
+                <s.icon className="w-6 h-6" />
               </div>
             </div>
-            <p className="text-2xl font-black text-slate-900 mb-1">
-              {analysing ? <span className="inline-block w-12 h-6 bg-slate-100 rounded animate-pulse" /> : s.value}
+            <p className="text-3xl font-black text-slate-900 mb-1.5 tracking-tight">
+              {analysing ? <span className="inline-block w-16 h-8 bg-slate-100 rounded-lg animate-pulse" /> : s.value}
             </p>
-            <p className="text-xs text-slate-500 font-medium leading-tight">{s.label}</p>
+            <p className="text-[13px] text-slate-500 font-semibold tracking-wide uppercase">{s.label}</p>
           </motion.div>
         ))}
       </div>
@@ -556,11 +561,13 @@ export default function AiReportPage() {
           )}
 
           {/* JD Score Table */}
-          <div className="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-indigo-500" />
-                <h3 className="font-bold text-slate-800 text-sm">Điểm AI cho từng JD</h3>
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-inner">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-[15px]">Điểm AI cho từng JD</h3>
               </div>
               <div className="relative group/filter">
                 <button className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-100 hover:border-indigo-100 transition-colors">
@@ -589,45 +596,45 @@ export default function AiReportPage() {
             ) : (
               <div className="divide-y divide-slate-100">
                 {currentScores.map((jd: any, i: number) => (
-                  <div key={i} className="px-6 py-3.5 flex items-center gap-4 hover:bg-slate-50 transition-colors group">
-                    <span className="text-xs font-bold text-slate-400 w-6">{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</span>
+                  <div key={i} className="px-6 py-4 flex items-center gap-5 hover:bg-slate-50/80 transition-colors group">
+                    <span className="text-[13px] font-black text-slate-300 w-6">{(currentPage - 1) * ITEMS_PER_PAGE + i + 1}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Link href={`/recruiter/jobs/${jd.id}`} className="font-semibold text-sm text-slate-800 hover:text-indigo-600 transition-colors truncate">{jd.title}</Link>
-                        {jd.trend === 'up' && <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />}
-                        {jd.trend === 'down' && <ArrowDownRight className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />}
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Link href={`/recruiter/jobs/${jd.id}`} className="font-bold text-[15px] text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{jd.title}</Link>
+                        {jd.trend === 'up' && <ArrowUpRight className="w-4 h-4 text-emerald-500 flex-shrink-0 drop-shadow-sm" />}
+                        {jd.trend === 'down' && <ArrowDownRight className="w-4 h-4 text-rose-500 flex-shrink-0 drop-shadow-sm" />}
                       </div>
                       <div className="flex items-center gap-2">
-                         <p className="text-xs text-slate-500 line-clamp-1">{jd.reason}</p>
-                         <Link href={`/recruiter/jobs/${jd.id}`} title="Sửa tin bằng AI" className="text-indigo-500 hover:text-indigo-600 transition-colors shrink-0">
+                         <p className="text-[13px] text-slate-600 line-clamp-1 leading-relaxed">{jd.reason}</p>
+                         <Link href={`/recruiter/jobs/${jd.id}`} title="Sửa tin bằng AI" className="text-indigo-400 hover:text-indigo-600 bg-indigo-50 hover:bg-indigo-100 p-1 rounded-md transition-colors shrink-0">
                            <Wand2 className="w-3.5 h-3.5" />
                          </Link>
                       </div>
 
                       {/* Hiển thị điểm mạnh và điểm yếu */}
-                      <div className="flex flex-col gap-1.5 mt-2">
+                      <div className="flex flex-col gap-2 mt-2.5">
                         {jd.strengths && jd.strengths.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1.5">
                             {jd.strengths.map((s: string, idx: number) => (
-                              <span key={`s-${idx}`} className="px-1.5 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-medium rounded border border-emerald-100 line-clamp-1 break-words">{s}</span>
+                              <span key={`s-${idx}`} className="px-2 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded-lg border border-emerald-200/60 line-clamp-1 break-words shadow-sm">{s}</span>
                             ))}
                           </div>
                         )}
                         {jd.weaknesses && jd.weaknesses.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1.5">
                             {jd.weaknesses.map((w: string, idx: number) => (
-                              <span key={`w-${idx}`} className="px-1.5 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-medium rounded border border-rose-100 line-clamp-1 break-words">{w}</span>
+                              <span key={`w-${idx}`} className="px-2 py-1 bg-rose-50 text-rose-700 text-[11px] font-bold rounded-lg border border-rose-200/60 line-clamp-1 break-words shadow-sm">{w}</span>
                             ))}
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="w-20 bg-slate-100 rounded-full h-2 overflow-hidden">
-                        <div className={`h-2 rounded-full transition-all ${jd.score >= 80 ? 'bg-emerald-500' : jd.score >= 60 ? 'bg-amber-400' : 'bg-rose-400'}`} style={{ width: `${jd.score}%` }} />
+                    <div className="flex items-center gap-3 shrink-0 pl-2">
+                      <div className="w-24 bg-slate-100/80 backdrop-blur-sm rounded-full h-2.5 overflow-hidden shadow-inner">
+                        <div className={`h-2.5 rounded-full transition-all duration-700 ${jd.score >= 80 ? 'bg-emerald-500' : jd.score >= 60 ? 'bg-amber-400' : 'bg-rose-500'}`} style={{ width: `${jd.score}%` }} />
                       </div>
-                      <span className={`text-xs font-black w-8 text-right ${jd.score >= 80 ? 'text-emerald-600' : jd.score >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>{jd.score}</span>
-                      {jd.trend === 'up' ? <ArrowUp className="w-3 h-3 text-emerald-500" /> : jd.trend === 'down' ? <ArrowDown className="w-3 h-3 text-rose-400" /> : <span className="w-3 h-3" />}
+                      <span className={`text-[15px] font-black w-8 text-right ${jd.score >= 80 ? 'text-emerald-600' : jd.score >= 60 ? 'text-amber-500' : 'text-rose-600'}`}>{jd.score}</span>
+                      {jd.trend === 'up' ? <ArrowUp className="w-3.5 h-3.5 text-emerald-500" /> : jd.trend === 'down' ? <ArrowDown className="w-3.5 h-3.5 text-rose-500" /> : <span className="w-3.5 h-3.5" />}
                     </div>
                   </div>
                 ))}

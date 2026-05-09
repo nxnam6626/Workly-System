@@ -97,7 +97,7 @@ export default function VerifyEmailScreen() {
           <View style={styles.successIcon}>
             <Ionicons name="shield-checkmark" size={64} color="#fff" />
           </View>
-          <Text style={styles.successTitle}>Tuyệt vời! 🎉</Text>
+          <Text style={styles.successTitle}>Tuyệt vời!</Text>
           <Text style={styles.successDesc}>
             Email của bạn đã được xác minh thành công. Bây giờ bạn có thể trải nghiệm toàn bộ tính năng của Workly.
           </Text>

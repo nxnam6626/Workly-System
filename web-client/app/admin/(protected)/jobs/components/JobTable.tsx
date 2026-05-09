@@ -1,7 +1,7 @@
 'use client';
 
 import { Loader2, Briefcase } from 'lucide-react';
-import { JobPosting } from '@/lib/admin-api';
+import { JobPosting, JobStatus } from '@/lib/admin-api';
 import JobTableRow from './JobTableRow';
 import JobPagination from './JobPagination';
 
@@ -59,23 +59,25 @@ export default function JobTable({
     <>
       <div className="flex-1 overflow-x-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="sticky top-0 bg-slate-50 border-b border-slate-100 z-10">
-            <tr className="text-[11px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50/80 backdrop-blur-sm">
-              <th className="px-5 py-4 w-10">
+          <thead className="sticky top-0 z-10">
+            <tr className="bg-slate-50/50 border-b border-slate-100">
+              <th className="px-8 py-5 w-10">
                 <input
                   type="checkbox"
-                  checked={selectedIds.length === jobs.length && jobs.length > 0}
+                  checked={
+                    jobs.filter(j => j.status === JobStatus.PENDING).length > 0 &&
+                    selectedIds.length === jobs.filter(j => j.status === JobStatus.PENDING).length
+                  }
                   onChange={toggleSelectAll}
                   className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
               </th>
-              <th className="px-5 py-4 min-w-[300px]">Thông tin việc làm</th>
-              <th className="px-5 py-4">Mức lương</th>
-              <th className="px-5 py-4">Loại hình</th>
-              <th className="px-5 py-4">Phân loại</th>
-              <th className="px-5 py-4">Trạng thái</th>
-              <th className="px-5 py-4">Độ tin cậy AI</th>
-              <th className="px-5 py-4 text-right">Thao tác</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest min-w-[300px]">Thông tin việc làm</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Mức lương</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Loại hình</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Độ tin cậy AI</th>
+              <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">

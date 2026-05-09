@@ -230,7 +230,8 @@ export const Step2_JobDetails = ({
         <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex gap-4 items-start">
            <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
            <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-             Hệ thống sẽ tự động hiển thị thời gian dự kiến phản hồi cho ứng viên. 
+               Hệ thống sẽ tự động hiển thị thời gian dự kiến phản hồi cho ứng viên. 
+             <br />
              <span className="text-white font-bold mx-1">Lưu ý:</span> Việc quá hạn phản hồi thường xuyên có thể làm giảm điểm uy tín của công ty trên nền tảng.
            </p>
         </div>

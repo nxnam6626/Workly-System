@@ -1,5 +1,5 @@
 import React from 'react';
-import { Briefcase, Crown, Lock, Sparkles } from 'lucide-react';
+import { Briefcase, Crown, Lock, Sparkles, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -23,8 +23,18 @@ export const PostJobHeader = ({ editJobId, userPlan, setAiModalOpen }: PostJobHe
 
   return (
     <div className="border-b border-indigo-100 pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+      <div className="flex items-start gap-3">
+        {editJobId && (
+          <button 
+            onClick={() => router.back()} 
+            className="mt-1 p-2 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-xl transition-all border border-slate-200 shadow-sm"
+            title="Quay lại trang trước"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
           <Briefcase className="h-8 w-8 text-indigo-600" />
           {editJobId ? 'Chỉnh Sửa Tin Tuyển Dụng' : 'Gửi Yêu Cầu Tuyển Dụng'}
           {userPlan && (
@@ -42,6 +52,7 @@ export const PostJobHeader = ({ editJobId, userPlan, setAiModalOpen }: PostJobHe
             ? 'Cập nhật lại thông tin tuyển dụng, chức danh và yêu cầu.' 
             : 'Điền thông tin chi tiết và gửi yêu cầu để Admin phê duyệt trước khi tin được hiển thị.'}
         </p>
+        </div>
       </div>
 
       {!editJobId && (

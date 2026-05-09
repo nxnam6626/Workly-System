@@ -67,6 +67,28 @@ export class RecruitersService {
     return { success: true, settings: newSettings };
   }
 
+  async updateProfile(userId: string, data: { fullName?: string; phoneNumber?: string }) {
+    const recruiter = await this.ensureRecruiter(userId);
+
+    // Update Recruiter
+    if (data.fullName !== undefined) {
+      await this.prisma.recruiter.update({
+        where: { recruiterId: recruiter.recruiterId },
+        data: { fullName: data.fullName },
+      });
+    }
+
+    // Update User
+    if (data.phoneNumber !== undefined) {
+      await this.prisma.user.update({
+        where: { userId },
+        data: { phoneNumber: data.phoneNumber },
+      });
+    }
+
+    return { success: true };
+  }
+
   private async cancelInterviewsOnBlockedDates(recruiterId: string, blockedDates: string[]) {
     if (!blockedDates.length) return;
 

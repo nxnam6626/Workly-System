@@ -1,0 +1,18 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 10
+      arrivalRate: 2
+      name: "Ramp up load"
+    - duration: 20
+      arrivalRate: 5
+      name: "Sustained load"
+scenarios:
+  - name: "AI Chat Request"
+    flow:
+      - post:
+          url: "/api/ai/chat"
+          headers:
+            Content-Type: "application/json"
+          json:
+            message: "Bạn có thể giúp tôi viết một JD đơn giản cho vị trí IT Helpdesk không?"

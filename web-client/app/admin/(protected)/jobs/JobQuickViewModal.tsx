@@ -111,6 +111,21 @@ export default function JobQuickViewModal({
             </div>
           )}
 
+          {/* Rejection Reason */}
+          {job.status === JobStatus.REJECTED && job.moderationFeedback?.reason && (
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-rose-50 border border-rose-100">
+                <div className="p-2 bg-rose-100 rounded-xl">
+                    <XCircle className="w-5 h-5 text-rose-600" />
+                </div>
+                <div>
+                    <h4 className="text-sm font-bold text-rose-900">Lý do từ chối</h4>
+                    <p className="text-xs text-rose-700 mt-1 leading-relaxed whitespace-pre-wrap">
+                        {job.moderationFeedback.reason}
+                    </p>
+                </div>
+            </div>
+          )}
+
           {/* Quick Info Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
@@ -125,7 +140,11 @@ export default function JobQuickViewModal({
                     <MapPin className="w-4 h-4" />
                     <span className="text-[11px] font-bold uppercase tracking-wider">Địa điểm</span>
                 </div>
-                <p className="text-sm font-semibold text-slate-900">{job.locationCity || 'Không rõ'}</p>
+                <p className="text-sm font-semibold text-slate-900 line-clamp-2">
+                  {(!job.locationCity || job.locationCity === 'Không rõ') 
+                    ? (job.company?.address || 'Không rõ') 
+                    : job.locationCity}
+                </p>
             </div>
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
                 <div className="flex items-center gap-2 text-slate-400 mb-1">
@@ -286,24 +305,26 @@ export default function JobQuickViewModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 border-t border-slate-100 bg-white flex items-center gap-4">
-            <button
-                onClick={() => onReject(job.jobPostingId)}
-                disabled={isProcessing || job.status === JobStatus.REJECTED}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 disabled:opacity-50 transition-all"
-            >
-                <XCircle className="w-4 h-4" />
-                Từ chối tin
-            </button>
-            <button
-                onClick={() => onApprove(job.jobPostingId)}
-                disabled={isProcessing || job.status === JobStatus.APPROVED}
-                className="flex-[2] flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 disabled:opacity-50 transition-all"
-            >
-                <CheckCircle2 className="w-4 h-4" />
-                Duyệt tin ngay
-            </button>
-        </div>
+        {job.status === JobStatus.PENDING && (
+          <div className="p-6 border-t border-slate-100 bg-white flex items-center gap-4">
+              <button
+                  onClick={() => onReject(job.jobPostingId)}
+                  disabled={isProcessing}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border border-red-200 text-red-600 font-bold text-sm hover:bg-red-50 disabled:opacity-50 transition-all"
+              >
+                  <XCircle className="w-4 h-4" />
+                  Từ chối tin
+              </button>
+              <button
+                  onClick={() => onApprove(job.jobPostingId)}
+                  disabled={isProcessing}
+                  className="flex-[2] flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 disabled:opacity-50 transition-all"
+              >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Duyệt tin ngay
+              </button>
+          </div>
+        )}
       </motion.div>
     </AnimatePresence>
   );

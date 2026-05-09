@@ -150,36 +150,36 @@ export default function ApplicationsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'Tổng đơn', value: stats.total, icon: Users, color: 'text-slate-600 bg-slate-50 border-slate-200' },
-            { label: 'Chờ duyệt', value: stats.pending, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-100' },
-            { label: 'Phỏng vấn', value: stats.interviewing, icon: Star, color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
-            { label: 'Đã tuyển', value: stats.accepted, icon: CheckCircle, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+            { label: 'Chờ duyệt', value: stats.pending, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200/60' },
+            { label: 'Phỏng vấn', value: stats.interviewing, icon: Star, color: 'text-indigo-600 bg-indigo-50 border-indigo-200/60' },
+            { label: 'Đã tuyển', value: stats.accepted, icon: CheckCircle, color: 'text-emerald-600 bg-emerald-50 border-emerald-200/60' },
           ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className={`flex items-center gap-4 p-5 rounded-2xl border ${color} bg-white`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-                <Icon className="w-5 h-5" />
+            <div key={label} className={`flex items-center gap-4 p-6 rounded-3xl border ${color} bg-white group hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300`}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform ${color.split(' ')[0]} ${color.split(' ')[1]}`}>
+                <Icon className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-2xl font-black text-slate-900">{value}</p>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+                <p className="text-3xl font-black text-slate-900 tracking-tight mb-0.5">{value}</p>
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{label}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           {/* Toolbar */}
-          <div className="px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between bg-slate-50/50">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row gap-5 items-start md:items-center justify-between bg-slate-50/50">
+            <div className="relative w-full md:w-80 group">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm ứng viên hoặc vị trí..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 hover:border-slate-300 transition-all placeholder:text-slate-400" />
             </div>
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               {TABS.map(t => (
                 <button key={t.key} onClick={() => setTab(t.key)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                    tab === t.key ? 'bg-indigo-600 text-white shadow-md shadow-indigo-100' : 'bg-white border border-slate-200 text-slate-500 hover:border-indigo-100 hover:text-indigo-600'
+                  className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+                    tab === t.key ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600 shadow-sm'
                   }`}>
                   {t.label}
                 </button>
@@ -192,17 +192,17 @@ export default function ApplicationsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="px-6 py-3 w-10">
+                  <th className="px-6 py-4 w-10">
                     <input type="checkbox" onChange={e => setSelectedIds(e.target.checked ? filtered.map(a => a.applicationId) : [])}
                       checked={selectedIds.length === filtered.length && filtered.length > 0}
-                      className="rounded border-slate-300 text-indigo-600" />
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ứng viên</th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Vị trí</th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Ngày nộp</th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Match</th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
-                  <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Thao tác</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Ứng viên</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden md:table-cell">Vị trí</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hidden lg:table-cell">Ngày nộp</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Match</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Trạng thái</th>
+                  <th className="px-4 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -218,43 +218,43 @@ export default function ApplicationsPage() {
                     <motion.tr key={app.applicationId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.03 }}
                       className={`group hover:bg-slate-50/80 transition-colors cursor-pointer ${isSelected ? 'bg-indigo-50/40' : ''}`}
                       onClick={() => setSelectedApp(app)}>
-                      <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
+                      <td className="px-6 py-5" onClick={e => e.stopPropagation()}>
                         <input type="checkbox" checked={isSelected} onChange={() => toggleId(app.applicationId)}
-                          className="rounded border-slate-300 text-indigo-600" />
+                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" />
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                             {app.isUnlocked && app.candidate?.user?.avatar
                               ? <img src={app.candidate.user.avatar} className="w-full h-full object-cover" />
                               : <span className="font-black text-indigo-600 text-sm">{(app.candidate?.fullName || 'U')[0].toUpperCase()}</span>}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-700 transition-colors">{app.candidate?.fullName}</p>
-                            {app.desiredLocation && <p className="text-xs text-slate-400">{app.desiredLocation}</p>}
+                            <p className="text-[15px] font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{app.candidate?.fullName}</p>
+                            {app.desiredLocation && <p className="text-[13px] text-slate-500">{app.desiredLocation}</p>}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 hidden md:table-cell">
-                        <p className="text-sm text-slate-600 font-medium max-w-[200px] truncate">{app.jobPosting?.title}</p>
+                      <td className="px-4 py-5 hidden md:table-cell">
+                        <p className="text-[14px] text-slate-700 font-semibold max-w-[200px] truncate">{app.jobPosting?.title}</p>
                       </td>
-                      <td className="px-4 py-4 hidden lg:table-cell">
-                        <p className="text-xs text-slate-400 font-medium">{new Date(app.applyDate).toLocaleDateString('vi-VN')}</p>
+                      <td className="px-4 py-5 hidden lg:table-cell">
+                        <p className="text-[13px] text-slate-500 font-medium">{new Date(app.applyDate).toLocaleDateString('vi-VN')}</p>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-5">
                         {score > 0 ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${score >= 70 ? 'bg-emerald-500' : score >= 50 ? 'bg-indigo-500' : 'bg-amber-500'}`} style={{ width: `${score}%` }} />
+                          <div className="flex items-center gap-3">
+                            <div className="w-20 h-2.5 bg-slate-100/80 backdrop-blur-sm shadow-inner rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full transition-all duration-700 ${score >= 70 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-400' : 'bg-rose-500'}`} style={{ width: `${score}%` }} />
                             </div>
-                            <span className={`text-xs font-black ${score >= 70 ? 'text-emerald-600' : score >= 50 ? 'text-indigo-600' : 'text-amber-600'}`}>{score}%</span>
+                            <span className={`text-[13px] font-black ${score >= 70 ? 'text-emerald-600' : score >= 50 ? 'text-amber-500' : 'text-rose-600'}`}>{score}%</span>
                           </div>
-                        ) : <span className="text-xs text-slate-300">—</span>}
+                        ) : <span className="text-[13px] font-bold text-slate-300">—</span>}
                       </td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-[11px] font-black ${st.cls}`}>{st.label}</span>
+                      <td className="px-4 py-5">
+                        <span className={`inline-flex items-center px-2.5 py-1.5 rounded-lg border text-[11px] font-black uppercase tracking-widest shadow-sm ${st.cls}`}>{st.label}</span>
                       </td>
-                      <td className="px-4 py-4 text-right" onClick={e => e.stopPropagation()}>
+                      <td className="px-4 py-5 text-right" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-2">
                           {app.appStatus === 'PENDING' && (
                             <>
@@ -268,7 +268,7 @@ export default function ApplicationsPage() {
                               </button>
                             </>
                           )}
-                          {app.appStatus === 'INTERVIEWING' && (
+                          {(app.appStatus === 'INTERVIEWING' || app.appStatus === 'INTERVIEW_CONFIRMED') && (
                             <>
                               <button onClick={() => updateStatus(app.applicationId, 'ACCEPTED')} title="Đã tuyển"
                                 className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors">

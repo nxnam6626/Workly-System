@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth';
 import {
   RefreshCw,
@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   XCircle,
   Lock,
+  Briefcase,
 } from 'lucide-react';
 import { adminJobsApi, JobPosting, JobStatus, AdminFilterJobPostingDto } from '@/lib/admin-api';
 import JobQuickViewModal from './JobQuickViewModal';
@@ -36,7 +37,7 @@ function AccessDenied() {
   );
 }
 
-export default function JobsPage() {
+function JobsPageContent() {
   const { user } = useAuthStore();
   const perms: string[] = user?.admin?.permissions ?? [];
   const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_JOBS');
@@ -47,11 +48,16 @@ export default function JobsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const searchParams = useSearchParams();
+  const defaultStatus = searchParams.get('status') as JobStatus | null;
+  const defaultSearch = searchParams.get('searchTerm') || '';
+  const viewId = searchParams.get('viewId');
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [filters, setFilters] = useState<AdminFilterJobPostingDto>({
-    status: JobStatus.PENDING,
+    status: defaultStatus || JobStatus.PENDING,
     minAiScore: undefined,
     searchTerm: '',
   });
@@ -151,8 +157,9 @@ export default function JobsPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.length === jobs.length && jobs.length > 0) setSelectedIds([]);
-    else setSelectedIds(jobs.map(j => j.jobPostingId));
+    const pendingJobs = jobs.filter(j => j.status === JobStatus.PENDING);
+    if (selectedIds.length === pendingJobs.length && pendingJobs.length > 0) setSelectedIds([]);
+    else setSelectedIds(pendingJobs.map(j => j.jobPostingId));
   };
 
   const toggleSelect = (id: string) => {
@@ -160,27 +167,36 @@ export default function JobsPage() {
   };
 
   const statsItems = useMemo(() => [
-    { label: 'Chờ duyệt', value: globalStats?.totalPending || 0, color: 'bg-amber-50 text-amber-600', icon: Clock },
-    { label: 'Đã Duyệt', value: globalStats?.totalApproved || 0, color: 'bg-emerald-50 text-emerald-600', icon: CheckCircle2 },
-    { label: 'Đã Từ chối', value: globalStats?.totalRejected || 0, color: 'bg-rose-50 text-rose-600', icon: XCircle },
-    { label: 'Điểm AI thấp', value: jobs.filter(j => j.aiReliabilityScore < 60).length, color: 'bg-red-50 text-red-600', icon: ShieldAlert },
-  ], [globalStats, jobs]);
+    { label: 'Chờ duyệt', value: globalStats?.totalPending || 0, color: 'bg-amber-50 text-amber-600 border-amber-100', icon: Clock },
+    { label: 'Đã Duyệt', value: globalStats?.totalApproved || 0, color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: CheckCircle2 },
+    { label: 'Đã Từ chối', value: globalStats?.totalRejected || 0, color: 'bg-rose-50 text-rose-600 border-rose-100', icon: XCircle },
+    { label: 'Điểm AI thấp', value: globalStats?.totalLowAiScore || 0, color: 'bg-red-50 text-red-600 border-red-100', icon: ShieldAlert },
+  ], [globalStats]);
 
   // --- PERMISSION GATE ---
   if (!canAccess) return <AccessDenied />;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Kiểm Duyệt Yêu Cầu Tuyển Dụng</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Duyệt yêu cầu đăng tin mới, quản lý AI Score và xử lý hàng loạt
-          </p>
+          <div className="flex items-center gap-3">
+             <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+               <Briefcase className="w-6 h-6" />
+             </div>
+             <div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Công Việc
+                </h1>
+                <p className="text-slate-500 font-medium mt-1">
+                  Duyệt yêu cầu đăng tin mới, quản lý AI Score và xử lý hàng loạt.
+                </p>
+             </div>
+          </div>
         </div>
         <button
           onClick={fetchJobs}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           Làm mới
@@ -189,8 +205,9 @@ export default function JobsPage() {
 
       <JobStats stats={statsItems} />
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
-        <div className="p-4 border-b border-slate-100 bg-slate-50/30 space-y-4">
+      <div className="bg-white rounded-[2.5rem] border border-indigo-100 shadow-2xl shadow-indigo-50/50 overflow-hidden flex flex-col min-h-[600px] relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-blue-500" />
+        <div className="p-8 border-b border-indigo-50 bg-indigo-50/20 space-y-4">
           <JobFilters filters={filters} setFilters={setFilters} />
           <BulkActionsBar
             selectedCount={selectedIds.length}
@@ -198,6 +215,7 @@ export default function JobsPage() {
             onBulkReject={requestBulkReject}
             onClearSelection={() => setSelectedIds([])}
             isProcessing={isBulkProcessing}
+            currentStatus={filters.status}
           />
         </div>
 
@@ -238,5 +256,13 @@ export default function JobsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Đang tải dữ liệu...</div>}>
+      <JobsPageContent />
+    </Suspense>
   );
 }

@@ -91,13 +91,9 @@ export default function MembersTab() {
       });
       if (data.errors && data.errors.length > 0) {
         setImportErrors(data.errors);
-        if (data.success > 0) {
-          toast.success(`Thành công ${data.success}. Thất bại ${data.failed}`, { id: toastId });
-        } else {
-          toast.error(`Thất bại ${data.failed} thành viên`, { id: toastId });
-        }
+        toast.dismiss(toastId);
       } else {
-        toast.success(`Đã thêm thành công ${data.success} thành viên`, { id: toastId });
+        toast.dismiss(toastId);
       }
       fetchMembers();
     } catch (error: any) {

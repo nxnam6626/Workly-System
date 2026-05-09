@@ -72,6 +72,18 @@ export class UserDataService {
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
+
+    // Sync subscription for MEMBER
+    if (user.recruiter && user.recruiter.companyRole === 'MEMBER' && user.recruiter.companyId) {
+      const masterRecruiter = await this.prisma.recruiter.findFirst({
+        where: { companyId: user.recruiter.companyId, companyRole: 'MASTER' },
+        include: { recruiterSubscription: true },
+      });
+      if (masterRecruiter && masterRecruiter.recruiterSubscription) {
+        user.recruiter.recruiterSubscription = masterRecruiter.recruiterSubscription;
+      }
+    }
+
     return user;
   }
 
@@ -125,11 +137,25 @@ export class UserDataService {
             },
           },
         },
-        recruiter: true,
+        recruiter: {
+          include: { recruiterSubscription: true, company: { include: { wallet: true } } },
+        },
         admin: { select: { permissions: true } },
       },
     });
     if (!user) throw new NotFoundException('Không tìm thấy user.');
+
+    // Sync subscription for MEMBER
+    if (user.recruiter && user.recruiter.companyRole === 'MEMBER' && user.recruiter.companyId) {
+      const masterRecruiter = await this.prisma.recruiter.findFirst({
+        where: { companyId: user.recruiter.companyId, companyRole: 'MASTER' },
+        include: { recruiterSubscription: true },
+      });
+      if (masterRecruiter && masterRecruiter.recruiterSubscription) {
+        user.recruiter.recruiterSubscription = masterRecruiter.recruiterSubscription;
+      }
+    }
+
     return user;
   }
 }

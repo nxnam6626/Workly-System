@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
 import { AppliedJobsPageSkeleton } from "@/components/candidates/AppliedJobSkeleton";
+import { CompanyReviewModal } from "@/components/candidates/CompanyReviewModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AppliedJob {
@@ -33,11 +34,12 @@ interface AppliedJob {
     salaryMax: number;
     currency: string;
     locationCity: string;
-    company: { companyName: string; logo: string | null };
+    company: { companyId: string; companyName: string; logo: string | null };
   };
   expectedResponseAt?: string;
   expectedResultAt?: string;
   candidateResponseAt?: string;
+  companyReview?: any;
 }
 
 const STATUS_CONFIG: Record<string, {
@@ -71,7 +73,7 @@ const STATUS_CONFIG: Record<string, {
     borderColor: "#DDD6FE", badgeBg: "bg-violet-50", step: 4,
   },
   ACCEPTED: {
-    label: "Được tuyển dụng 🎉", icon: CheckCircle2,
+    label: "Được tuyển dụng", icon: CheckCircle2,
     accentColor: "#10B981", bgColor: "#ECFDF5", textColor: "#064E3B",
     borderColor: "#A7F3D0", badgeBg: "bg-emerald-50", step: 5,
   },
@@ -94,6 +96,8 @@ export default function AppliedJobsPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
+  const [reviewModalData, setReviewModalData] = useState<{ isOpen: boolean; appId: string; companyId: string; companyName: string } | null>(null);
+
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
   const confirm = useConfirm();
@@ -353,6 +357,20 @@ export default function AppliedJobsPage() {
                                     <ExternalLink className="w-3 h-3" />
                                   </a>
                                   <div className="flex items-center gap-2">
+                                    {['INTERVIEWING', 'ACCEPTED', 'REJECTED'].includes(app.appStatus) && !app.companyReview && (
+                                      <button 
+                                        onClick={() => setReviewModalData({
+                                          isOpen: true,
+                                          appId: app.applicationId,
+                                          companyId: app.jobPosting.company.companyId,
+                                          companyName: app.jobPosting.company.companyName,
+                                        })}
+                                        className="text-[11px] font-bold text-slate-500 hover:text-[#2563EB] hover:bg-blue-50 transition-colors px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-200 flex items-center gap-1.5"
+                                      >
+                                        <Star className="w-3.5 h-3.5" />
+                                        Đánh giá phỏng vấn
+                                      </button>
+                                    )}
                                     {app.appStatus === 'PENDING' && (
                                       <button onClick={() => handleCancelApplication(app.applicationId)}
                                         className="text-[11px] font-bold text-slate-300 hover:text-red-400 transition-colors px-2 py-1">
@@ -408,6 +426,21 @@ export default function AppliedJobsPage() {
           </main>
         </div>
       </div>
+
+      {/* Review Modal */}
+      {reviewModalData && (
+        <CompanyReviewModal
+          isOpen={reviewModalData.isOpen}
+          onClose={() => setReviewModalData(null)}
+          applicationId={reviewModalData.appId}
+          companyId={reviewModalData.companyId}
+          companyName={reviewModalData.companyName}
+          onSuccess={() => {
+            setReviewModalData(null);
+            fetchData(true);
+          }}
+        />
+      )}
     </div>
   );
 }

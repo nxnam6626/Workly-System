@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
 
@@ -7,15 +7,43 @@ export class CompanyReviewsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
-  async create(candidateId: string, companyId: string, applicationId: string, dto: any) {
+  async create(userId: string, companyId: string, applicationId: string, dto: any) {
+    // Profanity Filter
+    const BAD_WORDS = ['ngu', 'địt', 'lồn', 'cặc', 'đĩ', 'phò', 'chó', 'dốt', 'mẹ mày', 'thằng chó', 'đm', 'vcl', 'đcm', 'vãi lồn', 'cc', 'ncc', 'vl', 'đụ', 'cl', 'đéo'];
+    const contentLower = dto.content.toLowerCase();
+
+    // Check for exact word matches using regex to avoid matching substrings like "người" for "ngu"
+    for (const badWord of BAD_WORDS) {
+      const regex = new RegExp(`\\b${badWord}\\b`, 'i');
+      if (regex.test(contentLower)) {
+        throw new BadRequestException('Nội dung đánh giá chứa từ ngữ không phù hợp hoặc xúc phạm. Vui lòng chỉnh sửa lại.');
+      }
+    }
+
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+
+    if (!candidate) {
+      throw new ForbiddenException('Bạn phải là ứng viên để đánh giá.');
+    }
+
     const application = await this.prisma.application.findUnique({
       where: { applicationId },
       include: { jobPosting: true },
     });
 
-    if (!application || application.candidateId !== candidateId || application.jobPosting.companyId !== companyId) {
+    console.log('DEBUG REVIEW:', {
+      appExists: !!application,
+      appCandidateId: application?.candidateId,
+      userCandidateId: candidate.candidateId,
+      appCompanyId: application?.jobPosting?.companyId,
+      passedCompanyId: companyId,
+    });
+
+    if (!application || application.candidateId !== candidate.candidateId || application.jobPosting.companyId !== companyId) {
       throw new ForbiddenException('Bạn không có quyền đánh giá buổi phỏng vấn này.');
     }
 
@@ -33,7 +61,7 @@ export class CompanyReviewsService {
 
     const review = await this.prisma.companyReview.create({
       data: {
-        candidateId,
+        candidateId: candidate.candidateId,
         companyId,
         applicationId,
         ratingProcess: dto.ratingProcess,
@@ -61,6 +89,13 @@ export class CompanyReviewsService {
           select: {
             fullName: true,
             user: { select: { avatar: true } },
+          },
+        },
+        application: {
+          include: {
+            jobPosting: {
+              select: { title: true },
+            },
           },
         },
       },
@@ -94,5 +129,67 @@ export class CompanyReviewsService {
       avgOffice: Math.round(avgOffice * 10) / 10,
       avgTotal: Math.round(avgTotal * 10) / 10,
     };
+  }
+
+  // Admin APIs
+  async findAllAdmin(page: number = 1, limit: number = 10, status?: string, searchTerm?: string) {
+    const skip = (page - 1) * limit;
+    
+    const where: any = {};
+    if (status) where.status = status;
+    if (searchTerm) {
+      where.OR = [
+        { company: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+        { content: { contains: searchTerm, mode: 'insensitive' } },
+        { candidate: { fullName: { contains: searchTerm, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.companyReview.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          company: { select: { companyId: true, companyName: true, logo: true } },
+          candidate: { select: { candidateId: true, fullName: true, user: { select: { email: true } } } },
+          application: {
+            include: {
+              jobPosting: {
+                select: { title: true },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.companyReview.count({ where }),
+    ]);
+
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateStatusAdmin(reviewId: string, status: string) {
+    return this.prisma.companyReview.update({
+      where: { reviewId },
+      data: { status },
+      include: {
+        company: { select: { companyId: true, companyName: true } },
+      }
+    });
+  }
+
+  async deleteAdmin(reviewId: string) {
+    return this.prisma.companyReview.delete({
+      where: { reviewId },
+    });
   }
 }

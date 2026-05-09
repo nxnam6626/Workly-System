@@ -17,21 +17,40 @@ import {
   Shield,
   Menu,
   HelpCircle,
+  MessageSquare,
+  Bot,
+  Star,
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { checkIsAdmin } from '@/lib/admin-auth';
 
 const NAV_GROUPS = [
   {
-    label: 'Quản lý',
+    label: 'Hệ thống',
     items: [
       { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard, requireLevel1: true },
       { label: 'Quản Trị Viên', href: '/admin/admins', icon: Shield, requireLevel1: true },
-      { label: 'Ứng Viên', href: '/admin/candidates', icon: Users, perm: 'MANAGE_USERS' },
-      { label: 'Nhà Tuyển Dụng', href: '/admin/recruiters', icon: Briefcase, perm: 'MANAGE_USERS' },
-      { label: 'Doanh Nghiệp', href: '/admin/companies', icon: Building, perm: 'MANAGE_USERS' },
+    ],
+  },
+  {
+    label: 'Dữ liệu',
+    items: [
       { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
-      { label: 'Doanh Thu', href: '/admin/revenue', icon: TrendingUp, perm: 'MANAGE_BILLING' },
+      { label: 'Đánh Giá (Review)', href: '/admin/reviews', icon: Star, perm: 'MANAGE_JOBS' },
+    ],
+  },
+  {
+    label: 'Khách hàng',
+    items: [
+      { label: 'Doanh Nghiệp', href: '/admin/companies', icon: Building, perm: 'MANAGE_USERS' },
+      { label: 'Nhà Tuyển Dụng', href: '/admin/recruiters', icon: Briefcase, perm: 'MANAGE_USERS' },
+      { label: 'Ứng Viên', href: '/admin/candidates', icon: Users, perm: 'MANAGE_USERS' },
+    ],
+  },
+  {
+    label: 'Tài chính & Hỗ trợ',
+    items: [
+      { label: 'Thanh Toán & Doanh Thu', href: '/admin/revenue', icon: TrendingUp, perm: 'MANAGE_BILLING' },
       { label: 'Hỗ Trợ', href: '/admin/support', icon: HelpCircle, perm: 'MANAGE_SUPPORT' },
     ],
   },
@@ -139,7 +158,7 @@ export default function ProtectedAdminConsoleLayout({ children }: { children: Re
                   >
                     <item.icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`} />
                     {!collapsed && (
-                      <span className="text-sm font-semibold truncate">{item.label}</span>
+                      <span className="text-sm font-bold truncate tracking-tight">{item.label}</span>
                     )}
                   </Link>
                 );
@@ -219,9 +238,9 @@ export default function ProtectedAdminConsoleLayout({ children }: { children: Re
             <div className="flex items-center gap-3">
               <div className="hidden sm:text-right">
                 <p className="text-sm font-black text-slate-900">{user?.name || 'Admin'}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Administrator</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">System Administrator</p>
               </div>
-              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-600 font-black text-sm">
+              <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-600 font-black text-sm shadow-sm">
                 {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
               </div>
             </div>

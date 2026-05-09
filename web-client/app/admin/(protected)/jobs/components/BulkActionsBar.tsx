@@ -9,6 +9,7 @@ interface BulkActionsBarProps {
   onBulkReject: () => void;
   onClearSelection: () => void;
   isProcessing: boolean;
+  currentStatus?: string;
 }
 
 export default function BulkActionsBar({
@@ -17,6 +18,7 @@ export default function BulkActionsBar({
   onBulkReject,
   onClearSelection,
   isProcessing,
+  currentStatus,
 }: BulkActionsBarProps) {
   return (
     <AnimatePresence>
@@ -32,22 +34,26 @@ export default function BulkActionsBar({
             <span className="text-sm font-semibold text-white">Tin tuyển dụng đã chọn</span>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={onBulkApprove}
-              disabled={isProcessing}
-              className="px-4 py-1.5 bg-white text-indigo-600 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-              Duyệt tất cả
-            </button>
-            <button
-              onClick={onBulkReject}
-              disabled={isProcessing}
-              className="px-4 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-400 transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
-              Từ chối đã chọn
-            </button>
+            {currentStatus !== 'APPROVED' && (
+              <button
+                onClick={onBulkApprove}
+                disabled={isProcessing}
+                className="px-4 py-1.5 bg-white text-indigo-600 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                Duyệt tất cả
+              </button>
+            )}
+            {currentStatus !== 'REJECTED' && (
+              <button
+                onClick={onBulkReject}
+                disabled={isProcessing}
+                className="px-4 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold hover:bg-rose-400 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
+                Từ chối đã chọn
+              </button>
+            )}
             <button onClick={onClearSelection} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
               <XCircle className="w-4 h-4" />
             </button>

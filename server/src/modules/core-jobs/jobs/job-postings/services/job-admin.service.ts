@@ -19,12 +19,13 @@ export class JobAdminService {
   ) {}
 
   async getAdminStats() {
-    const [totalPending, totalApproved, totalRejected] = await Promise.all([
+    const [totalPending, totalApproved, totalRejected, totalLowAiScore] = await Promise.all([
       this.prisma.jobPosting.count({ where: { status: 'PENDING' } }),
       this.prisma.jobPosting.count({ where: { status: 'APPROVED' } }),
       this.prisma.jobPosting.count({ where: { status: 'REJECTED' } }),
+      this.prisma.jobPosting.count({ where: { aiReliabilityScore: { lt: 60 } } }),
     ]);
-    return { totalPending, totalApproved, totalRejected };
+    return { totalPending, totalApproved, totalRejected, totalLowAiScore };
   }
 
   async findAllAdmin(query: AdminFilterJobPostingDto) {
@@ -36,6 +37,7 @@ export class JobAdminService {
       where.aiReliabilityScore = { gte: minAiScore };
     if (searchTerm) {
       where.OR = [
+        { jobPostingId: { contains: searchTerm, mode: 'insensitive' } },
         { title: { contains: searchTerm, mode: 'insensitive' } },
         {
           company: {

@@ -55,6 +55,12 @@ export interface JobPosting {
   updatedAt: string;
   companyId: string;
   approvedBy?: string | null;
+  moderationFeedback?: {
+    reason?: string;
+    feedback?: string[];
+    safe?: boolean;
+    score?: number;
+  } | null;
   company?: Company;
   recruiter?: Recruiter;
 }
@@ -70,6 +76,49 @@ export interface CrawlLog {
   startTime: string;
   endTime?: string;
 }
+
+// ─── Company Reviews ────────────────────────────────────────────────────────────
+
+export interface CompanyReviewDto {
+  reviewId: string;
+  companyId: string;
+  candidateId: string;
+  applicationId: string;
+  ratingProcess: number;
+  ratingInterviewer: number;
+  ratingOffice: number;
+  content: string | null;
+  isAnonymous: boolean;
+  status: 'PUBLISHED' | 'HIDDEN' | 'FLAGGED';
+  createdAt: string;
+  updatedAt: string;
+  company: {
+    companyId: string;
+    companyName: string;
+    logo: string | null;
+  };
+  candidate: {
+    candidateId: string;
+    fullName: string;
+    user: {
+      email: string;
+    };
+  };
+  application?: {
+    jobPosting?: {
+      title: string;
+    };
+  };
+}
+
+export const adminReviewsApi = {
+  getAll: (params: { page?: number; limit?: number; status?: string; searchTerm?: string }) =>
+    api.get<{ data: CompanyReviewDto[]; meta: any }>('/company-reviews/admin/all', { params }).then(r => r.data),
+  updateStatus: (reviewId: string, status: string) =>
+    api.patch(`/company-reviews/admin/${reviewId}/status`, { status }).then(r => r.data),
+  delete: (reviewId: string) =>
+    api.delete(`/company-reviews/admin/${reviewId}`).then(r => r.data),
+};
 
 // ─── Crawl Logs ───────────────────────────────────────────────────────────────
 
@@ -117,6 +166,7 @@ export interface AdminJobStats {
   totalPending: number;
   totalApproved: number;
   totalRejected: number;
+  totalLowAiScore: number;
 }
 
 export interface PaginatedJobPostings {

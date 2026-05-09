@@ -293,19 +293,21 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-0">
+      <div className="flex-1 bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-50/50 border border-indigo-100 overflow-hidden flex flex-col md:flex-row min-h-0 relative">
+        {/* Decorative Top Gradient */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-blue-500 z-50" />
 
         {/* Sidebar Contacts */}
         <div className={`w-full md:w-80 border-r border-slate-100 flex-col shrink-0 flex-1 md:flex-none ${activeChat ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 border-b border-slate-100">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="p-6 border-b border-indigo-50 bg-indigo-50/20">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm kiếm tin nhắn..."
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 rounded-xl border border-transparent focus:bg-white focus:border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all text-sm"
+                placeholder="Tìm ứng viên..."
+                className="w-full pl-11 pr-4 py-3 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 focus:outline-none focus:ring-0 transition-all text-sm font-medium placeholder:text-slate-400 shadow-sm"
               />
             </div>
           </div>
@@ -319,24 +321,24 @@ export default function MessagesPage() {
                 <button
                   key={conv.conversationId}
                   onClick={() => setActiveChat(conv)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${isActive ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-slate-50 border border-transparent'}`}
+                  className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-left group ${isActive ? 'bg-indigo-50 border border-indigo-100 shadow-sm' : 'hover:bg-slate-50 border border-transparent hover:shadow-sm'}`}
                 >
                   <div className="relative">
                     {conv.candidate?.user?.avatar ? (
-                      <img src={conv.candidate.user.avatar} alt="Avatar" className="w-12 h-12 rounded-2xl object-cover shrink-0" />
+                      <img src={conv.candidate.user.avatar} alt="Avatar" className="w-12 h-12 rounded-2xl object-cover shrink-0 shadow-sm" />
                     ) : (
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-700 font-bold text-lg shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 font-black text-lg shrink-0 shadow-sm">
                         {name.charAt(0)}
                       </div>
                     )}
                     {conv.candidate?.user?.isOnline && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline mb-0.5">
-                      <span className={`font-semibold text-sm truncate pr-2 ${isActive ? 'text-indigo-900' : 'text-slate-800'}`}>{name}</span>
-                      <span className={`text-xs whitespace-nowrap ${conv.unread ? 'text-indigo-600 font-medium' : 'text-slate-400'}`}>{formatTime(conv.updatedAt)}</span>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className={`font-black text-[14px] truncate pr-2 ${isActive ? 'text-indigo-900' : 'text-slate-900'}`}>{name}</span>
+                      <span className={`text-[10px] uppercase tracking-wider font-bold whitespace-nowrap ${conv.unread ? 'text-indigo-600' : 'text-slate-400'}`}>{formatTime(conv.updatedAt)}</span>
                     </div>
                     <div className="flex justify-between items-center gap-4">
                       <p className={`text-xs truncate ${conv.unread ? 'text-slate-800 font-semibold text-sm' : 'text-slate-500'}`}>{conv.lastMessage || 'Chưa có tin nhắn'}</p>
@@ -358,21 +360,21 @@ export default function MessagesPage() {
           {activeChat ? (
             <>
               {/* Chat Header */}
-              <div className="h-16 px-4 md:px-6 border-b border-slate-100 bg-white flex items-center justify-between shadow-sm z-10 shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="h-[88px] px-6 border-b border-indigo-50 bg-white/50 backdrop-blur-md flex items-center justify-between z-10 shrink-0">
+                <div className="flex items-center gap-4">
                   <button
                     onClick={() => setActiveChat(null)}
                     className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-lg shadow-sm">
                     {activeChat.candidate?.fullName?.charAt(0) || 'N'}
                   </div>
                   <div>
-                    <h2 className="font-semibold text-slate-800">{activeChat.candidate?.fullName || 'Người dùng'}</h2>
-                    <p className={`text-xs font-medium flex items-center gap-1 ${activeChat.candidate?.user?.isOnline ? 'text-emerald-600' : 'text-slate-500'}`}>
-                      {activeChat.candidate?.user?.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>}
+                    <h2 className="font-black text-[18px] text-slate-900 tracking-tight">{activeChat.candidate?.fullName || 'Người dùng'}</h2>
+                    <p className={`text-[10px] uppercase tracking-widest font-black flex items-center gap-1.5 mt-0.5 ${activeChat.candidate?.user?.isOnline ? 'text-emerald-500' : 'text-slate-400'}`}>
+                      {activeChat.candidate?.user?.isOnline && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>}
                       {getOnlineStatusText(activeChat.candidate?.user)}
                     </p>
                   </div>
@@ -452,17 +454,17 @@ export default function MessagesPage() {
                   const isSender = msg.senderId === user?.userId;
                   return (
                     <div key={msg.messageId || Math.random().toString()} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[70%] xl:max-w-[60%] flex gap-3 ${isSender ? 'flex-row-reverse' : ''}`}>
+                      <div className={`max-w-[75%] xl:max-w-[65%] flex gap-3 ${isSender ? 'flex-row-reverse' : ''}`}>
                         {!isSender && (
-                          <div className="w-8 h-8 rounded-full bg-indigo-100 shrink-0 flex items-center justify-center font-bold text-indigo-700 text-xs mt-auto">
+                          <div className="w-8 h-8 rounded-2xl bg-indigo-100 shrink-0 flex items-center justify-center font-black text-indigo-600 mt-auto shadow-sm">
                             {activeChat.candidate?.fullName?.charAt(0) || 'N'}
                           </div>
                         )}
 
                         <div className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}>
-                          <div className={`px-4 py-2.5 rounded-2xl ${isSender
-                              ? 'bg-indigo-600 text-white rounded-br-sm shadow-sm shadow-indigo-600/20'
-                              : 'bg-white text-slate-700 border border-slate-100 rounded-bl-sm shadow-sm'
+                          <div className={`px-5 py-3.5 rounded-[1.25rem] font-medium text-[14px] leading-relaxed shadow-sm ${isSender
+                              ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white rounded-br-sm shadow-indigo-500/20'
+                              : 'bg-white text-slate-700 border border-slate-100 rounded-bl-sm'
                             }`}>
                             {msg.fileName && msg.fileUrl && (
                               <div className="mb-2">
@@ -488,12 +490,12 @@ export default function MessagesPage() {
                                         href={part}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className={`inline-flex items-center gap-1.5 mt-2 mb-1 px-4 py-2 text-sm font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${isSender
+                                        className={`inline-flex items-center gap-2 mt-3 mb-1 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-95 ${isSender
                                             ? 'bg-white text-indigo-600 border border-indigo-100 hover:bg-indigo-50'
-                                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100/50'
                                           }`}
                                       >
-                                        Xem chi tiết & Ứng tuyển
+                                        Xem công việc & Ứng tuyển
                                       </a>
                                     );
                                   }
@@ -502,7 +504,7 @@ export default function MessagesPage() {
                               })()}
                             </p>
                           </div>
-                          <span className="text-[11px] text-slate-400 mt-1 px-1">{formatTime(msg.sentAt)}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2 px-1">{formatTime(msg.sentAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -512,13 +514,13 @@ export default function MessagesPage() {
               </div>
 
               {/* Chat Input */}
-              <div className="p-4 bg-white border-t border-slate-100">
-                <form onSubmit={handleSend} className="flex gap-2">
+              <div className="p-6 bg-slate-50/50 border-t border-indigo-50">
+                <form onSubmit={handleSend} className="flex gap-3">
                   <button
                     type="button"
                     disabled={uploading}
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-12 h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center transition-colors shrink-0"
+                    className="w-[52px] h-[52px] rounded-2xl bg-white hover:bg-indigo-50 border border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-200 flex items-center justify-center transition-all shrink-0 shadow-sm"
                   >
                     {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Paperclip className="w-5 h-5" />}
                   </button>
@@ -536,13 +538,13 @@ export default function MessagesPage() {
                       disabled={uploading}
                       onChange={(e) => setInputText(e.target.value)}
                       placeholder={uploading ? "Đang tải tệp & Quét bằng AI..." : "Nhập tin nhắn..."}
-                      className="w-full h-12 pl-4 pr-4 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px]"
+                      className="w-full h-[52px] pl-6 pr-4 rounded-2xl bg-white border border-slate-200 focus:outline-none focus:ring-0 focus:border-indigo-500 transition-all text-[14px] font-medium placeholder:text-slate-400 shadow-sm"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={uploading || !inputText.trim()}
-                    className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white flex items-center justify-center transition-colors shadow-md shadow-indigo-500/30 shrink-0"
+                    className="w-[52px] h-[52px] rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white flex items-center justify-center transition-all shadow-lg shadow-indigo-600/30 shrink-0 active:scale-95"
                   >
                     <Send className="w-5 h-5 ml-1" />
                   </button>

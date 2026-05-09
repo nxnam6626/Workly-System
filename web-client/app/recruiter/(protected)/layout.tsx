@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,7 +25,10 @@ import {
   Menu,
   PartyPopper,
   X,
-  Calendar
+  Calendar,
+  Settings,
+  ChevronDown,
+  Star
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { useMessageStore } from '@/stores/message';
@@ -33,18 +36,22 @@ import { useSocketStore } from '@/stores/socket';
 import { useWalletStore } from '@/stores/wallet';
 import toast from 'react-hot-toast';
 
-const navItems = [
+const personalNavItems = [
   { label: 'Bảng Điều Khiển', href: '/recruiter/dashboard', icon: LayoutDashboard },
-  { label: 'Công Ty', href: '/recruiter/company', icon: Building },
   { label: 'Quản Lý Tin Tuyển Dụng', href: '/recruiter/jobs', icon: Briefcase },
-  { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
-  { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
   { label: 'AI Insights', href: '/recruiter/ai-report', icon: Brain },
   { label: 'Đơn Ứng Tuyển', href: '/recruiter/applications', icon: FileText },
-  { label: 'Quản Lý Phỏng Vấn', href: '/recruiter/interviews', icon: Calendar },
+  { label: 'Lịch Phỏng Vấn', href: '/recruiter/interviews', icon: Calendar },
   { label: 'Ứng Viên Tiềm Năng', href: '/recruiter/candidates', icon: Users },
   { label: 'Yêu Thích', href: '/recruiter/candidates/saved', icon: Heart },
   { label: 'Nhắn Tin', href: '/recruiter/messages', icon: MessageSquare },
+];
+
+const companyNavItems = [
+  { label: 'Hồ Sơ Công Ty', href: '/recruiter/company', icon: Building },
+  { label: 'Đánh Giá & Phản Hồi', href: '/recruiter/reviews', icon: Star },
+  { label: 'Ví Nội Bộ', href: '/recruiter/wallet', icon: Wallet },
+  { label: 'Gói Dịch Vụ', href: '/recruiter/billing/plans', icon: Sparkles },
 ];
 
 interface Wallet {
@@ -57,6 +64,22 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   const { isAuthenticated, isLoading, logout, user } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+  };
   const { wallet, fetchWallet } = useWalletStore();
   const { socket } = useSocketStore();
   const { unreadCount, fetchUnreadCount, incrementUnread } = useMessageStore();
@@ -140,6 +163,18 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
   if (!isAuthenticated || !user?.roles?.includes('RECRUITER')) return null;
 
+  const isCompanyAdmin = user?.recruiter?.companyRole === 'MASTER';
+  const isCompanyRoute = pathname.startsWith('/recruiter/company') || pathname.startsWith('/recruiter/wallet') || pathname.startsWith('/recruiter/billing') || pathname.startsWith('/recruiter/reviews');
+  
+  // Security guard: If non-admin tries to access company routes, redirect back
+  if (isCompanyRoute && !isCompanyAdmin && !isLoading) {
+    router.replace('/recruiter/dashboard');
+    toast.error('Chỉ Quản trị viên mới có quyền truy cập khu vực này', { id: 'role-error' });
+    return null;
+  }
+
+  const activeNavItems = isCompanyRoute ? companyNavItems : personalNavItems;
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       {/* Mobile Sidebar Overlay */}
@@ -218,7 +253,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
         className={`fixed md:sticky top-0 left-0 bottom-0 z-[120] md:z-auto flex flex-col bg-slate-900 text-white overflow-hidden shrink-0 h-screen transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-600/40">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <AnimatePresence>
@@ -228,16 +263,58 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
                 transition={{ duration: 0.15 }}
-                className="text-lg font-bold tracking-tight whitespace-nowrap"
+                className="text-lg font-black tracking-tight whitespace-nowrap text-white"
               >
-                Workly Recruiter
+                Workly Workspace
               </motion.span>
             )}
           </AnimatePresence>
         </div>
 
-        <nav className="flex-1 px-2 py-4 space-y-1">
-          {navItems.map(({ label, href, icon: Icon }) => {
+        {/* Context Switcher (Toggle) */}
+        <AnimatePresence>
+          {!collapsed && isCompanyAdmin && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="px-4 py-4 border-b border-slate-800"
+            >
+              <div className="flex bg-slate-950/50 rounded-xl p-1 border border-slate-800/60 shadow-inner">
+                <button
+                  onClick={() => router.push('/recruiter/dashboard')}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                    !isCompanyRoute 
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  }`}
+                >
+                  Việc của tôi
+                </button>
+                <button
+                  onClick={() => {
+                    if (!isCompanyAdmin) {
+                      toast.error('Bạn không có quyền quản trị công ty');
+                      return;
+                    }
+                    router.push('/recruiter/company');
+                  }}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                    isCompanyRoute 
+                      ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                  } ${!isCompanyAdmin ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title={!isCompanyAdmin ? 'Chỉ Quản trị viên mới được vào' : ''}
+                >
+                  Công ty
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+          {activeNavItems.map(({ label, href, icon: Icon }) => {
             const active = pathname === href || (pathname.startsWith(href + '/') && (href !== '/recruiter/candidates' || !pathname.startsWith('/recruiter/candidates/saved')));
             return (
               <Link
@@ -276,7 +353,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        <div className="border-t border-slate-800 px-2 py-3 space-y-1">
+        {/* <div className="border-t border-slate-800 px-2 py-3 space-y-1">
           <button
             onClick={() => logout()}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-all"
@@ -295,7 +372,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
               )}
             </AnimatePresence>
           </button>
-        </div>
+        </div> */}
 
         <button
           onClick={() => setCollapsed((c) => !c)}
@@ -333,13 +410,54 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
                 </div>
               )}
               <NotificationMenu />
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm">
-                  {(user.name || user.email).charAt(0).toUpperCase()}
-                </div>
-                <span className="text-sm text-slate-700 font-medium hidden sm:block">
-                  {user.name || user.email}
-                </span>
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                  className="flex items-center gap-2 p-1.5 pr-2 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all cursor-pointer"
+                >
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-sm overflow-hidden border border-indigo-200">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      (user.recruiter?.fullName || user.name || user.email).charAt(0).toUpperCase()
+                    )}
+                  </div>
+                  <span className="text-sm text-slate-700 font-bold hidden sm:block">
+                    {user.recruiter?.fullName || user.name || user.email}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {profileDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                    >
+                      <div className="p-3">
+                        <Link
+                          href="/recruiter/settings"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors font-medium text-sm"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Cài đặt tài khoản
+                        </Link>
+                        <div className="h-px bg-slate-100 my-1"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium text-sm"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Đăng xuất
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           )}

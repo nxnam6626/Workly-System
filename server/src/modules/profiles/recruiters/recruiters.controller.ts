@@ -88,4 +88,13 @@ export class RecruitersController {
   ) {
     return this.recruitersService.updateInterviewSettings(req.user.userId, settings);
   }
+
+  @Patch('me/profile')
+  @Roles(Role.RECRUITER)
+  updateProfile(
+    @Req() req: any,
+    @Body() data: { fullName?: string; phoneNumber?: string },
+  ) {
+    return this.recruitersService.updateProfile(req.user.userId, data);
+  }
 }
