@@ -28,6 +28,7 @@ export interface CandidateProfile {
     languages?: { name: string; level: string }[];
     softSkills?: string[];
     interests?: string[];
+    otherInfo?: { header: string; content: string }[];
     skills: { skillId: string; skillName: string; level: string; category?: string }[];
     experiences: { experienceId: string; company: string; role: string; duration: string; description?: string }[];
     projects: { projectId: string; projectName: string; description?: string; role?: string; technology?: string }[];
@@ -85,6 +86,7 @@ export interface UpdateProfileDto {
   languages?: { name: string; level: string }[];
   softSkills?: string[];
   interests?: string[];
+  otherInfo?: { header: string; content: string }[];
   certifications?: string[];
 }
 
@@ -98,7 +100,7 @@ export const profileApi = {
     api.get('/users/me').then((r) => r.data),
 
   updateProfile: (dto: UpdateProfileDto): Promise<CandidateProfile> =>
-    api.patch('/users/me/profile', dto).then((r) => r.data),
+    api.patch('/candidates/me/profile', dto).then((r) => r.data),
 
   changePassword: (dto: ChangePasswordDto): Promise<{ message: string }> =>
     api.patch('/auth/change-password', dto).then((r) => r.data),
@@ -111,6 +113,9 @@ export const profileApi = {
 
   updateCv: (cvId: string, data: any): Promise<any> =>
     api.patch(`/candidates/cv/${cvId}`, data),
+
+  analyzeCv: (cvId: string): Promise<any> =>
+    api.post(`/candidates/cv/${cvId}/analyze`).then((r) => r.data),
 
   extractCv: (file: File): Promise<any> => {
     const formData = new FormData();

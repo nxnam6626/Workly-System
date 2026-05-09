@@ -210,7 +210,9 @@ export type FilterAction = (typeof FilterAction)[keyof typeof FilterAction]
 export const JobType: {
   FULLTIME: 'FULLTIME',
   PARTTIME: 'PARTTIME',
-  REMOTE: 'REMOTE'
+  REMOTE: 'REMOTE',
+  INTERNSHIP: 'INTERNSHIP',
+  OTHER: 'OTHER'
 };
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
@@ -219,7 +221,11 @@ export type JobType = (typeof JobType)[keyof typeof JobType]
 export const JobLevel: {
   INTERN: 'INTERN',
   STAFF: 'STAFF',
+  TEAM_LEADER: 'TEAM_LEADER',
+  DEPARTMENT_HEAD: 'DEPARTMENT_HEAD',
   MANAGER: 'MANAGER',
+  BRANCH_MANAGER: 'BRANCH_MANAGER',
+  VICE_DIRECTOR: 'VICE_DIRECTOR',
   DIRECTOR: 'DIRECTOR'
 };
 
@@ -11147,6 +11153,7 @@ export namespace Prisma {
     industries: number
     interests: number
     languages: number
+    otherInfo: number
     softSkills: number
     _all: number
   }
@@ -11220,6 +11227,7 @@ export namespace Prisma {
     industries?: true
     interests?: true
     languages?: true
+    otherInfo?: true
     softSkills?: true
     _all?: true
   }
@@ -11330,6 +11338,7 @@ export namespace Prisma {
     industries: string[]
     interests: string[]
     languages: JsonValue | null
+    otherInfo: JsonValue | null
     softSkills: string[]
     _count: CandidateCountAggregateOutputType | null
     _avg: CandidateAvgAggregateOutputType | null
@@ -11372,6 +11381,7 @@ export namespace Prisma {
     industries?: boolean
     interests?: boolean
     languages?: boolean
+    otherInfo?: boolean
     softSkills?: boolean
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
@@ -11406,6 +11416,7 @@ export namespace Prisma {
     industries?: boolean
     interests?: boolean
     languages?: boolean
+    otherInfo?: boolean
     softSkills?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
@@ -11430,6 +11441,7 @@ export namespace Prisma {
     industries?: boolean
     interests?: boolean
     languages?: boolean
+    otherInfo?: boolean
     softSkills?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
@@ -11454,10 +11466,11 @@ export namespace Prisma {
     industries?: boolean
     interests?: boolean
     languages?: boolean
+    otherInfo?: boolean
     softSkills?: boolean
   }
 
-  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "totalYearsExp" | "degree" | "gender" | "industries" | "interests" | "languages" | "softSkills", ExtArgs["result"]["candidate"]>
+  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "totalYearsExp" | "degree" | "gender" | "industries" | "interests" | "languages" | "otherInfo" | "softSkills", ExtArgs["result"]["candidate"]>
   export type CandidateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
@@ -11512,6 +11525,7 @@ export namespace Prisma {
       industries: string[]
       interests: string[]
       languages: Prisma.JsonValue | null
+      otherInfo: Prisma.JsonValue | null
       softSkills: string[]
     }, ExtArgs["result"]["candidate"]>
     composites: {}
@@ -11965,6 +11979,7 @@ export namespace Prisma {
     readonly industries: FieldRef<"Candidate", 'String[]'>
     readonly interests: FieldRef<"Candidate", 'String[]'>
     readonly languages: FieldRef<"Candidate", 'Json'>
+    readonly otherInfo: FieldRef<"Candidate", 'Json'>
     readonly softSkills: FieldRef<"Candidate", 'String[]'>
   }
     
@@ -40430,6 +40445,7 @@ export namespace Prisma {
     industries: 'industries',
     interests: 'interests',
     languages: 'languages',
+    otherInfo: 'otherInfo',
     softSkills: 'softSkills'
   };
 
@@ -41532,6 +41548,7 @@ export namespace Prisma {
     industries?: StringNullableListFilter<"Candidate">
     interests?: StringNullableListFilter<"Candidate">
     languages?: JsonNullableFilter<"Candidate">
+    otherInfo?: JsonNullableFilter<"Candidate">
     softSkills?: StringNullableListFilter<"Candidate">
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
@@ -41565,6 +41582,7 @@ export namespace Prisma {
     industries?: SortOrder
     interests?: SortOrder
     languages?: SortOrderInput | SortOrder
+    otherInfo?: SortOrderInput | SortOrder
     softSkills?: SortOrder
     applications?: ApplicationOrderByRelationAggregateInput
     cvs?: CVOrderByRelationAggregateInput
@@ -41601,6 +41619,7 @@ export namespace Prisma {
     industries?: StringNullableListFilter<"Candidate">
     interests?: StringNullableListFilter<"Candidate">
     languages?: JsonNullableFilter<"Candidate">
+    otherInfo?: JsonNullableFilter<"Candidate">
     softSkills?: StringNullableListFilter<"Candidate">
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
@@ -41634,6 +41653,7 @@ export namespace Prisma {
     industries?: SortOrder
     interests?: SortOrder
     languages?: SortOrderInput | SortOrder
+    otherInfo?: SortOrderInput | SortOrder
     softSkills?: SortOrder
     _count?: CandidateCountOrderByAggregateInput
     _avg?: CandidateAvgOrderByAggregateInput
@@ -41665,6 +41685,7 @@ export namespace Prisma {
     industries?: StringNullableListFilter<"Candidate">
     interests?: StringNullableListFilter<"Candidate">
     languages?: JsonNullableWithAggregatesFilter<"Candidate">
+    otherInfo?: JsonNullableWithAggregatesFilter<"Candidate">
     softSkills?: StringNullableListFilter<"Candidate">
   }
 
@@ -44002,6 +44023,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -44035,6 +44057,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -44066,6 +44089,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -44099,6 +44123,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -44131,6 +44156,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
   }
 
@@ -44153,6 +44179,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
   }
 
@@ -44176,6 +44203,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
   }
 
@@ -46854,6 +46882,7 @@ export namespace Prisma {
     industries?: SortOrder
     interests?: SortOrder
     languages?: SortOrder
+    otherInfo?: SortOrder
     softSkills?: SortOrder
   }
 
@@ -50997,6 +51026,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -51028,6 +51058,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -51255,6 +51286,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -51286,6 +51318,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -52783,6 +52816,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -52815,6 +52849,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -52861,6 +52896,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -52893,6 +52929,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -52923,6 +52960,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -52955,6 +52993,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -53001,6 +53040,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -53033,6 +53073,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -53063,6 +53104,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -53095,6 +53137,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -53141,6 +53184,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -53173,6 +53217,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -53203,6 +53248,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -53235,6 +53281,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -53281,6 +53328,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -53313,6 +53361,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -55614,6 +55663,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -55646,6 +55696,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -55769,6 +55820,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -55801,6 +55853,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -55956,6 +56009,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -55988,6 +56042,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
@@ -56078,6 +56133,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -56110,6 +56166,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
@@ -56169,6 +56226,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -56201,6 +56259,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
@@ -56353,6 +56412,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -56385,6 +56445,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
@@ -56533,6 +56594,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -56565,6 +56627,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -56688,6 +56751,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -56720,6 +56784,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
@@ -56833,6 +56898,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
@@ -56865,6 +56931,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[]
     interests?: CandidateCreateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateCreatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
@@ -56990,6 +57057,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
@@ -57022,6 +57090,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[]
     interests?: CandidateUpdateinterestsInput | string[]
     languages?: NullableJsonNullValueInput | InputJsonValue
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     softSkills?: CandidateUpdatesoftSkillsInput | string[]
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput

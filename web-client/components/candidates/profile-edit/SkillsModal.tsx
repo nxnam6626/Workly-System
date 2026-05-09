@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -38,10 +38,28 @@ interface SkillsModalProps {
   onSuccess: (updated: CandidateProfile) => void;
 }
 
-const DRAWER_VARIANTS = {
-  hidden: { x: "100%", opacity: 0 },
-  visible: { x: 0, opacity: 1, transition: { type: "spring" as const, damping: 30, stiffness: 240 } },
-  exit: { x: "100%", opacity: 0, transition: { duration: 0.22, ease: "easeIn" as const } },
+const MODAL_VARIANTS: Variants = {
+  hidden: { scale: 0.95, opacity: 0, y: 20 },
+  visible: { 
+    scale: 1, 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: "spring", 
+      damping: 25, 
+      stiffness: 300,
+      mass: 0.5 
+    } 
+  },
+  exit: { 
+    scale: 0.95, 
+    opacity: 0, 
+    y: 20, 
+    transition: { 
+      duration: 0.2, 
+      ease: "easeOut" 
+    } 
+  },
 };
 
 export function SkillsModal({ isOpen, onClose, initialData, onSuccess }: SkillsModalProps) {
@@ -96,30 +114,41 @@ export function SkillsModal({ isOpen, onClose, initialData, onSuccess }: SkillsM
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[120] flex justify-end" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-          <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');`}</style>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          `}</style>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="absolute inset-0 bg-slate-800/30 backdrop-blur-[2px]" />
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            onClick={onClose} 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+          />
 
-          <motion.aside variants={DRAWER_VARIANTS} initial="hidden" animate="visible" exit="exit"
-            className="relative w-full max-w-[560px] h-full flex flex-col bg-white border-l border-[#DBEAFE] overflow-hidden z-10 shadow-2xl shadow-blue-50">
-
+          <motion.div 
+            variants={MODAL_VARIANTS} 
+            initial="hidden" 
+            animate="visible" 
+            exit="exit"
+            className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white/95 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden z-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] border border-white/20"
+          >
             {/* Blue top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#2563EB] via-[#60A5FA] to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-blue-400 to-blue-600" />
 
             {/* Header */}
             <header className="relative flex-shrink-0 px-8 pt-10 pb-7 border-b border-[#EFF6FF]">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
                       <Zap className="w-3.5 h-3.5 text-blue-600" />
                     </div>
-                    <p className="text-[10px] font-semibold tracking-[0.3em] text-blue-600 uppercase">Bộ kỹ năng</p>
+                    <p className="text-[10px] font-bold tracking-[0.3em] text-blue-600 uppercase">Bộ kỹ năng</p>
                   </div>
-                  <h2 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[28px] text-[#111110] leading-tight">
-                    Kỹ năng & <em className="text-blue-600 not-italic">Chuyên môn</em>
+                  <h2 className="text-3xl text-slate-900 leading-tight font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Kỹ năng & <span className="text-blue-600 italic">Chuyên môn</span>
                   </h2>
                 </div>
                 <button onClick={onClose} className="mt-1 w-9 h-9 flex items-center justify-center rounded-xl border border-[#DBEAFE] text-[#93C5FD] hover:text-[#111110] hover:border-blue-300 transition-all">
@@ -241,7 +270,7 @@ export function SkillsModal({ isOpen, onClose, initialData, onSuccess }: SkillsM
                 </button>
               </div>
             </footer>
-          </motion.aside>
+          </motion.div>
         </div>
       )}
     </AnimatePresence>

@@ -173,7 +173,7 @@ export function JobCard({ job, variant = 'horizontal', onToggleFavorite }: JobCa
           className="absolute top-2 right-2 p-1 rounded-full hover:bg-blue-50 transition-colors"
         >
           <Heart
-            className={`w-4 h-4 transition-colors ${isSaved ? "fill-[#1e60ad] text-[#1e60ad]" : "text-slate-300"
+            className={`w-4 h-4 transition-colors ${isSaved ? "fill-red-500 text-red-500" : "text-slate-300"
               }`}
           />
         </button>

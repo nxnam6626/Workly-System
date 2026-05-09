@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class CandidateManagementService {
   private readonly logger = new Logger(CandidateManagementService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue('matching') private matchingQueue: Queue,
+  ) {}
 
   private mapToSkillLevel(level: string): any {
     if (!level) return 'BEGINNER';
@@ -38,13 +43,11 @@ export class CandidateManagementService {
     return 'BEGINNER';
   }
 
-  async create(createCandidateDto: any) {
-    return this.prisma.candidate.create({
-      data: createCandidateDto,
-    });
-  }
 
   async update(candidateId: string, updateCandidateDto: any) {
+    this.logger.log(`[CandidateManagement] Cập nhật hồ sơ cho Candidate ID: ${candidateId}`);
+    this.logger.debug(`[CandidateManagement] Dữ liệu nhận được: ${JSON.stringify(updateCandidateDto)}`);
+    
     const candidate = await this.prisma.candidate.findUnique({
       where: { candidateId },
       include: { user: true },
@@ -68,10 +71,11 @@ export class CandidateManagementService {
       languages,
       softSkills,
       interests,
+      otherInfo,
       ...rest
     } = updateCandidateDto;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const updatedCandidate = await tx.candidate.update({
         where: { candidateId },
         data: {
@@ -85,6 +89,7 @@ export class CandidateManagementService {
           ...(languages !== undefined && { languages }),
           ...(softSkills !== undefined && { softSkills }),
           ...(interests !== undefined && { interests }),
+          ...(otherInfo !== undefined && { otherInfo }),
         },
       });
 
@@ -157,6 +162,59 @@ export class CandidateManagementService {
       }
 
       return updatedCandidate;
+    });
+
+    // Fetch full profile data after update to ensure frontend state consistency
+    return this.prisma.user.findUnique({
+      where: { userId: candidate.userId },
+      select: {
+        userId: true,
+        email: true,
+        status: true,
+        phoneNumber: true,
+        avatar: true,
+        createdAt: true,
+        lastLogin: true,
+        provider: true,
+        userRoles: { include: { role: true } },
+        candidate: {
+          select: {
+            candidateId: true,
+            fullName: true,
+            university: true,
+            major: true,
+            gpa: true,
+            summary: true,
+            desiredJob: true,
+            isOpenToWork: true,
+            gender: true,
+            birthYear: true,
+            location: true,
+            totalYearsExp: true,
+            currentSalary: true,
+            degree: true,
+            industries: true,
+            languages: true,
+            softSkills: true,
+            interests: true,
+            skills: true,
+            experiences: { orderBy: { duration: 'desc' } },
+            projects: true,
+            certifications: true,
+            cvs: {
+              select: {
+                cvId: true,
+                cvTitle: true,
+                fileUrl: true,
+                isMain: true,
+                createdAt: true,
+                parsedData: true,
+              },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+      },
     });
   }
 

@@ -28,12 +28,12 @@ export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
-      <div className="flex items-center gap-2.5 mb-4">
-        <div className="p-2 bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-600 rounded-lg shadow-sm border border-emerald-100/50">
-          <Target size={16} />
+    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
+      <div className="flex items-center gap-2.5 mb-6">
+        <div className="p-2.5 bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-600 rounded-lg shadow-sm border border-emerald-100/50">
+          <Target size={18} />
         </div>
-        <h2 className="text-lg font-bold text-gray-900 leading-none">Công việc mong muốn</h2>
+        <h2 className="text-base font-bold text-gray-900 leading-none">Công việc mong muốn</h2>
       </div>
 
       <div className="space-y-4">

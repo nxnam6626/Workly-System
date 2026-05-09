@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,13 +28,31 @@ interface ProjectsModalProps {
   onSuccess: (updated: CandidateProfile) => void;
 }
 
-const DRAWER_VARIANTS = {
-  hidden: { x: "100%", opacity: 0 },
-  visible: { x: 0, opacity: 1, transition: { type: "spring" as const, damping: 30, stiffness: 240 } },
-  exit: { x: "100%", opacity: 0, transition: { duration: 0.22, ease: "easeIn" as const } },
+const MODAL_VARIANTS: Variants = {
+  hidden: { scale: 0.95, opacity: 0, y: 20 },
+  visible: { 
+    scale: 1, 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: "spring", 
+      damping: 25, 
+      stiffness: 300,
+      mass: 0.5 
+    } 
+  },
+  exit: { 
+    scale: 0.95, 
+    opacity: 0, 
+    y: 20, 
+    transition: { 
+      duration: 0.2, 
+      ease: "easeOut" 
+    } 
+  },
 };
 
-const ITEM_VARIANTS = {
+const ITEM_VARIANTS: Variants = {
   hidden: { opacity: 0, x: 16 },
   visible: (i: number) => ({ opacity: 1, x: 0, transition: { delay: i * 0.05, duration: 0.25 } }),
   exit: { opacity: 0, x: -16, transition: { duration: 0.15 } },
@@ -77,30 +95,41 @@ export function ProjectsModal({ isOpen, onClose, initialData, onSuccess }: Proje
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[120] flex justify-end" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-          <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');`}</style>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          `}</style>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose} className="absolute inset-0 bg-slate-800/30 backdrop-blur-[2px]" />
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            onClick={onClose} 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+          />
 
-          <motion.aside variants={DRAWER_VARIANTS} initial="hidden" animate="visible" exit="exit"
-            className="relative w-full max-w-[600px] h-full flex flex-col bg-white border-l border-[#D1EFE5] overflow-hidden z-10 shadow-2xl shadow-emerald-50">
-
+          <motion.div 
+            variants={MODAL_VARIANTS} 
+            initial="hidden" 
+            animate="visible" 
+            exit="exit"
+            className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white/95 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden z-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] border border-white/20"
+          >
             {/* Emerald top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#059669] via-[#34D399] to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-600" />
 
             {/* Header */}
             <header className="relative flex-shrink-0 px-8 pt-10 pb-7 border-b border-[#E8F5EF]">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
                       <Terminal className="w-3.5 h-3.5 text-emerald-600" />
                     </div>
-                    <p className="text-[10px] font-semibold tracking-[0.3em] text-emerald-600 uppercase">Portfolio kỹ thuật</p>
+                    <p className="text-[10px] font-bold tracking-[0.3em] text-emerald-600 uppercase">Portfolio kỹ thuật</p>
                   </div>
-                  <h2 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[28px] text-[#111110] leading-tight">
-                    Dự án <em className="text-emerald-600 not-italic">tiêu biểu</em>
+                  <h2 className="text-3xl text-slate-900 leading-tight font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Dự án <span className="text-emerald-600 italic">tiêu biểu</span>
                   </h2>
                 </div>
                 <div className="flex items-center gap-2.5 mt-1">
@@ -130,7 +159,7 @@ export function ProjectsModal({ isOpen, onClose, initialData, onSuccess }: Proje
 
                       {/* Serial */}
                       <div className="absolute top-4 right-12 select-none pointer-events-none"
-                        style={{ fontFamily: "'DM Serif Display', serif", fontSize: "52px", lineHeight: 1, color: "#E8F5EF", fontWeight: 700 }}>
+                        style={{ fontFamily: "'Inter', sans-serif", fontSize: "52px", lineHeight: 1, color: "#E8F5EF", fontWeight: 700 }}>
                         {String(index + 1).padStart(2, "0")}
                       </div>
 
@@ -175,7 +204,7 @@ export function ProjectsModal({ isOpen, onClose, initialData, onSuccess }: Proje
                       <Terminal className="w-7 h-7 text-emerald-300" />
                     </div>
                     <div>
-                      <p style={{ fontFamily: "'DM Serif Display', serif" }} className="text-xl text-[#111110] mb-1">Chưa có dự án nào</p>
+                      <p style={{ fontFamily: "'Inter', sans-serif" }} className="text-xl font-bold text-[#111110] mb-1">Chưa có dự án nào</p>
                       <p className="text-sm text-[#999890]">Khoe sản phẩm của bạn với nhà tuyển dụng</p>
                     </div>
                     <button type="button"
@@ -207,7 +236,7 @@ export function ProjectsModal({ isOpen, onClose, initialData, onSuccess }: Proje
                 </button>
               </div>
             </footer>
-          </motion.aside>
+          </motion.div>
         </div>
       )}
     </AnimatePresence>

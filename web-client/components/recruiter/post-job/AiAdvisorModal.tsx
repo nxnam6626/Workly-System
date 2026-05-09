@@ -37,7 +37,7 @@ export const AiAdvisorModal = ({
               <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-8 transform -rotate-3">
                 <Sparkles className="w-7 h-7 text-indigo-600" />
               </div>
-              <h3 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-3xl text-[#111110] leading-[1.1] mb-5">
+              <h3 style={{ fontFamily: "'Inter', sans-serif" }} className="text-3xl text-[#111110] font-bold leading-[1.1] mb-5">
                 Trợ lý <em className="text-indigo-600 not-italic">Sáng tạo</em> JD
               </h3>
               <p className="text-sm text-[#666660] leading-relaxed mb-8 font-medium">

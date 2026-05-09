@@ -20,9 +20,13 @@ export const EXPERIENCE_LEVELS = [
 
 export const JOB_LEVELS = [
   { value: "INTERN", label: "Thực tập sinh" },
-  { value: "STAFF", label: "Nhân viên/Chuyên viên" },
-  { value: "MANAGER", label: "Trưởng nhóm/Trưởng phòng" },
-  { value: "DIRECTOR", label: "Giám đốc/Cấp cao hơn" },
+  { value: "STAFF", label: "Nhân viên" },
+  { value: "TEAM_LEADER", label: "Trưởng nhóm" },
+  { value: "DEPARTMENT_HEAD", label: "Trưởng/Phó phòng" },
+  { value: "MANAGER", label: "Quản lý / Giám sát" },
+  { value: "BRANCH_MANAGER", label: "Trưởng chi nhánh" },
+  { value: "VICE_DIRECTOR", label: "Phó giám đốc" },
+  { value: "DIRECTOR", label: "Giám đốc" },
 ];
 
 // Mức lương thực tế thị trường VN (triệu VNĐ)
@@ -37,18 +41,7 @@ export const SALARY_RANGES = [
   { label: "Trên 50 triệu", min: 50_000_000, max: 999_000_000 },
 ];
 
-export const HOT_KEYWORDS = [
-  "Frontend React",
-  "Backend Node.js",
-  "Data Science",
-  "Product Manager",
-  "Mobile Flutter",
-  "DevOps AWS",
-  "AI Engineer",
-  "Kế toán tổng hợp",
-  "Kinh doanh B2B",
-  "UI/UX Designer",
-];
+
 
 export const JOB_TYPE_LABEL: Record<string, string> = {
   FULLTIME: "Toàn thời gian",
@@ -58,9 +51,13 @@ export const JOB_TYPE_LABEL: Record<string, string> = {
 
 export const JOB_LEVEL_LABEL: Record<string, string> = {
   INTERN: "Thực tập sinh",
-  STAFF: "Nhân viên/Chuyên viên",
-  MANAGER: "Trưởng nhóm/Trưởng phòng",
-  DIRECTOR: "Giám đốc/Cấp cao hơn",
+  STAFF: "Nhân viên",
+  TEAM_LEADER: "Trưởng nhóm",
+  DEPARTMENT_HEAD: "Trưởng/Phó phòng",
+  MANAGER: "Quản lý / Giám sát",
+  BRANCH_MANAGER: "Trưởng chi nhánh",
+  VICE_DIRECTOR: "Phó giám đốc",
+  DIRECTOR: "Giám đốc",
 };
 
 // Danh sách ngành nghề chuẩn (dùng cho dropdown)

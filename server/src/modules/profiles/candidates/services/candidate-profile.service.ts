@@ -5,7 +5,7 @@ import { CandidateInteractionService } from './candidate-interaction.service';
 
 @Injectable()
 export class CandidateProfileService {
-  private readonly logger = new Logger(CandidateProfileService.name);
+  private readonly logger = new Logger('CandidateProfileService (Identity)');
 
   constructor(
     private readonly searchService: CandidateSearchService,
@@ -25,13 +25,15 @@ export class CandidateProfileService {
     return this.searchService.findByUserId(userId);
   }
 
-  async create(createCandidateDto: any) {
-    return this.managementService.create(createCandidateDto);
+
+  async updateByUserId(userId: string, updateCandidateDto: any) {
+    const candidate = await this.searchService.findByUserId(userId);
+    return this.managementService.update(
+      candidate.candidateId,
+      updateCandidateDto,
+    );
   }
 
-  async update(candidateId: string, updateCandidateDto: any) {
-    return this.managementService.update(candidateId, updateCandidateDto);
-  }
 
   async remove(candidateId: string) {
     return this.managementService.remove(candidateId);
@@ -43,5 +45,9 @@ export class CandidateProfileService {
 
   async getSavedCandidates(userId: string) {
     return this.interactionService.getSavedCandidates(userId);
+  }
+
+  async getMyInvitations(userId: string) {
+    return this.interactionService.getMyInvitations(userId);
   }
 }

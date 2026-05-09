@@ -69,32 +69,7 @@ export class CandidatesController {
       throw new BadRequestException('Vui lòng tải lên tệp CV (PDF hoặc Word).');
     }
 
-    // Luồng Onboarding: Tự động xóa file nếu phân tích thất bại để tránh rác dữ liệu
-    const cv = await this.candidatesService.uploadCvOnly(userId, file);
-
-    try {
-      const result = (await this.candidatesService.analyzeCv(
-        userId,
-        cv.cvId,
-      )) as any;
-
-      if (!result || !result.parsedData) {
-        await this.candidatesService.deleteCv(userId, cv.cvId);
-        throw new BadRequestException(
-          'AI không thể bóc tách dữ liệu từ CV này. Vui lòng tải lên tệp khác hoặc thử lại.',
-        );
-      }
-
-      return result;
-    } catch (error) {
-      // Dọn dẹp nếu có lỗi bất kỳ (AI timeout, lỗi mạng, v.v.)
-      await this.candidatesService.deleteCv(userId, cv.cvId);
-
-      if (error instanceof BadRequestException) throw error;
-      throw new BadRequestException(
-        'Quá trình phân tích CV gặp lỗi. Vui lòng thử lại.',
-      );
-    }
+    return this.candidatesService.extractAndAnalyzeCv(userId, file);
   }
 
   @Patch('cv/:cvId')
@@ -135,21 +110,6 @@ export class CandidatesController {
     return this.candidatesService.deleteCv(userId, cvId);
   }
 
-  @Post()
-  create(@Body() createCandidateDto: any) {
-    return this.candidatesService.create(createCandidateDto);
-  }
-
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  async findMe(@CurrentUser('userId') userId: string) {
-    try {
-      return await this.candidatesService.findByUserId(userId);
-    } catch (e) {
-      console.error('ERROR IN findMe candidates:', e);
-      throw e;
-    }
-  }
 
   @Get('saved')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -167,6 +127,13 @@ export class CandidatesController {
     @Query('limit') limit?: number,
   ) {
     return this.candidatesService.getRecommendedJobs(userId, page, limit);
+  }
+
+  @Get('me/invitations')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
+  getMyInvitations(@CurrentUser('userId') userId: string) {
+    return this.candidatesService.getMyInvitations(userId);
   }
 
   @Get()
@@ -188,10 +155,16 @@ export class CandidatesController {
     return this.candidatesService.toggleSave(id, userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCandidateDto: any) {
-    return this.candidatesService.update(id, updateCandidateDto);
+  @Patch('me/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
+  updateMyProfile(
+    @CurrentUser('userId') userId: string,
+    @Body() updateCandidateDto: any,
+  ) {
+    return this.candidatesService.updateByUserId(userId, updateCandidateDto);
   }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

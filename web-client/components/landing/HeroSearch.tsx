@@ -40,10 +40,10 @@ export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
 
   return (
     <div className="relative">
-      <div className="bg-[#d7ecf7] rounded-[20px] p-2 shadow-sm border border-blue-50">
+      <div className="bg-[#d7ecf7] rounded-[16px] p-1.5 shadow-sm border border-blue-50">
         <div className="bg-white rounded-xl p-1 flex flex-col md:flex-row items-stretch gap-1 shadow-md">
           {/* Keyword Field */}
-          <div className="flex-[1.5] flex items-center gap-2.5 px-4 py-2.5 group">
+          <div className="flex-[1.5] flex items-center gap-2.5 px-4 py-1.5 group">
             <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Từ khóa:</span>
             <input
               type="text"
@@ -59,7 +59,7 @@ export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
           <div className="hidden md:block w-px h-8 bg-slate-100 self-center" />
 
           {/* Location Field */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-2.5">
+          <div className="flex-1 flex items-center gap-2.5 px-4 py-1.5">
             <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
             <input
               type="text"
@@ -74,7 +74,7 @@ export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
           {/* Search Button */}
           <button
             onClick={() => handleSearch()}
-            className="px-8 py-2 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[14px] rounded-lg transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-lg shadow-blue-900/10 uppercase"
+            className="px-6 py-1.5 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[14px] rounded-lg transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-lg shadow-blue-900/10 uppercase"
           >
             TÌM VIỆC
           </button>
@@ -86,9 +86,8 @@ export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
             <div className="relative" ref={industryRef}>
               <button
                 onClick={() => setShowIndustry(!showIndustry)}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all shadow-sm active:scale-[0.97] ${
-                  showIndustry ? "bg-white text-[#1e60ad]" : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
-                }`}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[13px] font-bold transition-all shadow-sm active:scale-[0.97] ${showIndustry ? "bg-white text-[#1e60ad]" : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
+                  }`}
               >
                 <LayoutGrid className="w-4 h-4" />
                 <span>Ngành nghề</span>
@@ -97,7 +96,7 @@ export function HeroSearch({ hideFilters = false }: HeroSearchProps) {
 
               {showIndustry && (
                 <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-[800px]">
-                  <IndustryMegaMenu 
+                  <IndustryMegaMenu
                     height="360px"
                     onSelect={(industry) => handleSearch(industry)}
                     onClose={() => setShowIndustry(false)}

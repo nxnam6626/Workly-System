@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, Loader2, User, Briefcase } from 'lucide-react';
+import { Save, Loader2, User, Briefcase, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -14,6 +14,7 @@ import { ExperienceSection } from './cv-review/ExperienceSection';
 import { ProjectsSection } from './cv-review/ProjectsSection';
 import { SummarySection } from './cv-review/SummarySection';
 import { DesiredJobSection } from './cv-review/DesiredJobSection';
+import { AdditionalInfoSection } from './cv-review/AdditionalInfoSection';
 
 interface CvReviewFormProps {
   initialData: any;
@@ -23,7 +24,7 @@ interface CvReviewFormProps {
 }
 
 export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, currentProfile, onSubmit: onSubmitProp, isSaving }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'experience'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'experience' | 'other'>('profile');
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -90,6 +91,15 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
       },
       totalYearsExp: initialData?.experience?.total_months ? Math.round(initialData.experience.total_months / 12) : (initialData?.totalYearsExp || 0),
       summary: initialData?.summary || '',
+      languages: (initialData?.languages || []).map((l: any) => ({
+        language: l.language || '',
+        level: l.level || ''
+      })),
+      interests: initialData?.interests || [],
+      otherInfo: (initialData?.other_info || []).map((o: any) => ({
+        header: o.header || '',
+        content: o.content || ''
+      })),
     }
   });
 
@@ -99,17 +109,36 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
 
   const onError = (errors: any) => {
     console.error('Validation Errors:', errors);
-    const errorCount = Object.keys(errors).length;
-    toast.error(`Có ${errorCount} mục cần kiểm tra lại. Vui lòng xem các thông báo đỏ trên form.`);
+
+    const fieldLabels: Record<string, string> = {
+      fullName: 'Họ và tên',
+      email: 'Email',
+      phone: 'Số điện thoại',
+      skills: 'Kỹ năng',
+      experience: 'Kinh nghiệm làm việc',
+      education: 'Lịch sử học vấn',
+      projects: 'Dự án',
+      desiredJob: 'Công việc mong muốn',
+      summary: 'Giới thiệu bản thân'
+    };
+
+    // Lấy danh sách các trường bị lỗi
+    const errorFields = Object.keys(errors);
     
-    // Tìm lỗi đầu tiên để thông báo cụ thể
-    const firstError: any = Object.values(errors)[0];
-    if (firstError?.message) {
-      toast.error(firstError.message, { id: 'validation-detail' });
-    } else if (typeof firstError === 'object') {
-      // Lỗi trong mảng (kinh nghiệm/dự án)
-      const firstSubError: any = Object.values(firstError)[0];
-      if (firstSubError?.message) toast.error(firstSubError.message, { id: 'validation-detail' });
+    if (errorFields.length > 0) {
+      // Hiển thị thông báo chi tiết cho từng nhóm lỗi chính
+      errorFields.forEach((field) => {
+        const label = fieldLabels[field] || field;
+        const error = errors[field];
+        
+        if (error.message) {
+          // Lỗi ở trường cấp 1 (fullName, email...)
+          toast.error(`${label}: ${error.message}`, { id: `error-${field}` });
+        } else if (Array.isArray(error) || typeof error === 'object') {
+          // Lỗi ở các mảng (education, experience...) hoặc object (desiredJob)
+          toast.error(`Vui lòng kiểm tra lại mục: ${label}`, { id: `error-${field}` });
+        }
+      });
     }
   };
 
@@ -153,6 +182,17 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
                 <Briefcase size={13} />
                 Kinh nghiệm
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('other')}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${activeTab === 'other'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                  }`}
+              >
+                <PlusCircle size={13} />
+                Khác
+              </button>
             </div>
 
             {/* Quick Top Save Button (Optional/Secondary) */}
@@ -186,7 +226,7 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
               <SummarySection />
               <SkillsSection />
             </motion.div>
-          ) : (
+          ) : activeTab === 'experience' ? (
             <motion.div
               key="tab-experience"
               initial={{ opacity: 0, x: 16 }}
@@ -198,7 +238,18 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
               <ExperienceSection />
               <ProjectsSection />
             </motion.div>
-          )}
+          ) : activeTab === 'other' ? (
+            <motion.div
+              key="tab-other"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.2 }}
+              className="max-w-4xl mx-auto"
+            >
+              <AdditionalInfoSection />
+            </motion.div>
+          ) : null}
         </AnimatePresence>
 
         {/* Main Form Action Box */}

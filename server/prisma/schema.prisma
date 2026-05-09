@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  // output          = "../src/generated/prisma"
+  output          = "../src/generated/prisma"
 }
 
 datasource db {
@@ -107,6 +107,7 @@ model Candidate {
   industries     String[]        @default([])
   interests      String[]        @default([])
   languages      Json?
+  otherInfo      Json?
   softSkills     String[]        @default([])
   applications   Application[]
   cvs            CV[]
@@ -498,12 +499,18 @@ enum JobType {
   FULLTIME
   PARTTIME
   REMOTE
+  INTERNSHIP
+  OTHER
 }
 
 enum JobLevel {
   INTERN
   STAFF
+  TEAM_LEADER
+  DEPARTMENT_HEAD
   MANAGER
+  BRANCH_MANAGER
+  VICE_DIRECTOR
   DIRECTOR
 }
 

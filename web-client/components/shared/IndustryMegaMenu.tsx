@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import IndustryPanel from "./IndustryPanel";
 
@@ -25,8 +25,24 @@ export default function IndustryMegaMenu({
 }: IndustryMegaMenuProps) {
   const industries = HIERARCHICAL_INDUSTRIES;
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const loading = false;
   const isHomepage = variant === "homepage";
+
+  const filteredIndustries = industries.filter((item) => {
+    const matchesCategory = item.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSub = item.subCategories.some((sub) =>
+      sub.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return matchesCategory || matchesSub;
+  });
+
+  // Auto-select first result on search
+  useEffect(() => {
+    if (searchTerm && filteredIndustries.length > 0) {
+      setActiveCategory(filteredIndustries[0].category);
+    }
+  }, [searchTerm]);
 
   return (
     <div
@@ -35,14 +51,32 @@ export default function IndustryMegaMenu({
       onMouseLeave={() => isHomepage && setActiveCategory(null)}
     >
       {/* Left Sidebar: Main Categories */}
-      <div className="w-[260px] bg-[#fdf8f1] border-r border-slate-100 py-4 flex flex-col shrink-0 rounded-l-2xl">
-        <div className="px-5 mb-4 flex items-center gap-2">
+      <div className="w-[260px] bg-[#fdf8f1] border-r border-slate-100 py-3 flex flex-col shrink-0 rounded-l-2xl">
+        <div className="px-5 mb-2 flex items-center gap-2">
           <div className="flex flex-col gap-0.5">
             <div className="w-4 h-0.5 bg-slate-800"></div>
             <div className="w-4 h-0.5 bg-slate-800"></div>
             <div className="w-4 h-0.5 bg-slate-800"></div>
           </div>
           <span className="font-black text-slate-900 text-[16px] tracking-tight">NGÀNH NGHỀ</span>
+        </div>
+
+        {/* Search Bar */}
+        <div className="px-4 mb-2">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <svg className="w-3.5 h-3.5 text-slate-400 group-focus-within:text-[#1e60ad] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm kiếm ngành nghề..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white/50 backdrop-blur-sm border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-[12.5px] focus:outline-none focus:ring-1 focus:ring-[#1e60ad] focus:border-[#1e60ad] transition-all placeholder:text-slate-400"
+            />
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto custom-sidebar-scroll pr-1">
@@ -53,12 +87,12 @@ export default function IndustryMegaMenu({
               </div>
             ))
           ) : (
-            industries.map((item) => (
+            filteredIndustries.map((item) => (
               <button
                 key={item.category}
                 onMouseEnter={() => setActiveCategory(item.category)}
                 title={item.category}
-                className={`w-full flex items-center justify-between px-5 py-3 text-[14px] font-medium transition-all group relative ${activeCategory === item.category
+                className={`w-full flex items-center justify-between px-5 py-1.5 text-[13px] font-medium transition-all group relative ${activeCategory === item.category
                   ? "bg-white text-[#1e60ad]"
                   : "text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad]"
                   }`}
@@ -82,6 +116,7 @@ export default function IndustryMegaMenu({
           subCategories={industries.find(i => i.category === activeCategory)?.subCategories || []}
           onSelect={onSelect}
           onClose={onClose}
+          searchTerm={searchTerm}
         />
       </div>
 

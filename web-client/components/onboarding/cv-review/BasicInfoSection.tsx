@@ -35,12 +35,12 @@ export function BasicInfoSection({ currentProfile }: BasicInfoSectionProps) {
   };
 
   return (
-    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
-      <div className="flex items-center gap-2.5 mb-4">
-        <div className="p-2 bg-gradient-to-br from-sky-100 to-blue-50 text-sky-600 rounded-lg shadow-sm border border-sky-100/50">
-          <User size={16} />
+    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
+      <div className="flex items-center gap-2.5 mb-6">
+        <div className="p-2.5 bg-gradient-to-br from-sky-100 to-blue-50 text-sky-600 rounded-lg shadow-sm border border-sky-100/50">
+          <User size={18} />
         </div>
-        <h2 className="text-lg font-bold text-gray-900 leading-none">Thông tin cơ bản</h2>
+        <h2 className="text-base font-bold text-gray-900 leading-none">Thông tin cơ bản</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">

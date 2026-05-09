@@ -199,6 +199,7 @@ exports.Prisma.CandidateScalarFieldEnum = {
   industries: 'industries',
   interests: 'interests',
   languages: 'languages',
+  otherInfo: 'otherInfo',
   softSkills: 'softSkills'
 };
 
@@ -541,13 +542,19 @@ exports.TransactionType = exports.$Enums.TransactionType = {
 exports.JobType = exports.$Enums.JobType = {
   FULLTIME: 'FULLTIME',
   PARTTIME: 'PARTTIME',
-  REMOTE: 'REMOTE'
+  REMOTE: 'REMOTE',
+  INTERNSHIP: 'INTERNSHIP',
+  OTHER: 'OTHER'
 };
 
 exports.JobLevel = exports.$Enums.JobLevel = {
   INTERN: 'INTERN',
   STAFF: 'STAFF',
+  TEAM_LEADER: 'TEAM_LEADER',
+  DEPARTMENT_HEAD: 'DEPARTMENT_HEAD',
   MANAGER: 'MANAGER',
+  BRANCH_MANAGER: 'BRANCH_MANAGER',
+  VICE_DIRECTOR: 'VICE_DIRECTOR',
   DIRECTOR: 'DIRECTOR'
 };
 

@@ -93,7 +93,7 @@ export function SavedJobsDropdown() {
                 </h3>
               </div>
               <Link 
-                href="/saved-jobs" 
+                href="/profile/jobs/saved" 
                 onClick={() => setIsOpen(false)}
                 className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors px-2 py-1 rounded-md hover:bg-blue-50"
                 >

@@ -15,14 +15,52 @@ export function useCvImport() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
+  const [error, setError] = useState<any>(null);
   const [currentProfile, setCurrentProfile] = useState<any>(null);
 
   const handleUpload = async (file: File) => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await profileApi.extractCv(file);
       if (response && response.parsedData) {
-        setParsedData(response.parsedData);
+        const raw = response.parsedData;
+        // Chuẩn hóa dữ liệu từ snake_case (Server) sang camelCase (Frontend)
+        const normalized = {
+          fullName: raw.personal_info?.full_name || '',
+          email: raw.personal_info?.email || '',
+          phone: raw.personal_info?.phone || '',
+          summary: raw.summary || '',
+          gpa: raw.personal_info?.gpa || 0,
+          education: Array.isArray(raw.education) 
+            ? raw.education.map((edu: any) => ({
+                school: edu.school || edu.institution || '',
+                major: edu.major || '',
+                degree: edu.degree || ''
+              }))
+            : raw.education ? [{
+                school: raw.education.school || raw.education.institution || '',
+                major: raw.education.major || '',
+                degree: raw.education.degree || ''
+              }] : [],
+          skills: [
+            ...(raw.skills?.hard_skills || []),
+            ...(raw.skills?.soft_skills || [])
+          ],
+          experience: (raw.experience?.roles || []).map((r: any) => ({
+            company: r.company_or_project,
+            role: r.job_title,
+            duration: r.duration,
+            description: r.description
+          })),
+          projects: raw.projects || [],
+          desiredJob: raw.desired_job || {},
+          languages: raw.languages || [],
+          interests: raw.interests || [],
+          otherInfo: raw.other_info || []
+        };
+
+        setParsedData(normalized);
         // Fetch current profile for comparison
         try {
           const profile = await profileApi.getMe();
@@ -32,24 +70,38 @@ export function useCvImport() {
         }
         setStep('review');
         
-        if (response.parsedData.aiWarning) {
-          toast.error(response.parsedData.aiWarning, { duration: 5000 });
+        if (response.parsedData.error_message) {
+          toast.error(response.parsedData.error_message, { duration: 5000 });
         } else {
           toast.success('Bóc tách CV thành công!');
         }
       } else {
-        toast.error('Không thể bóc tách dữ liệu. Bạn có thể nhập thông tin thủ công.');
+        const msg = 'Không thể bóc tách dữ liệu. Bạn có thể nhập thông tin thủ công.';
+        setError(msg);
+        toast.error(msg);
       }
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      const message = error.response?.data?.message || 'Có lỗi xảy ra khi xử lý CV.';
-      toast.error(message);
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      const errorData = err.response?.data;
+      const message = errorData?.message || 'Có lỗi xảy ra khi xử lý CV.';
+      
+      if (errorData?.error === 'CV_INCOMPLETE' && errorData.missingFields) {
+        setError({
+          message,
+          missingFields: errorData.missingFields
+        });
+      } else {
+        setError(message);
+      }
+      
+      // toast.error(typeof message === 'string' ? message : 'Dữ liệu CV không hợp lệ');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleManualEntry = () => {
+    setError(null);
     setParsedData({
       fullName: '',
       email: '',
@@ -66,6 +118,7 @@ export function useCvImport() {
 
   const handleSaveProfile = async (data: any) => {
     setIsSaving(true);
+    setError(null);
     try {
       // Mapping fields for profile update
       await profileApi.updateProfile({
@@ -93,6 +146,12 @@ export function useCvImport() {
         major: data.education?.[0]?.major,
         gpa: data.gpa,
         certifications: data.certifications,
+        languages: (data.languages || []).map((l: any) => ({
+          name: l.language || l.name,
+          level: l.level
+        })),
+        interests: data.interests || [],
+        otherInfo: data.otherInfo || []
       });
 
       setStep('success');
@@ -109,15 +168,20 @@ export function useCvImport() {
       setTimeout(() => {
         router.push('/profile');
       }, 2000);
-    } catch (error: any) {
-      console.error('Save error:', error);
-      toast.error(error.response?.data?.message || 'Không thể lưu hồ sơ.');
+    } catch (err: any) {
+      console.error('Save error:', err);
+      const msg = err.response?.data?.message || 'Không thể lưu hồ sơ.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const goToUpload = () => setStep('upload');
+  const goToUpload = () => {
+    setStep('upload');
+    setError(null);
+  };
 
   return {
     step,
@@ -125,6 +189,7 @@ export function useCvImport() {
     isSaving,
     parsedData,
     currentProfile,
+    error,
     handleUpload,
     handleSaveProfile,
     handleManualEntry,

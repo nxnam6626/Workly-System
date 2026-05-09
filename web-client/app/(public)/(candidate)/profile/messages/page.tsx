@@ -253,8 +253,8 @@ export default function CandidateMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] py-8 px-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');`}</style>
+    <div className="min-h-screen bg-[#f8fafc] py-8 px-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');`}</style>
       <div className="max-w-[1300px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
@@ -272,7 +272,7 @@ export default function CandidateMessagesPage() {
               {/* Page Header */}
               <div className="mb-5">
                 <p className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-1">Kết nối & Hợp tác</p>
-                <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 700 }}
+                <h1 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
                   className="text-3xl text-slate-900 leading-none">
                   Tin nhắn <em className="text-emerald-600">nhà tuyển dụng</em>
                 </h1>

@@ -31,12 +31,12 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
       {/* Tab Navigation Bar */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex gap-8">
+          <div className="flex gap-6">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`py-4 text-sm font-black uppercase tracking-widest transition-all relative ${
+                className={`py-3 text-[11px] font-black uppercase tracking-widest transition-all relative ${
                   activeTab === tab.id ? 'text-mariner' : 'text-slate-400 hover:text-slate-600'
                 }`}
               >
@@ -54,7 +54,7 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
       </div>
 
       {/* Main Content Area */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Content based on Tab */}
         <div className="lg:col-span-2">
           <AnimatePresence mode="wait">
@@ -64,12 +64,12 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="space-y-8"
+              className="space-y-6"
             >
               {activeTab === 'about' && <AboutSection company={company} />}
               {activeTab === 'jobs' && <JobListSection company={company} isPreview={isPreview} />}
               {activeTab === 'reviews' && (
-                <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
+                <div className="bg-white rounded-2xl p-10 text-center border border-slate-100 shadow-sm">
                    <p className="text-slate-400 font-bold italic">Chưa có đánh giá nào cho công ty này.</p>
                 </div>
               )}
@@ -78,7 +78,7 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
         </div>
 
         {/* Right Column: Sidebar (Always visible) */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           <SidebarInfo company={company} isPreview={isPreview} />
         </div>
       </section>

@@ -25,6 +25,16 @@ export const projectSchema = z.object({
   technology: z.string().optional(),
 });
 
+export const languageSchema = z.object({
+  language: z.string().min(1, 'Vui lòng nhập ngôn ngữ'),
+  level: z.string().optional(),
+});
+
+export const otherInfoSchema = z.object({
+  header: z.string().min(1, 'Vui lòng nhập tiêu đề'),
+  content: z.string().min(1, 'Vui lòng nhập nội dung'),
+});
+
 export const desiredJobSchema = z.object({
   jobTitle: z.string().optional(),
   jobType: z.string().optional(),
@@ -45,6 +55,9 @@ export const formSchema = z.object({
   desiredJob: desiredJobSchema.optional(),
   totalYearsExp: z.number().min(0),
   summary: z.string().optional(),
+  languages: z.array(languageSchema).optional(),
+  interests: z.array(z.string()).optional(),
+  otherInfo: z.array(otherInfoSchema).optional(),
 });
 
 export type FormValues = z.infer<typeof formSchema>;

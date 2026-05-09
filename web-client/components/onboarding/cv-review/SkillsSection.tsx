@@ -93,14 +93,14 @@ export function SkillsSection() {
     });
 
   return (
-    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
-      <div className="flex items-center justify-between mb-4">
+    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-500">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-gradient-to-br from-indigo-100 to-violet-50 text-indigo-600 rounded-lg shadow-sm border border-indigo-100/50">
-            <Code size={16} />
+          <div className="p-2.5 bg-gradient-to-br from-indigo-100 to-violet-50 text-indigo-600 rounded-lg shadow-sm border border-indigo-100/50">
+            <Code size={18} />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-gray-900 leading-none">Kỹ năng chuyên môn</h2>
+            <h2 className="text-base font-bold text-gray-900 leading-none">Kỹ năng chuyên môn</h2>
             {skills.length > 0 && (
               <p className="text-[10px] text-gray-400 mt-0.5">{skills.length} kỹ năng · Nhấn cấp độ để thay đổi</p>
             )}
