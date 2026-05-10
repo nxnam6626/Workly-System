@@ -16,8 +16,10 @@ import {
   MailOpen,
   Camera,
   Loader2,
+  Wallet,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import ActivateJobSearchModal from '@/components/modals/ActivateJobSearchModal';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -35,6 +37,7 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
   const { user, logout, updateUser } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false);
+  const [isActivationModalOpen, setIsActivationModalOpen] = useState(false);
 
   const displayName = user?.name || (user as any)?.candidate?.fullName || user?.email || 'Người dùng';
   const jobTitle = (user as any)?.candidate?.major || 'Ứng viên';
@@ -59,8 +62,14 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
       });
       updateUser({ candidate: updated.candidate });
       (await import('react-hot-toast')).default.success(newValue ? "Hồ sơ của bạn đã được hiển thị với Nhà tuyển dụng!" : "Đã tắt. Hồ sơ của bạn đang được ẩn khỏi kết quả tìm kiếm.", { id: toastId });
-    } catch (error) {
-      (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
+    } catch (error: any) {
+      const message = error.response?.data?.message;
+      if (message === 'JOB_SEARCH_EXPIRED') {
+         (await import('react-hot-toast')).default.dismiss(toastId);
+         setIsActivationModalOpen(true);
+      } else {
+         (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
+      }
     }
   };
 
@@ -93,6 +102,13 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
       href: '/profile',
       isActive: pathname === '/profile',
       accent: 'text-blue-600 bg-blue-50',
+    },
+    {
+      icon: Wallet,
+      label: 'Ví của tôi',
+      href: '/profile/wallet',
+      isActive: pathname === '/profile/wallet',
+      accent: 'text-violet-600 bg-violet-50',
     },
     {
       icon: ClipboardCheck,
@@ -211,8 +227,31 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
               ? 'Hồ sơ đang hiển thị với nhà tuyển dụng.'
               : 'Hồ sơ đang tạm ẩn khỏi tìm kiếm.'}
           </p>
+          
+          {isLookingForJob && (user as any)?.candidate?.jobSearchExpiresAt && (() => {
+             const diff = new Date((user as any).candidate.jobSearchExpiresAt).getTime() - new Date().getTime();
+             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+             if (days <= 0) return null;
+             
+             return (
+               <div className="mt-2 px-2 py-1 bg-emerald-100/50 text-emerald-700 rounded-lg text-[9px] font-bold inline-flex items-center gap-1">
+                 <Sparkles size={10} /> Còn {days} ngày kích hoạt
+               </div>
+             );
+          })()}
         </div>
       </div>
+
+      <ActivateJobSearchModal 
+        isOpen={isActivationModalOpen} 
+        onClose={() => setIsActivationModalOpen(false)} 
+        onSuccess={async () => {
+          // Fetch fresh user data to update the context and show the toggle turned ON automatically
+          const { profileApi } = await import('@/lib/profile-api');
+          const data = await profileApi.getProfile();
+          updateUser({ candidate: data.candidate });
+        }}
+      />
 
       {/* Navigation Menu */}
       <nav className="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-3 space-y-1">

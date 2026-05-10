@@ -37,6 +37,7 @@ import { NotificationsModule } from '@/modules/communication/notifications/notif
 
 // Billing
 import { WalletsModule } from '@/modules/billing/wallets/wallets.module';
+import { CandidateWalletsModule } from '@/modules/billing/candidate-wallets/candidate-wallets.module';
 import { SubscriptionsModule } from '@/modules/billing/subscriptions/subscriptions.module';
 
 // Support
@@ -75,6 +76,7 @@ import { ReportsModule } from '@/modules/communication/reports/reports.module';
     NotificationsModule,
     RecruitersModule,
     WalletsModule,
+    CandidateWalletsModule,
     SupabaseModule,
     SubscriptionsModule,
     SupportModule,

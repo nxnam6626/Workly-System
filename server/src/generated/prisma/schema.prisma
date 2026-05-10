@@ -88,40 +88,42 @@ model Admin {
 }
 
 model Candidate {
-  candidateId      String            @id @default(uuid())
-  fullName         String
-  university       String?
-  major            String?
-  gpa              Float?
-  cvUrl            String?
-  userId           String            @unique
-  isOpenToWork     Boolean           @default(true)
-  location         String?
-  desiredJob       Json?
-  summary          String?
-  birthYear        Int?
-  currentSalary    String?
-  totalYearsExp    Float?            @default(0)
-  degree           String?
-  gender           String?
-  industries       String[]          @default([])
-  interests        String[]          @default([])
-  languages        Json?
-  softSkills       String[]          @default([])
-  applications     Application[]
-  cvs              CV[]
-  user             User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  certifications   Certification[]
-  conversations    Conversation[]
-  experiences      Experience[]
-  jobMatches       JobMatch[]
-  projects         Project[]
-  savedJobs        SavedJob[]
-  skills           Skill[]
-  candidateUnlocks CandidateUnlock[]
-  candidateReviews CandidateReview[]
-  companyReviews   CompanyReview[]
-  reports          CandidateReport[]
+  candidateId        String            @id @default(uuid())
+  fullName           String
+  university         String?
+  major              String?
+  gpa                Float?
+  cvUrl              String?
+  userId             String            @unique
+  isOpenToWork       Boolean           @default(true)
+  jobSearchExpiresAt DateTime?
+  location           String?
+  desiredJob         Json?
+  summary            String?
+  birthYear          Int?
+  currentSalary      String?
+  totalYearsExp      Float?            @default(0)
+  degree             String?
+  gender             String?
+  industries         String[]          @default([])
+  interests          String[]          @default([])
+  languages          Json?
+  softSkills         String[]          @default([])
+  applications       Application[]
+  cvs                CV[]
+  user               User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  certifications     Certification[]
+  conversations      Conversation[]
+  experiences        Experience[]
+  jobMatches         JobMatch[]
+  projects           Project[]
+  savedJobs          SavedJob[]
+  skills             Skill[]
+  candidateUnlocks   CandidateUnlock[]
+  candidateReviews   CandidateReview[]
+  companyReviews     CompanyReview[]
+  reports            CandidateReport[]
+  wallet             CandidateWallet?
 }
 
 model Experience {
@@ -444,6 +446,29 @@ model CompanyWallet {
   transactions     Transaction[]
 }
 
+model CandidateWallet {
+  walletId     String                 @id @default(uuid())
+  candidateId  String                 @unique
+  balance      Int                    @default(0)
+  updatedAt    DateTime               @updatedAt
+  candidate    Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  transactions CandidateTransaction[]
+}
+
+model CandidateTransaction {
+  transactionId String          @id @default(uuid())
+  amount        Int
+  description   String?
+  createdAt     DateTime        @default(now())
+  walletId      String
+  candidateId   String?
+  orderCode     Int?            @unique
+  status        String          @default("SUCCESS")
+  realMoney     Float?
+  type          TransactionType
+  wallet        CandidateWallet @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
+}
+
 model RecruiterSubscription {
   subscriptionId  String    @id @default(uuid())
   recruiterId     String    @unique
@@ -564,6 +589,7 @@ enum TransactionType {
   BUY_PACKAGE
   POST_JOB
   OPEN_CV
+  ACTIVATE_JOB_SEARCH
 }
 
 enum SupportStatus {

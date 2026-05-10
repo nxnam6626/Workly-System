@@ -17,7 +17,8 @@ import {
   LogOut,
   Sparkles,
   Lock,
-  Bell
+  Bell,
+  Wallet
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import Image from 'next/image';
@@ -64,9 +65,16 @@ export function UserDropdown() {
       // Sync global state
       updateUser({ candidate: updated.candidate });
       (await import('react-hot-toast')).default.success(newValue ? "Hồ sơ đã công khai!" : "Hồ sơ đã tạm ẩn.", { id: toastId });
-    } catch (error) {
+    } catch (error: any) {
       setIsLookingForJob(!newValue);
-      (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
+      const message = error.response?.data?.message;
+      if (message === 'JOB_SEARCH_EXPIRED') {
+         (await import('react-hot-toast')).default.error("Thời gian tìm việc đã hết hạn. Vui lòng gia hạn ở trang Cá nhân!", { id: toastId });
+         router.push('/profile');
+         setDropdownOpen(false);
+      } else {
+         (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
+      }
     }
   };
 
@@ -88,6 +96,7 @@ export function UserDropdown() {
   if (isCandidate) {
     navItems.push(
       { icon: <User className="w-5 h-5" />, label: "Quản lý hồ sơ", href: "/profile" },
+      { icon: <Wallet className="w-5 h-5" />, label: "Ví của tôi", href: "/profile/wallet" },
       { icon: <ClipboardCheck className="w-5 h-5" />, label: "Việc làm đã ứng tuyển", href: "/profile/jobs/applied" },
       { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
       { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },

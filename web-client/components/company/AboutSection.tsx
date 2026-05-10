@@ -5,7 +5,17 @@ import {
   ChevronDown, 
   ChevronUp,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Company } from "@/types/company";
+
+const JobMap = dynamic(() => import("@/components/jobs/JobMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-200 animate-pulse">
+      <span className="text-xs text-slate-400 font-medium">Đang tải bản đồ...</span>
+    </div>
+  )
+});
 
 interface AboutSectionProps {
   company: Partial<Company>;
@@ -20,8 +30,10 @@ export function AboutSection({ company }: AboutSectionProps) {
     ? description.substring(0, 500) + "..." 
     : description;
 
+  const branches = company.branches || [];
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 md:p-7 space-y-6">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 md:p-7 space-y-8">
       {/* Main Introduction */}
       <div className="space-y-3">
         <h2 className="text-base font-bold text-slate-900 tracking-tight">
@@ -97,6 +109,21 @@ export function AboutSection({ company }: AboutSectionProps) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Locations Map Integration */}
+      {branches.length > 0 && (
+        <div className="space-y-4 pt-4 border-t border-slate-100">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight flex items-center gap-2">
+            Địa điểm & Bản đồ chi nhánh
+          </h3>
+          <div className="grid grid-cols-1 gap-4">
+            {/* Optional summary list of branches can go here if wanted */}
+            <div className="rounded-xl overflow-hidden shadow-sm border border-slate-200">
+              <JobMap branches={branches} />
+            </div>
+          </div>
         </div>
       )}
     </div>

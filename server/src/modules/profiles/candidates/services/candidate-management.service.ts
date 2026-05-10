@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -54,6 +54,14 @@ export class CandidateManagementService {
     });
     if (!candidate) {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
+    }
+
+    if (updateCandidateDto.isOpenToWork === true && candidate.isOpenToWork === false) {
+       const now = new Date();
+       const expiry = candidate.jobSearchExpiresAt ? new Date(candidate.jobSearchExpiresAt) : null;
+       if (!expiry || expiry <= now) {
+         throw new BadRequestException('JOB_SEARCH_EXPIRED');
+       }
     }
 
     const {
@@ -187,6 +195,7 @@ export class CandidateManagementService {
             summary: true,
             desiredJob: true,
             isOpenToWork: true,
+            jobSearchExpiresAt: true,
             gender: true,
             birthYear: true,
             location: true,

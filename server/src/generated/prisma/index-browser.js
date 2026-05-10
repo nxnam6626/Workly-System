@@ -188,6 +188,7 @@ exports.Prisma.CandidateScalarFieldEnum = {
   cvUrl: 'cvUrl',
   userId: 'userId',
   isOpenToWork: 'isOpenToWork',
+  jobSearchExpiresAt: 'jobSearchExpiresAt',
   location: 'location',
   desiredJob: 'desiredJob',
   summary: 'summary',
@@ -446,6 +447,26 @@ exports.Prisma.CompanyWalletScalarFieldEnum = {
   cvUnlockQuotaMax: 'cvUnlockQuotaMax'
 };
 
+exports.Prisma.CandidateWalletScalarFieldEnum = {
+  walletId: 'walletId',
+  candidateId: 'candidateId',
+  balance: 'balance',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CandidateTransactionScalarFieldEnum = {
+  transactionId: 'transactionId',
+  amount: 'amount',
+  description: 'description',
+  createdAt: 'createdAt',
+  walletId: 'walletId',
+  candidateId: 'candidateId',
+  orderCode: 'orderCode',
+  status: 'status',
+  realMoney: 'realMoney',
+  type: 'type'
+};
+
 exports.Prisma.RecruiterSubscriptionScalarFieldEnum = {
   subscriptionId: 'subscriptionId',
   recruiterId: 'recruiterId',
@@ -603,7 +624,8 @@ exports.TransactionType = exports.$Enums.TransactionType = {
   DEPOSIT: 'DEPOSIT',
   BUY_PACKAGE: 'BUY_PACKAGE',
   POST_JOB: 'POST_JOB',
-  OPEN_CV: 'OPEN_CV'
+  OPEN_CV: 'OPEN_CV',
+  ACTIVATE_JOB_SEARCH: 'ACTIVATE_JOB_SEARCH'
 };
 
 exports.JobType = exports.$Enums.JobType = {
@@ -695,6 +717,8 @@ exports.Prisma.ModelName = {
   Conversation: 'Conversation',
   Message: 'Message',
   CompanyWallet: 'CompanyWallet',
+  CandidateWallet: 'CandidateWallet',
+  CandidateTransaction: 'CandidateTransaction',
   RecruiterSubscription: 'RecruiterSubscription',
   SupportRequest: 'SupportRequest',
   AiQueryCache: 'AiQueryCache',

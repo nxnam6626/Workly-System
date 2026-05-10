@@ -110,6 +110,7 @@ export class UserDataService {
             summary: true,
             desiredJob: true,
             isOpenToWork: true,
+            jobSearchExpiresAt: true,
             gender: true,
             birthYear: true,
             location: true,

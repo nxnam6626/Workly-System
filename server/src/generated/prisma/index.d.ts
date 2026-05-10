@@ -149,6 +149,16 @@ export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
  */
 export type CompanyWallet = $Result.DefaultSelection<Prisma.$CompanyWalletPayload>
 /**
+ * Model CandidateWallet
+ * 
+ */
+export type CandidateWallet = $Result.DefaultSelection<Prisma.$CandidateWalletPayload>
+/**
+ * Model CandidateTransaction
+ * 
+ */
+export type CandidateTransaction = $Result.DefaultSelection<Prisma.$CandidateTransactionPayload>
+/**
  * Model RecruiterSubscription
  * 
  */
@@ -307,7 +317,8 @@ export const TransactionType: {
   DEPOSIT: 'DEPOSIT',
   BUY_PACKAGE: 'BUY_PACKAGE',
   POST_JOB: 'POST_JOB',
-  OPEN_CV: 'OPEN_CV'
+  OPEN_CV: 'OPEN_CV',
+  ACTIVATE_JOB_SEARCH: 'ACTIVATE_JOB_SEARCH'
 };
 
 export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType]
@@ -778,6 +789,26 @@ export class PrismaClient<
     * ```
     */
   get companyWallet(): Prisma.CompanyWalletDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.candidateWallet`: Exposes CRUD operations for the **CandidateWallet** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CandidateWallets
+    * const candidateWallets = await prisma.candidateWallet.findMany()
+    * ```
+    */
+  get candidateWallet(): Prisma.CandidateWalletDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.candidateTransaction`: Exposes CRUD operations for the **CandidateTransaction** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CandidateTransactions
+    * const candidateTransactions = await prisma.candidateTransaction.findMany()
+    * ```
+    */
+  get candidateTransaction(): Prisma.CandidateTransactionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.recruiterSubscription`: Exposes CRUD operations for the **RecruiterSubscription** model.
@@ -1319,6 +1350,8 @@ export namespace Prisma {
     Conversation: 'Conversation',
     Message: 'Message',
     CompanyWallet: 'CompanyWallet',
+    CandidateWallet: 'CandidateWallet',
+    CandidateTransaction: 'CandidateTransaction',
     RecruiterSubscription: 'RecruiterSubscription',
     SupportRequest: 'SupportRequest',
     AiQueryCache: 'AiQueryCache',
@@ -1342,7 +1375,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "experience" | "certification" | "skill" | "project" | "recruiter" | "transaction" | "company" | "companySection" | "companyBenefit" | "companyHistory" | "companyBranch" | "jobPosting" | "jobPostingBranch" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "companyWallet" | "recruiterSubscription" | "supportRequest" | "aiQueryCache" | "candidateUnlock" | "candidateReview" | "interviewEvaluation" | "companyReview" | "candidateReport"
+      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "experience" | "certification" | "skill" | "project" | "recruiter" | "transaction" | "company" | "companySection" | "companyBenefit" | "companyHistory" | "companyBranch" | "jobPosting" | "jobPostingBranch" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "companyWallet" | "candidateWallet" | "candidateTransaction" | "recruiterSubscription" | "supportRequest" | "aiQueryCache" | "candidateUnlock" | "candidateReview" | "interviewEvaluation" | "companyReview" | "candidateReport"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3344,6 +3377,154 @@ export namespace Prisma {
           }
         }
       }
+      CandidateWallet: {
+        payload: Prisma.$CandidateWalletPayload<ExtArgs>
+        fields: Prisma.CandidateWalletFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CandidateWalletFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CandidateWalletFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          findFirst: {
+            args: Prisma.CandidateWalletFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CandidateWalletFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          findMany: {
+            args: Prisma.CandidateWalletFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>[]
+          }
+          create: {
+            args: Prisma.CandidateWalletCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          createMany: {
+            args: Prisma.CandidateWalletCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CandidateWalletCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>[]
+          }
+          delete: {
+            args: Prisma.CandidateWalletDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          update: {
+            args: Prisma.CandidateWalletUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          deleteMany: {
+            args: Prisma.CandidateWalletDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CandidateWalletUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CandidateWalletUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>[]
+          }
+          upsert: {
+            args: Prisma.CandidateWalletUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateWalletPayload>
+          }
+          aggregate: {
+            args: Prisma.CandidateWalletAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCandidateWallet>
+          }
+          groupBy: {
+            args: Prisma.CandidateWalletGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CandidateWalletGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CandidateWalletCountArgs<ExtArgs>
+            result: $Utils.Optional<CandidateWalletCountAggregateOutputType> | number
+          }
+        }
+      }
+      CandidateTransaction: {
+        payload: Prisma.$CandidateTransactionPayload<ExtArgs>
+        fields: Prisma.CandidateTransactionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CandidateTransactionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CandidateTransactionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          findFirst: {
+            args: Prisma.CandidateTransactionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CandidateTransactionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          findMany: {
+            args: Prisma.CandidateTransactionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>[]
+          }
+          create: {
+            args: Prisma.CandidateTransactionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          createMany: {
+            args: Prisma.CandidateTransactionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CandidateTransactionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>[]
+          }
+          delete: {
+            args: Prisma.CandidateTransactionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          update: {
+            args: Prisma.CandidateTransactionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          deleteMany: {
+            args: Prisma.CandidateTransactionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CandidateTransactionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CandidateTransactionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>[]
+          }
+          upsert: {
+            args: Prisma.CandidateTransactionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CandidateTransactionPayload>
+          }
+          aggregate: {
+            args: Prisma.CandidateTransactionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCandidateTransaction>
+          }
+          groupBy: {
+            args: Prisma.CandidateTransactionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CandidateTransactionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CandidateTransactionCountArgs<ExtArgs>
+            result: $Utils.Optional<CandidateTransactionCountAggregateOutputType> | number
+          }
+        }
+      }
       RecruiterSubscription: {
         payload: Prisma.$RecruiterSubscriptionPayload<ExtArgs>
         fields: Prisma.RecruiterSubscriptionFieldRefs
@@ -4071,6 +4252,8 @@ export namespace Prisma {
     conversation?: ConversationOmit
     message?: MessageOmit
     companyWallet?: CompanyWalletOmit
+    candidateWallet?: CandidateWalletOmit
+    candidateTransaction?: CandidateTransactionOmit
     recruiterSubscription?: RecruiterSubscriptionOmit
     supportRequest?: SupportRequestOmit
     aiQueryCache?: AiQueryCacheOmit
@@ -4829,6 +5012,37 @@ export namespace Prisma {
    */
   export type CompanyWalletCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TransactionWhereInput
+  }
+
+
+  /**
+   * Count Type CandidateWalletCountOutputType
+   */
+
+  export type CandidateWalletCountOutputType = {
+    transactions: number
+  }
+
+  export type CandidateWalletCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    transactions?: boolean | CandidateWalletCountOutputTypeCountTransactionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CandidateWalletCountOutputType without action
+   */
+  export type CandidateWalletCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWalletCountOutputType
+     */
+    select?: CandidateWalletCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CandidateWalletCountOutputType without action
+   */
+  export type CandidateWalletCountOutputTypeCountTransactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CandidateTransactionWhereInput
   }
 
 
@@ -11631,6 +11845,7 @@ export namespace Prisma {
     cvUrl: string | null
     userId: string | null
     isOpenToWork: boolean | null
+    jobSearchExpiresAt: Date | null
     location: string | null
     summary: string | null
     birthYear: number | null
@@ -11649,6 +11864,7 @@ export namespace Prisma {
     cvUrl: string | null
     userId: string | null
     isOpenToWork: boolean | null
+    jobSearchExpiresAt: Date | null
     location: string | null
     summary: string | null
     birthYear: number | null
@@ -11667,6 +11883,7 @@ export namespace Prisma {
     cvUrl: number
     userId: number
     isOpenToWork: number
+    jobSearchExpiresAt: number
     location: number
     desiredJob: number
     summary: number
@@ -11704,6 +11921,7 @@ export namespace Prisma {
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
+    jobSearchExpiresAt?: true
     location?: true
     summary?: true
     birthYear?: true
@@ -11722,6 +11940,7 @@ export namespace Prisma {
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
+    jobSearchExpiresAt?: true
     location?: true
     summary?: true
     birthYear?: true
@@ -11740,6 +11959,7 @@ export namespace Prisma {
     cvUrl?: true
     userId?: true
     isOpenToWork?: true
+    jobSearchExpiresAt?: true
     location?: true
     desiredJob?: true
     summary?: true
@@ -11850,6 +12070,7 @@ export namespace Prisma {
     cvUrl: string | null
     userId: string
     isOpenToWork: boolean
+    jobSearchExpiresAt: Date | null
     location: string | null
     desiredJob: JsonValue | null
     summary: string | null
@@ -11892,6 +12113,7 @@ export namespace Prisma {
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: boolean
     location?: boolean
     desiredJob?: boolean
     summary?: boolean
@@ -11918,6 +12140,7 @@ export namespace Prisma {
     candidateReviews?: boolean | Candidate$candidateReviewsArgs<ExtArgs>
     companyReviews?: boolean | Candidate$companyReviewsArgs<ExtArgs>
     reports?: boolean | Candidate$reportsArgs<ExtArgs>
+    wallet?: boolean | Candidate$walletArgs<ExtArgs>
     _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["candidate"]>
 
@@ -11930,6 +12153,7 @@ export namespace Prisma {
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: boolean
     location?: boolean
     desiredJob?: boolean
     summary?: boolean
@@ -11954,6 +12178,7 @@ export namespace Prisma {
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: boolean
     location?: boolean
     desiredJob?: boolean
     summary?: boolean
@@ -11978,6 +12203,7 @@ export namespace Prisma {
     cvUrl?: boolean
     userId?: boolean
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: boolean
     location?: boolean
     desiredJob?: boolean
     summary?: boolean
@@ -11992,7 +12218,7 @@ export namespace Prisma {
     softSkills?: boolean
   }
 
-  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "totalYearsExp" | "degree" | "gender" | "industries" | "interests" | "languages" | "softSkills", ExtArgs["result"]["candidate"]>
+  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "isOpenToWork" | "jobSearchExpiresAt" | "location" | "desiredJob" | "summary" | "birthYear" | "currentSalary" | "totalYearsExp" | "degree" | "gender" | "industries" | "interests" | "languages" | "softSkills", ExtArgs["result"]["candidate"]>
   export type CandidateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
@@ -12008,6 +12234,7 @@ export namespace Prisma {
     candidateReviews?: boolean | Candidate$candidateReviewsArgs<ExtArgs>
     companyReviews?: boolean | Candidate$companyReviewsArgs<ExtArgs>
     reports?: boolean | Candidate$reportsArgs<ExtArgs>
+    wallet?: boolean | Candidate$walletArgs<ExtArgs>
     _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CandidateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12034,6 +12261,7 @@ export namespace Prisma {
       candidateReviews: Prisma.$CandidateReviewPayload<ExtArgs>[]
       companyReviews: Prisma.$CompanyReviewPayload<ExtArgs>[]
       reports: Prisma.$CandidateReportPayload<ExtArgs>[]
+      wallet: Prisma.$CandidateWalletPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       candidateId: string
@@ -12044,6 +12272,7 @@ export namespace Prisma {
       cvUrl: string | null
       userId: string
       isOpenToWork: boolean
+      jobSearchExpiresAt: Date | null
       location: string | null
       desiredJob: Prisma.JsonValue | null
       summary: string | null
@@ -12464,6 +12693,7 @@ export namespace Prisma {
     candidateReviews<T extends Candidate$candidateReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$candidateReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     companyReviews<T extends Candidate$companyReviewsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$companyReviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reports<T extends Candidate$reportsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    wallet<T extends Candidate$walletArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$walletArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12501,6 +12731,7 @@ export namespace Prisma {
     readonly cvUrl: FieldRef<"Candidate", 'String'>
     readonly userId: FieldRef<"Candidate", 'String'>
     readonly isOpenToWork: FieldRef<"Candidate", 'Boolean'>
+    readonly jobSearchExpiresAt: FieldRef<"Candidate", 'DateTime'>
     readonly location: FieldRef<"Candidate", 'String'>
     readonly desiredJob: FieldRef<"Candidate", 'Json'>
     readonly summary: FieldRef<"Candidate", 'String'>
@@ -13223,6 +13454,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CandidateReportScalarFieldEnum | CandidateReportScalarFieldEnum[]
+  }
+
+  /**
+   * Candidate.wallet
+   */
+  export type Candidate$walletArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    where?: CandidateWalletWhereInput
   }
 
   /**
@@ -36946,6 +37196,2290 @@ export namespace Prisma {
 
 
   /**
+   * Model CandidateWallet
+   */
+
+  export type AggregateCandidateWallet = {
+    _count: CandidateWalletCountAggregateOutputType | null
+    _avg: CandidateWalletAvgAggregateOutputType | null
+    _sum: CandidateWalletSumAggregateOutputType | null
+    _min: CandidateWalletMinAggregateOutputType | null
+    _max: CandidateWalletMaxAggregateOutputType | null
+  }
+
+  export type CandidateWalletAvgAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type CandidateWalletSumAggregateOutputType = {
+    balance: number | null
+  }
+
+  export type CandidateWalletMinAggregateOutputType = {
+    walletId: string | null
+    candidateId: string | null
+    balance: number | null
+    updatedAt: Date | null
+  }
+
+  export type CandidateWalletMaxAggregateOutputType = {
+    walletId: string | null
+    candidateId: string | null
+    balance: number | null
+    updatedAt: Date | null
+  }
+
+  export type CandidateWalletCountAggregateOutputType = {
+    walletId: number
+    candidateId: number
+    balance: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CandidateWalletAvgAggregateInputType = {
+    balance?: true
+  }
+
+  export type CandidateWalletSumAggregateInputType = {
+    balance?: true
+  }
+
+  export type CandidateWalletMinAggregateInputType = {
+    walletId?: true
+    candidateId?: true
+    balance?: true
+    updatedAt?: true
+  }
+
+  export type CandidateWalletMaxAggregateInputType = {
+    walletId?: true
+    candidateId?: true
+    balance?: true
+    updatedAt?: true
+  }
+
+  export type CandidateWalletCountAggregateInputType = {
+    walletId?: true
+    candidateId?: true
+    balance?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CandidateWalletAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateWallet to aggregate.
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateWallets to fetch.
+     */
+    orderBy?: CandidateWalletOrderByWithRelationInput | CandidateWalletOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CandidateWalletWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateWallets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateWallets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CandidateWallets
+    **/
+    _count?: true | CandidateWalletCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CandidateWalletAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CandidateWalletSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CandidateWalletMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CandidateWalletMaxAggregateInputType
+  }
+
+  export type GetCandidateWalletAggregateType<T extends CandidateWalletAggregateArgs> = {
+        [P in keyof T & keyof AggregateCandidateWallet]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCandidateWallet[P]>
+      : GetScalarType<T[P], AggregateCandidateWallet[P]>
+  }
+
+
+
+
+  export type CandidateWalletGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CandidateWalletWhereInput
+    orderBy?: CandidateWalletOrderByWithAggregationInput | CandidateWalletOrderByWithAggregationInput[]
+    by: CandidateWalletScalarFieldEnum[] | CandidateWalletScalarFieldEnum
+    having?: CandidateWalletScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CandidateWalletCountAggregateInputType | true
+    _avg?: CandidateWalletAvgAggregateInputType
+    _sum?: CandidateWalletSumAggregateInputType
+    _min?: CandidateWalletMinAggregateInputType
+    _max?: CandidateWalletMaxAggregateInputType
+  }
+
+  export type CandidateWalletGroupByOutputType = {
+    walletId: string
+    candidateId: string
+    balance: number
+    updatedAt: Date
+    _count: CandidateWalletCountAggregateOutputType | null
+    _avg: CandidateWalletAvgAggregateOutputType | null
+    _sum: CandidateWalletSumAggregateOutputType | null
+    _min: CandidateWalletMinAggregateOutputType | null
+    _max: CandidateWalletMaxAggregateOutputType | null
+  }
+
+  type GetCandidateWalletGroupByPayload<T extends CandidateWalletGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CandidateWalletGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CandidateWalletGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CandidateWalletGroupByOutputType[P]>
+            : GetScalarType<T[P], CandidateWalletGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CandidateWalletSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    walletId?: boolean
+    candidateId?: boolean
+    balance?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+    transactions?: boolean | CandidateWallet$transactionsArgs<ExtArgs>
+    _count?: boolean | CandidateWalletCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateWallet"]>
+
+  export type CandidateWalletSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    walletId?: boolean
+    candidateId?: boolean
+    balance?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateWallet"]>
+
+  export type CandidateWalletSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    walletId?: boolean
+    candidateId?: boolean
+    balance?: boolean
+    updatedAt?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateWallet"]>
+
+  export type CandidateWalletSelectScalar = {
+    walletId?: boolean
+    candidateId?: boolean
+    balance?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CandidateWalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"walletId" | "candidateId" | "balance" | "updatedAt", ExtArgs["result"]["candidateWallet"]>
+  export type CandidateWalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+    transactions?: boolean | CandidateWallet$transactionsArgs<ExtArgs>
+    _count?: boolean | CandidateWalletCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CandidateWalletIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }
+  export type CandidateWalletIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }
+
+  export type $CandidateWalletPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CandidateWallet"
+    objects: {
+      candidate: Prisma.$CandidatePayload<ExtArgs>
+      transactions: Prisma.$CandidateTransactionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      walletId: string
+      candidateId: string
+      balance: number
+      updatedAt: Date
+    }, ExtArgs["result"]["candidateWallet"]>
+    composites: {}
+  }
+
+  type CandidateWalletGetPayload<S extends boolean | null | undefined | CandidateWalletDefaultArgs> = $Result.GetResult<Prisma.$CandidateWalletPayload, S>
+
+  type CandidateWalletCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CandidateWalletFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CandidateWalletCountAggregateInputType | true
+    }
+
+  export interface CandidateWalletDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CandidateWallet'], meta: { name: 'CandidateWallet' } }
+    /**
+     * Find zero or one CandidateWallet that matches the filter.
+     * @param {CandidateWalletFindUniqueArgs} args - Arguments to find a CandidateWallet
+     * @example
+     * // Get one CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CandidateWalletFindUniqueArgs>(args: SelectSubset<T, CandidateWalletFindUniqueArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CandidateWallet that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CandidateWalletFindUniqueOrThrowArgs} args - Arguments to find a CandidateWallet
+     * @example
+     * // Get one CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CandidateWalletFindUniqueOrThrowArgs>(args: SelectSubset<T, CandidateWalletFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateWallet that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletFindFirstArgs} args - Arguments to find a CandidateWallet
+     * @example
+     * // Get one CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CandidateWalletFindFirstArgs>(args?: SelectSubset<T, CandidateWalletFindFirstArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateWallet that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletFindFirstOrThrowArgs} args - Arguments to find a CandidateWallet
+     * @example
+     * // Get one CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CandidateWalletFindFirstOrThrowArgs>(args?: SelectSubset<T, CandidateWalletFindFirstOrThrowArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CandidateWallets that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CandidateWallets
+     * const candidateWallets = await prisma.candidateWallet.findMany()
+     * 
+     * // Get first 10 CandidateWallets
+     * const candidateWallets = await prisma.candidateWallet.findMany({ take: 10 })
+     * 
+     * // Only select the `walletId`
+     * const candidateWalletWithWalletIdOnly = await prisma.candidateWallet.findMany({ select: { walletId: true } })
+     * 
+     */
+    findMany<T extends CandidateWalletFindManyArgs>(args?: SelectSubset<T, CandidateWalletFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CandidateWallet.
+     * @param {CandidateWalletCreateArgs} args - Arguments to create a CandidateWallet.
+     * @example
+     * // Create one CandidateWallet
+     * const CandidateWallet = await prisma.candidateWallet.create({
+     *   data: {
+     *     // ... data to create a CandidateWallet
+     *   }
+     * })
+     * 
+     */
+    create<T extends CandidateWalletCreateArgs>(args: SelectSubset<T, CandidateWalletCreateArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CandidateWallets.
+     * @param {CandidateWalletCreateManyArgs} args - Arguments to create many CandidateWallets.
+     * @example
+     * // Create many CandidateWallets
+     * const candidateWallet = await prisma.candidateWallet.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CandidateWalletCreateManyArgs>(args?: SelectSubset<T, CandidateWalletCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CandidateWallets and returns the data saved in the database.
+     * @param {CandidateWalletCreateManyAndReturnArgs} args - Arguments to create many CandidateWallets.
+     * @example
+     * // Create many CandidateWallets
+     * const candidateWallet = await prisma.candidateWallet.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CandidateWallets and only return the `walletId`
+     * const candidateWalletWithWalletIdOnly = await prisma.candidateWallet.createManyAndReturn({
+     *   select: { walletId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CandidateWalletCreateManyAndReturnArgs>(args?: SelectSubset<T, CandidateWalletCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CandidateWallet.
+     * @param {CandidateWalletDeleteArgs} args - Arguments to delete one CandidateWallet.
+     * @example
+     * // Delete one CandidateWallet
+     * const CandidateWallet = await prisma.candidateWallet.delete({
+     *   where: {
+     *     // ... filter to delete one CandidateWallet
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CandidateWalletDeleteArgs>(args: SelectSubset<T, CandidateWalletDeleteArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CandidateWallet.
+     * @param {CandidateWalletUpdateArgs} args - Arguments to update one CandidateWallet.
+     * @example
+     * // Update one CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CandidateWalletUpdateArgs>(args: SelectSubset<T, CandidateWalletUpdateArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CandidateWallets.
+     * @param {CandidateWalletDeleteManyArgs} args - Arguments to filter CandidateWallets to delete.
+     * @example
+     * // Delete a few CandidateWallets
+     * const { count } = await prisma.candidateWallet.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CandidateWalletDeleteManyArgs>(args?: SelectSubset<T, CandidateWalletDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateWallets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CandidateWallets
+     * const candidateWallet = await prisma.candidateWallet.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CandidateWalletUpdateManyArgs>(args: SelectSubset<T, CandidateWalletUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateWallets and returns the data updated in the database.
+     * @param {CandidateWalletUpdateManyAndReturnArgs} args - Arguments to update many CandidateWallets.
+     * @example
+     * // Update many CandidateWallets
+     * const candidateWallet = await prisma.candidateWallet.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CandidateWallets and only return the `walletId`
+     * const candidateWalletWithWalletIdOnly = await prisma.candidateWallet.updateManyAndReturn({
+     *   select: { walletId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CandidateWalletUpdateManyAndReturnArgs>(args: SelectSubset<T, CandidateWalletUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CandidateWallet.
+     * @param {CandidateWalletUpsertArgs} args - Arguments to update or create a CandidateWallet.
+     * @example
+     * // Update or create a CandidateWallet
+     * const candidateWallet = await prisma.candidateWallet.upsert({
+     *   create: {
+     *     // ... data to create a CandidateWallet
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CandidateWallet we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CandidateWalletUpsertArgs>(args: SelectSubset<T, CandidateWalletUpsertArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CandidateWallets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletCountArgs} args - Arguments to filter CandidateWallets to count.
+     * @example
+     * // Count the number of CandidateWallets
+     * const count = await prisma.candidateWallet.count({
+     *   where: {
+     *     // ... the filter for the CandidateWallets we want to count
+     *   }
+     * })
+    **/
+    count<T extends CandidateWalletCountArgs>(
+      args?: Subset<T, CandidateWalletCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CandidateWalletCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CandidateWallet.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CandidateWalletAggregateArgs>(args: Subset<T, CandidateWalletAggregateArgs>): Prisma.PrismaPromise<GetCandidateWalletAggregateType<T>>
+
+    /**
+     * Group by CandidateWallet.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateWalletGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CandidateWalletGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CandidateWalletGroupByArgs['orderBy'] }
+        : { orderBy?: CandidateWalletGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CandidateWalletGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCandidateWalletGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CandidateWallet model
+   */
+  readonly fields: CandidateWalletFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CandidateWallet.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CandidateWalletClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    candidate<T extends CandidateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateDefaultArgs<ExtArgs>>): Prisma__CandidateClient<$Result.GetResult<Prisma.$CandidatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    transactions<T extends CandidateWallet$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, CandidateWallet$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CandidateWallet model
+   */
+  interface CandidateWalletFieldRefs {
+    readonly walletId: FieldRef<"CandidateWallet", 'String'>
+    readonly candidateId: FieldRef<"CandidateWallet", 'String'>
+    readonly balance: FieldRef<"CandidateWallet", 'Int'>
+    readonly updatedAt: FieldRef<"CandidateWallet", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CandidateWallet findUnique
+   */
+  export type CandidateWalletFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateWallet to fetch.
+     */
+    where: CandidateWalletWhereUniqueInput
+  }
+
+  /**
+   * CandidateWallet findUniqueOrThrow
+   */
+  export type CandidateWalletFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateWallet to fetch.
+     */
+    where: CandidateWalletWhereUniqueInput
+  }
+
+  /**
+   * CandidateWallet findFirst
+   */
+  export type CandidateWalletFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateWallet to fetch.
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateWallets to fetch.
+     */
+    orderBy?: CandidateWalletOrderByWithRelationInput | CandidateWalletOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateWallets.
+     */
+    cursor?: CandidateWalletWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateWallets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateWallets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateWallets.
+     */
+    distinct?: CandidateWalletScalarFieldEnum | CandidateWalletScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateWallet findFirstOrThrow
+   */
+  export type CandidateWalletFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateWallet to fetch.
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateWallets to fetch.
+     */
+    orderBy?: CandidateWalletOrderByWithRelationInput | CandidateWalletOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateWallets.
+     */
+    cursor?: CandidateWalletWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateWallets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateWallets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateWallets.
+     */
+    distinct?: CandidateWalletScalarFieldEnum | CandidateWalletScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateWallet findMany
+   */
+  export type CandidateWalletFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateWallets to fetch.
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateWallets to fetch.
+     */
+    orderBy?: CandidateWalletOrderByWithRelationInput | CandidateWalletOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CandidateWallets.
+     */
+    cursor?: CandidateWalletWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateWallets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateWallets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateWallets.
+     */
+    distinct?: CandidateWalletScalarFieldEnum | CandidateWalletScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateWallet create
+   */
+  export type CandidateWalletCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CandidateWallet.
+     */
+    data: XOR<CandidateWalletCreateInput, CandidateWalletUncheckedCreateInput>
+  }
+
+  /**
+   * CandidateWallet createMany
+   */
+  export type CandidateWalletCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CandidateWallets.
+     */
+    data: CandidateWalletCreateManyInput | CandidateWalletCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CandidateWallet createManyAndReturn
+   */
+  export type CandidateWalletCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * The data used to create many CandidateWallets.
+     */
+    data: CandidateWalletCreateManyInput | CandidateWalletCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateWallet update
+   */
+  export type CandidateWalletUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CandidateWallet.
+     */
+    data: XOR<CandidateWalletUpdateInput, CandidateWalletUncheckedUpdateInput>
+    /**
+     * Choose, which CandidateWallet to update.
+     */
+    where: CandidateWalletWhereUniqueInput
+  }
+
+  /**
+   * CandidateWallet updateMany
+   */
+  export type CandidateWalletUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CandidateWallets.
+     */
+    data: XOR<CandidateWalletUpdateManyMutationInput, CandidateWalletUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateWallets to update
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * Limit how many CandidateWallets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateWallet updateManyAndReturn
+   */
+  export type CandidateWalletUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * The data used to update CandidateWallets.
+     */
+    data: XOR<CandidateWalletUpdateManyMutationInput, CandidateWalletUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateWallets to update
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * Limit how many CandidateWallets to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateWallet upsert
+   */
+  export type CandidateWalletUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CandidateWallet to update in case it exists.
+     */
+    where: CandidateWalletWhereUniqueInput
+    /**
+     * In case the CandidateWallet found by the `where` argument doesn't exist, create a new CandidateWallet with this data.
+     */
+    create: XOR<CandidateWalletCreateInput, CandidateWalletUncheckedCreateInput>
+    /**
+     * In case the CandidateWallet was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CandidateWalletUpdateInput, CandidateWalletUncheckedUpdateInput>
+  }
+
+  /**
+   * CandidateWallet delete
+   */
+  export type CandidateWalletDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+    /**
+     * Filter which CandidateWallet to delete.
+     */
+    where: CandidateWalletWhereUniqueInput
+  }
+
+  /**
+   * CandidateWallet deleteMany
+   */
+  export type CandidateWalletDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateWallets to delete
+     */
+    where?: CandidateWalletWhereInput
+    /**
+     * Limit how many CandidateWallets to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateWallet.transactions
+   */
+  export type CandidateWallet$transactionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    where?: CandidateTransactionWhereInput
+    orderBy?: CandidateTransactionOrderByWithRelationInput | CandidateTransactionOrderByWithRelationInput[]
+    cursor?: CandidateTransactionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CandidateTransactionScalarFieldEnum | CandidateTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateWallet without action
+   */
+  export type CandidateWalletDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateWallet
+     */
+    select?: CandidateWalletSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateWallet
+     */
+    omit?: CandidateWalletOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateWalletInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CandidateTransaction
+   */
+
+  export type AggregateCandidateTransaction = {
+    _count: CandidateTransactionCountAggregateOutputType | null
+    _avg: CandidateTransactionAvgAggregateOutputType | null
+    _sum: CandidateTransactionSumAggregateOutputType | null
+    _min: CandidateTransactionMinAggregateOutputType | null
+    _max: CandidateTransactionMaxAggregateOutputType | null
+  }
+
+  export type CandidateTransactionAvgAggregateOutputType = {
+    amount: number | null
+    orderCode: number | null
+    realMoney: number | null
+  }
+
+  export type CandidateTransactionSumAggregateOutputType = {
+    amount: number | null
+    orderCode: number | null
+    realMoney: number | null
+  }
+
+  export type CandidateTransactionMinAggregateOutputType = {
+    transactionId: string | null
+    amount: number | null
+    description: string | null
+    createdAt: Date | null
+    walletId: string | null
+    candidateId: string | null
+    orderCode: number | null
+    status: string | null
+    realMoney: number | null
+    type: $Enums.TransactionType | null
+  }
+
+  export type CandidateTransactionMaxAggregateOutputType = {
+    transactionId: string | null
+    amount: number | null
+    description: string | null
+    createdAt: Date | null
+    walletId: string | null
+    candidateId: string | null
+    orderCode: number | null
+    status: string | null
+    realMoney: number | null
+    type: $Enums.TransactionType | null
+  }
+
+  export type CandidateTransactionCountAggregateOutputType = {
+    transactionId: number
+    amount: number
+    description: number
+    createdAt: number
+    walletId: number
+    candidateId: number
+    orderCode: number
+    status: number
+    realMoney: number
+    type: number
+    _all: number
+  }
+
+
+  export type CandidateTransactionAvgAggregateInputType = {
+    amount?: true
+    orderCode?: true
+    realMoney?: true
+  }
+
+  export type CandidateTransactionSumAggregateInputType = {
+    amount?: true
+    orderCode?: true
+    realMoney?: true
+  }
+
+  export type CandidateTransactionMinAggregateInputType = {
+    transactionId?: true
+    amount?: true
+    description?: true
+    createdAt?: true
+    walletId?: true
+    candidateId?: true
+    orderCode?: true
+    status?: true
+    realMoney?: true
+    type?: true
+  }
+
+  export type CandidateTransactionMaxAggregateInputType = {
+    transactionId?: true
+    amount?: true
+    description?: true
+    createdAt?: true
+    walletId?: true
+    candidateId?: true
+    orderCode?: true
+    status?: true
+    realMoney?: true
+    type?: true
+  }
+
+  export type CandidateTransactionCountAggregateInputType = {
+    transactionId?: true
+    amount?: true
+    description?: true
+    createdAt?: true
+    walletId?: true
+    candidateId?: true
+    orderCode?: true
+    status?: true
+    realMoney?: true
+    type?: true
+    _all?: true
+  }
+
+  export type CandidateTransactionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateTransaction to aggregate.
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateTransactions to fetch.
+     */
+    orderBy?: CandidateTransactionOrderByWithRelationInput | CandidateTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CandidateTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CandidateTransactions
+    **/
+    _count?: true | CandidateTransactionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CandidateTransactionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CandidateTransactionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CandidateTransactionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CandidateTransactionMaxAggregateInputType
+  }
+
+  export type GetCandidateTransactionAggregateType<T extends CandidateTransactionAggregateArgs> = {
+        [P in keyof T & keyof AggregateCandidateTransaction]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCandidateTransaction[P]>
+      : GetScalarType<T[P], AggregateCandidateTransaction[P]>
+  }
+
+
+
+
+  export type CandidateTransactionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CandidateTransactionWhereInput
+    orderBy?: CandidateTransactionOrderByWithAggregationInput | CandidateTransactionOrderByWithAggregationInput[]
+    by: CandidateTransactionScalarFieldEnum[] | CandidateTransactionScalarFieldEnum
+    having?: CandidateTransactionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CandidateTransactionCountAggregateInputType | true
+    _avg?: CandidateTransactionAvgAggregateInputType
+    _sum?: CandidateTransactionSumAggregateInputType
+    _min?: CandidateTransactionMinAggregateInputType
+    _max?: CandidateTransactionMaxAggregateInputType
+  }
+
+  export type CandidateTransactionGroupByOutputType = {
+    transactionId: string
+    amount: number
+    description: string | null
+    createdAt: Date
+    walletId: string
+    candidateId: string | null
+    orderCode: number | null
+    status: string
+    realMoney: number | null
+    type: $Enums.TransactionType
+    _count: CandidateTransactionCountAggregateOutputType | null
+    _avg: CandidateTransactionAvgAggregateOutputType | null
+    _sum: CandidateTransactionSumAggregateOutputType | null
+    _min: CandidateTransactionMinAggregateOutputType | null
+    _max: CandidateTransactionMaxAggregateOutputType | null
+  }
+
+  type GetCandidateTransactionGroupByPayload<T extends CandidateTransactionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CandidateTransactionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CandidateTransactionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CandidateTransactionGroupByOutputType[P]>
+            : GetScalarType<T[P], CandidateTransactionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CandidateTransactionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    transactionId?: boolean
+    amount?: boolean
+    description?: boolean
+    createdAt?: boolean
+    walletId?: boolean
+    candidateId?: boolean
+    orderCode?: boolean
+    status?: boolean
+    realMoney?: boolean
+    type?: boolean
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateTransaction"]>
+
+  export type CandidateTransactionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    transactionId?: boolean
+    amount?: boolean
+    description?: boolean
+    createdAt?: boolean
+    walletId?: boolean
+    candidateId?: boolean
+    orderCode?: boolean
+    status?: boolean
+    realMoney?: boolean
+    type?: boolean
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateTransaction"]>
+
+  export type CandidateTransactionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    transactionId?: boolean
+    amount?: boolean
+    description?: boolean
+    createdAt?: boolean
+    walletId?: boolean
+    candidateId?: boolean
+    orderCode?: boolean
+    status?: boolean
+    realMoney?: boolean
+    type?: boolean
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["candidateTransaction"]>
+
+  export type CandidateTransactionSelectScalar = {
+    transactionId?: boolean
+    amount?: boolean
+    description?: boolean
+    createdAt?: boolean
+    walletId?: boolean
+    candidateId?: boolean
+    orderCode?: boolean
+    status?: boolean
+    realMoney?: boolean
+    type?: boolean
+  }
+
+  export type CandidateTransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"transactionId" | "amount" | "description" | "createdAt" | "walletId" | "candidateId" | "orderCode" | "status" | "realMoney" | "type", ExtArgs["result"]["candidateTransaction"]>
+  export type CandidateTransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }
+  export type CandidateTransactionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }
+  export type CandidateTransactionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    wallet?: boolean | CandidateWalletDefaultArgs<ExtArgs>
+  }
+
+  export type $CandidateTransactionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CandidateTransaction"
+    objects: {
+      wallet: Prisma.$CandidateWalletPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      transactionId: string
+      amount: number
+      description: string | null
+      createdAt: Date
+      walletId: string
+      candidateId: string | null
+      orderCode: number | null
+      status: string
+      realMoney: number | null
+      type: $Enums.TransactionType
+    }, ExtArgs["result"]["candidateTransaction"]>
+    composites: {}
+  }
+
+  type CandidateTransactionGetPayload<S extends boolean | null | undefined | CandidateTransactionDefaultArgs> = $Result.GetResult<Prisma.$CandidateTransactionPayload, S>
+
+  type CandidateTransactionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CandidateTransactionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CandidateTransactionCountAggregateInputType | true
+    }
+
+  export interface CandidateTransactionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CandidateTransaction'], meta: { name: 'CandidateTransaction' } }
+    /**
+     * Find zero or one CandidateTransaction that matches the filter.
+     * @param {CandidateTransactionFindUniqueArgs} args - Arguments to find a CandidateTransaction
+     * @example
+     * // Get one CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CandidateTransactionFindUniqueArgs>(args: SelectSubset<T, CandidateTransactionFindUniqueArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CandidateTransaction that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CandidateTransactionFindUniqueOrThrowArgs} args - Arguments to find a CandidateTransaction
+     * @example
+     * // Get one CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CandidateTransactionFindUniqueOrThrowArgs>(args: SelectSubset<T, CandidateTransactionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateTransaction that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionFindFirstArgs} args - Arguments to find a CandidateTransaction
+     * @example
+     * // Get one CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CandidateTransactionFindFirstArgs>(args?: SelectSubset<T, CandidateTransactionFindFirstArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CandidateTransaction that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionFindFirstOrThrowArgs} args - Arguments to find a CandidateTransaction
+     * @example
+     * // Get one CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CandidateTransactionFindFirstOrThrowArgs>(args?: SelectSubset<T, CandidateTransactionFindFirstOrThrowArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CandidateTransactions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CandidateTransactions
+     * const candidateTransactions = await prisma.candidateTransaction.findMany()
+     * 
+     * // Get first 10 CandidateTransactions
+     * const candidateTransactions = await prisma.candidateTransaction.findMany({ take: 10 })
+     * 
+     * // Only select the `transactionId`
+     * const candidateTransactionWithTransactionIdOnly = await prisma.candidateTransaction.findMany({ select: { transactionId: true } })
+     * 
+     */
+    findMany<T extends CandidateTransactionFindManyArgs>(args?: SelectSubset<T, CandidateTransactionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CandidateTransaction.
+     * @param {CandidateTransactionCreateArgs} args - Arguments to create a CandidateTransaction.
+     * @example
+     * // Create one CandidateTransaction
+     * const CandidateTransaction = await prisma.candidateTransaction.create({
+     *   data: {
+     *     // ... data to create a CandidateTransaction
+     *   }
+     * })
+     * 
+     */
+    create<T extends CandidateTransactionCreateArgs>(args: SelectSubset<T, CandidateTransactionCreateArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CandidateTransactions.
+     * @param {CandidateTransactionCreateManyArgs} args - Arguments to create many CandidateTransactions.
+     * @example
+     * // Create many CandidateTransactions
+     * const candidateTransaction = await prisma.candidateTransaction.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CandidateTransactionCreateManyArgs>(args?: SelectSubset<T, CandidateTransactionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CandidateTransactions and returns the data saved in the database.
+     * @param {CandidateTransactionCreateManyAndReturnArgs} args - Arguments to create many CandidateTransactions.
+     * @example
+     * // Create many CandidateTransactions
+     * const candidateTransaction = await prisma.candidateTransaction.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CandidateTransactions and only return the `transactionId`
+     * const candidateTransactionWithTransactionIdOnly = await prisma.candidateTransaction.createManyAndReturn({
+     *   select: { transactionId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CandidateTransactionCreateManyAndReturnArgs>(args?: SelectSubset<T, CandidateTransactionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CandidateTransaction.
+     * @param {CandidateTransactionDeleteArgs} args - Arguments to delete one CandidateTransaction.
+     * @example
+     * // Delete one CandidateTransaction
+     * const CandidateTransaction = await prisma.candidateTransaction.delete({
+     *   where: {
+     *     // ... filter to delete one CandidateTransaction
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CandidateTransactionDeleteArgs>(args: SelectSubset<T, CandidateTransactionDeleteArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CandidateTransaction.
+     * @param {CandidateTransactionUpdateArgs} args - Arguments to update one CandidateTransaction.
+     * @example
+     * // Update one CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CandidateTransactionUpdateArgs>(args: SelectSubset<T, CandidateTransactionUpdateArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CandidateTransactions.
+     * @param {CandidateTransactionDeleteManyArgs} args - Arguments to filter CandidateTransactions to delete.
+     * @example
+     * // Delete a few CandidateTransactions
+     * const { count } = await prisma.candidateTransaction.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CandidateTransactionDeleteManyArgs>(args?: SelectSubset<T, CandidateTransactionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CandidateTransactions
+     * const candidateTransaction = await prisma.candidateTransaction.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CandidateTransactionUpdateManyArgs>(args: SelectSubset<T, CandidateTransactionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CandidateTransactions and returns the data updated in the database.
+     * @param {CandidateTransactionUpdateManyAndReturnArgs} args - Arguments to update many CandidateTransactions.
+     * @example
+     * // Update many CandidateTransactions
+     * const candidateTransaction = await prisma.candidateTransaction.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CandidateTransactions and only return the `transactionId`
+     * const candidateTransactionWithTransactionIdOnly = await prisma.candidateTransaction.updateManyAndReturn({
+     *   select: { transactionId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CandidateTransactionUpdateManyAndReturnArgs>(args: SelectSubset<T, CandidateTransactionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CandidateTransaction.
+     * @param {CandidateTransactionUpsertArgs} args - Arguments to update or create a CandidateTransaction.
+     * @example
+     * // Update or create a CandidateTransaction
+     * const candidateTransaction = await prisma.candidateTransaction.upsert({
+     *   create: {
+     *     // ... data to create a CandidateTransaction
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CandidateTransaction we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CandidateTransactionUpsertArgs>(args: SelectSubset<T, CandidateTransactionUpsertArgs<ExtArgs>>): Prisma__CandidateTransactionClient<$Result.GetResult<Prisma.$CandidateTransactionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CandidateTransactions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionCountArgs} args - Arguments to filter CandidateTransactions to count.
+     * @example
+     * // Count the number of CandidateTransactions
+     * const count = await prisma.candidateTransaction.count({
+     *   where: {
+     *     // ... the filter for the CandidateTransactions we want to count
+     *   }
+     * })
+    **/
+    count<T extends CandidateTransactionCountArgs>(
+      args?: Subset<T, CandidateTransactionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CandidateTransactionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CandidateTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CandidateTransactionAggregateArgs>(args: Subset<T, CandidateTransactionAggregateArgs>): Prisma.PrismaPromise<GetCandidateTransactionAggregateType<T>>
+
+    /**
+     * Group by CandidateTransaction.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CandidateTransactionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CandidateTransactionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CandidateTransactionGroupByArgs['orderBy'] }
+        : { orderBy?: CandidateTransactionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CandidateTransactionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCandidateTransactionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CandidateTransaction model
+   */
+  readonly fields: CandidateTransactionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CandidateTransaction.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CandidateTransactionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    wallet<T extends CandidateWalletDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateWalletDefaultArgs<ExtArgs>>): Prisma__CandidateWalletClient<$Result.GetResult<Prisma.$CandidateWalletPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CandidateTransaction model
+   */
+  interface CandidateTransactionFieldRefs {
+    readonly transactionId: FieldRef<"CandidateTransaction", 'String'>
+    readonly amount: FieldRef<"CandidateTransaction", 'Int'>
+    readonly description: FieldRef<"CandidateTransaction", 'String'>
+    readonly createdAt: FieldRef<"CandidateTransaction", 'DateTime'>
+    readonly walletId: FieldRef<"CandidateTransaction", 'String'>
+    readonly candidateId: FieldRef<"CandidateTransaction", 'String'>
+    readonly orderCode: FieldRef<"CandidateTransaction", 'Int'>
+    readonly status: FieldRef<"CandidateTransaction", 'String'>
+    readonly realMoney: FieldRef<"CandidateTransaction", 'Float'>
+    readonly type: FieldRef<"CandidateTransaction", 'TransactionType'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CandidateTransaction findUnique
+   */
+  export type CandidateTransactionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateTransaction to fetch.
+     */
+    where: CandidateTransactionWhereUniqueInput
+  }
+
+  /**
+   * CandidateTransaction findUniqueOrThrow
+   */
+  export type CandidateTransactionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateTransaction to fetch.
+     */
+    where: CandidateTransactionWhereUniqueInput
+  }
+
+  /**
+   * CandidateTransaction findFirst
+   */
+  export type CandidateTransactionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateTransaction to fetch.
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateTransactions to fetch.
+     */
+    orderBy?: CandidateTransactionOrderByWithRelationInput | CandidateTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateTransactions.
+     */
+    cursor?: CandidateTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateTransactions.
+     */
+    distinct?: CandidateTransactionScalarFieldEnum | CandidateTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateTransaction findFirstOrThrow
+   */
+  export type CandidateTransactionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateTransaction to fetch.
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateTransactions to fetch.
+     */
+    orderBy?: CandidateTransactionOrderByWithRelationInput | CandidateTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CandidateTransactions.
+     */
+    cursor?: CandidateTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateTransactions.
+     */
+    distinct?: CandidateTransactionScalarFieldEnum | CandidateTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateTransaction findMany
+   */
+  export type CandidateTransactionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter, which CandidateTransactions to fetch.
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CandidateTransactions to fetch.
+     */
+    orderBy?: CandidateTransactionOrderByWithRelationInput | CandidateTransactionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CandidateTransactions.
+     */
+    cursor?: CandidateTransactionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CandidateTransactions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CandidateTransactions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CandidateTransactions.
+     */
+    distinct?: CandidateTransactionScalarFieldEnum | CandidateTransactionScalarFieldEnum[]
+  }
+
+  /**
+   * CandidateTransaction create
+   */
+  export type CandidateTransactionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CandidateTransaction.
+     */
+    data: XOR<CandidateTransactionCreateInput, CandidateTransactionUncheckedCreateInput>
+  }
+
+  /**
+   * CandidateTransaction createMany
+   */
+  export type CandidateTransactionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CandidateTransactions.
+     */
+    data: CandidateTransactionCreateManyInput | CandidateTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CandidateTransaction createManyAndReturn
+   */
+  export type CandidateTransactionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to create many CandidateTransactions.
+     */
+    data: CandidateTransactionCreateManyInput | CandidateTransactionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateTransaction update
+   */
+  export type CandidateTransactionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CandidateTransaction.
+     */
+    data: XOR<CandidateTransactionUpdateInput, CandidateTransactionUncheckedUpdateInput>
+    /**
+     * Choose, which CandidateTransaction to update.
+     */
+    where: CandidateTransactionWhereUniqueInput
+  }
+
+  /**
+   * CandidateTransaction updateMany
+   */
+  export type CandidateTransactionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CandidateTransactions.
+     */
+    data: XOR<CandidateTransactionUpdateManyMutationInput, CandidateTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateTransactions to update
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * Limit how many CandidateTransactions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateTransaction updateManyAndReturn
+   */
+  export type CandidateTransactionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * The data used to update CandidateTransactions.
+     */
+    data: XOR<CandidateTransactionUpdateManyMutationInput, CandidateTransactionUncheckedUpdateManyInput>
+    /**
+     * Filter which CandidateTransactions to update
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * Limit how many CandidateTransactions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CandidateTransaction upsert
+   */
+  export type CandidateTransactionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CandidateTransaction to update in case it exists.
+     */
+    where: CandidateTransactionWhereUniqueInput
+    /**
+     * In case the CandidateTransaction found by the `where` argument doesn't exist, create a new CandidateTransaction with this data.
+     */
+    create: XOR<CandidateTransactionCreateInput, CandidateTransactionUncheckedCreateInput>
+    /**
+     * In case the CandidateTransaction was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CandidateTransactionUpdateInput, CandidateTransactionUncheckedUpdateInput>
+  }
+
+  /**
+   * CandidateTransaction delete
+   */
+  export type CandidateTransactionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+    /**
+     * Filter which CandidateTransaction to delete.
+     */
+    where: CandidateTransactionWhereUniqueInput
+  }
+
+  /**
+   * CandidateTransaction deleteMany
+   */
+  export type CandidateTransactionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CandidateTransactions to delete
+     */
+    where?: CandidateTransactionWhereInput
+    /**
+     * Limit how many CandidateTransactions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CandidateTransaction without action
+   */
+  export type CandidateTransactionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CandidateTransaction
+     */
+    select?: CandidateTransactionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CandidateTransaction
+     */
+    omit?: CandidateTransactionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CandidateTransactionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model RecruiterSubscription
    */
 
@@ -46321,6 +48855,7 @@ export namespace Prisma {
     cvUrl: 'cvUrl',
     userId: 'userId',
     isOpenToWork: 'isOpenToWork',
+    jobSearchExpiresAt: 'jobSearchExpiresAt',
     location: 'location',
     desiredJob: 'desiredJob',
     summary: 'summary',
@@ -46640,6 +49175,32 @@ export namespace Prisma {
   };
 
   export type CompanyWalletScalarFieldEnum = (typeof CompanyWalletScalarFieldEnum)[keyof typeof CompanyWalletScalarFieldEnum]
+
+
+  export const CandidateWalletScalarFieldEnum: {
+    walletId: 'walletId',
+    candidateId: 'candidateId',
+    balance: 'balance',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CandidateWalletScalarFieldEnum = (typeof CandidateWalletScalarFieldEnum)[keyof typeof CandidateWalletScalarFieldEnum]
+
+
+  export const CandidateTransactionScalarFieldEnum: {
+    transactionId: 'transactionId',
+    amount: 'amount',
+    description: 'description',
+    createdAt: 'createdAt',
+    walletId: 'walletId',
+    candidateId: 'candidateId',
+    orderCode: 'orderCode',
+    status: 'status',
+    realMoney: 'realMoney',
+    type: 'type'
+  };
+
+  export type CandidateTransactionScalarFieldEnum = (typeof CandidateTransactionScalarFieldEnum)[keyof typeof CandidateTransactionScalarFieldEnum]
 
 
   export const RecruiterSubscriptionScalarFieldEnum: {
@@ -47520,6 +50081,7 @@ export namespace Prisma {
     cvUrl?: StringNullableFilter<"Candidate"> | string | null
     userId?: StringFilter<"Candidate"> | string
     isOpenToWork?: BoolFilter<"Candidate"> | boolean
+    jobSearchExpiresAt?: DateTimeNullableFilter<"Candidate"> | Date | string | null
     location?: StringNullableFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableFilter<"Candidate">
     summary?: StringNullableFilter<"Candidate"> | string | null
@@ -47546,6 +50108,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewListRelationFilter
     companyReviews?: CompanyReviewListRelationFilter
     reports?: CandidateReportListRelationFilter
+    wallet?: XOR<CandidateWalletNullableScalarRelationFilter, CandidateWalletWhereInput> | null
   }
 
   export type CandidateOrderByWithRelationInput = {
@@ -47557,6 +50120,7 @@ export namespace Prisma {
     cvUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    jobSearchExpiresAt?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
     summary?: SortOrderInput | SortOrder
@@ -47583,6 +50147,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewOrderByRelationAggregateInput
     companyReviews?: CompanyReviewOrderByRelationAggregateInput
     reports?: CandidateReportOrderByRelationAggregateInput
+    wallet?: CandidateWalletOrderByWithRelationInput
   }
 
   export type CandidateWhereUniqueInput = Prisma.AtLeast<{
@@ -47597,6 +50162,7 @@ export namespace Prisma {
     gpa?: FloatNullableFilter<"Candidate"> | number | null
     cvUrl?: StringNullableFilter<"Candidate"> | string | null
     isOpenToWork?: BoolFilter<"Candidate"> | boolean
+    jobSearchExpiresAt?: DateTimeNullableFilter<"Candidate"> | Date | string | null
     location?: StringNullableFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableFilter<"Candidate">
     summary?: StringNullableFilter<"Candidate"> | string | null
@@ -47623,6 +50189,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewListRelationFilter
     companyReviews?: CompanyReviewListRelationFilter
     reports?: CandidateReportListRelationFilter
+    wallet?: XOR<CandidateWalletNullableScalarRelationFilter, CandidateWalletWhereInput> | null
   }, "candidateId" | "userId">
 
   export type CandidateOrderByWithAggregationInput = {
@@ -47634,6 +50201,7 @@ export namespace Prisma {
     cvUrl?: SortOrderInput | SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    jobSearchExpiresAt?: SortOrderInput | SortOrder
     location?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
     summary?: SortOrderInput | SortOrder
@@ -47665,6 +50233,7 @@ export namespace Prisma {
     cvUrl?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     userId?: StringWithAggregatesFilter<"Candidate"> | string
     isOpenToWork?: BoolWithAggregatesFilter<"Candidate"> | boolean
+    jobSearchExpiresAt?: DateTimeNullableWithAggregatesFilter<"Candidate"> | Date | string | null
     location?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     desiredJob?: JsonNullableWithAggregatesFilter<"Candidate">
     summary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
@@ -49339,6 +51908,143 @@ export namespace Prisma {
     cvUnlockQuotaMax?: IntWithAggregatesFilter<"CompanyWallet"> | number
   }
 
+  export type CandidateWalletWhereInput = {
+    AND?: CandidateWalletWhereInput | CandidateWalletWhereInput[]
+    OR?: CandidateWalletWhereInput[]
+    NOT?: CandidateWalletWhereInput | CandidateWalletWhereInput[]
+    walletId?: StringFilter<"CandidateWallet"> | string
+    candidateId?: StringFilter<"CandidateWallet"> | string
+    balance?: IntFilter<"CandidateWallet"> | number
+    updatedAt?: DateTimeFilter<"CandidateWallet"> | Date | string
+    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
+    transactions?: CandidateTransactionListRelationFilter
+  }
+
+  export type CandidateWalletOrderByWithRelationInput = {
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    balance?: SortOrder
+    updatedAt?: SortOrder
+    candidate?: CandidateOrderByWithRelationInput
+    transactions?: CandidateTransactionOrderByRelationAggregateInput
+  }
+
+  export type CandidateWalletWhereUniqueInput = Prisma.AtLeast<{
+    walletId?: string
+    candidateId?: string
+    AND?: CandidateWalletWhereInput | CandidateWalletWhereInput[]
+    OR?: CandidateWalletWhereInput[]
+    NOT?: CandidateWalletWhereInput | CandidateWalletWhereInput[]
+    balance?: IntFilter<"CandidateWallet"> | number
+    updatedAt?: DateTimeFilter<"CandidateWallet"> | Date | string
+    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
+    transactions?: CandidateTransactionListRelationFilter
+  }, "walletId" | "candidateId">
+
+  export type CandidateWalletOrderByWithAggregationInput = {
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    balance?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CandidateWalletCountOrderByAggregateInput
+    _avg?: CandidateWalletAvgOrderByAggregateInput
+    _max?: CandidateWalletMaxOrderByAggregateInput
+    _min?: CandidateWalletMinOrderByAggregateInput
+    _sum?: CandidateWalletSumOrderByAggregateInput
+  }
+
+  export type CandidateWalletScalarWhereWithAggregatesInput = {
+    AND?: CandidateWalletScalarWhereWithAggregatesInput | CandidateWalletScalarWhereWithAggregatesInput[]
+    OR?: CandidateWalletScalarWhereWithAggregatesInput[]
+    NOT?: CandidateWalletScalarWhereWithAggregatesInput | CandidateWalletScalarWhereWithAggregatesInput[]
+    walletId?: StringWithAggregatesFilter<"CandidateWallet"> | string
+    candidateId?: StringWithAggregatesFilter<"CandidateWallet"> | string
+    balance?: IntWithAggregatesFilter<"CandidateWallet"> | number
+    updatedAt?: DateTimeWithAggregatesFilter<"CandidateWallet"> | Date | string
+  }
+
+  export type CandidateTransactionWhereInput = {
+    AND?: CandidateTransactionWhereInput | CandidateTransactionWhereInput[]
+    OR?: CandidateTransactionWhereInput[]
+    NOT?: CandidateTransactionWhereInput | CandidateTransactionWhereInput[]
+    transactionId?: StringFilter<"CandidateTransaction"> | string
+    amount?: IntFilter<"CandidateTransaction"> | number
+    description?: StringNullableFilter<"CandidateTransaction"> | string | null
+    createdAt?: DateTimeFilter<"CandidateTransaction"> | Date | string
+    walletId?: StringFilter<"CandidateTransaction"> | string
+    candidateId?: StringNullableFilter<"CandidateTransaction"> | string | null
+    orderCode?: IntNullableFilter<"CandidateTransaction"> | number | null
+    status?: StringFilter<"CandidateTransaction"> | string
+    realMoney?: FloatNullableFilter<"CandidateTransaction"> | number | null
+    type?: EnumTransactionTypeFilter<"CandidateTransaction"> | $Enums.TransactionType
+    wallet?: XOR<CandidateWalletScalarRelationFilter, CandidateWalletWhereInput>
+  }
+
+  export type CandidateTransactionOrderByWithRelationInput = {
+    transactionId?: SortOrder
+    amount?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    walletId?: SortOrder
+    candidateId?: SortOrderInput | SortOrder
+    orderCode?: SortOrderInput | SortOrder
+    status?: SortOrder
+    realMoney?: SortOrderInput | SortOrder
+    type?: SortOrder
+    wallet?: CandidateWalletOrderByWithRelationInput
+  }
+
+  export type CandidateTransactionWhereUniqueInput = Prisma.AtLeast<{
+    transactionId?: string
+    orderCode?: number
+    AND?: CandidateTransactionWhereInput | CandidateTransactionWhereInput[]
+    OR?: CandidateTransactionWhereInput[]
+    NOT?: CandidateTransactionWhereInput | CandidateTransactionWhereInput[]
+    amount?: IntFilter<"CandidateTransaction"> | number
+    description?: StringNullableFilter<"CandidateTransaction"> | string | null
+    createdAt?: DateTimeFilter<"CandidateTransaction"> | Date | string
+    walletId?: StringFilter<"CandidateTransaction"> | string
+    candidateId?: StringNullableFilter<"CandidateTransaction"> | string | null
+    status?: StringFilter<"CandidateTransaction"> | string
+    realMoney?: FloatNullableFilter<"CandidateTransaction"> | number | null
+    type?: EnumTransactionTypeFilter<"CandidateTransaction"> | $Enums.TransactionType
+    wallet?: XOR<CandidateWalletScalarRelationFilter, CandidateWalletWhereInput>
+  }, "transactionId" | "orderCode">
+
+  export type CandidateTransactionOrderByWithAggregationInput = {
+    transactionId?: SortOrder
+    amount?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    walletId?: SortOrder
+    candidateId?: SortOrderInput | SortOrder
+    orderCode?: SortOrderInput | SortOrder
+    status?: SortOrder
+    realMoney?: SortOrderInput | SortOrder
+    type?: SortOrder
+    _count?: CandidateTransactionCountOrderByAggregateInput
+    _avg?: CandidateTransactionAvgOrderByAggregateInput
+    _max?: CandidateTransactionMaxOrderByAggregateInput
+    _min?: CandidateTransactionMinOrderByAggregateInput
+    _sum?: CandidateTransactionSumOrderByAggregateInput
+  }
+
+  export type CandidateTransactionScalarWhereWithAggregatesInput = {
+    AND?: CandidateTransactionScalarWhereWithAggregatesInput | CandidateTransactionScalarWhereWithAggregatesInput[]
+    OR?: CandidateTransactionScalarWhereWithAggregatesInput[]
+    NOT?: CandidateTransactionScalarWhereWithAggregatesInput | CandidateTransactionScalarWhereWithAggregatesInput[]
+    transactionId?: StringWithAggregatesFilter<"CandidateTransaction"> | string
+    amount?: IntWithAggregatesFilter<"CandidateTransaction"> | number
+    description?: StringNullableWithAggregatesFilter<"CandidateTransaction"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"CandidateTransaction"> | Date | string
+    walletId?: StringWithAggregatesFilter<"CandidateTransaction"> | string
+    candidateId?: StringNullableWithAggregatesFilter<"CandidateTransaction"> | string | null
+    orderCode?: IntNullableWithAggregatesFilter<"CandidateTransaction"> | number | null
+    status?: StringWithAggregatesFilter<"CandidateTransaction"> | string
+    realMoney?: FloatNullableWithAggregatesFilter<"CandidateTransaction"> | number | null
+    type?: EnumTransactionTypeWithAggregatesFilter<"CandidateTransaction"> | $Enums.TransactionType
+  }
+
   export type RecruiterSubscriptionWhereInput = {
     AND?: RecruiterSubscriptionWhereInput | RecruiterSubscriptionWhereInput[]
     OR?: RecruiterSubscriptionWhereInput[]
@@ -50455,6 +53161,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -50481,6 +53188,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateInput = {
@@ -50492,6 +53200,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -50517,6 +53226,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUpdateInput = {
@@ -50527,6 +53237,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50553,6 +53264,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateInput = {
@@ -50564,6 +53276,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50589,6 +53302,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateCreateManyInput = {
@@ -50600,6 +53314,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -50622,6 +53337,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -50645,6 +53361,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -52459,6 +55176,148 @@ export namespace Prisma {
     cvUnlockQuotaMax?: IntFieldUpdateOperationsInput | number
   }
 
+  export type CandidateWalletCreateInput = {
+    walletId?: string
+    balance?: number
+    updatedAt?: Date | string
+    candidate: CandidateCreateNestedOneWithoutWalletInput
+    transactions?: CandidateTransactionCreateNestedManyWithoutWalletInput
+  }
+
+  export type CandidateWalletUncheckedCreateInput = {
+    walletId?: string
+    candidateId: string
+    balance?: number
+    updatedAt?: Date | string
+    transactions?: CandidateTransactionUncheckedCreateNestedManyWithoutWalletInput
+  }
+
+  export type CandidateWalletUpdateInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateUpdateOneRequiredWithoutWalletNestedInput
+    transactions?: CandidateTransactionUpdateManyWithoutWalletNestedInput
+  }
+
+  export type CandidateWalletUncheckedUpdateInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: CandidateTransactionUncheckedUpdateManyWithoutWalletNestedInput
+  }
+
+  export type CandidateWalletCreateManyInput = {
+    walletId?: string
+    candidateId: string
+    balance?: number
+    updatedAt?: Date | string
+  }
+
+  export type CandidateWalletUpdateManyMutationInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CandidateWalletUncheckedUpdateManyInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CandidateTransactionCreateInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+    wallet: CandidateWalletCreateNestedOneWithoutTransactionsInput
+  }
+
+  export type CandidateTransactionUncheckedCreateInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    walletId: string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUpdateInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+    wallet?: CandidateWalletUpdateOneRequiredWithoutTransactionsNestedInput
+  }
+
+  export type CandidateTransactionUncheckedUpdateInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    walletId?: StringFieldUpdateOperationsInput | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
+  export type CandidateTransactionCreateManyInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    walletId: string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUpdateManyMutationInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUncheckedUpdateManyInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    walletId?: StringFieldUpdateOperationsInput | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
   export type RecruiterSubscriptionCreateInput = {
     subscriptionId?: string
     planType: $Enums.PlanType
@@ -53779,6 +56638,11 @@ export namespace Prisma {
     none?: CandidateReportWhereInput
   }
 
+  export type CandidateWalletNullableScalarRelationFilter = {
+    is?: CandidateWalletWhereInput | null
+    isNot?: CandidateWalletWhereInput | null
+  }
+
   export type ApplicationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -53840,6 +56704,7 @@ export namespace Prisma {
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    jobSearchExpiresAt?: SortOrder
     location?: SortOrder
     desiredJob?: SortOrder
     summary?: SortOrder
@@ -53869,6 +56734,7 @@ export namespace Prisma {
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    jobSearchExpiresAt?: SortOrder
     location?: SortOrder
     summary?: SortOrder
     birthYear?: SortOrder
@@ -53887,6 +56753,7 @@ export namespace Prisma {
     cvUrl?: SortOrder
     userId?: SortOrder
     isOpenToWork?: SortOrder
+    jobSearchExpiresAt?: SortOrder
     location?: SortOrder
     summary?: SortOrder
     birthYear?: SortOrder
@@ -55104,6 +57971,101 @@ export namespace Prisma {
     cvUnlockQuotaMax?: SortOrder
   }
 
+  export type CandidateTransactionListRelationFilter = {
+    every?: CandidateTransactionWhereInput
+    some?: CandidateTransactionWhereInput
+    none?: CandidateTransactionWhereInput
+  }
+
+  export type CandidateTransactionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CandidateWalletCountOrderByAggregateInput = {
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    balance?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateWalletAvgOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type CandidateWalletMaxOrderByAggregateInput = {
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    balance?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateWalletMinOrderByAggregateInput = {
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    balance?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CandidateWalletSumOrderByAggregateInput = {
+    balance?: SortOrder
+  }
+
+  export type CandidateWalletScalarRelationFilter = {
+    is?: CandidateWalletWhereInput
+    isNot?: CandidateWalletWhereInput
+  }
+
+  export type CandidateTransactionCountOrderByAggregateInput = {
+    transactionId?: SortOrder
+    amount?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    orderCode?: SortOrder
+    status?: SortOrder
+    realMoney?: SortOrder
+    type?: SortOrder
+  }
+
+  export type CandidateTransactionAvgOrderByAggregateInput = {
+    amount?: SortOrder
+    orderCode?: SortOrder
+    realMoney?: SortOrder
+  }
+
+  export type CandidateTransactionMaxOrderByAggregateInput = {
+    transactionId?: SortOrder
+    amount?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    orderCode?: SortOrder
+    status?: SortOrder
+    realMoney?: SortOrder
+    type?: SortOrder
+  }
+
+  export type CandidateTransactionMinOrderByAggregateInput = {
+    transactionId?: SortOrder
+    amount?: SortOrder
+    description?: SortOrder
+    createdAt?: SortOrder
+    walletId?: SortOrder
+    candidateId?: SortOrder
+    orderCode?: SortOrder
+    status?: SortOrder
+    realMoney?: SortOrder
+    type?: SortOrder
+  }
+
+  export type CandidateTransactionSumOrderByAggregateInput = {
+    amount?: SortOrder
+    orderCode?: SortOrder
+    realMoney?: SortOrder
+  }
+
   export type EnumPlanTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.PlanType | EnumPlanTypeFieldRefInput<$PrismaModel>
     in?: $Enums.PlanType[] | ListEnumPlanTypeFieldRefInput<$PrismaModel>
@@ -56169,6 +59131,12 @@ export namespace Prisma {
     connect?: CandidateReportWhereUniqueInput | CandidateReportWhereUniqueInput[]
   }
 
+  export type CandidateWalletCreateNestedOneWithoutCandidateInput = {
+    create?: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutCandidateInput
+    connect?: CandidateWalletWhereUniqueInput
+  }
+
   export type ApplicationUncheckedCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -56258,6 +59226,12 @@ export namespace Prisma {
     connectOrCreate?: CandidateReportCreateOrConnectWithoutCandidateInput | CandidateReportCreateOrConnectWithoutCandidateInput[]
     createMany?: CandidateReportCreateManyCandidateInputEnvelope
     connect?: CandidateReportWhereUniqueInput | CandidateReportWhereUniqueInput[]
+  }
+
+  export type CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput = {
+    create?: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutCandidateInput
+    connect?: CandidateWalletWhereUniqueInput
   }
 
   export type NullableFloatFieldUpdateOperationsInput = {
@@ -56481,6 +59455,16 @@ export namespace Prisma {
     deleteMany?: CandidateReportScalarWhereInput | CandidateReportScalarWhereInput[]
   }
 
+  export type CandidateWalletUpdateOneWithoutCandidateNestedInput = {
+    create?: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutCandidateInput
+    upsert?: CandidateWalletUpsertWithoutCandidateInput
+    disconnect?: CandidateWalletWhereInput | boolean
+    delete?: CandidateWalletWhereInput | boolean
+    connect?: CandidateWalletWhereUniqueInput
+    update?: XOR<XOR<CandidateWalletUpdateToOneWithWhereWithoutCandidateInput, CandidateWalletUpdateWithoutCandidateInput>, CandidateWalletUncheckedUpdateWithoutCandidateInput>
+  }
+
   export type ApplicationUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -56661,6 +59645,16 @@ export namespace Prisma {
     update?: CandidateReportUpdateWithWhereUniqueWithoutCandidateInput | CandidateReportUpdateWithWhereUniqueWithoutCandidateInput[]
     updateMany?: CandidateReportUpdateManyWithWhereWithoutCandidateInput | CandidateReportUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: CandidateReportScalarWhereInput | CandidateReportScalarWhereInput[]
+  }
+
+  export type CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput = {
+    create?: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutCandidateInput
+    upsert?: CandidateWalletUpsertWithoutCandidateInput
+    disconnect?: CandidateWalletWhereInput | boolean
+    delete?: CandidateWalletWhereInput | boolean
+    connect?: CandidateWalletWhereUniqueInput
+    update?: XOR<XOR<CandidateWalletUpdateToOneWithWhereWithoutCandidateInput, CandidateWalletUpdateWithoutCandidateInput>, CandidateWalletUncheckedUpdateWithoutCandidateInput>
   }
 
   export type CandidateCreateNestedOneWithoutExperiencesInput = {
@@ -58369,6 +61363,76 @@ export namespace Prisma {
     deleteMany?: TransactionScalarWhereInput | TransactionScalarWhereInput[]
   }
 
+  export type CandidateCreateNestedOneWithoutWalletInput = {
+    create?: XOR<CandidateCreateWithoutWalletInput, CandidateUncheckedCreateWithoutWalletInput>
+    connectOrCreate?: CandidateCreateOrConnectWithoutWalletInput
+    connect?: CandidateWhereUniqueInput
+  }
+
+  export type CandidateTransactionCreateNestedManyWithoutWalletInput = {
+    create?: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput> | CandidateTransactionCreateWithoutWalletInput[] | CandidateTransactionUncheckedCreateWithoutWalletInput[]
+    connectOrCreate?: CandidateTransactionCreateOrConnectWithoutWalletInput | CandidateTransactionCreateOrConnectWithoutWalletInput[]
+    createMany?: CandidateTransactionCreateManyWalletInputEnvelope
+    connect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+  }
+
+  export type CandidateTransactionUncheckedCreateNestedManyWithoutWalletInput = {
+    create?: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput> | CandidateTransactionCreateWithoutWalletInput[] | CandidateTransactionUncheckedCreateWithoutWalletInput[]
+    connectOrCreate?: CandidateTransactionCreateOrConnectWithoutWalletInput | CandidateTransactionCreateOrConnectWithoutWalletInput[]
+    createMany?: CandidateTransactionCreateManyWalletInputEnvelope
+    connect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+  }
+
+  export type CandidateUpdateOneRequiredWithoutWalletNestedInput = {
+    create?: XOR<CandidateCreateWithoutWalletInput, CandidateUncheckedCreateWithoutWalletInput>
+    connectOrCreate?: CandidateCreateOrConnectWithoutWalletInput
+    upsert?: CandidateUpsertWithoutWalletInput
+    connect?: CandidateWhereUniqueInput
+    update?: XOR<XOR<CandidateUpdateToOneWithWhereWithoutWalletInput, CandidateUpdateWithoutWalletInput>, CandidateUncheckedUpdateWithoutWalletInput>
+  }
+
+  export type CandidateTransactionUpdateManyWithoutWalletNestedInput = {
+    create?: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput> | CandidateTransactionCreateWithoutWalletInput[] | CandidateTransactionUncheckedCreateWithoutWalletInput[]
+    connectOrCreate?: CandidateTransactionCreateOrConnectWithoutWalletInput | CandidateTransactionCreateOrConnectWithoutWalletInput[]
+    upsert?: CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput | CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput[]
+    createMany?: CandidateTransactionCreateManyWalletInputEnvelope
+    set?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    disconnect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    delete?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    connect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    update?: CandidateTransactionUpdateWithWhereUniqueWithoutWalletInput | CandidateTransactionUpdateWithWhereUniqueWithoutWalletInput[]
+    updateMany?: CandidateTransactionUpdateManyWithWhereWithoutWalletInput | CandidateTransactionUpdateManyWithWhereWithoutWalletInput[]
+    deleteMany?: CandidateTransactionScalarWhereInput | CandidateTransactionScalarWhereInput[]
+  }
+
+  export type CandidateTransactionUncheckedUpdateManyWithoutWalletNestedInput = {
+    create?: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput> | CandidateTransactionCreateWithoutWalletInput[] | CandidateTransactionUncheckedCreateWithoutWalletInput[]
+    connectOrCreate?: CandidateTransactionCreateOrConnectWithoutWalletInput | CandidateTransactionCreateOrConnectWithoutWalletInput[]
+    upsert?: CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput | CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput[]
+    createMany?: CandidateTransactionCreateManyWalletInputEnvelope
+    set?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    disconnect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    delete?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    connect?: CandidateTransactionWhereUniqueInput | CandidateTransactionWhereUniqueInput[]
+    update?: CandidateTransactionUpdateWithWhereUniqueWithoutWalletInput | CandidateTransactionUpdateWithWhereUniqueWithoutWalletInput[]
+    updateMany?: CandidateTransactionUpdateManyWithWhereWithoutWalletInput | CandidateTransactionUpdateManyWithWhereWithoutWalletInput[]
+    deleteMany?: CandidateTransactionScalarWhereInput | CandidateTransactionScalarWhereInput[]
+  }
+
+  export type CandidateWalletCreateNestedOneWithoutTransactionsInput = {
+    create?: XOR<CandidateWalletCreateWithoutTransactionsInput, CandidateWalletUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutTransactionsInput
+    connect?: CandidateWalletWhereUniqueInput
+  }
+
+  export type CandidateWalletUpdateOneRequiredWithoutTransactionsNestedInput = {
+    create?: XOR<CandidateWalletCreateWithoutTransactionsInput, CandidateWalletUncheckedCreateWithoutTransactionsInput>
+    connectOrCreate?: CandidateWalletCreateOrConnectWithoutTransactionsInput
+    upsert?: CandidateWalletUpsertWithoutTransactionsInput
+    connect?: CandidateWalletWhereUniqueInput
+    update?: XOR<XOR<CandidateWalletUpdateToOneWithWhereWithoutTransactionsInput, CandidateWalletUpdateWithoutTransactionsInput>, CandidateWalletUncheckedUpdateWithoutTransactionsInput>
+  }
+
   export type RecruiterCreateNestedOneWithoutRecruiterSubscriptionInput = {
     create?: XOR<RecruiterCreateWithoutRecruiterSubscriptionInput, RecruiterUncheckedCreateWithoutRecruiterSubscriptionInput>
     connectOrCreate?: RecruiterCreateOrConnectWithoutRecruiterSubscriptionInput
@@ -59183,6 +62247,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -59208,6 +62273,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutUserInput = {
@@ -59218,6 +62284,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -59243,6 +62310,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutUserInput = {
@@ -59459,6 +62527,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59484,6 +62553,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutUserInput = {
@@ -59494,6 +62564,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59519,6 +62590,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type JobAlertUpsertWithWhereUniqueWithoutUserInput = {
@@ -60825,6 +63897,25 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CandidateWalletCreateWithoutCandidateInput = {
+    walletId?: string
+    balance?: number
+    updatedAt?: Date | string
+    transactions?: CandidateTransactionCreateNestedManyWithoutWalletInput
+  }
+
+  export type CandidateWalletUncheckedCreateWithoutCandidateInput = {
+    walletId?: string
+    balance?: number
+    updatedAt?: Date | string
+    transactions?: CandidateTransactionUncheckedCreateNestedManyWithoutWalletInput
+  }
+
+  export type CandidateWalletCreateOrConnectWithoutCandidateInput = {
+    where: CandidateWalletWhereUniqueInput
+    create: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+  }
+
   export type ApplicationUpsertWithWhereUniqueWithoutCandidateInput = {
     where: ApplicationWhereUniqueInput
     update: XOR<ApplicationUpdateWithoutCandidateInput, ApplicationUncheckedUpdateWithoutCandidateInput>
@@ -61276,6 +64367,31 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CandidateReport"> | Date | string
   }
 
+  export type CandidateWalletUpsertWithoutCandidateInput = {
+    update: XOR<CandidateWalletUpdateWithoutCandidateInput, CandidateWalletUncheckedUpdateWithoutCandidateInput>
+    create: XOR<CandidateWalletCreateWithoutCandidateInput, CandidateWalletUncheckedCreateWithoutCandidateInput>
+    where?: CandidateWalletWhereInput
+  }
+
+  export type CandidateWalletUpdateToOneWithWhereWithoutCandidateInput = {
+    where?: CandidateWalletWhereInput
+    data: XOR<CandidateWalletUpdateWithoutCandidateInput, CandidateWalletUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type CandidateWalletUpdateWithoutCandidateInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: CandidateTransactionUpdateManyWithoutWalletNestedInput
+  }
+
+  export type CandidateWalletUncheckedUpdateWithoutCandidateInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    transactions?: CandidateTransactionUncheckedUpdateManyWithoutWalletNestedInput
+  }
+
   export type CandidateCreateWithoutExperiencesInput = {
     candidateId?: string
     fullName: string
@@ -61284,6 +64400,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61309,6 +64426,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutExperiencesInput = {
@@ -61320,6 +64438,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61344,6 +64463,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutExperiencesInput = {
@@ -61370,6 +64490,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61395,6 +64516,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutExperiencesInput = {
@@ -61406,6 +64528,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61430,6 +64553,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateCreateWithoutCertificationsInput = {
@@ -61440,6 +64564,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61465,6 +64590,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCertificationsInput = {
@@ -61476,6 +64602,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61500,6 +64627,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCertificationsInput = {
@@ -61526,6 +64654,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61551,6 +64680,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCertificationsInput = {
@@ -61562,6 +64692,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61586,6 +64717,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateCreateWithoutSkillsInput = {
@@ -61596,6 +64728,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61621,6 +64754,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutSkillsInput = {
@@ -61632,6 +64766,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61656,6 +64791,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutSkillsInput = {
@@ -61682,6 +64818,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61707,6 +64844,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutSkillsInput = {
@@ -61718,6 +64856,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61742,6 +64881,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateCreateWithoutProjectsInput = {
@@ -61752,6 +64892,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61777,6 +64918,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutProjectsInput = {
@@ -61788,6 +64930,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -61812,6 +64955,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutProjectsInput = {
@@ -61838,6 +64982,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61863,6 +65008,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutProjectsInput = {
@@ -61874,6 +65020,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -61898,6 +65045,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type ConversationCreateWithoutRecruiterInput = {
@@ -64880,6 +68028,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -64905,6 +68054,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutJobMatchesInput = {
@@ -64916,6 +68066,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -64940,6 +68091,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutJobMatchesInput = {
@@ -65053,6 +68205,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65078,6 +68231,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutJobMatchesInput = {
@@ -65089,6 +68243,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65113,6 +68268,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type JobPostingUpsertWithoutJobMatchesInput = {
@@ -65270,6 +68426,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -65295,6 +68452,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCvsInput = {
@@ -65306,6 +68464,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -65330,6 +68489,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCvsInput = {
@@ -65402,6 +68562,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65427,6 +68588,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCvsInput = {
@@ -65438,6 +68600,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65462,6 +68625,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUnlockUpsertWithWhereUniqueWithoutCvInput = {
@@ -65488,6 +68652,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -65513,6 +68678,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutApplicationsInput = {
@@ -65524,6 +68690,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -65548,6 +68715,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutApplicationsInput = {
@@ -65795,6 +68963,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65820,6 +68989,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutApplicationsInput = {
@@ -65831,6 +69001,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65855,6 +69026,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type CVUpsertWithoutApplicationsInput = {
@@ -66066,6 +69238,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -66091,6 +69264,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutSavedJobsInput = {
@@ -66102,6 +69276,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -66126,6 +69301,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutSavedJobsInput = {
@@ -66239,6 +69415,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66264,6 +69441,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutSavedJobsInput = {
@@ -66275,6 +69453,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66299,6 +69478,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type JobPostingUpsertWithoutSavedJobsInput = {
@@ -66402,6 +69582,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -66427,6 +69608,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutConversationsInput = {
@@ -66438,6 +69620,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -66462,6 +69645,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutConversationsInput = {
@@ -66577,6 +69761,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66602,6 +69787,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutConversationsInput = {
@@ -66613,6 +69799,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66637,6 +69824,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type RecruiterUpsertWithoutConversationsInput = {
@@ -66986,6 +70174,280 @@ export namespace Prisma {
     data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutWalletInput>
   }
 
+  export type CandidateCreateWithoutWalletInput = {
+    candidateId?: string
+    fullName: string
+    university?: string | null
+    major?: string | null
+    gpa?: number | null
+    cvUrl?: string | null
+    isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
+    location?: string | null
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    totalYearsExp?: number | null
+    degree?: string | null
+    gender?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    user: UserCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
+    conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
+    projects?: ProjectCreateNestedManyWithoutCandidateInput
+    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
+    skills?: SkillCreateNestedManyWithoutCandidateInput
+    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput
+    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
+    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
+    reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateUncheckedCreateWithoutWalletInput = {
+    candidateId?: string
+    fullName: string
+    university?: string | null
+    major?: string | null
+    gpa?: number | null
+    cvUrl?: string | null
+    userId: string
+    isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
+    location?: string | null
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    totalYearsExp?: number | null
+    degree?: string | null
+    gender?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
+    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
+    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
+    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
+    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput
+    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
+    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
+    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateCreateOrConnectWithoutWalletInput = {
+    where: CandidateWhereUniqueInput
+    create: XOR<CandidateCreateWithoutWalletInput, CandidateUncheckedCreateWithoutWalletInput>
+  }
+
+  export type CandidateTransactionCreateWithoutWalletInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUncheckedCreateWithoutWalletInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+  }
+
+  export type CandidateTransactionCreateOrConnectWithoutWalletInput = {
+    where: CandidateTransactionWhereUniqueInput
+    create: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput>
+  }
+
+  export type CandidateTransactionCreateManyWalletInputEnvelope = {
+    data: CandidateTransactionCreateManyWalletInput | CandidateTransactionCreateManyWalletInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CandidateUpsertWithoutWalletInput = {
+    update: XOR<CandidateUpdateWithoutWalletInput, CandidateUncheckedUpdateWithoutWalletInput>
+    create: XOR<CandidateCreateWithoutWalletInput, CandidateUncheckedCreateWithoutWalletInput>
+    where?: CandidateWhereInput
+  }
+
+  export type CandidateUpdateToOneWithWhereWithoutWalletInput = {
+    where?: CandidateWhereInput
+    data: XOR<CandidateUpdateWithoutWalletInput, CandidateUncheckedUpdateWithoutWalletInput>
+  }
+
+  export type CandidateUpdateWithoutWalletInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
+    conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUpdateManyWithoutCandidateNestedInput
+    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
+    skills?: SkillUpdateManyWithoutCandidateNestedInput
+    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput
+    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
+    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
+    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateUncheckedUpdateWithoutWalletInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
+    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
+    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
+    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
+    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
+    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
+    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
+    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
+    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput = {
+    where: CandidateTransactionWhereUniqueInput
+    update: XOR<CandidateTransactionUpdateWithoutWalletInput, CandidateTransactionUncheckedUpdateWithoutWalletInput>
+    create: XOR<CandidateTransactionCreateWithoutWalletInput, CandidateTransactionUncheckedCreateWithoutWalletInput>
+  }
+
+  export type CandidateTransactionUpdateWithWhereUniqueWithoutWalletInput = {
+    where: CandidateTransactionWhereUniqueInput
+    data: XOR<CandidateTransactionUpdateWithoutWalletInput, CandidateTransactionUncheckedUpdateWithoutWalletInput>
+  }
+
+  export type CandidateTransactionUpdateManyWithWhereWithoutWalletInput = {
+    where: CandidateTransactionScalarWhereInput
+    data: XOR<CandidateTransactionUpdateManyMutationInput, CandidateTransactionUncheckedUpdateManyWithoutWalletInput>
+  }
+
+  export type CandidateTransactionScalarWhereInput = {
+    AND?: CandidateTransactionScalarWhereInput | CandidateTransactionScalarWhereInput[]
+    OR?: CandidateTransactionScalarWhereInput[]
+    NOT?: CandidateTransactionScalarWhereInput | CandidateTransactionScalarWhereInput[]
+    transactionId?: StringFilter<"CandidateTransaction"> | string
+    amount?: IntFilter<"CandidateTransaction"> | number
+    description?: StringNullableFilter<"CandidateTransaction"> | string | null
+    createdAt?: DateTimeFilter<"CandidateTransaction"> | Date | string
+    walletId?: StringFilter<"CandidateTransaction"> | string
+    candidateId?: StringNullableFilter<"CandidateTransaction"> | string | null
+    orderCode?: IntNullableFilter<"CandidateTransaction"> | number | null
+    status?: StringFilter<"CandidateTransaction"> | string
+    realMoney?: FloatNullableFilter<"CandidateTransaction"> | number | null
+    type?: EnumTransactionTypeFilter<"CandidateTransaction"> | $Enums.TransactionType
+  }
+
+  export type CandidateWalletCreateWithoutTransactionsInput = {
+    walletId?: string
+    balance?: number
+    updatedAt?: Date | string
+    candidate: CandidateCreateNestedOneWithoutWalletInput
+  }
+
+  export type CandidateWalletUncheckedCreateWithoutTransactionsInput = {
+    walletId?: string
+    candidateId: string
+    balance?: number
+    updatedAt?: Date | string
+  }
+
+  export type CandidateWalletCreateOrConnectWithoutTransactionsInput = {
+    where: CandidateWalletWhereUniqueInput
+    create: XOR<CandidateWalletCreateWithoutTransactionsInput, CandidateWalletUncheckedCreateWithoutTransactionsInput>
+  }
+
+  export type CandidateWalletUpsertWithoutTransactionsInput = {
+    update: XOR<CandidateWalletUpdateWithoutTransactionsInput, CandidateWalletUncheckedUpdateWithoutTransactionsInput>
+    create: XOR<CandidateWalletCreateWithoutTransactionsInput, CandidateWalletUncheckedCreateWithoutTransactionsInput>
+    where?: CandidateWalletWhereInput
+  }
+
+  export type CandidateWalletUpdateToOneWithWhereWithoutTransactionsInput = {
+    where?: CandidateWalletWhereInput
+    data: XOR<CandidateWalletUpdateWithoutTransactionsInput, CandidateWalletUncheckedUpdateWithoutTransactionsInput>
+  }
+
+  export type CandidateWalletUpdateWithoutTransactionsInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidate?: CandidateUpdateOneRequiredWithoutWalletNestedInput
+  }
+
+  export type CandidateWalletUncheckedUpdateWithoutTransactionsInput = {
+    walletId?: StringFieldUpdateOperationsInput | string
+    candidateId?: StringFieldUpdateOperationsInput | string
+    balance?: IntFieldUpdateOperationsInput | number
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RecruiterCreateWithoutRecruiterSubscriptionInput = {
     recruiterId?: string
     fullName?: string | null
@@ -67285,6 +70747,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -67310,6 +70773,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCandidateUnlocksInput = {
@@ -67321,6 +70785,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -67345,6 +70810,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCandidateUnlocksInput = {
@@ -67619,6 +71085,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67644,6 +71111,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCandidateUnlocksInput = {
@@ -67655,6 +71123,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67679,6 +71148,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type JobPostingUpsertWithoutCandidateUnlocksInput = {
@@ -67894,6 +71364,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -67919,6 +71390,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCandidateReviewsInput = {
@@ -67930,6 +71402,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -67954,6 +71427,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCandidateReviewsInput = {
@@ -68035,6 +71509,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68060,6 +71535,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCandidateReviewsInput = {
@@ -68071,6 +71547,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68095,6 +71572,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type RecruiterUpsertWithoutCandidateReviewsInput = {
@@ -68457,6 +71935,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -68482,6 +71961,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutCompanyReviewsInput = {
@@ -68493,6 +71973,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -68517,6 +71998,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutCompanyReviewsInput = {
@@ -68669,6 +72151,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68694,6 +72177,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutCompanyReviewsInput = {
@@ -68705,6 +72189,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68729,6 +72214,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type ApplicationUpsertWithoutCompanyReviewInput = {
@@ -68849,6 +72335,7 @@ export namespace Prisma {
     gpa?: number | null
     cvUrl?: string | null
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -68874,6 +72361,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateUncheckedCreateWithoutReportsInput = {
@@ -68885,6 +72373,7 @@ export namespace Prisma {
     cvUrl?: string | null
     userId: string
     isOpenToWork?: boolean
+    jobSearchExpiresAt?: Date | string | null
     location?: string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: string | null
@@ -68909,6 +72398,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
     companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
   }
 
   export type CandidateCreateOrConnectWithoutReportsInput = {
@@ -69045,6 +72535,7 @@ export namespace Prisma {
     gpa?: NullableFloatFieldUpdateOperationsInput | number | null
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69070,6 +72561,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
   }
 
   export type CandidateUncheckedUpdateWithoutReportsInput = {
@@ -69081,6 +72573,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     location?: NullableStringFieldUpdateOperationsInput | string | null
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     summary?: NullableStringFieldUpdateOperationsInput | string | null
@@ -69105,6 +72598,7 @@ export namespace Prisma {
     candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
   }
 
   export type ApplicationUpsertWithoutReportsInput = {
@@ -71366,6 +74860,54 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recruiterId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
+  export type CandidateTransactionCreateManyWalletInput = {
+    transactionId?: string
+    amount: number
+    description?: string | null
+    createdAt?: Date | string
+    candidateId?: string | null
+    orderCode?: number | null
+    status?: string
+    realMoney?: number | null
+    type: $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUpdateWithoutWalletInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUncheckedUpdateWithoutWalletInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
+    orderCode?: NullableIntFieldUpdateOperationsInput | number | null
+    status?: StringFieldUpdateOperationsInput | string
+    realMoney?: NullableFloatFieldUpdateOperationsInput | number | null
+    type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  }
+
+  export type CandidateTransactionUncheckedUpdateManyWithoutWalletInput = {
+    transactionId?: StringFieldUpdateOperationsInput | string
+    amount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    candidateId?: NullableStringFieldUpdateOperationsInput | string | null
     orderCode?: NullableIntFieldUpdateOperationsInput | number | null
     status?: StringFieldUpdateOperationsInput | string
     realMoney?: NullableFloatFieldUpdateOperationsInput | number | null

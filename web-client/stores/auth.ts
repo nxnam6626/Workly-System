@@ -17,6 +17,7 @@ interface User {
     major?: string;
     gpa?: number;
     isOpenToWork?: boolean;
+    jobSearchExpiresAt?: string | null;
     skills?: { skillId: string; skillName: string }[];
   };
   recruiter?: any;

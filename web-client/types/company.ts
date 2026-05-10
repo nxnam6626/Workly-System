@@ -19,8 +19,12 @@ export interface CompanyHistory {
 }
 
 export interface CompanyBranch {
-  id: string;
+  branchId: string;
+  name: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
+  isVerified: boolean;
 }
 
 export interface Company {

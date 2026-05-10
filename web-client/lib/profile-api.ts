@@ -18,6 +18,7 @@ export interface CandidateProfile {
     summary?: string;
     desiredJob?: any;
     isOpenToWork: boolean;
+    jobSearchExpiresAt?: string | null;
     gender?: string;
     birthYear?: number;
     location?: string;
@@ -78,6 +79,7 @@ export interface UpdateProfileDto {
   location?: string;
   totalYearsExp?: number;
   isOpenToWork?: boolean;
+  jobSearchExpiresAt?: string | null;
   gender?: string;
   birthYear?: number;
   currentSalary?: string;

@@ -121,105 +121,120 @@ export default function MatchingJobsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05, duration: 0.4, ease: "easeOut" }}
-                className="group relative bg-white/60 backdrop-blur-xl rounded-[32px] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-500 p-6 md:p-8 overflow-hidden"
+                className="group relative bg-white rounded-[28px] border border-slate-100 shadow-sm hover:shadow-[0_32px_64px_-16px_rgba(59,130,246,0.08)] hover:border-blue-200/70 hover:-translate-y-1 transition-all duration-500 p-5 overflow-hidden"
               >
-                {/* Ambient Glow */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors duration-500 pointer-events-none" />
+                {/* Premium Hover Accent */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                 
-                <div className="relative z-10 flex flex-col gap-6">
-                  {/* Header: Logo, Title, Score */}
-                  <div className="flex flex-col sm:flex-row items-start gap-5">
-                    <div className="shrink-0 w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-3 relative group-hover:shadow-md transition-shadow">
-                      {job.company.logo ? (
-                        <img src={job.company.logo} alt={job.company.companyName} className="max-w-full max-h-full object-contain filter group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <Building2 className="w-10 h-10 text-slate-200" />
-                      )}
+                {/* Ambient Glow on Hover */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                
+                <div className="relative z-10 flex flex-col gap-5">
+                  {/* Top Section: Logo and Header row */}
+                  <div className="flex flex-col md:flex-row items-start gap-5">
+                    {/* Company Logo Framed */}
+                    <div className="shrink-0 relative">
+                      <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center p-2.5 shadow-sm group-hover:shadow-md transition-all duration-300">
+                        {job.company.logo ? (
+                          <img src={job.company.logo} alt={job.company.companyName} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <Building2 className="w-7 h-7 text-slate-300" />
+                        )}
+                      </div>
                       {job.score >= 90 && (
-                        <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm" title="Độ tương thích cực cao">
-                          <Sparkles className="w-3 h-3" />
+                        <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-orange-400 border-2 border-white flex items-center justify-center shadow-sm animate-pulse" title="Highly Relevant">
+                           <Sparkles className="w-3 h-3 text-white" />
                         </div>
                       )}
                     </div>
-                    
-                    <div className="grow w-full min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <Link href={`/jobs/${job.jobPostingId}`}>
-                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors truncate">
-                              {job.title}
-                            </h3>
-                          </Link>
-                          <p className="text-[13px] font-semibold text-slate-500 mt-1.5 flex items-center gap-2">
-                             {job.company.companyName}
-                             <span className="w-1 h-1 bg-slate-300 rounded-full"/>
-                             <span className="text-slate-400 font-medium">Đăng 2 ngày trước</span>
-                          </p>
-                        </div>
-                        
-                        {/* Match Score Badge */}
-                        <div className="shrink-0">
-                           <div className="px-4 py-2 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black text-[11px] uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform duration-300">
-                             <Target className="w-3.5 h-3.5" />
-                             MATCH {job.score}%
-                           </div>
-                        </div>
-                      </div>
-                      
-                      {/* Tags Row */}
-                      <div className="flex flex-wrap items-center gap-2.5 mt-5">
-                         <div className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold flex items-center gap-1.5 border border-emerald-100/50 transition-colors group-hover:bg-emerald-100/50">
-                           <DollarSign className="w-3.5 h-3.5" />
-                           {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
-                         </div>
-                         <div className="px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold flex items-center gap-1.5 border border-slate-100 transition-colors group-hover:bg-slate-100/50">
-                           <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                           {job.locationCity}
-                         </div>
-                         {job.jobType && (
-                           <div className="px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600 text-xs font-bold flex items-center gap-1.5 border border-slate-100 transition-colors group-hover:bg-slate-100/50">
-                             <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                             {job.jobType}
-                           </div>
-                         )}
-                      </div>
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 min-w-0">
+                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                             <Link href={`/jobs/${job.jobPostingId}`} className="inline-block max-w-full group/title">
+                               <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors truncate pr-4">
+                                  {job.title}
+                               </h3>
+                             </Link>
+                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[13px] font-medium text-slate-500">
+                                <span className="font-semibold text-slate-700">{job.company.companyName}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                                <span className="text-slate-400">Đăng 2 ngày trước</span>
+                             </div>
+                          </div>
+                          
+                          {/* Enhanced Match Score */}
+                          <div className="shrink-0">
+                             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-[11px] uppercase tracking-widest shadow-sm transition-all duration-300 group-hover:scale-105 ${
+                               job.score >= 90 
+                                 ? 'bg-blue-600 border-blue-600 text-white shadow-blue-500/20' 
+                                 : 'bg-blue-50 border-blue-100 text-blue-600'
+                             }`}>
+                                <BrainCircuit className={`w-3.5 h-3.5 ${job.score >= 90 ? 'animate-pulse' : ''}`} />
+                                <span>MATCH {job.score}%</span>
+                             </div>
+                          </div>
+                       </div>
+
+                       {/* Tags Row */}
+                       <div className="flex flex-wrap items-center gap-2 mt-3.5">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-100/50 text-emerald-700 text-[12px] font-bold transition-colors hover:bg-emerald-100/50">
+                             <DollarSign className="w-3.5 h-3.5" />
+                             {formatSalary(job.salaryMin, job.salaryMax, job.currency)}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 text-[12px] font-semibold transition-colors hover:bg-slate-100/80">
+                             <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                             {job.locationCity}
+                          </span>
+                          {job.jobType && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 text-[12px] font-semibold transition-colors hover:bg-slate-100/80">
+                               <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                               {job.jobType}
+                            </span>
+                          )}
+                       </div>
                     </div>
                   </div>
-                  
-                  {/* AI Matching Insights */}
-                  <div className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-2xl p-4 md:p-5 border border-blue-100/50 group-hover:border-blue-200/50 transition-colors">
-                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 mb-3 flex items-center gap-1.5">
-                        <BrainCircuit className="w-3.5 h-3.5" /> Phân tích kỹ năng tương thích
-                     </p>
-                     <div className="flex flex-wrap gap-2">
-                        {job.matchedSkills?.map((skill, i) => (
-                          <span key={i} className="px-3 py-1 bg-white text-slate-700 text-[11px] font-bold rounded-lg shadow-sm border border-slate-100/50 lowercase">
-                            {skill}
-                          </span>
-                        ))}
-                        {(!job.matchedSkills || job.matchedSkills.length === 0) && (
-                          <span className="text-xs text-slate-400 italic">Đang phân tích kỹ năng...</span>
-                        )}
+
+                  {/* Specialized Skills Analysis Section */}
+                  <div className="relative bg-slate-50/60 rounded-2xl p-4 border border-slate-100/80 overflow-hidden group-hover:bg-blue-50/30 group-hover:border-blue-100/80 transition-all duration-300">
+                     {/* Subtle Technical Pattern Overlay */}
+                     <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#0f172a 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                     
+                     <div className="relative z-10">
+                        <p className="flex items-center gap-1.5 text-[10px] font-black text-blue-600 uppercase tracking-[0.15em] mb-3">
+                           <Target className="w-3.5 h-3.5" />
+                           Phân tích kỹ năng tương thích
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                           {job.matchedSkills?.map((skill, i) => (
+                             <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl border border-slate-200 text-slate-700 text-[12px] font-bold shadow-[0_1px_2px_rgba(0,0,0,0.02)] lowercase hover:border-blue-300 hover:text-blue-700 transition-all duration-200 cursor-default">
+                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
+                               {skill}
+                             </span>
+                           ))}
+                           {(!job.matchedSkills || job.matchedSkills.length === 0) && (
+                             <span className="text-[12px] text-slate-400 italic font-medium">Hệ thống đang tổng hợp từ khóa kỹ năng...</span>
+                           )}
+                        </div>
                      </div>
                   </div>
-                  
-                  {/* Footer CTA */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
-                     <p className="text-[11px] font-medium text-slate-400 italic hidden md:block">
-                        Hệ thống gợi ý dựa trên hồ sơ chuyên sâu của bạn
-                     </p>
+
+                  {/* Divider & Actions */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-50 group-hover:border-blue-50/50 transition-colors">
+                     <div className="hidden md:flex items-center gap-1.5 text-slate-400 text-[11px] font-medium italic">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        Gợi ý độc quyền dựa trên hồ sơ của bạn
+                     </div>
+                     
                      <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <Link
-                          href={`/jobs/${job.jobPostingId}`}
-                          className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-2.5 bg-slate-50 text-slate-700 text-[11px] font-black rounded-xl hover:bg-slate-100 transition-colors uppercase tracking-widest border border-slate-200"
-                        >
+                        <Link href={`/jobs/${job.jobPostingId}`} className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
                           Chi tiết
                         </Link>
-                        <Link
-                          href={`/jobs/${job.jobPostingId}`}
-                          className="flex-[2] sm:flex-none inline-flex items-center justify-center gap-2 px-8 py-2.5 bg-blue-600 text-white text-[11px] font-black rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 uppercase tracking-widest group/btn"
-                        >
-                          Ứng tuyển ngay <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                        <Link href={`/jobs/${job.jobPostingId}`} className="flex-[2] sm:flex-none inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-600 shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(37,99,235,0.25)] transition-all duration-300 group/btn">
+                          Ứng tuyển ngay
+                          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
                         </Link>
                      </div>
                   </div>
