@@ -13,6 +13,9 @@ export const cvSchema = z.object({
   desiredJob: z.any().optional(),
   certifications: z.array(z.string()).optional(),
   gpa: z.number().min(0).max(4).optional().or(z.string()),
+  languages: z.array(z.any()).optional(),
+  interests: z.array(z.string()).optional(),
+  otherInfo: z.array(z.any()).optional(),
 });
 
 export type CVFormData = z.infer<typeof cvSchema>;

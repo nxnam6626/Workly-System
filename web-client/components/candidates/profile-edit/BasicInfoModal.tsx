@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,10 +33,28 @@ interface BasicInfoModalProps {
   onSuccess: (updated: CandidateProfile) => void;
 }
 
-const DRAWER_VARIANTS = {
-  hidden: { x: "100%", opacity: 0 },
-  visible: { x: 0, opacity: 1, transition: { type: "spring" as const, damping: 30, stiffness: 240, mass: 0.8 } },
-  exit: { x: "100%", opacity: 0, transition: { duration: 0.22, ease: "easeIn" as const } },
+const MODAL_VARIANTS: Variants = {
+  hidden: { scale: 0.95, opacity: 0, y: 20 },
+  visible: { 
+    scale: 1, 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: "spring", 
+      damping: 25, 
+      stiffness: 300,
+      mass: 0.5 
+    } 
+  },
+  exit: { 
+    scale: 0.95, 
+    opacity: 0, 
+    y: 20, 
+    transition: { 
+      duration: 0.2, 
+      ease: "easeOut" 
+    } 
+  },
 };
 
 const inputCls = "w-full bg-[#F7F7F5] border border-[#E8E8E2] rounded-xl px-4 py-3 text-[#111110] text-sm font-medium placeholder-[#C0BFB8] focus:outline-none focus:border-[#D97706]/60 focus:bg-white transition-all";
@@ -111,33 +129,40 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[120] flex justify-end" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-          <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');`}</style>
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          `}</style>
 
           {/* Overlay */}
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-slate-800/30 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
           />
 
-          {/* Drawer */}
-          <motion.aside
-            variants={DRAWER_VARIANTS} initial="hidden" animate="visible" exit="exit"
-            className="relative w-full max-w-[560px] h-full flex flex-col bg-white border-l border-[#E8E8E2] overflow-hidden z-10 shadow-2xl shadow-slate-200"
+          {/* Modal Container */}
+          <motion.div
+            variants={MODAL_VARIANTS} 
+            initial="hidden" 
+            animate="visible" 
+            exit="exit"
+            className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white/95 backdrop-blur-2xl rounded-[2.5rem] overflow-hidden z-10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] border border-white/20"
           >
-            {/* Subtle top accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#D97706] via-[#F59E0B] to-transparent" />
+            {/* Top Accent Gradient */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600" />
 
             {/* Header */}
             <header className="relative flex-shrink-0 px-8 pt-10 pb-7 border-b border-[#F0EFE8]">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold tracking-[0.3em] text-[#D97706] uppercase mb-2.5">Cập nhật hồ sơ</p>
-                  <h2 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[28px] text-[#111110] leading-tight">
-                    Thông tin <em className="text-[#D97706] not-italic">cá nhân</em>
+                  <p className="text-[10px] font-bold tracking-[0.3em] text-amber-600 uppercase mb-2">Cập nhật hồ sơ</p>
+                  <h2 className="text-3xl text-slate-900 leading-tight font-bold" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    Thông tin <span className="text-amber-600 italic">cá nhân</span>
                   </h2>
-                  <p className="text-[12px] text-[#999890] mt-1.5">Thông tin hiển thị trên hồ sơ của bạn</p>
+                  <p className="text-xs text-slate-400 mt-1.5 font-medium">Hoàn thiện thông tin để AI gợi ý việc làm chính xác hơn</p>
                 </div>
                 <button onClick={onClose}
                   className="mt-1 w-9 h-9 flex items-center justify-center rounded-xl border border-[#E8E8E2] text-[#BEBDB5] hover:text-[#111110] hover:border-[#D0CFCA] transition-all">
@@ -153,7 +178,7 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                 {/* 01 — Danh tính */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">01</span>
+                    <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">01</span>
                     <div className="flex-1 border-t border-[#F0EFE8]" />
                     <div className="flex items-center gap-2">
                       <User className="w-3.5 h-3.5 text-[#D97706]" />
@@ -190,7 +215,7 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                 {/* 02 — Học vấn */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">02</span>
+                    <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">02</span>
                     <div className="flex-1 border-t border-[#F0EFE8]" />
                     <div className="flex items-center gap-2">
                       <GraduationCap className="w-3.5 h-3.5 text-[#D97706]" />
@@ -223,7 +248,7 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                 {/* 03 — Mục tiêu */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">03</span>
+                    <span style={{ fontFamily: "'Inter', sans-serif" }} className="text-[42px] leading-none text-[#F0EFE8] font-bold select-none">03</span>
                     <div className="flex-1 border-t border-[#F0EFE8]" />
                     <div className="flex items-center gap-2">
                       <Target className="w-3.5 h-3.5 text-[#D97706]" />
@@ -268,7 +293,7 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
                   : <><Sparkles className="w-3.5 h-3.5" /> Lưu thay đổi <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" /></>}
               </button>
             </footer>
-          </motion.aside>
+          </motion.div>
         </div>
       )}
     </AnimatePresence>

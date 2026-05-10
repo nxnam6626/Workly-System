@@ -1,4 +1,6 @@
 export interface CvParsedData {
+  is_cv: boolean;
+  error_message?: string;
   personal_info: {
     full_name: string;
     email: string;
@@ -7,6 +9,7 @@ export interface CvParsedData {
     gpa?: number;
   };
   summary?: string;
+  categories?: string[];
   desired_job?: {
     jobTitle?: string;
     jobType?: string;
@@ -16,9 +19,15 @@ export interface CvParsedData {
   education: {
     degree?: string;
     major?: string;
-    institution?: string;
-  };
+    school?: string;
+    duration?: string;
+  }[];
   certifications?: string[];
+  languages?: {
+    language: string;
+    level: string;
+  }[];
+  interests?: string[];
   skills: {
     hard_skills: {
       skillName: string;
@@ -43,5 +52,9 @@ export interface CvParsedData {
     description: string;
     role?: string;
     technology?: string;
+  }[];
+  other_info?: {
+    header: string;
+    content: string;
   }[];
 }

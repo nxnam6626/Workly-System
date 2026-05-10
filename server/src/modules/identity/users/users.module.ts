@@ -2,7 +2,6 @@ import { Module, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { UserCreationService } from './services/user-creation.service';
-import { CandidateProfileService } from './services/candidate-profile.service';
 import { UserAvatarService } from './services/user-avatar.service';
 import { UserModerationService } from './services/user-moderation.service';
 import { UserDataService } from './services/user-data.service';
@@ -30,7 +29,6 @@ import { PrismaModule } from '@/prisma/prisma.module';
   providers: [
     UsersService,
     UserCreationService,
-    CandidateProfileService,
     UserAvatarService,
     UserModerationService,
     UserDataService,
@@ -39,7 +37,6 @@ import { PrismaModule } from '@/prisma/prisma.module';
   exports: [
     UsersService,
     UserCreationService,
-    CandidateProfileService,
     UserAvatarService,
     UserModerationService,
     UserDataService,

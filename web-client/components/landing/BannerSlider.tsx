@@ -37,7 +37,7 @@ export function BannerSlider() {
           />
           {/* Enhanced Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 p-8 pt-20 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-0 p-6 pt-12 pointer-events-none">
              <motion.div 
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
@@ -45,7 +45,7 @@ export function BannerSlider() {
                className="text-white"
              >
                 <div className="w-12 h-1 bg-safety-orange mb-3 rounded-full" />
-                <h3 className="text-2xl font-black drop-shadow-lg uppercase tracking-tight">KẾT NỐI TƯƠNG LAI CÙNG WORKLY</h3>
+                <h3 className="text-xl font-black drop-shadow-lg uppercase tracking-tight">KẾT NỐI TƯƠNG LAI CÙNG WORKLY</h3>
              </motion.div>
           </div>
         </motion.div>

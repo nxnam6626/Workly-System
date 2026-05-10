@@ -199,10 +199,37 @@ export class ApplicationStatusService {
       `Mở khóa ứng viên: ${application.candidate?.fullName}`,
     );
 
-    return this.prisma.application.update({
+    const updated = await this.prisma.application.update({
       where: { applicationId },
-      data: { isUnlocked: true },
+      data: {
+        isUnlocked: true,
+        appStatus: application.appStatus === 'PENDING' ? 'REVIEWED' : application.appStatus,
+      },
+      include: {
+        jobPosting: {
+          select: {
+            title: true,
+            recruiterId: true,
+            recruiter: { select: { userId: true } },
+            company: { select: { companyName: true } },
+          },
+        },
+        candidate: {
+          select: { userId: true, fullName: true, candidateId: true },
+        },
+      },
     });
+
+    if (application.appStatus === 'PENDING' && updated.candidate?.userId) {
+      await this.notificationService.notifyCandidateOfStatusUpdate(
+        updated.candidate.userId,
+        updated.jobPosting?.company?.companyName || 'Công ty',
+        updated.jobPosting?.title || 'Công việc',
+        'REVIEWED',
+      );
+    }
+
+    return updated;
   }
 
   obfuscateApplication(app: any, accurateScore: number) {

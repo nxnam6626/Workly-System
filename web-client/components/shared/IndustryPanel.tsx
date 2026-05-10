@@ -9,6 +9,7 @@ interface IndustryPanelProps {
   onSelect?: (value: string) => void;
   onClose?: () => void;
   variant?: "dropdown" | "sidebar";
+  searchTerm?: string;
 }
 
 export default function IndustryPanel({
@@ -17,12 +18,19 @@ export default function IndustryPanel({
   onSelect,
   onClose,
   variant = "dropdown",
+  searchTerm = "",
 }: IndustryPanelProps) {
   const isSidebar = variant === "sidebar";
   const renderItem = (text: string, isAll: boolean = false) => {
-    const className = isAll
+    const isMatched = searchTerm && text.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let className = isAll
       ? "px-3 py-1.5 bg-slate-200/60 text-slate-800 text-[12.5px] font-bold rounded-md hover:bg-[#1e60ad] hover:text-white transition-all active:scale-[0.98] shrink-0"
       : "px-3 py-1.5 bg-slate-100 text-slate-600 text-[12.5px] font-medium rounded-md hover:bg-[#1e60ad] hover:text-white transition-all active:scale-[0.98] shrink-0";
+
+    if (isMatched) {
+      className = "px-3 py-1.5 bg-[#1e60ad] text-white text-[12.5px] font-bold rounded-md ring-2 ring-blue-200 transition-all active:scale-[0.98] shrink-0";
+    }
 
     if (onSelect) {
       return (

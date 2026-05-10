@@ -8,6 +8,9 @@ export interface FavoriteJob {
   salaryMax: number | null;
   currency: string | null;
   locationCity: string | null;
+  createdAt?: string;
+  slug?: string | null;
+  jobType?: string | null;
   company: {
     companyName: string;
     logo: string | null;
@@ -72,6 +75,9 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
         salaryMax: job.salaryMax,
         currency: job.currency,
         locationCity: job.locationCity,
+        createdAt: job.createdAt,
+        slug: job.slug,
+        jobType: job.jobType,
         company: {
           companyName: job.company?.companyName || 'Công ty',
           logo: job.company?.logo || null,

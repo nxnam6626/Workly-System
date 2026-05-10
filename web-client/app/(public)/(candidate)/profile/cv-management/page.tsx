@@ -26,7 +26,6 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import api from '@/lib/api';
-import { CVReviewModal } from '@/components/candidates/CVReviewModal';
 
 export default function CvManagementPage() {
   const router = useRouter();
@@ -40,13 +39,6 @@ export default function CvManagementPage() {
   // Stats cho Upload
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
-
-  // States cho Smart Upload Modal
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
-  const [fileUrl, setFileUrl] = useState('');
-  const [cvTitle, setCvTitle] = useState('');
-  const [cvId, setCvId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -93,14 +85,10 @@ export default function CvManagementPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      const { parsedData, fileUrl, cvTitle, cvId } = response.data;
-      setExtractedData(parsedData || {});
-      setFileUrl(fileUrl);
-      setCvTitle(cvTitle);
-      setCvId(cvId);
+      const { cvId } = response.data;
 
-      // Mở modal xác nhận
-      setIsReviewModalOpen(true);
+      // Điều hướng sang trang review
+      router.push(`/profile/cv-review/${cvId}`);
       toast.success('Bóc tách thành công!', { id: toastId });
       
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -159,14 +147,8 @@ export default function CvManagementPage() {
   };
 
   const handleSetMainCv = async (cvId: string) => {
-    const toastId = toast.loading('Đang xử lý...');
-    try {
-      await profileApi.setMainCv(cvId);
-      toast.success('Đã chọn CV này làm mặc định.', { id: toastId });
-      fetchProfile(true);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi thay đổi.', { id: toastId });
-    }
+    // Tự động chuyển hướng sang trang review để đồng bộ vào hồ sơ
+    router.push(`/profile/cv-review/${cvId}`);
   };
 
   const cvs = profile?.candidate?.cvs || [];
@@ -406,19 +388,7 @@ export default function CvManagementPage() {
         </div>
       </main>
 
-      <CVReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        initialData={extractedData}
-        fileUrl={fileUrl}
-        cvTitle={cvTitle}
-        cvId={cvId}
-        onSuccess={() => {
-          setIsReviewModalOpen(false);
-          fetchProfile(true); // Tải lại danh sách CV
-          toast.success("Hồ sơ đã được cập nhật đồng bộ!");
-        }}
-      />
+
     </div>
   );
 }

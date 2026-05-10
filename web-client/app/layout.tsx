@@ -9,7 +9,10 @@ import { AlertPopup } from "@/components/ui/AlertPopup";
 import ConditionalAiChat from "@/components/chat/ConditionalAiChat";
 import ScrollToTop from "@/components/navbar/ScrollToTop";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Workly - Tìm kiếm Công việc Mơ ước",
@@ -23,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300`}>
+      <body className={`${inter.variable} ${inter.className} antialiased min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300`}>
         <AuthProvider>
           <ConfirmProvider>
             {children}

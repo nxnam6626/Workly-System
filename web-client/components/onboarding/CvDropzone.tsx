@@ -1,21 +1,23 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useDropzone, DropzoneState } from 'react-dropzone';
-import { Upload, FileText, X, CheckCircle2, Loader2, AlertCircle, Sparkles, Bot, BrainCircuit } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import { Upload, FileText, X, CheckCircle2, Loader2, AlertCircle, Sparkles, BrainCircuit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CvDropzoneProps {
   onUpload: (file: File) => void;
   onManualEntry: () => void;
   isLoading: boolean;
+  apiError?: any;
+  onClearError?: () => void;
 }
 
 import { AIScanner } from '@/components/ui/ai-scanner';
 
-export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry, isLoading }) => {
+export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry, isLoading, apiError, onClearError }) => {
   const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const droppedFile = acceptedFiles[0];
@@ -27,11 +29,11 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
       ];
       
       if (!allowedTypes.includes(droppedFile.type)) {
-        setError('Vui lòng tải lên tệp định dạng PDF hoặc Word (.doc, .docx).');
+        setLocalError('Vui lòng tải lên tệp định dạng PDF hoặc Word (.doc, .docx).');
         return;
       }
       setFile(droppedFile);
-      setError(null);
+      setLocalError(null);
     }
   }, []);
 
@@ -44,19 +46,26 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
     },
     multiple: false,
     disabled: isLoading,
-    noClick: file !== null,
-    noKeyboard: file !== null,
+    noClick: file !== null || !!apiError,
+    noKeyboard: file !== null || !!apiError,
   });
 
-  const removeFile = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const removeFile = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setFile(null);
-    setError(null);
+    setLocalError(null);
+    onClearError?.();
   };
 
   const handleChangeFile = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dropzone.open();
+    removeFile();
+    setTimeout(() => dropzone.open(), 100);
+  };
+
+  const handleRetry = (e?: React.MouseEvent) => {
+    removeFile(e);
+    setTimeout(() => dropzone.open(), 100);
   };
 
   const handleManualUpload = (e: React.MouseEvent) => {
@@ -66,23 +75,32 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
     }
   };
 
+  const displayError = localError || (typeof apiError === 'string' ? apiError : apiError?.message);
+
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-lg mx-auto">
       <div
         {...dropzone.getRootProps()}
-        className={`relative group cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed transition-all duration-500 min-h-[300px] flex flex-col items-center justify-center p-8 bg-white/60 backdrop-blur-md shadow-sm
-          ${dropzone.isDragActive ? 'border-sky-500 bg-sky-50/80 scale-[1.02] shadow-[0_0_40px_rgba(14,165,233,0.15)] ring-4 ring-sky-500/10' : 'border-gray-200 hover:border-sky-300 hover:bg-gray-50/80'}
-          ${error ? 'border-red-400 bg-red-50/80' : ''}
-          ${(isLoading || file) ? 'cursor-default pointer-events-auto' : ''}
-          ${isLoading ? 'opacity-90' : ''}
+        className={`relative group overflow-hidden rounded-[2rem] border-2 border-dashed transition-all duration-700 min-h-[320px] flex flex-col items-center justify-center p-6 bg-white/40 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+          ${dropzone.isDragActive ? 'border-sky-500 bg-sky-50/50 scale-[1.01] shadow-[0_20px_50px_rgba(14,165,233,0.1)] ring-8 ring-sky-500/5' : 'border-gray-200/60 hover:border-sky-300/80 hover:bg-white/60'}
+          ${displayError ? 'border-rose-200 bg-rose-50/30' : ''}
+          ${(isLoading || file || apiError) ? 'cursor-default pointer-events-auto' : 'cursor-pointer'}
+          ${isLoading ? 'opacity-95' : ''}
         `}
       >
         <input {...dropzone.getInputProps()} />
 
         <AnimatePresence mode="wait">
-          {!file && !isLoading && <DropzoneIdle isDragActive={dropzone.isDragActive} onManualEntry={onManualEntry} key="idle" />}
-          {isLoading && <DropzoneLoading onManualEntry={onManualEntry} key="loading" />}
-          {file && !isLoading && (
+          {apiError ? (
+            <DropzoneError 
+              error={apiError} 
+              onRetry={handleRetry} 
+              onManualEntry={onManualEntry}
+              key="api-error" 
+            />
+          ) : isLoading ? (
+            <DropzoneLoading onManualEntry={onManualEntry} key="loading" />
+          ) : file ? (
             <DropzonePreview
               file={file}
               onRemove={removeFile}
@@ -90,18 +108,20 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
               onUpload={handleManualUpload}
               key="preview"
             />
+          ) : (
+            <DropzoneIdle isDragActive={dropzone.isDragActive} onManualEntry={onManualEntry} key="idle" />
           )}
         </AnimatePresence>
 
-        {error && !isLoading && (
+        {localError && !isLoading && !apiError && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute bottom-6 left-0 right-0 px-8 pointer-events-none"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="absolute bottom-8 left-0 right-0 px-8 pointer-events-none"
           >
-            <div className="flex items-center justify-center gap-2 max-w-sm mx-auto p-3.5 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium shadow-sm">
+            <div className="flex items-center justify-center gap-2.5 max-w-sm mx-auto p-4 bg-white/90 backdrop-blur-md border border-rose-100 rounded-2xl text-rose-600 text-[13px] font-bold shadow-xl shadow-rose-500/5 ring-1 ring-rose-500/10">
               <AlertCircle size={18} strokeWidth={2.5} className="shrink-0" />
-              <span>{error}</span>
+              <span>{localError}</span>
             </div>
           </motion.div>
         )}
@@ -115,101 +135,182 @@ export const CvDropzone: React.FC<CvDropzoneProps> = ({ onUpload, onManualEntry,
 function DropzoneIdle({ isDragActive, onManualEntry }: { isDragActive: boolean; onManualEntry: () => void }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="flex flex-col items-center text-center space-y-4"
+      exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col items-center text-center space-y-5"
     >
-      <div className={`p-4 rounded-full transition-all duration-500 ${isDragActive ? 'bg-sky-500 text-white scale-110 shadow-lg shadow-sky-500/30' : 'bg-sky-50 text-sky-500 group-hover:scale-105 group-hover:bg-sky-100 group-hover:shadow-md'}`}>
-        <Upload size={44} strokeWidth={1.5} className={isDragActive ? 'animate-bounce' : ''} />
+      <div className="relative">
+        <motion.div
+          animate={isDragActive ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className={`p-5 rounded-[1.5rem] transition-all duration-700 ${isDragActive ? 'bg-sky-500 text-white scale-110 shadow-2xl shadow-sky-500/40 rotate-6' : 'bg-gradient-to-br from-sky-50 to-white text-sky-500 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-sky-500/10 border border-sky-100/50'}`}
+        >
+          <Upload size={36} strokeWidth={1.5} className={isDragActive ? 'animate-pulse' : ''} />
+        </motion.div>
+        {!isDragActive && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1 -right-1 w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white"
+          >
+            <Sparkles size={10} fill="currentColor" />
+          </motion.div>
+        )}
       </div>
+
       <div className="space-y-1.5">
-        <h3 className={`text-xl font-bold transition-colors tracking-tight ${isDragActive ? 'text-sky-600' : 'text-gray-900'}`}>
-          {isDragActive ? 'Thả CV vào đây!' : 'Kéo thả CV của bạn vào đây'}
+        <h3 className={`text-lg font-black transition-colors tracking-tight ${isDragActive ? 'text-sky-600' : 'text-slate-900'}`}>
+          {isDragActive ? 'Thả để bóc tách ngay!' : 'Tải lên CV của bạn'}
         </h3>
-        <p className="text-gray-500 max-w-sm mx-auto text-sm leading-relaxed">
-          Tải lên CV định dạng PDF hoặc Word. AI sẽ tự động bóc tách thông tin giúp bạn hoàn thiện hồ sơ.
+        <p className="text-slate-500 max-w-[280px] mx-auto text-[12px] leading-relaxed font-medium">
+          Hệ thống AI sẽ tự động đọc và nhận diện kỹ năng, kinh nghiệm từ file PDF/Word.
         </p>
       </div>
-      <div className={`mt-5 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm
+
+      <div className={`flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl text-[14px] font-black transition-all duration-500 shadow-lg
         ${isDragActive
-          ? 'bg-sky-500 text-white shadow-sky-500/25'
-          : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-md hover:-translate-y-0.5 group-hover:bg-sky-600'
+          ? 'bg-sky-500 text-white shadow-sky-500/30 scale-105'
+          : 'bg-slate-900 text-white hover:bg-sky-600 hover:shadow-sky-500/20 hover:-translate-y-1'
         }`}
       >
         <Upload size={16} strokeWidth={2.5} />
-        <span>Chọn tệp trên máy tính</span>
+        <span>Chọn tệp tin</span>
       </div>
 
-      {!isDragActive && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onManualEntry();
+        }}
+        className="text-[12px] font-bold text-slate-400 hover:text-sky-500 transition-colors underline underline-offset-4 decoration-slate-200 hover:decoration-sky-500/30"
+      >
+        Hoặc nhập thủ công
+      </button>
+    </motion.div>
+  );
+}
+
+function DropzoneError({ error, onRetry, onManualEntry }: { error: any; onRetry: () => void; onManualEntry: () => void }) {
+  const message = typeof error === 'string' ? error : error.message;
+  const missingFields = error.missingFields || [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+      transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+      className="flex flex-col items-center text-center space-y-6 p-4"
+    >
+      <div className="relative">
+        <div className="p-6 rounded-[2rem] bg-rose-50 text-rose-500 border border-rose-100 shadow-xl shadow-rose-500/5">
+          <AlertCircle size={48} strokeWidth={1.5} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="text-xl font-black text-slate-900 tracking-tight">
+          Phân tích thất bại
+        </h3>
+        <p className="text-rose-600/80 max-w-sm mx-auto text-[13px] font-bold leading-relaxed px-4 py-2 bg-rose-50/50 rounded-xl border border-rose-100/50">
+          {message}
+        </p>
+        
+        {missingFields.length > 0 && (
+          <div className="text-left bg-white/50 backdrop-blur-sm rounded-2xl border border-rose-100/50 p-4 w-full max-w-xs mx-auto space-y-2">
+            <p className="text-[11px] font-black text-rose-500 uppercase tracking-widest text-center">Các trường còn thiếu:</p>
+            <div className="grid grid-cols-1 gap-1.5">
+              {missingFields.map((field: string, i: number) => (
+                <div key={i} className="flex items-center gap-2 text-[12px] text-slate-600 font-bold">
+                  <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                  {field}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onManualEntry();
-          }}
-          className="mt-4 text-[13px] font-medium text-gray-400 hover:text-sky-500 transition-colors underline underline-offset-4"
+          onClick={onRetry}
+          className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[14px] font-black hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
         >
-          Hoặc nhập thông tin thủ công
+          Thử tệp khác
         </button>
-      )}
+        <button
+          onClick={onManualEntry}
+          className="px-8 py-3 bg-white text-slate-900 border border-slate-200 rounded-2xl text-[14px] font-black hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+        >
+          Nhập thủ công
+        </button>
+      </div>
     </motion.div>
   );
 }
 
 function DropzoneLoading({ onManualEntry }: { onManualEntry: () => void }) {
   const steps = [
-    'Đọc và nhận dạng nội dung CV...',
-    'Trích xuất kỹ năng & kinh nghiệm...',
-    'Phân tích học vấn & dự án...',
+    'Đang đọc cấu trúc tệp...',
+    'Trích xuất văn bản thô...',
+    'AI đang nhận diện CV...',
+    'Bóc tách thông tin chi tiết...',
   ];
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center w-full max-w-sm mx-auto gap-5"
+      className="flex flex-col items-center w-full max-w-sm mx-auto gap-8"
     >
-      {/* Header section: Animation on left, Text on right */}
-      <div className="flex items-center justify-center w-full mb-2 gap-5 px-2">
-        <AIScanner />
+      <div className="flex flex-col items-center gap-6">
+        <div className="relative">
+          <AIScanner />
+          <motion.div
+            animate={{ 
+              boxShadow: ['0 0 20px rgba(14,165,233,0.1)', '0 0 40px rgba(14,165,233,0.3)', '0 0 20px rgba(14,165,233,0.1)'] 
+            }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute inset-0 rounded-full"
+          />
+        </div>
 
-        {/* Title & description */}
-        <div className="text-left space-y-1">
-          <h3 className="text-base font-bold text-gray-900 tracking-tight">AI đang phân tích CV của bạn</h3>
-          <p className="text-xs text-gray-400">Quá trình này có thể mất vài giây</p>
+        <div className="text-center space-y-1">
+          <h3 className="text-lg font-black text-slate-900 tracking-tight">Hệ thống đang xử lý</h3>
+          <p className="text-xs text-slate-400 font-medium">Vui lòng đợi trong giây lát...</p>
         </div>
       </div>
 
-      {/* Step indicators */}
-      <div className="w-full space-y-2">
+      <div className="w-full space-y-2.5">
         {steps.map((label, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, x: -8 }}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 1.8, duration: 0.4 }}
-            className="flex items-center gap-2.5 px-3 py-1.5 bg-white border border-gray-100 rounded-xl shadow-sm"
+            transition={{ delay: i * 1.5, duration: 0.5 }}
+            className="flex items-center gap-3 px-4 py-2 bg-white/60 border border-sky-100/50 rounded-2xl shadow-sm backdrop-blur-sm"
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: i * 1.8 + 0.2, type: 'spring' }}
-              className="w-4 h-4 rounded-full bg-sky-100 flex items-center justify-center shrink-0"
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-            </motion.div>
-            <span className="text-xs text-gray-700 font-medium">{label}</span>
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 1, 0.5]
+              }}
+              transition={{ repeat: Infinity, duration: 2, delay: i * 0.5 }}
+              className="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.5)]"
+            />
+            <span className="text-[13px] text-slate-600 font-bold">{label}</span>
           </motion.div>
         ))}
       </div>
 
-      {/* Simple progress bar */}
-      <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden mt-1">
+      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: '100%' }}
-          transition={{ duration: 8, ease: 'linear' }}
-          className="h-full bg-sky-500 rounded-full"
+          transition={{ duration: 10, ease: 'linear' }}
+          className="h-full bg-gradient-to-r from-sky-400 to-sky-600 rounded-full"
         />
       </div>
 
@@ -218,61 +319,62 @@ function DropzoneLoading({ onManualEntry }: { onManualEntry: () => void }) {
           e.stopPropagation();
           onManualEntry();
         }}
-        className="mt-2 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-wider"
+        className="text-[11px] font-black text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest"
       >
-        Bỏ qua & Nhập thủ công
+        Dừng lại & Nhập thủ công
       </button>
     </motion.div>
   );
 }
 
 function DropzonePreview({ file, onRemove, onChangeFile, onUpload }: { file: File, onRemove: (e: React.MouseEvent) => void, onChangeFile: (e: React.MouseEvent) => void, onUpload: (e: React.MouseEvent) => void }) {
-  const getFileExtension = (filename: string) => {
-    return filename.split('.').pop()?.toUpperCase() || 'FILE';
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col sm:flex-row items-center sm:items-stretch justify-center gap-5 w-full max-w-lg mx-auto p-1"
+      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="flex flex-col items-center gap-6 w-full max-w-[300px]"
     >
-
-
-      <div className="w-full sm:w-1/2 relative p-5 rounded-[1.25rem] bg-gradient-to-b from-white to-sky-50/50 border border-sky-100 shadow-[0_4px_20px_rgb(0,0,0,0.04)] flex flex-col items-center group/file cursor-default hover:shadow-[0_4px_20px_rgb(14,165,233,0.08)] transition-all">
-        <div className="relative mb-3">
-          <div className="absolute inset-0 bg-sky-200 blur-xl opacity-20 rounded-full"></div>
-          <FileText className="w-12 h-12 text-sky-500 drop-shadow-sm group-hover/file:scale-105 transition-transform duration-500 relative z-10" strokeWidth={1.5} />
+      <div className="w-full relative p-6 rounded-[2rem] bg-white border border-slate-200/60 shadow-2xl shadow-slate-200/40 flex flex-col items-center group/file overflow-hidden">
+        <div className="relative mb-5">
+          <div className="w-16 h-16 bg-sky-50 rounded-2xl border border-sky-100 flex items-center justify-center shadow-sm group-hover/file:-translate-y-1 transition-transform duration-500">
+            <FileText size={32} className="text-sky-500" strokeWidth={1.5} />
+          </div>
         </div>
 
         <button
           onClick={onRemove}
-          className="absolute top-2.5 right-2.5 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 shadow-sm transition-all z-20 tooltip"
-          title="Hủy tệp này"
+          className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md border border-slate-100 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 shadow-sm transition-all z-20 group/close"
         >
-          <X size={14} strokeWidth={2.5} />
+          <X size={16} strokeWidth={2.5} className="group-hover/close:rotate-90 transition-transform" />
         </button>
 
-        <div className="space-y-1 w-full text-center">
-          <p className="text-[10px] font-black text-sky-600 flex items-center justify-center gap-1 bg-sky-50 inline-flex px-2 py-0.5 rounded-full border border-sky-100 uppercase tracking-wider">
-            <CheckCircle2 size={12} strokeWidth={3} /> Đã chọn thành công
+        <div className="space-y-2 w-full text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+             <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-full border border-emerald-100 flex items-center gap-1.5 uppercase tracking-wider">
+               <CheckCircle2 size={12} strokeWidth={3} /> Sẵn sàng
+             </span>
+          </div>
+          <h3 className="text-[15px] font-black text-slate-900 truncate px-2" title={file.name}>{file.name}</h3>
+          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+            {(file.size / 1024 / 1024).toFixed(2)} MB • {file.name.split('.').pop()}
           </p>
-          <h3 className="text-sm font-bold text-gray-900 truncate px-1 mt-1" title={file.name}>{file.name}</h3>
-          <p className="text-xs text-gray-500 font-medium">{(file.size / 1024 / 1024).toFixed(2)} MB <span className="mx-1 font-bold opacity-30">•</span> {getFileExtension(file.name)}</p>
         </div>
       </div>
-      <div className="flex flex-col justify-center items-center w-full sm:w-1/2 space-y-3">
+
+      <div className="flex flex-col items-center gap-3 w-full">
         <button
           onClick={onUpload}
-          className="w-full max-w-[180px] py-2.5 text-[13px] bg-black hover:bg-sky-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-md shadow-sky-500/20 hover:shadow-sky-500/30 hover:-translate-y-0.5 transition-all duration-300 group/btn"
+          className="w-full py-3 px-6 bg-slate-900 hover:bg-sky-600 text-white rounded-2xl font-black text-[14px] flex items-center justify-center gap-2.5 shadow-xl shadow-slate-200 hover:shadow-sky-500/25 hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap"
         >
+          <BrainCircuit size={18} />
           <span>Bắt đầu phân tích</span>
         </button>
 
         <button
           onClick={onChangeFile}
-          className="text-[11px] font-semibold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wide underline underline-offset-4"
+          className="py-2 text-[12px] font-bold text-slate-400 hover:text-slate-900 transition-colors flex items-center gap-1.5 group/retry"
         >
+          <span className="opacity-0 group-hover/retry:opacity-100 transition-opacity">←</span>
           Chọn tệp khác
         </button>
       </div>

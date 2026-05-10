@@ -19,7 +19,6 @@ import { memoryStorage } from 'multer';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 import { Role, Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
@@ -54,14 +53,6 @@ export class UsersController {
     return this.usersService.updateAvatar(userId, file);
   }
 
-  /** Cập nhật hồ sơ ứng viên (dành cho CANDIDATE). */
-  @Patch('me/profile')
-  updateMyProfile(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: UpdateCandidateProfileDto,
-  ) {
-    return this.usersService.updateCandidateProfile(userId, dto);
-  }
 
   // ─── Admin-only routes below ───────────────────────────────────────────────
 

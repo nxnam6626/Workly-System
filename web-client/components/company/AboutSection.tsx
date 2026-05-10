@@ -21,15 +21,15 @@ export function AboutSection({ company }: AboutSectionProps) {
     : description;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-8">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 md:p-7 space-y-6">
       {/* Main Introduction */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+      <div className="space-y-3">
+        <h2 className="text-base font-bold text-slate-900 tracking-tight">
           Giới thiệu công ty {company.companyName}
         </h2>
         
         <div className="relative">
-          <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
+          <div className="text-slate-600 text-xs leading-relaxed whitespace-pre-wrap">
             {displayDescription}
             {shouldTruncate && !isExpanded && (
               <button 
@@ -44,7 +44,7 @@ export function AboutSection({ company }: AboutSectionProps) {
           {isExpanded && (
             <button 
               onClick={() => setIsExpanded(false)}
-              className="mt-2 block text-mariner font-medium hover:underline focus:outline-none text-sm"
+              className="mt-2 block text-mariner font-medium hover:underline focus:outline-none text-xs"
             >
               Thu gọn
             </button>
@@ -54,14 +54,14 @@ export function AboutSection({ company }: AboutSectionProps) {
 
       {/* Dynamic Sections (Insurance, Policy, etc.) */}
       {company.sections?.map((section) => (
-        <div key={section.id} className="space-y-3">
-          <h3 className="text-[15px] font-bold text-slate-900 uppercase tracking-tight">
+        <div key={section.id} className="space-y-2">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
             {section.title}
           </h3>
-          <ul className="space-y-2">
+          <ul className="space-y-1.5">
             {section.content.split('\n').filter(line => line.trim()).map((line, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-slate-600 text-[13px] leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+              <li key={idx} className="flex items-start gap-2 text-slate-600 text-xs leading-relaxed">
+                <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
                 {line.startsWith('-') || line.startsWith('•') ? line.substring(1).trim() : line.trim()}
               </li>
             ))}
@@ -71,12 +71,12 @@ export function AboutSection({ company }: AboutSectionProps) {
 
       {/* History */}
       {company.history && company.history.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-[15px] font-bold text-slate-900 uppercase tracking-tight">Lịch sử thành lập</h3>
-          <ul className="space-y-2">
+        <div className="space-y-2">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Lịch sử thành lập</h3>
+          <ul className="space-y-1.5">
             {company.history.map((item) => (
-              <li key={item.id} className="flex items-start gap-2 text-slate-600 text-[13px] leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+              <li key={item.id} className="flex items-start gap-2 text-slate-600 text-xs leading-relaxed">
+                <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
                 <span className="font-bold shrink-0">{item.year}:</span>
                 <span>{item.event}</span>
               </li>
@@ -87,12 +87,12 @@ export function AboutSection({ company }: AboutSectionProps) {
 
       {/* Benefits */}
       {company.benefits && company.benefits.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-[15px] font-bold text-slate-900 uppercase tracking-tight">Phúc lợi công ty</h3>
-          <ul className="space-y-2">
+        <div className="space-y-2">
+          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Phúc lợi công ty</h3>
+          <ul className="space-y-1.5">
             {company.benefits.map((benefit) => (
-              <li key={benefit.id} className="flex items-start gap-2 text-slate-600 text-[13px] leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+              <li key={benefit.id} className="flex items-start gap-2 text-slate-600 text-xs leading-relaxed">
+                <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
                 {benefit.title}
               </li>
             ))}

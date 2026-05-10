@@ -12,9 +12,6 @@ export class CandidatesService {
   ) {}
 
   // --- Profile Logic ---
-  create(createCandidateDto: any) {
-    return this.profileService.create(createCandidateDto);
-  }
 
   findAll(query: any, recruiterUserId?: string) {
     return this.profileService.findAll(query, recruiterUserId);
@@ -28,9 +25,10 @@ export class CandidatesService {
     return this.profileService.findByUserId(userId);
   }
 
-  update(candidateId: string, updateCandidateDto: any) {
-    return this.profileService.update(candidateId, updateCandidateDto);
+  updateByUserId(userId: string, updateCandidateDto: any) {
+    return this.profileService.updateByUserId(userId, updateCandidateDto);
   }
+
 
   remove(candidateId: string) {
     return this.profileService.remove(candidateId);
@@ -51,6 +49,10 @@ export class CandidatesService {
 
   analyzeCv(userId: string, cvId: string) {
     return this.cvService.analyzeCv(userId, cvId);
+  }
+
+  extractAndAnalyzeCv(userId: string, file: Express.Multer.File) {
+    return this.cvService.extractAndAnalyzeCv(userId, file);
   }
 
   saveCv(userId: string, saveCvDto: any) {
@@ -76,5 +78,9 @@ export class CandidatesService {
   // --- Matching Logic ---
   getRecommendedJobs(userId: string, page: number = 1, limit: number = 10) {
     return this.matchingService.getRecommendedJobs(userId, page, limit);
+  }
+
+  getMyInvitations(userId: string) {
+    return this.profileService.getMyInvitations(userId);
   }
 }

@@ -230,7 +230,9 @@ export type FilterAction = (typeof FilterAction)[keyof typeof FilterAction]
 export const JobType: {
   FULLTIME: 'FULLTIME',
   PARTTIME: 'PARTTIME',
-  REMOTE: 'REMOTE'
+  REMOTE: 'REMOTE',
+  INTERNSHIP: 'INTERNSHIP',
+  OTHER: 'OTHER'
 };
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
@@ -239,7 +241,11 @@ export type JobType = (typeof JobType)[keyof typeof JobType]
 export const JobLevel: {
   INTERN: 'INTERN',
   STAFF: 'STAFF',
+  TEAM_LEADER: 'TEAM_LEADER',
+  DEPARTMENT_HEAD: 'DEPARTMENT_HEAD',
   MANAGER: 'MANAGER',
+  BRANCH_MANAGER: 'BRANCH_MANAGER',
+  VICE_DIRECTOR: 'VICE_DIRECTOR',
   DIRECTOR: 'DIRECTOR'
 };
 

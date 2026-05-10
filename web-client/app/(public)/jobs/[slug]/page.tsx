@@ -40,6 +40,32 @@ export default function JobDetailPage() {
       setLoading(true);
       const { data } = await api.get(`/job-postings/${slug}?trackView=true`);
       setJob(data);
+      if (typeof window !== "undefined" && data) {
+        try {
+          const viewedStr = localStorage.getItem("workly:viewed-jobs");
+          let viewed = viewedStr ? JSON.parse(viewedStr) : [];
+          viewed = viewed.filter((item: any) => item.jobPostingId !== data.jobPostingId);
+          viewed.unshift({
+            jobPostingId: data.jobPostingId,
+            title: data.title,
+            company: {
+              companyName: data.company?.companyName,
+              logo: data.company?.logo,
+            },
+            salaryMin: data.salaryMin,
+            salaryMax: data.salaryMax,
+            currency: data.currency,
+            locationCity: data.locationCity,
+            jobType: data.jobType,
+            createdAt: data.createdAt,
+            viewedAt: new Date().toISOString()
+          });
+          if (viewed.length > 50) viewed = viewed.slice(0, 50);
+          localStorage.setItem("workly:viewed-jobs", JSON.stringify(viewed));
+        } catch (e) {
+          console.error("Failed to save viewed jobs:", e);
+        }
+      }
     } catch (error) {
       console.error("Failed to load job details:", error);
       toast.error("Không thể tải thông tin công việc");
@@ -176,8 +202,8 @@ export default function JobDetailPage() {
                   onClick={handleToggleFavorite}
                   className={`p-3.5 rounded-xl border-2 transition-all flex items-center justify-center gap-2 font-bold ${
                     isSaved 
-                      ? "border-blue-600 text-blue-600 bg-blue-50" 
-                      : "border-slate-200 text-slate-600 hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50"
+                      ? "border-red-500 text-red-500 bg-red-50" 
+                      : "border-slate-200 text-slate-600 hover:border-red-500 hover:text-red-500 hover:bg-red-50"
                   }`}
                 >
                   <Heart className={`w-6 h-6 ${isSaved ? "fill-current" : ""}`} />

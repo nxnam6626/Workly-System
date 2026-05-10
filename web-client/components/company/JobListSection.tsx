@@ -13,19 +13,19 @@ export function JobListSection({ company, isPreview }: JobListSectionProps) {
   const jobsCount = company.jobPostings?.length || 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
-        <h2 className="text-[15px] font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-50 flex items-center justify-between">
+        <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
           Việc đang tuyển
-          <span className="text-mariner bg-blue-50 px-2 py-0.5 rounded text-[12px]">
+          <span className="text-mariner bg-blue-50 px-2 py-0.5 rounded text-[10px]">
             {jobsCount}
           </span>
         </h2>
       </div>
 
-      <div className="p-6">
+      <div className="p-5">
         {jobsCount > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {company.jobPostings?.map((job: any) => (
               <JobCard
                 key={job.jobPostingId}
@@ -39,7 +39,7 @@ export function JobListSection({ company, isPreview }: JobListSectionProps) {
         )}
 
         {jobsCount > 4 && (
-          <button className="w-full mt-6 py-3 border border-blue-100 rounded-xl text-mariner font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2">
+          <button className="w-full mt-4 py-2.5 border border-blue-100 rounded-lg text-mariner font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-xs">
             Xem thêm việc làm
             <ChevronRight className="w-4 h-4" />
           </button>

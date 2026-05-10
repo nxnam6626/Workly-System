@@ -17,11 +17,11 @@ export function ProjectsSection() {
   const toggle = (i: number) => setOpenIndex(prev => prev === i ? null : i);
 
   return (
-    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white transition-all duration-500">
-      <div className="flex items-center justify-between mb-4">
+    <section className="relative overflow-hidden bg-white/60 backdrop-blur-3xl rounded-[1.5rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-white transition-all duration-500">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-gradient-to-br from-purple-100 to-indigo-50 text-purple-600 rounded-lg shadow-sm border border-purple-100/50">
-            <Code size={16} />
+          <div className="p-2.5 bg-gradient-to-br from-purple-100 to-indigo-50 text-purple-600 rounded-lg shadow-sm border border-purple-100/50">
+            <Code size={18} />
           </div>
           <div>
             <h2 className="text-sm font-bold text-gray-900 leading-none">Dự án tiêu biểu</h2>
@@ -36,7 +36,7 @@ export function ProjectsSection() {
             appendProject({ projectName: '', description: '', role: '', technology: '' });
             setOpenIndex(projectFields.length);
           }}
-          className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold hover:bg-purple-100 transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-lg text-xs font-bold hover:bg-purple-100 transition-colors border border-purple-100/50 shadow-sm"
         >
           <Plus size={12} /> Thêm
         </button>

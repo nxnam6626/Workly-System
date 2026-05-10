@@ -54,6 +54,79 @@ export class CandidateCvService {
     });
   }
 
+  async extractAndAnalyzeCv(userId: string, file: Express.Multer.File) {
+    this.logger.log(`[Flow] Bắt đầu quy trình bóc tách CV cho User: ${userId}`);
+    const buffer = file.buffer;
+    const mimeType = file.mimetype;
+
+    // 1. Gate 1: Bóc tách văn bản & Sanity Check
+    const rawText = await this.cvParsingService.extractTextLocal(buffer, mimeType);
+    const sanityCheck = this.cvParsingService.validateIsCv(rawText);
+    if (!sanityCheck.isValid) {
+      throw new BadRequestException(sanityCheck.reason || 'Không thể bóc tách văn bản từ tệp này.');
+    }
+
+    // 2. Tạm thời tải lên Supabase để lấy FileUrl (Phục vụ hiển thị Preview nếu cần)
+    this.logger.log('[Flow] Gate 1 Pass. Lưu tạm thời hồ sơ...');
+    const cv = await this.uploadCvOnly(userId, file);
+
+    try {
+      // 3. Gate 2: AI Parsing (All-in-One)
+      this.logger.log('[Flow] Đang gọi AI xử lý (Gate 2)...');
+      const extractedData = await this.cvParsingService.parseCvFromText(rawText);
+
+      if (!extractedData) {
+        throw new BadRequestException('AI không thể xử lý dữ liệu từ tệp này.');
+      }
+
+      // 4. Gate 3: Schema Validation & Rollback
+      const schemaCheck = this.cvParsingService.validateParsedData(extractedData);
+      if (!schemaCheck.isValid) {
+        this.logger.warn('[Flow] Gate 3 Fail. Dữ liệu không đạt chuẩn.');
+        await this.rollbackCvUpload(cv.cvId, cv.fileUrl);
+
+        throw new BadRequestException({
+          message: schemaCheck.errorReason || 'Hồ sơ thiếu thông tin quan trọng.',
+          missingFields: schemaCheck.missingFields,
+          error: 'CV_INCOMPLETE',
+        });
+      }
+
+      // 5. Thành công: Cập nhật DB
+      this.logger.log('✅ [Flow] Gate 3 Pass. Hoàn tất quy trình.');
+      const result = await this.updateCv(userId, cv.cvId, {
+        parsedData: extractedData,
+      });
+      return result;
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+
+      this.logger.error('[Flow] Lỗi nghiêm trọng trong quy trình:', error);
+      return cv;
+    }
+  }
+
+  /**
+   * Hoàn tác việc tải lên CV nếu phát hiện không hợp lệ
+   */
+  private async rollbackCvUpload(cvId: string, fileUrl: string | null) {
+    if (!fileUrl) {
+      await this.prisma.cV.delete({ where: { cvId } });
+      return;
+    }
+
+    this.logger.log(`[Flow] Thực hiện Rollback: Xóa file ${fileUrl}`);
+    try {
+      const path = this.supabaseService.extractPathFromUrl(fileUrl);
+      if (path) {
+        await this.supabaseService.deleteFile(path);
+      }
+      await this.prisma.cV.delete({ where: { cvId } });
+    } catch (err) {
+      this.logger.error('[Flow] Lỗi khi thực hiện Rollback:', err);
+    }
+  }
+
   async analyzeCv(userId: string, cvId: string) {
     const candidate = await this.candidateProfileService.findByUserId(userId);
     if (!candidate) throw new NotFoundException('Candidate profile not found');
@@ -91,8 +164,27 @@ export class CandidateCvService {
           'Hệ thống AI không thể bóc tách dữ liệu từ CV này.',
         );
 
+      // Thêm kiểm tra chất lượng ở đây nếu muốn đồng bộ
+      const qualityCheck =
+        this.cvParsingService.validateParsedData(extractedData);
+      if (!qualityCheck.isValid) {
+        throw new BadRequestException({
+          message: 'CV thiếu thông tin quan trọng để tham gia tuyển dụng.',
+          missingFields: qualityCheck.missingFields,
+          error: 'CV_INCOMPLETE',
+        });
+      }
+
       return this.updateCv(userId, cv.cvId, { parsedData: extractedData });
-    } catch (error) {
+    } catch (error: any) {
+      const msg = error.response?.message || error.message;
+      if (
+        msg === 'NOT_A_CV' ||
+        msg.includes('thông tin liên hệ') ||
+        msg.includes('nội dung đặc trưng')
+      ) {
+        throw new BadRequestException(msg);
+      }
       this.logger.error('Error analyzing CV:', error);
       throw error;
     }
@@ -189,39 +281,6 @@ export class CandidateCvService {
         parsedData: true,
       },
     });
-
-    if (parsedData) {
-      const candidateUpdateData: any = {};
-      if (parsedData.fullName)
-        candidateUpdateData.fullName = parsedData.fullName;
-      if (parsedData.phone) candidateUpdateData.phone = parsedData.phone;
-      if (parsedData.education && parsedData.education.length > 0) {
-        candidateUpdateData.university = parsedData.education[0].school;
-        candidateUpdateData.major = parsedData.education[0].major;
-      }
-      if (parsedData.gpa !== undefined)
-        candidateUpdateData.gpa = parsedData.gpa;
-      if (parsedData.skills && Array.isArray(parsedData.skills))
-        candidateUpdateData.skills = parsedData.skills;
-
-      if (Object.keys(candidateUpdateData).length > 0) {
-        try {
-          await this.candidateProfileService.update(
-            candidate.candidateId,
-            candidateUpdateData,
-          );
-        } catch (error) {
-          this.logger.error(
-            'Lỗi khi đồng bộ dữ liệu vào hồ sơ ứng viên:',
-            error,
-          );
-        }
-      }
-    }
-
-    if (isMain || parsedData) {
-      await this.matchingQueue.add('match-candidate', { userId });
-    }
 
     return updatedCv;
   }

@@ -4,11 +4,9 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '@/modules/identity/auth/dto/register.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserCreationService } from './services/user-creation.service';
-import { CandidateProfileService } from './services/candidate-profile.service';
 import { UserAvatarService } from './services/user-avatar.service';
 import { UserModerationService } from './services/user-moderation.service';
 import { UserDataService } from './services/user-data.service';
-import { UpdateCandidateProfileDto } from './dto/update-candidate-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +15,6 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private userCreationService: UserCreationService,
-    private candidateProfileService: CandidateProfileService,
     private userAvatarService: UserAvatarService,
     private moderationService: UserModerationService,
     private userDataService: UserDataService,
@@ -42,10 +39,6 @@ export class UsersService {
     return this.userCreationService.addRoleToUser(userId, data);
   }
 
-  // --- Profile Management ---
-  async updateCandidateProfile(userId: string, dto: UpdateCandidateProfileDto) {
-    return this.candidateProfileService.updateCandidateProfile(userId, dto);
-  }
 
   async updateAvatar(userId: string, file: Express.Multer.File) {
     return this.userAvatarService.updateAvatar(userId, file);
@@ -135,18 +128,6 @@ export class UsersService {
       }
     });
 
-    if (dto.fullName) {
-      const user = await this.prisma.user.findUnique({
-        where: { userId },
-        include: { candidate: true },
-      });
-      if (user?.candidate) {
-        await this.prisma.candidate.update({
-          where: { candidateId: user.candidate.candidateId },
-          data: { fullName: dto.fullName },
-        });
-      }
-    }
 
     return this.findOne(userId);
   }

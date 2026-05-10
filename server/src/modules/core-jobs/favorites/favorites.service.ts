@@ -51,20 +51,38 @@ export class FavoritesService {
   async findAllForUser(userId: string) {
     const candidate = await this.prisma.candidate.findUnique({
       where: { userId },
+      select: { candidateId: true },
     });
 
     if (!candidate) return [];
 
     const savedJobs = await this.prisma.savedJob.findMany({
       where: { candidateId: candidate.candidateId },
-      include: {
+      select: {
+        savedJobId: true,
+        savedAt: true,
+        jobPostingId: true,
         jobPosting: {
-          include: {
-            company: true,
+          select: {
+            jobPostingId: true,
+            title: true,
+            salaryMin: true,
+            salaryMax: true,
+            currency: true,
+            locationCity: true,
+            jobType: true,
+            createdAt: true,
+            slug: true,
+            company: {
+              select: {
+                companyName: true,
+                logo: true,
+              },
+            },
           },
         },
       },
-      orderBy: { savedAt: 'desc' },
+      orderBy: { savedAt: "desc" },
     });
 
     // Extract jobPostingIds to check applications in bulk

@@ -11,18 +11,18 @@ import IndustryMegaMenu from "@/components/shared/IndustryMegaMenu";
 export default function Home() {
    return (
       <div className="flex flex-col items-center w-full min-h-screen bg-[#F4F7FA]">
-         <section className="w-full bg-workly-blue pt-10 pb-16">
-            <div className="max-w-6xl mx-auto px-4 lg:px-6 flex flex-col gap-5">
+         <section className="w-full bg-workly-blue pt-6 pb-8">
+            <div className="max-w-6xl mx-auto px-4 lg:px-6 flex flex-col gap-4">
                <HeroSearch hideFilters={true} />
-               
-               <div className="grid grid-cols-1 md:grid-cols-12 gap-5 relative">
+
+               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 relative">
                   {/* Left: Industry Menu */}
                   <div className="md:col-span-3">
-                     <IndustryMegaMenu height="360px" variant="homepage" />
+                     <IndustryMegaMenu height="260px" variant="homepage" />
                   </div>
 
                   {/* Right: Hero Banner */}
-                  <main className="md:col-span-9 h-[360px] rounded-2xl overflow-hidden shadow-sm">
+                  <main className="md:col-span-9 h-[260px] rounded-2xl overflow-hidden shadow-sm">
                      <BannerSlider />
                   </main>
                </div>
