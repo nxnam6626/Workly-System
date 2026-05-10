@@ -41,19 +41,27 @@ export class CompaniesService {
   ) { }
 
   async findAll(query: FilterCompanyDto) {
-    const { search, page = 1, limit = 10 } = query;
+    const { search, page = 1, limit = 10, sortBy = 'ALPHABETICAL' } = query;
     const skip = (page - 1) * limit;
 
     const where = search
       ? { companyName: { contains: search, mode: 'insensitive' as const } }
       : {};
 
+    let orderBy: any = { companyName: 'asc' };
+    
+    if (sortBy === 'TRENDING') {
+      orderBy = { jobPostings: { _count: 'desc' } };
+    } else if (sortBy === 'TYPICAL') {
+      orderBy = { companySize: 'desc' };
+    }
+
     const [items, total] = await Promise.all([
       this.prisma.company.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { companyName: 'asc' },
+        orderBy,
         include: {
           _count: {
             select: {
@@ -77,7 +85,7 @@ export class CompaniesService {
     const company = await this.prisma.company.findUnique({
       where: { companyId: id },
       include: {
-        jobPostings: { where: { status: 'APPROVED' } },
+        jobPostings: { where: { status: 'APPROVED' }, orderBy: { createdAt: 'desc' }, take: 10 },
         branches: true,
         sections: { orderBy: { displayOrder: 'asc' } },
         benefits: true,
@@ -89,9 +97,14 @@ export class CompaniesService {
       throw new NotFoundException(`Không tìm thấy công ty với ID ${id}`);
     }
 
+    const jobCount = await this.prisma.jobPosting.count({
+      where: { companyId: company.companyId, status: 'APPROVED' }
+    });
+
     return {
       ...company,
       completeness: this.calculateCompleteness(company),
+      jobPostingsCount: jobCount
     };
   }
 
@@ -101,6 +114,7 @@ export class CompaniesService {
       include: {
         company: {
           include: {
+            jobPostings: { where: { status: 'APPROVED' }, orderBy: { createdAt: 'desc' }, take: 10 },
             branches: true,
             sections: { orderBy: { displayOrder: 'asc' } },
             benefits: true,
@@ -112,9 +126,14 @@ export class CompaniesService {
 
     if (!recruiter?.company) return {};
 
+    const jobCount = await this.prisma.jobPosting.count({
+      where: { companyId: recruiter.company.companyId, status: 'APPROVED' }
+    });
+
     return {
       ...recruiter.company,
       completeness: this.calculateCompleteness(recruiter.company),
+      jobPostingsCount: jobCount
     };
   }
 

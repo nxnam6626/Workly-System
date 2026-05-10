@@ -122,33 +122,74 @@ export default function JobsManagementPage() {
       )}
 
       {/* Pagination Footer */}
+      {/* Pagination Footer */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-8">
           <button
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-all"
+            className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronRight className="w-5 h-5 rotate-180" />
           </button>
+          
           <div className="flex items-center gap-1">
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${currentPage === i + 1
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
-                  : 'bg-white text-slate-500 hover:bg-slate-50'
-                  }`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {(() => {
+              const pages = [];
+              const maxVisible = 5;
+              
+              if (totalPages <= maxVisible + 2) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+              } else {
+                pages.push(1);
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(totalPages - 1, currentPage + 1);
+
+                if (currentPage <= 3) {
+                  end = 4;
+                } else if (currentPage >= totalPages - 2) {
+                  start = totalPages - 3;
+                }
+
+                if (start > 2) pages.push('...');
+                
+                for (let i = start; i <= end; i++) {
+                  pages.push(i);
+                }
+                
+                if (end < totalPages - 1) pages.push('...');
+                
+                pages.push(totalPages);
+              }
+
+              return pages.map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-slate-300 font-bold">
+                      ...
+                    </span>
+                  );
+                }
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page as number)}
+                    className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${currentPage === page
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                      : 'bg-white text-slate-500 hover:bg-slate-50 border border-transparent hover:border-slate-100'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                );
+              });
+            })()}
           </div>
+          
           <button
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 disabled:opacity-30 transition-all"
+            className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

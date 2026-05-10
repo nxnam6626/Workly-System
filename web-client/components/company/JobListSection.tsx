@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { ChevronRight } from "lucide-react";
 import { JobCard } from "@/components/jobs/JobCard";
 import { Company } from "@/types/company";
@@ -10,6 +11,7 @@ interface JobListSectionProps {
 }
 
 export function JobListSection({ company, isPreview }: JobListSectionProps) {
+  const trueTotal = company.jobPostingsCount || company.jobPostings?.length || 0;
   const jobsCount = company.jobPostings?.length || 0;
 
   return (
@@ -18,7 +20,7 @@ export function JobListSection({ company, isPreview }: JobListSectionProps) {
         <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
           Việc đang tuyển
           <span className="text-mariner bg-blue-50 px-2 py-0.5 rounded text-[10px]">
-            {jobsCount}
+            {trueTotal}
           </span>
         </h2>
       </div>
@@ -38,11 +40,11 @@ export function JobListSection({ company, isPreview }: JobListSectionProps) {
           <EmptyJobsPlaceholder isPreview={isPreview} />
         )}
 
-        {jobsCount > 4 && (
-          <button className="w-full mt-4 py-2.5 border border-blue-100 rounded-lg text-mariner font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-xs">
-            Xem thêm việc làm
+        {trueTotal > jobsCount && (
+          <Link href={`/jobs?companyId=${company.companyId}`} className="w-full mt-4 py-2.5 border border-blue-100 rounded-lg text-mariner font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-xs">
+            Xem thêm {trueTotal - jobsCount} việc làm
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </Link>
         )}
       </div>
     </div>

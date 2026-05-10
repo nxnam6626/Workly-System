@@ -85,6 +85,7 @@ export class CandidateMatchingService {
           branches: m.jobPosting.branches?.map((b) => b.branch) || [],
           score: m.score,
           matchedSkills: m.matchedSkills,
+          analysis: m.details,
         })),
       total,
       page: Number(page),

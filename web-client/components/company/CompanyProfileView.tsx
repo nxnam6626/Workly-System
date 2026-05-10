@@ -21,7 +21,7 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
 
   const tabs = [
     { id: 'about', label: 'Giới thiệu' },
-    { id: 'jobs', label: `Tin tuyển dụng (${company.jobPostings?.length || 0})` },
+    { id: 'jobs', label: `Tin tuyển dụng (${company.jobPostingsCount || company.jobPostings?.length || 0})` },
     { id: 'reviews', label: 'Đánh giá' },
   ];
 

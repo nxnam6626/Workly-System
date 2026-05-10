@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Plus, Trash2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
@@ -24,6 +24,10 @@ interface Props {
 
 export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
   const [branches, setBranches] = useState<Branch[]>(initialBranches);
+
+  useEffect(() => {
+    setBranches(initialBranches || []);
+  }, [initialBranches]);
   const [isAdding, setIsAdding] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
   const [newBranchAddress, setNewBranchAddress] = useState('');
@@ -189,36 +193,71 @@ export default function CompanyBranches({ initialBranches, onUpdate }: Props) {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {branches.map(branch => (
-            <div key={branch.branchId} className="bg-white border flex flex-col justify-between border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow transition-shadow relative group">
-              <div>
-                <h4 className="font-bold text-slate-800 pr-8 line-clamp-1">{branch.name}</h4>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{branch.address}</p>
-                <div className="mt-3 inline-block">
-                    {branch.isVerified ? (
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-wide uppercase">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Đã xác thực trên bản đồ
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold tracking-wide uppercase" title="Không tìm thấy toạ độ dựa trên OpenStreetMap, vui lòng xem lại địa chỉ">
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            Địa chỉ chưa xác minh toạ độ bản đồ
-                        </div>
-                    )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {branches.map(branch => {
+            // Construct secure mapping source URL based on positional data presence
+            const mapSrc = (branch.latitude && branch.longitude)
+              ? `https://maps.google.com/maps?q=${branch.latitude},${branch.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+              : `https://maps.google.com/maps?q=${encodeURIComponent(branch.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+            return (
+              <div key={branch.branchId} className="bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-md transition-all overflow-hidden relative flex flex-col">
+                {/* Interactive Map Embed Header */}
+                <div className="w-full h-48 bg-slate-50 relative group/map border-b border-slate-100">
+                  <iframe
+                    src={mapSrc}
+                    className="w-full h-full border-0 grayscale-[0.2] contrast-[0.9] group-hover/map:grayscale-0 transition-all"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  <div className="absolute top-3 right-3 z-10">
+                     <button
+                        type="button"
+                        onClick={() => handleDelete(branch.branchId)}
+                        className="p-2 bg-white/80 backdrop-blur-md text-slate-400 hover:text-red-600 shadow-lg border border-white rounded-xl transition-all"
+                        title="Xoá chi nhánh"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                  </div>
+                </div>
+
+                <div className="p-5 flex flex-col justify-between flex-1">
+                  <div>
+                    <h4 className="font-black text-lg text-slate-800 line-clamp-1">{branch.name}</h4>
+                    <p className="text-sm text-slate-500 mt-1 font-medium flex items-start gap-1.5">
+                       <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                       {branch.address}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
+                      {branch.isVerified || (branch.latitude && branch.longitude) ? (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-black tracking-wide uppercase">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Đã xác thực vị trí
+                          </div>
+                      ) : (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-600 text-[11px] font-black tracking-wide uppercase" title="Hệ thống đang dùng địa chỉ text để render map">
+                              <AlertCircle className="w-3.5 h-3.5" />
+                              Map dựa trên Text
+                          </div>
+                      )}
+
+                      <a 
+                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.address)}`}
+                         target="_blank"
+                         rel="noreferrer"
+                         className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline"
+                      >
+                         Mở Maps ↗
+                      </a>
+                  </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleDelete(branch.branchId)}
-                className="absolute top-3 right-3 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                title="Xoá chi nhánh"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

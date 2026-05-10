@@ -351,8 +351,8 @@ export default function ProfileDashboard() {
                             { label: "Trường học", value: profile?.candidate?.university },
                             { label: "Chuyên ngành", value: profile?.candidate?.major },
                             { label: "GPA", value: profile?.candidate?.gpa ? `${profile.candidate.gpa}/4.0` : null },
-                            { label: "Vị trí mong muốn", value: profile?.candidate?.desiredJob?.title || profile?.candidate?.desiredJob?.job_title },
-                            { label: "Mức lương kỳ vọng", value: profile?.candidate?.desiredJob?.salary || profile?.candidate?.desiredJob?.expected_salary },
+                            { label: "Vị trí mong muốn", value: profile?.candidate?.desiredJob?.title || profile?.candidate?.desiredJob?.jobTitle || profile?.candidate?.desiredJob?.job_title },
+                            { label: "Mức lương kỳ vọng", value: profile?.candidate?.desiredJob?.salary || profile?.candidate?.desiredJob?.expectedSalary || profile?.candidate?.desiredJob?.expected_salary },
                             { label: "Ngành nghề", value: profile?.candidate?.industries?.length ? profile.candidate.industries.join(", ") : null },
                             { label: "Kinh nghiệm", value: profile?.candidate?.totalYearsExp != null ? `${profile.candidate.totalYearsExp} năm` : null },
                           ].map((item, idx) => (

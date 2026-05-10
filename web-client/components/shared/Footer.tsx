@@ -1,159 +1,169 @@
-﻿"use client";
+"use client";
 
-import {
-  Facebook,
-  Linkedin,
-  Instagram,
-  Music2, // For TikTok placeholder
-  AtSign, // For Threads
-  Phone,
-  Mail,
-  ShieldCheck,
-  CheckCircle2
-} from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, Github, Mail, Headphones } from "lucide-react";
+
+const productLinks = [
+  { label: "Tìm việc làm", href: "/jobs" },
+  { label: "Danh sách công ty", href: "/companies" },
+  { label: "Tạo CV trực tuyến", href: "/cv-builder" },
+  { label: "AI Matching", href: "/matching" },
+  { label: "Hồ sơ cá nhân", href: "/profile" },
+];
+
+const recruiterLinks = [
+  { label: "Dashboard", href: "/recruiter/dashboard" },
+  { label: "Đăng tin tuyển dụng", href: "/recruiter/post-job" },
+  { label: "Quản lý ứng viên", href: "/recruiter/applications" },
+  { label: "Lịch phỏng vấn", href: "/recruiter/interviews" },
+  { label: "Hồ sơ công ty", href: "/recruiter/company" },
+];
+
+const resourceLinks = [
+  { label: "Trung tâm hỗ trợ", href: "/support" },
+  { label: "Điều khoản sử dụng", href: "/support" },
+  { label: "Chính sách bảo mật", href: "/support" },
+];
 
 export function Footer() {
-  const footerLinks = {
-    locations: ["TPHCM", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Bình Dương", "Hải Phòng", "Đồng Nai", "Quảng Ninh", "Bắc Ninh"],
-    industries: ["Tài Chính/Ngân Hàng", "Kế Toán/Kiểm Toán", "Hành Chính/Văn Phòng", "Kinh Doanh/Bán Hàng", "Marketing/Quảng Cáo", "Xây dựng/Kiến Trúc", "Công Nghệ Thông Tin"],
-    titles: ["Thực Tập Sinh", "Trợ Lý", "Nhân Viên Văn Phòng", "Trưởng Phòng", "Giám Đốc"],
-    types: ["Part-time", "Online", "Thời vụ", "Remote"]
-  };
-
-  const secondaryLinks = [
-    "Giới thiệu", "Điều khoản sử dụng", "Chính sách bảo mật", "Giải quyết tranh chấp",
-    "Thoả thuận sử dụng mạng XH", "Quy chế", "Nhà Tuyển Dụng", "FAQ", "Blog", "Hỏi & Đáp", "Sitemap", "Quy định đăng tin"
-  ];
-
   return (
-    <footer className="w-full bg-white border-t border-slate-100 pt-16 pb-8">
-      <div className="max-w-6xl mx-auto px-4 lg:px-6">
-        {/* Top Section: Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
-          {/* Column 1: Company Info (Span 4) */}
-          <div className="lg:col-span-4 pr-0 lg:pr-8">
-            <h3 className="text-[#0056b3] font-bold text-[18px] mb-6 uppercase tracking-tight">
-              CÔNG TY CỔ PHẦN WORKLY AI
-            </h3>
-            <div className="space-y-4 text-slate-700 text-[13px] leading-relaxed">
-              <p>
-                <span className="font-bold">Trụ sở:</span> Tầng 3, Tòa nhà GIM, Ngõ 460 Khương Đình, Phường Khương Đình, Thành phố Hà Nội
-                <br />
-                <span className="font-bold flex items-center gap-1 mt-1">
-                   Điện thoại: <span className="text-[#0056b3] font-medium">0984.259.428</span>
-                </span>
-              </p>
-              <p>
-                <span className="font-bold">Chi nhánh:</span> Tầng 5, Tòa nhà Phú Nhuận Plaza, Số 82 Trần Huy Liệu, Phường Cầu Kiệu, Thành phố Hồ Chí Minh
-                <br />
-                <span className="font-bold flex items-center gap-1 mt-1">
-                   Điện thoại: <span className="text-[#0056b3] font-medium">0902.698.348</span>
-                </span>
-              </p>
-              <div className="space-y-1.5 pt-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Email:</span>
-                  <a href="mailto:contact@workly.vn" className="text-[#0056b3] hover:underline">contact@workly.vn</a>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Hỗ trợ ứng viên:</span>
-                  <span className="text-[#0056b3] font-medium">034.834.4515</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold">Hotline:</span>
-                  <span className="text-[#0056b3] font-medium">034.834.4515</span>
-                </div>
-              </div>
+    <footer className="w-full bg-slate-50/80 border-t border-slate-200/60">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 py-16">
+
+          {/* Brand Column — Takes more space */}
+          <div className="lg:col-span-4 space-y-6">
+            <Link href="/" className="flex items-center gap-3 group">
+              <Image
+                src="/logos/logo.png"
+                alt="Workly Logo"
+                width={36}
+                height={36}
+                className="rounded-xl"
+              />
+              <span className="text-slate-900 font-extrabold text-[22px] tracking-tight group-hover:text-blue-600 transition-colors">
+                Workly
+              </span>
+            </Link>
+
+            <p className="text-slate-500 text-[14px] leading-relaxed max-w-sm">
+              Nền tảng tuyển dụng thông minh — kết nối ứng viên phù hợp với nhà tuyển dụng nhanh chóng, chính xác nhờ công nghệ AI.
+            </p>
+
+            {/* CTA Button */}
+            <Link
+              href="/jobs"
+              className="inline-flex items-center gap-2.5 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 transition-all duration-200 active:scale-[0.97] group"
+            >
+              Khám phá việc làm
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+
+            {/* Contact mini */}
+            <div className="flex flex-col gap-2 pt-2">
+              <a
+                href="mailto:contact@workly.vn"
+                className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 text-xs transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                contact@workly.vn
+              </a>
+              <Link
+                href="/support"
+                className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 text-xs transition-colors"
+              >
+                <Headphones className="w-3.5 h-3.5" />
+                Trung tâm hỗ trợ
+              </Link>
             </div>
           </div>
 
-          {/* Column 2: Địa điểm (Span 2) */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[#0056b3] font-bold text-[14px] mb-6 whitespace-nowrap">Việc làm theo địa điểm</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.locations.map(link => (
-                <li key={link}><Link href="#" className="text-slate-600 hover:text-[#0056b3] text-[13px] transition-colors">{link}</Link></li>
-              ))}
-            </ul>
-          </div>
+          {/* Link Columns */}
+          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8 lg:gap-6 lg:pt-1">
 
-          {/* Column 3: Ngành nghề (Span 2) */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[#0056b3] font-bold text-[14px] mb-6 whitespace-nowrap">Việc theo ngành nghề</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.industries.map(link => (
-                <li key={link}><Link href="#" className="text-slate-600 hover:text-[#0056b3] text-[13px] transition-colors">{link}</Link></li>
-              ))}
-            </ul>
-          </div>
+            {/* Sản phẩm */}
+            <div>
+              <h4 className="text-slate-900 font-bold text-xs uppercase tracking-widest mb-5">
+                Ứng viên
+              </h4>
+              <ul className="space-y-3">
+                {productLinks.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-500 hover:text-slate-900 text-[13px] transition-colors duration-150"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Column 4: Chức danh (Span 2) */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[#0056b3] font-bold text-[14px] mb-6 whitespace-nowrap">Việc theo chức danh</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.titles.map(link => (
-                <li key={link}><Link href="#" className="text-slate-600 hover:text-[#0056b3] text-[13px] transition-colors">{link}</Link></li>
-              ))}
-            </ul>
-          </div>
+            {/* Nhà tuyển dụng */}
+            <div>
+              <h4 className="text-slate-900 font-bold text-xs uppercase tracking-widest mb-5">
+                Nhà tuyển dụng
+              </h4>
+              <ul className="space-y-3">
+                {recruiterLinks.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-500 hover:text-slate-900 text-[13px] transition-colors duration-150"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Column 5: Loại hình (Span 2) */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[#0056b3] font-bold text-[14px] mb-6 whitespace-nowrap">Việc theo loại hình</h4>
-            <ul className="space-y-2.5">
-              {footerLinks.types.map(link => (
-                <li key={link}><Link href="#" className="text-slate-600 hover:text-[#0056b3] text-[13px] transition-colors">{link}</Link></li>
-              ))}
-            </ul>
+            {/* Tài nguyên */}
+            <div>
+              <h4 className="text-slate-900 font-bold text-xs uppercase tracking-widest mb-5">
+                Tài nguyên
+              </h4>
+              <ul className="space-y-3">
+                {resourceLinks.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-500 hover:text-slate-900 text-[13px] transition-colors duration-150"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              {/* GitHub */}
+              <div className="mt-6">
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 text-xs font-medium transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                  Source Code
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Middle Section: Secondary Links & Socials */}
-        <div className="flex flex-col lg:flex-row items-center justify-between py-6 border-t border-slate-100 gap-6">
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2">
-            {secondaryLinks.map(link => (
-              <Link key={link} href="#" className="text-slate-500 hover:text-[#0056b3] text-[12px] whitespace-nowrap transition-colors">
-                {link}
-              </Link>
-            ))}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {[
-              { icon: <Facebook className="w-4 h-4 fill-current" />, color: "hover:bg-blue-600" },
-              { icon: <Linkedin className="w-4 h-4 fill-current" />, color: "hover:bg-blue-700" },
-              { icon: <Instagram className="w-4 h-4" />, color: "hover:bg-pink-600" },
-              { icon: <Music2 className="w-4 h-4" />, color: "hover:bg-black" },
-              { icon: <AtSign className="w-4 h-4" />, color: "hover:bg-slate-700" }
-            ].map((social, i) => (
-              <a key={i} href="#" className={`w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-white transition-all ${social.color}`}>
-                {social.icon}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom Section: Legal & Compliance */}
-        <div className="pt-8 border-t border-slate-100 flex flex-col lg:flex-row items-start justify-between gap-8">
-          <div className="space-y-2 text-slate-400 text-[11px] leading-relaxed max-w-3xl">
-            <p>Số ĐKKD: 0108266100, cấp ngày 09/05/2018 do Sở Kế hoạch và Đầu tư Thành phố Hà Nội cấp.</p>
-            <p>Giấy phép thiết lập Mạng xã hội trên mạng số 568/GP-BTTTT do Bộ Thông tin & Truyền thông cấp ngày 30/08/2021.</p>
-            <p className="font-medium text-slate-500">© 2026 Công ty Cổ phần Workly AI. All Rights Reserved.</p>
-          </div>
-
-          <div className="flex items-center gap-4 shrink-0">
-             {/* Bộ Công Thương Badge */}
-             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF0000] text-white rounded font-black italic text-[10px] leading-none shrink-0 shadow-sm">
-                <CheckCircle2 className="w-3 h-3" />
-                ĐÃ ĐĂNG KÝ <br/> BỘ CÔNG THƯƠNG
-             </div>
-             {/* DMCA Badge */}
-             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#4CAF50] text-white rounded font-black text-[10px] leading-none shrink-0 shadow-sm italic">
-                <ShieldCheck className="w-3 h-3" />
-                DMCA <br/> PROTECTED
-             </div>
-          </div>
+        {/* Bottom Bar */}
+        <div className="border-t border-slate-200/60 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-slate-400 text-[11px] font-medium">
+            © {new Date().getFullYear()} Workly. All rights reserved.
+          </p>
+          <p className="text-slate-300 text-[11px]">
+            Built with Next.js, NestJS & AI
+          </p>
         </div>
       </div>
     </footer>

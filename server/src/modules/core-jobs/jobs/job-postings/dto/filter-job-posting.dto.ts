@@ -16,6 +16,10 @@ export class FilterJobPostingDto {
 
   @IsOptional()
   @IsString()
+  companyId?: string;
+
+  @IsOptional()
+  @IsString()
   location?: string;
 
   @IsOptional()

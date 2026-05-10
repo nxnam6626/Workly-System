@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
+import { useAuthStore } from "@/stores/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles, User, Briefcase, PlusCircle, ChevronRight, ArrowLeft } from "lucide-react";
 
@@ -107,6 +108,7 @@ export default function CVReviewPage() {
             level: l.level || ''
           })),
           interests: initialData.interests || [],
+          industries: (initialData.categories || initialData.industries || []).join(', '),
           otherInfo: (initialData.other_info || initialData.otherInfo || []).map((o: any) => ({
             header: o.header || '',
             content: o.content || ''
@@ -139,11 +141,13 @@ export default function CVReviewPage() {
         university: data.education?.[0]?.school,
         major: data.education?.[0]?.major,
         gpa: Number(data.gpa || 0),
+        totalYearsExp: Number(data.totalYearsExp || 0),
         languages: (data.languages || []).map((l: any) => ({
           name: l.language,
           level: l.level || "BEGINNER"
         })),
         interests: data.interests || [],
+        industries: data.industries ? data.industries.split(',').map((i: string) => i.trim()).filter(Boolean) : [],
         otherInfo: data.otherInfo || []
       });
 
@@ -155,6 +159,10 @@ export default function CVReviewPage() {
       });
 
       toast.success("Hồ sơ đã được xác nhận và cập nhật thành công!", { id: toastId });
+      
+      // ĐỒNG BỘ STATE MỚI NHẤT LÊN THANH NAVBAR/HEADER NGAY LẬP TỨC
+      await useAuthStore.getState().checkAuth();
+      
       router.push("/profile");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Lỗi khi lưu hồ sơ.", { id: toastId });
@@ -174,100 +182,95 @@ export default function CVReviewPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-      {/* Header Page */}
-      <header className="px-8 py-4 bg-slate-900 text-white sticky top-0 z-50 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-        
-        <div className="max-w-[1400px] mx-auto relative z-10 flex justify-between items-center">
-          <div className="flex items-center gap-6">
+      {/* Simplified Unified Light Header - Positioned below global navbar */}
+      <header className="bg-white border-b border-slate-200/80 sticky top-16 z-40 shadow-sm backdrop-blur-md bg-white/90">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3 flex flex-row items-center justify-between gap-4">
+          
+          {/* Left: Identity & Context */}
+          <div className="flex items-center gap-3 min-w-0">
             <button 
               onClick={() => router.back()}
-              className="p-2 hover:bg-white/10 rounded-xl transition-all border border-white/5"
+              className="hidden sm:flex p-2 hover:bg-slate-100 text-slate-500 rounded-xl transition-all border border-slate-100 shrink-0"
+              title="Quay lại"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                <Sparkles className="w-3 h-3 text-emerald-400" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">AI Review Dashboard</span>
+            
+            <div className="flex items-center gap-3 min-w-0">
+              <h1 className="text-[15px] sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-blue-500 fill-blue-100 shrink-0" />
+                Xác nhận hồ sơ
+              </h1>
+              <div className="hidden md:flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-md border border-slate-100 min-w-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-[10px] font-medium text-slate-500 truncate max-w-[120px]">
+                  {cvData?.cvTitle}
+                </span>
               </div>
-              <h1 className="text-xl font-black tracking-tighter">Xác nhận thông tin hồ sơ</h1>
             </div>
-            <p className="hidden lg:block text-slate-500 font-medium text-[11px] max-w-sm leading-snug border-l border-slate-800 pl-6">
-              Vui lòng tinh chỉnh các thông tin mà AI đã nhận diện từ bản CV của bạn để đảm bảo độ chính xác cao nhất.
-            </p>
           </div>
-          
-          <div className="flex items-center gap-4">
-             <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">File: {cvData?.cvTitle}</span>
-             </div>
-          </div>
-        </div>
-      </header>
 
-      {/* Navigation Tab Bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-[72px] z-40">
-        <div className="max-w-[1400px] mx-auto px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-xl">
+          {/* Center: Navigation Tabs */}
+          <div className="flex items-center gap-0.5 p-0.5 bg-slate-100/70 rounded-lg border border-slate-200/50">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'profile' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-md text-[12px] font-medium transition-all whitespace-nowrap ${
+                activeTab === 'profile' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <User size={14} />
-              Thông tin cá nhân
+              <User size={13} />
+              <span className="hidden sm:inline">Cá nhân</span>
             </button>
             <button
               onClick={() => setActiveTab('experience')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'experience' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-md text-[12px] font-medium transition-all whitespace-nowrap ${
+                activeTab === 'experience' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Briefcase size={14} />
-              Kinh nghiệm & Dự án
+              <Briefcase size={13} />
+              <span className="hidden sm:inline">Kinh nghiệm</span>
             </button>
             <button
               onClick={() => setActiveTab('other')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === 'other' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-md text-[12px] font-medium transition-all whitespace-nowrap ${
+                activeTab === 'other' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <PlusCircle size={14} />
-              Thông tin khác
+              <PlusCircle size={13} />
+              <span className="hidden lg:inline">Thông tin khác</span>
+              <span className="inline lg:hidden">Khác</span>
             </button>
           </div>
           
-          <div className="flex gap-4">
+          {/* Right: Action CTA */}
+          <div className="flex items-center gap-2 shrink-0">
              <button 
                 onClick={() => router.back()}
-                className="px-6 py-2.5 bg-slate-50 text-slate-600 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-slate-100 transition-all active:scale-95 border border-slate-200"
+                className="hidden sm:block px-3 py-1.5 text-slate-500 font-semibold text-[12px] rounded-lg hover:bg-slate-100 hover:text-slate-800 transition-all whitespace-nowrap"
               >
-                Hủy bỏ
+                Hủy
               </button>
               <button
                 type="submit"
                 form="cv-review-form"
                 disabled={methods.formState.isSubmitting}
-                className="px-8 py-2.5 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-200 transition-all shadow-xl shadow-blue-100 disabled:opacity-50 active:scale-95 flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-slate-900 text-white font-semibold text-[12px] rounded-lg hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-100 transition-all shadow-sm disabled:opacity-50 active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap"
               >
                 {methods.formState.isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Đang đồng bộ...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Đang lưu</span>
                   </>
                 ) : (
                   <>
-                    Xác nhận & Đồng bộ Profile
-                    <ChevronRight className="w-4 h-4" />
+                    <span>Đồng bộ hồ sơ</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </>
                 )}
               </button>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-[1400px] mx-auto w-full p-8">

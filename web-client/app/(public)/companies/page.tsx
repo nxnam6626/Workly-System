@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight, Building2, ChevronFirst, ChevronLast, Loader2 } from "lucide-react";
 import api from "@/lib/api";
-import { COMPANY_CATEGORIES } from "@/lib/mock-data";
 
 export default function CompaniesPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -13,6 +12,7 @@ export default function CompaniesPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('ALPHABETICAL');
   const itemsPerPage = 9;
 
   const fetchCompanies = useCallback(async () => {
@@ -22,7 +22,8 @@ export default function CompaniesPage() {
         params: {
           search: searchQuery,
           page: currentPage,
-          limit: itemsPerPage
+          limit: itemsPerPage,
+          sortBy: sortBy
         }
       });
       setCompanies(data.items);
@@ -32,7 +33,7 @@ export default function CompaniesPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, currentPage]);
+  }, [searchQuery, currentPage, sortBy]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,80 +46,74 @@ export default function CompaniesPage() {
 
   return (
     <main className="min-h-screen bg-[#f8fafc]">
-      {/* Search Hero Section */}
-      <section className="relative h-[280px] w-full flex items-center justify-center overflow-hidden">
-        {/* Abstract Blue Background with City Silhouette */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#e0f2fe] via-[#f0f9ff] to-white z-0" />
-        <div className="absolute bottom-0 right-0 opacity-20 z-0 select-none pointer-events-none">
-          <Building2 className="w-[400px] h-[400px] text-[#0056b3]" />
-        </div>
-
-        <div className="relative z-10 max-w-4xl w-full px-6 text-center">
-          <h1 className="text-[28px] font-black text-slate-800 mb-8 uppercase tracking-tight">
-            Các công ty hàng đầu đang tuyển dụng
-          </h1>
-
-          <div className="flex flex-col md:flex-row items-stretch gap-0 rounded-xl shadow-2xl overflow-hidden bg-white p-1">
-            <div className="flex-1 flex items-center px-6 py-4 gap-3">
-              <Search className="w-5 h-5 text-slate-300" />
-              <input
-                type="text"
-                placeholder="Nhập tên công ty..."
-                className="w-full outline-none text-[15px] font-medium text-slate-700 placeholder:text-slate-300"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button className="bg-[#1e60ad] hover:bg-[#164a8a] text-white font-black text-[14px] px-10 py-4 transition-colors uppercase tracking-widest active:scale-95">
-              TÌM CÔNG TY
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Breadcrumb */}
-      <nav className="max-w-6xl mx-auto px-4 lg:px-6 py-5">
+      <nav className="max-w-6xl mx-auto px-4 lg:px-6 pt-8 pb-4">
         <div className="flex items-center gap-2 text-[13px] font-medium">
-          <Link href="/" className="text-slate-400 hover:text-mariner">Workly</Link>
+          <Link href="/" className="text-slate-400 hover:text-mariner transition-colors">Trang chủ</Link>
           <span className="text-slate-300">/</span>
-          <Link href="/companies" className="text-slate-400 hover:text-mariner">Công ty</Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-800">Công ty đang tuyển dụng</span>
+          <Link href="/companies" className="text-slate-800 font-semibold">Công ty</Link>
         </div>
       </nav>
 
-      {/* Categories / Top Businesses Section */}
-      <section className="max-w-6xl mx-auto px-4 lg:px-6 mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[20px] font-black text-slate-900 uppercase">Doanh nghiệp hàng đầu đang tuyển dụng</h2>
-          <div className="flex gap-2">
-            <button className="p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-400 hover:text-mariner transition-all opacity-50 cursor-not-allowed">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button className="p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-400 hover:text-mariner transition-all">
-              <ChevronRight className="w-5 h-5" />
-            </button>
+      {/* Header Section */}
+      <header className="max-w-6xl mx-auto px-4 lg:px-6 mb-8">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <Building2 className="w-8 h-8 text-mariner fill-blue-50" />
+          Khám phá Doanh nghiệp
+        </h1>
+        <p className="text-slate-500 text-sm font-medium mt-2 ml-11">
+          Kết nối cùng <span className="text-mariner font-bold">{total}</span> công ty hàng đầu trên Workly
+        </p>
+      </header>
+
+      {/* Main Unified Control Panel & List */}
+      <section className="max-w-6xl mx-auto px-4 lg:px-6 pb-20">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-10 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50">
+          
+          {/* Smart Search Box integrated inline */}
+          <div className="flex-1 flex items-center gap-3 bg-slate-50 border border-slate-200/60 rounded-xl px-4 py-2 group focus-within:bg-white focus-within:border-mariner/40 focus-within:ring-4 focus-within:ring-blue-50 transition-all duration-200">
+            <Search className="w-4 h-4 text-slate-400 group-focus-within:text-mariner transition-colors" />
+            <input
+              type="text"
+              placeholder="Tìm nhanh theo tên doanh nghiệp..."
+              className="w-full bg-transparent border-none outline-none text-[14px] font-medium text-slate-800 placeholder:text-slate-400 h-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="text-[10px] font-bold text-slate-400 hover:text-slate-600 px-2 py-1 bg-slate-200/50 hover:bg-slate-200 rounded"
+              >
+                Xóa
+              </button>
+            )}
+          </div>
+
+          {/* Filters adjacent */}
+          <div className="bg-slate-100/80 p-1 rounded-xl flex items-center gap-1 flex-shrink-0">
+            {[
+              { title: "Tất Cả", type: 'ALPHABETICAL' },
+              { title: "Tiêu Biểu", type: 'TYPICAL' },
+              { title: "Nổi Bật", type: 'TRENDING' }
+            ].map((cat) => (
+              <button
+                key={cat.title}
+                onClick={() => {
+                  setSortBy(cat.type as any);
+                  setCurrentPage(1);
+                }}
+                className={`px-5 py-2 rounded-lg text-[13px] font-bold transition-all duration-200 whitespace-nowrap ${
+                  sortBy === cat.type 
+                    ? 'bg-white text-mariner shadow-sm ring-1 ring-black/[0.03]' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                }`}
+              >
+                {cat.title}
+              </button>
+            ))}
           </div>
         </div>
-
-        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
-          {COMPANY_CATEGORIES.map((cat) => (
-            <div
-              key={cat.title}
-              className="min-w-[200px] flex-shrink-0 bg-white rounded-xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group"
-            >
-              <h3 className="text-[15px] font-black text-slate-800 group-hover:text-mariner transition-colors mb-1">{cat.title}</h3>
-              <p className="text-[12px] font-medium text-slate-400">{cat.count}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Main Companies List */}
-      <section className="max-w-6xl mx-auto px-4 lg:px-6 pb-20">
-        <h2 className="text-[20px] font-black text-slate-900 mb-8">
-          <span className="text-mariner">{total}</span> Doanh nghiệp đang tuyển dụng T4/2026
-        </h2>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -150,24 +145,24 @@ export default function CompaniesPage() {
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-[15px] font-bold text-slate-800 leading-tight group-hover:text-mariner transition-colors line-clamp-2">
+                    <h3 className="text-[14px] font-bold text-slate-900 leading-snug group-hover:text-mariner transition-colors line-clamp-2 mb-1">
                       {company.companyName}
                     </h3>
-                    <p className="text-[12px] font-medium text-slate-400 mt-1 flex items-center gap-1 line-clamp-1">
-                      {company.mainIndustry}
+                    <p className="text-[12px] text-slate-500 font-medium line-clamp-1">
+                      {company.mainIndustry || "N/A"}
                     </p>
                   </div>
                 </div>
 
-                <p className="text-[13px] text-slate-500 font-medium leading-relaxed mb-6 line-clamp-3">
-                  {company.description}
-                </p>
-
-                <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
-                  <span className="bg-blue-50 text-mariner text-[12px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter">
-                    {company.activeJobs || 0} việc làm đang tuyển
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-mariner group-hover:translate-x-1 transition-all" />
+                <div className="mt-auto">
+                  <div className="inline-flex items-center bg-[#eef2ff] px-2 py-1 rounded-md group-hover:bg-blue-100 transition-colors">
+                    <span className="text-[#2563eb] text-[13px] font-bold">
+                      {company.activeJobs || 0}
+                    </span>
+                    <span className="text-[#2563eb] text-[12px] font-medium ml-1">
+                      việc làm đang tuyển
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}

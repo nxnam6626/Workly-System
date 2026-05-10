@@ -31,6 +31,7 @@ function JobSearchContent() {
   const [experienceParam, setExperienceParam] = useState(searchParams.get("experience") || "");
   const [rankParam, setRankParam] = useState(searchParams.get("rank") || "");
   const [educationParam, setEducationParam] = useState(searchParams.get("education") || "");
+  const [companyIdParam, setCompanyIdParam] = useState(searchParams.get("companyId") || "");
   
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "suitable");
   const [page, setPage] = useState(1);
@@ -50,6 +51,7 @@ function JobSearchContent() {
     setExperienceParam(searchParams.get("experience") || "");
     setRankParam(searchParams.get("rank") || "");
     setEducationParam(searchParams.get("education") || "");
+    setCompanyIdParam(searchParams.get("companyId") || "");
     setSortBy(searchParams.get("sortBy") || "suitable");
   }, [searchParams]);
 
@@ -65,6 +67,7 @@ function JobSearchContent() {
     if (experienceParam) params.set("experience", experienceParam);
     if (rankParam) params.set("rank", rankParam);
     if (educationParam) params.set("education", educationParam);
+    if (companyIdParam) params.set("companyId", companyIdParam);
     if (sortBy !== "suitable") params.set("sortBy", sortBy);
     
     const newUrl = `/jobs?${params.toString()}`;
@@ -72,7 +75,7 @@ function JobSearchContent() {
       router.replace(newUrl, { scroll: false });
     }
     fetchJobs(1);
-  }, [searchQuery, locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, sortBy]);
+  }, [searchQuery, locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, companyIdParam, sortBy]);
 
   const fetchJobs = useCallback(
     async (p = page) => {
@@ -89,6 +92,7 @@ function JobSearchContent() {
             experience: experienceParam || undefined,
             rank: rankParam || undefined,
             education: educationParam || undefined,
+            companyId: companyIdParam || undefined,
             sortBy: sortBy,
             page: p,
             limit: LIMIT,
@@ -102,7 +106,7 @@ function JobSearchContent() {
         setLoading(false);
       }
     },
-    [searchQuery, locationParam, jobTypeParam, industryParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, page]
+      [searchQuery, locationParam, jobTypeParam, industryParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, companyIdParam, page]
   );
 
   const handleSearch = (e?: React.FormEvent) => {

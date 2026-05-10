@@ -107,6 +107,15 @@ export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
             <DiffIndicator current={currentProfile?.desiredJob?.location} newValue={watchedLocation} />
           </div>
         </div>
+        
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-tight">Ngành nghề</label>
+          <input
+            {...register('industries')}
+            className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none"
+            placeholder="VD: IT Phần mềm, Nhân sự, Tài chính..."
+          />
+        </div>
 
       </div>
     </section>

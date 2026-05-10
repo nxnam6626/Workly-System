@@ -19,6 +19,11 @@ import {
   Star,
   CloudUpload,
   FileCheck,
+  Edit2,
+  Check,
+  X,
+  AlertTriangle,
+  Sparkles
 } from 'lucide-react';
 import { profileApi, type CandidateProfile } from '@/lib/profile-api';
 import { useAuthStore } from '@/stores/auth';
@@ -39,6 +44,11 @@ export default function CvManagementPage() {
   // Stats cho Upload
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+
+  // Tinh năng đổi tên
+  const [editingCvId, setEditingCvId] = useState<string | null>(null);
+  const [tempCvTitle, setTempCvTitle] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -77,23 +87,34 @@ export default function CvManagementPage() {
     }
 
     setIsUploading(true);
-    const toastId = toast.loading('Đang bóc tách CV bằng AI...');
+    const toastId = toast.loading('Đang tải tài liệu lên hệ thống...');
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await api.post('/candidates/cv/extract', formData, {
+      await api.post('/candidates/cv/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      const { cvId } = response.data;
-
-      // Điều hướng sang trang review
-      router.push(`/profile/cv-review/${cvId}`);
-      toast.success('Bóc tách thành công!', { id: toastId });
-      
+      toast.success('Đã thêm CV thành công! Giờ đây bạn có thể chọn đồng bộ dữ liệu từ danh sách.', { id: toastId, duration: 4000 });
       if (fileInputRef.current) fileInputRef.current.value = '';
+      fetchProfile(true); // Reload list instantly
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Lỗi khi xử lý CV.', { id: toastId });
+      toast.dismiss(toastId);
+      const errorData = error.response?.data;
+      const msgText = typeof errorData?.message === 'string' ? errorData.message : (errorData?.message?.message || 'Lỗi hệ thống khi xử lý tệp.');
+
+      // Super premium modal for duplicate notification in DEAD CENTER
+      if (errorData?.errorCode === 'DUPLICATE_CV' || errorData?.message?.errorCode === 'DUPLICATE_CV') {
+         confirm({
+           title: 'Tài liệu này đã tồn tại',
+           message: 'Bạn vừa tải lên một tệp hoàn toàn trùng khớp với CV hiện có trong hệ thống. Vui lòng không tải trùng lặp nhiều lần.',
+           variant: 'warning',
+           confirmText: 'Đã hiểu',
+           hideCancel: true
+         });
+      } else {
+        toast.error(msgText);
+      }
     } finally {
       setIsUploading(false);
     }
@@ -147,11 +168,60 @@ export default function CvManagementPage() {
   };
 
   const handleSetMainCv = async (cvId: string) => {
-    // Tự động chuyển hướng sang trang review để đồng bộ vào hồ sơ
-    router.push(`/profile/cv-review/${cvId}`);
+    const tid = toast.loading(
+      <div className="flex flex-col items-start gap-1 py-1 px-2">
+        <span className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" /> Đang gửi dữ liệu tới AI...
+        </span>
+        <span className="text-[12px] text-slate-500 font-medium">Hệ thống đang phân tích chuyên sâu hồ sơ của bạn (thường mất 5-10s). Vui lòng chờ.</span>
+      </div>,
+      { duration: 20000 }
+    );
+    
+    try {
+      // Bước 1: Phân tích và bóc tách AI thực tế
+      await api.post(`/candidates/cv/${cvId}/analyze`);
+      
+      toast.success('Bóc tách thành công!', { id: tid });
+      
+      // Bước 2: Sau khi có kết quả AI trong Database -> Chuyển tới bước Verify
+      router.push(`/profile/cv-review/${cvId}`);
+    } catch (error: any) {
+      const errMsg = error.response?.data?.message || 'Không thể khởi chạy công cụ phân tích AI.';
+      toast.error(errMsg, { id: tid, duration: 4000 });
+    }
   };
 
-  const cvs = profile?.candidate?.cvs || [];
+  const startRename = (cvId: string, currentTitle: string) => {
+    setEditingCvId(cvId);
+    setTempCvTitle(currentTitle);
+  };
+
+  const handleRenameCv = async () => {
+    if (!editingCvId || !tempCvTitle.trim()) {
+      setEditingCvId(null);
+      return;
+    }
+    setIsRenaming(true);
+    try {
+      await profileApi.updateCv(editingCvId, { cvTitle: tempCvTitle.trim() });
+      toast.success('Đã cập nhật tên tài liệu.');
+      setEditingCvId(null);
+      fetchProfile(true);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Không thể đổi tên tài liệu.');
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const cvs = [...(profile?.candidate?.cvs || [])].sort((a, b) => {
+    // Ưu tiên CV mặc định lên hàng đầu
+    if (a.isMain && !b.isMain) return -1;
+    if (!a.isMain && b.isMain) return 1;
+    // Nếu cả 2 cùng loại, cái mới hơn xếp trước
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
   const mainCv = cvs.find((cv) => cv.isMain);
 
   if (authLoading || loadingProfile) {
@@ -169,40 +239,6 @@ export default function CvManagementPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-100 selection:text-blue-900 pb-20">
-      {/* Top Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-6">
-              <h1 className="text-lg font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
-                <div className="w-8 h-8 border border-slate-200 rounded-lg flex items-center justify-center text-blue-600 shadow-sm">
-                  <FileText className="w-4 h-4" />
-                </div>
-                CV của bạn
-              </h1>
-              <nav className="hidden md:flex items-center gap-5">
-                <Link
-                  href="/profile"
-                  className="text-[13px] font-bold text-slate-400 hover:text-slate-700 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <div className="h-4 w-px bg-slate-200" />
-                <span className="text-[13px] font-black text-blue-600">Quản lý CV</span>
-              </nav>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/profile"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-bold text-[13px] hover:bg-slate-50 transition-all shadow-sm"
-              >
-                <LayoutDashboard className="w-4 h-4" /> Quay lại
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-6xl mx-auto px-4 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* CỘT TRÁI - DANH SÁCH CV */}
@@ -223,74 +259,119 @@ export default function CvManagementPage() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={`group bg-white border ${
-                      cv.isMain ? 'border-blue-400 ring-2 ring-blue-50' : 'border-slate-200'
-                    } rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-5 hover:shadow-lg hover:border-slate-300 transition-all`}
+                    className={`group bg-white border ${cv.isMain ? 'border-blue-300 ring-2 ring-blue-50/50' : 'border-slate-200'
+                      } rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-slate-300 transition-all`}
                   >
-                    {/* Icon Hình Trực Quan */}
-                    <div className="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
-                      <FileText className="w-8 h-8" />
+                    {/* Icon Hình Trực Quan - Gọn hơn */}
+                    <div className={`w-12 h-12 rounded-xl ${cv.isMain ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'} border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                      <FileText className="w-6 h-6" />
                     </div>
 
                     {/* Chi tiết */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-1.5">
-                        <Link 
-                           href={cv.fileUrl} 
-                           target="_blank" 
-                           className="text-base sm:text-lg font-bold text-slate-800 hover:text-blue-600 transition-colors truncate"
-                           title={cv.cvTitle}
-                        >
-                          {cv.cvTitle}
-                        </Link>
+                      <div className="flex items-center flex-wrap gap-2 mb-1">
+                        {editingCvId === cv.cvId ? (
+                          <div className="flex items-center gap-1.5 w-full sm:w-auto flex-1">
+                            <input
+                              type="text"
+                              value={tempCvTitle}
+                              onChange={(e) => setTempCvTitle(e.target.value)}
+                              className="flex-1 px-2 py-1 bg-slate-50 border border-blue-400 rounded-md text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 ring-blue-100"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRenameCv();
+                                if (e.key === 'Escape') setEditingCvId(null);
+                              }}
+                              disabled={isRenaming}
+                            />
+                            <button
+                              onClick={handleRenameCv}
+                              disabled={isRenaming}
+                              className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                              {isRenaming ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                            </button>
+                            <button
+                              onClick={() => setEditingCvId(null)}
+                              disabled={isRenaming}
+                              className="p-1.5 bg-slate-100 text-slate-500 rounded-md hover:bg-slate-200 transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 group/title min-w-0 max-w-full">
+                            <Link
+                              href={cv.fileUrl}
+                              target="_blank"
+                              className="text-sm sm:text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors truncate"
+                              title={cv.cvTitle}
+                            >
+                              {cv.cvTitle}
+                            </Link>
+                            <button
+                              onClick={() => startRename(cv.cvId, cv.cvTitle)}
+                              className="opacity-0 group-hover/title:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                              title="Đổi tên"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        
                         {cv.isMain && (
-                          <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 font-bold border border-blue-200 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-blue-600" /> Mặc định
+                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 font-black border border-blue-100 rounded-full text-[9px] uppercase tracking-wider flex items-center gap-1 shrink-0">
+                            <Star className="w-2.5 h-2.5 fill-blue-600" /> Mặc định
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-[13px] text-slate-500 font-medium">
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Tải lên thành công
+                      <div className="flex items-center gap-3 text-[12px] text-slate-500 font-medium">
+                        <span className="flex items-center gap-1 shrink-0">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Tải lên thành công
                         </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="w-4 h-4 text-slate-400" /> 
+                        <span className="text-slate-300 shrink-0">•</span>
+                        <span className="flex items-center gap-1 shrink-0">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
                           {new Date(cv.createdAt).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 mt-4 sm:mt-0 w-full sm:w-auto">
-                      {!cv.isMain && (
+                    <div className="flex items-center gap-1.5 mt-3 sm:mt-0 shrink-0">
+                      {!cv.isMain ? (
                         <button
                           onClick={() => handleSetMainCv(cv.cvId)}
-                          className="flex-1 sm:flex-none px-4 py-2 bg-slate-50 hover:bg-slate-900 border border-slate-200 hover:text-white rounded-xl text-[12px] font-bold transition-all shadow-sm"
+                          className="px-3 py-1.5 bg-white hover:bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-[12px] font-semibold transition-all shadow-sm active:scale-95"
+                          title="Đặt CV này làm mặc định"
                         >
-                          Dùng Profile
+                          Đặt làm chính
                         </button>
+                      ) : (
+                         <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[11px] font-bold flex items-center gap-1">
+                            <FileCheck className="w-3 h-3" /> Đang dùng
+                         </div>
                       )}
-                      
+
                       <Link
                         href={cv.fileUrl}
                         target="_blank"
-                        className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
                         title="Xem tài liệu"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3.5 h-3.5" />
                       </Link>
-                      
+
                       <button
                         onClick={() => handleDeleteCv(cv.cvId)}
-                        className={`w-10 h-10 flex items-center justify-center rounded-xl border transition-all shadow-sm ${
-                          cv.isMain
-                            ? 'bg-red-50/50 text-red-300 border-red-100 hover:bg-red-50 hover:text-red-500'
-                            : 'bg-white text-red-500 border-slate-200 hover:bg-red-50 hover:border-red-200'
-                        }`}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all shadow-sm ${cv.isMain
+                          ? 'bg-red-50/30 text-red-300 border-red-50 cursor-not-allowed opacity-50'
+                          : 'bg-white text-red-500 border-slate-200 hover:bg-red-50 hover:border-red-200'
+                          }`}
                         title="Xoá tài liệu"
+                        disabled={cv.isMain}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </motion.div>
@@ -312,20 +393,21 @@ export default function CvManagementPage() {
           {/* CỘT PHẢI - UPLOAD BOX */}
           <aside className="lg:col-span-4 space-y-6">
             <div className="sticky top-24 space-y-6 animate-in slide-in-from-right-4 duration-500">
-              
+
               {/* Box Kéo thả upload */}
-              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-                <h3 className="text-base font-bold text-slate-900 mb-4">Tải tài liệu mới</h3>
-                
+              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  Tải tài liệu mới
+                </h3>
+
                 <div
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all ${
-                    isDragActive
-                      ? 'border-blue-500 bg-blue-50/50'
-                      : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-                  }`}
+                  className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center transition-all ${isDragActive
+                    ? 'border-blue-500 bg-blue-50/50'
+                    : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
                 >
                   <input
                     type="file"
@@ -334,17 +416,16 @@ export default function CvManagementPage() {
                     className="hidden"
                     accept=".pdf"
                   />
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 transition-colors ${
-                      isDragActive ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors ${isDragActive ? 'bg-blue-100 text-blue-600' : 'bg-slate-50 text-slate-400'
                     }`}
                   >
                     {isUploading ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
                     ) : (
-                      <CloudUpload className="w-6 h-6" />
+                      <CloudUpload className="w-5 h-5" />
                     )}
                   </div>
-                  
+
                   {isUploading ? (
                     <div>
                       <p className="text-[13px] font-bold text-slate-800">Đang thực thi tải lên...</p>
@@ -361,27 +442,7 @@ export default function CvManagementPage() {
                 </div>
               </div>
 
-              {/* Thông tin hỗ trợ */}
-              <div className="bg-slate-900 rounded-3xl p-7 relative overflow-hidden shadow-xl shadow-slate-300 pointer-events-none">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/30 blur-[40px] rounded-full translate-x-10 -translate-y-10" />
-                 <h4 className="text-white text-base font-bold mb-3 flex items-center gap-2 relative z-10">
-                   <FileCheck className="w-5 h-5 text-emerald-400" /> Bí quyết gửi CV
-                 </h4>
-                 <ul className="space-y-3 relative z-10">
-                   <li className="text-[12px] text-slate-300 font-medium flex items-start gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
-                     Viết tiêu đề file đầy đủ, ví dụ: "CV_NguyenVanA_Frontend.pdf" thay vì "cv.pdf".
-                   </li>
-                   <li className="text-[12px] text-slate-300 font-medium flex items-start gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
-                     Luôn nộp dưới định dạng PDF để giữ nguyên căn lề trên mọi thiết bị máy tính của nhà tuyển dụng.
-                   </li>
-                   <li className="text-[12px] text-slate-300 font-medium flex items-start gap-2">
-                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
-                     Để tối ưu, dung lượng file nên dưới 2MB.
-                   </li>
-                 </ul>
-              </div>
+
 
             </div>
           </aside>

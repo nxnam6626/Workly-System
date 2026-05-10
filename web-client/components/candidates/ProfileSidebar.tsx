@@ -4,22 +4,10 @@ import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import {
-  User,
-  ClipboardCheck,
-  Heart,
-  Eye,
-  LogOut,
-  ChevronRight,
-  Sparkles,
-  CalendarDays,
-  MailOpen,
-  Camera,
-  Loader2,
-  Wallet,
-} from 'lucide-react';
+import { User, Wallet, LogOut, Settings, FileText, Briefcase, CalendarDays, History, Star, Shield, Heart, Eye, MailOpen, Sparkles, ClipboardCheck, Phone, Building2, Clock, Camera, Loader2, ChevronRight, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import ActivateJobSearchModal from '@/components/modals/ActivateJobSearchModal';
+import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -38,6 +26,7 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false);
   const [isActivationModalOpen, setIsActivationModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const displayName = user?.name || (user as any)?.candidate?.fullName || user?.email || 'Người dùng';
   const jobTitle = (user as any)?.candidate?.major || 'Ứng viên';
@@ -46,13 +35,7 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
   // Đọc trạng thái mở tìm việc: ưu tiên prop truyền vào, nếu không có thì đọc từ Auth Store
   const isLookingForJob = isOpenToWork !== undefined ? isOpenToWork : (user?.candidate?.isOpenToWork ?? true);
 
-  const handleToggle = async () => {
-    if (onToggleOpenToWork) {
-      onToggleOpenToWork();
-      return;
-    }
-    if (!user?.candidate) return;
-    const newValue = !isLookingForJob;
+  const executeToggle = async (newValue: boolean) => {
     const toastId = (await import('react-hot-toast')).default.loading("Đang cập nhật trạng thái...");
     try {
       const { profileApi } = await import('@/lib/profile-api');
@@ -71,6 +54,24 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
          (await import('react-hot-toast')).default.error("Lỗi cập nhật trạng thái.", { id: toastId });
       }
     }
+  };
+
+  const handleToggle = async () => {
+    if (onToggleOpenToWork) {
+      onToggleOpenToWork();
+      return;
+    }
+    if (!user?.candidate) return;
+    const newValue = !isLookingForJob;
+    
+    if (newValue === false) {
+       // Trigger Beautiful Modal instead of native window.confirm
+       setIsConfirmModalOpen(true);
+       return;
+    }
+    
+    // If turning ON, directly execute
+    executeToggle(newValue);
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +154,13 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
       isActive: pathname === '/profile/jobs/interviews',
       accent: 'text-orange-600 bg-orange-50',
     },
+    {
+      icon: MessageSquare,
+      label: 'Nhắn tin nhà tuyển dụng',
+      href: '/profile/messages',
+      isActive: pathname === '/profile/messages',
+      accent: 'text-cyan-600 bg-cyan-50',
+    },
   ];
 
   return (
@@ -209,7 +217,7 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
 
         {/* Open-to-work toggle — Hiển thị trên tất cả các trang */}
         <div className="mt-4 w-full p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <span className="text-[12px] font-bold text-slate-700">Sẵn sàng tìm việc</span>
             <button
               onClick={handleToggle}
@@ -222,11 +230,6 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
               />
             </button>
           </div>
-          <p className={`text-[10px] font-medium leading-relaxed text-left ${isLookingForJob ? 'text-emerald-600' : 'text-slate-400'}`}>
-            {isLookingForJob
-              ? 'Hồ sơ đang hiển thị với nhà tuyển dụng.'
-              : 'Hồ sơ đang tạm ẩn khỏi tìm kiếm.'}
-          </p>
           
           {isLookingForJob && (user as any)?.candidate?.jobSearchExpiresAt && (() => {
              const diff = new Date((user as any).candidate.jobSearchExpiresAt).getTime() - new Date().getTime();
@@ -248,9 +251,20 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
         onSuccess={async () => {
           // Fetch fresh user data to update the context and show the toggle turned ON automatically
           const { profileApi } = await import('@/lib/profile-api');
-          const data = await profileApi.getProfile();
+          const data = await profileApi.getMe();
           updateUser({ candidate: data.candidate });
         }}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={() => executeToggle(false)}
+        title="Tạm dừng hiển thị hồ sơ?"
+        message="Lưu ý: Thời gian 30 ngày ưu tiên (nếu đang có) vẫn tiếp tục được tính ngay cả khi bạn ẩn hồ sơ. Bạn vẫn muốn thực hiện?"
+        confirmLabel="Đồng ý ẩn"
+        cancelLabel="Hủy bỏ"
+        type="warning"
       />
 
       {/* Navigation Menu */}
@@ -312,25 +326,6 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
         </div>
       </nav>
 
-      {/* Promo card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-xl shadow-slate-900/10">
-        <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
-        <div className="absolute bottom-0 left-0 w-20 h-20 bg-indigo-500/10 rounded-full -translate-x-1/2 translate-y-1/2 blur-2xl" />
-        <div className="relative z-10 text-center space-y-3">
-          <div className="w-10 h-10 mx-auto bg-white/10 rounded-2xl flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-blue-300" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm leading-tight">Workly AI</h4>
-            <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
-              Bật thông báo để không bỏ lỡ việc làm phù hợp nhất với bạn!
-            </p>
-          </div>
-          <button className="w-full py-2 bg-white text-slate-900 font-bold rounded-xl text-[11px] hover:bg-blue-50 transition-all">
-            Tải App ngay
-          </button>
-        </div>
-      </div>
     </aside>
   );
 });

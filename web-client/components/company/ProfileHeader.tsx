@@ -62,22 +62,11 @@ export function ProfileHeader({ company, isPreview }: ProfileHeaderProps) {
                   <Building2 className="w-4 h-4 text-mariner" />
                   <span>{displayIndustry}</span>
                </div>
-               <div className="flex items-center gap-2 text-slate-500 font-bold text-xs">
-                  <Users className="w-4 h-4 text-mariner" />
-                  <span>1.2k Người theo dõi</span>
-               </div>
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2 w-full md:w-auto">
-            <button 
-              disabled={isPreview}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-mariner hover:bg-blue-700 text-white font-black px-7 py-3 rounded-xl transition-all shadow-lg shadow-mariner/20 active:scale-95 text-xs uppercase tracking-widest disabled:opacity-50"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Theo dõi
-            </button>
             <button className="p-3 rounded-xl border-2 border-slate-100 text-slate-400 hover:text-mariner hover:border-mariner transition-all bg-slate-50 shadow-sm">
               <Share2 className="w-4 h-4" />
             </button>

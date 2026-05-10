@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { 
-  Search, 
-  MapPin, 
   Briefcase, 
   DollarSign, 
   User, 
@@ -15,28 +13,30 @@ import {
 } from "lucide-react";
 import IndustryMegaMenu from "../shared/IndustryMegaMenu";
 import LocationMegaMenu from "../shared/LocationMegaMenu";
+import { useRouter } from "next/navigation";
 
 interface JobSearchHeroProps {
-  searchQuery: string;
-  setSearchQuery: (val: string) => void;
-  locationParam: string;
-  setLocationParam: (val: string) => void;
-  industryParam: string;
-  setIndustryParam: (val: string) => void;
-  jobTypeParam: string;
-  setJobTypeParam: (val: string) => void;
-  experienceParam: string;
-  setExperienceParam: (val: string) => void;
+  standaloneMode?: boolean;
+  searchQuery?: string;
+  setSearchQuery?: (val: string) => void;
+  locationParam?: string;
+  setLocationParam?: (val: string) => void;
+  industryParam?: string;
+  setIndustryParam?: (val: string) => void;
+  jobTypeParam?: string;
+  setJobTypeParam?: (val: string) => void;
+  experienceParam?: string;
+  setExperienceParam?: (val: string) => void;
   salaryMinParam?: number;
-  setSalaryMinParam: (val?: number) => void;
+  setSalaryMinParam?: (val?: number) => void;
   salaryMaxParam?: number;
-  setSalaryMaxParam: (val?: number) => void;
-  rankParam: string;
-  setRankParam: (val: string) => void;
-  educationParam: string;
-  setEducationParam: (val: string) => void;
-  handleSearch: (e?: React.FormEvent) => void;
-  totalJobs: number;
+  setSalaryMaxParam?: (val?: number) => void;
+  rankParam?: string;
+  setRankParam?: (val: string) => void;
+  educationParam?: string;
+  setEducationParam?: (val: string) => void;
+  handleSearch?: (e?: React.FormEvent) => void;
+  totalJobs?: number;
 }
 
 const FILTER_OPTIONS: Record<string, string[]> = {
@@ -91,8 +91,62 @@ export function JobSearchHero({
   educationParam,
   setEducationParam,
   handleSearch,
-  totalJobs
+  totalJobs,
+  standaloneMode = false
 }: JobSearchHeroProps) {
+  const router = useRouter();
+
+  // Local states for Standalone Mode fallback
+  const [localSearch, setLocalSearch] = useState("");
+  const [localLocation, setLocalLocation] = useState("");
+  const [localIndustry, setLocalIndustry] = useState("");
+  const [localJobType, setLocalJobType] = useState("");
+  const [localExp, setLocalExp] = useState("");
+  const [localMin, setLocalMin] = useState<number>();
+  const [localMax, setLocalMax] = useState<number>();
+  const [localRank, setLocalRank] = useState("");
+  const [localEdu, setLocalEdu] = useState("");
+
+  // Dynamic proxies picking state/prop based on mode
+  const sQuery = standaloneMode ? localSearch : (searchQuery || "");
+  const sSetQuery = standaloneMode ? setLocalSearch : (setSearchQuery || (() => {}));
+  const lParam = standaloneMode ? localLocation : (locationParam || "");
+  const sSetLocation = standaloneMode ? setLocalLocation : (setLocationParam || (() => {}));
+  const iParam = standaloneMode ? localIndustry : (industryParam || "");
+  const sSetIndustry = standaloneMode ? setLocalIndustry : (setIndustryParam || (() => {}));
+  const jtParam = standaloneMode ? localJobType : (jobTypeParam || "");
+  const sSetJobType = standaloneMode ? setLocalJobType : (setJobTypeParam || (() => {}));
+  const expParam = standaloneMode ? localExp : (experienceParam || "");
+  const sSetExp = standaloneMode ? setLocalExp : (setExperienceParam || (() => {}));
+  const rParam = standaloneMode ? localRank : (rankParam || "");
+  const sSetRank = standaloneMode ? setLocalRank : (setRankParam || (() => {}));
+  const eParam = standaloneMode ? localEdu : (educationParam || "");
+  const sSetEdu = standaloneMode ? setLocalEdu : (setEducationParam || (() => {}));
+  
+  const sMin = standaloneMode ? localMin : salaryMinParam;
+  const sSetMin = standaloneMode ? setLocalMin : (setSalaryMinParam || (() => {}));
+  const sMax = standaloneMode ? localMax : salaryMaxParam;
+  const sSetMax = standaloneMode ? setLocalMax : (setSalaryMaxParam || (() => {}));
+
+  const performSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (standaloneMode) {
+      const p = new URLSearchParams();
+      if (sQuery) p.set("search", sQuery);
+      if (lParam) p.set("location", lParam);
+      if (iParam) p.set("industry", iParam);
+      if (jtParam) p.set("jobType", jtParam);
+      if (expParam) p.set("experience", expParam);
+      if (sMin) p.set("salaryMin", sMin.toString());
+      if (sMax) p.set("salaryMax", sMax.toString());
+      if (rParam) p.set("rank", rParam);
+      if (eParam) p.set("education", eParam);
+      router.push(`/jobs?${p.toString()}`);
+    } else {
+      handleSearch?.(e);
+    }
+  };
+
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const locationDropdownRef = useRef<HTMLDivElement>(null);
@@ -115,24 +169,30 @@ export function JobSearchHero({
   const handleSelectFilterValue = (type: string, label: string) => {
     setOpenFilter(null);
     if (type === "Loại hình") {
-      setJobTypeParam(JOB_TYPE_MAP[label] || "");
+      sSetJobType(JOB_TYPE_MAP[label] || "");
     } else if (type === "Mức lương") {
       const range = SALARY_MAP[label];
-      setSalaryMinParam(range?.min);
-      setSalaryMaxParam(range?.max);
+      sSetMin(range?.min);
+      sSetMax(range?.max);
     } else if (type === "Kinh nghiệm") {
-      setExperienceParam(label === "Không yêu cầu" ? "" : label);
+      sSetExp(label === "Không yêu cầu" ? "" : label);
     } else if (type === "Chức vụ") {
-      setRankParam(label);
+      sSetRank(label);
     } else if (type === "Học vấn") {
-      setEducationParam(label === "Không yêu cầu" ? "" : label);
+      sSetEdu(label === "Không yêu cầu" ? "" : label);
     }
   };
 
   const handleSelectIndustry = (val: string) => {
-    setIndustryParam(val);
+    sSetIndustry(val);
     setOpenFilter(null);
-    handleSearch();
+    // Wait brief moment to make sure state updates if standalone before redirect
+    if (standaloneMode) {
+      // Wait 1 tick
+      setTimeout(() => performSearch(), 10);
+    } else {
+      performSearch();
+    }
   };
 
   const filterButtons = [
@@ -147,43 +207,43 @@ export function JobSearchHero({
   const getJobTypeLabel = (val: string) => Object.keys(JOB_TYPE_MAP).find(k => JOB_TYPE_MAP[k] === val) || val;
 
   return (
-    <div className="w-full bg-[#f8fafc] py-4 border-b border-slate-100 relative z-40">
-      <div className="max-w-6xl mx-auto px-4 lg:px-6">
-        <div className="bg-[#d7ecf7] rounded-[16px] p-2 shadow-sm border border-blue-50 relative">
+    <div className={`w-full ${standaloneMode ? "" : "bg-[#f8fafc] py-3 border-b border-slate-100"} relative z-40`}>
+      <div className={standaloneMode ? "w-full" : "max-w-6xl mx-auto px-4 lg:px-6"}>
+        <div className="bg-[#d7ecf7] rounded-[14px] p-1.5 shadow-sm border border-blue-50 relative">
           <form
-            onSubmit={handleSearch}
-            className="bg-white rounded-xl p-1 flex flex-col md:flex-row items-stretch gap-1 mb-2 shadow-md"
+            onSubmit={performSearch}
+            className="bg-white rounded-lg p-0.5 flex flex-col md:flex-row items-stretch gap-1 mb-1.5 shadow-md"
           >
-            <div className="flex-[1.5] flex items-center gap-2.5 px-4 py-2.5 group">
-              <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Từ khóa:</span>
+            <div className="flex-[1.5] flex items-center gap-2 px-3 py-2 group">
+              <span className="text-slate-800 font-bold text-[13px] whitespace-nowrap">Từ khóa:</span>
               <input
                 type="text"
                 placeholder="Việc, công ty, ngành nghề..."
-                className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 outline-none text-slate-800 text-[13px] font-medium placeholder:text-slate-300 h-7"
+                value={sQuery}
+                onChange={(e) => sSetQuery(e.target.value)}
               />
             </div>
-            <div className="hidden md:block w-px h-8 bg-slate-100 self-center" />
+            <div className="hidden md:block w-px h-6 bg-slate-100 self-center" />
             <div className="flex-1 flex flex-col md:flex-row items-stretch gap-1 relative" ref={locationDropdownRef}>
               <div 
-                className="flex-1 flex items-center gap-2.5 px-4 py-2.5 cursor-pointer hover:bg-slate-50 transition-colors"
+                className="flex-1 flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors"
                 onClick={() => setOpenLocation(!openLocation)}
               >
-                <span className="text-slate-800 font-bold text-[14px] whitespace-nowrap">Địa điểm:</span>
+                <span className="text-slate-800 font-bold text-[13px] whitespace-nowrap">Địa điểm:</span>
                 <input
                   type="text"
                   placeholder="Tỉnh/thành, quận..."
-                  className="flex-1 outline-none text-slate-800 text-[14px] font-medium placeholder:text-slate-300 pointer-events-none"
-                  value={locationParam}
+                  className="flex-1 outline-none text-slate-800 text-[13px] font-medium placeholder:text-slate-300 pointer-events-none h-7"
+                  value={lParam}
                   readOnly
                 />
-                {locationParam && (
+                {lParam && (
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setLocationParam(""); }}
-                    className="p-1 hover:bg-slate-200 rounded-full transition-colors"
+                    onClick={(e) => { e.stopPropagation(); sSetLocation(""); }}
+                    className="p-0.5 hover:bg-slate-200 rounded-full transition-colors"
                   >
-                    <X className="w-3.5 h-3.5 text-slate-400" />
+                    <X className="w-3 h-3 text-slate-400" />
                   </button>
                 )}
               </div>
@@ -191,7 +251,7 @@ export function JobSearchHero({
               {openLocation && (
                 <div className="absolute top-[calc(100%+8px)] left-0 right-0 md:left-auto md:right-0 md:w-[700px] z-[60]">
                   <LocationMegaMenu 
-                    onSelect={(val) => { setLocationParam(val); setOpenLocation(false); }}
+                    onSelect={(val) => { sSetLocation(val); setOpenLocation(false); }}
                     onClose={() => setOpenLocation(false)}
                   />
                 </div>
@@ -199,27 +259,26 @@ export function JobSearchHero({
             </div>
             <button
               type="submit"
-              className="px-8 py-2 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[14px] rounded-lg transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-lg shadow-blue-900/10"
+              className="px-6 py-1.5 bg-gradient-to-r from-[#1e60ad] to-[#164a8a] hover:from-[#164a8a] hover:to-[#0f3463] text-white font-black text-[13px] rounded-md transition-all active:scale-[0.98] tracking-wide shrink-0 shadow-md shadow-blue-900/10 uppercase"
             >
               TÌM VIỆC
             </button>
           </form>
 
-
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-1.5 px-0.5">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-1 px-0.5">
             {filterButtons.map((btn) => {
               const getSelectedValue = () => {
-                if (btn.label === "Ngành nghề") return industryParam;
-                if (btn.label === "Loại hình") return getJobTypeLabel(jobTypeParam);
+                if (btn.label === "Ngành nghề") return iParam;
+                if (btn.label === "Loại hình") return getJobTypeLabel(jtParam);
                 if (btn.label === "Mức lương") {
-                  if (salaryMinParam && salaryMaxParam) return `${(salaryMinParam / 1000000).toFixed(0)}-${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
-                  if (salaryMinParam) return `Trên ${(salaryMinParam / 1000000).toFixed(0)} triệu`;
-                  if (salaryMaxParam) return `Dưới ${(salaryMaxParam / 1000000).toFixed(0)} triệu`;
+                  if (sMin && sMax) return `${(sMin / 1000000).toFixed(0)}-${(sMax / 1000000).toFixed(0)} triệu`;
+                  if (sMin) return `Trên ${(sMin / 1000000).toFixed(0)} triệu`;
+                  if (sMax) return `Dưới ${(sMax / 1000000).toFixed(0)} triệu`;
                   return null;
                 }
-                if (btn.label === "Chức vụ") return rankParam;
-                if (btn.label === "Kinh nghiệm") return experienceParam;
-                if (btn.label === "Học vấn") return educationParam;
+                if (btn.label === "Chức vụ") return rParam;
+                if (btn.label === "Kinh nghiệm") return expParam;
+                if (btn.label === "Học vấn") return eParam;
                 return null;
               };
 
@@ -230,24 +289,24 @@ export function JobSearchHero({
                 <div key={btn.label} className="relative w-full">
                   <button
                     onClick={() => setOpenFilter(openFilter === btn.label ? null : btn.label)}
-                    className={`w-full flex items-center justify-between gap-1 px-4 py-2.5 rounded-full text-[13px] font-bold transition-all group shadow-sm active:scale-[0.97] border border-transparent ${
+                    className={`w-full flex items-center justify-between gap-1 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all group shadow-sm active:scale-[0.97] border border-transparent ${
                       openFilter === btn.label 
                         ? "bg-white text-[#1e60ad] border-blue-200 shadow-md" 
                         : "bg-[#1e60ad] text-white hover:bg-[#164a8a]"
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <span className={`shrink-0 transition-opacity ${openFilter === btn.label ? "" : "opacity-90 group-hover:opacity-100"}`}>
-                        {btn.icon && <span className="scale-95">{btn.icon}</span>}
+                        {btn.icon && <span className="scale-90">{btn.icon}</span>}
                       </span>
                       <span className="truncate">{displayValue}</span>
                     </div>
-                    <ChevronDown className={`w-4 h-4 shrink-0 transition-all ${openFilter === btn.label ? "rotate-180" : "opacity-70 group-hover:translate-y-0.5"}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-all ${openFilter === btn.label ? "rotate-180" : "opacity-70 group-hover:translate-y-0.5"}`} />
                   </button>
                 {openFilter === btn.label && btn.label !== "Ngành nghề" && (
-                  <div className="absolute top-[calc(100%+8px)] left-0 min-w-[200px] bg-white rounded-xl shadow-2xl border border-slate-100 z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="absolute top-[calc(100%+4px)] left-0 min-w-[180px] bg-white rounded-lg shadow-xl border border-slate-100 z-50 py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
                     {FILTER_OPTIONS[btn.label]?.map((val) => (
-                      <button key={val} onClick={() => handleSelectFilterValue(btn.label, val)} className="w-full text-left px-5 py-2.5 text-[13.5px] font-medium text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad] transition-all">
+                      <button key={val} onClick={() => handleSelectFilterValue(btn.label, val)} className="w-full text-left px-4 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 hover:text-[#1e60ad] transition-all">
                         {val}
                       </button>
                     ))}

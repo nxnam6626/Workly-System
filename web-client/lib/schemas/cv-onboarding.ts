@@ -55,6 +55,7 @@ export const formSchema = z.object({
   desiredJob: desiredJobSchema.optional(),
   totalYearsExp: z.number().min(0),
   summary: z.string().optional(),
+  industries: z.string().optional(),
   languages: z.array(languageSchema).optional(),
   interests: z.array(z.string()).optional(),
   otherInfo: z.array(otherInfoSchema).optional(),

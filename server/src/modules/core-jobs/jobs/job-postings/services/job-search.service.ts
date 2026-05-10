@@ -178,12 +178,17 @@ export class JobSearchService {
       limit = 10,
       industry,
       sortBy,
+      companyId,
     } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {
       status: 'APPROVED',
     };
+
+    if (companyId) {
+      where.companyId = companyId;
+    }
 
     if (userId) {
       const recruiter = await this.prisma.recruiter.findUnique({

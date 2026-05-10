@@ -17,4 +17,8 @@ export class FilterCompanyDto {
   @IsInt()
   @Min(1)
   limit?: number = 10;
+
+  @IsOptional()
+  @IsString()
+  sortBy?: 'TYPICAL' | 'TRENDING' | 'ALPHABETICAL';
 }

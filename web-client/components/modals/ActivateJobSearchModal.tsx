@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, ShieldCheck, Wallet, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { getWalletBalance, topUpWallet, activateJobSearch, CandidateWallet } from '@/lib/candidate-wallet-api';
+import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -18,6 +19,11 @@ export default function ActivateJobSearchModal({ isOpen, onClose, onSuccess }: P
   const [processing, setProcessing] = useState(false);
   const [topupAmount, setTopupAmount] = useState<number>(50000);
   const ACTIVATION_COST = 20000;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -69,36 +75,40 @@ export default function ActivateJobSearchModal({ isOpen, onClose, onSuccess }: P
     }
   };
 
-  if (!isOpen) return null;
 
   const isShortOnFunds = wallet && wallet.balance < ACTIVATION_COST;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
-      />
+  if (!mounted) return null;
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/20"
-      >
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 transition-colors z-10 text-slate-400">
-          <X size={20} />
-        </button>
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-md"
+          />
 
-        <div className="p-6">
-          <div className="flex flex-col items-center text-center mb-6 pt-4">
-            <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-              <ShieldCheck className="w-8 h-8 text-indigo-600" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-md bg-white rounded-[28px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] overflow-hidden border border-white/20"
+          >
+            <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-xl hover:bg-slate-100 transition-all duration-200 z-10 text-slate-400 hover:text-slate-600 group">
+              <X size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+            </button>
+
+        <div className="p-6 pt-8">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-indigo-600/20 transform -rotate-3">
+              <ShieldCheck className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800">Kích hoạt Tìm Việc</h3>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Kích hoạt Tìm Việc</h3>
             <p className="text-sm text-slate-500 mt-1 max-w-xs">
               Duy trì hồ sơ nổi bật và ứng tuyển mọi vị trí trong vòng 30 ngày.
             </p>
@@ -175,7 +185,10 @@ export default function ActivateJobSearchModal({ isOpen, onClose, onSuccess }: P
             Hồ sơ sẽ được gắn thẻ Ưu Tiên tự động.
           </p>
         </div>
-      </motion.div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

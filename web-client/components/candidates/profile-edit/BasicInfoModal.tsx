@@ -71,8 +71,8 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
       major: initialData.candidate?.major || "",
       gpa: initialData.candidate?.gpa != null ? String(initialData.candidate.gpa) : "",
       summary: initialData.candidate?.summary || "",
-      desiredJobTitle: initialData.candidate?.desiredJob?.title || "",
-      desiredJobSalary: initialData.candidate?.desiredJob?.salary || "",
+      desiredJobTitle: initialData.candidate?.desiredJob?.title || initialData.candidate?.desiredJob?.jobTitle || initialData.candidate?.desiredJob?.job_title || "",
+      desiredJobSalary: initialData.candidate?.desiredJob?.salary || initialData.candidate?.desiredJob?.expectedSalary || initialData.candidate?.desiredJob?.expected_salary || "",
       industries: initialData.candidate?.industries?.join(", ") || "",
       totalYearsExp: initialData.candidate?.totalYearsExp != null ? String(initialData.candidate.totalYearsExp) : "",
       degree: initialData.candidate?.degree || "",
@@ -89,8 +89,8 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
         major: initialData.candidate?.major || "",
         gpa: initialData.candidate?.gpa != null ? String(initialData.candidate.gpa) : "",
         summary: initialData.candidate?.summary || "",
-        desiredJobTitle: initialData.candidate?.desiredJob?.title || "",
-        desiredJobSalary: initialData.candidate?.desiredJob?.salary || "",
+        desiredJobTitle: initialData.candidate?.desiredJob?.title || initialData.candidate?.desiredJob?.jobTitle || initialData.candidate?.desiredJob?.job_title || "",
+        desiredJobSalary: initialData.candidate?.desiredJob?.salary || initialData.candidate?.desiredJob?.expectedSalary || initialData.candidate?.desiredJob?.expected_salary || "",
         industries: initialData.candidate?.industries?.join(", ") || "",
         totalYearsExp: initialData.candidate?.totalYearsExp != null ? String(initialData.candidate.totalYearsExp) : "",
         degree: initialData.candidate?.degree || "",
@@ -115,7 +115,9 @@ export function BasicInfoModal({ isOpen, onClose, initialData, onSuccess }: Basi
         desiredJob: {
           ...(initialData.candidate?.desiredJob || {}),
           title: data.desiredJobTitle,
+          jobTitle: data.desiredJobTitle,
           salary: data.desiredJobSalary,
+          expectedSalary: data.desiredJobSalary,
         },
       });
       toast.success("Hồ sơ đã được cập nhật!");

@@ -32,7 +32,13 @@ export class CandidateCvService {
     const candidate = await this.candidateProfileService.findByUserId(userId);
     if (candidate) {
       const duplicate = await this.findByHash(candidate.candidateId, fileHash);
-      if (duplicate) return duplicate;
+      if (duplicate) {
+        throw new BadRequestException({
+          message: 'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
+          errorCode: 'DUPLICATE_CV',
+          cvId: duplicate.cvId
+        });
+      }
     }
 
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -48,7 +54,7 @@ export class CandidateCvService {
     return this.saveCv(userId, {
       cvTitle,
       fileUrl,
-      isMain: true,
+      isMain: false,
       parsedData: null,
       fileHash,
     });
@@ -58,6 +64,28 @@ export class CandidateCvService {
     this.logger.log(`[Flow] Bắt đầu quy trình bóc tách CV cho User: ${userId}`);
     const buffer = file.buffer;
     const mimeType = file.mimetype;
+
+    // 0. Gate 0: Chống trùng lặp hồ sơ (File Hash)
+    const fileHash = crypto.createHash('md5').update(buffer).digest('hex');
+    this.logger.log(`[Duplicate Check] Computed Hash: ${fileHash} for userId: ${userId}`);
+    
+    const candidate = await this.candidateProfileService.findByUserId(userId);
+    if (candidate) {
+      this.logger.log(`[Duplicate Check] CandidateId: ${candidate.candidateId}. Querying DB...`);
+      const duplicate = await this.findByHash(candidate.candidateId, fileHash);
+      if (duplicate) {
+        this.logger.warn(`[Duplicate Check] FOUND MATCHING CV: ${duplicate.cvId}. THROWING EXCEPTION NOW.`);
+        throw new BadRequestException({
+          message: 'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
+          errorCode: 'DUPLICATE_CV',
+          cvId: duplicate.cvId
+        });
+      } else {
+        this.logger.log(`[Duplicate Check] No duplicate found in database for hash: ${fileHash}`);
+      }
+    } else {
+       this.logger.log(`[Duplicate Check] Candidate profile not found for userId: ${userId}`);
+    }
 
     // 1. Gate 1: Bóc tách văn bản & Sanity Check
     const rawText = await this.cvParsingService.extractTextLocal(buffer, mimeType);

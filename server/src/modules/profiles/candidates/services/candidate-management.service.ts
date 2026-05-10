@@ -97,7 +97,6 @@ export class CandidateManagementService {
           ...(languages !== undefined && { languages }),
           ...(softSkills !== undefined && { softSkills }),
           ...(interests !== undefined && { interests }),
-          ...(otherInfo !== undefined && { otherInfo }),
         },
       });
 

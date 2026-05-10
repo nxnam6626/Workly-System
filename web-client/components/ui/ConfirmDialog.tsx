@@ -11,6 +11,7 @@ interface ConfirmOptions {
   confirmText?: string;
   cancelText?: string;
   variant?: ConfirmVariant;
+  hideCancel?: boolean;
 }
 
 interface ConfirmContextType {
@@ -116,17 +117,19 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 
             {/* Actions */}
             <div className="flex gap-3 px-6 pb-6">
-              <button
-                onClick={() => handleClose(false)}
-                className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
-              >
-                {state.options.cancelText ?? 'Hủy'}
-              </button>
+              {!state.options.hideCancel && (
+                <button
+                  onClick={() => handleClose(false)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm"
+                >
+                  {state.options.cancelText ?? 'Hủy'}
+                </button>
+              )}
               <button
                 onClick={() => handleClose(true)}
-                className={`flex-[2] px-4 py-2.5 text-white font-bold rounded-xl transition-all text-sm shadow-lg ${config.confirmBtn}`}
+                className={`${state.options.hideCancel ? 'flex-1' : 'flex-[2]'} px-4 py-2.5 text-white font-bold rounded-xl transition-all text-sm shadow-lg ${config.confirmBtn}`}
               >
-                {state.options.confirmText ?? 'Xác nhận'}
+                {state.options.confirmText ?? 'Đã hiểu'}
               </button>
             </div>
           </div>

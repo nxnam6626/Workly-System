@@ -103,21 +103,21 @@ export const JobsTable = ({
                     </div>
                   </td>
                   <td className="px-6 py-6">
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                       <div
-                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-xl"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/60 border border-indigo-100/50 rounded-xl hover:bg-indigo-100/80 transition-all cursor-default"
                         title="Số lượng ứng viên phù hợp"
                       >
-                        <Users className="w-4 h-4 text-indigo-600" />
-                        <span className="text-indigo-700 font-black text-xs">{job.matchedCount} Match</span>
+                        <Users className="w-3.5 h-3.5 text-indigo-600" />
+                        <span className="text-indigo-700 font-black text-xs whitespace-nowrap">{job.matchedCount} Match</span>
                       </div>
 
                       <div
-                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/60 border border-emerald-100/50 rounded-xl hover:bg-emerald-100/80 transition-all cursor-default"
                         title="Số lượt xem tin tuyển dụng"
                       >
-                        <Eye className="w-4 h-4 text-emerald-600" />
-                        <span className="text-emerald-700 font-black text-xs">{job.viewCount} View</span>
+                        <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700 font-black text-xs whitespace-nowrap">{job.viewCount} View</span>
                       </div>
                     </div>
                   </td>

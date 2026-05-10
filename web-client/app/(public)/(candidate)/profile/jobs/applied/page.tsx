@@ -460,7 +460,7 @@ export default function AppliedJobsPage() {
                   <Briefcase className="w-9 h-9 text-slate-200" />
                 </div>
                 <div className="space-y-2">
-                  <h3 style={{ fontFamily: "'Fraunces', serif" }} className="text-2xl font-bold text-slate-900">
+                  <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                     {searchTerm || activeFilter !== "Tất cả"
                       ? "Không tìm thấy kết quả"
                       : "Chưa có đơn ứng tuyển nào"}

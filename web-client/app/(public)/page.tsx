@@ -1,4 +1,4 @@
-import { HeroSearch } from "@/components/landing/HeroSearch";
+import { JobSearchHero } from "@/components/jobs/JobSearchHero";
 import { RecommendedJobsSection } from "@/components/jobs/RecommendedJobsSection";
 import { UrgentJobsSection } from "@/components/jobs/UrgentJobsSection";
 import { InternshipJobsSection as InternshipJobs } from "@/components/jobs/InternshipJobs";
@@ -11,7 +11,7 @@ export default function Home() {
       <div className="flex flex-col items-center w-full min-h-screen bg-[#F4F7FA]">
          <section className="w-full bg-workly-blue pt-6 pb-8">
             <div className="max-w-6xl mx-auto px-4 lg:px-6 flex flex-col gap-4">
-               <HeroSearch hideFilters={false} />
+               <JobSearchHero standaloneMode={true} />
             </div>
          </section>
 

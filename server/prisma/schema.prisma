@@ -95,7 +95,7 @@ model Candidate {
   gpa              Float?
   cvUrl            String?
   userId           String            @unique
-  isOpenToWork     Boolean           @default(true)
+  isOpenToWork     Boolean           @default(false)
   jobSearchExpiresAt DateTime?
   location         String?
   desiredJob       Json?

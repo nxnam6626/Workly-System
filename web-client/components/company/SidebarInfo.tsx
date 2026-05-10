@@ -38,18 +38,6 @@ export function SidebarInfo({ company, isPreview }: SidebarInfoProps) {
               label="Địa chỉ"
               value={company.address || "Chưa cập nhật"} 
             />
-            <InfoItem 
-              icon={<Phone className="w-4 h-4 text-mariner" />} 
-              label="Điện thoại"
-              value="Chưa cập nhật" 
-              isPlaceholder
-            />
-            <InfoItem 
-              icon={<Mail className="w-4 h-4 text-mariner" />} 
-              label="Email"
-              value="Chưa cập nhật" 
-              isPlaceholder
-            />
             
             {company.websiteUrl && (
               <div className="flex gap-3 group cursor-pointer">
@@ -85,26 +73,24 @@ export function SidebarInfo({ company, isPreview }: SidebarInfoProps) {
              </div>
           </div>
 
-          {/* Map Widget */}
+          {/* Live Interactive Map Widget */}
           {company.address && (
-            <div className="rounded-xl overflow-hidden h-[150px] bg-slate-100 relative group border border-slate-200">
-              <div 
-                className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/105.8342,21.0278,13/400x200?access_token=placeholder')] bg-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
-                style={{ backgroundImage: `url('https://maps.googleapis.com/maps/api/staticmap?center=${encodeURIComponent(company.address)}&zoom=14&size=400x200&maptype=roadmap&markers=color:blue%7C${encodeURIComponent(company.address)}&key=')` }} // This would act as a visual placeholder fallback
+            <div className="rounded-xl overflow-hidden h-[160px] bg-slate-50 relative border border-slate-200 group">
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(company.address)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                className="w-full h-full border-0 grayscale-[0.1] group-hover:grayscale-0 transition-all duration-500"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white gap-2 pointer-events-none">
-                <MapPin className="w-6 h-6 drop-shadow-lg" />
-                <span className="text-[10px] font-black uppercase tracking-widest drop-shadow-md">Xem bản đồ</span>
-              </div>
-              <div className="absolute bottom-2.5 left-2.5 right-2.5">
+              <div className="absolute bottom-2 left-2 right-2">
                 <a 
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2 bg-white text-mariner rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-slate-50 transition-all flex items-center justify-center gap-2 no-underline"
+                  className="w-full py-1.5 bg-white/95 backdrop-blur-sm text-mariner rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md border border-white/50 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 no-underline"
                 >
-                  Mở Google Maps <ChevronRight className="w-3 h-3" />
+                  Xem toàn màn hình <ChevronRight className="w-3 h-3" />
                 </a>
               </div>
             </div>

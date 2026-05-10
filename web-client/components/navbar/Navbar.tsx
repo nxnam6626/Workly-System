@@ -47,6 +47,14 @@ export function Navbar() {
     ]
   };
 
+  const companiesMenu = [
+    "Tiêu Biểu", "Nổi Bật", "Ngân Hàng", "Bảo Hiểm",
+    "Công Nghệ", "Xây Dựng", "Sản Xuất", "Nhà Hàng",
+    "Khách Sạn", "Y Tế", "Bất Động Sản", "Giáo Dục"
+  ];
+
+
+
   return (
     <nav className="w-full bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 lg:px-6 flex items-center justify-between h-16">
@@ -62,22 +70,21 @@ export function Navbar() {
             >
               <Link
                 href="/jobs"
-                className={`text-[15px] font-bold flex items-center gap-1 transition-colors h-full ${isJobsMenuOpen ? 'text-mariner' : 'text-slate-700 hover:text-mariner'
-                  }`}
+                className={`text-[15px] font-bold flex items-center gap-1 transition-colors h-full ${isJobsMenuOpen ? 'text-mariner' : 'text-slate-700 hover:text-mariner'}`}
               >
                 Việc làm <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isJobsMenuOpen ? 'rotate-180' : ''}`} />
               </Link>
 
               {/* Mega Menu */}
               {isJobsMenuOpen && (
-                <div className="absolute top-16 -left-20 w-[850px] bg-white shadow-2xl rounded-b-2xl border-t border-slate-50 p-8 grid grid-cols-3 gap-10 animate-in fade-in slide-in-from-top-2 duration-300 z-50">
+                <div className="absolute top-16 -left-20 w-[750px] bg-white shadow-xl rounded-b-2xl border-t border-slate-50 p-6 grid grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-2 duration-300 z-50">
                   {/* Column 1: Ngành nghề */}
                   <div>
-                    <h4 className="font-black text-slate-900 text-sm mb-5 uppercase tracking-wide">Việc theo ngành nghề</h4>
-                    <ul className="space-y-3">
+                    <h4 className="font-black text-slate-900 text-[13px] mb-3 uppercase tracking-wide">Việc theo ngành nghề</h4>
+                    <ul className="space-y-2">
                       {jobsMegaMenu.industries.map(item => (
                         <li key={item.label}>
-                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[13px] font-medium transition-colors block">
+                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[12.5px] font-medium transition-colors block">
                             {item.label}
                           </Link>
                         </li>
@@ -87,11 +94,11 @@ export function Navbar() {
 
                   {/* Column 2: Địa điểm */}
                   <div>
-                    <h4 className="font-black text-slate-900 text-sm mb-5 uppercase tracking-wide">Việc theo địa điểm</h4>
-                    <ul className="space-y-3">
+                    <h4 className="font-black text-slate-900 text-[13px] mb-3 uppercase tracking-wide">Việc theo địa điểm</h4>
+                    <ul className="space-y-2">
                       {jobsMegaMenu.locations.map(item => (
                         <li key={item.label}>
-                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[13px] font-medium transition-colors block">
+                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[12.5px] font-medium transition-colors block">
                             {item.label}
                           </Link>
                         </li>
@@ -101,11 +108,11 @@ export function Navbar() {
 
                   {/* Column 3: Nhu cầu */}
                   <div>
-                    <h4 className="font-black text-slate-900 text-sm mb-5 uppercase tracking-wide">Việc theo nhu cầu</h4>
-                    <ul className="space-y-3">
+                    <h4 className="font-black text-slate-900 text-[13px] mb-3 uppercase tracking-wide">Việc theo nhu cầu</h4>
+                    <ul className="space-y-2">
                       {jobsMegaMenu.needs.map(item => (
                         <li key={item.label}>
-                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[13px] font-medium transition-colors block">
+                          <Link href={item.href} className="text-slate-500 hover:text-mariner text-[12.5px] font-medium transition-colors block">
                             {item.label}
                           </Link>
                         </li>
@@ -116,6 +123,7 @@ export function Navbar() {
               )}
             </div>
 
+            {/* Công ty Dropdown */}
             <div
               className="relative h-full flex items-center"
               onMouseEnter={() => setIsCompaniesMenuOpen(true)}
@@ -123,23 +131,17 @@ export function Navbar() {
             >
               <Link
                 href="/companies"
-                className={`text-[15px] font-bold flex items-center gap-1 transition-colors h-full ${isCompaniesMenuOpen ? 'text-mariner' : 'text-slate-700 hover:text-mariner'
-                  }`}
+                className={`text-[15px] font-bold flex items-center gap-1 transition-colors h-full ${isCompaniesMenuOpen ? 'text-mariner' : 'text-slate-700 hover:text-mariner'}`}
               >
                 Công ty <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isCompaniesMenuOpen ? 'rotate-180' : ''}`} />
               </Link>
 
-              {/* Companies Dropdown */}
               {isCompaniesMenuOpen && (
-                <div className="absolute top-16 left-0 w-48 bg-white shadow-2xl rounded-b-xl border-t border-slate-50 py-3 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-                  <ul className="space-y-1">
-                    {[
-                      "Tiêu Biểu", "Nổi Bật", "Ngân Hàng", "Bảo Hiểm",
-                      "Công Nghệ", "Xây Dựng", "Sản Xuất", "Nhà Hàng",
-                      "Khách Sạn", "Y Tế", "Bất Động Sản", "Giáo Dục"
-                    ].map(item => (
+                <div className="absolute top-16 left-0 w-48 bg-white shadow-xl rounded-b-xl border-t border-slate-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+                  <ul className="space-y-0.5">
+                    {companiesMenu.map(item => (
                       <li key={item}>
-                        <Link href="#" className="px-5 py-2 text-slate-600 hover:bg-slate-50 hover:text-mariner text-[13.5px] font-medium transition-all block">
+                        <Link href="/companies" className="px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-mariner text-[13px] font-medium transition-all block rounded-lg">
                           {item}
                         </Link>
                       </li>
@@ -148,6 +150,7 @@ export function Navbar() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
 

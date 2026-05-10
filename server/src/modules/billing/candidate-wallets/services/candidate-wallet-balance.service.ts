@@ -43,7 +43,10 @@ export class CandidateWalletBalanceService {
     
     // CandidateWallet returns the standard schema object
     return this.prisma.candidateTransaction.findMany({
-      where: { walletId: walletData.walletId },
+      where: { 
+        walletId: walletData.walletId,
+        status: 'SUCCESS'
+      },
       orderBy: { createdAt: 'desc' },
       skip,
       take,

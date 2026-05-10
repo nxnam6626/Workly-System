@@ -12,7 +12,7 @@ import {
   Heart,
   FileText,
   Briefcase,
-  RefreshCcw,
+  MessageSquare,
   Eye,
   LogOut,
   Sparkles,
@@ -87,9 +87,9 @@ export function UserDropdown() {
   const displayName = user?.name || user?.candidate?.fullName || user?.email || 'Người dùng';
   const initial = displayName.charAt(0).toUpperCase();
 
-  const isCandidate = user?.roles?.includes('CANDIDATE');
-  const isRecruiter = user?.roles?.includes('RECRUITER');
-  const isAdmin = user?.roles?.includes('ADMIN');
+  const isCandidate = user?.roles?.includes('CANDIDATE') || !!user?.candidate;
+  const isRecruiter = user?.roles?.includes('RECRUITER') || !!user?.recruiter;
+  const isAdmin = user?.roles?.includes('ADMIN') || !!user?.admin;
 
   const navItems = [];
 
@@ -101,7 +101,7 @@ export function UserDropdown() {
       { icon: <Heart className="w-5 h-5" />, label: "Việc làm đã lưu", href: "/profile/jobs/saved" },
       { icon: <FileText className="w-5 h-5" />, label: "Việc làm đã xem", href: "/profile/jobs/viewed" },
       { icon: <Briefcase className="w-5 h-5" />, label: "Việc làm phù hợp", href: "/profile/jobs/matching" },
-      { icon: <RefreshCcw className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/messages" },
+      { icon: <MessageSquare className="w-5 h-5" />, label: "Nhắn tin với nhà tuyển dụng", href: "/profile/messages" },
     );
   }
 
@@ -120,7 +120,6 @@ export function UserDropdown() {
 
   navItems.push(
     { icon: <Lock className="w-5 h-5" />, label: "Đổi mật khẩu", href: "/profile/change-password" },
-    { icon: <Bell className="w-5 h-5" />, label: "Cài đặt thông báo email", href: "/profile/settings/notifications" },
   );
 
   return (

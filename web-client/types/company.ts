@@ -45,4 +45,5 @@ export interface Company {
   history?: CompanyHistory[];
   cultureContent?: any; 
   jobPostings?: any[];
+  jobPostingsCount?: number;
 }

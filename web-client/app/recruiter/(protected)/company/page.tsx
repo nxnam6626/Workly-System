@@ -7,6 +7,7 @@ import { Building, Loader2, Settings, Heart, Eye, Users } from 'lucide-react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 // Types
 interface CompanyData {
@@ -82,6 +83,7 @@ export default function CompanyProfilePage() {
   const [completeness, setCompleteness] = useState<Completeness>({ total: 0, breakdown: {} });
   
   const { accessToken } = useAuthStore();
+  const confirm = useConfirm();
 
   const fetchCompany = useCallback(async () => {
     if (!accessToken) return;
@@ -138,14 +140,49 @@ export default function CompanyProfilePage() {
       if (apiData.error === 0 && apiData.data) {
         const d = apiData.data;
         toast.success('Đã tự động điền thông tin doanh nghiệp!');
+        const fetchedName = d.ten || d.name || d.title || formData.companyName;
+        const fetchedAddress = d.dc || d.address || formData.address;
+
         setFormData(prev => ({
           ...prev,
-          companyName: d.name || d.title || prev.companyName,
-          address: d.address || prev.address,
+          companyName: fetchedName,
+          address: fetchedAddress,
           mainIndustry: d.nganh_nghe || d.industry || prev.mainIndustry,
           companySize: d.employees || d.size || prev.companySize,
           verifyStatus: 1
         }));
+
+        // Smart Auto-Sync for Branch List
+        setTimeout(async () => {
+          const hasBranchSync = await confirm({
+            title: 'Đồng bộ Địa điểm làm việc?',
+            message: `Bạn vừa cập nhật địa chỉ mới theo MST. Hệ thống có thể tự động CẬP NHẬT HOẶC TẠO MỚI địa điểm "Trụ sở chính" ngay lập tức cho bạn. Thực thi?`,
+            confirmText: 'Cập nhật ngay',
+            cancelText: 'Để sau',
+            variant: 'info'
+          });
+
+          if (hasBranchSync) {
+            try {
+               const loadingId = toast.loading('Đang xử lý địa điểm...');
+               // 1. Find any existing "Trụ sở chính" to clean up
+               const existingHQ = formData.branches?.find(b => b.name?.toLowerCase().includes('trụ sở') || b.name?.toLowerCase().includes('hq'));
+               if (existingHQ) {
+                  await api.delete(`/companies/my-company/branches/${existingHQ.branchId}`);
+               }
+               // 2. Create fresh unified branch
+               await api.post('/companies/my-company/branches', {
+                  name: 'Trụ sở chính',
+                  address: fetchedAddress
+               });
+               toast.success('Đã đồng bộ địa chỉ chi nhánh thành công!', { id: loadingId });
+               fetchCompany(); // Reload authoritative list from DB
+            } catch (error) {
+               toast.error('Gặp lỗi khi đồng bộ chi nhánh.');
+            }
+          }
+        }, 800);
+
         return;
       }
 
@@ -226,7 +263,7 @@ export default function CompanyProfilePage() {
   const isChanged = JSON.stringify(formData) !== JSON.stringify(initialData);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 px-4 pb-20">
+    <div className="max-w-[1400px] mx-auto space-y-8 px-6 pb-20">
       <HeaderSection activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <AnimatePresence mode="wait">

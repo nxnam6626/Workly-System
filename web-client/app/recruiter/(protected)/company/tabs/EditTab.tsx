@@ -141,8 +141,9 @@ export default function EditTab({
                   type="text"
                   name="companyName"
                   value={formData.companyName}
-                  readOnly
-                  className="w-full h-12 pl-12 pr-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 font-semibold cursor-not-allowed outline-none"
+                  onChange={handleChange}
+                  className="w-full h-12 pl-12 pr-4 rounded-2xl border border-slate-200 focus:border-mariner focus:ring-4 focus:ring-mariner/5 font-semibold outline-none transition-all"
+                  placeholder="Tên doanh nghiệp chính thức..."
                 />
               </div>
             </div>
@@ -180,8 +181,9 @@ export default function EditTab({
                   type="text"
                   name="address"
                   value={formData.address}
-                  readOnly
-                  className="w-full h-12 pl-12 pr-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 font-semibold cursor-not-allowed outline-none"
+                  onChange={handleChange}
+                  className="w-full h-12 pl-12 pr-4 rounded-2xl border border-slate-200 focus:border-mariner focus:ring-4 focus:ring-mariner/5 font-semibold outline-none transition-all"
+                  placeholder="Số nhà, Tên đường, Quận/Huyện..."
                 />
               </div>
             </div>

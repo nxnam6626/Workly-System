@@ -18,14 +18,15 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/stores/auth';
 import { ProfilePageShell } from '@/components/candidates/ProfilePageShell';
-import ActivateJobSearchModal from '@/components/modals/ActivateJobSearchModal';
 import { getWalletBalance, getTransactions, topUpWallet } from '@/lib/candidate-wallet-api';
 
 export default function CandidateWalletPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuthStore();
+  const isLookingForJob = user?.candidate?.isOpenToWork ?? false;
   const [topupAmount, setTopupAmount] = useState<string>('50000');
   const [processing, setProcessing] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
@@ -123,9 +124,15 @@ export default function CandidateWalletPage() {
                         <p className="text-xs text-indigo-200/60">Trạng thái Tìm việc</p>
                         <p className="font-bold text-[13px] mt-0.5">
                           {daysLeft > 0 ? (
-                            <span className="text-emerald-400 flex items-center gap-1">
-                              <CalendarDays size={14} /> Đang kích hoạt
-                            </span>
+                             isLookingForJob ? (
+                                <span className="text-emerald-400 flex items-center gap-1">
+                                  <CalendarDays size={14} /> Đang hoạt động
+                                </span>
+                             ) : (
+                                <span className="text-amber-400 flex items-center gap-1" title="Gói vẫn còn hạn nhưng bạn đã ẩn hồ sơ">
+                                  <CalendarDays size={14} /> Đang tạm ẩn
+                                </span>
+                             )
                           ) : (
                             <span className="text-slate-400">Chưa kích hoạt</span>
                           )}
@@ -183,13 +190,6 @@ export default function CandidateWalletPage() {
              </div>
           </div>
           
-          <button
-             onClick={() => setIsModalOpen(true)}
-             className="w-full p-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl text-white font-bold text-center shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-all flex items-center justify-center gap-2"
-          >
-            <Sparkles size={20} />
-            Kích hoạt/Gia hạn Gói Tìm Việc
-          </button>
         </div>
 
         {/* RIGHT: Transactions Table */}
@@ -253,42 +253,49 @@ export default function CandidateWalletPage() {
         </div>
       </div>
 
-      <ActivateJobSearchModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          refreshData();
-        }}
-      />
 
-      {/* Payment Iframe Handler */}
+      {/* Modern Immersive Payment Portal */}
       {paymentUrl && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0f172a]/80 backdrop-blur-md p-0 sm:p-4 md:p-8 animate-in fade-in duration-300">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl w-full max-w-4xl h-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-white/20"
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="bg-white w-full max-w-5xl h-full max-h-screen sm:max-h-[90vh] flex flex-col overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] sm:rounded-[28px] border border-white/10 relative"
           >
-            <div className="p-4 border-b flex items-center justify-between bg-slate-50/50">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                 <CreditCard className="text-indigo-600" size={18} />
-                 Cổng thanh toán trực tuyến
-              </h3>
+            {/* Premium Header Blur Pane */}
+            <div className="absolute top-0 left-0 right-0 h-16 z-10 px-6 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                  <CreditCard className="text-white" size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 tracking-tight leading-none mb-1">Thanh toán Workly</h3>
+                  <p className="text-[11px] font-medium text-slate-500">Kết nối bảo mật qua PayOS Secure</p>
+                </div>
+              </div>
+              
               <button 
                 onClick={() => {
                   setPaymentUrl(null);
                   refreshData();
                 }}
-                className="px-3 py-1.5 bg-white border rounded-xl text-xs font-bold text-slate-500 flex items-center gap-1 hover:bg-slate-100 shadow-sm"
+                className="group relative px-4 py-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-2xl text-xs font-bold text-slate-600 hover:text-rose-600 flex items-center gap-2 transition-all shadow-sm active:scale-[0.98]"
               >
-                Đóng cửa sổ <X size={14} />
+                <span>Đóng và tải lại</span>
+                <div className="w-5 h-5 rounded-full bg-white group-hover:bg-rose-100 flex items-center justify-center transition-colors">
+                  <X size={12} className="transition-transform group-hover:rotate-90 duration-300" />
+                </div>
               </button>
             </div>
-            <div className="flex-1 w-full">
+            
+            {/* Immersive Frame Content with proper top offset for header */}
+            <div className="flex-1 w-full pt-16 bg-[#F4F7FA]">
                <iframe 
                  src={paymentUrl}
-                 className="w-full h-full border-0"
-                 title="PayOS Payment"
+                 className="w-full h-full border-0 bg-[#F4F7FA]"
+                 title="Secure Payment Terminal"
+                 allow="payment"
                />
             </div>
           </motion.div>

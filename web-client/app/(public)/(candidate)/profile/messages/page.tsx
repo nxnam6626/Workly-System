@@ -7,6 +7,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { ProfilePageShell } from '@/components/candidates/ProfilePageShell';
 import { ScheduleInterviewModal } from '@/components/candidate/messages/ScheduleInterviewModal';
 
 export default function CandidateMessagesPage() {
@@ -251,21 +253,30 @@ export default function CandidateMessagesPage() {
     );
   }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="flex flex-col h-[calc(100vh-120px)] min-h-[600px]"
-    >
-      {/* Page Header */}
-      <div className="mb-5">
-        <p className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-1">Kết nối & Hợp tác</p>
-        <h1 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 700 }}
-          className="text-3xl text-slate-900 leading-none">
-          Tin nhắn <em className="text-emerald-600">nhà tuyển dụng</em>
-        </h1>
+  const customTitle = (
+    <div className="space-y-4">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-1.5 text-slate-500 text-[12px] font-medium">
+        <Link href="/" className="hover:text-[#1e60ad] transition-colors">Trang chủ</Link>
+        <span>/</span>
+        <Link href="/profile" className="hover:text-[#1e60ad] transition-colors">Quản lý hồ sơ</Link>
+        <span>/</span>
+        <span className="text-slate-400">Tin nhắn</span>
       </div>
+      <h1 className="text-3xl font-extrabold text-slate-900 leading-tight">
+        Nhắn tin tuyển dụng
+      </h1>
+    </div>
+  );
+
+  return (
+    <ProfilePageShell title={customTitle} subtitle="">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col h-[calc(100vh-240px)] min-h-[550px]"
+      >
 
       <div className="flex-1 bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden flex flex-col md:flex-row min-h-0">
 
@@ -503,5 +514,6 @@ export default function CandidateMessagesPage() {
         </div>
       </div>
     </motion.div>
+    </ProfilePageShell>
   );
 }
