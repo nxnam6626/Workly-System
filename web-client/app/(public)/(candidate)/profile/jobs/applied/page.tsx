@@ -36,6 +36,8 @@ interface AppliedJob {
     salaryMax: number;
     currency: string;
     locationCity: string;
+    jobLevel?: string;
+    createdAt?: string;
     company: { companyId: string; companyName: string; logo: string | null };
   };
   expectedResponseAt?: string;
@@ -109,6 +111,7 @@ export default function AppliedJobsPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tất cả");
+  const [sortBy, setSortBy] = useState<"NEWEST" | "OLDEST">("NEWEST");
   const [reviewModalData, setReviewModalData] = useState<{ isOpen: boolean; appId: string; companyId: string; companyName: string } | null>(null);
 
   const { accessToken } = useAuthStore();
@@ -293,7 +296,7 @@ export default function AppliedJobsPage() {
                   return (
                     <div
                       key={app.applicationId}
-                      className="group relative bg-white rounded-2xl border border-slate-100 p-5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-5 overflow-visible"
+                      className="group relative bg-white rounded-2xl border border-slate-100 p-5 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 flex flex-col gap-3 overflow-visible"
                     >
                       {/* Left Block: Logo, Title, Status, Company, Location & Salary badges */}
                       <div className="flex items-start gap-4 flex-1 min-w-0">
@@ -318,10 +321,20 @@ export default function AppliedJobsPage() {
                                 className="font-bold text-slate-900 text-base hover:text-blue-600 transition-colors block leading-snug truncate pr-2 group-hover:text-blue-600">
                                 {app.jobPosting.title}
                               </Link>
-                              <p className="text-sm text-slate-400 font-medium mt-0.5 flex items-center gap-1.5">
-                                <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                                {app.jobPosting.company.companyName}
-                              </p>
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[13px] font-medium text-slate-500">
+                                <div className="flex items-center gap-1.5 text-slate-600">
+                                  <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                                  <span className="font-semibold">{app.jobPosting.company.companyName}</span>
+                                </div>
+                                {app.jobPosting.createdAt && (
+                                  <>
+                                    <span className="text-slate-300 font-normal select-none">•</span>
+                                    <span className="text-slate-400 flex items-center gap-1">
+                                      Đăng ngày: {new Date(app.jobPosting.createdAt).toLocaleDateString('vi-VN')}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
 
                             {/* Status badge */}
@@ -360,18 +373,7 @@ export default function AppliedJobsPage() {
                             )}
                           </div>
 
-                          {/* Company Name and Job Posting Date with a sleek bullet separator */}
-                          <p className="text-[#64748B] text-[11px] font-bold tracking-wide uppercase flex flex-wrap items-center gap-1.5">
-                            <span>{app.jobPosting.company?.companyName ? app.jobPosting.company.companyName.toUpperCase() : ""}</span>
-                            {app.jobPosting.createdAt && (
-                              <>
-                                <span className="text-slate-300 font-normal select-none">•</span>
-                                <span className="text-[#64748B] font-semibold text-[10px] normal-case bg-slate-50 border border-slate-100/50 px-1.5 py-0.2 rounded-md">
-                                  Đăng ngày: {new Date(app.jobPosting.createdAt).toLocaleDateString('vi-VN')}
-                                </span>
-                              </>
-                            )}
-                          </p>
+
 
                           {/* Location, Salary and Job Level (Vị trí công việc) badges with matching styles */}
                           <div className="flex flex-wrap items-center gap-2 pt-0.5">
@@ -445,65 +447,57 @@ export default function AppliedJobsPage() {
                         </div>
                       </div>
                     </div>
-                            </div>
-                          </div>
-      </motion.div>
-      );
-                    })
-      ) : (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl border border-slate-100 shadow-sm p-20 text-center space-y-6"
-      >
-        <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
-          <Briefcase className="w-9 h-9 text-slate-200" />
+                  );
+                })}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm p-20 text-center space-y-6"
+              >
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+                  <Briefcase className="w-9 h-9 text-slate-200" />
+                </div>
+                <div className="space-y-2">
+                  <h3 style={{ fontFamily: "'Fraunces', serif" }} className="text-2xl font-bold text-slate-900">
+                    {searchTerm || activeFilter !== "Tất cả"
+                      ? "Không tìm thấy kết quả"
+                      : "Chưa có đơn ứng tuyển nào"}
+                  </h3>
+                  <p className="text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
+                    {searchTerm || activeFilter !== "Tất cả"
+                      ? "Thử thay đổi từ khóa hoặc bộ lọc khác."
+                      : "Hãy bắt đầu hành trình sự nghiệp bằng cách ứng tuyển vào những vị trí phù hợp!"}
+                  </p>
+                </div>
+                {!searchTerm && activeFilter === "Tất cả" && (
+                  <Link href="/jobs"
+                    className="inline-flex items-center gap-2 px-8 py-3 bg-slate-900 text-white text-sm font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg group/cta">
+                    Khám phá việc làm
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5" />
+                  </Link>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="space-y-2">
-          <h3 style={{ fontFamily: "'Fraunces', serif" }} className="text-2xl font-bold text-slate-900">
-            {searchTerm || activeFilter !== "Tất cả"
-              ? "Không tìm thấy kết quả"
-              : "Chưa có đơn ứng tuyển nào"}
-          </h3>
-          <p className="text-sm text-slate-400 max-w-xs mx-auto leading-relaxed">
-            {searchTerm || activeFilter !== "Tất cả"
-              ? "Thử thay đổi từ khóa hoặc bộ lọc khác."
-              : "Hãy bắt đầu hành trình sự nghiệp bằng cách ứng tuyển vào những vị trí phù hợp!"}
-          </p>
-        </div>
-        {!searchTerm && activeFilter === "Tất cả" && (
-          <Link href="/jobs"
-            className="inline-flex items-center gap-2 px-8 py-3 bg-slate-900 text-white text-sm font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg group/cta">
-            Khám phá việc làm
-            <ArrowRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5" />
-          </Link>
-        )}
-      </motion.div>
-                  )}
-    </AnimatePresence>
-  )
-}
-            </div >
-          </main >
-        </div >
-      </div >
+      </div>
 
-  {/* Review Modal */ }
-{
-  reviewModalData && (
-    <CompanyReviewModal
-      isOpen={reviewModalData.isOpen}
-      onClose={() => setReviewModalData(null)}
-      applicationId={reviewModalData.appId}
-      companyId={reviewModalData.companyId}
-      companyName={reviewModalData.companyName}
-      onSuccess={() => {
-        setReviewModalData(null);
-        fetchData(true);
-      }}
-    />
-  )
-}
-    </div >
+      {/* Review Modal */}
+      {reviewModalData && (
+        <CompanyReviewModal
+          isOpen={reviewModalData.isOpen}
+          onClose={() => setReviewModalData(null)}
+          applicationId={reviewModalData.appId}
+          companyId={reviewModalData.companyId}
+          companyName={reviewModalData.companyName}
+          onSuccess={() => {
+            setReviewModalData(null);
+            fetchData(true);
+          }}
+        />
+      )}
+    </ProfilePageShell>
   );
 }
