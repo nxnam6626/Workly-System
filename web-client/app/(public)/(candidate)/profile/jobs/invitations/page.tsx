@@ -163,14 +163,14 @@ export default function InvitationsPage() {
             <span>/</span>
             <Link href="/profile" className="hover:text-[#1e60ad] transition-colors">Quản lý hồ sơ</Link>
             <span>/</span>
-            <span className="text-slate-400">Lời mời phỏng vấn</span>
+            <span className="text-slate-400">Lời mời tuyển dụng</span>
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 leading-tight">
-            Lời mời phỏng vấn
+            Lời mời tuyển dụng
           </h1>
         </div>
       }
-      subtitle={`${invitations.length} cơ hội phỏng vấn đặc quyền dành riêng cho bạn`}
+      subtitle={`${invitations.length} cơ hội phát triển sự nghiệp dành riêng cho bạn`}
       action={
         <ProfileSearchBar
           value={searchTerm}

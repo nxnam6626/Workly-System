@@ -65,10 +65,17 @@ export const InvitationDetail: React.FC<InvitationDetailProps> = ({
 
           {/* Job Meta badges */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-100 text-[9px] font-black text-emerald-600 uppercase tracking-wider shadow-sm shadow-emerald-50">
-              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-              Công việc đã ứng tuyển
-            </span>
+            {activeInv.invType === "JOB_APPLICATION" ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 border border-blue-100 text-[9px] font-black text-blue-600 uppercase tracking-wider shadow-sm shadow-blue-50">
+                <CheckCircle2 className="w-2.5 h-2.5 text-blue-500" />
+                Lời mời quan tâm việc làm
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-100 text-[9px] font-black text-emerald-600 uppercase tracking-wider shadow-sm shadow-emerald-50">
+                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                Lịch hẹn phỏng vấn
+              </span>
+            )}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-[9px] font-black text-indigo-600 uppercase tracking-wider shadow-sm shadow-indigo-50">
               <Building2 className="w-2.5 h-2.5 text-indigo-500" />
               Doanh nghiệp xác thực
@@ -103,7 +110,9 @@ export const InvitationDetail: React.FC<InvitationDetailProps> = ({
       <div className="px-5 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl relative space-y-2">
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           <MessageSquare className="w-3.5 h-3.5 text-slate-300" />
-          Thư mời phỏng vấn từ Phòng Nhân sự
+          {activeInv.invType === "JOB_APPLICATION" 
+            ? "Lời mời quan tâm cơ hội nghề nghiệp" 
+            : "Thư mời phỏng vấn từ Phòng Nhân sự"}
         </p>
         <p className="text-[13px] text-slate-600 leading-relaxed italic">
           "{activeInv.message || 'Chúng tôi rất ấn tượng với hồ sơ của bạn và muốn hẹn lịch phỏng vấn để trao đổi thêm.'}"
@@ -127,18 +136,28 @@ export const InvitationDetail: React.FC<InvitationDetailProps> = ({
             >
               Từ chối
             </button>
-            <button
-              onClick={() => onAcceptClick(activeInv)}
-              disabled={isProcessing}
-              className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1e60ad] hover:bg-[#164e8c] text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-50 active:scale-95 disabled:opacity-50"
-            >
-              {isProcessing ? (
-                <RefreshCw className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4" />
-              )}
-              Chọn thời gian phỏng vấn
-            </button>
+            {activeInv.invType === "JOB_APPLICATION" ? (
+              <Link
+                href={`/jobs/${activeInv.jobPostingId}`}
+                className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1e60ad] hover:bg-[#164e8c] text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-50 active:scale-95"
+              >
+                <ArrowRight className="w-4 h-4" />
+                Ứng tuyển ngay
+              </Link>
+            ) : (
+              <button
+                onClick={() => onAcceptClick(activeInv)}
+                disabled={isProcessing}
+                className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1e60ad] hover:bg-[#164e8c] text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-blue-50 active:scale-95 disabled:opacity-50"
+              >
+                {isProcessing ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                Chọn thời gian phỏng vấn
+              </button>
+            )}
           </div>
         )}
 
@@ -156,7 +175,7 @@ export const InvitationDetail: React.FC<InvitationDetailProps> = ({
           <div className="flex items-center gap-2.5">
             <span className="text-[11px] text-slate-500 font-bold flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3.5 py-2.5 rounded-2xl">
               <XCircle className="w-4 h-4 text-slate-400" />
-              Bạn đã từ chối lời mời phỏng vấn này.
+              Bạn đã từ chối yêu cầu này.
             </span>
           </div>
         )}

@@ -4,7 +4,8 @@ import api from '@/lib/api';
 export interface Notification {
   notificationId: string;
   title: string;
-  content: string;
+  message: string;
+  link?: string;
   type: string;
   isRead: boolean;
   metadata: any;
@@ -41,7 +42,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   fetchUnreadCount: async () => {
     try {
       const { data } = await api.get('/notifications/unread-count');
-      set({ unreadCount: typeof data === 'number' ? data : 0 });
+      const count = typeof data === 'object' ? data?.unreadCount : data;
+      set({ unreadCount: typeof count === 'number' ? count : 0 });
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }

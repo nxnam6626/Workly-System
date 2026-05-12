@@ -83,7 +83,7 @@ export class ApplicationsNotificationService {
       'Lịch Phỏng Vấn Đặc Cách',
       msgContent,
       'success',
-      '/applied-jobs',
+      '/profile/jobs/interviews',
     );
 
     this.messagesGateway.server
@@ -92,7 +92,7 @@ export class ApplicationsNotificationService {
         title: 'Lịch Phỏng Vấn Đặc Cách',
         message: msgContent,
         type: 'success',
-        link: '/applied-jobs',
+        link: '/profile/jobs/interviews',
       });
 
     // Inject message into conversation
@@ -120,11 +120,14 @@ export class ApplicationsNotificationService {
     let message = `Trạng thái hồ sơ của bạn tại ${companyName} đã biến đổi.`;
     let type = 'info';
 
+    let link = '/profile/jobs/applied';
+
     if (status === 'INTERVIEWING') {
       const isReschedule = details?.isReschedule;
       if (!details?.interviewDate) {
         title = 'Yêu cầu chọn lịch phỏng vấn';
         message = `Nhà tuyển dụng ${companyName} đã gửi yêu cầu phỏng vấn cho vị trí "${jobTitle}". Vui lòng chọn lịch phỏng vấn phù hợp ở phía trên để xác nhận.`;
+        link = '/profile/jobs/invitations';
       } else {
         title = isReschedule ? 'Lịch Phỏng Vấn Đã Dời' : 'Lịch Phỏng Vấn Mới';
         const dateStr = details?.interviewDate
@@ -135,6 +138,7 @@ export class ApplicationsNotificationService {
         } else {
           message = `Bạn có lịch phỏng vấn cho vị trí "${jobTitle}" vào ${details?.interviewTime || ''} ngày ${dateStr}. Địa điểm/Link: ${details?.interviewLocation || 'Đang cập nhật'}.`;
         }
+        link = '/profile/jobs/interviews';
       }
     } else if (status === 'ACCEPTED') {
       title = 'Chúc Mừng Trúng Tuyển!';
@@ -153,12 +157,12 @@ export class ApplicationsNotificationService {
       title,
       message,
       type,
-      '/applied-jobs',
+      link,
     );
 
     this.messagesGateway.server
       .to(`user_${candidateUserId}`)
-      .emit('notification', { title, message, type, link: '/applied-jobs' });
+      .emit('notification', { title, message, type, link });
 
     return message;
   }

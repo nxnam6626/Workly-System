@@ -140,7 +140,7 @@ export function NotificationsDropdown() {
                           </h4>
                         </div>
                         <p className={`text-[13px] leading-relaxed mb-1.5 line-clamp-2 ${notification.isRead ? 'text-slate-500 font-medium' : 'text-slate-700 font-semibold'}`}>
-                          {notification.content}
+                          {notification.message}
                         </p>
                         <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                           <Clock className="w-3 h-3" />
@@ -148,10 +148,10 @@ export function NotificationsDropdown() {
                         </div>
                       </div>
 
-                      {/* Link overlay for Job Alert */}
-                      {notification.metadata?.jobPostingId && (
+                      {/* Link overlay for Dynamic Notifications & Job Alerts */}
+                      {(notification.link || notification.metadata?.jobPostingId) && (
                         <Link 
-                          href={`/jobs/${notification.metadata.jobPostingId}`}
+                          href={notification.link || `/jobs/${notification.metadata.jobPostingId}`}
                           className="absolute inset-0 z-10"
                           onClick={() => {
                             setIsOpen(false);

@@ -1,5 +1,6 @@
 export interface Invitation {
   invitationId: string;
+  invType?: "INTERVIEW" | "JOB_APPLICATION";
   jobPostingId: string;
   message?: string;
   status: "PENDING" | "ACCEPTED" | "DECLINED";

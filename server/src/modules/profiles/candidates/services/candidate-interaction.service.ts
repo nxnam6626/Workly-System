@@ -112,6 +112,7 @@ export class CandidateInteractionService {
       msgId: string;
       content: string;
       sentAt: Date;
+      invType: 'INTERVIEW' | 'JOB_APPLICATION';
       slugOrId?: string;
       titleInQuotes?: string;
       companyId?: string;
@@ -126,6 +127,11 @@ export class CandidateInteractionService {
                              msg.content.includes('lịch phỏng vấn');
                              
         if (isInvitation) {
+          const isInterview = msg.content.includes('phỏng vấn') || 
+                             msg.content.includes('lịch hẹn phỏng vấn') || 
+                             msg.content.includes('yêu cầu phỏng vấn');
+          const invType = isInterview ? 'INTERVIEW' : 'JOB_APPLICATION';
+
           const match = msg.content.match(/\/jobs\/([a-zA-Z0-9\-]+)/);
           if (match && match[1]) {
             const slugOrId = match[1];
@@ -134,6 +140,7 @@ export class CandidateInteractionService {
               msgId: msg.messageId,
               content: msg.content,
               sentAt: msg.sentAt,
+              invType,
               slugOrId,
             });
           } else {
@@ -147,6 +154,7 @@ export class CandidateInteractionService {
                 msgId: msg.messageId,
                 content: msg.content,
                 sentAt: msg.sentAt,
+                invType,
                 titleInQuotes: jobTitle,
                 companyId: conv.recruiter.company.companyId,
               });
@@ -225,6 +233,7 @@ export class CandidateInteractionService {
 
         realInvitations.push({
           invitationId: detail.msgId,
+          invType: detail.invType,
           jobPostingId: matchedJob.jobPostingId,
           message: detail.content,
           status: hasApplied ? 'ACCEPTED' : 'PENDING',
