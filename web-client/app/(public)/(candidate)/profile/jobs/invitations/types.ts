@@ -1,5 +1,6 @@
 export interface Invitation {
   invitationId: string;
+  applicationId?: string | null;
   invType?: "INTERVIEW" | "JOB_APPLICATION";
   jobPostingId: string;
   message?: string;

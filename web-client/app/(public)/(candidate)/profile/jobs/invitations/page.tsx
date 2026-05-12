@@ -57,9 +57,11 @@ export default function InvitationsPage() {
     setIsSchedulerOpen(true);
   };
 
-  const handleConfirmSchedule = async (finalSlot: string) => {
+  const handleConfirmSchedule = async (dateStr: string, timeStr: string) => {
     if (!selectedInvitation) return;
     const id = selectedInvitation.invitationId;
+    const appId = selectedInvitation.applicationId;
+
     setProcessingId(id);
     setIsSchedulerOpen(false);
 
@@ -67,22 +69,30 @@ export default function InvitationsPage() {
       setInvitations(prev =>
         prev.map(inv => inv.invitationId === id ? { ...inv, status: "ACCEPTED" } : inv)
       );
-      toast.success(`Đặt lịch phỏng vấn thành công lúc: ${finalSlot}!`);
+      toast.success(`Đặt lịch thành công!`);
+      setProcessingId(null);
+      return;
+    }
+
+    if (!appId) {
+      toast.error("Hệ thống không tìm thấy hồ sơ ứng tuyển tương ứng. Vui lòng thử lại.");
       setProcessingId(null);
       return;
     }
 
     try {
-      await api.patch(`/candidates/me/invitations/${id}/status`, {
-        status: "ACCEPTED",
-        scheduledTime: finalSlot
+      await api.post(`/applications/${appId}/schedule`, {
+        date: dateStr,
+        time: timeStr
       });
+      
       setInvitations(prev =>
         prev.map(inv => inv.invitationId === id ? { ...inv, status: "ACCEPTED" } : inv)
       );
-      toast.success(`Đặt lịch phỏng vấn thành công lúc: ${finalSlot}!`);
+      toast.success(`Đặt lịch phỏng vấn thành công vào lúc ${timeStr}!`);
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi chấp nhận lời mời");
+      console.error("Schedule error:", error);
+      toast.error("Có lỗi xảy ra khi xác nhận lịch phỏng vấn. Vui lòng thử lại sau.");
     } finally {
       setProcessingId(null);
     }

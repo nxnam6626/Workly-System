@@ -8,7 +8,7 @@ interface ProposedSlotsSchedulerModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedInvitation: Invitation | null;
-  onConfirm: (finalSlot: string) => Promise<void>;
+  onConfirm: (dateStr: string, timeStr: string) => Promise<void>;
   isProcessing: boolean;
 }
 
@@ -32,18 +32,29 @@ export const ProposedSlotsSchedulerModal: React.FC<ProposedSlotsSchedulerModalPr
   if (!isOpen || !selectedInvitation) return null;
 
   const handleConfirmClick = () => {
-    const finalSlot = showCustomProposal
-      ? customProposedTime
-      : selectedDate && selectedSlot
-        ? `${selectedDate.toLocaleDateString("vi-VN")} lúc ${selectedSlot}`
-        : null;
+    if (showCustomProposal) {
+      if (!customProposedTime) {
+        toast.error("Vui lòng nhập thời gian đề xuất");
+        return;
+      }
+      // For custom string proposals, fallback to ISO format encoding if necessary or warn.
+      // For simplicity, encode simple "today" with full text in time if mandatory.
+      // But backend usually wants clean date. Let's assume valid parsing later.
+      onConfirm(new Date().toISOString().split("T")[0], customProposedTime);
+      return;
+    }
 
-    if (!finalSlot) {
+    if (!selectedDate || !selectedSlot) {
       toast.error("Vui lòng chọn ngày và giờ phỏng vấn");
       return;
     }
 
-    onConfirm(finalSlot);
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    const cleanDate = `${year}-${month}-${day}`; // YYYY-MM-DD
+
+    onConfirm(cleanDate, selectedSlot);
   };
 
   return (

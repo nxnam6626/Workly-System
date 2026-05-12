@@ -210,10 +210,14 @@ export class CandidateInteractionService {
             candidateId: candidate.candidateId,
             jobPostingId: { in: matchedJobIds },
           },
-          select: { jobPostingId: true },
+          select: { applicationId: true, jobPostingId: true, interviewDate: true, interviewTime: true },
         })
       : [];
-    const appliedJobIds = new Set(applications.map(app => app.jobPostingId));
+
+    const appsByJobId = new Map<string, any>();
+    for (const app of applications) {
+      appsByJobId.set(app.jobPostingId, app);
+    }
 
     // Map matched jobs and applications back to the message details
     const realInvitations: any[] = [];
@@ -229,14 +233,25 @@ export class CandidateInteractionService {
 
       if (matchedJob && !addedJobIds.has(matchedJob.jobPostingId)) {
         addedJobIds.add(matchedJob.jobPostingId);
-        const hasApplied = appliedJobIds.has(matchedJob.jobPostingId);
+        const application = appsByJobId.get(matchedJob.jobPostingId);
+        
+        let status = 'PENDING';
+        if (detail.invType === 'JOB_APPLICATION') {
+          // Lời mời ứng tuyển được coi là ĐÃ CHẤP NHẬN khi user đã tạo hồ sơ ứng tuyển
+          status = application ? 'ACCEPTED' : 'PENDING';
+        } else {
+          // Lời mời Phỏng vấn chỉ được coi là ĐÃ CHẤP NHẬN khi đã được chọn thời gian
+          const hasTime = !!(application?.interviewDate || application?.interviewTime);
+          status = hasTime ? 'ACCEPTED' : 'PENDING';
+        }
 
         realInvitations.push({
           invitationId: detail.msgId,
+          applicationId: application?.applicationId || null, // ADD THIS
           invType: detail.invType,
           jobPostingId: matchedJob.jobPostingId,
           message: detail.content,
-          status: hasApplied ? 'ACCEPTED' : 'PENDING',
+          status: status,
           createdAt: detail.sentAt.toISOString(),
           jobPosting: {
             title: matchedJob.title,
