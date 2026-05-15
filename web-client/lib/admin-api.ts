@@ -375,6 +375,9 @@ export const adminDashboardApi = {
 
   getLatestViolations: (): Promise<LatestViolation[]> =>
     api.get('/admin/violations/latest').then((r) => r.data),
+
+  getRecentTransactions: (limit?: number): Promise<any[]> =>
+    api.get('/admin/revenue/transactions', { params: { limit } }).then((r) => r.data),
 };
 
 // ─── Admin Support Management ──────────────────────────────────────────────────

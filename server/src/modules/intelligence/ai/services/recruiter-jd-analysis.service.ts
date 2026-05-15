@@ -30,6 +30,7 @@ export class RecruiterJdAnalysisService {
       ) {
         finalJdScores.push({
           id: job.jobPostingId,
+          title: job.title,
           ...aiAnalysis,
           autoFixedByAI: struct?.autoFixedByAI,
         });
@@ -200,6 +201,7 @@ export class RecruiterJdAnalysisService {
 
         const struct = jobData.structuredRequirements || {};
         finalJdScores.push({
+          title: jobData.title,
           ...scoreObj,
           autoFixedByAI: struct.autoFixedByAI,
         });

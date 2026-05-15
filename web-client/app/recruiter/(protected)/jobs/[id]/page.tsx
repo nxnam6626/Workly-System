@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Clock, MapPin, DollarSign, Users, Eye, Edit, Sparkles,
   RefreshCw, Lock, BarChart3, MessageCircle, User, Star, Briefcase,
-  ExternalLink, Building2, CheckCircle, ChevronRight
+  ExternalLink, Building2, CheckCircle, ChevronRight, Archive, AlertTriangle, X
 } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -34,7 +34,9 @@ export default function RecruiterJobDetailPage() {
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingCandidates, setLoadingCandidates] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [messagingId, setMessagingId] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
@@ -55,11 +57,25 @@ export default function RecruiterJobDetailPage() {
     try {
       const { data } = await api.get(`/job-postings/${id}`);
       setJob(data);
+      if (data.companyId) {
+        fetchReviews(data.companyId);
+      }
     } catch {
       toast.error('Không tìm thấy tin tuyển dụng');
       router.push('/recruiter/jobs');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async (companyId: string) => {
+    try {
+      const { data } = await api.get(`/company-reviews/${companyId}`);
+      // Lọc đánh giá thuộc về Job Posting hiện tại
+      const jobReviews = data.filter((r: any) => r.application?.jobPosting?.jobPostingId === id);
+      setReviews(jobReviews);
+    } catch (e) {
+      console.error('Failed to fetch reviews', e);
     }
   };
 
@@ -91,6 +107,32 @@ export default function RecruiterJobDetailPage() {
       await api.post('/messages/job-invitation', { candidateId, jobPostingId: id });
       toast.success('Đã gửi lời mời!');
     } catch { toast.error('Gửi thất bại.'); } finally { setMessagingId(null); }
+  };
+
+  const handleCloseJob = () => {
+    setShowCloseModal(true);
+  };
+
+  const executeCloseJob = async () => {
+    try {
+      await api.post(`/job-postings/${id}/close`);
+      toast.success('Đã đóng tin tuyển dụng thành công');
+      setShowCloseModal(false);
+      fetchJobDetails();
+    } catch {
+      toast.error('Có lỗi xảy ra khi đóng tin tuyển dụng');
+      setShowCloseModal(false);
+    }
+  };
+
+  const executeReopenJob = async () => {
+    try {
+      await api.post(`/job-postings/${id}/resume`);
+      toast.success('Đã mở lại tin tuyển dụng thành công');
+      fetchJobDetails();
+    } catch {
+      toast.error('Có lỗi xảy ra khi mở lại tin tuyển dụng');
+    }
   };
 
   if (loading) return (
@@ -187,6 +229,18 @@ export default function RecruiterJobDetailPage() {
                     <ExternalLink className="w-4 h-4" /> Xem trang ứng viên
                   </Link>
                 )}
+                {job.status !== 'CLOSED' && job.status !== 'REJECTED' && (
+                  <button onClick={handleCloseJob}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white border border-rose-200 text-rose-600 rounded-xl text-sm font-bold hover:bg-rose-50 transition-all">
+                    <Archive className="w-4 h-4" /> Đóng tin
+                  </button>
+                )}
+                {job.status === 'CLOSED' && (
+                  <button onClick={executeReopenJob}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 border border-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all shadow-md shadow-emerald-100">
+                    <RefreshCw className="w-4 h-4" /> Mở lại tin
+                  </button>
+                )}
               </div>
             </div>
 
@@ -227,6 +281,52 @@ export default function RecruiterJobDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Candidate Reviews Section */}
+            {reviews.length > 0 && (
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden p-8 space-y-6">
+                <h2 className="text-base font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1 h-5 bg-orange-500 rounded-full" />
+                  Đánh giá của ứng viên ({reviews.length})
+                </h2>
+                <div className="space-y-4">
+                  {reviews.map((review) => {
+                    const avgScore = (review.ratingProcess + review.ratingInterviewer + review.ratingOffice) / 3;
+                    return (
+                      <div key={review.reviewId} className="p-5 border border-slate-100 rounded-2xl bg-slate-50/50">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                              {!review.isAnonymous && review.candidate?.user?.avatar ? (
+                                <img src={review.candidate.user.avatar} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold">
+                                  {review.isAnonymous ? "ẨN" : review.candidate?.fullName?.[0]?.toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-800">
+                                {review.isAnonymous ? "Người dùng ẩn danh" : review.candidate?.fullName || "Ứng viên"}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                            <Star className="w-4 h-4 fill-orange-400 text-orange-400" />
+                            <span className="text-sm font-black text-slate-800">{avgScore.toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <p className="text-slate-600 text-sm leading-relaxed">{review.content}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* ── RIGHT: Sidebar ───────────────────────────── */}
@@ -390,6 +490,64 @@ export default function RecruiterJobDetailPage() {
           missingSkills={analysisTarget.missingSkills ?? []}
           analysis={analysisTarget.analysis}
         />
+      )}
+
+      {/* Modal Xác nhận đóng tin */}
+      {showCloseModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" 
+            onClick={() => setShowCloseModal(false)}
+          />
+          <div className="relative z-10 w-full max-w-[400px] bg-white shadow-2xl rounded-2xl border border-slate-100 p-6 animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowCloseModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-10 h-10 rounded-full border border-rose-100 bg-rose-50 flex items-center justify-center text-rose-600 mb-4">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Đóng tin tuyển dụng?</h3>
+            <div className="text-sm text-slate-500 leading-relaxed mb-6 space-y-3">
+              <p>
+                Bạn có chắc chắn muốn đóng tin tuyển dụng này? Tin đã đóng sẽ không thể tiếp nhận thêm hồ sơ ứng tuyển mới.
+              </p>
+              {(30 - Math.floor((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24)) > 0 || (job.vacancies > 0 && job.vacancies > (job.applications?.length || 0))) && (
+                <div className="bg-rose-50/50 border border-rose-100/50 p-3 rounded-xl text-[13px] text-slate-600">
+                  <ul className="space-y-1.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                      <span>Đã ứng tuyển: <strong className="text-slate-800">{job.applications?.length || 0} {job.vacancies > 0 ? `/ ${job.vacancies}` : '(Không giới hạn)'}</strong> người</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                      <span>Thời gian còn lại: <strong className="text-slate-800">Khoảng {30 - Math.floor((Date.now() - new Date(job.createdAt).getTime()) / (1000 * 60 * 60 * 24))} ngày</strong></span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowCloseModal(false)}
+                className="flex-1 py-2.5 bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={executeCloseJob}
+                className="flex-1 py-2.5 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 shadow-sm shadow-rose-200 transition-colors"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

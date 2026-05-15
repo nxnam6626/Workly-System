@@ -188,15 +188,17 @@ export default function JobDetailPage() {
               <div className="flex gap-4">
                 <button 
                   onClick={handleApplyClick}
-                  disabled={job.hasApplied}
+                  disabled={job.hasApplied || job.status === 'CLOSED'}
                   className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-white transition-all shadow-md ${
-                    job.hasApplied 
-                      ? "bg-slate-300 shadow-none cursor-not-allowed" 
-                      : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+                    job.status === 'CLOSED'
+                      ? "bg-slate-300 shadow-none cursor-not-allowed text-slate-500"
+                      : job.hasApplied 
+                        ? "bg-slate-300 shadow-none cursor-not-allowed" 
+                        : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
                   }`}
                 >
                   <Send className="w-5 h-5" />
-                  {job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
+                  {job.status === 'CLOSED' ? "Đã đóng tin" : (job.hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay")}
                 </button>
                 <button 
                   onClick={handleToggleFavorite}
