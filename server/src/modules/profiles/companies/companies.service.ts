@@ -143,7 +143,17 @@ export class CompaniesService {
     });
     if (!recruiter) throw new NotFoundException('Nhà tuyển dụng không tồn tại');
 
+    if (updateData.companyName !== undefined && (!updateData.companyName || updateData.companyName.trim() === '')) {
+      throw new BadRequestException('Tên công ty không được để trống');
+    }
+    if (updateData.address !== undefined && (!updateData.address || updateData.address.trim() === '')) {
+      throw new BadRequestException('Địa chỉ công ty không được để trống');
+    }
+
     if (!recruiter.companyId) {
+      if (!updateData.companyName || !updateData.address) {
+        throw new BadRequestException('Vui lòng cung cấp đầy đủ tên và địa chỉ công ty để khởi tạo');
+      }
       return this.createNewCompany(recruiter.recruiterId, updateData);
     }
 

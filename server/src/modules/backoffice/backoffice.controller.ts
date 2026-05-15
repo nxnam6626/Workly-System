@@ -20,6 +20,11 @@ export class BackofficeController {
     return this.backofficeService.getRevenueStats();
   }
 
+  @Get('revenue/transactions')
+  getRecentTransactions() {
+    return this.backofficeService.getRecentTransactions();
+  }
+
   @Get('recruiters/violations')
   getViolatingRecruiters() {
     return this.backofficeService.getViolatingRecruiters();

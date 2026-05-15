@@ -32,6 +32,15 @@ export const Step1_BasicInfo = ({
     return categoryMatch || subMatch;
   });
 
+  const salaryMinVal = Number(formData.salaryMin);
+  const salaryMaxVal = Number(formData.salaryMax);
+  const isSalaryMinValid = formData.salaryMin === '' || formData.salaryMin === undefined || formData.salaryMin === null;
+  const isSalaryMaxValid = formData.salaryMax === '' || formData.salaryMax === undefined || formData.salaryMax === null;
+  
+  const minNegative = !isSalaryMinValid && salaryMinVal < 0;
+  const maxNegative = !isSalaryMaxValid && salaryMaxVal < 0;
+  const hasSalaryError = !isSalaryMinValid && !isSalaryMaxValid && salaryMinVal > salaryMaxVal;
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-4">
       {/* Tiêu đề & Lĩnh vực */}
@@ -231,7 +240,7 @@ export const Step1_BasicInfo = ({
               name="salaryMin" 
               value={formData.salaryMin} 
               onChange={handleChange} 
-              className="w-full h-14 px-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 focus:bg-white outline-none transition-all font-bold text-slate-700" 
+              className={`w-full h-14 px-6 rounded-2xl bg-slate-50 border-2 ${minNegative || hasSalaryError ? 'border-red-400 bg-red-50 text-red-600 focus:border-red-500' : 'border-transparent focus:border-emerald-500/20 focus:bg-white'} outline-none transition-all font-bold text-slate-700`} 
               placeholder="Tối thiểu" 
             />
           </div>
@@ -241,11 +250,29 @@ export const Step1_BasicInfo = ({
               name="salaryMax" 
               value={formData.salaryMax} 
               onChange={handleChange} 
-              className="w-full h-14 px-6 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-emerald-500/20 focus:bg-white outline-none transition-all font-bold text-slate-700" 
+              className={`w-full h-14 px-6 rounded-2xl bg-slate-50 border-2 ${maxNegative || hasSalaryError ? 'border-red-400 bg-red-50 text-red-600 focus:border-red-500' : 'border-transparent focus:border-emerald-500/20 focus:bg-white'} outline-none transition-all font-bold text-slate-700`} 
               placeholder="Tối đa" 
             />
           </div>
         </div>
+
+        {(hasSalaryError || minNegative || maxNegative) && (
+          <div className="flex flex-col gap-1.5 px-2 py-1">
+            {hasSalaryError && (
+              <p className="text-xs font-bold text-red-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.
+              </p>
+            )}
+            {(minNegative || maxNegative) && (
+              <p className="text-xs font-bold text-red-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Mức lương không được nhập số nhỏ hơn 0.
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center gap-2 text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
            <p className="text-[11px] font-medium italic">Gợi ý: Để trống nếu bạn muốn hiển thị "Thỏa thuận" trên tin tuyển dụng.</p>

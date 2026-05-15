@@ -6,16 +6,13 @@ import {
   ShieldCheck, 
   Eye, 
   EyeOff, 
-  CheckCircle2, 
   AlertCircle,
   ArrowRight,
   Shield,
   KeyRound,
-  Fingerprint,
   Sparkles
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ProfileSidebar } from "@/components/candidates/ProfileSidebar";
+import { motion } from "framer-motion";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/stores/auth";
@@ -55,95 +52,80 @@ export default function ChangePasswordPage() {
   };
 
   const getStrengthLabel = (score: number) => {
-    if (score <= 25) return "Y?u";
-    if (score <= 50) return "Trung b�nh";
-    if (score <= 75) return "Kh�";
-    return "M?nh";
+    if (score <= 25) return "Yếu";
+    if (score <= 50) return "Trung bình";
+    if (score <= 75) return "Khá";
+    return "Mạnh";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.newPassword !== formData.confirmPassword) {
-      toast.error("M?t kh?u x�c nh?n kh�ng kh?p!");
+      toast.error("Mật khẩu xác nhận không khớp!");
       return;
     }
 
-    if (passwordStrength < 50) {
-      toast.error("M?t kh?u qu� y?u! Vui l�ng s? d?ng m?t kh?u m?nh hon.");
-      return;
-    }
-
-    setLoading(true);
     try {
+      setLoading(true);
       await api.patch("/auth/change-password", {
         currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
+        newPassword: formData.newPassword,
       });
       
-      toast.success("�?i m?t kh?u th�nh c�ng!");
+      toast.success("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+      setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       
-      // Optional security measure: logout after 2 seconds
+      // Auto logout after successful password change
       setTimeout(() => {
-        toast("Phi�n dang nh?p d� h?t h?n. Vui l�ng dang nh?p l?i v?i m?t kh?u m?i.", { icon: "??" });
         logout();
-        router.push("/login");
+        router.push("/auth/login");
       }, 2000);
       
     } catch (error: any) {
-      const msg = error.response?.data?.message || "�� c� l?i x?y ra. Vui l�ng th? l?i.";
-      toast.error(msg);
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfdfe] pt-24 pb-20 font-sans">
-      <div className="max-w-6xl mx-auto px-4 lg:px-6">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-          
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <ProfileSidebar />
-          </aside>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-2xl"
-            >
-              <div className="mb-10 space-y-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-blue-600 text-[10px] font-black uppercase tracking-widest mb-4">
-                  <Fingerprint className="w-3 h-3" />
-                  Security Center
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-3xl"
+    >
+              {/* Header */}
+              <div className="bg-white rounded-[32px] p-8 md:p-10 shadow-sm border border-slate-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+                  <ShieldCheck className="w-64 h-64" />
                 </div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                  �?i m?t kh?u <Sparkles className="w-8 h-8 text-blue-500" />
-                </h1>
-                <p className="text-slate-500 font-medium">B?o m?t t�i kho?n c?a b?n b?ng c�ch c?p nh?t m?t kh?u d?nh k?.</p>
-              </div>
-
-              <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-slate-200/50 p-8 md:p-12 relative overflow-hidden">
-                {/* Decorative background circle */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 opacity-10 rounded-full translate-x-1/2 -translate-y-1/2" />
                 
-                <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-                  
+                <div className="relative z-10 space-y-2 mb-10">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-sm font-black text-slate-800 mb-4">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    BẢO MẬT TÀI KHOẢN
+                  </div>
+                  <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+                    Đổi mật khẩu
+                  </h1>
+                  <p className="text-slate-500 font-medium">
+                    Cập nhật mật khẩu thường xuyên để bảo vệ tài khoản của bạn
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
                   {/* Current Password */}
                   <div className="space-y-2">
                     <label className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
                       <KeyRound className="w-4 h-4 text-slate-400" />
-                      M?t kh?u hi?n t?i
+                      Mật khẩu hiện tại
                     </label>
                     <div className="relative group">
                       <input
                         type={showOld ? "text" : "password"}
                         className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all font-medium pr-14"
-                        placeholder="��������"
+                        placeholder="Nhập mật khẩu hiện tại"
                         required
                         value={formData.currentPassword}
                         onChange={(e) => setFormData({...formData, currentPassword: e.target.value})}
@@ -165,13 +147,13 @@ export default function ChangePasswordPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
                         <Lock className="w-4 h-4 text-slate-400" />
-                        M?t kh?u m?i
+                        Mật khẩu mới
                       </label>
                       <div className="relative group">
                         <input
                           type={showNew ? "text" : "password"}
                           className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all font-medium pr-14"
-                          placeholder="Nh?p m?t kh?u m?i"
+                          placeholder="Nhập mật khẩu mới"
                           required
                           value={formData.newPassword}
                           onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
@@ -194,7 +176,7 @@ export default function ChangePasswordPage() {
                         className="space-y-3"
                       >
                         <div className="flex justify-between items-center px-1">
-                          <span className="text-xs font-bold text-slate-400">�? m?nh: <b className="text-slate-900">{getStrengthLabel(passwordStrength)}</b></span>
+                          <span className="text-xs font-bold text-slate-400">Độ mạnh: <b className="text-slate-900">{getStrengthLabel(passwordStrength)}</b></span>
                           <span className="text-xs font-black text-blue-600">{passwordStrength}%</span>
                         </div>
                         <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -206,7 +188,7 @@ export default function ChangePasswordPage() {
                           />
                         </div>
                         <p className="text-[10px] text-slate-400 font-medium italic">
-                          M?o: S? d?ng �t nh?t 8 k� t?, bao g?m c? ch? hoa, ch? thu?ng, s? v� k� t? d?c bi?t.
+                          Mẹo: Sử dụng ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
                         </p>
                       </motion.div>
                     )}
@@ -214,13 +196,13 @@ export default function ChangePasswordPage() {
                     <div className="space-y-2">
                       <label className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
                         <ShieldCheck className="w-4 h-4 text-slate-400" />
-                        X�c nh?n m?t kh?u m?i
+                        Xác nhận mật khẩu mới
                       </label>
                       <div className="relative group">
                         <input
                           type={showConfirm ? "text" : "password"}
                           className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all font-medium pr-14"
-                          placeholder="Nh?p l?i m?t kh?u m?i"
+                          placeholder="Nhập lại mật khẩu mới"
                           required
                           value={formData.confirmPassword}
                           onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
@@ -236,7 +218,7 @@ export default function ChangePasswordPage() {
                       {formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
                         <div className="flex items-center gap-1.5 text-xs font-bold text-red-500 px-1 pt-1">
                           <AlertCircle className="w-3.5 h-3.5" />
-                          M?t kh?u x�c nh?n kh�ng kh?p
+                          Mật khẩu xác nhận không khớp
                         </div>
                       )}
                     </div>
@@ -252,7 +234,7 @@ export default function ChangePasswordPage() {
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
                         <>
-                          X�C NH?N �?I M?T KH?U
+                          XÁC NHẬN ĐỔI MẬT KHẨU
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
@@ -267,18 +249,12 @@ export default function ChangePasswordPage() {
                     <Shield className="w-10 h-10 text-blue-400" />
                  </div>
                  <div className="space-y-2 text-center md:text-left">
-                   <h3 className="text-xl font-black">T?i sao b?n n�n d?i m?t kh?u?</h3>
+                   <h3 className="text-xl font-black">Tại sao bạn nên đổi mật khẩu?</h3>
                    <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                     Vi?c thay d?i m?t kh?u d?nh k? gi�p b?o v? t�i kho?n kh?i c�c r?i ro b?o m?t v� gi? cho th�ng tin h? so c?a b?n lu�n an to�n tr�n Workly.
+                     Việc thay đổi mật khẩu định kỳ giúp bảo vệ tài khoản khỏi các rủi ro bảo mật và giữ cho thông tin hồ sơ của bạn luôn an toàn trên nền tảng.
                    </p>
                  </div>
               </div>
-            </motion.div>
-          </div>
-        </div>
-
-      </div>
-    </div>
+    </motion.div>
   );
 }
-

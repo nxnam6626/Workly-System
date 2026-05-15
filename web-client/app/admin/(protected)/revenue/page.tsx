@@ -48,8 +48,10 @@ function formatXuToVnd(xuAmount: number) {
 export default function RevenuePage() {
   const [revenue, setRevenue] = useState<RevenueStats | null>(null);
   const [violations, setViolations] = useState<ViolatingRecruiter[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoadingRevenue, setIsLoadingRevenue] = useState(true);
   const [isLoadingViolations, setIsLoadingViolations] = useState(true);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const [revenueError, setRevenueError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
@@ -59,7 +61,7 @@ export default function RevenuePage() {
   const perms: string[] = user?.admin?.permissions ?? [];
   const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_REVENUE');
 
-  const isLoading = isLoadingRevenue || isLoadingViolations;
+  const isLoading = isLoadingRevenue || isLoadingViolations || isLoadingTransactions;
 
   const fetchData = async () => {
     setIsLoadingRevenue(true);
@@ -76,6 +78,12 @@ export default function RevenuePage() {
       .then(setViolations)
       .catch(() => setViolations([]))
       .finally(() => setIsLoadingViolations(false));
+
+    setIsLoadingTransactions(true);
+    adminDashboardApi.getRecentTransactions(20)
+      .then(setTransactions)
+      .catch(() => setTransactions([]))
+      .finally(() => setIsLoadingTransactions(false));
   };
 
   useEffect(() => { 
@@ -90,6 +98,10 @@ export default function RevenuePage() {
         .then(setRevenue)
         .catch(() => setRevenueError(true))
         .finally(() => { setLastUpdated(new Date()); });
+        
+      adminDashboardApi.getRecentTransactions(20)
+        .then(setTransactions)
+        .catch(() => setTransactions([]));
     };
 
     socket.on('revenueUpdated', handleRevenueUpdate);
@@ -337,6 +349,82 @@ export default function RevenuePage() {
                           <span className={`inline-block px-3 py-1.5 rounded-xl text-[11px] font-black tracking-widest uppercase border shadow-sm ${v.status === 'LOCKED' ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'}`}>
                             {v.status === 'LOCKED' ? 'Đã khóa' : 'Hoạt động'}
                           </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Transactions Table */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden hover:shadow-2xl transition-all duration-300">
+            <div className="p-6 lg:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center border border-indigo-200 shadow-sm shadow-indigo-100">
+                  <Wallet className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-xl tracking-tight">Lịch Sử Chi Tiêu Gần Đây</h3>
+                  <p className="text-[13px] font-medium text-slate-500 mt-1">Theo dõi hoạt động giao dịch của các nhà tuyển dụng</p>
+                </div>
+              </div>
+            </div>
+
+            {isLoadingTransactions ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="py-20 text-center text-slate-400">
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-8 h-8 opacity-30" />
+                </div>
+                <p className="text-[15px] font-bold text-slate-800">Không có giao dịch nào gần đây</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-white border-b border-slate-100">
+                    <tr>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Thời gian</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Khách hàng</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Loại giao dịch</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Mô tả</th>
+                      <th className="text-right px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Số tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {transactions.map((tx) => (
+                       <tr key={tx.transactionId} className="hover:bg-slate-50/80 transition-colors group">
+                        <td className="px-6 py-5 text-slate-500 font-medium text-[13px] whitespace-nowrap">
+                          {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                        </td>
+                        <td className="px-6 py-5">
+                          <p className="font-black text-slate-800 text-[14px]">{tx.companyName}</p>
+                          <p className="text-[12px] text-slate-500">{tx.recruiterName}</p>
+                        </td>
+                        <td className="px-6 py-5">
+                           <span className={`inline-block px-3 py-1 rounded-xl text-[11px] font-black tracking-widest uppercase border shadow-sm ${
+                              tx.type === 'DEPOSIT' ? 'bg-blue-50 text-blue-700 border-blue-200/60' :
+                              tx.type === 'BUY_PACKAGE' ? 'bg-purple-50 text-purple-700 border-purple-200/60' :
+                              tx.type === 'POST_JOB' ? 'bg-amber-50 text-amber-700 border-amber-200/60' :
+                              'bg-rose-50 text-rose-700 border-rose-200/60'
+                           }`}>
+                             {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : 'Mở CV'}
+                           </span>
+                        </td>
+                        <td className="px-6 py-5 text-slate-600 font-medium text-[13px] max-w-xs truncate" title={tx.description}>
+                          {tx.description}
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                           <p className={`font-black text-[14px] ${tx.type === 'DEPOSIT' ? 'text-blue-600' : 'text-slate-700'}`}>
+                              {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount} xu
+                           </p>
+                           {tx.realMoney > 0 && (
+                             <p className="text-[11px] text-slate-400 mt-0.5">({formatVnd(tx.realMoney)})</p>
+                           )}
                         </td>
                       </tr>
                     ))}

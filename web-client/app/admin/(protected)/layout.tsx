@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Bot,
   Star,
+  Key,
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { checkIsAdmin } from '@/lib/admin-auth';
@@ -181,6 +182,14 @@ export default function ProtectedAdminConsoleLayout({ children }: { children: Re
             </div>
           )}
         </div>
+        <Link
+          href="/admin/change-password"
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-blue-500/10 hover:text-blue-400 transition-colors mb-1 ${collapsed ? 'justify-center' : ''}`}
+          title={collapsed ? 'Đổi mật khẩu' : ''}
+        >
+          <Key className="w-4 h-4" />
+          {!collapsed && <span className="text-sm font-bold">Đổi mật khẩu</span>}
+        </Link>
         <button
           onClick={() => logout()}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 transition-colors ${collapsed ? 'justify-center' : ''}`}

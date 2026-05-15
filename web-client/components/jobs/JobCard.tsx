@@ -32,6 +32,7 @@ export interface Job {
   vacancies?: number | null;
   category?: string;
   jobLevel?: 'INTERN' | 'STAFF' | 'MANAGER' | 'DIRECTOR' | null;
+  status?: string;
 }
 
 interface JobCardProps {

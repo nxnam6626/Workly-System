@@ -206,6 +206,19 @@ export class JobManagementService {
       ...updateJobPostingDto,
     } as any);
 
+    const mergedSalaryMin = updateJobPostingDto.salaryMin !== undefined ? updateJobPostingDto.salaryMin : existingJob.salaryMin;
+    const mergedSalaryMax = updateJobPostingDto.salaryMax !== undefined ? updateJobPostingDto.salaryMax : existingJob.salaryMax;
+
+    if (
+      mergedSalaryMin !== null && mergedSalaryMin !== undefined &&
+      mergedSalaryMax !== null && mergedSalaryMax !== undefined &&
+      mergedSalaryMin > mergedSalaryMax
+    ) {
+      throw new ForbiddenException(
+        'Lương tối thiểu không thể lớn hơn lương tối đa.',
+      );
+    }
+
     let newStatus: JobStatus =
       (updateJobPostingDto as any).status || existingJob.status;
     if (modResult.score < 50) newStatus = JobStatus.REJECTED;

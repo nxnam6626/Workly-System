@@ -348,7 +348,7 @@ export default function UserDetailModal({
             <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-2 text-sm">
                 <AlertTriangle className={`w-4 h-4 ${(user as any).violations >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
-                <span className="font-medium text-slate-700">Vi phạm gian lận / Chat:</span>
+                <span className="font-medium text-slate-700">Vi phạm gian lận:</span>
                 <span className={`font-bold ${(user as any).violations >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
                   {(user as any).violations || 0}/3
                 </span>

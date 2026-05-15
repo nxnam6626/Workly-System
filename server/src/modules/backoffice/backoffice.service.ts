@@ -256,4 +256,38 @@ export class BackofficeService {
       },
     });
   }
+
+  async getRecentTransactions(limit = 20) {
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        status: 'SUCCESS',
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        wallet: {
+          include: {
+            company: { select: { companyName: true } }
+          }
+        },
+        recruiter: {
+          select: {
+            user: { select: { email: true } },
+            fullName: true
+          }
+        }
+      }
+    });
+
+    return transactions.map(tx => ({
+      transactionId: tx.transactionId,
+      amount: tx.amount,
+      realMoney: tx.realMoney,
+      type: tx.type,
+      description: tx.description,
+      createdAt: tx.createdAt,
+      companyName: tx.wallet?.company?.companyName || 'N/A',
+      recruiterName: tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
+    }));
+  }
 }

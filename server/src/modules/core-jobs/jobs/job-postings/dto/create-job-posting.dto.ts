@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsEnum,
   IsArray,
+  Min,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { JobType, JobLevel } from '@prisma/client';
@@ -30,10 +31,12 @@ export class CreateJobPostingDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0, { message: 'Mức lương tối thiểu không được nhỏ hơn 0' })
   salaryMin?: number;
 
   @IsOptional()
   @IsNumber()
+  @Min(0, { message: 'Mức lương tối đa không được nhỏ hơn 0' })
   salaryMax?: number;
 
   @IsString()

@@ -94,7 +94,7 @@ export class CompanyReviewsService {
         application: {
           include: {
             jobPosting: {
-              select: { title: true },
+              select: { title: true, jobPostingId: true },
             },
           },
         },
