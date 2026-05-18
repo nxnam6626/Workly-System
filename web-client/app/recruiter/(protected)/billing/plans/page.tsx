@@ -203,17 +203,17 @@ export default function PlansPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-4">
+    <div className="max-w-6xl mx-auto py-4 px-4">
+      <div className="text-center mb-6">
+        <h1 className="text-xl font-extrabold text-slate-900 mb-2">
           Nâng cấp Giải pháp Tuyển dụng
         </h1>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+        <p className="text-base text-slate-600 max-w-2xl mx-auto">
           Lựa chọn gói phù hợp để tối ưu chi phí và tăng tốc độ tìm kiếm ứng viên tài năng cho công ty bạn.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
         {plans.map((plan) => {
           const isActive =
             currentSubscription?.planType === plan.id &&
@@ -222,7 +222,7 @@ export default function PlansPage() {
           return (
             <div
               key={plan.id}
-              className={`bg-white h-full flex flex-col rounded-3xl p-8 border-2 transition-all duration-300 relative ${
+              className={`bg-white h-full flex flex-col rounded-2xl p-4 border-2 transition-all duration-300 relative ${
                 isActive
                   ? 'border-indigo-500 shadow-xl ring-4 ring-indigo-500/20'
                   : plan.popular
@@ -243,30 +243,30 @@ export default function PlansPage() {
               </div>
             )}
 
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-3 mb-3">
               <div
-                className={`p-3 rounded-2xl ${
+                className={`p-2 rounded-xl ${
                   plan.theme === 'blue' ? 'bg-blue-50' : 'bg-amber-50'
                 }`}
               >
                 {plan.icon}
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900">{plan.name}</h3>
-                <p className="text-slate-500 text-sm">{plan.description}</p>
+                <h3 className="text-base font-bold text-slate-900">{plan.name}</h3>
+                <p className="text-slate-500 text-xs leading-tight mt-0.5">{plan.description}</p>
               </div>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-3">
               <div className="flex items-end gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">{plan.price}</span>
-                <span className="text-slate-500 mb-1 font-medium">/ tháng</span>
+                <span className="text-2xl font-extrabold text-slate-900">{plan.price}</span>
+                <span className="text-slate-500 mb-1 text-sm font-medium">/ tháng</span>
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-2 mb-4">
               {plan.benefits.map((benefit, i) => (
-                <div key={i} className="flex gap-3 text-slate-700 font-medium">
+                <div key={i} className="flex gap-2 text-slate-700 font-medium text-sm">
                   <div
                     className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
                       plan.theme === 'blue'
@@ -285,7 +285,7 @@ export default function PlansPage() {
               <button
                 onClick={() => handleBuyPlan(plan.id)}
                 disabled={loading === plan.id}
-                className={`w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 ${
+                className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
                   isActive
                     ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                     : plan.theme === 'blue'
@@ -296,9 +296,9 @@ export default function PlansPage() {
                 {loading === plan.id ? 'Đang xử lý...' : isActive ? 'Gia hạn gói' : 'Mua gói ngay'}
                 {!loading && <ArrowRight className="w-5 h-5" />}
               </button>
-              <div className="h-6 mt-4 flex items-center justify-center">
+              <div className="h-5 mt-3 flex items-center justify-center">
                 {isActive && (
-                  <p className="text-center text-[13px] text-slate-500 flex items-center justify-center gap-1">
+                  <p className="text-center text-[12px] text-slate-500 flex items-center justify-center gap-1">
                     <Clock className="w-3.5 h-3.5" /> Còn hạn tới {new Date(currentSubscription.expiryDate).toLocaleDateString('vi-VN')}
                   </p>
                 )}
@@ -309,23 +309,23 @@ export default function PlansPage() {
         })}
       </div>
 
-      <div className="mt-20 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2 text-center">Nhu cầu Mở khóa ứng viên?</h2>
-        <p className="text-slate-500 text-center mb-8">Tiết kiệm lớn với các gói mở khóa riêng lẻ (Không cần mua gói tháng)</p>
+      <div className="mt-8 max-w-4xl mx-auto">
+        <h2 className="text-xl font-bold text-slate-900 mb-1 text-center">Nhu cầu Mở khóa ứng viên?</h2>
+        <p className="text-slate-500 text-center mb-4 text-sm">Tiết kiệm lớn với các gói mở khóa riêng lẻ (Không cần mua gói tháng)</p>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
           {[{ id: 'XEM_NHANH', name: 'Gói "Xem Nhanh"', price: '150.000', xuPrice: 150, quota: 6, subtitle: 'Mua 5 tặng 1' },
             { id: 'SAN_TAI', name: 'Gói "Săn Tài"', price: '400.000', xuPrice: 400, quota: 20, subtitle: 'Giá cực hời cho HR' }
           ].map(pack => (
-            <div key={pack.id} className="bg-white border rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg transition-all">
+            <div key={pack.id} className="bg-white border rounded-2xl p-4 flex flex-col justify-between hover:shadow-lg transition-all">
               <div>
-                <h3 className="text-lg font-bold text-slate-800">{pack.name}</h3>
-                <p className="text-sm text-green-600 font-medium">{pack.subtitle}</p>
-                <div className="my-4">
-                  <span className="text-3xl font-black text-slate-900">{pack.price}</span>
-                  <span className="text-slate-500 font-medium ml-1">VNĐ</span>
+                <h3 className="text-base font-bold text-slate-800">{pack.name}</h3>
+                <p className="text-xs text-green-600 font-medium">{pack.subtitle}</p>
+                <div className="my-2">
+                  <span className="text-xl font-black text-slate-900">{pack.price}</span>
+                  <span className="text-slate-500 font-medium text-sm ml-1">VNĐ</span>
                 </div>
-                <p className="text-slate-600 mb-6 flex items-center gap-2">
+                <p className="text-slate-600 mb-4 text-sm flex items-center gap-2">
                   <Check className="w-5 h-5 text-emerald-500" /> Nhận ngay <strong className="text-slate-900">{pack.quota} lượt</strong> mở CV
                 </p>
               </div>
@@ -357,7 +357,7 @@ export default function PlansPage() {
                     setLoading(null);
                   }
                 }}
-                className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl transition-colors"
+                className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-xl transition-colors"
                >
                  {loading === pack.id ? 'Đang giao dịch...' : 'Mua ngay'}
                </button>

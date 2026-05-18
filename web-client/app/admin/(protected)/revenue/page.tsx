@@ -13,11 +13,11 @@ import {
   Crown,
   ArrowUpRight,
   Wallet,
-  ShieldAlert,
   Lock,
   Clock,
+  X,
 } from 'lucide-react';
-import { adminDashboardApi, RevenueStats, ViolatingRecruiter } from '@/lib/admin-api';
+import { adminDashboardApi, RevenueStats } from '@/lib/admin-api';
 import Link from 'next/link';
 import { useSocketStore } from '@/stores/socket';
 import { useAuthStore } from '@/stores/auth';
@@ -47,13 +47,15 @@ function formatXuToVnd(xuAmount: number) {
 
 export default function RevenuePage() {
   const [revenue, setRevenue] = useState<RevenueStats | null>(null);
-  const [violations, setViolations] = useState<ViolatingRecruiter[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoadingRevenue, setIsLoadingRevenue] = useState(true);
-  const [isLoadingViolations, setIsLoadingViolations] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const [revenueError, setRevenueError] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [companyTransactions, setCompanyTransactions] = useState<any[]>([]);
+  const [isLoadingCompanyTx, setIsLoadingCompanyTx] = useState(false);
   
   const { socket } = useSocketStore();
   const { user } = useAuthStore();
@@ -61,23 +63,16 @@ export default function RevenuePage() {
   const perms: string[] = user?.admin?.permissions ?? [];
   const canAccess = perms.includes('SUPER_ADMIN') || perms.includes('MANAGE_REVENUE');
 
-  const isLoading = isLoadingRevenue || isLoadingViolations || isLoadingTransactions;
+  const isLoading = isLoadingRevenue || isLoadingTransactions;
 
   const fetchData = async () => {
     setIsLoadingRevenue(true);
-    setIsLoadingViolations(true);
     setRevenueError(false);
 
-    // Fetch independently so one failure doesn't block the other
     adminDashboardApi.getRevenueStats()
       .then(setRevenue)
       .catch(() => setRevenueError(true))
       .finally(() => { setIsLoadingRevenue(false); setLastUpdated(new Date()); });
-
-    adminDashboardApi.getViolatingRecruiters()
-      .then(setViolations)
-      .catch(() => setViolations([]))
-      .finally(() => setIsLoadingViolations(false));
 
     setIsLoadingTransactions(true);
     adminDashboardApi.getRecentTransactions(20)
@@ -89,6 +84,19 @@ export default function RevenuePage() {
   useEffect(() => { 
     if (canAccess) fetchData(); 
   }, [canAccess]);
+
+  const fetchCompanyTransactions = async (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    setIsLoadingCompanyTx(true);
+    try {
+      const txs = await adminDashboardApi.getRecentTransactions(50, companyId);
+      setCompanyTransactions(txs);
+    } catch (err) {
+      setCompanyTransactions([]);
+    } finally {
+      setIsLoadingCompanyTx(false);
+    }
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -185,7 +193,7 @@ export default function RevenuePage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Doanh Thu & Vi Phạm</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Doanh Thu</h1>
           <p className="text-sm font-medium text-slate-500 mt-2 flex items-center gap-2">
             <Clock className="w-4 h-4 text-slate-400" />
             {lastUpdated
@@ -282,7 +290,11 @@ export default function RevenuePage() {
               ) : (
                 <div className="space-y-4">
                   {revenue?.topSpenders?.map((s, i) => (
-                    <div key={s.recruiterId} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/50 hover:-translate-y-0.5 transition-all group">
+                    <div 
+                      key={s.recruiterId} 
+                      onClick={() => fetchCompanyTransactions(s.recruiterId)}
+                      className="cursor-pointer flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/50 hover:-translate-y-0.5 transition-all group"
+                    >
                       <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-100 flex flex-col items-center justify-center font-black text-emerald-600 text-sm shadow-sm border border-emerald-200 group-hover:scale-110 transition-transform">
                         #{i + 1}
                       </div>
@@ -298,69 +310,9 @@ export default function RevenuePage() {
             </div>
           </div>
 
-          {/* Violation Recruiters Table */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden hover:shadow-2xl transition-all duration-300">
-            <div className="p-6 lg:p-8 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
-              <div className="w-12 h-12 bg-rose-100 rounded-2xl flex items-center justify-center border border-rose-200 shadow-sm shadow-rose-100">
-                <ShieldAlert className="w-6 h-6 text-rose-600" />
-              </div>
-              <div>
-                <h3 className="font-black text-slate-900 text-xl tracking-tight">Nhà Tuyển Dụng Vi Phạm</h3>
-                <p className="text-[13px] font-medium text-slate-500 mt-1">Danh sách recruiter đang bị cảnh báo</p>
-              </div>
-              {violations.length > 0 && (
-                <span className="ml-auto bg-rose-100 border border-rose-200 text-rose-700 text-xs font-black px-3 py-1.5 rounded-xl shadow-sm">
-                  {violations.length} người
-                </span>
-              )}
-            </div>
-
-            {violations.length === 0 ? (
-              <div className="py-20 text-center text-slate-400">
-                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ShieldAlert className="w-8 h-8 opacity-30" />
-                </div>
-                <p className="text-[15px] font-bold text-slate-800">Không có vi phạm nào được ghi nhận</p>
-                <p className="text-sm mt-1">Hệ thống đang hoạt động ổn định</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-white border-b border-slate-100">
-                    <tr>
-                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Công ty</th>
-                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Email</th>
-                      <th className="text-center px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Vi phạm</th>
-                      <th className="text-center px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {violations.map((v) => (
-                       <tr key={v.recruiterId} className="hover:bg-slate-50/80 transition-colors group">
-                        <td className="px-6 py-5 font-black text-slate-800 text-[14px]">{v.companyName}</td>
-                        <td className="px-6 py-5 text-slate-500 font-medium text-[13px]">{v.email}</td>
-                        <td className="px-6 py-5 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm ${v.violationCount >= 2 ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-amber-50 text-amber-700 border-amber-200/60'}`}>
-                            <AlertTriangle className="w-3.5 h-3.5" />
-                            {v.violationCount}/3
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-center">
-                          <span className={`inline-block px-3 py-1.5 rounded-xl text-[11px] font-black tracking-widest uppercase border shadow-sm ${v.status === 'LOCKED' ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'}`}>
-                            {v.status === 'LOCKED' ? 'Đã khóa' : 'Hoạt động'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
           {/* Recent Transactions Table */}
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden hover:shadow-2xl transition-all duration-300">
-            <div className="p-6 lg:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col max-h-[500px]">
+            <div className="p-6 lg:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center border border-indigo-200 shadow-sm shadow-indigo-100">
                   <Wallet className="w-6 h-6 text-indigo-600" />
@@ -384,9 +336,9 @@ export default function RevenuePage() {
                 <p className="text-[15px] font-bold text-slate-800">Không có giao dịch nào gần đây</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-white border-b border-slate-100">
+              <div className="overflow-auto custom-scrollbar flex-1">
+                <table className="w-full text-sm relative">
+                  <thead className="bg-white border-b border-slate-100 sticky top-0 z-10 shadow-sm">
                     <tr>
                       <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Thời gian</th>
                       <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Khách hàng</th>
@@ -434,6 +386,89 @@ export default function RevenuePage() {
             )}
           </div>
         </>
+      )}
+
+      {/* Modal Lịch Sử Chi Tiêu Của Top Spender */}
+      {selectedCompanyId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center border border-emerald-200">
+                  <Wallet className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-lg">Lịch Sử Giao Dịch</h3>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">
+                    {companyTransactions.length > 0 ? companyTransactions[0].companyName : 'Loading...'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedCompanyId(null)}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-6 bg-white">
+              {isLoadingCompanyTx ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+                </div>
+              ) : companyTransactions.length === 0 ? (
+                <div className="py-20 text-center text-slate-400">
+                  <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Wallet className="w-6 h-6 opacity-30" />
+                  </div>
+                  <p className="text-sm font-bold text-slate-800">Chưa có giao dịch nào</p>
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                    <tr>
+                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Thời gian</th>
+                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Loại giao dịch</th>
+                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Mô tả</th>
+                      <th className="text-right px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Số tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {companyTransactions.map((tx) => (
+                      <tr key={tx.transactionId} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-4 py-4 text-slate-500 font-medium text-[13px] whitespace-nowrap">
+                          {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                        </td>
+                        <td className="px-4 py-4">
+                           <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black tracking-widest uppercase border shadow-sm ${
+                              tx.type === 'DEPOSIT' ? 'bg-blue-50 text-blue-700 border-blue-200/60' :
+                              tx.type === 'BUY_PACKAGE' ? 'bg-purple-50 text-purple-700 border-purple-200/60' :
+                              tx.type === 'POST_JOB' ? 'bg-amber-50 text-amber-700 border-amber-200/60' :
+                              'bg-rose-50 text-rose-700 border-rose-200/60'
+                           }`}>
+                             {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : 'Mở CV'}
+                           </span>
+                        </td>
+                        <td className="px-4 py-4 text-slate-600 font-medium text-[13px] max-w-xs truncate" title={tx.description}>
+                          {tx.description}
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                           <p className={`font-black text-[14px] ${tx.type === 'DEPOSIT' ? 'text-blue-600' : 'text-slate-700'}`}>
+                              {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount} xu
+                           </p>
+                           {tx.realMoney > 0 && (
+                             <p className="text-[11px] text-slate-400 mt-0.5">({formatVnd(tx.realMoney)})</p>
+                           )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

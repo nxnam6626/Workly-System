@@ -21,13 +21,24 @@ export class BackofficeController {
   }
 
   @Get('revenue/transactions')
-  getRecentTransactions() {
-    return this.backofficeService.getRecentTransactions();
+  getRecentTransactions(
+    @Query('limit') limit?: string,
+    @Query('companyId') companyId?: string,
+  ) {
+    return this.backofficeService.getRecentTransactions(
+      limit ? Number(limit) : 20,
+      companyId,
+    );
   }
 
   @Get('recruiters/violations')
   getViolatingRecruiters() {
     return this.backofficeService.getViolatingRecruiters();
+  }
+
+  @Get('candidates/violations')
+  getViolatingCandidates() {
+    return this.backofficeService.getViolatingCandidates();
   }
 
   @Get('violations/latest')

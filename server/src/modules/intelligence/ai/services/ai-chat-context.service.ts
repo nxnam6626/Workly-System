@@ -55,9 +55,9 @@ export class AiChatContextService {
       if (!planType) {
         upsellContext = `
 --- [THÔNG TIN GÓI DỊCH VỤ CỦA NHÀ TUYỂN DỤNG] ---
-Nhà tuyển dụng này đang dùng GÓI MIỄN PHÍ (FREE).
+Nhà tuyển dụng này đang dùng GÓI BASIC.
 
-CÁC TÍNH NĂNG HẠN CHẾ VỚI GÓI FREE:
+CÁC TÍNH NĂNG HẠN CHẾ VỚI GÓI BASIC:
 - Không dùng tính năng tạo tin tự động bằng AI
 - Không có AI Cố Vấn JD và tự động sửa JD
 - Không có AI Insights & phân tích nhân sự nâng cao

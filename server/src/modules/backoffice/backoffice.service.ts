@@ -189,17 +189,37 @@ export class BackofficeService {
       where: { user: { violations: { gt: 0 } } },
       orderBy: { user: { violations: 'desc' } },
       include: {
-        user: { select: { email: true, status: true, violations: true } },
+        user: { select: { email: true, status: true, violations: true, userId: true } },
         company: { select: { companyName: true } },
       },
     });
 
     return recruiters.map((r) => ({
       recruiterId: r.recruiterId,
+      userId: r.user.userId,
       companyName: r.company?.companyName || 'Chưa có công ty',
       email: r.user.email,
       violationCount: r.user.violations,
       status: r.user.status,
+    }));
+  }
+
+  async getViolatingCandidates() {
+    const candidates = await this.prisma.candidate.findMany({
+      where: { user: { violations: { gt: 0 } } },
+      orderBy: { user: { violations: 'desc' } },
+      include: {
+        user: { select: { email: true, status: true, violations: true, userId: true } },
+      },
+    });
+
+    return candidates.map((c) => ({
+      candidateId: c.candidateId,
+      userId: c.user.userId,
+      fullName: c.fullName || 'Chưa cập nhật',
+      email: c.user.email,
+      violationCount: c.user.violations,
+      status: c.user.status,
     }));
   }
 
@@ -257,11 +277,14 @@ export class BackofficeService {
     });
   }
 
-  async getRecentTransactions(limit = 20) {
+  async getRecentTransactions(limit = 20, companyId?: string) {
+    const whereClause: any = { status: 'SUCCESS' };
+    if (companyId) {
+      whereClause.wallet = { companyId };
+    }
+
     const transactions = await this.prisma.transaction.findMany({
-      where: {
-        status: 'SUCCESS',
-      },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: limit,
       include: {
