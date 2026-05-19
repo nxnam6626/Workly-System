@@ -24,7 +24,7 @@ export function useJobs() {
     },
     {
       revalidateOnFocus: false,
-      dedupingInterval: 10000,
+      dedupingInterval: 2000,
     }
   );
 
@@ -66,6 +66,8 @@ export function useJobs() {
     };
 
     const handleJobMatchUpdated = (payload: { jobId: string; matchedCount: number }) => {
+      // Bỏ `false` ở tham số thứ 2 để SWR tự động fetch lại API (Revalidate)
+      // Vừa update giao diện ngay lập tức, vừa gọi API ngầm để đồng bộ chính xác
       mutate(prev => {
         if (!prev) return prev;
         return {
@@ -76,7 +78,7 @@ export function useJobs() {
               : j
           )
         };
-      }, false);
+      }, true);
     };
 
     socket.on('notification', handleNotification);

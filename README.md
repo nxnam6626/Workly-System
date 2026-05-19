@@ -1,136 +1,190 @@
 <div align="center">
+  <img src="https://via.placeholder.com/150?text=Workly+System" alt="Workly Logo" width="150" height="150" style="border-radius: 20px;"/>
   <h1>Workly System</h1>
-  <p><em>Nền tảng tuyển dụng thông minh được siêu nạp bởi Trí Tuệ Nhân Tạo (AI)</em></p>
+  <p><em>🚀 Nền tảng tuyển dụng thông minh thế hệ mới, siêu nạp bởi Trí Tuệ Nhân Tạo (AI)</em></p>
+
+  <!-- Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+    <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" />
+    <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+    <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini AI" />
+  </p>
 </div>
 
-<p align="center">
-  <a href="#features">Các Tính Năng</a> •
-  <a href="#tech-stack">Công Nghệ Sử Dụng</a> •
-  <a href="#project-structure">Cấu Trúc Hệ Thống</a> •
-  <a href="#getting-started">Hướng Dẫn Cài Đặt</a> •
-  <a href="#deployment">Triển Khai</a>
-</p>
+<br />
+
+<details>
+  <summary><b>📖 MỤC LỤC</b> (Nhấn để mở rộng)</summary>
+
+  - [🎯 Giới Thiệu](#-giới-thiệu)
+  - [✨ Tính Năng Nổi Bật](#-tính-năng-nổi-bật)
+    - [Dành cho Ứng viên (Candidate)](#dành-cho-ứng-viên-candidate)
+    - [Dành cho Nhà Tuyển Dụng (Recruiter)](#dành-cho-nhà-tuyển-dụng-recruiter)
+    - [Dành cho Quản trị viên (Admin)](#dành-cho-quản-trị-viên-admin)
+  - [🛠 Công Nghệ Sử Dụng](#-công-nghệ-sử-dụng)
+  - [📂 Cấu Trúc Hệ Thống](#-cấu-trúc-hệ-thống)
+  - [🚀 Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
+  - [🧪 Kiểm Thử (Testing)](#-kiểm-thử-testing)
+  - [🚢 Triển Khai (Deployment)](#-triển-khai-deployment)
+</details>
 
 ---
 
-## 🎯 Giới Thiệu (Introduction)
+## 🎯 Giới Thiệu
 
-**Workly System** là một hệ sinh thái kết nối Tuyển dụng và Ứng viên mang tính đột phá, tích hợp trực tiếp **Cố vấn AI (Gemini)** vào mọi giai đoạn của quá trình tuyển dụng. Nền tảng giúp tối ưu hóa việc phân tích JD, gợi ý CV tự động, hỗ trợ ứng viên viết hồ sơ và theo dõi số liệu thống kê bằng AI - giảm thiểu mọi thao tác thủ công với độ chính xác cao.
+**Workly System** không chỉ là một trang web tìm việc thông thường, mà là một **Hệ sinh thái Tuyển dụng Toàn diện** tích hợp trực tiếp **Cố vấn AI (Google Gemini 2.0)** vào lõi hệ thống.
 
-## ✨ Các Tính Năng Nổi Bật (Key Features)
-
-### Cấp độ Ứng viên (Candidate)
-- 📄 **Trình phân tích CV AI**: Tự động bóc tách kỹ năng, kinh nghiệm từ file PDF.
-- 💬 **Trò chuyện cùng AI**: Chatbot hỗ trợ giải đáp thắc mắc về công việc, gợi ý việc làm và tư vấn lộ trình.
-- 🔍 **Tìm kiếm việc làm thông minh**: Cỗ máy tìm kiếm tích hợp bộ lọc linh hoạt.
-- 🔔 **Hệ thống Thông báo Realtime**: Socket.IO giữ kết nối vòng lặp ngay khi có lời mời tuyển dụng!
-
-### Cấp độ Nhà Tuyển Dụng (Recruiter)
-- 🪄 **Tối ưu Job Description (JD)**: Tạo/Tối ưu hoá tin tuyển dụng với góc nhìn của AI (Chỉnh sửa ngôn từ tự động, chuẩn hóa fomat).
-- ⚡ **Auto-Matching & Auto-Invite**: Chạy nền tự động (Background Jobs) rà soát Ứng viên phù hợp và gửi lời mời ngay khi tin được đăng tải.
-- 📊 **AI Insights Dashboard**: Tóm tắt, đo lường điểm mạnh/điểm yếu thông kê các chiến dịch đăng tin.
-- 💳 **Mua Credit Tuyển dụng**: Tích hợp thanh toán QR Code bằng API **PayOS**.
-
-### Cấp độ Quản trị (Admin)
-- 🛡️ **Hệ thống Kiểm duyệt (Moderation)**: Đánh giá điểm rủi ro (Risk score) của các tin tuyển dụng dựa trên AI.
-- 📈 **Bảng điều khiển Thống kê**: Báo cáo doanh thu, hoạt động hệ thống.
+Sứ mệnh của nền tảng là tối ưu hóa điểm chạm giữa Nhà tuyển dụng và Ứng viên:
+- **Tự động hóa** quá trình sàng lọc và gợi ý CV.
+- **Tối ưu hóa** mô tả công việc (JD) với AI.
+- **Đồng bộ hóa** luồng thông tin qua hệ thống Real-time Notifications.
+- Mang lại trải nghiệm UI/UX **hiện đại, mượt mà** và đáng tin cậy.
 
 ---
 
-## 🛠 Công Nghệ Sử Dụng (Tech Stack)
+## ✨ Tính Năng Nổi Bật
 
-Hệ thống được xây dựng 100% bằng hệ sinh thái **TypeScript / JavaScript** linh hoạt:
+### 👨‍💻 Dành cho Ứng viên (Candidate)
+- 📄 **Trình Phân Tích CV AI**: Tự động trích xuất kỹ năng, kinh nghiệm, học vấn từ file PDF với độ chính xác cao.
+- 💬 **Trợ Lý AI Cá Nhân**: Chatbot hỗ trợ giải đáp thắc mắc, tư vấn lộ trình nghề nghiệp và gợi ý việc làm phù hợp 24/7.
+- 🔍 **Tìm Kiếm Thông Minh**: Trình tìm kiếm tích hợp bộ lọc nâng cao (mức lương, địa điểm, hình thức làm việc).
+- ⚡ **Theo Dõi Hồ Sơ Real-time**: Nhận thông báo qua Socket.IO ngay khi Nhà tuyển dụng xem CV hoặc gửi lời mời phỏng vấn.
 
-**🌍 Web Client (Frontend)**
-- ⚡ **Next.js 14** (App Router) + React
-- 🎨 **Tailwind CSS** + Framer Motion (Animation)
-- 📦 **Zustand** (Quản lý State)
-- 🔌 **Socket.IO Client**
+### 🏢 Dành cho Nhà Tuyển Dụng (Recruiter)
+- 🪄 **Tạo JD Siêu Tốc Bằng AI**: Tự động viết và tối ưu hóa Mô tả công việc (Job Description) từ các từ khóa ngắn gọn.
+- 🎯 **Hệ Thống Matching Thông Minh**: Background worker tự động rà soát, đánh giá độ phù hợp (matching score) của ứng viên và tự động gửi lời mời ứng tuyển.
+- 👥 **Quản Lý Ứng Viên (ATS)**: Kéo thả Kanban board, lưu trữ hồ sơ yêu thích (Saved Candidates) tiện lợi.
+- 📊 **Dashboard Thống Kê**: Báo cáo đa chiều về hiệu quả tin đăng, lượt xem, tỷ lệ chuyển đổi.
+- 💳 **Thanh Toán Tiện Lợi**: Nạp Credit để đăng tin qua cổng thanh toán QR Code tự động **PayOS**.
+- 🔔 **Thông Báo Thời Gian Thực**: Sử dụng thông báo dạng Toast (react-hot-toast) kết hợp Socket.IO cho mọi hoạt động quan trọng.
 
-**⚙️ Server (Backend)**
-- 🟩 **NestJS** (Framework kiến trúc mạnh mẽ)
-- 🗄️ **Prisma ORM** + **PostgreSQL** (Cơ sở dữ liệu)
-- 🧠 **Google Generative AI (Gemini 2.0)**
-- 🏎️ **Redis & BullMQ** (Xử lý tác vụ nền/Hàng đợi)
-- 🌐 **Socket.IO** (WebSocket Gateway)
-
-**☁️ 3rd Party Cloud & APIs**
-- **Supabase** (Lưu trữ file PDF / Bucket storage)
-- **PayOS** (Cổng thanh toán tự động)
-- **RapidAPI** (Hỗ trợ Data Crawler)
+### 👑 Dành cho Quản trị viên (Admin)
+- 🛡️ **Kiểm Duyệt Tự Động (AI Moderation)**: Hệ thống tự động chấm điểm rủi ro (Risk Score) cho các tin tuyển dụng mới để phát hiện spam/lừa đảo.
+- 📈 **Quản Lý Hệ Thống Toàn Diện**: Quản lý tài khoản (Recruiter/Candidate), duyệt tin thủ công, quản trị doanh thu.
+- 🔔 **Giám Sát Real-time**: Theo dõi hoạt động của hệ thống một cách minh bạch với thông báo theo thời gian thực.
 
 ---
 
-## 📂 Cấu Trúc Hệ Thống (Project Structure)
+## 🛠 Công Nghệ Sử Dụng
 
-Workly hoạt động trên mô hình Monorepo chia làm 2 thư mục chính:
+Kiến trúc hệ thống mạnh mẽ, linh hoạt và được xây dựng hoàn toàn bằng **TypeScript**:
+
+### 🌍 Web Client (Frontend)
+- **Framework**: Next.js 14 (App Router), React 18
+- **Styling**: Tailwind CSS v4, Framer Motion (Micro-animations)
+- **State Management**: Zustand, React Query
+- **UI Components**: Radix UI, Lucide Icons, React Hot Toast (Thông báo hiện đại)
+- **Real-time**: Socket.IO Client
+
+### ⚙️ Server (Backend)
+- **Framework**: NestJS (Kiến trúc Module hóa, Dependency Injection)
+- **Database**: PostgreSQL với **Prisma ORM**
+- **AI Engine**: Google Generative AI (Gemini 2.0)
+- **Queue & Background Jobs**: Redis + BullMQ (Xử lý tác vụ nặng, gửi mail)
+- **WebSockets**: Socket.IO Gateway
+
+### ☁️ Cloud & 3rd Party APIs
+- **Storage**: Supabase Storage (Lưu trữ avatar, CV PDF)
+- **Payments**: PayOS API
+- **Testing**: Playwright (E2E Testing)
+
+---
+
+## 📂 Cấu Trúc Hệ Thống
+
+Dự án được tổ chức theo mô hình **Monorepo**, giúp dễ dàng chia sẻ logic và quản lý code:
 
 ```text
 Workly-System/
-├── server/                     # NEST.JS BACKEND
+├── server/                     # 🟩 NESTJS BACKEND
 │   ├── src/
 │   │   ├── modules/            # Domain logic (auth, jobs, ai, admin, ...)
-│   │   ├── prisma/             # Lược đồ cơ sở dữ liệu (schema.prisma)
+│   │   ├── prisma/             # Lược đồ DB (schema.prisma) & Migrations
 │   │   └── main.ts             # Entry point
-│   ├── .env                    # Biến môi trường local backend
+│   ├── test/                   # Unit & E2E Tests cho Backend
 │   └── package.json    
-└── web-client/                 # NEXT.JS FRONTEND
-    ├── app/                    # Routing (Recruiter, Public, API...)
-    ├── components/             # React UI Components
-    ├── lib/                    # Helpers, Axios API interface
-    ├── stores/                 # Zustand Stores
-    ├── .env.local              # Biến môi trường local frontend
-    └── package.json    
+├── web-client/                 # 🟦 NEXTJS FRONTEND
+│   ├── app/                    # App Router (Recruiter, Admin, Public...)
+│   ├── components/             # Reusable UI Components & Modals
+│   ├── lib/                    # Utils, API Client (Axios)
+│   ├── stores/                 # Zustand State
+│   └── package.json    
+└── README.md
 ```
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt (Getting Started)
+## 🚀 Hướng Dẫn Cài Đặt
 
-### 1. Yêu cầu hệ thống
-- `Node.js` >= 18.x
-- `PostgreSQL` >= 14.x
-- `Redis` (Chạy local hoặc Upstash)
+### 1. Yêu Cầu Môi Trường
+- **Node.js**: Phiên bản `>= 18.17.0`
+- **Database**: PostgreSQL (Local hoặc dùng Supabase/NeonDB)
+- **Cache/Queue**: Redis (Local hoặc Upstash)
 
-### 2. Khởi tạo Backend (Server)
-Mở cửa sổ Terminal và trỏ vào thư mục `server`:
+### 2. Cài Đặt Backend (NestJS)
+
 ```bash
 cd server
 
-# Cài đặt thư viện
+# Cài đặt các gói phụ thuộc
 npm install
 
-# Đổi tên .env.example thành .env và điền cấu hình (PGSQL, Redis, Gemini API...)
+# Khởi tạo biến môi trường
 cp .env.example .env
+# Mở file .env và cập nhật DATABASE_URL, REDIS_URL, GEMINI_API_KEY...
 
-# Chạy migration DB
+# Khởi tạo Database Schema
 npx prisma generate
-npx prisma migrate dev
+npx prisma db push # Hoặc npx prisma migrate dev
 
-# Khởi động Backend server (Chạy tại port 3001)
+# Chạy server
 npm run start:dev
+# API sẽ chạy tại: http://localhost:3001
 ```
 
-### 3. Khởi tạo Frontend (Web Client)
-Mở cửa sổ Terminal thứ 2 và trỏ vào thư mục `web-client`:
+### 3. Cài Đặt Frontend (Next.js)
+
 ```bash
+# Mở một Terminal mới
 cd web-client
 
-# Cài đặt thư viện
+# Cài đặt các gói phụ thuộc
 npm install
 
-# Khởi động Next.js development server (Chạy tại port 3000)
+# Khởi tạo biến môi trường
+cp .env.example .env.local
+# Mở file .env.local và cập nhật NEXT_PUBLIC_API_URL...
+
+# Chạy web client
 npm run dev
+# Website sẽ chạy tại: http://localhost:3000
 ```
-Trang web hiện đã sẵn sàng tại: [`http://localhost:3000`](http://localhost:3000)
+
+---
+
+## 🧪 Kiểm Thử (Testing)
+
+Hệ thống được bảo vệ bởi các bộ test tự động để đảm bảo độ ổn định cao nhất:
+
+- **Unit & Integration Test (Backend)**: Sử dụng Jest.
+  ```bash
+  cd server && npm run test
+  ```
+- **End-to-End (E2E) Test**: Sử dụng **Playwright** để kiểm thử toàn bộ luồng người dùng (Đăng nhập, tạo JD, quản lý ứng viên, v.v).
+  ```bash
+  cd web-client && npx playwright test
+  ```
 
 ---
 
 ## 🚢 Triển Khai (Deployment)
 
-Hệ thống được thiết kế để dễ dàng hoạt động trên môi trường Cloud:
-1. **Front-End:** Khuyên dùng deploy qua **[Vercel](https://vercel.com/)**. Khai báo các biến tại file `web-client/.env.production`.
-2. **Back-End:** Cực kỳ tương thích với các giải pháp Container / PaaS như **[Render](https://render.com/)**, **Railway**, hoặc **AWS/VPS**. Tham khảo cấu hình tại `server/.env.production`.
-3. **Database:** Dùng **Supabase** hoặc **NeonDB** làm PostgreSQL managed service.
+Hệ thống sẵn sàng để đưa lên Production với các nền tảng Cloud hiện đại:
 
-⭐ *Sản phẩm được tối ưu caching với AI nhằm tiết kiệm tài nguyên Quota và tăng độ tải trang!*
+1. **Frontend**: Tối ưu nhất khi deploy trên **[Vercel](https://vercel.com/)**. Cần cung cấp các biến môi trường tại `web-client/.env.production`.
+2. **Backend**: Tương thích tốt với các dịch vụ Container/PaaS như **[Render](https://render.com/)**, **Railway**, hoặc VPS (sử dụng PM2/Docker). Tham khảo cấu hình biến môi trường tại `server/.env.production`.
+3. **Database**: Khuyến khích sử dụng **Supabase**, **NeonDB** hoặc AWS RDS.
+
+> 💡 *Pro-tip: Cấu hình Redis cẩn thận trên Production để đảm bảo BullMQ xử lý hàng đợi (Background Jobs) ổn định.*

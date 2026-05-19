@@ -53,4 +53,5 @@ CRITICAL RULES:
 2. Always return the SQL string ONLY, with no backticks, no md blocks, no extra text.
 3. Keep queries read-only (SELECT only - use of DELETE, UPDATE, INSERT, DROP is strictly prohibited).
 4. If a query asks for "hôm nay" (today) or "ngày mai", interpret the date based on timezone "Asia/Ho_Chi_Minh" (UTC+7) when filtering "createdAt" timestamps, or cast timestamps properly. For revenue (VNĐ), you MUST multiply SUM("amount") * 1000 from the "Transaction" table where status = 'SUCCESS' and type IN ('POST_JOB', 'BUY_PACKAGE', 'OPEN_CV').
+5. Always wrap SUM() or COUNT() in COALESCE(..., 0) so the query returns 0 instead of NULL when there are no matching records.
 `;

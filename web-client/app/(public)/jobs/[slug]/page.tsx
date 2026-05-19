@@ -225,7 +225,7 @@ export default function JobDetailPage() {
                       Mô tả công việc
                     </h2>
                     <div 
-                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.description }}
                     />
                   </div>
@@ -239,7 +239,7 @@ export default function JobDetailPage() {
                       Yêu cầu ứng viên
                     </h2>
                     <div 
-                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.requirements }}
                     />
                   </div>
@@ -253,7 +253,7 @@ export default function JobDetailPage() {
                       Quyền lợi
                     </h2>
                     <div 
-                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                      className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.benefits }}
                     />
                   </div>

@@ -12,7 +12,7 @@ export class WalletBalanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagesGateway: MessagesGateway,
-  ) {}
+  ) { }
 
   async getBalance(userId: string) {
     let recruiter: any = await this.prisma.recruiter.findUnique({
@@ -77,7 +77,7 @@ export class WalletBalanceService {
       include: { company: { include: { wallet: true } } },
     });
     const wallet = recruiter?.company?.wallet;
-    
+
     if (!wallet) throw new NotFoundException('Company Wallet not found');
     if (wallet.balance < amount)
       throw new BadRequestException('Insufficient balance in Company Wallet');
@@ -107,7 +107,7 @@ export class WalletBalanceService {
       include: { company: { include: { wallet: true } } },
     });
     const wallet = recruiter?.company?.wallet;
-    
+
     if (!wallet) throw new NotFoundException('Company Wallet not found');
 
     const [updatedWallet, transaction] = await this.prisma.$transaction([
@@ -130,7 +130,7 @@ export class WalletBalanceService {
       include: { company: { include: { wallet: true } } },
     });
     const wallet = recruiter?.company?.wallet;
-    
+
     if (!wallet) throw new NotFoundException('Company Wallet not found');
 
     const [updatedWallet, transaction] = await this.prisma.$transaction([
@@ -163,7 +163,7 @@ export class WalletBalanceService {
       include: { company: { include: { wallet: true } } },
     });
     const wallet = recruiter?.company?.wallet;
-    
+
     if (!wallet) throw new NotFoundException('Company Wallet not found');
 
     const [updatedWallet, transaction] = await this.prisma.$transaction([
@@ -232,7 +232,7 @@ export class WalletBalanceService {
         data: {
           amount: cost,
           type: TransactionType.OPEN_CV,
-          description: `${description} (Phí sỉ ${cost} xu)`,
+          description: `${description} (Phí mở khóa CV ${cost} xu)`,
           walletId: wallet.walletId,
           recruiterId,
         },

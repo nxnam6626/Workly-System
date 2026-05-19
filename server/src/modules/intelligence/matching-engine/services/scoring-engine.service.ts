@@ -64,12 +64,29 @@ export class ScoringEngineService {
       titleRes.score * weights.jobTitle +
       expRes.score * (weights.experience || 0);
 
-    // --- TÍNH TOÁN HÌNH PHẠT (PENALTIES) ---
+    // --- TÍNH TOÁN HÌNH PHẠT (PENALTIES) & HARD FILTERS ---
     let totalPenalty = 0;
 
-    // Penalty Tầng 1: Địa điểm (Trừ 40% nếu không khớp)
+    // Knockout Tầng 1: Địa điểm (Loại trực tiếp nếu không khớp)
     if (locationRes.score === 0) {
-      totalPenalty += PENALTY.LOCATION_MISMATCH;
+      return {
+        finalScore: 0,
+        breakdown: {
+          locationScore: 0,
+          salaryScore: Math.round(salaryRes.score),
+          industryScore: Math.round(industryRes.score),
+          jobTitleScore: Math.round(titleRes.score),
+          experienceScore: Math.round(expRes.score),
+          relevantExpScore: Math.round(relExpRes.score),
+          educationScore: Math.round(eduRes.score),
+          skillsScore: Math.round(skillsRes.score),
+          languageScore: Math.round(langRes.score),
+        },
+        details: {
+          message: 'Loại trực tiếp: Không khớp địa điểm làm việc',
+          locationDetails: locationRes.details,
+        },
+      };
     }
 
     // Penalty Tầng 1: Ngành nghề (Trừ 50% nếu không khớp)

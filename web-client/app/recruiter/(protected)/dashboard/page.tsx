@@ -352,56 +352,56 @@ export default function RecruiterDashboard() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-[28px] font-black text-slate-900 tracking-tight">
+          <h1 className="text-[24px] font-black text-slate-900 tracking-tight">
             Chào mừng trở lại, {user?.name || 'Nhà tuyển dụng'}!
           </h1>
-          <p className="text-[15px] font-medium text-slate-500 mt-1.5">
+          <p className="text-[14px] font-medium text-slate-500 mt-1">
             Dưới đây là tổng quan về hoạt động tuyển dụng của bạn.
           </p>
         </div>
         <Link
           href="/recruiter/post-job"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95 text-sm"
         >
-          <PlusCircle className="w-5 h-5" />
+          <PlusCircle className="w-4 h-4" />
           Đăng tin mới
         </Link>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
+            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300"
           >
-            <div className="flex items-center justify-between mb-5">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform ${stat.bg} ${stat.color}`}>
-                <stat.icon className="w-7 h-7" />
+            <div className="flex items-center justify-between mb-3">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform ${stat.bg} ${stat.color}`}>
+                <stat.icon className="w-6 h-6" />
               </div>
             </div>
-            <p className="text-3xl font-black text-slate-900 tracking-tight mb-1">{stat.value.toLocaleString()}</p>
-            <p className="text-[13px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
+            <p className="text-2xl font-black text-slate-900 tracking-tight mb-1">{stat.value.toLocaleString()}</p>
+            <p className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Recent Jobs Table */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-7 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h3 className="font-bold text-[17px] text-slate-900 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h3 className="font-bold text-[16px] text-slate-900 flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-indigo-600" /> Tin tuyển dụng gần đây
               </h3>
-              <Link href="/recruiter/jobs" className="text-[13px] font-bold text-indigo-600 hover:text-white hover:bg-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl flex items-center transition-all active:scale-95 shadow-sm hover:shadow-md">
+              <Link href="/recruiter/jobs" className="text-[12px] font-bold text-indigo-600 hover:text-white hover:bg-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg flex items-center transition-all active:scale-95 shadow-sm hover:shadow-md">
                 Xem tất cả <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </div>
@@ -409,34 +409,34 @@ export default function RecruiterDashboard() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
-                    <th className="px-7 py-4">Vị trí</th>
-                    <th className="px-7 py-4">Ứng viên</th>
-                    <th className="px-7 py-4">Trạng thái</th>
-                    <th className="px-7 py-4 text-right">Thao tác</th>
+                    <th className="px-5 py-3">Vị trí</th>
+                    <th className="px-5 py-3">Ứng viên</th>
+                    <th className="px-5 py-3">Trạng thái</th>
+                    <th className="px-5 py-3 text-right">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {recentJobs.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                      <td colSpan={4} className="px-5 py-6 text-center text-slate-500">
                         Chưa có tin tuyển dụng nào.
                       </td>
                     </tr>
                   ) : recentJobs.map((job: any) => (
                     <tr key={job.id} className="hover:bg-slate-50/80 transition-colors group">
-                      <td className="px-7 py-5">
-                        <Link href={`/recruiter/jobs/${job.id}`} className="font-bold text-[15px] text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1 max-w-[200px] hover:underline underline-offset-4 decoration-2">{job.title}</Link>
-                        <p className="text-[13px] text-slate-500 font-medium mt-0.5">{timeAgo(job.date)}</p>
+                      <td className="px-5 py-3.5">
+                        <Link href={`/recruiter/jobs/${job.id}`} className="font-bold text-[14px] text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1 max-w-[200px] hover:underline underline-offset-4 decoration-2">{job.title}</Link>
+                        <p className="text-[12px] text-slate-500 font-medium mt-0.5">{timeAgo(job.date)}</p>
                       </td>
-                      <td className="px-7 py-5 font-black text-slate-700 text-[15px]">{job.applicants}</td>
-                      <td className="px-7 py-5">
-                        <span className={`inline-flex px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest shadow-sm ${getStatusConfig(job.status).className}`}>
+                      <td className="px-5 py-3.5 font-black text-slate-700 text-[14px]">{job.applicants}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm ${getStatusConfig(job.status).className}`}>
                           {getStatusConfig(job.status).label}
                         </span>
                       </td>
-                      <td className="px-7 py-5 text-right">
-                        <Link href={`/recruiter/jobs/${job.id}`} className="inline-flex p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
-                          <ChevronRight className="w-5 h-5" />
+                      <td className="px-5 py-3.5 text-right">
+                        <Link href={`/recruiter/jobs/${job.id}`} className="inline-flex p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 text-slate-400 hover:text-indigo-600 transition-all shadow-sm">
+                          <ChevronRight className="w-4 h-4" />
                         </Link>
                       </td>
                     </tr>
@@ -447,25 +447,25 @@ export default function RecruiterDashboard() {
           </div>
 
           {/* Upcoming Interviews */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-7 py-5 border-b border-slate-100 flex flex-wrap items-center justify-between bg-slate-50/50 gap-4">
-              <h3 className="font-bold text-[17px] text-slate-900 flex items-center gap-2">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between bg-slate-50/50 gap-3">
+              <h3 className="font-bold text-[16px] text-slate-900 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-indigo-600" />
                 Lịch phỏng vấn sắp tới
               </h3>
               <div className="flex items-center gap-2">
-                <label htmlFor="interview-date-filter" className="text-[13px] text-slate-500 font-bold uppercase tracking-widest">Lọc:</label>
+                <label htmlFor="interview-date-filter" className="text-[12px] text-slate-500 font-bold uppercase tracking-widest">Lọc:</label>
                 <input
                   id="interview-date-filter"
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-3 py-2 text-[13px] font-bold rounded-xl border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none text-slate-700 bg-white transition-all shadow-sm cursor-pointer"
+                  className="px-2.5 py-1.5 text-[12px] font-bold rounded-lg border border-slate-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 outline-none text-slate-700 bg-white transition-all shadow-sm cursor-pointer"
                 />
                 {selectedDate && (
                   <button
                     onClick={() => setSelectedDate('')}
-                    className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                    className="p-1 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
                     title="Xóa bộ lọc ngày"
                   >
                     <XCircle className="w-4 h-4" />
@@ -473,11 +473,11 @@ export default function RecruiterDashboard() {
                 )}
               </div>
             </div>
-            <div className="p-5 space-y-3 bg-slate-50/30">
+            <div className="p-4 space-y-3 bg-slate-50/30">
               {upcomingInterviews.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 flex flex-col items-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
-                    <Calendar className="w-8 h-8 text-slate-300" />
+                <div className="py-8 text-center text-slate-500 flex flex-col items-center">
+                  <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mb-2">
+                    <Calendar className="w-6 h-6 text-slate-300" />
                   </div>
                   <p className="text-sm font-medium">Chưa có lịch phỏng vấn nào sắp tới.</p>
                 </div>
@@ -489,30 +489,30 @@ export default function RecruiterDashboard() {
                 const isReschedule = interview.status === 'RESCHEDULE_REQUESTED';
 
                 return (
-                  <div key={interview.id} className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100/50 transition-all duration-300 gap-4">
-                    <div className="flex items-start sm:items-center gap-4">
+                  <div key={interview.id} className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-white border border-slate-200/60 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100/50 transition-all duration-300 gap-3">
+                    <div className="flex items-start sm:items-center gap-3">
                       {/* Calendar Date Box */}
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 flex flex-col items-center justify-center shrink-0 border border-indigo-100/50 shadow-inner">
-                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 mb-0.5">Th {dateObj.getMonth() + 1}</span>
-                        <span className="text-xl font-black leading-none">{dateObj.getDate()}</span>
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-600 flex flex-col items-center justify-center shrink-0 border border-indigo-100/50 shadow-inner">
+                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-80 mb-0.5">Th {dateObj.getMonth() + 1}</span>
+                        <span className="text-lg font-black leading-none">{dateObj.getDate()}</span>
                       </div>
                       
                       {/* Info */}
                       <div>
-                        <h4 className="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors flex items-center gap-2">
+                        <h4 className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors flex items-center gap-2">
                           {interview.candidateName}
                           {isConfirmed && <span className="flex w-2 h-2 rounded-full bg-blue-500" title="Đã xác nhận"></span>}
                           {isReschedule && <span className="flex w-2 h-2 rounded-full bg-orange-500" title="Xin dời lịch"></span>}
                         </h4>
-                        <p className="text-sm text-slate-500 font-medium line-clamp-1 mb-1.5">{interview.jobTitle}</p>
+                        <p className="text-xs text-slate-500 font-medium line-clamp-1 mb-1">{interview.jobTitle}</p>
                         
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                            <Clock className="w-3 h-3 text-slate-400" />
                             {interview.time}
                           </span>
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 max-w-[200px] truncate">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 max-w-[150px] truncate">
+                            <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
                             <span className="truncate">{interview.location || 'Chưa cập nhật địa điểm'}</span>
                           </span>
                         </div>
@@ -520,38 +520,38 @@ export default function RecruiterDashboard() {
                     </div>
 
                     {/* Right side Actions & Status */}
-                    <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0">
                       {/* Status Badge */}
                       {isAccept ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
-                          <CheckCircle className="w-4 h-4" /> Đã duyệt
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-100">
+                          <CheckCircle className="w-3.5 h-3.5" /> Đã duyệt
                         </span>
                       ) : isReject ? (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 text-xs font-bold border border-rose-100">
-                          <XCircle className="w-4 h-4" /> Đã từ chối
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-100">
+                          <XCircle className="w-3.5 h-3.5" /> Đã từ chối
                         </span>
                       ) : (
-                        <div className="flex items-center gap-1 sm:opacity-0 sm:-translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                        <div className="flex items-center gap-1 sm:opacity-0 sm:-translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                           <button
                             onClick={() => setConfirmStatusData({ id: interview.id, status: 'ACCEPTED' })}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 hover:text-white hover:bg-emerald-500 rounded-lg transition-colors border border-emerald-200 hover:border-emerald-500"
+                            className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-600 hover:text-white hover:bg-emerald-500 rounded-md transition-colors border border-emerald-200 hover:border-emerald-500"
                             title="Chấp nhận"
                           >
-                            <CheckCircle className="w-3.5 h-3.5" /> Đậu
+                            <CheckCircle className="w-3 h-3" /> Đậu
                           </button>
                           <button
                             onClick={() => setConfirmStatusData({ id: interview.id, status: 'REJECTED' })}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-500 rounded-lg transition-colors border border-rose-200 hover:border-rose-500"
+                            className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:text-white hover:bg-rose-500 rounded-md transition-colors border border-rose-200 hover:border-rose-500"
                             title="Từ chối"
                           >
-                            <XCircle className="w-3.5 h-3.5" /> Rớt
+                            <XCircle className="w-3 h-3" /> Rớt
                           </button>
                           <button
                             onClick={() => setEditingInterview(interview)}
-                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors ml-1"
+                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors ml-1"
                             title="Đổi lịch phỏng vấn"
                           >
-                            <Clock className="w-4 h-4" />
+                            <Clock className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}
@@ -564,41 +564,41 @@ export default function RecruiterDashboard() {
         </div>
 
         {/* Quick Tips/Resources */}
-        <div className="space-y-8">
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-7 text-white shadow-xl shadow-slate-900/10 overflow-hidden relative">
-            <Sparkles className="absolute -top-4 -right-4 w-32 h-32 text-indigo-400/10" />
-            <h3 className="font-black text-xl mb-2.5 relative z-10 flex items-center gap-2">Phân Tích AI</h3>
-            <p className="text-indigo-200 text-[13px] leading-relaxed mb-5 relative z-10 font-medium">
+        <div className="space-y-6">
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl shadow-slate-900/10 overflow-hidden relative">
+            <Sparkles className="absolute -top-4 -right-4 w-24 h-24 text-indigo-400/10" />
+            <h3 className="font-black text-lg mb-2 relative z-10 flex items-center gap-2">Phân Tích AI</h3>
+            <p className="text-indigo-200 text-[12px] leading-relaxed mb-4 relative z-10 font-medium">
               Công nghệ AI sẽ giúp bạn tìm ra những điểm yếu trong JD (tin tuyển dụng) của mình, từ đó sửa đổi để thu hút đúng ứng viên tiềm năng!
             </p>
             {subInfo?.canViewAIReport ? (
-              <Link href="/recruiter/ai-report" className="w-full flex items-center justify-center py-3 bg-white text-slate-900 font-bold rounded-2xl text-[14px] hover:bg-slate-50 transition-all shadow-md active:scale-95 relative z-10">
+              <Link href="/recruiter/ai-report" className="w-full flex items-center justify-center py-2.5 bg-white text-slate-900 font-bold rounded-xl text-[13px] hover:bg-slate-50 transition-all shadow-md active:scale-95 relative z-10">
                 Mở Báo Cáo AI <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             ) : (
-              <Link href="/recruiter/billing/plans" className="w-full flex items-center justify-center py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold rounded-2xl text-[14px] hover:opacity-90 transition-all shadow-md active:scale-95 relative z-10">
+              <Link href="/recruiter/billing/plans" className="w-full flex items-center justify-center py-2.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold rounded-xl text-[13px] hover:opacity-90 transition-all shadow-md active:scale-95 relative z-10">
                 Nâng cấp gói Growth để dùng
               </Link>
             )}
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 p-7 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-5 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
-              <Wallet className="w-32 h-32 text-indigo-600" />
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+              <Wallet className="w-24 h-24 text-indigo-600" />
             </div>
-            <h3 className="font-black text-slate-900 text-[17px] mb-1.5 flex items-center gap-2">
+            <h3 className="font-black text-slate-900 text-[16px] mb-1.5 flex items-center gap-2">
               <Wallet className="w-5 h-5 text-indigo-600" /> Ví Nội Bộ
             </h3>
-            <p className="text-slate-500 text-[13px] font-medium mb-5">Dùng để mở khóa thông tin ứng viên tiềm năng.</p>
-            <div className="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-5 mb-5 border border-indigo-100 shadow-inner flex items-end justify-between">
+            <p className="text-slate-500 text-[12px] font-medium mb-4">Dùng để mở khóa thông tin ứng viên tiềm năng.</p>
+            <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-4 mb-4 border border-indigo-100 shadow-inner flex items-end justify-between">
               <div>
-                <p className="text-[11px] text-indigo-500 font-black uppercase tracking-widest mb-1.5">Số dư khả dụng</p>
-                <p className="text-3xl font-black text-indigo-600 tracking-tight">{walletInfo?.balance || 0} <span className="text-xl">Xu</span></p>
+                <p className="text-[10px] text-indigo-500 font-black uppercase tracking-widest mb-1">Số dư khả dụng</p>
+                <p className="text-2xl font-black text-indigo-600 tracking-tight">{walletInfo?.balance || 0} <span className="text-base">Xu</span></p>
               </div>
             </div>
             <Link
               href="/recruiter/wallet"
-              className="w-full flex items-center justify-center py-3 bg-slate-900 text-white font-bold rounded-2xl text-[14px] hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95"
+              className="w-full flex items-center justify-center py-2.5 bg-slate-900 text-white font-bold rounded-xl text-[13px] hover:bg-slate-800 transition-all shadow-md shadow-slate-900/20 active:scale-95"
             >
               Quản lý Ví
             </Link>

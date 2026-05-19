@@ -239,15 +239,16 @@ export class ConversationService {
           include: { user: true },
         });
         if (candidateDetails?.user.email) {
-          await this.mailService.sendJobInvitation(
+          // Fire and forget email to avoid blocking the loop
+          this.mailService.sendJobInvitation(
             candidateDetails.user.email,
             candidateDetails.fullName,
             companyName,
             content,
-          );
+          ).catch(e => console.error('Failed to send auto-email in broadcastMessage:', e));
         }
       } catch (err) {
-        console.error('Failed to send auto-email in broadcastMessage:', err);
+        console.error('Failed to get candidate for email in broadcastMessage:', err);
       }
     }
     return results;
@@ -323,16 +324,17 @@ export class ConversationService {
         include: { user: true },
       });
       if (candidateDetails?.user.email) {
-        await this.mailService.sendJobInvitation(
+        // Fire and forget email to avoid blocking the auto-invite loop
+        this.mailService.sendJobInvitation(
           candidateDetails.user.email,
           candidateDetails.fullName,
           companyName,
           content,
-        );
+        ).catch(e => console.error('Failed to send auto-email in sendJobInvitationMessage:', e));
       }
     } catch (err) {
       console.error(
-        'Failed to send auto-email in sendJobInvitationMessage:',
+        'Failed to get candidate for email in sendJobInvitationMessage:',
         err,
       );
     }
