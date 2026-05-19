@@ -54,7 +54,7 @@ export class LocationStrategy implements IMatchingStrategy {
       const jobLocLower = jobLocation.toLowerCase();
 
       // 1. Công việc từ xa (Remote)
-      if (job.workModel === 'REMOTE' || jobLocLower.includes('remote')) {
+      if (job.jobType === 'REMOTE' || jobLocLower.includes('remote')) {
         return {
           score: 100,
           details: {
@@ -139,7 +139,14 @@ export class LocationStrategy implements IMatchingStrategy {
 
   private extractCityFromAddress(address: string): string {
     if (!address) return '';
-    const parts = address.split(',');
-    return this.normalizeCity(parts[parts.length - 1]);
+    const parts = address.split(',').map(p => p.trim());
+    let cityPart = parts[parts.length - 1];
+    
+    // Nếu phần cuối là "Việt Nam", lấy phần liền trước đó (Thành phố/Tỉnh)
+    if (parts.length > 1 && (cityPart.toLowerCase() === 'việt nam' || cityPart.toLowerCase() === 'vietnam')) {
+      cityPart = parts[parts.length - 2];
+    }
+    
+    return this.normalizeCity(cityPart);
   }
 }

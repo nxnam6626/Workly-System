@@ -253,7 +253,7 @@ export default function RecruiterJobDetailPage() {
                       <span className="w-1 h-5 bg-indigo-500 rounded-full" />
                       Mô tả công việc
                     </h2>
-                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.description }} />
                   </section>
                 )}
@@ -264,7 +264,7 @@ export default function RecruiterJobDetailPage() {
                       <span className="w-1 h-5 bg-amber-500 rounded-full" />
                       Yêu cầu ứng viên
                     </h2>
-                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.requirements }} />
                   </section>
                 )}
@@ -275,7 +275,7 @@ export default function RecruiterJobDetailPage() {
                       <span className="w-1 h-5 bg-emerald-500 rounded-full" />
                       Quyền lợi
                     </h2>
-                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed"
+                    <div className="prose prose-slate max-w-none text-slate-600 text-[15px] leading-relaxed whitespace-pre-wrap"
                       dangerouslySetInnerHTML={{ __html: job.benefits }} />
                   </section>
                 )}

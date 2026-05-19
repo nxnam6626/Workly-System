@@ -26,11 +26,32 @@ export class AiController {
     private readonly adminAiService: AdminAiService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('chat')
-  async chat(@Body('message') message: string) {
+  async chat(
+    @CurrentUser('userId') userId: string,
+    @CurrentUser('roles') roles: string[],
+    @Body('message') message: string,
+  ) {
     if (!message) return { message: 'Hãy nhập điều gì đó!' };
-    const response = await this.aiService.generateResponse(message);
-    return { message: response };
+    
+    const stream = this.aiService.generateStreamResponse(message, userId, roles, 'RECRUITER');
+    let fullResponse = '';
+    for await (const chunk of stream) {
+      if (typeof chunk === 'string') {
+        fullResponse += chunk;
+      } else if (typeof chunk === 'object' && chunk !== null) {
+        // If it's an action, we can ignore or format it for the simple chat
+        if ((chunk as any).type === 'SHOW_JOB_CARDS') {
+          // just ignore for simple chat, or append something
+        }
+      }
+    }
+    
+    // Remove __ACTION__ prefixes if any
+    fullResponse = fullResponse.replace(/__ACTION__:.*?(\n|$)/g, '');
+    
+    return { message: fullResponse || 'Xin lỗi, tôi không thể xử lý yêu cầu lúc này.' };
   }
 
   @UseGuards(JwtAuthGuard)

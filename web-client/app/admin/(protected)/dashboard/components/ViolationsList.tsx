@@ -18,11 +18,11 @@ export default function ViolationsList() {
 
   const formatTime = (d: string) => {
     const date = new Date(d);
-    return date.toLocaleString('vi-VN', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -39,8 +39,8 @@ export default function ViolationsList() {
             <p className="text-[10px] font-medium text-slate-500 mt-0.5">Nhà tuyển dụng rủi ro</p>
           </div>
         </div>
-        <Link 
-          href="/admin/revenue" 
+        <Link
+          href="/admin/violations"
           className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-700 hover:underline px-3 py-1.5 bg-indigo-50 rounded-lg transition-colors"
         >
           Tất cả

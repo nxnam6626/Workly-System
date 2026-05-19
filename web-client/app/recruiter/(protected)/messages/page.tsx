@@ -368,9 +368,13 @@ export default function MessagesPage() {
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-lg shadow-sm">
-                    {activeChat.candidate?.fullName?.charAt(0) || 'N'}
-                  </div>
+                  {activeChat.candidate?.user?.avatar ? (
+                    <img src={activeChat.candidate.user.avatar} alt="Avatar" className="w-12 h-12 rounded-2xl object-cover shadow-sm shrink-0" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-lg shadow-sm shrink-0">
+                      {activeChat.candidate?.fullName?.charAt(0) || 'N'}
+                    </div>
+                  )}
                   <div>
                     <h2 className="font-black text-[18px] text-slate-900 tracking-tight">{activeChat.candidate?.fullName || 'Người dùng'}</h2>
                     <p className={`text-[10px] uppercase tracking-widest font-black flex items-center gap-1.5 mt-0.5 ${activeChat.candidate?.user?.isOnline ? 'text-emerald-500' : 'text-slate-400'}`}>
@@ -456,9 +460,13 @@ export default function MessagesPage() {
                     <div key={msg.messageId || Math.random().toString()} className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] xl:max-w-[65%] flex gap-3 ${isSender ? 'flex-row-reverse' : ''}`}>
                         {!isSender && (
-                          <div className="w-8 h-8 rounded-2xl bg-indigo-100 shrink-0 flex items-center justify-center font-black text-indigo-600 mt-auto shadow-sm">
-                            {activeChat.candidate?.fullName?.charAt(0) || 'N'}
-                          </div>
+                          activeChat.candidate?.user?.avatar ? (
+                            <img src={activeChat.candidate.user.avatar} alt="Avatar" className="w-8 h-8 rounded-2xl object-cover shrink-0 mt-auto shadow-sm" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-2xl bg-indigo-100 shrink-0 flex items-center justify-center font-black text-indigo-600 mt-auto shadow-sm">
+                              {activeChat.candidate?.fullName?.charAt(0) || 'N'}
+                            </div>
+                          )
                         )}
 
                         <div className={`flex flex-col ${isSender ? 'items-end' : 'items-start'}`}>

@@ -4,7 +4,7 @@ import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class BackofficeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getDashboardStats() {
     const [
@@ -46,18 +46,32 @@ export class BackofficeService {
 
   async getRevenueStats() {
     // Tổng doanh thu thực từ giao dịch nạp tiền thành công (realMoney)
-    const depositAgg = await this.prisma.transaction.aggregate({
-      where: { type: TransactionType.DEPOSIT, status: 'SUCCESS' },
-      _sum: { realMoney: true, amount: true },
-      _count: true,
-    });
+    const [depositAgg, candidateDepositAgg] = await Promise.all([
+      this.prisma.transaction.aggregate({
+        where: { type: TransactionType.DEPOSIT, status: 'SUCCESS' },
+        _sum: { realMoney: true, amount: true },
+        _count: true,
+      }),
+      this.prisma.candidateTransaction.aggregate({
+        where: { type: TransactionType.DEPOSIT, status: 'SUCCESS' },
+        _sum: { realMoney: true, amount: true },
+        _count: true,
+      })
+    ]);
 
-    // Doanh thu từ mua gói đăng tin
-    const packageAgg = await this.prisma.transaction.aggregate({
-      where: { type: TransactionType.BUY_PACKAGE, status: 'SUCCESS' },
-      _sum: { amount: true },
-      _count: true,
-    });
+    // Doanh thu từ mua gói đăng tin/VIP
+    const [packageAgg, candidatePackageAgg] = await Promise.all([
+      this.prisma.transaction.aggregate({
+        where: { type: TransactionType.BUY_PACKAGE, status: 'SUCCESS' },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      this.prisma.candidateTransaction.aggregate({
+        where: { type: TransactionType.BUY_PACKAGE, status: 'SUCCESS' },
+        _sum: { amount: true },
+        _count: true,
+      })
+    ]);
 
     // Doanh thu từ đăng tin
     const postJobAgg = await this.prisma.transaction.aggregate({
@@ -77,21 +91,26 @@ export class BackofficeService {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const recentSpending = await this.prisma.transaction.findMany({
-      where: {
-        type: {
-          in: [
-            TransactionType.BUY_PACKAGE,
-            TransactionType.POST_JOB,
-            TransactionType.OPEN_CV,
-          ],
+    const [recentTx, recentCtx] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: {
+          type: { in: [TransactionType.BUY_PACKAGE, TransactionType.POST_JOB, TransactionType.OPEN_CV] },
+          status: 'SUCCESS',
+          createdAt: { gte: thirtyDaysAgo },
         },
-        status: 'SUCCESS',
-        createdAt: { gte: thirtyDaysAgo },
-      },
-      select: { amount: true, createdAt: true },
-      orderBy: { createdAt: 'asc' },
-    });
+        select: { amount: true, createdAt: true },
+      }),
+      this.prisma.candidateTransaction.findMany({
+        where: {
+          type: { in: [TransactionType.BUY_PACKAGE] },
+          status: 'SUCCESS',
+          createdAt: { gte: thirtyDaysAgo },
+        },
+        select: { amount: true, createdAt: true },
+      })
+    ]);
+
+    const recentSpending = [...recentTx, ...recentCtx].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     // Group by date (Spending)
     const dailyRevenue: Record<string, number> = {};
@@ -133,18 +152,20 @@ export class BackofficeService {
       }),
     );
 
+    const packageSpend = (packageAgg._sum.amount || 0) + (candidatePackageAgg._sum.amount || 0);
+
     const totalSpending =
-      (packageAgg._sum.amount || 0) +
+      packageSpend +
       (postJobAgg._sum.amount || 0) +
       (openCvAgg._sum.amount || 0);
 
     return {
-      totalDepositVnd: depositAgg._sum.realMoney || 0,
-      totalDepositXu: depositAgg._sum.amount || 0,
-      depositCount: depositAgg._count,
+      totalDepositVnd: (depositAgg._sum.realMoney || 0) + (candidateDepositAgg._sum.realMoney || 0),
+      totalDepositXu: (depositAgg._sum.amount || 0) + (candidateDepositAgg._sum.amount || 0),
+      depositCount: depositAgg._count + candidateDepositAgg._count,
       totalSpendingRevenue: totalSpending,
-      packageSpend: packageAgg._sum.amount || 0,
-      packageCount: packageAgg._count,
+      packageSpend: packageSpend,
+      packageCount: packageAgg._count + candidatePackageAgg._count,
       postJobSpend: postJobAgg._sum.amount || 0,
       postJobCount: postJobAgg._count,
       openCvSpend: openCvAgg._sum.amount || 0,

@@ -373,7 +373,7 @@ export default function RevenuePage() {
                              {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : tx.type === 'OPEN_CV' ? 'Mở CV' : tx.type}
                            </span>
                         </td>
-                        <td className="px-6 py-5 text-slate-600 font-medium text-[13px] max-w-xs truncate" title={tx.description}>
+                        <td className="px-6 py-5 text-slate-600 font-medium text-[13px] break-words max-w-[300px]">
                           {tx.description}
                         </td>
                         <td className="px-6 py-5 text-right">
@@ -418,7 +418,7 @@ export default function RevenuePage() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-6 bg-white">
+            <div className="flex-1 overflow-auto custom-scrollbar bg-white">
               {isLoadingCompanyTx ? (
                 <div className="flex items-center justify-center py-20">
                   <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
@@ -432,21 +432,21 @@ export default function RevenuePage() {
                 </div>
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                  <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10 shadow-sm">
                     <tr>
-                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Thời gian</th>
-                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Loại giao dịch</th>
-                      <th className="text-left px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Mô tả</th>
-                      <th className="text-right px-4 py-3 font-black text-slate-400 text-[10px] uppercase tracking-widest">Số tiền</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Thời gian</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Loại giao dịch</th>
+                      <th className="text-left px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Mô tả</th>
+                      <th className="text-right px-6 py-4 font-black text-slate-400 text-[10px] uppercase tracking-widest">Số tiền</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {companyTransactions.map((tx) => (
                       <tr key={tx.transactionId} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="px-4 py-4 text-slate-500 font-medium text-[13px] whitespace-nowrap">
+                        <td className="px-6 py-5 text-slate-500 font-medium text-[13px] whitespace-nowrap">
                           {new Date(tx.createdAt).toLocaleString('vi-VN')}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-6 py-5">
                            <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] font-black tracking-widest uppercase border shadow-sm ${
                               tx.type === 'DEPOSIT' ? 'bg-blue-50 text-blue-700 border-blue-200/60' :
                               tx.type === 'BUY_PACKAGE' ? 'bg-purple-50 text-purple-700 border-purple-200/60' :
@@ -456,10 +456,10 @@ export default function RevenuePage() {
                              {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : 'Mở CV'}
                            </span>
                         </td>
-                        <td className="px-4 py-4 text-slate-600 font-medium text-[13px] max-w-xs truncate" title={tx.description}>
+                        <td className="px-6 py-5 text-slate-600 font-medium text-[13px] break-words max-w-[300px]">
                           {tx.description}
                         </td>
-                        <td className="px-4 py-4 text-right">
+                        <td className="px-6 py-5 text-right">
                            <p className={`font-black text-[14px] ${tx.type === 'DEPOSIT' ? 'text-blue-600' : 'text-slate-700'}`}>
                               {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount} xu
                            </p>

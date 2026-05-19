@@ -1,81 +1,102 @@
 <div align="center">
 
-# 🌐 Workly Web Client Platform
+# 🌐 Workly Web Client
 
-**Giao diện Trình duyệt Tốc độ cao dành cho Ứng viên & Nhà tuyển dụng**
+**Giao diện Web Hiện đại dành cho Ứng viên, Nhà tuyển dụng & Admin**
 
-![Next JS](https://img.shields.io/badge/Next-white?style=for-the-badge&logo=next.js&logoColor=black)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 
 </div>
 
 ## 📌 Vai trò của phân hệ
-Thư mục `web-client/` chứa mã nguồn cho nền tảng website chạy trên Desktop & Mobile Browser. Nó là điểm tiếp xúc chính giữa người dùng và hệ thống, bao gồm 3 không gian quản lý biệt lập:
 
-1. **Trang Chủ & Ứng viên (Public & Job Seeker)**: Tìm việc, thiết kế CV, quản lý Job Applications.
-2. **Khu vực Nhà tuyển dụng (Recruiter Workspace)**: `/recruiter/*` - Môi trường làm việc an toàn của HR để quản lý chiến dịch, thanh toán gói VIP và duyệt hồ sơ.
-3. **Control Panel (Super Admin)**: Quản lý tối cao toàn bộ hệ thống.
+Thư mục `web-client/` chứa mã nguồn Frontend cho toàn bộ nền tảng Workly. Đây là điểm tiếp xúc chính giữa người dùng và hệ thống, bao gồm 3 phân hệ chính:
+
+1. **Ứng viên (Candidate & Public)**: Tìm việc, xem chi tiết công việc, tạo CV và ứng tuyển.
+2. **Nhà tuyển dụng (Recruiter Dashboard)**: Giao diện an toàn cho HR để quản lý chiến dịch, duyệt hồ sơ, nạp credit, tạo JD tự động bằng AI.
+3. **Quản trị viên (Admin Dashboard)**: Bảng điều khiển tối cao để quản lý user, phê duyệt tin đăng, giám sát hệ thống.
 
 ---
 
-## 🏗 Kiến trúc File (App Router Architecture)
+## 🏗 Kiến trúc File (App Router)
 
-Dự án sử dụng cơ chế **Next.js App Router** thế hệ mới (Next.js v16+).
+Dự án sử dụng cơ chế **Next.js App Router (v14)**:
 
 ```text
 web-client/
-├── app/                  # Toàn bộ Routing (Routes) hoạt động dựa trên cấu trúc thư mục
-│   ├── (auth)/           # Route group cho Đăng nhập, Đăng ký (không hiển thị trong URL)
-│   ├── recruiter/        # Các tuyến đường dành riêng cho khu vực quản lý của HR
-│   ├── jobs/             # Chi tiết công việc
+├── app/                  # Hệ thống Routing
+│   ├── (auth)/           # Route group cho Đăng nhập/Đăng ký
+│   ├── admin/            # Dashboard dành riêng cho Admin
+│   ├── recruiter/        # Dashboard dành riêng cho Nhà tuyển dụng
+│   ├── (public)/         # Khu vực Public (Trang chủ, Chi tiết Job,...)
 │   ├── globals.css       # File gốc cấu hình CSS cho Tailwind v4
-│   └── page.tsx          # Trang chủ / Landing Page
-├── components/           # Components React dùng chung, Alert, Layout UI Tái sử dụng
-├── lib/                  # Tiện ích, Axios configuration (`api.ts`), Helpers function
-├── stores/               # Zustand States quản lý Auth, Wallet, Navigation
-├── .env.local            # File bảo mật thiết lập URL gọi sang hệ thống Backend
-└── tailwind.config.js    # Cấu hình UI theo Design Tokens chuẩn (Tailwind v4)
+│   └── layout.tsx        # Root layout (ToastProvider, ReactQuery,...)
+├── components/           # Reusable UI Components
+│   ├── ui/               # Radix UI / Shadcn base components
+│   ├── recruiter/        # Components riêng cho Recruiter (Modals, Forms)
+│   └── admin/            # Components riêng cho Admin
+├── lib/                  # Tiện ích, Axios client (`api.ts`), Hooks
+├── stores/               # Zustand States quản lý Auth, UI state
+├── tests/                # E2E Tests (Playwright)
+├── .env.local            # Biến môi trường local
+└── tailwind.config.ts    # Cấu hình UI theo Design Tokens chuẩn (Tailwind v4)
 ```
 
 ---
 
-## ✨ Bộ Tính Năng & Trải Nghiệm Lõi
+## ✨ Điểm Nhấn Công Nghệ & UX/UI
 
-- **Bản Đồ Tìm Việc Thông Minh (Heatmap Job Search):** Tích hợp Leaflet tạo biểu diễn trực tiếp hàng nghìn job quanh khu vực trên nền bản đồ mượt mà (Lazy Rendering).
-- **Trải nghiệm UX/UI Chuẩn Xác:** Sử dụng React Hook Form kết hợp Zod Validation cho các form, Framer Motion hỗ trợ Micro-Interaction mang lại cảm giác phản hồi chạm tay xuất sắc.
-- **Dynamic AI CV Analyzer:** Đọc tệp PDF trích xuất thông tin, giao tiếp với model NLP để trả về phần trăm tương tự theo JD yêu cầu trước khi ứng tuyển.
-- **Khu Vực Phân Tích (Insight Dashboards):** Biểu đồ Chart mạnh mẽ cùng báo cáo tự động tóm gọn số liệu doanh thu hoặc số lượng nộp theo thời gian thông qua Zustand quản lý State nội bộ hiệu quả.
-- **Kết nối Thời Giang Thực:** Tính năng Chatbot AI tư vấn nghiệp vụ & Nhắn tin Real-Time với nhà Tuyền Dụng thông qua Socket.io-client.
+- **Trải Nghiệm Mượt Mà (Micro-Interactions)**: Sử dụng **Framer Motion** mang lại các hiệu ứng chuyển cảnh mềm mại và **React Hot Toast** để hiển thị thông báo thay vì `alert()` mặc định.
+- **Form Xử Lý Chuyên Nghiệp**: Quản lý form bằng **React Hook Form** kết hợp **Zod** để xác thực dữ liệu chặt chẽ ở phía client trước khi gửi lên server.
+- **Tối Ưu Hóa Trạng Thái**: Quản lý global state cực nhẹ với **Zustand** và handle caching, server state bằng **React Query**.
+- **Real-time Updates**: Tích hợp **Socket.IO Client** nhận thông báo ngay lập tức khi có hồ sơ mới, tin duyệt thành công, hay tin nhắn.
+- **E2E Testing (Playwright)**: Đảm bảo luồng người dùng (Login, Post Job, Change Status) luôn hoạt động ổn định nhờ bộ test tự động.
 
 ---
 
-## 🛠 Hướng dẫn phát triển nhanh
+## 🛠 Hướng dẫn khởi chạy
 
-### 1. Cài đặt các thư viện phụ thuộc
+### 1. Cài đặt các gói phụ thuộc
 ```bash
 npm install
 ```
 
 ### 2. Thiết lập Biến môi trường
-Tạo file `.env.local` ở thư mục hiện tại:
+Copy file `.env.example` thành `.env.local` (nếu chưa có) và cập nhật URL trỏ về Backend:
 ```env
-# Địa chỉ URL của Backend Server (Chú ý KHÔNG kèm gạch chéo cuối /)
-NEXT_PUBLIC_API_URL=http://localhost:3000
+# Địa chỉ URL của Backend Server (Cổng 3001)
+NEXT_PUBLIC_API_URL=http://localhost:3001
 
-# Tuỳ chọn URL Public
+# URL của chính Frontend
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 3. Bật máy chủ giao diện
+### 3. Bật máy chủ phát triển
 ```bash
 npm run dev
 ```
-
 Truy cập Web trên trình duyệt thông qua: 👉 `http://localhost:3000`
 
 ---
 
-## 📦 Build Deployment
+## 🧪 Chạy Kiểm Thử (E2E Tests)
 
-Trang này được cấu hình tương thích 100% để Host tự động lên nền tảng **Vercel**. Bạn không cần tinh chỉnh gì thêm, chỉ cần import Github Repo vào Vercel, framework sẽ tự động chọn môi trường là "Next.js".
+Để chạy kiểm thử Playwright cho Frontend:
+```bash
+# Chạy ở chế độ nền
+npx playwright test
+
+# Chạy có hiển thị giao diện browser (UI Mode)
+npx playwright test --ui
+```
+
+---
+
+## 📦 Triển Khai (Deployment)
+
+Dự án Frontend này tương thích 100% để deploy trực tiếp lên **Vercel** - nền tảng tối ưu nhất cho Next.js.
+- Cài đặt Biến môi trường trên Vercel: `NEXT_PUBLIC_API_URL` trỏ về API Backend (VD: Render hoặc Railway).
+- Mọi tối ưu hoá hình ảnh, cache, Edge API đều được Vercel tự động xử lý.
