@@ -33,13 +33,28 @@ export class LocationStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedCv = cv.parsedData || {};
-      const candLocation = (cv.candidate?.location || parsedCv.location || '')
-        .toLowerCase()
-        .trim();
-      const jobLocation = (job.locationCity || '').toLowerCase().trim();
+      const rawCandLocations = [cv.candidate?.location, parsedCv.location].filter(Boolean);
+      let candLocation = '';
+      if (rawCandLocations.length > 0) {
+        const cities = rawCandLocations.map(loc => this.extractCityFromAddress(loc));
+        candLocation = [...new Set(cities.filter(Boolean))].join(', ');
+      }
+
+      let jobLocation = (job.locationCity || '').trim();
+      if (!jobLocation && job.branches && job.branches.length > 0) {
+        const cities = job.branches
+          .map((b: any) => this.extractCityFromAddress(b.branch?.address))
+          .filter(Boolean);
+        jobLocation = [...new Set(cities)].join(', ');
+      } else if (jobLocation) {
+        jobLocation = this.extractCityFromAddress(jobLocation);
+      }
+
+      const candLocLower = candLocation.toLowerCase();
+      const jobLocLower = jobLocation.toLowerCase();
 
       // 1. Công việc từ xa (Remote)
-      if (job.workModel === 'REMOTE' || jobLocation.includes('remote')) {
+      if (job.workModel === 'REMOTE' || jobLocLower.includes('remote')) {
         return {
           score: 100,
           details: {
@@ -53,31 +68,36 @@ export class LocationStrategy implements IMatchingStrategy {
       if (!jobLocation || !candLocation) {
         return {
           score: 100,
-          details: { message: 'Thiếu thông tin địa điểm, bỏ qua lọc' },
+          details: {
+            message: 'Thiếu thông tin địa điểm, bỏ qua lọc',
+            jobLocation: jobLocation || 'Không yêu cầu',
+            candLocation: candLocation || 'Chưa cập nhật',
+            type: 'Không áp dụng'
+          },
         };
       }
 
       // 2. Khớp chính xác hoặc chứa nhau
       const isExactMatch =
-        candLocation.includes(jobLocation) ||
-        jobLocation.includes(candLocation);
+        candLocLower.includes(jobLocLower) ||
+        jobLocLower.includes(candLocLower);
       if (isExactMatch) {
         return {
           score: 100,
-          details: { jobLocation, candLocation, type: 'Exact' },
+          details: { jobLocation, candLocation, type: 'Khớp chính xác' },
         };
       }
 
       // 3. Kiểm tra vùng lân cận
       let isNear = false;
       for (const [city, neighbors] of Object.entries(this.PROXIMITY_MAP)) {
-        if (jobLocation.includes(city)) {
-          isNear = neighbors.some((n) => candLocation.includes(n));
+        if (jobLocLower.includes(city)) {
+          isNear = neighbors.some((n) => candLocLower.includes(n));
           if (isNear) break;
         }
         // Chiều ngược lại: ứng viên ở thành phố lớn, job ở tỉnh lân cận
-        if (candLocation.includes(city)) {
-          isNear = neighbors.some((n) => jobLocation.includes(n));
+        if (candLocLower.includes(city)) {
+          isNear = neighbors.some((n) => jobLocLower.includes(n));
           if (isNear) break;
         }
       }
@@ -88,7 +108,7 @@ export class LocationStrategy implements IMatchingStrategy {
           details: {
             jobLocation,
             candLocation,
-            type: 'Neighbor',
+            type: 'Vùng lân cận',
             message: 'Vùng lân cận - Có thể di chuyển',
           },
         };
@@ -97,11 +117,29 @@ export class LocationStrategy implements IMatchingStrategy {
       // 4. Không khớp
       return {
         score: 0,
-        details: { jobLocation, candLocation, type: 'Mismatch' },
+        details: { jobLocation, candLocation, type: 'Không khớp' },
       };
     } catch (error) {
       this.logger.error(`Location Match Error: ${error.message}`);
       return { score: 100 };
     }
+  }
+
+  private normalizeCity(city: string): string {
+    if (!city) return '';
+    let normalized = city.toLowerCase().trim();
+    normalized = normalized.replace(/^(thành phố|tp\.|tp|tỉnh)\s*/g, '').trim();
+    if (['hcm', 'hồ chí minh', 'ho chi minh'].includes(normalized)) return 'Hồ Chí Minh';
+    if (['hn', 'hà nội', 'ha noi'].includes(normalized)) return 'Hà Nội';
+    if (['đn', 'đà nẵng', 'da nang'].includes(normalized)) return 'Đà Nẵng';
+    
+    // Capitalize each word (Unicode support)
+    return normalized.replace(/(^|\s)\S/g, (l) => l.toUpperCase());
+  }
+
+  private extractCityFromAddress(address: string): string {
+    if (!address) return '';
+    const parts = address.split(',');
+    return this.normalizeCity(parts[parts.length - 1]);
   }
 }

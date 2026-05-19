@@ -6,6 +6,7 @@ import { Users, Search, Filter, Bookmark, MapPin, GraduationCap, Briefcase, Mail
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth';
+import { useWalletStore } from '@/stores/wallet';
 import api, { getFileUrl } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
@@ -25,6 +26,7 @@ export default function CandidatesPage() {
   const [isBroadcastOpen, setIsBroadcastOpen] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const fetchWallet = useWalletStore((state) => state.fetchWallet);
 
   // Thêm state cho Unlock Modal
   const [isUnlockOpen, setIsUnlockOpen] = useState(false);
@@ -146,6 +148,7 @@ export default function CandidatesPage() {
         toast.success('Mở khóa thành công! Đã trừ xu.');
         // Refresh 
         fetchCandidates();
+        fetchWallet();
         setIsUnlockOpen(false);
       }
     } catch (e: any) {

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workly Screen Flow (Thực tế)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #0f172a;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 1400px;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 25px;
+      padding: 15px 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .legend-arrow {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      font-size: 18px;
+      letter-spacing: -1px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Sơ đồ Luồng màn hình (Workly System)<br><span style="font-size: 16px; font-weight: normal; color: #64748b;">Mô
+      phỏng dựa trên cấu trúc Routing thực tế của dự án Workly</span></h1>
+  <div class="container">
+
+    <!-- CHÚ THÍCH (LEGEND) -->
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-arrow" style="color: #dca63a;">─────&gt;</span>
+        Khách (Public)
+      </div>
+      <div class="legend-item">
+        <span class="legend-arrow" style="color: #9b59b6;">-.-.-&gt;</span>
+        Quản trị viên (Admin)
+      </div>
+      <div class="legend-item">
+        <span class="legend-arrow" style="color: #e74c3c;">- - -&gt;</span>
+        Ứng viên (Candidate)
+      </div>
+      <div class="legend-item">
+        <span class="legend-arrow" style="color: #2ecc71;">.....&gt;</span>
+        Nhà tuyển dụng (Recruiter)
+      </div>
+    </div>
+
+    <div class="mermaid">
+      flowchart LR
+      %% Định dạng style cơ bản cho các box bo góc mềm mại
+      classDef default fill:#ffffff,stroke:#666666,stroke-width:1px,color:#000000,rx:8,ry:8
+
+      %% ==========================================
+      %% KHAI BÁO CÁC MÀN HÌNH (NODES)
+      %% ==========================================
+
+      %% MÀN HÌNH CHÍNH & PUBLIC
+      Home["Màn hình<br>trang chủ"]
+      Register["Trang Đăng ký"]
+      Login["Trang Đăng nhập"]
+      P_Jobs["Tìm việc làm"]
+      P_Companies["Danh sách công ty"]
+      P_Support["Trung tâm hỗ trợ"]
+
+      %% MÀN HÌNH ADMIN (Tím)
+      AdminHome["Dashboard<br>Admin"]
+      A_Users["Quản lý<br>Người dùng"]
+      A_Candidates["Danh sách<br>Ứng viên"]
+      A_Recruiters["Danh sách<br>Nhà tuyển dụng"]
+      A_Admins["Danh sách<br>Admin"]
+
+      A_Content["Kiểm duyệt<br>Nội dung"]
+      A_Jobs["Quản lý<br>Việc làm"]
+      A_Companies["Quản lý<br>Công ty"]
+      A_Reviews["Quản lý<br>Đánh giá"]
+
+      A_Operations["Vận hành &<br>Tài chính"]
+      A_Violations["Quản lý<br>Vi phạm"]
+      A_Revenue["Quản lý<br>Doanh thu"]
+      A_Support["Xử lý<br>Hỗ trợ"]
+
+      %% MÀN HÌNH CỦA ỨNG VIÊN (Đỏ)
+      CandidateHome["Dashboard<br>Ứng viên"]
+      C_Profile["Quản lý<br>Hồ sơ & CV"]
+      C_AppliedJobs["Việc làm<br>đã ứng tuyển"]
+      C_Interviews["Lịch<br>Phỏng vấn"]
+      C_Chatbot["Trợ lý ảo<br>AI Chatbot"]
+
+      %% MÀN HÌNH CỦA NHÀ TUYỂN DỤNG (Xanh lá)
+      R_Home["Dashboard<br>Nhà tuyển dụng"]
+      R_JobsManage["Quản lý<br>Tuyển dụng"]
+      R_PostJob["Đăng tin<br>Việc làm"]
+      R_JobList["Tin tuyển dụng<br>đã đăng"]
+
+      R_CandidateManage["Quản lý<br>Ứng viên"]
+      R_Applications["Hồ sơ<br>ứng tuyển"]
+      R_Interviews["Lịch<br>Phỏng vấn"]
+
+      R_Company["Hồ sơ<br>Công ty"]
+      R_Wallet["Ví PayOS &<br>Thanh toán"]
+      R_AIReport["Báo cáo<br>AI Analytics"]
+      R_Messages["Tin nhắn<br>Trực tuyến"]
+
+      %% ==========================================
+      %% KHAI BÁO CÁC ĐƯỜNG LIÊN KẾT (LINKS)
+      %% ==========================================
+
+      %% Public (0-5)
+      Home -- "Khám phá<br>việc làm" --> P_Jobs
+      Home -- "Tìm hiểu<br>công ty" --> P_Companies
+      Home -- "Cần giúp đỡ" --> P_Support
+      Home -- "Chọn chức năng<br>Đăng ký" --> Register
+      Home -- "Chọn chức năng<br>Đăng nhập" --> Login
+      Register -- "Tạo tài khoản<br>thành công" --> Login
+
+      %% Login Forks (6-8)
+      Login -- "Đăng nhập<br>(Role Admin)" --> AdminHome
+      Login -- "Đăng nhập<br>(Role Candidate)" --> CandidateHome
+      Login -- "Đăng nhập<br>(Role Recruiter)" --> R_Home
+
+      %% Admin (9-20)
+      AdminHome -- "Chọn mục<br>Người dùng" --> A_Users
+      A_Users -- "Xem" --> A_Candidates
+      A_Users -- "Xem" --> A_Recruiters
+      A_Users -- "Xem" --> A_Admins
+
+      AdminHome -- "Chọn mục<br>Nội dung" --> A_Content
+      A_Content -- "Kiểm duyệt" --> A_Jobs
+      A_Content -- "Kiểm duyệt" --> A_Companies
+      A_Content -- "Quản lý" --> A_Reviews
+
+      AdminHome -- "Chọn mục<br>Vận hành" --> A_Operations
+      A_Operations -- "Khóa/Mở<br>tài khoản" --> A_Violations
+      A_Operations -- "Thống kê" --> A_Revenue
+      A_Operations -- "Phản hồi" --> A_Support
+
+      %% Candidate (21-24)
+      CandidateHome -- "Cập nhật<br>thông tin" --> C_Profile
+      CandidateHome -- "Theo dõi<br>tiến trình" --> C_AppliedJobs
+      CandidateHome -- "Xem lịch trình" --> C_Interviews
+      CandidateHome -- "Nhờ tư vấn" --> C_Chatbot
+
+      %% Recruiter (25-34)
+      R_Home -- "Chọn mục<br>Tuyển dụng" --> R_JobsManage
+      R_JobsManage -- "Tạo mới" --> R_PostJob
+      R_JobsManage -- "Chỉnh sửa" --> R_JobList
+
+      R_Home -- "Chọn mục<br>Ứng viên" --> R_CandidateManage
+      R_CandidateManage -- "Duyệt CV" --> R_Applications
+      R_CandidateManage -- "Lên lịch" --> R_Interviews
+
+      R_Home -- "Cập nhật<br>thương hiệu" --> R_Company
+      R_Home -- "Quản lý<br>tài chính" --> R_Wallet
+      R_Home -- "Xem phân tích" --> R_AIReport
+      R_Home -- "Chat với<br>ứng viên" --> R_Messages
+
+      %% ==========================================
+      %% KIỂU DÁNG VÀ MÀU SẮC MŨI TÊN (CHO TỪNG ROLE)
+      %% ==========================================
+
+      %% Public (Vàng): Nét liền (Solid) ──>
+      linkStyle 0,1,2,3,4,5 stroke:#dca63a,stroke-width:2px,color:#555
+
+      %% Admin (Tím): Nét đứt chấm (Dash-dot) -.-.>
+      linkStyle 6,9,10,11,12,13,14,15,16,17,18,19,20 stroke:#9b59b6,stroke-width:2px,color:#555,stroke-dasharray: 12 5 2
+      5
+
+      %% Candidate (Đỏ): Nét đứt (Dashed) ---->
+      linkStyle 7,21,22,23,24 stroke:#e74c3c,stroke-width:2px,color:#555,stroke-dasharray: 8 6
+
+      %% Recruiter (Xanh lá): Nét chấm (Dotted) ....>
+      linkStyle 8,25,26,27,28,29,30,31,32,33,34 stroke:#2ecc71,stroke-width:3px,color:#555,stroke-dasharray: 2 5
+    </div>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose'
+    });
+  </script>
+</body>
+
+</html>

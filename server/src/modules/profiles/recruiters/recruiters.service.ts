@@ -174,7 +174,7 @@ export class RecruitersService {
       return [];
     }
 
-    const threshold = job?.autoInviteThreshold || 70;
+    const threshold = job?.autoInviteThreshold ?? 70;
 
     const dbMatches = await this.prisma.jobMatch.findMany({
       where: {

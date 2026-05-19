@@ -185,6 +185,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
   "benefits": ["Quyền lợi 1", "Quyền lợi 2", "Quyền lợi 3"],
   "hardSkills": ["Kỹ năng 1", "Kỹ năng 2"],
   "softSkills": ["Kỹ năng mềm 1", "Kỹ năng mềm 2"],
+  "categories": ["Lĩnh vực ngành nghề 1", "Lĩnh vực ngành nghề 2 (tối đa 3 lĩnh vực)"],
   "salaryMin": "Lương tối thiểu (chỉ ghi số nguyên, ví dụ 10000000, hoặc null)",
   "salaryMax": "Lương tối đa (chỉ ghi số nguyên, hoặc null)",
   "experience": "Yêu cầu kinh nghiệm (vd: Dưới 1 năm, 1 năm, 2 năm...)",
@@ -196,28 +197,34 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
     let success = false;
 
     if (process.env.GROQ_API_KEY) {
-      try {
-        const groqRes = await axios.post(
-          'https://api.groq.com/openai/v1/chat/completions',
-          {
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are an elite HR Recruiter API. Output extremely detailed JD in JSON. Use fluent Vietnamese.',
-              },
-              { role: 'user', content: extractionPrompt },
-            ],
-            temperature: 0.2,
-            response_format: { type: 'json_object' },
-          },
-          { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` } },
-        );
-        jobData = JSON.parse(groqRes.data.choices[0].message.content);
-        success = true;
-      } catch (error) {
-        this.logger.error(`Groq generateJdFromPrompt failed`);
+      const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
+      
+      for (const modelName of groqModels) {
+        try {
+          const groqRes = await axios.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            {
+              model: modelName,
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are an elite HR Recruiter API. Output extremely detailed JD in JSON. Use fluent Vietnamese.',
+                },
+                { role: 'user', content: extractionPrompt },
+              ],
+              temperature: 0.2,
+              response_format: { type: 'json_object' },
+            },
+            { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` } },
+          );
+          jobData = JSON.parse(groqRes.data.choices[0].message.content);
+          success = true;
+          this.logger.log(`Groq generated JD successfully using model: ${modelName}`);
+          break;
+        } catch (error: any) {
+          this.logger.error(`Groq generateJdFromPrompt failed for model ${modelName}: ${error.message}`);
+        }
       }
     }
 
@@ -232,12 +239,32 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
           const result = await model.generateContent(extractionPrompt);
           jobData = JSON.parse(result.response.text());
           success = true;
+          this.logger.log(`Gemini generated JD successfully using model: ${modelName}`);
           break;
-        } catch (error) {}
+        } catch (error: any) {
+          this.logger.error(`Gemini generateJdFromPrompt failed for model ${modelName}: ${error.message}`);
+        }
       }
     }
 
-    if (!jobData) throw new Error('Không thể sử dụng dịch vụ AI lúc này.');
+    if (!jobData) {
+      this.logger.warn('Tất cả AI đều hết hạn mức (Quota Exceeded). Trả về dữ liệu mẫu (Mock JD).');
+      jobData = {
+        title: "Lập Trình Viên (Dữ liệu mẫu do AI hết Quota)",
+        locationCity: "Hồ Chí Minh",
+        workModel: "OFFICE",
+        vacancies: 1,
+        salaryMin: 10000000,
+        salaryMax: 20000000,
+        description: "Lưu ý: Đây là dữ liệu mẫu tự động được điền do API AI đang bị giới hạn truy cập (Rate Limit 429).\nBạn có thể chỉnh sửa lại nội dung này.",
+        requirements: "Có kinh nghiệm làm việc thực tế.\nĐam mê và có trách nhiệm với công việc.",
+        benefits: "Đóng BHXH đầy đủ.\nThưởng tháng 13.",
+        hardSkills: ["JavaScript", "React"],
+        softSkills: ["Làm việc nhóm", "Giao tiếp"],
+        minExperienceYears: 1
+      };
+    }
+    
     return { success: true, data: jobData };
   }
 }

@@ -64,6 +64,7 @@ function JobsPageContent() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [quickViewJob, setQuickViewJob] = useState<JobPosting | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [isBulkProcessing, setIsBulkProcessing] = useState(false);
   const confirm = useConfirm();
@@ -108,21 +109,32 @@ function JobsPageContent() {
       await adminJobsApi.approve(id);
       setJobs((prev) => prev.map(j => j.jobPostingId === id ? { ...j, status: JobStatus.APPROVED } : j));
       if (quickViewJob?.jobPostingId === id) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.APPROVED } : null);
-    } catch { setError('Duyệt tin thất bại.'); }
+      toast.success('Duyệt tin thành công');
+    } catch { toast.error('Duyệt tin thất bại.'); }
     finally { setIsProcessing(null); }
   };
 
-  const handleReject = async (id: string) => {
-    const reason = window.prompt('Nhập lý do từ chối (Gửi đến nhà tuyển dụng):', 'Nội dung chưa đạt yêu cầu');
-    if (reason === null) return;
+  const handleReject = (id: string) => {
+    setRejectingId(id);
+  };
 
-    setIsProcessing(id);
+  const submitReject = async () => {
+    if (!rejectingId) return;
+    const el = document.getElementById(`reject-reason-${rejectingId}`) as HTMLTextAreaElement;
+    const reason = el?.value?.trim() || 'Nội dung chưa đạt yêu cầu';
+    setRejectingId(null);
+    
+    setIsProcessing(rejectingId);
     try {
-      await adminJobsApi.reject(id, reason);
-      setJobs((prev) => prev.map(j => j.jobPostingId === id ? { ...j, status: JobStatus.REJECTED } : j));
-      if (quickViewJob?.jobPostingId === id) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.REJECTED } : null);
-    } catch { setError('Từ chối tin thất bại.'); }
-    finally { setIsProcessing(null); }
+      await adminJobsApi.reject(rejectingId, reason);
+      setJobs((prev) => prev.map(j => j.jobPostingId === rejectingId ? { ...j, status: JobStatus.REJECTED } : j));
+      if (quickViewJob?.jobPostingId === rejectingId) setQuickViewJob(prev => prev ? { ...prev, status: JobStatus.REJECTED } : null);
+      toast.success('Đã từ chối tin đăng');
+    } catch { 
+      toast.error('Từ chối tin thất bại.'); 
+    } finally { 
+      setIsProcessing(null); 
+    }
   };
 
   const handleBulkApprove = async () => {
@@ -254,6 +266,43 @@ function JobsPageContent() {
           onReject={handleReject}
           isProcessing={isProcessing === quickViewJob.jobPostingId}
         />
+      )}
+
+      {rejectingId && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setRejectingId(null)} />
+          <div className="relative max-w-md w-full bg-white shadow-2xl rounded-2xl flex flex-col border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-4 bg-rose-50 border-b border-rose-100 flex items-center gap-3">
+              <ShieldAlert className="w-5 h-5 text-rose-500" />
+              <h3 className="font-bold text-rose-700">Lý do từ chối</h3>
+            </div>
+            <div className="p-4">
+              <textarea
+                id={`reject-reason-${rejectingId}`}
+                className="w-full border border-slate-200 rounded-xl p-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 resize-none transition-all shadow-sm"
+                rows={3}
+                defaultValue="Nội dung chưa đạt yêu cầu"
+                placeholder="Nhập lý do gửi đến nhà tuyển dụng..."
+                autoFocus
+              />
+            </div>
+            <div className="flex border-t border-slate-100 bg-slate-50">
+              <button
+                onClick={() => setRejectingId(null)}
+                className="flex-1 p-3 text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+              >
+                Hủy
+              </button>
+              <div className="w-px bg-slate-200" />
+              <button
+                onClick={submitReject}
+                className="flex-1 p-3 text-sm font-bold text-rose-600 hover:bg-rose-100 transition-colors"
+              >
+                Xác nhận từ chối
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

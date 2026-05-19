@@ -189,17 +189,37 @@ export class BackofficeService {
       where: { user: { violations: { gt: 0 } } },
       orderBy: { user: { violations: 'desc' } },
       include: {
-        user: { select: { email: true, status: true, violations: true } },
+        user: { select: { email: true, status: true, violations: true, userId: true } },
         company: { select: { companyName: true } },
       },
     });
 
     return recruiters.map((r) => ({
       recruiterId: r.recruiterId,
+      userId: r.user.userId,
       companyName: r.company?.companyName || 'Chưa có công ty',
       email: r.user.email,
       violationCount: r.user.violations,
       status: r.user.status,
+    }));
+  }
+
+  async getViolatingCandidates() {
+    const candidates = await this.prisma.candidate.findMany({
+      where: { user: { violations: { gt: 0 } } },
+      orderBy: { user: { violations: 'desc' } },
+      include: {
+        user: { select: { email: true, status: true, violations: true, userId: true } },
+      },
+    });
+
+    return candidates.map((c) => ({
+      candidateId: c.candidateId,
+      userId: c.user.userId,
+      fullName: c.fullName || 'Chưa cập nhật',
+      email: c.user.email,
+      violationCount: c.user.violations,
+      status: c.user.status,
     }));
   }
 
@@ -257,29 +277,60 @@ export class BackofficeService {
     });
   }
 
-  async getRecentTransactions(limit = 20) {
-    const transactions = await this.prisma.transaction.findMany({
-      where: {
-        status: 'SUCCESS',
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      include: {
-        wallet: {
-          include: {
-            company: { select: { companyName: true } }
-          }
-        },
-        recruiter: {
-          select: {
-            user: { select: { email: true } },
-            fullName: true
+  async getRecentTransactions(limit = 20, companyId?: string) {
+    if (companyId) {
+      const transactions = await this.prisma.transaction.findMany({
+        where: { status: 'SUCCESS', wallet: { companyId } },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: {
+          wallet: {
+            include: { company: { select: { companyName: true } } }
+          },
+          recruiter: {
+            select: { user: { select: { email: true } }, fullName: true }
           }
         }
-      }
-    });
+      });
+      return transactions.map(tx => ({
+        transactionId: tx.transactionId,
+        amount: tx.amount,
+        realMoney: tx.realMoney,
+        type: tx.type,
+        description: tx.description,
+        createdAt: tx.createdAt,
+        companyName: tx.wallet?.company?.companyName || 'N/A',
+        recruiterName: tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
+      }));
+    }
 
-    return transactions.map(tx => ({
+    const [recruiterTxs, candidateTxs] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where: { status: 'SUCCESS' },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: {
+          wallet: {
+            include: { company: { select: { companyName: true } } }
+          },
+          recruiter: {
+            select: { user: { select: { email: true } }, fullName: true }
+          }
+        }
+      }),
+      this.prisma.candidateTransaction.findMany({
+        where: { status: 'SUCCESS' },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        include: {
+          wallet: {
+            include: { candidate: { select: { fullName: true, user: { select: { email: true } } } } }
+          }
+        }
+      })
+    ]);
+
+    const mappedRecruiter = recruiterTxs.map(tx => ({
       transactionId: tx.transactionId,
       amount: tx.amount,
       realMoney: tx.realMoney,
@@ -288,6 +339,23 @@ export class BackofficeService {
       createdAt: tx.createdAt,
       companyName: tx.wallet?.company?.companyName || 'N/A',
       recruiterName: tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
+      isCandidate: false
     }));
+
+    const mappedCandidate = candidateTxs.map(tx => ({
+      transactionId: tx.transactionId,
+      amount: tx.amount,
+      realMoney: tx.realMoney,
+      type: tx.type,
+      description: tx.description,
+      createdAt: tx.createdAt,
+      companyName: tx.wallet?.candidate?.fullName || 'Ứng viên',
+      recruiterName: tx.wallet?.candidate?.user?.email || 'Hệ thống',
+      isCandidate: true
+    }));
+
+    return [...mappedRecruiter, ...mappedCandidate]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
   }
 }

@@ -82,7 +82,7 @@ export class JobPostingsService {
     const jobIds = jobs.map((j) => j.jobPostingId);
     const [allMatches, allUnlocks] = await Promise.all([
       this.prisma.jobMatch.findMany({
-        where: { jobPostingId: { in: jobIds }, score: { gte: 40 } },
+        where: { jobPostingId: { in: jobIds } },
         select: { jobPostingId: true, score: true },
       }),
       this.prisma.candidateUnlock.findMany({
@@ -104,7 +104,7 @@ export class JobPostingsService {
     const matchesByJob = allMatches.reduce(
       (acc, m) => {
         const job = jobs.find((j) => j.jobPostingId === m.jobPostingId);
-        const threshold = job?.autoInviteThreshold || 70;
+        const threshold = job?.autoInviteThreshold ?? 70;
         // Lấy đúng số ứng viên thoả mãn mức % mà HR cấu hình
         if (m.score >= threshold) {
           acc[m.jobPostingId] = (acc[m.jobPostingId] || 0) + 1;
@@ -230,7 +230,23 @@ export class JobPostingsService {
   }
 
   async getCategoryStats() {
-    return [];
+    const jobs = await this.prisma.jobPosting.findMany({
+      where: { status: 'APPROVED' },
+      select: { structuredRequirements: true },
+    });
+
+    const stats: Record<string, number> = {};
+
+    for (const job of jobs) {
+      const struct = job.structuredRequirements as any;
+      if (struct && Array.isArray(struct.categories)) {
+        for (const cat of struct.categories) {
+          stats[cat] = (stats[cat] || 0) + 1;
+        }
+      }
+    }
+
+    return stats;
   }
 
   async update(

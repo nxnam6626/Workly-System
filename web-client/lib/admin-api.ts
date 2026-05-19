@@ -357,7 +357,17 @@ export interface LatestViolation {
 
 export interface ViolatingRecruiter {
   recruiterId: string;
+  userId: string;
   companyName: string;
+  email: string;
+  violationCount: number;
+  status: string;
+}
+
+export interface ViolatingCandidate {
+  candidateId: string;
+  userId: string;
+  fullName: string;
   email: string;
   violationCount: number;
   status: string;
@@ -373,11 +383,14 @@ export const adminDashboardApi = {
   getViolatingRecruiters: (): Promise<ViolatingRecruiter[]> =>
     api.get('/admin/recruiters/violations').then((r) => r.data),
 
+  getViolatingCandidates: (): Promise<ViolatingCandidate[]> =>
+    api.get('/admin/candidates/violations').then((r) => r.data),
+
   getLatestViolations: (): Promise<LatestViolation[]> =>
     api.get('/admin/violations/latest').then((r) => r.data),
 
-  getRecentTransactions: (limit?: number): Promise<any[]> =>
-    api.get('/admin/revenue/transactions', { params: { limit } }).then((r) => r.data),
+  getRecentTransactions: (limit?: number, companyId?: string): Promise<any[]> =>
+    api.get('/admin/revenue/transactions', { params: { limit, companyId } }).then((r) => r.data),
 };
 
 // ─── Admin Support Management ──────────────────────────────────────────────────

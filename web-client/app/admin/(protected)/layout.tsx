@@ -21,6 +21,7 @@ import {
   Bot,
   Star,
   Key,
+  ShieldAlert,
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { checkIsAdmin } from '@/lib/admin-auth';
@@ -37,7 +38,7 @@ const NAV_GROUPS = [
     label: 'Dữ liệu',
     items: [
       { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
-      { label: 'Đánh Giá (Review)', href: '/admin/reviews', icon: Star, perm: 'MANAGE_JOBS' },
+      { label: 'Đánh Giá', href: '/admin/reviews', icon: Star, perm: 'MANAGE_JOBS' },
     ],
   },
   {
@@ -46,6 +47,7 @@ const NAV_GROUPS = [
       { label: 'Doanh Nghiệp', href: '/admin/companies', icon: Building, perm: 'MANAGE_USERS' },
       { label: 'Nhà Tuyển Dụng', href: '/admin/recruiters', icon: Briefcase, perm: 'MANAGE_USERS' },
       { label: 'Ứng Viên', href: '/admin/candidates', icon: Users, perm: 'MANAGE_USERS' },
+      { label: 'Vi Phạm', href: '/admin/violations', icon: ShieldAlert, perm: 'MANAGE_USERS' },
     ],
   },
   {
@@ -128,7 +130,7 @@ export default function ProtectedAdminConsoleLayout({ children }: { children: Re
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-8 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-3 py-6 space-y-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="space-y-3">
             {!collapsed && (

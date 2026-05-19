@@ -118,6 +118,7 @@ export function TopEmployers() {
               <Link
                 key={`${emp.companyId}-${i}`}
                 href={`/companies/${emp.companyId}`}
+                title={emp.companyName}
                 className="w-24 h-24 bg-white rounded-2xl border border-white/50 shadow-md flex items-center justify-center p-3 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer shrink-0"
               >
                 {emp.logo ? (

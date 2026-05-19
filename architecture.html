@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workly System Architecture</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #0f172a;
+      margin-bottom: 30px;
+    }
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 1200px;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sơ đồ Kiến trúc Hệ thống Workly</h1>
+  <div class="container">
+    <div class="mermaid">
+flowchart TB
+    %% Định dạng CSS cho các Node
+    classDef person fill:#08427b,stroke:#052e56,stroke-width:2px,color:#fff,rx:50,ry:50
+    classDef webApp fill:#1168bd,stroke:#0b4884,stroke-width:2px,color:#fff
+    classDef apiGateway fill:#e11d48,stroke:#9f1239,stroke-width:2px,color:#fff
+    classDef service fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
+    classDef database fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff,shape:cylinder
+    classDef external fill:#64748b,stroke:#475569,stroke-width:2px,color:#fff
+    
+    %% Các Actor
+    Candidate(("Ứng viên")):::person
+    Recruiter(("Nhà tuyển dụng")):::person
+    Admin(("Quản trị viên")):::person
+
+    %% Hệ thống bên trong
+    subgraph WorklySystem ["Hệ sinh thái Workly"]
+        direction TB
+        
+        subgraph Frontend ["Tầng Frontend"]
+            WebApp["Web Application\n[Next.js]"]:::webApp
+            MobileApp["Mobile App\n[React Native]"]:::webApp
+        end
+        
+        subgraph Backend ["Tầng Backend (NestJS)"]
+            APIGateway["API Gateway\n[NestJS Core]"]:::apiGateway
+            
+            AuthService["Auth Module"]:::service
+            JobService["Job & CV Module"]:::service
+            AIService["AI Module"]:::service
+            AdminService["Admin Module"]:::service
+            
+            RealtimeService["Realtime\n[Socket.IO]"]:::service
+            Worker["Worker Queue\n[BullMQ]"]:::service
+        end
+        
+        subgraph DataLayer ["Tầng Data & Cache"]
+            PostgreSQL[("PostgreSQL\n[Prisma DB]")]:::database
+            Redis[("Redis\n[Cache/Queue]")]:::database
+        end
+    end
+    
+    %% Các Hệ thống bên ngoài
+    GeminiAI["Google Gemini 2.0\n[AI LLM]"]:::external
+    Supabase["Supabase\n[S3 Storage]"]:::external
+    PayOS["PayOS\n[Thanh toán]"]:::external
+
+
+    %% Các luồng kết nối
+    Candidate --> WebApp
+    Candidate --> MobileApp
+    Recruiter --> WebApp
+    Admin --> WebApp
+    
+    WebApp -.->|"REST API"| APIGateway
+    WebApp <-->|"WebSocket"| RealtimeService
+    MobileApp -.->|"REST API"| APIGateway
+    
+    APIGateway --> AuthService
+    APIGateway --> JobService
+    APIGateway --> AIService
+    APIGateway --> AdminService
+    
+    AuthService --> PostgreSQL
+    JobService --> PostgreSQL
+    AdminService --> PostgreSQL
+    
+    APIGateway -.->|"Cache"| Redis
+    JobService -->|"Push Job"| Worker
+    AIService -->|"Push Job"| Worker
+    Worker <--> Redis
+    RealtimeService <--> Redis
+    
+    AIService <-->|"API"| GeminiAI
+    Worker <-->|"API"| GeminiAI
+    
+    JobService <-->|"Upload CV"| Supabase
+    JobService <-->|"Tạo QR"| PayOS
+
+    </div>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+      startOnLoad: true, 
+      theme: 'default',
+      securityLevel: 'loose'
+    });
+  </script>
+</body>
+</html>

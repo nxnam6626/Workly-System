@@ -96,7 +96,7 @@ export class JobAdminService {
       const message =
         status === JobStatus.APPROVED
           ? `Tin tuyển dụng "${job.title}" của bạn đã được Admin phê duyệt.`
-          : `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.`;
+          : `Tin tuyển dụng "${job.title}" của bạn đã bị Admin từ chối.${reason ? ` Lý do: ${reason}` : ''}`;
 
       await this.jobNotificationService.sendStatusNotification(
         job.recruiter.userId,
