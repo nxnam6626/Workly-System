@@ -60,11 +60,10 @@ export const AiAdvisorModal = ({
               </div>
             </div>
 
-            <div className={`relative z-10 mt-10 p-5 rounded-2xl border backdrop-blur-sm transition-all duration-500 ${
-              userPlan === 'GROWTH' ? 'bg-amber-50/80 border-amber-200 shadow-sm' :
-              userPlan === 'LITE' ? 'bg-indigo-50/80 border-indigo-200 shadow-sm' :
-              'bg-slate-100 border-slate-200'
-            }`}>
+            <div className={`relative z-10 mt-10 p-5 rounded-2xl border backdrop-blur-sm transition-all duration-500 ${userPlan === 'GROWTH' ? 'bg-amber-50/80 border-amber-200 shadow-sm' :
+                userPlan === 'LITE' ? 'bg-indigo-50/80 border-indigo-200 shadow-sm' :
+                  'bg-slate-100 border-slate-200'
+              }`}>
               <div className="flex items-center gap-2 mb-2.5">
                 <Crown className={`w-4 h-4 ${userPlan === 'GROWTH' ? 'text-amber-600' : userPlan === 'LITE' ? 'text-indigo-600' : 'text-slate-500'}`} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#111110]">
@@ -114,7 +113,7 @@ export const AiAdvisorModal = ({
               <div className="flex items-center gap-6">
                 <button
                   type="button"
-                  onClick={() => setAiPrompt(aiPrompt + (aiPrompt ? "\n\n" : "") + "📍 Địa điểm: \n💻 Mô tả: \n🎯 Yêu cầu: \n🎁 Quyền lợi: ")}
+                  onClick={() => setAiPrompt(aiPrompt + (aiPrompt ? "\n\n" : "") + "Địa điểm: \nMô tả: \nYêu cầu: \nQuyền lợi: ")}
                   className="flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-[0.2em] group"
                 >
                   <Plus className="w-3.5 h-3.5 transition-transform group-hover:rotate-90" />

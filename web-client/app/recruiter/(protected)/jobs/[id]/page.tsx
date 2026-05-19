@@ -49,7 +49,7 @@ export default function RecruiterJobDetailPage() {
     if (!id) return;
     fetchJobDetails();
     fetchCandidates();
-    api.get('/subscriptions/current').then(({ data }) => setSubscription(data)).catch(() => {});
+    api.get('/subscriptions/current').then(({ data }) => setSubscription(data)).catch(() => { });
     fetchWallet();
   }, [id]);
 
@@ -392,16 +392,14 @@ export default function RecruiterJobDetailPage() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: idx * 0.04 }}
-                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all group ${
-                            c.isUnlocked
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all group ${c.isUnlocked
                               ? 'border-emerald-100 bg-emerald-50/30 hover:border-emerald-200'
                               : 'border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/20'
-                          }`}
+                            }`}
                         >
                           {/* Avatar */}
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 shrink-0 overflow-hidden ${
-                            c.isUnlocked ? 'bg-slate-100' : 'bg-slate-100'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 shrink-0 overflow-hidden ${c.isUnlocked ? 'bg-slate-100' : 'bg-slate-100'
+                            }`}>
                             {c.avatar
                               ? <img src={c.avatar} alt="" className="w-full h-full object-cover" />
                               : c.isUnlocked
@@ -495,12 +493,12 @@ export default function RecruiterJobDetailPage() {
       {/* Modal Xác nhận đóng tin */}
       {showCloseModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
-          <div 
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" 
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setShowCloseModal(false)}
           />
           <div className="relative z-10 w-full max-w-[400px] bg-white shadow-2xl rounded-2xl border border-slate-100 p-6 animate-in fade-in zoom-in-95 duration-200">
-            <button 
+            <button
               onClick={() => setShowCloseModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
             >

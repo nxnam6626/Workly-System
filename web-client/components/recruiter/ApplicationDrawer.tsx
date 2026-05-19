@@ -51,7 +51,7 @@ export function ApplicationDrawer({ app, onClose, onStatusChange, onUnlock }: Pr
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-xl font-black text-slate-900 truncate">{app.candidate?.fullName}</h3>
-                <p className="text-sm text-slate-500 font-medium truncate">Ứng tuyển: {app.jobPosting?.title}</p>
+                <p className="text-sm text-slate-500 font-medium truncate">Ứng tuyển: {app.jobTitle || app.jobPosting?.title}</p>
                 <span className={`inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-black border ${st.cls}`}>{st.label}</span>
               </div>
             </div>
@@ -74,7 +74,7 @@ export function ApplicationDrawer({ app, onClose, onStatusChange, onUnlock }: Pr
               {[
                 { icon: Clock,     label: 'Ngày ứng tuyển', value: new Date(app.applyDate).toLocaleDateString('vi-VN') },
                 { icon: MapPin,    label: 'Nơi làm việc', value: app.desiredLocation || 'Không yêu cầu' },
-                { icon: Briefcase, label: 'Vị trí', value: app.jobPosting?.title || '—' },
+                { icon: Briefcase, label: 'Vị trí', value: app.jobTitle || app.jobPosting?.title || '—' },
                 { icon: User,      label: 'Họ tên', value: app.candidate?.fullName || '—' },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="p-3 bg-slate-50 rounded-xl border border-slate-100">

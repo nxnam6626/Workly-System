@@ -319,7 +319,7 @@ export default function RevenuePage() {
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 text-xl tracking-tight">Lịch Sử Chi Tiêu Gần Đây</h3>
-                  <p className="text-[13px] font-medium text-slate-500 mt-1">Theo dõi hoạt động giao dịch của các nhà tuyển dụng</p>
+                  <p className="text-[13px] font-medium text-slate-500 mt-1">Theo dõi hoạt động giao dịch của người dùng trên hệ thống</p>
                 </div>
               </div>
             </div>
@@ -354,7 +354,12 @@ export default function RevenuePage() {
                           {new Date(tx.createdAt).toLocaleString('vi-VN')}
                         </td>
                         <td className="px-6 py-5">
-                          <p className="font-black text-slate-800 text-[14px]">{tx.companyName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-black text-slate-800 text-[14px]">{tx.companyName}</p>
+                            {tx.isCandidate && (
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">Ứng viên</span>
+                            )}
+                          </div>
                           <p className="text-[12px] text-slate-500">{tx.recruiterName}</p>
                         </td>
                         <td className="px-6 py-5">
@@ -362,9 +367,10 @@ export default function RevenuePage() {
                               tx.type === 'DEPOSIT' ? 'bg-blue-50 text-blue-700 border-blue-200/60' :
                               tx.type === 'BUY_PACKAGE' ? 'bg-purple-50 text-purple-700 border-purple-200/60' :
                               tx.type === 'POST_JOB' ? 'bg-amber-50 text-amber-700 border-amber-200/60' :
-                              'bg-rose-50 text-rose-700 border-rose-200/60'
+                              tx.type === 'OPEN_CV' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                              'bg-indigo-50 text-indigo-700 border-indigo-200/60'
                            }`}>
-                             {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : 'Mở CV'}
+                             {tx.type === 'DEPOSIT' ? 'Nạp xu' : tx.type === 'BUY_PACKAGE' ? 'Mua gói' : tx.type === 'POST_JOB' ? 'Đăng tin' : tx.type === 'OPEN_CV' ? 'Mở CV' : tx.type}
                            </span>
                         </td>
                         <td className="px-6 py-5 text-slate-600 font-medium text-[13px] max-w-xs truncate" title={tx.description}>

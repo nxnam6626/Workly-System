@@ -43,23 +43,17 @@ export class ScoringEngineService {
     const locationRes = await locationStrategy.calculate(job, cv);
     const industryRes = await industryStrategy.calculate(job, cv);
 
-    // --- TẦNG 2: NHÓM CHẤM ĐIỂM THÀNH PHẦN (COMPONENT SCORING) ---
-    const skillsRes = await this.calculateSkillsScore(job, cv);
-    const expRes = await this.strategyFactory
-      .getStrategy('experience')
-      .calculate(job, cv);
-    const relExpRes = await this.strategyFactory
-      .getStrategy('relevantExp')
-      .calculate(job, cv);
-    const eduRes = await this.strategyFactory
-      .getStrategy('education')
-      .calculate(job, cv);
-    const langRes = await this.strategyFactory
-      .getStrategy('language')
-      .calculate(job, cv);
-    const titleRes = await this.strategyFactory
-      .getStrategy('jobTitle')
-      .calculate(job, cv);
+    // --- TẦNG 2 & TẦNG 3: CHẠY SONG SONG ĐỂ TĂNG TỐC (PARALLEL EXECUTION) ---
+    const [skillsRes, expRes, relExpRes, eduRes, langRes, titleRes, salaryRes] =
+      await Promise.all([
+        this.calculateSkillsScore(job, cv),
+        this.strategyFactory.getStrategy('experience').calculate(job, cv),
+        this.strategyFactory.getStrategy('relevantExp').calculate(job, cv),
+        this.strategyFactory.getStrategy('education').calculate(job, cv),
+        this.strategyFactory.getStrategy('language').calculate(job, cv),
+        this.strategyFactory.getStrategy('jobTitle').calculate(job, cv),
+        this.strategyFactory.getStrategy('salary').calculate(job, cv),
+      ]);
 
     // --- TẦNG 2: NHÓM TÍNH ĐIỂM (WEIGHTED SCORING) ---
     const weightedBaseScore =
@@ -69,10 +63,6 @@ export class ScoringEngineService {
       langRes.score * weights.languages +
       titleRes.score * weights.jobTitle +
       expRes.score * (weights.experience || 0);
-
-    // --- TẦNG 3: NHÓM ĐIỀU CHỈNH (MODIFIERS) ---
-    const salaryStrategy = this.strategyFactory.getStrategy('salary');
-    const salaryRes = await salaryStrategy.calculate(job, cv);
 
     // --- TÍNH TOÁN HÌNH PHẠT (PENALTIES) ---
     let totalPenalty = 0;

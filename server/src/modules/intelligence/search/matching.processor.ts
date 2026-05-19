@@ -42,7 +42,7 @@ export class MatchingProcessor extends WorkerHost {
         }
 
         const recruiterUserId = jobPosting.recruiter.userId;
-        const threshold = jobPosting.autoInviteThreshold || 70;
+        const threshold = jobPosting.autoInviteThreshold ?? 70;
 
         // Số ứng viên phù hợp dựa THEO ĐÚNG cấu hình của user
         const matchedCandidates = topMatches.filter((m) => m.score >= threshold);
@@ -67,7 +67,9 @@ export class MatchingProcessor extends WorkerHost {
           jobPosting.status === 'APPROVED'; // Chỉ auto-invite khi bài đã được duyệt
 
         if (shouldAutoInvite) {
-          const limit = jobPosting.vacancies || 1;
+          // Tỷ lệ phễu tuyển dụng (Recruitment Funnel Ratio): Cần mời 5 người để có 1 người đi làm
+          const FUNNEL_RATIO = 5;
+          const limit = (jobPosting.vacancies || 1) * FUNNEL_RATIO;
           const autoInviteCandidates = matchedCandidates.slice(0, limit);
 
           for (const match of autoInviteCandidates) {

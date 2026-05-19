@@ -76,6 +76,8 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
       });
       toast.success(`Đã mở khóa thành công ứng viên ${selectedCandidate.name}`);
       await fetchMatches(); // Reload lại danh sách
+      await fetchWallet(); // Cập nhật lại số dư ví và lượt mở CV
+      
       // Nếu đang mở CV preview thì cập nhật previewCandidate với dữ liệu mới
       setPreviewCandidate((prev: any) => {
         if (prev && prev.candidateId === selectedCandidate.id) {
@@ -83,6 +85,8 @@ export const MatchedCandidatesModal = ({ isOpen, onClose, jobId }: MatchedCandid
         }
         return prev;
       });
+      setShowUnlockModal(false);
+      setSelectedCandidate(null);
     } catch (error: any) {
       const msg = error.response?.data?.message || 'Mở khóa thất bại do số dư không đủ hoặc lỗi hệ thống.';
       toast.error(msg);

@@ -21,7 +21,7 @@ export class MatchingOrchestratorService {
   async runMatchingForJob(jobId: string) {
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      include: { company: true },
+      include: { company: true, branches: { include: { branch: true } } },
     });
 
     if (!job) return [];
@@ -46,7 +46,7 @@ export class MatchingOrchestratorService {
     }
 
     // 2. Lấy danh sách ứng viên (Có thể tối ưu phân trang)
-    const candidates = await this.prisma.candidate.findMany({
+    let candidates = await this.prisma.candidate.findMany({
       where: { user: { status: 'ACTIVE' } },
       include: {
         cvs: {
@@ -68,59 +68,106 @@ export class MatchingOrchestratorService {
       },
     });
 
-    const results: any[] = [];
+    const isRemote = job.jobType === 'REMOTE';
+    const jobLocation = (job.locationCity || '').toLowerCase().replace(/tp\.|thành phố|tỉnh/g, '').trim();
+    const isJobHcm = jobLocation.includes('hồ chí minh') || jobLocation.includes('hcm');
 
-    for (const candidate of candidates) {
-      const mainCv = candidate.cvs[0];
-      if (!mainCv) continue;
+    const structuredReqs = typeof job.structuredRequirements === 'string' 
+      ? JSON.parse(job.structuredRequirements) 
+      : (job.structuredRequirements || {});
+      
+    const jobCategories = Array.isArray(structuredReqs.categories) 
+      ? structuredReqs.categories.map((c: string) => c.toLowerCase())
+      : [];
 
-      // 3. Đảm bảo CV có Embedding
-      if (!(mainCv as any).embedding) {
-        const parsedData = (mainCv.parsedData as any) || {};
-        const text = `${parsedData.summary || ''} ${parsedData.experience || ''}`;
-        const vector = await this.dataParser.getEmbedding(text);
-        try {
-          const vectorSql = `[${vector.join(',')}]`;
-          await this.prisma.$executeRaw`
-            UPDATE "CV" SET "embedding" = ${vectorSql}::vector WHERE "cvId" = ${mainCv.cvId}
-          `;
-        } catch (dbErr: any) {
-          this.logger.warn(`pgvector error for CV. ${dbErr.message}`);
-        }
-        (mainCv as any).embedding = vector;
+    candidates = candidates.filter(candidate => {
+      if (!isRemote && jobLocation) {
+        const candLocRaw = (candidate.location || '').toLowerCase();
+        if (!candLocRaw) return false;
+        
+        const candLoc = candLocRaw.replace(/tp\.|thành phố|tỉnh/g, '').trim();
+        const isCandHcm = candLoc.includes('hồ chí minh') || candLoc.includes('hcm');
+        
+        const locationMatch = (isJobHcm && isCandHcm) || candLoc.includes(jobLocation) || jobLocation.includes(candLoc);
+        if (!locationMatch) return false;
       }
 
-      // 4. Tính điểm bằng Engine mới (9 yếu tố)
-      const { finalScore, breakdown, details } =
-        await this.scoringEngine.calculateFinalScore(job, mainCv);
+      if (jobCategories.length > 0) {
+        const candInds = (candidate.industries || []).map(i => i.toLowerCase());
+        if (candInds.length === 0) return false;
+        
+        const hasOverlap = candInds.some(ind => jobCategories.some(cat => cat.includes(ind) || ind.includes(cat)));
+        if (!hasOverlap) return false;
+      }
 
-      // 5. Phân tích kết quả (UX)
-      const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
+      return true;
+    });
 
-      // 6. Lưu vào DB
-      const matchRecord = await this.prisma.jobMatch.upsert({
-        where: {
-          candidateId_jobPostingId: {
-            candidateId: candidate.candidateId,
-            jobPostingId: jobId,
+    const results: any[] = [];
+
+    // TỐI ƯU HÓA: Chia nhỏ danh sách ứng viên (Chunking) để xử lý song song, tăng tốc độ Matching
+    const CHUNK_SIZE = 5; 
+    const chunks: any[][] = [];
+    for (let i = 0; i < candidates.length; i += CHUNK_SIZE) {
+      chunks.push(candidates.slice(i, i + CHUNK_SIZE));
+    }
+
+    for (const chunk of chunks) {
+      const chunkPromises = chunk.map(async (candidate) => {
+        const mainCv = candidate.cvs[0];
+        if (!mainCv) return null;
+
+        // 3. Đảm bảo CV có Embedding
+        if (!(mainCv as any).embedding) {
+          const parsedData = (mainCv.parsedData as any) || {};
+          const text = `${parsedData.summary || ''} ${parsedData.experience || ''}`;
+          const vector = await this.dataParser.getEmbedding(text);
+          try {
+            const vectorSql = `[${vector.join(',')}]`;
+            await this.prisma.$executeRaw`
+              UPDATE "CV" SET "embedding" = ${vectorSql}::vector WHERE "cvId" = ${mainCv.cvId}
+            `;
+          } catch (dbErr: any) {
+            this.logger.warn(`pgvector error for CV. ${dbErr.message}`);
+          }
+          (mainCv as any).embedding = vector;
+        }
+
+        // 4. Tính điểm bằng Engine mới (9 yếu tố - Đã được tối ưu chạy song song bên trong)
+        const { finalScore, breakdown, details } =
+          await this.scoringEngine.calculateFinalScore(job, mainCv);
+
+        // 5. Phân tích kết quả (UX)
+        const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
+
+        // 6. Lưu vào DB
+        const matchRecord = await this.prisma.jobMatch.upsert({
+          where: {
+            candidateId_jobPostingId: {
+              candidateId: candidate.candidateId,
+              jobPostingId: jobId,
+            },
           },
-        },
-        update: {
-          score: finalScore,
-          matchedSkills: analysis.skillsAnalysis.matchedSkills,
-          details: { breakdown, details } as any,
-          updatedAt: new Date(),
-        },
-        create: {
-          jobPostingId: jobId,
-          candidateId: candidate.candidateId,
-          score: finalScore,
-          matchedSkills: analysis.skillsAnalysis.matchedSkills,
-          details: { breakdown, details } as any,
-        },
+          update: {
+            score: finalScore,
+            matchedSkills: analysis.skillsAnalysis.matchedSkills,
+            details: { breakdown, details } as any,
+            updatedAt: new Date(),
+          },
+          create: {
+            jobPostingId: jobId,
+            candidateId: candidate.candidateId,
+            score: finalScore,
+            matchedSkills: analysis.skillsAnalysis.matchedSkills,
+            details: { breakdown, details } as any,
+          },
+        });
+
+        return matchRecord;
       });
 
-      results.push(matchRecord);
+      const chunkResults = await Promise.all(chunkPromises);
+      results.push(...chunkResults.filter(Boolean));
     }
 
     return results.sort((a, b) => b.score - a.score);
@@ -177,7 +224,7 @@ export class MatchingOrchestratorService {
     // 2. Jobs
     const activeJobs = await this.prisma.jobPosting.findMany({
       where: { status: 'APPROVED' },
-      include: { company: true },
+      include: { company: true, branches: { include: { branch: true } } },
     });
 
     const matchResults: any[] = [];

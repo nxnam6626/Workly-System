@@ -108,7 +108,10 @@ export default function CVReviewPage() {
             level: l.level || ''
           })),
           interests: initialData.interests || [],
-          industries: (initialData.categories || initialData.industries || []).join(', '),
+          industries: (() => {
+            const ind = initialData.categories || initialData.industries || [];
+            return Array.isArray(ind) ? ind.join(', ') : (typeof ind === 'string' ? ind : '');
+          })(),
           otherInfo: (initialData.other_info || initialData.otherInfo || []).map((o: any) => ({
             header: o.header || '',
             content: o.content || ''

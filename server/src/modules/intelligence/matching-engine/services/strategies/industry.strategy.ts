@@ -17,23 +17,30 @@ export class IndustryStrategy implements IMatchingStrategy {
         (i: string) => i.toLowerCase(),
       );
 
-      if (jobCategories.length === 0) return { score: 100 };
+      if (jobCategories.length === 0) return { 
+        score: 100, 
+        details: { jobCategories: [], cvIndustry: cvIndustry || 'Không rõ', isMatch: true, message: 'Không yêu cầu ngành nghề' } 
+      };
 
       // Kiểm tra xem ngành nghề của CV có nằm trong categories của Job không
       const isMatch = jobCategories.some((cat) => {
         const catLower = cat.toLowerCase();
-        return (
-          catLower.includes(cvIndustry) ||
-          cvIndustry.includes(catLower) ||
-          candidateIndustries.some(
-            (ci: string) => ci.includes(catLower) || catLower.includes(ci),
-          )
+        
+        const matchesCvIndustry = cvIndustry ? (catLower.includes(cvIndustry) || cvIndustry.includes(catLower)) : false;
+        const matchesCandidateIndustries = candidateIndustries.some(
+          (ci: string) => ci && (ci.includes(catLower) || catLower.includes(ci)),
         );
+
+        return matchesCvIndustry || matchesCandidateIndustries;
       });
+
+      const combinedCvIndustry = [cv.parsedData?.industry, ...(cv.candidate?.industries || [])]
+        .filter(Boolean)
+        .join(', ');
 
       return {
         score: isMatch ? 100 : 0,
-        details: { jobCategories, cvIndustry, isMatch },
+        details: { jobCategories, cvIndustry: combinedCvIndustry || 'Chưa cập nhật', isMatch },
       };
     } catch (error) {
       this.logger.error(`Industry Match Error: ${error.message}`);
