@@ -42,7 +42,6 @@ export function Navbar() {
       { label: "Việc làm Không cần bằng cấp", href: "/jobs?search=không cần bằng cấp" },
       { label: "Việc làm Online tại nhà", href: "/jobs?jobType=REMOTE" },
       { label: "Việc làm Part-time", href: "/jobs?jobType=PART_TIME" },
-      { label: "Việc làm Thời vụ", href: "/jobs?jobType=TEMPORARY" },
       { label: "Việc làm Remote", href: "/jobs?jobType=REMOTE" }
     ]
   };
@@ -139,13 +138,24 @@ export function Navbar() {
               {isCompaniesMenuOpen && (
                 <div className="absolute top-16 left-0 w-48 bg-white shadow-xl rounded-b-xl border-t border-slate-50 p-2 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
                   <ul className="space-y-0.5">
-                    {companiesMenu.map(item => (
-                      <li key={item}>
-                        <Link href="/companies" className="px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-mariner text-[13px] font-medium transition-all block rounded-lg">
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
+                    {companiesMenu.map(item => {
+                      let href = '/companies';
+                      if (item === 'Tiêu Biểu') {
+                        href = '/companies?sortBy=TYPICAL';
+                      } else if (item === 'Nổi Bật') {
+                        href = '/companies?sortBy=TRENDING';
+                      } else {
+                        href = `/companies?industry=${encodeURIComponent(item)}`;
+                      }
+                      
+                      return (
+                        <li key={item}>
+                          <Link href={href} className="px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-mariner text-[13px] font-medium transition-all block rounded-lg">
+                            {item}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}

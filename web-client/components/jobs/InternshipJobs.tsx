@@ -33,15 +33,18 @@ export function InternshipJobsSection() {
     setLoading(true);
     try {
       const industryMap: Record<string, string> = {
-        "IT": "CNTT / Phần mềm",
-        "Marketing": "Marketing / Truyền thông",
-        "Kinh Doanh": "Kinh doanh / CSKH",
-        "Kế Toán": "Tài chính / Kế toán / Ngân hàng",
-        "Nhân Sự": "Nhân sự / Hành / Pháp lý",
-        "Tuyển Dụng": "Nhân sự / Hành / Pháp lý",
-        "Thiết Kế": "Thiết kế / Sáng tạo",
-        "Kỹ Thuật": "Kỹ thuật / Cơ khí / Sản xuất",
-        "Đào Tạo": "Giáo dục / Đào tạo / Ngôn ngữ",
+        "it": "Công Nghệ Thông Tin",
+        "seo": "Content / SEO",
+        "r&d": "Công Nghệ Thông Tin",
+        "pháp lý": "Luật / Tư Vấn Pháp Lý",
+        "nhân sự": "Nhân Sự / Hành Chính / Pháp Lý",
+        "kinh doanh": "Kinh Doanh / Bán Hàng",
+        "kế toán": "Tài Chính / Kế Toán / Ngân Hàng",
+        "đào tạo": "Giáo Dục / Đào Tạo",
+        "kỹ thuật": "Kỹ Thuật / Cơ Khí / Sản Xuất",
+        "thiết kế": "Thiết Kế / Sáng Tạo",
+        "marketing": "Marketing / Truyền Thông",
+        "tuyển dụng": "Nhân Sự / Hành Chính / Pháp Lý",
       };
 
       const params: any = {
@@ -51,7 +54,7 @@ export function InternshipJobsSection() {
       };
 
       if (activeTab !== "Tất cả") {
-        params.industry = industryMap[activeTab] || activeTab;
+        params.industry = industryMap[activeTab.toLowerCase()] || activeTab;
       }
 
       const response = await api.get("/job-postings", { params });

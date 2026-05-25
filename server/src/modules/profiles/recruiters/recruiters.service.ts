@@ -11,7 +11,7 @@ export class RecruitersService {
     private messagesService: MessagesService,
     private messagesGateway: MessagesGateway,
     private mailService: MailService,
-  ) { }
+  ) {}
 
   private async ensureRecruiter(userId: string) {
     let recruiter = await this.prisma.recruiter.findUnique({
@@ -29,14 +29,16 @@ export class RecruitersService {
 
   async getInterviewSettings(userId: string) {
     const recruiter = await this.ensureRecruiter(userId);
-    return (recruiter as any).interviewSettings || {
-      defaultLocation: '',
-      timeSlots: ['08:00', '10:00', '14:00', '16:00'],
-      blockedDates: [],
-      maxCandidatesPerSlot: 1,
-      minNoticeHours: 24,
-      maxAdvanceDays: 14
-    };
+    return (
+      (recruiter as any).interviewSettings || {
+        defaultLocation: '',
+        timeSlots: ['08:00', '10:00', '14:00', '16:00'],
+        blockedDates: [],
+        maxCandidatesPerSlot: 1,
+        minNoticeHours: 24,
+        maxAdvanceDays: 14,
+      }
+    );
   }
 
   async updateInterviewSettings(userId: string, settings: any) {
@@ -45,29 +47,42 @@ export class RecruitersService {
     // Validate and merge settings
     const currentSettings: any = (recruiter as any).interviewSettings || {};
     const newSettings = {
-      defaultLocation: settings.defaultLocation ?? currentSettings.defaultLocation ?? '',
-      timeSlots: settings.timeSlots ?? currentSettings.timeSlots ?? ['08:00', '10:00', '14:00', '16:00'],
+      defaultLocation:
+        settings.defaultLocation ?? currentSettings.defaultLocation ?? '',
+      timeSlots: settings.timeSlots ??
+        currentSettings.timeSlots ?? ['08:00', '10:00', '14:00', '16:00'],
       blockedDates: settings.blockedDates ?? currentSettings.blockedDates ?? [],
-      maxCandidatesPerSlot: settings.maxCandidatesPerSlot ?? currentSettings.maxCandidatesPerSlot ?? 1,
-      minNoticeHours: settings.minNoticeHours ?? currentSettings.minNoticeHours ?? 24,
-      maxAdvanceDays: settings.maxAdvanceDays ?? currentSettings.maxAdvanceDays ?? 14
+      maxCandidatesPerSlot:
+        settings.maxCandidatesPerSlot ??
+        currentSettings.maxCandidatesPerSlot ??
+        1,
+      minNoticeHours:
+        settings.minNoticeHours ?? currentSettings.minNoticeHours ?? 24,
+      maxAdvanceDays:
+        settings.maxAdvanceDays ?? currentSettings.maxAdvanceDays ?? 14,
     };
 
     // Update recruiter
     await this.prisma.recruiter.update({
       where: { recruiterId: recruiter.recruiterId },
-      data: { interviewSettings: newSettings } as any
+      data: { interviewSettings: newSettings } as any,
     });
 
     // Check if we need to cancel interviews due to blocked dates
     if (settings.blockedDates && Array.isArray(settings.blockedDates)) {
-      await this.cancelInterviewsOnBlockedDates(recruiter.recruiterId, settings.blockedDates);
+      await this.cancelInterviewsOnBlockedDates(
+        recruiter.recruiterId,
+        settings.blockedDates,
+      );
     }
 
     return { success: true, settings: newSettings };
   }
 
-  async updateProfile(userId: string, data: { fullName?: string; phoneNumber?: string }) {
+  async updateProfile(
+    userId: string,
+    data: { fullName?: string; phoneNumber?: string },
+  ) {
     const recruiter = await this.ensureRecruiter(userId);
 
     // Update Recruiter
@@ -89,7 +104,10 @@ export class RecruitersService {
     return { success: true };
   }
 
-  private async cancelInterviewsOnBlockedDates(recruiterId: string, blockedDates: string[]) {
+  private async cancelInterviewsOnBlockedDates(
+    recruiterId: string,
+    blockedDates: string[],
+  ) {
     if (!blockedDates.length) return;
 
     for (const dateStr of blockedDates) {
@@ -107,17 +125,20 @@ export class RecruitersService {
         where: {
           appStatus: { in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED'] },
           jobPosting: { recruiterId },
-          interviewDate: { gte: startOfDay, lte: endOfDay }
+          interviewDate: { gte: startOfDay, lte: endOfDay },
         },
-        include: { candidate: { include: { user: true } }, jobPosting: { include: { recruiter: true } } }
+        include: {
+          candidate: { include: { user: true } },
+          jobPosting: { include: { recruiter: true } },
+        },
       });
 
       for (const app of affectedApps) {
         await this.prisma.application.update({
           where: { applicationId: app.applicationId },
           data: {
-            appStatus: 'RESCHEDULE_REQUESTED'
-          }
+            appStatus: 'RESCHEDULE_REQUESTED',
+          },
         });
 
         // Send a message to the candidate
@@ -127,23 +148,28 @@ export class RecruitersService {
 
             const conv = await this.messagesService.createConversation(
               app.candidateId,
-              app.jobPosting.recruiterId!
+              app.jobPosting.recruiterId!,
             );
 
             const savedMessage = await this.messagesService.sendMessage(
               app.jobPosting.recruiter.userId,
               conv.conversationId,
               content,
-              true
+              true,
             );
 
             // Emit newMessage to both parties
-            this.messagesGateway.server.to(`user_${app.candidate.userId}`).emit('newMessage', savedMessage);
-            this.messagesGateway.server.to(`user_${app.jobPosting.recruiter.userId}`).emit('newMessage', savedMessage);
+            this.messagesGateway.server
+              .to(`user_${app.candidate.userId}`)
+              .emit('newMessage', savedMessage);
+            this.messagesGateway.server
+              .to(`user_${app.jobPosting.recruiter.userId}`)
+              .emit('newMessage', savedMessage);
 
             // Emit notification to candidate to refresh applications and show "Chọn lịch ngay" banner
-            this.messagesGateway.server.to(`user_${app.candidate.userId}`).emit('notification');
-
+            this.messagesGateway.server
+              .to(`user_${app.candidate.userId}`)
+              .emit('notification');
 
             const userEmail = (app.candidate as any).user?.email;
             if (userEmail) {
@@ -151,7 +177,7 @@ export class RecruitersService {
               await this.mailService.sendInterviewRescheduleRequest(
                 userEmail,
                 app.candidate.fullName,
-                formattedDateStr
+                formattedDateStr,
               );
             }
           } catch (err) {
@@ -167,7 +193,11 @@ export class RecruitersService {
 
     const job = await this.prisma.jobPosting.findUnique({
       where: { jobPostingId: jobId },
-      select: { status: true, structuredRequirements: true, autoInviteThreshold: true },
+      select: {
+        status: true,
+        structuredRequirements: true,
+        autoInviteThreshold: true,
+      },
     });
 
     if (job?.status === 'REJECTED') {
@@ -179,7 +209,7 @@ export class RecruitersService {
     const dbMatches = await this.prisma.jobMatch.findMany({
       where: {
         jobPostingId: jobId,
-        score: { gte: threshold }
+        score: { gte: threshold },
       },
       orderBy: { score: 'desc' },
       include: {

@@ -27,7 +27,7 @@ interface AuthRequest extends Request {
 export class CandidateWalletsController {
   constructor(
     private readonly walletsService: CandidateWalletsService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -67,9 +67,10 @@ export class CandidateWalletsController {
     const candidate = await this.prisma.candidate.findUnique({
       where: { userId: req.user.userId },
     });
-    
-    if (!candidate) throw new NotFoundException('Tài khoản ứng viên không tồn tại');
-    
+
+    if (!candidate)
+      throw new NotFoundException('Tài khoản ứng viên không tồn tại');
+
     return this.walletsService.activateJobSearch(candidate.candidateId);
   }
 

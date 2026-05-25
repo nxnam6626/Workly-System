@@ -68,6 +68,16 @@ export class JobSearchService {
     } = query;
 
     let ids: string[] = [];
+    let expandedIndustry: string | string[] | undefined = industry;
+    if (industry) {
+      const targetCat = HIERARCHICAL_INDUSTRIES.find(
+        (c) => c.category === industry,
+      );
+      if (targetCat) {
+        expandedIndustry = [targetCat.category, ...targetCat.subCategories];
+      }
+    }
+
     let total = 0;
     try {
       const result = await this.searchService.searchJobs({
@@ -76,7 +86,7 @@ export class JobSearchService {
         jobTier,
         jobLevel,
         jobType,
-        industry,
+        industry: expandedIndustry,
         experience,
         salaryMin,
         salaryMax,
@@ -177,6 +187,9 @@ export class JobSearchService {
       page = 1,
       limit = 10,
       industry,
+      experience,
+      salaryMin,
+      salaryMax,
       sortBy,
       companyId,
     } = query;
@@ -221,6 +234,12 @@ export class JobSearchService {
     if (jobType) where.jobType = jobType;
     if (jobTier) where.jobTier = jobTier;
     if (jobLevel) where.jobLevel = jobLevel;
+    if (experience) where.experience = experience;
+    if (salaryMin || salaryMax) {
+      where.salaryMax = {};
+      if (salaryMin) where.salaryMax.gte = salaryMin;
+      if (salaryMax) where.salaryMax.lte = salaryMax;
+    }
 
     if (search) {
       const searchWords = search.split(/\s+/).filter((w) => w.length > 1);
@@ -258,28 +277,14 @@ export class JobSearchService {
       }
     }
 
-    if (industriesToMatch.length > 0 || industryKeywords.length > 0) {
+    if (industriesToMatch.length > 0) {
       const industryConds: any[] = [];
-      if (industriesToMatch.length > 0) {
-        industriesToMatch.forEach((name) => {
-          industryConds.push({
-            structuredRequirements: {
-              path: ['categories'],
-              array_contains: name,
-            },
-          });
-        });
-      }
-      const allKeywords = [
-        ...new Set([...industriesToMatch, ...industryKeywords]),
-      ];
-      allKeywords.forEach((kw) => {
-        industryConds.push({ title: { contains: kw, mode: 'insensitive' } });
+      industriesToMatch.forEach((name) => {
         industryConds.push({
-          description: { contains: kw, mode: 'insensitive' },
-        });
-        industryConds.push({
-          requirements: { contains: kw, mode: 'insensitive' },
+          structuredRequirements: {
+            path: ['categories'],
+            array_contains: name,
+          },
         });
       });
       andClauses.push({ OR: industryConds });

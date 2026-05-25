@@ -38,11 +38,15 @@ export class WalletsController {
     @Req() req: AuthRequest,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('date') date?: string,
+    @Query('search') search?: string,
   ) {
     return this.walletsService.getTransactions(
       req.user.userId,
       skip ? Number(skip) : undefined,
       take ? Number(take) : undefined,
+      date,
+      search,
     );
   }
 

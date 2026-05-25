@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -31,10 +35,10 @@ export class ReviewsService {
         recruiter: {
           select: {
             fullName: true,
-            user: { select: { avatar: true } }
-          }
-        }
-      }
+            user: { select: { avatar: true } },
+          },
+        },
+      },
     });
   }
 
@@ -43,16 +47,16 @@ export class ReviewsService {
       where: {
         candidateId,
         ...(companyId && {
-          recruiter: { companyId }
-        })
+          recruiter: { companyId },
+        }),
       },
       include: {
         recruiter: {
           select: {
             fullName: true,
-            user: { select: { avatar: true } }
-          }
-        }
+            user: { select: { avatar: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -60,28 +64,34 @@ export class ReviewsService {
 
   async update(id: string, updateReviewDto: UpdateReviewDto, userId: string) {
     const recruiter = await this.getRecruiterByUserId(userId);
-    const review = await this.prisma.candidateReview.findUnique({ where: { reviewId: id } });
-    
+    const review = await this.prisma.candidateReview.findUnique({
+      where: { reviewId: id },
+    });
+
     if (!review) throw new NotFoundException('Review not found');
-    if (review.recruiterId !== recruiter.recruiterId) throw new UnauthorizedException('Not your review');
+    if (review.recruiterId !== recruiter.recruiterId)
+      throw new UnauthorizedException('Not your review');
 
     return await this.prisma.candidateReview.update({
       where: { reviewId: id },
       data: updateReviewDto,
       include: {
         recruiter: {
-          select: { fullName: true, user: { select: { avatar: true } } }
-        }
-      }
+          select: { fullName: true, user: { select: { avatar: true } } },
+        },
+      },
     });
   }
 
   async remove(id: string, userId: string) {
     const recruiter = await this.getRecruiterByUserId(userId);
-    const review = await this.prisma.candidateReview.findUnique({ where: { reviewId: id } });
-    
+    const review = await this.prisma.candidateReview.findUnique({
+      where: { reviewId: id },
+    });
+
     if (!review) throw new NotFoundException('Review not found');
-    if (review.recruiterId !== recruiter.recruiterId) throw new UnauthorizedException('Not your review');
+    if (review.recruiterId !== recruiter.recruiterId)
+      throw new UnauthorizedException('Not your review');
 
     return await this.prisma.candidateReview.delete({
       where: { reviewId: id },

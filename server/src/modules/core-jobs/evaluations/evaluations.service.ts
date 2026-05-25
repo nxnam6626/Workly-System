@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { EvalResult } from '@/generated/prisma';
@@ -50,7 +54,12 @@ export class EvaluationsService {
         result: dto.result as EvalResult,
       },
       include: {
-        recruiter: { select: { fullName: true, user: { select: { avatar: true, userId: true } } } },
+        recruiter: {
+          select: {
+            fullName: true,
+            user: { select: { avatar: true, userId: true } },
+          },
+        },
       },
     });
   }
@@ -65,7 +74,12 @@ export class EvaluationsService {
         recruiter: { companyId: recruiter.companyId },
       },
       include: {
-        recruiter: { select: { fullName: true, user: { select: { avatar: true, userId: true } } } },
+        recruiter: {
+          select: {
+            fullName: true,
+            user: { select: { avatar: true, userId: true } },
+          },
+        },
       },
       orderBy: [{ roundNumber: 'asc' }, { createdAt: 'desc' }],
     });
@@ -92,7 +106,13 @@ export class EvaluationsService {
           { NOT: { interviewDate: null } },
           {
             appStatus: {
-              in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED', 'RESCHEDULE_REQUESTED', 'ACCEPTED', 'REJECTED'],
+              in: [
+                'INTERVIEWING',
+                'INTERVIEW_CONFIRMED',
+                'RESCHEDULE_REQUESTED',
+                'ACCEPTED',
+                'REJECTED',
+              ],
             },
           },
         ],
@@ -108,7 +128,9 @@ export class EvaluationsService {
         evaluations: {
           where: evalWhere,
           include: {
-            recruiter: { select: { fullName: true, user: { select: { avatar: true } } } },
+            recruiter: {
+              select: { fullName: true, user: { select: { avatar: true } } },
+            },
           },
           orderBy: { roundNumber: 'asc' },
         },
@@ -130,12 +152,20 @@ export class EvaluationsService {
 
       // Compute avg score per application
       const allScores = app.evaluations.flatMap((e) => {
-        const criteria = e.criteriaScores as { score: number; maxScore: number }[];
-        return criteria.map((c) => (c.maxScore > 0 ? (c.score / c.maxScore) * 5 : 0));
+        const criteria = e.criteriaScores as {
+          score: number;
+          maxScore: number;
+        }[];
+        return criteria.map((c) =>
+          c.maxScore > 0 ? (c.score / c.maxScore) * 5 : 0,
+        );
       });
-      const avgScore = allScores.length > 0
-        ? Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10
-        : null;
+      const avgScore =
+        allScores.length > 0
+          ? Math.round(
+              (allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10,
+            ) / 10
+          : null;
 
       grouped[dateKey].applications.push({ ...app, avgScore });
     }
@@ -157,14 +187,16 @@ export class EvaluationsService {
 
     // Get all job IDs belonging to this recruiter's company (or just them if no company)
     const myJobs = await this.prisma.jobPosting.findMany({
-      where: recruiter.companyId 
+      where: recruiter.companyId
         ? { companyId: recruiter.companyId }
         : { recruiterId: recruiter.recruiterId },
       select: { jobPostingId: true, title: true },
     });
 
     const jobIds = myJobs.map((j) => j.jobPostingId);
-    const jobTitleMap = Object.fromEntries(myJobs.map((j) => [j.jobPostingId, j.title]));
+    const jobTitleMap = Object.fromEntries(
+      myJobs.map((j) => [j.jobPostingId, j.title]),
+    );
 
     if (jobIds.length === 0) return [];
 
@@ -173,7 +205,17 @@ export class EvaluationsService {
         jobPostingId: { in: jobIds },
         OR: [
           { NOT: { interviewDate: null } },
-          { appStatus: { in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED', 'RESCHEDULE_REQUESTED', 'ACCEPTED', 'REJECTED'] } },
+          {
+            appStatus: {
+              in: [
+                'INTERVIEWING',
+                'INTERVIEW_CONFIRMED',
+                'RESCHEDULE_REQUESTED',
+                'ACCEPTED',
+                'REJECTED',
+              ],
+            },
+          },
         ],
       },
       include: {
@@ -187,7 +229,12 @@ export class EvaluationsService {
         evaluations: {
           where: evalWhere,
           include: {
-            recruiter: { select: { fullName: true, user: { select: { avatar: true, userId: true } } } },
+            recruiter: {
+              select: {
+                fullName: true,
+                user: { select: { avatar: true, userId: true } },
+              },
+            },
           },
           orderBy: { roundNumber: 'asc' },
         },
@@ -209,15 +256,24 @@ export class EvaluationsService {
       const allScores = app.evaluations.flatMap((e) => {
         let criteria = e.criteriaScores || [];
         if (typeof criteria === 'string') {
-          try { criteria = JSON.parse(criteria); } catch { criteria = []; }
+          try {
+            criteria = JSON.parse(criteria);
+          } catch {
+            criteria = [];
+          }
         }
         if (!Array.isArray(criteria)) criteria = [];
 
-        return criteria.map((c: any) => (c.maxScore > 0 ? (c.score / c.maxScore) * 5 : 0));
+        return criteria.map((c: any) =>
+          c.maxScore > 0 ? (c.score / c.maxScore) * 5 : 0,
+        );
       });
-      const avgScore = allScores.length > 0
-        ? Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10
-        : null;
+      const avgScore =
+        allScores.length > 0
+          ? Math.round(
+              (allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10,
+            ) / 10
+          : null;
 
       grouped[dateKey].applications.push({
         ...app,
@@ -233,7 +289,15 @@ export class EvaluationsService {
     });
   }
 
-  async scheduleNextRound(dto: { applicationId: string; interviewDate: string; interviewTime: string; interviewLocation?: string }, userId: string) {
+  async scheduleNextRound(
+    dto: {
+      applicationId: string;
+      interviewDate: string;
+      interviewTime: string;
+      interviewLocation?: string;
+    },
+    userId: string,
+  ) {
     const recruiter = await this.getRecruiter(userId);
     const application = await this.prisma.application.findUnique({
       where: { applicationId: dto.applicationId },
@@ -260,7 +324,10 @@ export class EvaluationsService {
       where: { applicationId: dto.applicationId },
       select: { roundNumber: true },
     });
-    const maxRound = existingEvals.length > 0 ? Math.max(...existingEvals.map(e => e.roundNumber)) : 0;
+    const maxRound =
+      existingEvals.length > 0
+        ? Math.max(...existingEvals.map((e) => e.roundNumber))
+        : 0;
     const nextRound = maxRound + 1;
 
     // Create a placeholder evaluation to establish the new round
@@ -271,7 +338,7 @@ export class EvaluationsService {
         roundNumber: nextRound,
         roundName: `Vòng ${nextRound}`,
         sessionDate: new Date(dto.interviewDate),
-      }
+      },
     });
 
     return { success: true };
@@ -302,7 +369,7 @@ export class EvaluationsService {
           taxCode: taxCode,
           isRegistered: true,
           verifyStatus: 1,
-        }
+        },
       });
     }
 
@@ -314,11 +381,13 @@ export class EvaluationsService {
           password: passwordHash,
           status: 'ACTIVE',
           isEmailVerified: true,
-        }
+        },
       });
     }
 
-    let role = await this.prisma.role.findUnique({ where: { roleName: 'RECRUITER' } });
+    let role = await this.prisma.role.findUnique({
+      where: { roleName: 'RECRUITER' },
+    });
     if (!role) {
       role = await this.prisma.role.create({ data: { roleName: 'RECRUITER' } });
     }
@@ -326,21 +395,25 @@ export class EvaluationsService {
     await this.prisma.userRole.upsert({
       where: { userId_roleId: { userId: user.userId, roleId: role.roleId } },
       create: { userId: user.userId, roleId: role.roleId },
-      update: {}
+      update: {},
     });
 
-    let recruiter = await this.prisma.recruiter.findUnique({ where: { userId: user.userId } });
+    let recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId: user.userId },
+    });
     if (!recruiter) {
       recruiter = await this.prisma.recruiter.create({
         data: {
           userId: user.userId,
           companyId: company.companyId,
           fullName: 'HR MISA',
-        }
+        },
       });
     }
 
-    const wallet = await this.prisma.companyWallet.findUnique({ where: { companyId: company.companyId } });
+    const wallet = await this.prisma.companyWallet.findUnique({
+      where: { companyId: company.companyId },
+    });
     if (!wallet) {
       await this.prisma.companyWallet.create({
         data: {
@@ -348,10 +421,15 @@ export class EvaluationsService {
           balance: 10000000,
           cvUnlockQuota: 100,
           cvUnlockQuotaMax: 100,
-        }
+        },
       });
     }
 
-    return { success: true, email: user.email, company: company.companyName, recruiterId: recruiter.recruiterId };
+    return {
+      success: true,
+      email: user.email,
+      company: company.companyName,
+      recruiterId: recruiter.recruiterId,
+    };
   }
 }

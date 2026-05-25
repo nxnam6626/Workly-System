@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Public } from '@/common/decorators/public.decorator';
 import { EvaluationsService } from './evaluations.service';
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
@@ -30,13 +40,15 @@ export class EvaluationsController {
 
   @Get('debug')
   async debugSessions(@Query('userId') userId: string) {
-    return this.evaluationsService.getAllSessions(userId || '521ce621-e8bb-4c26-8051-789f21f1d154');
+    return this.evaluationsService.getAllSessions(
+      userId || '521ce621-e8bb-4c26-8051-789f21f1d154',
+    );
   }
 
   @Public()
   @Get('create-test-user')
   async createTestUser() {
-    // Call the prisma service through an injected service, but since we are in a controller, 
+    // Call the prisma service through an injected service, but since we are in a controller,
     // it's easier to just do it via evaluationsService or manually via a temporary function.
     // I will write this inside evaluations.service.ts instead and call it from here.
     return this.evaluationsService.createTestUser();

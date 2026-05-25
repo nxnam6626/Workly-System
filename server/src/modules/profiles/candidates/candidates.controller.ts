@@ -110,7 +110,6 @@ export class CandidatesController {
     return this.candidatesService.deleteCv(userId, cvId);
   }
 
-
   @Get('saved')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECRUITER)
@@ -164,7 +163,6 @@ export class CandidatesController {
   ) {
     return this.candidatesService.updateByUserId(userId, updateCandidateDto);
   }
-
 
   @Delete(':id')
   remove(@Param('id') id: string) {

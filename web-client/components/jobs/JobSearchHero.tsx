@@ -31,8 +31,8 @@ interface JobSearchHeroProps {
   setSalaryMinParam?: (val?: number) => void;
   salaryMaxParam?: number;
   setSalaryMaxParam?: (val?: number) => void;
-  rankParam?: string;
-  setRankParam?: (val: string) => void;
+  jobLevelParam?: string;
+  setJobLevelParam?: (val: string) => void;
   educationParam?: string;
   setEducationParam?: (val: string) => void;
   handleSearch?: (e?: React.FormEvent) => void;
@@ -40,7 +40,7 @@ interface JobSearchHeroProps {
 }
 
 const FILTER_OPTIONS: Record<string, string[]> = {
-  "Loại hình": ["Full-time", "Part-time", "Thời vụ", "Remote"],
+  "Loại hình": ["Full-time", "Part-time", "Remote"],
   "Mức lương": ["Dưới 5 triệu", "5 - 7 triệu", "7 - 10 triệu", "10 - 15 triệu", "15 - 20 triệu", "20 - 30 triệu", "30 - 50 triệu", "Trên 50 triệu", "Thoả thuận"],
   "Chức vụ": ["Thực tập sinh", "Nhân viên/Chuyên viên", "Trưởng nhóm/Trưởng phòng", "Giám đốc/Cấp cao hơn"],
   "Kinh nghiệm": ["Không yêu cầu", "Dưới 1 năm", "1 - 2 năm", "3 - 5 năm", "Trên 5 năm"],
@@ -50,8 +50,7 @@ const FILTER_OPTIONS: Record<string, string[]> = {
 const JOB_TYPE_MAP: Record<string, string> = {
   "Full-time": "FULLTIME",
   "Part-time": "PARTTIME",
-  "Thời vụ": "PARTTIME",
-  "Remote": "FULLTIME"
+  "Remote": "REMOTE"
 };
 
 const SALARY_MAP: Record<string, { min?: number; max?: number }> = {
@@ -64,6 +63,13 @@ const SALARY_MAP: Record<string, { min?: number; max?: number }> = {
   "30 - 50 triệu": { min: 30000000, max: 50000000 },
   "Trên 50 triệu": { min: 50000000 },
   "Thoả thuận": {}
+};
+
+const JOB_LEVEL_MAP: Record<string, string> = {
+  "Thực tập sinh": "INTERN",
+  "Nhân viên/Chuyên viên": "STAFF",
+  "Trưởng nhóm/Trưởng phòng": "TEAM_LEAD",
+  "Giám đốc/Cấp cao hơn": "DIRECTOR"
 };
 
 interface IndustryItem {
@@ -86,8 +92,8 @@ export function JobSearchHero({
   setSalaryMinParam,
   salaryMaxParam,
   setSalaryMaxParam,
-  rankParam,
-  setRankParam,
+  jobLevelParam,
+  setJobLevelParam,
   educationParam,
   setEducationParam,
   handleSearch,
@@ -118,8 +124,8 @@ export function JobSearchHero({
   const sSetJobType = standaloneMode ? setLocalJobType : (setJobTypeParam || (() => {}));
   const expParam = standaloneMode ? localExp : (experienceParam || "");
   const sSetExp = standaloneMode ? setLocalExp : (setExperienceParam || (() => {}));
-  const rParam = standaloneMode ? localRank : (rankParam || "");
-  const sSetRank = standaloneMode ? setLocalRank : (setRankParam || (() => {}));
+  const rParam = standaloneMode ? localRank : (jobLevelParam || "");
+  const sSetRank = standaloneMode ? setLocalRank : (setJobLevelParam || (() => {}));
   const eParam = standaloneMode ? localEdu : (educationParam || "");
   const sSetEdu = standaloneMode ? setLocalEdu : (setEducationParam || (() => {}));
   
@@ -128,19 +134,35 @@ export function JobSearchHero({
   const sMax = standaloneMode ? localMax : salaryMaxParam;
   const sSetMax = standaloneMode ? setLocalMax : (setSalaryMaxParam || (() => {}));
 
-  const performSearch = (e?: React.FormEvent) => {
+  const performSearch = (e?: React.FormEvent, overrides?: any) => {
     e?.preventDefault();
     if (standaloneMode) {
       const p = new URLSearchParams();
       if (sQuery) p.set("search", sQuery);
-      if (lParam) p.set("location", lParam);
-      if (iParam) p.set("industry", iParam);
-      if (jtParam) p.set("jobType", jtParam);
-      if (expParam) p.set("experience", expParam);
-      if (sMin) p.set("salaryMin", sMin.toString());
-      if (sMax) p.set("salaryMax", sMax.toString());
-      if (rParam) p.set("rank", rParam);
-      if (eParam) p.set("education", eParam);
+      const locationToUse = overrides?.location !== undefined ? overrides.location : lParam;
+      if (locationToUse) p.set("location", locationToUse);
+      
+      const industryToUse = overrides?.industry !== undefined ? overrides.industry : iParam;
+      if (industryToUse) p.set("industry", industryToUse);
+      
+      const jtToUse = overrides?.jobType !== undefined ? overrides.jobType : jtParam;
+      if (jtToUse) p.set("jobType", jtToUse);
+      
+      const expToUse = overrides?.experience !== undefined ? overrides.experience : expParam;
+      if (expToUse) p.set("experience", expToUse);
+      
+      const minToUse = overrides?.salaryMin !== undefined ? overrides.salaryMin : sMin;
+      if (minToUse) p.set("salaryMin", minToUse.toString());
+      
+      const maxToUse = overrides?.salaryMax !== undefined ? overrides.salaryMax : sMax;
+      if (maxToUse) p.set("salaryMax", maxToUse.toString());
+      
+      const rankToUse = overrides?.jobLevel !== undefined ? overrides.jobLevel : rParam;
+      if (rankToUse) p.set("jobLevel", rankToUse);
+      
+      const eduToUse = overrides?.education !== undefined ? overrides.education : eParam;
+      if (eduToUse) p.set("education", eduToUse);
+      
       router.push(`/jobs?${p.toString()}`);
     } else {
       handleSearch?.(e);
@@ -168,30 +190,42 @@ export function JobSearchHero({
 
   const handleSelectFilterValue = (type: string, label: string) => {
     setOpenFilter(null);
+    let overrides: any = {};
     if (type === "Loại hình") {
-      sSetJobType(JOB_TYPE_MAP[label] || "");
+      const val = JOB_TYPE_MAP[label] || "";
+      sSetJobType(val);
+      overrides = { jobType: val };
     } else if (type === "Mức lương") {
       const range = SALARY_MAP[label];
       sSetMin(range?.min);
       sSetMax(range?.max);
+      overrides = { salaryMin: range?.min || "", salaryMax: range?.max || "" };
     } else if (type === "Kinh nghiệm") {
-      sSetExp(label === "Không yêu cầu" ? "" : label);
+      const val = label === "Không yêu cầu" ? "" : label;
+      sSetExp(val);
+      overrides = { experience: val };
     } else if (type === "Chức vụ") {
-      sSetRank(label);
+      const val = JOB_LEVEL_MAP[label] || "";
+      sSetRank(val);
+      overrides = { jobLevel: val };
     } else if (type === "Học vấn") {
-      sSetEdu(label === "Không yêu cầu" ? "" : label);
+      const val = label === "Không yêu cầu" ? "" : label;
+      sSetEdu(val);
+      overrides = { education: val };
+    }
+    
+    if (standaloneMode) {
+      performSearch(undefined, overrides);
     }
   };
 
   const handleSelectIndustry = (val: string) => {
     sSetIndustry(val);
     setOpenFilter(null);
-    // Wait brief moment to make sure state updates if standalone before redirect
     if (standaloneMode) {
-      // Wait 1 tick
-      setTimeout(() => performSearch(), 10);
+      performSearch(undefined, { industry: val });
     } else {
-      performSearch();
+      // In jobs page, state change triggers useEffect
     }
   };
 
@@ -205,6 +239,7 @@ export function JobSearchHero({
   ];
 
   const getJobTypeLabel = (val: string) => Object.keys(JOB_TYPE_MAP).find(k => JOB_TYPE_MAP[k] === val) || val;
+  const getJobLevelLabel = (val: string) => Object.keys(JOB_LEVEL_MAP).find(k => JOB_LEVEL_MAP[k] === val) || val;
 
   return (
     <div className={`w-full ${standaloneMode ? "" : "bg-[#f8fafc] py-3 border-b border-slate-100"} relative z-40`}>
@@ -240,7 +275,11 @@ export function JobSearchHero({
                 />
                 {lParam && (
                   <button 
-                    onClick={(e) => { e.stopPropagation(); sSetLocation(""); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      sSetLocation(""); 
+                      if (standaloneMode) performSearch(undefined, { location: "" });
+                    }}
                     className="p-0.5 hover:bg-slate-200 rounded-full transition-colors"
                   >
                     <X className="w-3 h-3 text-slate-400" />
@@ -249,9 +288,13 @@ export function JobSearchHero({
               </div>
 
               {openLocation && (
-                <div className="absolute top-[calc(100%+8px)] left-0 right-0 md:left-auto md:right-0 md:w-[700px] z-[60]">
+                <div className="absolute top-[calc(100%+8px)] left-0 right-0 md:left-auto md:right-0 md:w-[320px] z-[60]">
                   <LocationMegaMenu 
-                    onSelect={(val) => { sSetLocation(val); setOpenLocation(false); }}
+                    onSelect={(val) => { 
+                      sSetLocation(val); 
+                      setOpenLocation(false); 
+                      if (standaloneMode) performSearch(undefined, { location: val });
+                    }}
                     onClose={() => setOpenLocation(false)}
                   />
                 </div>
@@ -276,7 +319,7 @@ export function JobSearchHero({
                   if (sMax) return `Dưới ${(sMax / 1000000).toFixed(0)} triệu`;
                   return null;
                 }
-                if (btn.label === "Chức vụ") return rParam;
+                if (btn.label === "Chức vụ") return getJobLevelLabel(rParam);
                 if (btn.label === "Kinh nghiệm") return expParam;
                 if (btn.label === "Học vấn") return eParam;
                 return null;

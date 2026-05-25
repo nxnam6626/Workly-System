@@ -53,7 +53,6 @@ export class UsersController {
     return this.usersService.updateAvatar(userId, file);
   }
 
-
   // ─── Admin-only routes below ───────────────────────────────────────────────
 
   @UseGuards(RolesGuard)
@@ -64,7 +63,7 @@ export class UsersController {
     @CurrentUser('userId') reqUserId: string,
   ) {
     if (createUserDto.role === Role.ADMIN) {
-      const currentUser = await this.usersService.findOne(reqUserId) as any;
+      const currentUser = (await this.usersService.findOne(reqUserId)) as any;
       const isSupreme =
         currentUser.admin?.permissions?.includes('SUPER_ADMIN') ||
         currentUser.admin?.permissions?.includes('ALL');

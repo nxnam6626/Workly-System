@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus, HelpCircle, X, Crown, AlertCircle } from 'lucide-react';
+import { Wallet as WalletIcon, CreditCard, ArrowUpRight, ArrowDownRight, History, Loader2, Sparkles, Plus, HelpCircle, X, Crown, AlertCircle, Search, Download } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -15,7 +15,7 @@ import useSWR from 'swr';
 function WalletContent() {
   const { wallet: globalWallet, fetchWallet } = useWalletStore();
   const balance = globalWallet?.balance || 0;
-  
+
   const { accessToken } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -31,9 +31,15 @@ function WalletContent() {
     { revalidateOnFocus: false, dedupingInterval: 5000 }
   );
 
+  const [inputDate, setInputDate] = useState('');
+  const [inputUser, setInputUser] = useState('');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterUser, setFilterUser] = useState('');
+
   // SWR for Transactions
+  const transUrl = accessToken ? `/wallets/transactions?date=${filterDate}&search=${filterUser}` : null;
   const { data: transactions = [], isLoading: loading, mutate: mutateTrans } = useSWR(
-    accessToken ? '/wallets/transactions' : null,
+    transUrl,
     async (url) => {
       const res = await api.get(url);
       return res.data;
@@ -60,6 +66,7 @@ function WalletContent() {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [activeTab, setActiveTab] = useState<'usage' | 'history'>('usage');
 
   useEffect(() => {
     const status = searchParams.get('status');
@@ -150,6 +157,56 @@ function WalletContent() {
     }
   };
 
+  const handleExportCSV = async () => {
+    const toastId = toast.loading('Đang chuẩn bị dữ liệu xuất...');
+    try {
+      const exportUrl = accessToken
+        ? `/wallets/transactions?date=${filterDate}&search=${filterUser}&take=99999`
+        : null;
+
+      if (!exportUrl) {
+        toast.error('Lỗi xác thực, vui lòng tải lại trang', { id: toastId });
+        return;
+      }
+
+      const res = await api.get(exportUrl);
+      const exportData = res.data;
+
+      if (!exportData || exportData.length === 0) {
+        toast.error('Không có giao dịch nào để xuất', { id: toastId });
+        return;
+      }
+
+      const headers = ['Mã Giao Dịch', 'Thời Gian', 'Nội Dung', 'Người Giao Dịch', 'Loại', 'Số Xu', 'Trạng Thái'];
+
+      const rows = exportData.map((tx: any) => {
+        const id = tx.transactionId;
+        const time = new Date(tx.createdAt).toLocaleString('vi-VN');
+        const desc = (tx.description || '').split('|')[0];
+        const person = tx.recruiter ? (tx.recruiter.fullName || tx.recruiter.user?.email) : 'Hệ thống';
+        const type = tx.type === 'DEPOSIT' ? 'Nạp tiền' : 'Trừ tiền';
+        const amount = (tx.type === 'DEPOSIT' ? '+' : '-') + tx.amount;
+        const status = tx.status === 'SUCCESS' ? 'Thành công' : (tx.status === 'PENDING' ? 'Chờ xử lý' : 'Đã hủy');
+
+        return [id, time, desc, person, type, amount, status].map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `LichSuGiaoDich_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Xuất file thành công!', { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra khi xuất file', { id: toastId });
+    }
+  };
+
   const PresetAmount = ({ amount, label }: { amount: number, label: string }) => (
     <button
       type="button"
@@ -165,7 +222,7 @@ function WalletContent() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="max-w-5xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-6"
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div>
@@ -223,7 +280,7 @@ function WalletContent() {
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-indigo-600" /> Nạp tiền vào ví
               </h3>
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowSupportModal(true)}
                 className="text-sm font-medium text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors"
@@ -268,40 +325,70 @@ function WalletContent() {
         {/* Right Side: Usage Tracker & Transactions History */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* Usage Tracker */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-500" /> Hạn mức sử dụng
-              </h3>
-            </div>
+          {/* Tabs */}
+          <div className="flex items-center p-1 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto w-fit">
+            <button
+              onClick={() => setActiveTab('usage')}
+              className={`py-2 px-5 rounded-xl text-sm font-bold transition-all ${activeTab === 'usage'
+                ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+            >
+              Hạn mức sử dụng
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`py-2 px-5 rounded-xl text-sm font-bold transition-all ${activeTab === 'history'
+                ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+            >
+              Lịch sử giao dịch
+            </button>
+          </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              {/* CV Hunter Quota */}
-              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-slate-600">CV Hunter</p>
-                  {cvUnlockQuotaMax > 0 ? (
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cvUnlockQuota === 0 ? 'bg-rose-100 text-rose-600' :
-                        cvUnlockQuota / cvUnlockQuotaMax < 0.3 ? 'bg-amber-100 text-amber-600' :
-                          'bg-emerald-100 text-emerald-600'
-                      }`}>
-                      {cvUnlockQuota === 0 ? 'Hết lượt' : `Còn ${Math.round((cvUnlockQuota / cvUnlockQuotaMax) * 100)}%`}
-                    </span>
-                  ) : (
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400"></span>
-                  )}
+          <AnimatePresence mode="wait">
+            {activeTab === 'usage' ? (
+              <motion.div
+                key="usage"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-indigo-500" /> Hạn mức sử dụng
+                  </h3>
                 </div>
 
-                <div className="flex items-end gap-1 mb-3">
-                  <span className={`text-3xl font-black ${cvUnlockQuota === 0 ? 'text-rose-500' :
-                      cvUnlockQuota / Math.max(cvUnlockQuotaMax, 1) < 0.3 ? 'text-amber-500' :
-                        'text-emerald-600'
-                    }`}>{cvUnlockQuota}</span>
-                  <span className="text-slate-400 text-sm mb-1 font-medium">Lượt xem CV</span>
-                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {/* CV Hunter Quota */}
+                  <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-bold text-slate-600">CV Hunter</p>
+                      {cvUnlockQuotaMax > 0 ? (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cvUnlockQuota === 0 ? 'bg-rose-100 text-rose-600' :
+                          cvUnlockQuota / cvUnlockQuotaMax < 0.3 ? 'bg-amber-100 text-amber-600' :
+                            'bg-emerald-100 text-emerald-600'
+                          }`}>
+                          {cvUnlockQuota === 0 ? 'Hết lượt' : `Còn ${Math.round((cvUnlockQuota / cvUnlockQuotaMax) * 100)}%`}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400"></span>
+                      )}
+                    </div>
 
-                {/* Progress bar
+                    <div className="flex items-end gap-1 mb-3">
+                      <span className={`text-3xl font-black ${cvUnlockQuota === 0 ? 'text-rose-500' :
+                        cvUnlockQuota / Math.max(cvUnlockQuotaMax, 1) < 0.3 ? 'text-amber-500' :
+                          'text-emerald-600'
+                        }`}>{cvUnlockQuota}</span>
+                      <span className="text-slate-400 text-sm mb-1 font-medium">Lượt xem CV</span>
+                    </div>
+
+                    {/* Progress bar
                 <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                   <div
                     className={`h-2.5 rounded-full transition-all duration-500 ${cvUnlockQuota === 0 ? 'bg-rose-400' :
@@ -312,142 +399,190 @@ function WalletContent() {
                   />
                 </div> */}
 
-                <p className="text-xs text-slate-400 mt-2">
-                  {cvUnlockQuota === 0 && cvUnlockQuotaMax > 0
-                    ? `Hết lượt. Sẽ tính ${subscription && new Date() <= new Date(subscription.expiryDate) ? '30' : '50'} Xu / lượt`
-                    : cvUnlockQuota === 0
-                      ? 'Mua gói CV Hunter để xem liên hệ miễn phí'
-                      : `Còn ${cvUnlockQuota} lượt mở khóa hồ sơ miễn phí`}
-                </p>
-              </div>
-
-              {/* Monthly Plan */}
-              <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                <p className="text-sm font-bold text-slate-600 mb-3">Gói cước tháng</p>
-                {subscription && new Date() <= new Date(subscription.expiryDate) ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">{subscription.planType}</span>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold mb-1.5">
-                        <span className="text-slate-500">Tin Thường</span>
-                        <span className={subscription.usedBasicPosts >= subscription.maxBasicPosts ? 'text-rose-500' : 'text-slate-700'}>
-                          {subscription.usedBasicPosts} / {subscription.maxBasicPosts}
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
-                        <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedBasicPosts / subscription.maxBasicPosts) * 100, 100)}%` }} />
-                      </div>
-                    </div>
-                    {subscription.maxVipPosts > 0 && (
-                      <div>
-                        <div className="flex justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-500">Tin VIP Chuyên Nghiệp</span>
-                          <span className={subscription.usedVipPosts >= subscription.maxVipPosts ? 'text-rose-500' : 'text-slate-700'}>
-                            {subscription.usedVipPosts} / {subscription.maxVipPosts}
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedVipPosts / subscription.maxVipPosts) * 100, 100)}%` }} />
-                        </div>
-                      </div>
-                    )}
-                    {subscription.maxUrgentPosts > 0 && (
-                      <div>
-                        <div className="flex justify-between text-xs font-bold mb-1.5">
-                          <span className="text-slate-500">Tin Tuyển Gấp</span>
-                          <span className={subscription.usedUrgentPosts >= subscription.maxUrgentPosts ? 'text-rose-500' : 'text-slate-700'}>
-                            {subscription.usedUrgentPosts} / {subscription.maxUrgentPosts}
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div className="bg-rose-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedUrgentPosts / subscription.maxUrgentPosts) * 100, 100)}%` }} />
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-slate-400">Hết hạn: {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}</p>
-                    {subscription.isCancelled ? (
-                      <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Trạng thái: Đã hủy</p>
-                        <p className="text-[11px] text-amber-500 font-medium leading-tight">Gói sẽ tự động kết thúc vào ngày {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}. Bạn vẫn có thể sử dụng các quyền lợi còn lại.</p>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => setShowCancelModal(true)}
-                        className="w-full mt-4 py-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl transition-all"
-                      >
-                        Hủy gói dịch vụ
-                      </button>
-                    )}
+                    <p className="text-xs text-slate-400 mt-2">
+                      {cvUnlockQuota === 0 && cvUnlockQuotaMax > 0
+                        ? `Hết lượt. Sẽ tính ${subscription && new Date() <= new Date(subscription.expiryDate) ? '30' : '50'} Xu / lượt`
+                        : cvUnlockQuota === 0
+                          ? 'Mua gói CV Hunter để xem liên hệ miễn phí'
+                          : `Còn ${cvUnlockQuota} lượt mở khóa hồ sơ miễn phí`}
+                    </p>
                   </div>
-                ) : (
-                  <div className="flex flex-col justify-center h-full gap-1">
-                    <p className="text-sm font-medium text-slate-500">Chưa đăng ký gói tháng</p>
-                    <p className="text-xs text-slate-400">Đăng tin sẽ trừ phí theo từng bài</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col min-h-[400px]">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <History className="w-5 h-5 text-slate-500" /> Lịch sử giao dịch
-              </h3>
-            </div>
-            <div className="flex-1 overflow-auto p-2">
-              {loading ? (
-                <div className="flex justify-center items-center h-40 text-slate-400">
-                  <Loader2 className="w-6 h-6 animate-spin mr-2" /> Đang tải lịch sử...
-                </div>
-              ) : transactions.length === 0 ? (
-                <div className="flex flex-col justify-center items-center h-60 text-slate-400">
-                  <History className="w-12 h-12 mb-3 text-slate-200" />
-                  <p>Chưa có giao dịch nào.</p>
-                  <p className="text-xs mt-1">Lịch sử nạp và trừ tiền sẽ hiển thị ở đây.</p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {transactions.map((tx: any) => (
-                    <div key={tx.transactionId} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors rounded-2xl">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tx.type === 'DEPOSIT' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
-                          }`}>
-                          {tx.type === 'DEPOSIT' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
+                  {/* Monthly Plan */}
+                  <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                    <p className="text-sm font-bold text-slate-600 mb-3">Gói cước tháng</p>
+                    {subscription && new Date() <= new Date(subscription.expiryDate) ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">{subscription.planType}</span>
                         </div>
                         <div>
-                          <div className="font-bold text-slate-800 flex flex-wrap items-center gap-2">
-                            <span>{(tx.description || '').split('|')[0]}</span>
-                            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full ml-1 whitespace-nowrap">
-                              bởi {tx.recruiter ? (tx.recruiter.fullName || tx.recruiter.user?.email) : 'Hệ thống'}
+                          <div className="flex justify-between text-xs font-bold mb-1.5">
+                            <span className="text-slate-500">Tin Thường</span>
+                            <span className={subscription.usedBasicPosts >= subscription.maxBasicPosts ? 'text-rose-500' : 'text-slate-700'}>
+                              {subscription.usedBasicPosts} / {subscription.maxBasicPosts}
                             </span>
-                            {tx.status === 'PENDING' && <span className="text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 whitespace-nowrap">Đang chờ xử lý</span>}
-                            {tx.status === 'CANCELLED' && <span className="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 whitespace-nowrap">Đã huỷ</span>}
                           </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <p className="text-xs text-slate-500 font-medium">{new Date(tx.createdAt).toLocaleString('vi-VN')}</p>
-                            {tx.status === 'PENDING' && (
-                              <button
-                                onClick={() => resumePayment(tx.transactionId)}
-                                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded hover:underline hover:bg-indigo-100 transition-colors"
-                              >
-                                Thanh toán tiếp &rarr;
-                              </button>
-                            )}
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div className="bg-indigo-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedBasicPosts / subscription.maxBasicPosts) * 100, 100)}%` }} />
                           </div>
                         </div>
+                        {subscription.maxVipPosts > 0 && (
+                          <div>
+                            <div className="flex justify-between text-xs font-bold mb-1.5">
+                              <span className="text-slate-500">Tin VIP Chuyên Nghiệp</span>
+                              <span className={subscription.usedVipPosts >= subscription.maxVipPosts ? 'text-rose-500' : 'text-slate-700'}>
+                                {subscription.usedVipPosts} / {subscription.maxVipPosts}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-2">
+                              <div className="bg-amber-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedVipPosts / subscription.maxVipPosts) * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                        )}
+                        {subscription.maxUrgentPosts > 0 && (
+                          <div>
+                            <div className="flex justify-between text-xs font-bold mb-1.5">
+                              <span className="text-slate-500">Tin Tuyển Gấp</span>
+                              <span className={subscription.usedUrgentPosts >= subscription.maxUrgentPosts ? 'text-rose-500' : 'text-slate-700'}>
+                                {subscription.usedUrgentPosts} / {subscription.maxUrgentPosts}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-2">
+                              <div className="bg-rose-500 h-2 rounded-full transition-all" style={{ width: `${Math.min((subscription.usedUrgentPosts / subscription.maxUrgentPosts) * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-400">Hết hạn: {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}</p>
+                        {subscription.isCancelled ? (
+                          <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Trạng thái: Đã hủy</p>
+                            <p className="text-[11px] text-amber-500 font-medium leading-tight">Gói sẽ tự động kết thúc vào ngày {new Date(subscription.expiryDate).toLocaleDateString('vi-VN')}. Bạn vẫn có thể sử dụng các quyền lợi còn lại.</p>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setShowCancelModal(true)}
+                            className="w-full mt-4 py-2.5 text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl transition-all"
+                          >
+                            Hủy gói dịch vụ
+                          </button>
+                        )}
                       </div>
-                      <div className={`font-bold text-lg ${tx.type === 'DEPOSIT' && tx.status === 'SUCCESS' ? 'text-emerald-600' : 'text-slate-500'}`}>
-                        {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount} xu
+                    ) : (
+                      <div className="flex flex-col justify-center h-full gap-1">
+                        <p className="text-sm font-medium text-slate-500">Chưa đăng ký gói tháng</p>
+                        <p className="text-xs text-slate-400">Đăng tin sẽ trừ phí theo từng bài</p>
                       </div>
-                    </div>
-                  ))}
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[calc(100vh-380px)]"
+              >
+                <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between shrink-0 gap-4">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 shrink-0">
+                    <History className="w-5 h-5 text-slate-500" /> Lịch sử giao dịch
+                  </h3>
+                  <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                    <input
+                      type="date"
+                      value={inputDate}
+                      onChange={(e) => setInputDate(e.target.value)}
+                      className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-600 shrink-0"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Tên hoặc email..."
+                      value={inputUser}
+                      onChange={(e) => setInputUser(e.target.value)}
+                      className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500 text-slate-600 w-32 sm:w-40 shrink-0"
+                    />
+                    <button
+                      onClick={() => { setFilterDate(inputDate); setFilterUser(inputUser); }}
+                      className="p-1.5 px-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-1.5 font-semibold text-sm shrink-0"
+                      title="Tìm kiếm"
+                    >
+                      <Search className="w-4 h-4" /> Tìm
+                    </button>
+                    {(filterDate || filterUser) && (
+                      <button
+                        onClick={() => { setInputDate(''); setInputUser(''); setFilterDate(''); setFilterUser(''); }}
+                        className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                        title="Xóa bộ lọc"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    <div className="w-px h-6 bg-slate-200 mx-1 shrink-0"></div>
+                    <button
+                      onClick={handleExportCSV}
+                      className="p-1.5 px-3 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors flex items-center gap-1.5 font-semibold text-sm shrink-0"
+                      title="Xuất Excel (CSV)"
+                    >
+                      <Download className="w-4 h-4" /> Xuất File
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {loading ? (
+                    <div className="flex justify-center items-center h-40 text-slate-400">
+                      <Loader2 className="w-6 h-6 animate-spin mr-2" /> Đang tải lịch sử...
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="flex flex-col justify-center items-center h-60 text-slate-400">
+                      <History className="w-12 h-12 mb-3 text-slate-200" />
+                      <p>Chưa có giao dịch nào.</p>
+                      <p className="text-xs mt-1">Lịch sử nạp và trừ tiền sẽ hiển thị ở đây.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {transactions.map((tx: any) => (
+                        <div key={tx.transactionId} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors rounded-2xl">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tx.type === 'DEPOSIT' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
+                              }`}>
+                              {tx.type === 'DEPOSIT' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-800 flex flex-wrap items-center gap-2">
+                                <span>{(tx.description || '').split('|')[0]}</span>
+                                <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full ml-1 whitespace-nowrap">
+                                  bởi {tx.recruiter ? (tx.recruiter.fullName || tx.recruiter.user?.email) : 'Hệ thống'}
+                                </span>
+                                {tx.status === 'PENDING' && <span className="text-xs text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 whitespace-nowrap">Đang chờ xử lý</span>}
+                                {tx.status === 'CANCELLED' && <span className="text-xs text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 whitespace-nowrap">Đã huỷ</span>}
+                              </div>
+                              <div className="flex items-center gap-3 mt-1">
+                                <p className="text-xs text-slate-500 font-medium">{new Date(tx.createdAt).toLocaleString('vi-VN')}</p>
+                                {tx.status === 'PENDING' && (
+                                  <button
+                                    onClick={() => resumePayment(tx.transactionId)}
+                                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded hover:underline hover:bg-indigo-100 transition-colors"
+                                  >
+                                    Thanh toán tiếp &rarr;
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className={`font-bold text-lg ${tx.type === 'DEPOSIT' && tx.status === 'SUCCESS' ? 'text-emerald-600' : 'text-slate-500'}`}>
+                            {tx.type === 'DEPOSIT' ? '+' : '-'}{tx.amount} xu
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
       </div>
@@ -455,12 +590,12 @@ function WalletContent() {
       {/* Support Modal */}
       {showSupportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl relative"
           >
-            <button 
+            <button
               onClick={() => setShowSupportModal(false)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
             >
@@ -473,7 +608,7 @@ function WalletContent() {
               <h3 className="text-xl font-bold text-slate-800">Cần hỗ trợ nạp tiền?</h3>
               <p className="text-sm text-slate-500 mt-1">Mô tả vấn đề bạn gặp phải (ví dụ: đã chuyển khoản nhưng chưa có xu, lỗi thanh toán). Admin sẽ hỗ trợ bạn ngay.</p>
             </div>
-            
+
             <form onSubmit={handleSupportSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Chủ đề hỗ trợ</label>
@@ -526,7 +661,7 @@ function WalletContent() {
       {/* Cancel Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl text-center"
@@ -560,7 +695,7 @@ function WalletContent() {
       {/* Payment Iframe Modal */}
       {paymentUrl && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 sm:p-8">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl w-full max-w-4xl h-full max-h-[90vh] flex flex-col overflow-hidden relative shadow-2xl"
@@ -573,7 +708,7 @@ function WalletContent() {
               <p className="text-xs text-amber-600 ml-4 font-medium px-2 py-1 bg-amber-50 rounded hidden sm:block">
                 * Nếu gặp màn hình trắng khi hủy (do lỗi giả lập localhost), vui lòng nhấn nút X ở góc phải để đóng.
               </p>
-              <button 
+              <button
                 onClick={() => {
                   setPaymentUrl(null);
                   fetchWalletData();
@@ -585,8 +720,8 @@ function WalletContent() {
               </button>
             </div>
             <div className="flex-1 w-full bg-slate-100/50">
-              <iframe 
-                src={paymentUrl} 
+              <iframe
+                src={paymentUrl}
                 className="w-full h-full border-none"
                 title="Thanh toán"
                 allow="payment"

@@ -11,6 +11,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Bán Hàng Kỹ Thuật',
       'Bán Hàng Bất Động Sản',
       'Bán Hàng Bảo Hiểm / Tài Chính',
+      'Kinh doanh / CSKH',
     ],
     keywords: [
       'sales',
@@ -37,6 +38,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Hạ Tầng / Mạng / Cloud',
       'Vận Hành IT / Helpdesk',
       'DevOps / SRE',
+      'CNTT / Phần mềm',
     ],
     keywords: [
       'it',
@@ -67,6 +69,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'SEO / SEM / Google Ads',
       'Performance Marketing',
       'Marketing Tổng Hợp',
+      'Marketing / Truyền thông',
     ],
     keywords: [
       'marketing',
@@ -111,6 +114,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Ngân Hàng (Tín Dụng / Giao Dịch Viên)',
       'Chứng Khoán / Đầu Tư',
       'Quản Lý Quỹ',
+      'Tài chính / Kế toán / Ngân hàng',
     ],
     keywords: [
       'kế toán',
@@ -134,6 +138,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Thư Ký / Trợ Lý Giám Đốc',
       'Pháp Chế Doanh Nghiệp / Luật Sư',
       'Quản Lý Tòa Nhà',
+      'Nhân sự / Hành / Pháp lý',
     ],
     keywords: [
       'nhân sự',
@@ -156,6 +161,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Thiết Kế Nội Thất / Kiến Trúc',
       'Nhiếp Ảnh / Quay Phim',
       'Sáng Tạo Ý Tưởng (Creative)',
+      'Thiết kế / Sáng tạo',
     ],
     keywords: [
       'thiết kế',
@@ -177,6 +183,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Tự Động Hóa (PLC/SCADA)',
       'Quản Lý Sản Xuất / Quản Đốc',
       'Vận Hành Máy / QC Sản Xuất',
+      'Kỹ thuật / Cơ khí / Sản xuất',
     ],
     keywords: [
       'kỹ thuật',
@@ -293,6 +300,7 @@ export const HIERARCHICAL_INDUSTRIES = [
       'Đào Tạo Nội Bộ',
       'Biên Dịch / Phiên Dịch',
       'E-Learning',
+      'Giáo dục / Đào tạo / Ngôn ngữ',
     ],
     keywords: [
       'giáo dục',

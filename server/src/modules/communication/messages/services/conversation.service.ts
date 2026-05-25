@@ -130,9 +130,16 @@ export class ConversationService {
     return conversation;
   }
 
-  async sendMessage(senderId: string, conversationId: string, content: string, isSystemMessage: boolean = false) {
+  async sendMessage(
+    senderId: string,
+    conversationId: string,
+    content: string,
+    isSystemMessage: boolean = false,
+  ) {
     const normalizedContent = content.replace(/[\s\.\-\_]/g, '');
-    const isEvasion = !isSystemMessage && (EVASION_REGEX.test(content) || EVASION_REGEX.test(normalizedContent));
+    const isEvasion =
+      !isSystemMessage &&
+      (EVASION_REGEX.test(content) || EVASION_REGEX.test(normalizedContent));
     const isProfanity = !isSystemMessage && PROFANITY_REGEX.test(content);
 
     let finalContent = content;
@@ -240,15 +247,25 @@ export class ConversationService {
         });
         if (candidateDetails?.user.email) {
           // Fire and forget email to avoid blocking the loop
-          this.mailService.sendJobInvitation(
-            candidateDetails.user.email,
-            candidateDetails.fullName,
-            companyName,
-            content,
-          ).catch(e => console.error('Failed to send auto-email in broadcastMessage:', e));
+          this.mailService
+            .sendJobInvitation(
+              candidateDetails.user.email,
+              candidateDetails.fullName,
+              companyName,
+              content,
+            )
+            .catch((e) =>
+              console.error(
+                'Failed to send auto-email in broadcastMessage:',
+                e,
+              ),
+            );
         }
       } catch (err) {
-        console.error('Failed to get candidate for email in broadcastMessage:', err);
+        console.error(
+          'Failed to get candidate for email in broadcastMessage:',
+          err,
+        );
       }
     }
     return results;
@@ -315,7 +332,7 @@ export class ConversationService {
       recruiterUserId,
       conv.conversationId,
       content,
-      true
+      true,
     );
 
     try {
@@ -325,12 +342,19 @@ export class ConversationService {
       });
       if (candidateDetails?.user.email) {
         // Fire and forget email to avoid blocking the auto-invite loop
-        this.mailService.sendJobInvitation(
-          candidateDetails.user.email,
-          candidateDetails.fullName,
-          companyName,
-          content,
-        ).catch(e => console.error('Failed to send auto-email in sendJobInvitationMessage:', e));
+        this.mailService
+          .sendJobInvitation(
+            candidateDetails.user.email,
+            candidateDetails.fullName,
+            companyName,
+            content,
+          )
+          .catch((e) =>
+            console.error(
+              'Failed to send auto-email in sendJobInvitationMessage:',
+              e,
+            ),
+          );
       }
     } catch (err) {
       console.error(

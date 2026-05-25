@@ -66,7 +66,10 @@ export class UserDataService {
         userRoles: { include: { role: true } },
         candidate: true,
         recruiter: {
-          include: { recruiterSubscription: true, company: { include: { wallet: true } } },
+          include: {
+            recruiterSubscription: true,
+            company: { include: { wallet: true } },
+          },
         },
         admin: { select: { permissions: true } },
       },
@@ -74,13 +77,18 @@ export class UserDataService {
     if (!user) throw new NotFoundException('Không tìm thấy user.');
 
     // Sync subscription for MEMBER
-    if (user.recruiter && user.recruiter.companyRole === 'MEMBER' && user.recruiter.companyId) {
+    if (
+      user.recruiter &&
+      user.recruiter.companyRole === 'MEMBER' &&
+      user.recruiter.companyId
+    ) {
       const masterRecruiter = await this.prisma.recruiter.findFirst({
         where: { companyId: user.recruiter.companyId, companyRole: 'MASTER' },
         include: { recruiterSubscription: true },
       });
       if (masterRecruiter && masterRecruiter.recruiterSubscription) {
-        user.recruiter.recruiterSubscription = masterRecruiter.recruiterSubscription;
+        user.recruiter.recruiterSubscription =
+          masterRecruiter.recruiterSubscription;
       }
     }
 
@@ -139,7 +147,10 @@ export class UserDataService {
           },
         },
         recruiter: {
-          include: { recruiterSubscription: true, company: { include: { wallet: true } } },
+          include: {
+            recruiterSubscription: true,
+            company: { include: { wallet: true } },
+          },
         },
         admin: { select: { permissions: true } },
       },
@@ -147,13 +158,18 @@ export class UserDataService {
     if (!user) throw new NotFoundException('Không tìm thấy user.');
 
     // Sync subscription for MEMBER
-    if (user.recruiter && user.recruiter.companyRole === 'MEMBER' && user.recruiter.companyId) {
+    if (
+      user.recruiter &&
+      user.recruiter.companyRole === 'MEMBER' &&
+      user.recruiter.companyId
+    ) {
       const masterRecruiter = await this.prisma.recruiter.findFirst({
         where: { companyId: user.recruiter.companyId, companyRole: 'MASTER' },
         include: { recruiterSubscription: true },
       });
       if (masterRecruiter && masterRecruiter.recruiterSubscription) {
-        user.recruiter.recruiterSubscription = masterRecruiter.recruiterSubscription;
+        user.recruiter.recruiterSubscription =
+          masterRecruiter.recruiterSubscription;
       }
     }
 

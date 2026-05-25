@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -11,7 +21,10 @@ export class ReviewsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createReviewDto: CreateReviewDto, @CurrentUser('userId') userId: string) {
+  create(
+    @Body() createReviewDto: CreateReviewDto,
+    @CurrentUser('userId') userId: string,
+  ) {
     // In a real app, we'd look up the recruiterId from the userId.
     // Assuming the frontend sends the recruiterId, or we resolve it here.
     // For now, let's assume userId is the recruiterId (in our schema, Recruiter has a unique userId).
@@ -23,7 +36,7 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard)
   findAll(
     @Param('candidateId') candidateId: string,
-    @Query('companyId') companyId?: string
+    @Query('companyId') companyId?: string,
   ) {
     return this.reviewsService.findAllByCandidate(candidateId, companyId);
   }
@@ -33,7 +46,7 @@ export class ReviewsController {
   update(
     @Param('id') id: string,
     @Body() updateReviewDto: UpdateReviewDto,
-    @CurrentUser('userId') userId: string
+    @CurrentUser('userId') userId: string,
   ) {
     return this.reviewsService.update(id, updateReviewDto, userId); // NOTE: recruiterId resolution needed
   }

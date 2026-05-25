@@ -42,7 +42,12 @@ export class MessagesService {
     );
   }
 
-  sendMessage(senderId: string, conversationId: string, content: string, isSystemMessage: boolean = false) {
+  sendMessage(
+    senderId: string,
+    conversationId: string,
+    content: string,
+    isSystemMessage: boolean = false,
+  ) {
     return this.conversationService.sendMessage(
       senderId,
       conversationId,

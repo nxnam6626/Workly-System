@@ -44,7 +44,7 @@ export class JobNotificationService {
         if (c.userId) {
           await this.notificationsService.create(
             c.userId,
-            '🔥 Cơ hội việc làm Tuyển Gấp!',
+            'Cơ hội việc làm Tuyển Gấp!',
             `Công ty ${job.company?.companyName || 'đối tác'} đang tuyển gấp vị trí "${job.title}". Hãy apply ngay!`,
             'info',
             `/jobs/${job.jobPostingId}`,
@@ -52,7 +52,7 @@ export class JobNotificationService {
           this.messagesGateway.server
             .to(`user_${c.userId}`)
             .emit('notification', {
-              title: '🔥 Cơ hội việc làm Tuyển Gấp!',
+              title: 'Cơ hội việc làm Tuyển Gấp!',
               message: `Công ty ${job.company?.companyName || 'đối tác'} đang tuyển gấp vị trí "${job.title}". Hãy apply ngay!`,
               type: 'info',
               link: `/jobs/${job.jobPostingId}`,

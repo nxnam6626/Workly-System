@@ -25,7 +25,7 @@ export class CandidateMatchingService {
       this.prisma.jobMatch.findMany({
         where: {
           candidateId: candidate.candidateId,
-          score: { gte: 60 },
+          score: { gte: 70 },
           jobPosting: { status: 'APPROVED' },
         },
         include: {
@@ -40,7 +40,7 @@ export class CandidateMatchingService {
       this.prisma.jobMatch.count({
         where: {
           candidateId: candidate.candidateId,
-          score: { gte: 60 },
+          score: { gte: 70 },
           jobPosting: { status: 'APPROVED' },
         },
       }),
@@ -52,7 +52,7 @@ export class CandidateMatchingService {
         this.prisma.jobMatch.findMany({
           where: {
             candidateId: candidate.candidateId,
-            score: { gte: 60 },
+            score: { gte: 70 },
             jobPosting: { status: 'APPROVED' },
           },
           include: {
@@ -70,7 +70,7 @@ export class CandidateMatchingService {
         this.prisma.jobMatch.count({
           where: {
             candidateId: candidate.candidateId,
-            score: { gte: 60 },
+            score: { gte: 70 },
             jobPosting: { status: 'APPROVED' },
           },
         }),

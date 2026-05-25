@@ -145,7 +145,7 @@ export class CompaniesController {
     const recruiter = await this.companiesService.getRecruiterInfo(userId);
     return {
       members,
-      isMaster: recruiter?.companyRole === 'MASTER'
+      isMaster: recruiter?.companyRole === 'MASTER',
     };
   }
 
@@ -171,9 +171,13 @@ export class CompaniesController {
   blockMember(
     @CurrentUser('userId') userId: string,
     @Param('recruiterId') targetRecruiterId: string,
-    @Body() data: { isBlocked: boolean }
+    @Body() data: { isBlocked: boolean },
   ) {
-    return this.companiesService.blockMember(userId, targetRecruiterId, data.isBlocked);
+    return this.companiesService.blockMember(
+      userId,
+      targetRecruiterId,
+      data.isBlocked,
+    );
   }
 
   // --- End Member Management Endpoints ---

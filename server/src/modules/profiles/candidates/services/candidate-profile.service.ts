@@ -25,7 +25,6 @@ export class CandidateProfileService {
     return this.searchService.findByUserId(userId);
   }
 
-
   async updateByUserId(userId: string, updateCandidateDto: any) {
     const candidate = await this.searchService.findByUserId(userId);
     return this.managementService.update(
@@ -33,7 +32,6 @@ export class CandidateProfileService {
       updateCandidateDto,
     );
   }
-
 
   async remove(candidateId: string) {
     return this.managementService.remove(candidateId);

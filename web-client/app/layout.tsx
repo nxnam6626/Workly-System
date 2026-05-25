@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { ConfirmProvider } from "@/components/ui/ConfirmDialog";
 import { AlertPopup } from "@/components/ui/AlertPopup";
 import ConditionalAiChat from "@/components/chat/ConditionalAiChat";
+import JobInvitationsFloatingButton from "@/components/candidate/JobInvitationsFloatingButton";
 import ScrollToTop from "@/components/navbar/ScrollToTop";
 
 const inter = Inter({ 
@@ -32,7 +33,8 @@ export default function RootLayout({
             {children}
             <NotificationListener />
             <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
-            {/* <ConditionalAiChat /> */}
+            <JobInvitationsFloatingButton />
+            <ConditionalAiChat />
             <AlertPopup />
             <ScrollToTop />
           </ConfirmProvider>

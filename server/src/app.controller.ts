@@ -5,7 +5,10 @@ import { PrismaService } from './prisma/prisma.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService, private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -15,7 +18,7 @@ export class AppController {
   @Get('debug-apps')
   async debugApps() {
     return this.prisma.application.findMany({
-      include: { evaluations: true }
+      include: { evaluations: true },
     });
   }
 
@@ -23,9 +26,9 @@ export class AppController {
   async debugCandidate() {
     return this.prisma.application.findMany({
       where: {
-        candidate: { fullName: { contains: 'Duy Tiến' } }
+        candidate: { fullName: { contains: 'Duy Tiến' } },
       },
-      include: { evaluations: true }
+      include: { evaluations: true },
     });
   }
 
@@ -43,7 +46,7 @@ export class AppController {
           taxCode: taxCode,
           isRegistered: true,
           verifyStatus: 1,
-        }
+        },
       });
     }
 
@@ -55,11 +58,13 @@ export class AppController {
           password: passwordHash,
           status: 'ACTIVE',
           isEmailVerified: true,
-        }
+        },
       });
     }
 
-    let role = await this.prisma.role.findUnique({ where: { roleName: 'RECRUITER' } });
+    let role = await this.prisma.role.findUnique({
+      where: { roleName: 'RECRUITER' },
+    });
     if (!role) {
       role = await this.prisma.role.create({ data: { roleName: 'RECRUITER' } });
     }
@@ -67,21 +72,25 @@ export class AppController {
     await this.prisma.userRole.upsert({
       where: { userId_roleId: { userId: user.userId, roleId: role.roleId } },
       create: { userId: user.userId, roleId: role.roleId },
-      update: {}
+      update: {},
     });
 
-    let recruiter = await this.prisma.recruiter.findUnique({ where: { userId: user.userId } });
+    let recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId: user.userId },
+    });
     if (!recruiter) {
       recruiter = await this.prisma.recruiter.create({
         data: {
           userId: user.userId,
           companyId: company.companyId,
           fullName: 'HR MISA',
-        }
+        },
       });
     }
 
-    const wallet = await this.prisma.companyWallet.findUnique({ where: { companyId: company.companyId } });
+    const wallet = await this.prisma.companyWallet.findUnique({
+      where: { companyId: company.companyId },
+    });
     if (!wallet) {
       await this.prisma.companyWallet.create({
         data: {
@@ -89,10 +98,15 @@ export class AppController {
           balance: 10000000,
           cvUnlockQuota: 100,
           cvUnlockQuotaMax: 100,
-        }
+        },
       });
     }
 
-    return { success: true, email: user.email, company: company.companyName, recruiterId: recruiter.recruiterId };
+    return {
+      success: true,
+      email: user.email,
+      company: company.companyName,
+      recruiterId: recruiter.recruiterId,
+    };
   }
 }

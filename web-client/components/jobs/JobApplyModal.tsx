@@ -40,6 +40,10 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
   const [useExistingCv, setUseExistingCv] = useState(true);
   const [selectedCvId, setSelectedCvId] = useState<string>("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [candidateStatus, setCandidateStatus] = useState<{
+    isOpenToWork: boolean;
+    isExpired: boolean;
+  } | null>(null);
 
   const [reviewModal, setReviewModal] = useState<{
     isOpen: boolean;
@@ -74,6 +78,17 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
     setFetchingProfile(true);
     try {
       const profile = await profileApi.getMe();
+      if (profile.candidate) {
+        const isExpired = profile.candidate.jobSearchExpiresAt 
+          ? new Date(profile.candidate.jobSearchExpiresAt) < new Date() 
+          : true;
+        
+        setCandidateStatus({
+          isOpenToWork: profile.candidate.isOpenToWork,
+          isExpired
+        });
+      }
+
       if (profile.candidate?.cvs) {
         setUserCVs(profile.candidate.cvs);
         
@@ -227,6 +242,21 @@ export function JobApplyModal({ isOpen, onClose, jobTitle, companyName, jobPosti
                 </p>
              </div>
              <button onClick={onClose} className="px-8 py-2.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-all">
+                Đã hiểu
+             </button>
+          </div>
+        ) : candidateStatus && (!candidateStatus.isOpenToWork || candidateStatus.isExpired) ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4">
+             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-500">
+                <AlertCircle className="w-8 h-8" />
+             </div>
+             <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-900">Tính năng Tìm việc đang tắt</h3>
+                <p className="text-sm text-slate-500 max-w-sm mx-auto">
+                   Bạn cần bật trạng thái <strong>Đang tìm việc</strong> và đảm bảo tài khoản tìm việc chưa hết hạn để có thể ứng tuyển.
+                </p>
+             </div>
+             <button onClick={onClose} className="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
                 Đã hiểu
              </button>
           </div>

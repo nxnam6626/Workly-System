@@ -34,9 +34,10 @@ export class CandidateCvService {
       const duplicate = await this.findByHash(candidate.candidateId, fileHash);
       if (duplicate) {
         throw new BadRequestException({
-          message: 'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
+          message:
+            'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
           errorCode: 'DUPLICATE_CV',
-          cvId: duplicate.cvId
+          cvId: duplicate.cvId,
         });
       }
     }
@@ -67,31 +68,47 @@ export class CandidateCvService {
 
     // 0. Gate 0: Chống trùng lặp hồ sơ (File Hash)
     const fileHash = crypto.createHash('md5').update(buffer).digest('hex');
-    this.logger.log(`[Duplicate Check] Computed Hash: ${fileHash} for userId: ${userId}`);
-    
+    this.logger.log(
+      `[Duplicate Check] Computed Hash: ${fileHash} for userId: ${userId}`,
+    );
+
     const candidate = await this.candidateProfileService.findByUserId(userId);
     if (candidate) {
-      this.logger.log(`[Duplicate Check] CandidateId: ${candidate.candidateId}. Querying DB...`);
+      this.logger.log(
+        `[Duplicate Check] CandidateId: ${candidate.candidateId}. Querying DB...`,
+      );
       const duplicate = await this.findByHash(candidate.candidateId, fileHash);
       if (duplicate) {
-        this.logger.warn(`[Duplicate Check] FOUND MATCHING CV: ${duplicate.cvId}. THROWING EXCEPTION NOW.`);
+        this.logger.warn(
+          `[Duplicate Check] FOUND MATCHING CV: ${duplicate.cvId}. THROWING EXCEPTION NOW.`,
+        );
         throw new BadRequestException({
-          message: 'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
+          message:
+            'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
           errorCode: 'DUPLICATE_CV',
-          cvId: duplicate.cvId
+          cvId: duplicate.cvId,
         });
       } else {
-        this.logger.log(`[Duplicate Check] No duplicate found in database for hash: ${fileHash}`);
+        this.logger.log(
+          `[Duplicate Check] No duplicate found in database for hash: ${fileHash}`,
+        );
       }
     } else {
-       this.logger.log(`[Duplicate Check] Candidate profile not found for userId: ${userId}`);
+      this.logger.log(
+        `[Duplicate Check] Candidate profile not found for userId: ${userId}`,
+      );
     }
 
     // 1. Gate 1: Bóc tách văn bản & Sanity Check
-    const rawText = await this.cvParsingService.extractTextLocal(buffer, mimeType);
+    const rawText = await this.cvParsingService.extractTextLocal(
+      buffer,
+      mimeType,
+    );
     const sanityCheck = this.cvParsingService.validateIsCv(rawText);
     if (!sanityCheck.isValid) {
-      throw new BadRequestException(sanityCheck.reason || 'Không thể bóc tách văn bản từ tệp này.');
+      throw new BadRequestException(
+        sanityCheck.reason || 'Không thể bóc tách văn bản từ tệp này.',
+      );
     }
 
     // 2. Tạm thời tải lên Supabase để lấy FileUrl (Phục vụ hiển thị Preview nếu cần)
@@ -101,20 +118,23 @@ export class CandidateCvService {
     try {
       // 3. Gate 2: AI Parsing (All-in-One)
       this.logger.log('[Flow] Đang gọi AI xử lý (Gate 2)...');
-      const extractedData = await this.cvParsingService.parseCvFromText(rawText);
+      const extractedData =
+        await this.cvParsingService.parseCvFromText(rawText);
 
       if (!extractedData) {
         throw new BadRequestException('AI không thể xử lý dữ liệu từ tệp này.');
       }
 
       // 4. Gate 3: Schema Validation & Rollback
-      const schemaCheck = this.cvParsingService.validateParsedData(extractedData);
+      const schemaCheck =
+        this.cvParsingService.validateParsedData(extractedData);
       if (!schemaCheck.isValid) {
         this.logger.warn('[Flow] Gate 3 Fail. Dữ liệu không đạt chuẩn.');
         await this.rollbackCvUpload(cv.cvId, cv.fileUrl);
 
         throw new BadRequestException({
-          message: schemaCheck.errorReason || 'Hồ sơ thiếu thông tin quan trọng.',
+          message:
+            schemaCheck.errorReason || 'Hồ sơ thiếu thông tin quan trọng.',
           missingFields: schemaCheck.missingFields,
           error: 'CV_INCOMPLETE',
         });

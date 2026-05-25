@@ -151,7 +151,12 @@ export class ApplicationsController {
     @Body('date') date: string,
     @Body('time') time: string,
   ) {
-    return this.interviewService.candidateScheduleInterview(id, userId, date, time);
+    return this.interviewService.candidateScheduleInterview(
+      id,
+      userId,
+      date,
+      time,
+    );
   }
 
   @Patch(':id/confirm-interview')
@@ -172,6 +177,12 @@ export class ApplicationsController {
     @Body('proposedTime') proposedTime: string,
     @Body('reason') reason: string,
   ) {
-    return this.applicationsService.requestReschedule(id, userId, proposedDate, proposedTime, reason);
+    return this.applicationsService.requestReschedule(
+      id,
+      userId,
+      proposedDate,
+      proposedTime,
+      reason,
+    );
   }
 }

@@ -12,23 +12,31 @@ export class WalletBalanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly messagesGateway: MessagesGateway,
-  ) { }
+  ) {}
 
   async getBalance(userId: string) {
     let recruiter: any = await this.prisma.recruiter.findUnique({
       where: { userId },
-      include: { company: { include: { wallet: true } }, recruiterSubscription: true },
+      include: {
+        company: { include: { wallet: true } },
+        recruiterSubscription: true,
+      },
     });
 
     if (!recruiter) {
-      recruiter = await this.prisma.recruiter.create({
+      recruiter = (await this.prisma.recruiter.create({
         data: { userId },
-        include: { company: { include: { wallet: true } }, recruiterSubscription: true },
-      }) as any;
+        include: {
+          company: { include: { wallet: true } },
+          recruiterSubscription: true,
+        },
+      })) as any;
     }
 
     if (!recruiter.companyId) {
-      throw new BadRequestException('Tài khoản này chưa thuộc công ty nào nên không có Ví');
+      throw new BadRequestException(
+        'Tài khoản này chưa thuộc công ty nào nên không có Ví',
+      );
     }
 
     if (!recruiter.company?.wallet) {
@@ -44,7 +52,7 @@ export class WalletBalanceService {
     };
   }
 
-  async getTransactions(userId: string, skip = 0, take = 20) {
+  async getTransactions(userId: string, skip = 0, take = 50, date?: string, search?: string) {
     const wallet = await this.getBalance(userId);
 
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -57,9 +65,32 @@ export class WalletBalanceService {
       data: { status: 'CANCELLED' },
     });
 
+    const whereClause: any = { walletId: wallet.walletId };
+    
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      whereClause.createdAt = { gte: startOfDay, lte: endOfDay };
+    }
+
+    if (search) {
+      whereClause.recruiter = {
+        OR: [
+          { fullName: { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } }
+        ]
+      };
+    }
+
     return this.prisma.transaction.findMany({
-      where: { walletId: wallet.walletId },
-      include: { recruiter: { select: { fullName: true, user: { select: { email: true } } } } },
+      where: whereClause,
+      include: {
+        recruiter: {
+          select: { fullName: true, user: { select: { email: true } } },
+        },
+      },
       orderBy: { createdAt: 'desc' },
       skip,
       take,
@@ -88,7 +119,13 @@ export class WalletBalanceService {
         data: { balance: { decrement: amount } },
       }),
       this.prisma.transaction.create({
-        data: { amount, type, description, walletId: wallet.walletId, recruiterId },
+        data: {
+          amount,
+          type,
+          description,
+          walletId: wallet.walletId,
+          recruiterId,
+        },
       }),
     ]);
 
@@ -116,7 +153,13 @@ export class WalletBalanceService {
         data: { balance: { increment: amount } },
       }),
       this.prisma.transaction.create({
-        data: { amount, type, description, walletId: wallet.walletId, recruiterId },
+        data: {
+          amount,
+          type,
+          description,
+          walletId: wallet.walletId,
+          recruiterId,
+        },
       }),
     ]);
 

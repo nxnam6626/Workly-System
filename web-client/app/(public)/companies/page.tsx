@@ -6,14 +6,42 @@ import Image from "next/image";
 import { Search, ChevronLeft, ChevronRight, Building2, ChevronFirst, ChevronLast, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 
+import { useSearchParams, useRouter } from "next/navigation";
+
 export default function CompaniesPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const initialIndustry = searchParams.get("industry") || "";
+  const initialSortBy = searchParams.get("sortBy") || "ALPHABETICAL";
+  
   const [searchQuery, setSearchQuery] = useState("");
+  const [industry, setIndustry] = useState(initialIndustry);
   const [companies, setCompanies] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('ALPHABETICAL');
+  const [sortBy, setSortBy] = useState(initialSortBy);
   const itemsPerPage = 9;
+
+  // Sync state with URL params
+  useEffect(() => {
+    const ind = searchParams.get("industry") || "";
+    const sort = searchParams.get("sortBy");
+    
+    setIndustry(ind);
+    
+    if (sort) {
+      setSortBy(sort);
+    } else if (!ind) {
+      // If neither industry nor sort is provided (e.g. going back to /companies), default to ALL
+      setSortBy('ALPHABETICAL');
+    }
+    
+    if (ind || sort) {
+      setCurrentPage(1);
+    }
+  }, [searchParams]);
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true);
@@ -23,7 +51,8 @@ export default function CompaniesPage() {
           search: searchQuery,
           page: currentPage,
           limit: itemsPerPage,
-          sortBy: sortBy
+          sortBy: sortBy,
+          ...(industry ? { industry } : {})
         }
       });
       setCompanies(data.items);
@@ -33,7 +62,7 @@ export default function CompaniesPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, currentPage, sortBy]);
+  }, [searchQuery, currentPage, sortBy, industry]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -59,10 +88,13 @@ export default function CompaniesPage() {
       <header className="max-w-6xl mx-auto px-4 lg:px-6 mb-8">
         <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
           <Building2 className="w-8 h-8 text-mariner fill-blue-50" />
-          Khám phá Doanh nghiệp
+          {industry ? `Công ty ${industry}` : 'Khám phá Doanh nghiệp'}
         </h1>
         <p className="text-slate-500 text-sm font-medium mt-2 ml-11">
-          Kết nối cùng <span className="text-mariner font-bold">{total}</span> công ty hàng đầu trên Workly
+          {industry 
+            ? `Tìm thấy ${total} công ty trong lĩnh vực ${industry}`
+            : `Kết nối cùng ${total} công ty hàng đầu trên Workly`
+          }
         </p>
       </header>
 
@@ -86,6 +118,16 @@ export default function CompaniesPage() {
                 className="text-[10px] font-bold text-slate-400 hover:text-slate-600 px-2 py-1 bg-slate-200/50 hover:bg-slate-200 rounded"
               >
                 Xóa
+              </button>
+            )}
+            
+            {industry && (
+              <button 
+                onClick={() => router.push('/companies')}
+                className="text-[10px] font-bold text-white bg-mariner hover:bg-blue-700 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
+                title="Xóa bộ lọc ngành nghề"
+              >
+                {industry} ✕
               </button>
             )}
           </div>

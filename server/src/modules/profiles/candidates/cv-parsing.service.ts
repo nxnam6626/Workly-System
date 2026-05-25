@@ -6,7 +6,8 @@ import { PDFParse } from 'pdf-parse';
 import axios from 'axios';
 import { HIERARCHICAL_INDUSTRIES } from '../../core-jobs/jobs/job-postings/constants/industries';
 
-const getCvExtractionPrompt = (industriesList: string) => `
+const getCvExtractionPrompt = (industriesList: string) =>
+  `
 Nhiệm vụ: Trích xuất TOÀN BỘ thông tin từ CV thành JSON. Không được bỏ sót bất kỳ mục nào.
 Quy tắc quan trọng:
 1. Xác thực: AI tự đánh giá xem nội dung có phải là một CV/Resume hợp lệ không. Nếu KHÔNG PHẢI, đặt "is_cv": false.
@@ -64,9 +65,11 @@ export class CvParsingService {
   constructor(private readonly configService: ConfigService) {
     // Config Groq
     this.groqApiKey =
-      (this.configService.get<string>('GROQ_API_KEY') ||
-      process.env.GROQ_API_KEY ||
-      '').trim() || null;
+      (
+        this.configService.get<string>('GROQ_API_KEY') ||
+        process.env.GROQ_API_KEY ||
+        ''
+      ).trim() || null;
 
     if (this.groqApiKey) {
       this.logger.log('Đã cấu hình Groq API cho CV Parsing.');
@@ -77,12 +80,15 @@ export class CvParsingService {
     try {
       let text = '';
       if (mimeType === 'application/pdf') {
-        this.logger.log(`[CV Parsing] Bắt đầu xử lý PDF (Buffer size: ${buffer.length} bytes)`);
+        this.logger.log(
+          `[CV Parsing] Bắt đầu xử lý PDF (Buffer size: ${buffer.length} bytes)`,
+        );
         const parser = new PDFParse({ data: buffer });
         const data = await parser.getText();
         text = data.text || '';
       } else if (
-        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        mimeType ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         mimeType === 'application/msword'
       ) {
         const result = await mammoth.extractRawText({ buffer });
@@ -93,7 +99,9 @@ export class CvParsingService {
 
       return this.sanitizeRawText(text);
     } catch (error: any) {
-      this.logger.error(`Lỗi bóc tách văn bản local (${mimeType}): ${error.message}`);
+      this.logger.error(
+        `Lỗi bóc tách văn bản local (${mimeType}): ${error.message}`,
+      );
       return '';
     }
   }
@@ -120,24 +128,34 @@ export class CvParsingService {
     const relevant = HIERARCHICAL_INDUSTRIES.filter((ind) => {
       // Kiểm tra xem tên ngành hoặc bất kỳ từ khóa nào xuất hiện trong CV không
       const hasCategory = lowerText.includes(ind.category.toLowerCase());
-      const hasKeyword = ind.keywords.some((k) => lowerText.includes(k.toLowerCase()));
+      const hasKeyword = ind.keywords.some((k) =>
+        lowerText.includes(k.toLowerCase()),
+      );
       return hasCategory || hasKeyword;
     });
 
     // Nếu không tìm thấy gì, trả về 10 ngành đầu tiên mặc định
     // Nếu có, trả về danh sách đã lọc (giới hạn tối đa 15 ngành để prompt gọn)
-    const finalSelection = relevant.length > 0 ? relevant.slice(0, 15) : HIERARCHICAL_INDUSTRIES.slice(0, 10);
+    const finalSelection =
+      relevant.length > 0
+        ? relevant.slice(0, 15)
+        : HIERARCHICAL_INDUSTRIES.slice(0, 10);
 
     return finalSelection
       .map((i) => `- ${i.category}: ${i.subCategories.join(', ')}`)
       .join('\n');
   }
 
-  private async parseWithGroq(text: string, industriesList: string): Promise<CvParsedData | null> {
+  private async parseWithGroq(
+    text: string,
+    industriesList: string,
+  ): Promise<CvParsedData | null> {
     if (!this.groqApiKey) return null;
 
     try {
-      this.logger.log('[CV Parsing] Đang phân tích bằng Groq (Llama-3.3-70b)...');
+      this.logger.log(
+        '[CV Parsing] Đang phân tích bằng Groq (Llama-3.3-70b)...',
+      );
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
@@ -170,7 +188,9 @@ export class CvParsingService {
       const groqErrorDetail = error.response?.data
         ? JSON.stringify(error.response.data)
         : error.message;
-      this.logger.warn(`[CV Parsing] Groq parsing thất bại: ${groqErrorDetail}`);
+      this.logger.warn(
+        `[CV Parsing] Groq parsing thất bại: ${groqErrorDetail}`,
+      );
       return null;
     }
   }
@@ -216,12 +236,18 @@ export class CvParsingService {
     this.logger.log('[Gate 1] Kiểm tra sơ bộ (Sanity Check)...');
 
     // Hiển thị một đoạn nội dung để người dùng kiểm chứng trong log
-    const preview = text ? text.substring(0, 200).replace(/\s+/g, ' ').trim() : 'RỖNG';
+    const preview = text
+      ? text.substring(0, 200).replace(/\s+/g, ' ').trim()
+      : 'RỖNG';
     const charCount = text?.length || 0;
-    this.logger.log(`[Gate 1] Trích xuất thành công: ${charCount} ký tự. Nội dung: "${preview}..."`);
+    this.logger.log(
+      `[Gate 1] Trích xuất thành công: ${charCount} ký tự. Nội dung: "${preview}..."`,
+    );
 
     if (charCount < 100) {
-      this.logger.warn(`[Gate 1] Thất bại: Văn bản quá ngắn (${charCount} ký tự).`);
+      this.logger.warn(
+        `[Gate 1] Thất bại: Văn bản quá ngắn (${charCount} ký tự).`,
+      );
       return {
         isValid: false,
         reason: `Tệp tin chỉ chứa ${charCount} ký tự văn bản, không đủ nội dung tối thiểu (100) để phân tích CV.`,
@@ -258,7 +284,10 @@ export class CvParsingService {
       missingFields.push('Thông tin liên hệ (Email hoặc SĐT)');
 
     // Kiểm tra bằng chứng năng lực (ít nhất có 1 trong 3)
-    const hasEdu = data.education && data.education.length > 0 && !!data.education[0]?.school;
+    const hasEdu =
+      data.education &&
+      data.education.length > 0 &&
+      !!data.education[0]?.school;
     const hasExp = (data.experience?.roles?.length || 0) > 0;
     const hasProj = (data.projects?.length || 0) > 0;
 
@@ -311,7 +340,9 @@ export class CvParsingService {
 
       // 1. Bóc tách văn bản thô local
       const rawText = await this.extractTextLocal(buffer, mimeType);
-      this.logger.log(`[CV Parsing] Trích xuất local thành công: ${rawText.length} kí tự.`);
+      this.logger.log(
+        `[CV Parsing] Trích xuất local thành công: ${rawText.length} kí tự.`,
+      );
 
       if (!rawText || rawText.length < 50) {
         this.logger.warn(`[CV Parsing] Văn bản trích xuất quá ngắn.`);
@@ -327,9 +358,7 @@ export class CvParsingService {
       // 2. Phân tích AI
       return this.parseCvFromText(rawText);
     } catch (error: any) {
-      this.logger.error(
-        `[CV Parsing] Dừng xử lý do lỗi: ${error.message}`,
-      );
+      this.logger.error(`[CV Parsing] Dừng xử lý do lỗi: ${error.message}`);
       if (
         error.message === 'NOT_A_CV' ||
         error.message.includes('thông tin liên hệ') ||

@@ -18,6 +18,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { ProfilePageShell, ProfileSearchBar } from "@/components/candidates/ProfilePageShell";
 import { AppliedJobsPageSkeleton } from "@/components/candidates/AppliedJobSkeleton";
 import { CompanyReviewModal } from "@/components/candidates/CompanyReviewModal";
+import { ScheduleInterviewModal } from "@/components/candidate/messages/ScheduleInterviewModal";
 import { motion, AnimatePresence } from "framer-motion";
 import { useFavoriteStore } from "@/stores/favorites";
 
@@ -113,6 +114,7 @@ export default function AppliedJobsPage() {
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState<"NEWEST" | "OLDEST">("NEWEST");
   const [reviewModalData, setReviewModalData] = useState<{ isOpen: boolean; appId: string; companyId: string; companyName: string } | null>(null);
+  const [scheduleModalData, setScheduleModalData] = useState<{ isOpen: boolean; appId: string } | null>(null);
 
   const { accessToken } = useAuthStore();
   const { socket } = useSocketStore();
@@ -400,13 +402,21 @@ export default function AppliedJobsPage() {
                           <div className="flex-1 min-w-0">
                             <p className="text-[12px] font-bold text-violet-800">Lịch phỏng vấn</p>
                             <p className="text-[11px] text-violet-600 font-medium">
-                              {app.interviewTime} · {app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : '—'}
+                              {app.interviewTime ? `${app.interviewTime} · ` : ''}{app.interviewDate ? new Date(app.interviewDate).toLocaleDateString('vi-VN') : 'Chưa có lịch'}
                               {app.interviewLocation && ` · ${app.interviewLocation}`}
                             </p>
                           </div>
-                          <button className="flex-shrink-0 px-3 py-1.5 bg-violet-600 text-white text-[10px] font-black rounded-lg hover:bg-violet-700 uppercase tracking-wide transition-all">
-                            Tham gia
-                          </button>
+                          {!app.interviewDate ? (
+                            <button 
+                              onClick={() => setScheduleModalData({ isOpen: true, appId: app.applicationId })}
+                              className="flex-shrink-0 px-3 py-1.5 bg-violet-600 text-white text-[10px] font-black rounded-lg hover:bg-violet-700 uppercase tracking-wide transition-all">
+                              Chọn lịch
+                            </button>
+                          ) : (
+                            <button className="flex-shrink-0 px-3 py-1.5 bg-violet-600 text-white text-[10px] font-black rounded-lg hover:bg-violet-700 uppercase tracking-wide transition-all">
+                              Tham gia
+                            </button>
+                          )}
                         </div>
                       )}
 
@@ -494,6 +504,19 @@ export default function AppliedJobsPage() {
           companyName={reviewModalData.companyName}
           onSuccess={() => {
             setReviewModalData(null);
+            fetchData(true);
+          }}
+        />
+      )}
+
+      {/* Schedule Interview Modal */}
+      {scheduleModalData && (
+        <ScheduleInterviewModal
+          isOpen={scheduleModalData.isOpen}
+          onClose={() => setScheduleModalData(null)}
+          applicationId={scheduleModalData.appId}
+          onSuccess={() => {
+            setScheduleModalData(null);
             fetchData(true);
           }}
         />

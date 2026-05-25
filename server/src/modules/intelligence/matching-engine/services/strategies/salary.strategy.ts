@@ -11,14 +11,18 @@ export class SalaryStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedCv = cv.parsedData || {};
-      const desiredJob = cv.candidate?.desiredJob as any;
-      const profileSalaryStr = desiredJob?.expectedSalary || desiredJob?.salary || '';
-      const cvExpectedStr = typeof parsedCv.expectedSalary === 'string' ? parsedCv.expectedSalary : '';
+      const desiredJob = cv.candidate?.desiredJob;
+      const profileSalaryStr =
+        desiredJob?.expectedSalary || desiredJob?.salary || '';
+      const cvExpectedStr =
+        typeof parsedCv.expectedSalary === 'string'
+          ? parsedCv.expectedSalary
+          : '';
       const rawExpected = profileSalaryStr || cvExpectedStr;
-      
+
       const expectedSalary = rawExpected
         ? this.parseSalary(rawExpected)
-        : (Number(parsedCv.expectedSalary) || 0);
+        : Number(parsedCv.expectedSalary) || 0;
       const salaryMax = Number(job.salaryMax) || 0;
 
       let score = 100;
@@ -49,7 +53,7 @@ export class SalaryStrategy implements IMatchingStrategy {
     // Lấy phần tử đầu tiên (15,000,000) làm mức lương kỳ vọng tối thiểu
     const parts = salaryStr.split('-');
     const minSalaryPart = parts[0];
-    
+
     // Loại bỏ các ký tự không phải số
     const normalized = minSalaryPart.replace(/[^0-9]/g, '');
     return Number(normalized) || 0;

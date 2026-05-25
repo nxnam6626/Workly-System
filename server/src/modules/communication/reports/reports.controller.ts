@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, UseGuards, Request, Param, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Request,
+  Param,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 
@@ -14,7 +23,10 @@ export class ReportsController {
     @Param('candidateId') candidateId: string,
   ) {
     const recruiterId = req.user.recruiterId;
-    if (!recruiterId) throw new ForbiddenException('Chỉ nhà tuyển dụng mới có thể báo cáo ứng viên.');
+    if (!recruiterId)
+      throw new ForbiddenException(
+        'Chỉ nhà tuyển dụng mới có thể báo cáo ứng viên.',
+      );
     return this.reportsService.reportCandidate(recruiterId, candidateId, dto);
   }
 

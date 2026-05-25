@@ -135,12 +135,11 @@ export class ApplicationsService {
         const rejectThreshold = job.autoRejectThreshold ?? 40;
         if (aiMatchScore < rejectThreshold) {
           targetAppStatus = 'REJECTED';
-        } else if (job.autoInviteMatches && aiMatchScore >= 85) {
+        } else if (job.autoInviteMatches && aiMatchScore >= 90) {
           targetAppStatus = 'INTERVIEWING';
           autoInterviewDate = null;
           autoInterviewTime = null;
-          autoInterviewLocation =
-            'Hệ thống tự động đề xuất phỏng vấn. Bộ phận nhân sự sẽ liên hệ trực tiếp với bạn để thống nhất lịch phỏng vấn phù hợp nhất.';
+          autoInterviewLocation = null;
         }
 
         const application = await tx.application.create({
@@ -156,7 +155,9 @@ export class ApplicationsService {
             interviewLocation: autoInterviewLocation,
             aiMatchScore,
             isUnlocked: true,
-            expectedResponseAt: new Date(Date.now() + (job.slaApplicationDays || 3) * 24 * 60 * 60 * 1000),
+            expectedResponseAt: new Date(
+              Date.now() + (job.slaApplicationDays || 3) * 24 * 60 * 60 * 1000,
+            ),
           },
           include: {
             jobPosting: { include: { recruiter: true } },
@@ -189,12 +190,14 @@ export class ApplicationsService {
                 autoInterviewDate,
               );
             } else {
-              // Gửi tin nhắn mời phỏng vấn trực tiếp
-              await this.messagesService.sendJobInvitationMessage(
+              // Ứng viên được đặc cách tự chọn ngày
+              await this.notificationService.notifyCandidateOfFastTrack(
+                candidateUser.userId,
                 application.jobPosting.recruiter.userId,
+                application.jobPosting.recruiterId,
                 candidateId,
-                jobPostingId,
-              ).catch(err => console.error('Failed to send auto-invite message', err));
+                application.jobPosting.title,
+              );
             }
           }
         }
@@ -215,19 +218,26 @@ export class ApplicationsService {
   async getKanbanApplications(jobPostingId: string) {
     return this.prisma.application.findMany({
       where: { jobPostingId },
-      include: { 
+      include: {
         candidate: {
           include: {
-            user: { select: { avatar: true, email: true, phoneNumber: true, violations: true } },
+            user: {
+              select: {
+                avatar: true,
+                email: true,
+                phoneNumber: true,
+                violations: true,
+              },
+            },
             skills: true,
             experiences: true,
             candidateReviews: {
               orderBy: { createdAt: 'desc' },
-              include: { recruiter: { select: { fullName: true } } }
-            }
-          }
-        }, 
-        cv: true 
+              include: { recruiter: { select: { fullName: true } } },
+            },
+          },
+        },
+        cv: true,
       },
       orderBy: { applyDate: 'desc' },
     });
@@ -236,9 +246,9 @@ export class ApplicationsService {
   async findAllByCandidate(candidateId: string) {
     return this.prisma.application.findMany({
       where: { candidateId },
-      include: { 
+      include: {
         jobPosting: { include: { company: true } },
-        companyReview: true, 
+        companyReview: true,
       },
       orderBy: { applyDate: 'desc' },
     });
@@ -361,7 +371,10 @@ export class ApplicationsService {
   async confirmInterview(applicationId: string, candidateUserId: string) {
     const application = await this.prisma.application.findUnique({
       where: { applicationId },
-      include: { candidate: true, jobPosting: { include: { recruiter: true } } },
+      include: {
+        candidate: true,
+        jobPosting: { include: { recruiter: true } },
+      },
     });
     if (!application) throw new NotFoundException('Application not found');
     if (application.candidate?.userId !== candidateUserId)
@@ -369,9 +382,9 @@ export class ApplicationsService {
 
     const updated = await this.prisma.application.update({
       where: { applicationId },
-      data: { 
+      data: {
         appStatus: 'INTERVIEW_CONFIRMED',
-        candidateResponseAt: null 
+        candidateResponseAt: null,
       },
     });
 
@@ -388,15 +401,18 @@ export class ApplicationsService {
   }
 
   async requestReschedule(
-    applicationId: string, 
-    candidateUserId: string, 
-    proposedDate: string, 
-    proposedTime: string, 
-    reason: string
+    applicationId: string,
+    candidateUserId: string,
+    proposedDate: string,
+    proposedTime: string,
+    reason: string,
   ) {
     const application = await this.prisma.application.findUnique({
       where: { applicationId },
-      include: { candidate: true, jobPosting: { include: { recruiter: true } } },
+      include: {
+        candidate: true,
+        jobPosting: { include: { recruiter: true } },
+      },
     });
     if (!application) throw new NotFoundException('Application not found');
     if (application.candidate?.userId !== candidateUserId)
@@ -404,11 +420,11 @@ export class ApplicationsService {
 
     const updated = await this.prisma.application.update({
       where: { applicationId },
-      data: { 
+      data: {
         appStatus: 'RESCHEDULE_REQUESTED',
         candidateResponseAt: null,
         // Optional: save proposed details in a note/feedback field or create a new field
-        feedback: `Ứng viên xin dời lịch: ${proposedDate} lúc ${proposedTime}. Lý do: ${reason}` 
+        feedback: `Ứng viên xin dời lịch: ${proposedDate} lúc ${proposedTime}. Lý do: ${reason}`,
       },
     });
 
@@ -419,7 +435,7 @@ export class ApplicationsService {
         application.jobPosting.title,
         application.candidate.fullName,
         'RESCHEDULE',
-        `${proposedDate} lúc ${proposedTime} - Lý do: ${reason}`
+        `${proposedDate} lúc ${proposedTime} - Lý do: ${reason}`,
       );
     }
     return updated;
@@ -443,6 +459,19 @@ export class ApplicationsService {
       throw new NotFoundException(
         'Không tìm thấy hồ sơ ứng viên. Vui lòng hoàn tất thông tin ứng viên của bạn trước.',
       );
+      
+    if (!candidate.isOpenToWork) {
+      throw new ForbiddenException(
+        'Bạn cần bật trạng thái "Đang tìm việc" để có thể ứng tuyển.',
+      );
+    }
+    
+    if (!candidate.jobSearchExpiresAt || candidate.jobSearchExpiresAt < new Date()) {
+      throw new ForbiddenException(
+        'Tài khoản tìm việc của bạn đã hết hạn, vui lòng kích hoạt lại để ứng tuyển.',
+      );
+    }
+
     return candidate.candidateId;
   }
 
@@ -479,6 +508,19 @@ export class ApplicationsService {
       });
       return newCandidate.candidateId;
     }
+    
+    if (!candidate.isOpenToWork) {
+      throw new ForbiddenException(
+        'Email này đã có tài khoản. Vui lòng đăng nhập và bật trạng thái "Đang tìm việc" để ứng tuyển.',
+      );
+    }
+    
+    if (!candidate.jobSearchExpiresAt || candidate.jobSearchExpiresAt < new Date()) {
+      throw new ForbiddenException(
+        'Tài khoản của bạn đã hết hạn tìm việc, vui lòng đăng nhập và kích hoạt lại để ứng tuyển.',
+      );
+    }
+
     return candidate.candidateId;
   }
 }

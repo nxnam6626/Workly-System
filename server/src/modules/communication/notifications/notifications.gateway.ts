@@ -27,7 +27,7 @@ export class NotificationsGateway
       const token =
         client.handshake.auth?.token ||
         client.handshake.headers?.authorization?.split(' ')[1];
-      
+
       if (token) {
         try {
           const payload = this.jwtService.verify<JwtPayload>(token, {

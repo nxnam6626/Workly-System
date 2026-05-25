@@ -197,8 +197,13 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
     let success = false;
 
     if (process.env.GROQ_API_KEY) {
-      const groqModels = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
-      
+      const groqModels = [
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant',
+        'mixtral-8x7b-32768',
+        'gemma2-9b-it',
+      ];
+
       for (const modelName of groqModels) {
         try {
           const groqRes = await axios.post(
@@ -216,14 +221,20 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
               temperature: 0.2,
               response_format: { type: 'json_object' },
             },
-            { headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` } },
+            {
+              headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+            },
           );
           jobData = JSON.parse(groqRes.data.choices[0].message.content);
           success = true;
-          this.logger.log(`Groq generated JD successfully using model: ${modelName}`);
+          this.logger.log(
+            `Groq generated JD successfully using model: ${modelName}`,
+          );
           break;
         } catch (error: any) {
-          this.logger.error(`Groq generateJdFromPrompt failed for model ${modelName}: ${error.message}`);
+          this.logger.error(
+            `Groq generateJdFromPrompt failed for model ${modelName}: ${error.message}`,
+          );
         }
       }
     }
@@ -239,32 +250,40 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
           const result = await model.generateContent(extractionPrompt);
           jobData = JSON.parse(result.response.text());
           success = true;
-          this.logger.log(`Gemini generated JD successfully using model: ${modelName}`);
+          this.logger.log(
+            `Gemini generated JD successfully using model: ${modelName}`,
+          );
           break;
         } catch (error: any) {
-          this.logger.error(`Gemini generateJdFromPrompt failed for model ${modelName}: ${error.message}`);
+          this.logger.error(
+            `Gemini generateJdFromPrompt failed for model ${modelName}: ${error.message}`,
+          );
         }
       }
     }
 
     if (!jobData) {
-      this.logger.warn('Tất cả AI đều hết hạn mức (Quota Exceeded). Trả về dữ liệu mẫu (Mock JD).');
+      this.logger.warn(
+        'Tất cả AI đều hết hạn mức (Quota Exceeded). Trả về dữ liệu mẫu (Mock JD).',
+      );
       jobData = {
-        title: "Lập Trình Viên (Dữ liệu mẫu do AI hết Quota)",
-        locationCity: "Hồ Chí Minh",
-        workModel: "OFFICE",
+        title: 'Lập Trình Viên (Dữ liệu mẫu do AI hết Quota)',
+        locationCity: 'Hồ Chí Minh',
+        workModel: 'OFFICE',
         vacancies: 1,
         salaryMin: 10000000,
         salaryMax: 20000000,
-        description: "Lưu ý: Đây là dữ liệu mẫu tự động được điền do API AI đang bị giới hạn truy cập (Rate Limit 429).\nBạn có thể chỉnh sửa lại nội dung này.",
-        requirements: "Có kinh nghiệm làm việc thực tế.\nĐam mê và có trách nhiệm với công việc.",
-        benefits: "Đóng BHXH đầy đủ.\nThưởng tháng 13.",
-        hardSkills: ["JavaScript", "React"],
-        softSkills: ["Làm việc nhóm", "Giao tiếp"],
-        minExperienceYears: 1
+        description:
+          'Lưu ý: Đây là dữ liệu mẫu tự động được điền do API AI đang bị giới hạn truy cập (Rate Limit 429).\nBạn có thể chỉnh sửa lại nội dung này.',
+        requirements:
+          'Có kinh nghiệm làm việc thực tế.\nĐam mê và có trách nhiệm với công việc.',
+        benefits: 'Đóng BHXH đầy đủ.\nThưởng tháng 13.',
+        hardSkills: ['JavaScript', 'React'],
+        softSkills: ['Làm việc nhóm', 'Giao tiếp'],
+        minExperienceYears: 1,
       };
     }
-    
+
     return { success: true, data: jobData };
   }
 }

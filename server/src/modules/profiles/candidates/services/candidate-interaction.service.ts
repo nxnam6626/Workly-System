@@ -120,16 +120,18 @@ export class CandidateInteractionService {
 
     for (const conv of conversations) {
       for (const msg of conv.messages) {
-        const isInvitation = msg.content.includes('mời ứng tuyển') || 
-                             msg.content.includes('mời bạn ứng tuyển') ||
-                             msg.content.includes('/jobs/') || 
-                             msg.content.includes('yêu cầu phỏng vấn') || 
-                             msg.content.includes('lịch phỏng vấn');
-                             
+        const isInvitation =
+          msg.content.includes('mời ứng tuyển') ||
+          msg.content.includes('mời bạn ứng tuyển') ||
+          msg.content.includes('/jobs/') ||
+          msg.content.includes('yêu cầu phỏng vấn') ||
+          msg.content.includes('lịch phỏng vấn');
+
         if (isInvitation) {
-          const isInterview = msg.content.includes('phỏng vấn') || 
-                             msg.content.includes('lịch hẹn phỏng vấn') || 
-                             msg.content.includes('yêu cầu phỏng vấn');
+          const isInterview =
+            msg.content.includes('phỏng vấn') ||
+            msg.content.includes('lịch hẹn phỏng vấn') ||
+            msg.content.includes('yêu cầu phỏng vấn');
           const invType = isInterview ? 'INTERVIEW' : 'JOB_APPLICATION';
 
           const match = msg.content.match(/\/jobs\/([a-zA-Z0-9\-]+)/);
@@ -146,10 +148,18 @@ export class CandidateInteractionService {
           } else {
             const titleMatch = msg.content.match(/["'“]([^"'延“”]+)["'”]/);
             // Fallback match job title inside quotes (supporting multiple quotation mark styles)
-            const backupMatch = titleMatch || msg.content.match(/["'“]([^"'“”]+)["'”]/);
-            if (backupMatch && backupMatch[1] && conv.recruiter.company?.companyId) {
+            const backupMatch =
+              titleMatch || msg.content.match(/["'“]([^"'“”]+)["'”]/);
+            if (
+              backupMatch &&
+              backupMatch[1] &&
+              conv.recruiter.company?.companyId
+            ) {
               const jobTitle = backupMatch[1].trim();
-              titleAndCompanyPairs.push({ title: jobTitle, companyId: conv.recruiter.company.companyId });
+              titleAndCompanyPairs.push({
+                title: jobTitle,
+                companyId: conv.recruiter.company.companyId,
+              });
               messageDetails.push({
                 msgId: msg.messageId,
                 content: msg.content,
@@ -166,30 +176,32 @@ export class CandidateInteractionService {
 
     // Fetch jobs by slug/ID in bulk
     const slugOrIds = Array.from(slugOrIdSet);
-    const jobsBySlugOrId = slugOrIds.length > 0
-      ? await this.prisma.jobPosting.findMany({
-          where: {
-            OR: [
-              { jobPostingId: { in: slugOrIds } },
-              { slug: { in: slugOrIds } },
-            ],
-          },
-          include: { company: true },
-        })
-      : [];
+    const jobsBySlugOrId =
+      slugOrIds.length > 0
+        ? await this.prisma.jobPosting.findMany({
+            where: {
+              OR: [
+                { jobPostingId: { in: slugOrIds } },
+                { slug: { in: slugOrIds } },
+              ],
+            },
+            include: { company: true },
+          })
+        : [];
 
     // Fetch jobs by title and companyId in bulk
-    const jobsByTitleAndCompany = titleAndCompanyPairs.length > 0
-      ? await this.prisma.jobPosting.findMany({
-          where: {
-            OR: titleAndCompanyPairs.map(pair => ({
-              title: { equals: pair.title, mode: 'insensitive' },
-              companyId: pair.companyId,
-            })),
-          },
-          include: { company: true },
-        })
-      : [];
+    const jobsByTitleAndCompany =
+      titleAndCompanyPairs.length > 0
+        ? await this.prisma.jobPosting.findMany({
+            where: {
+              OR: titleAndCompanyPairs.map((pair) => ({
+                title: { equals: pair.title, mode: 'insensitive' },
+                companyId: pair.companyId,
+              })),
+            },
+            include: { company: true },
+          })
+        : [];
 
     // Combine all unique matched jobs
     const allJobs = [...jobsBySlugOrId, ...jobsByTitleAndCompany];
@@ -203,16 +215,24 @@ export class CandidateInteractionService {
     }
 
     // Fetch all applications for these jobs in bulk (eliminating N+1)
-    const matchedJobIds = Array.from(new Set(allJobs.map(job => job.jobPostingId)));
-    const applications = matchedJobIds.length > 0
-      ? await this.prisma.application.findMany({
-          where: {
-            candidateId: candidate.candidateId,
-            jobPostingId: { in: matchedJobIds },
-          },
-          select: { applicationId: true, jobPostingId: true, interviewDate: true, interviewTime: true },
-        })
-      : [];
+    const matchedJobIds = Array.from(
+      new Set(allJobs.map((job) => job.jobPostingId)),
+    );
+    const applications =
+      matchedJobIds.length > 0
+        ? await this.prisma.application.findMany({
+            where: {
+              candidateId: candidate.candidateId,
+              jobPostingId: { in: matchedJobIds },
+            },
+            select: {
+              applicationId: true,
+              jobPostingId: true,
+              interviewDate: true,
+              interviewTime: true,
+            },
+          })
+        : [];
 
     const appsByJobId = new Map<string, any>();
     for (const app of applications) {
@@ -228,20 +248,24 @@ export class CandidateInteractionService {
       if (detail.slugOrId) {
         matchedJob = jobMap.get(detail.slugOrId);
       } else if (detail.titleInQuotes && detail.companyId) {
-        matchedJob = jobMap.get(`${detail.titleInQuotes.toLowerCase()}_${detail.companyId}`);
+        matchedJob = jobMap.get(
+          `${detail.titleInQuotes.toLowerCase()}_${detail.companyId}`,
+        );
       }
 
       if (matchedJob && !addedJobIds.has(matchedJob.jobPostingId)) {
         addedJobIds.add(matchedJob.jobPostingId);
         const application = appsByJobId.get(matchedJob.jobPostingId);
-        
+
         let status = 'PENDING';
         if (detail.invType === 'JOB_APPLICATION') {
           // Lời mời ứng tuyển được coi là ĐÃ CHẤP NHẬN khi user đã tạo hồ sơ ứng tuyển
           status = application ? 'ACCEPTED' : 'PENDING';
         } else {
           // Lời mời Phỏng vấn chỉ được coi là ĐÃ CHẤP NHẬN khi đã được chọn thời gian
-          const hasTime = !!(application?.interviewDate || application?.interviewTime);
+          const hasTime = !!(
+            application?.interviewDate || application?.interviewTime
+          );
           status = hasTime ? 'ACCEPTED' : 'PENDING';
         }
 

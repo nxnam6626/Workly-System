@@ -74,10 +74,12 @@ export class UserCreationService {
         const taxCode = (data as any).taxCode;
         if (taxCode) {
           const existingCompany = await tx.company.findFirst({
-            where: { taxCode }
+            where: { taxCode },
           });
           if (existingCompany) {
-            throw new ConflictException("Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên của công ty để được cấp tài khoản.");
+            throw new ConflictException(
+              'Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên của công ty để được cấp tài khoản.',
+            );
           }
         }
 
@@ -103,7 +105,7 @@ export class UserCreationService {
 
         if (companyId) {
           await tx.companyWallet.create({
-            data: { companyId, balance: 0 }
+            data: { companyId, balance: 0 },
           });
         }
       } else if (data.role === 'ADMIN') {
@@ -256,10 +258,12 @@ export class UserCreationService {
           const taxCode = (data as any).taxCode;
           if (taxCode) {
             const existingCompany = await tx.company.findFirst({
-              where: { taxCode }
+              where: { taxCode },
             });
             if (existingCompany) {
-              throw new ConflictException("Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên để được cấp tài khoản.");
+              throw new ConflictException(
+                'Công ty này đã được đăng ký trên hệ thống. Vui lòng liên hệ Quản trị viên để được cấp tài khoản.',
+              );
             }
           }
 
@@ -268,7 +272,7 @@ export class UserCreationService {
               companyName: (data as any).companyName,
               taxCode: taxCode,
             });
-            
+
           await tx.recruiter.create({
             data: {
               userId,
@@ -280,7 +284,7 @@ export class UserCreationService {
 
           if (companyId) {
             await tx.companyWallet.create({
-              data: { companyId, balance: 0 }
+              data: { companyId, balance: 0 },
             });
           }
         }

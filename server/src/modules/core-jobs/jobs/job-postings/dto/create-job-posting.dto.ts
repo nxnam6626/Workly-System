@@ -20,12 +20,16 @@ export class CreateJobPostingDto {
   description: string;
 
   @IsOptional()
-  @Transform(({ value }) => (value === null || value === '' ? undefined : value))
+  @Transform(({ value }) =>
+    value === null || value === '' ? undefined : value,
+  )
   @IsString()
   requirements?: string;
 
   @IsOptional()
-  @Transform(({ value }) => (value === null || value === '' ? undefined : value))
+  @Transform(({ value }) =>
+    value === null || value === '' ? undefined : value,
+  )
   @IsString()
   benefits?: string;
 
@@ -98,7 +102,9 @@ export class CreateJobPostingDto {
   autoInviteThreshold?: number;
 
   @IsOptional()
-  @IsEnum(['STRICT', 'BALANCED', 'BROAD'], { message: 'Mức độ khắt khe không hợp lệ' })
+  @IsEnum(['STRICT', 'BALANCED', 'BROAD'], {
+    message: 'Mức độ khắt khe không hợp lệ',
+  })
   matchMode?: 'STRICT' | 'BALANCED' | 'BROAD';
 
   @IsOptional()

@@ -39,7 +39,7 @@ export class SlaCleanupService {
           app.candidate.fullName,
           'RECRUITER_RESPONSE',
         );
-        
+
         // Update application to mark as breach (optional, but good for reporting)
         // We might want a flag like 'isSlaBreached: true' in the schema later
       }
@@ -99,7 +99,9 @@ export class SlaCleanupService {
       }
     }
 
-    this.logger.log(`SLA check completed. Found ${pendingBreaches.length + candidateBreaches.length + resultBreaches.length} breaches.`);
+    this.logger.log(
+      `SLA check completed. Found ${pendingBreaches.length + candidateBreaches.length + resultBreaches.length} breaches.`,
+    );
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
@@ -107,7 +109,7 @@ export class SlaCleanupService {
     this.logger.log('Sending SLA Reminders...');
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const dayAfterTomorrow = new Date();
     dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
 
@@ -136,7 +138,7 @@ export class SlaCleanupService {
           'RECRUITER_RESPONSE',
         );
       }
-      
+
       if (app.expectedResultAt && app.jobPosting.recruiter?.userId) {
         await this.notificationService.notifySlaReminder(
           app.jobPosting.recruiter.userId,

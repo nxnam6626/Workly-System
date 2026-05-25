@@ -130,12 +130,14 @@ export class AiService {
     userId?: string,
     roles?: string[],
     contextMode?: string,
+    jobSlug?: string,
   ) {
     yield* this.aiChatService.generateStreamResponse(
       message,
       userId,
       roles,
       contextMode,
+      jobSlug,
     );
   }
 

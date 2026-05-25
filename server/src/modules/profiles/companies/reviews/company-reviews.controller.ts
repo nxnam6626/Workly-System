@@ -1,4 +1,15 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, Query, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { CompanyReviewsService } from './company-reviews.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
@@ -43,7 +54,12 @@ export class CompanyReviewsController {
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 10;
-    return this.reviewsService.findAllAdmin(pageNum, limitNum, status, searchTerm);
+    return this.reviewsService.findAllAdmin(
+      pageNum,
+      limitNum,
+      status,
+      searchTerm,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

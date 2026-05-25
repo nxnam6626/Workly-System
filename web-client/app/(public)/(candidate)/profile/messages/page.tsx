@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { MessageSquare, Search, Send, Loader2, ChevronLeft, X, Paperclip, File } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useSocketStore } from '@/stores/socket';
+import { useMessageStore } from '@/stores/message';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -62,6 +63,12 @@ export default function CandidateMessagesPage() {
     if (activeChat) {
       setHasMore(true);
       fetchMessages(activeChat.conversationId);
+      api.patch(`/messages/conversations/${activeChat.conversationId}/read`)
+        .then(() => {
+          setConversations(prev => prev.map(c => c.conversationId === activeChat.conversationId ? { ...c, isRead: true } : c));
+          useMessageStore.getState().fetchUnreadCount();
+        })
+        .catch(console.error);
     }
   }, [activeChat]);
 
@@ -75,6 +82,14 @@ export default function CandidateMessagesPage() {
             setTimeout(() => {
               messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 50);
+            
+            // If candidate is actively viewing this chat, mark it as read immediately
+            if (msg.senderId !== user?.userId) {
+              api.patch(`/messages/conversations/${msg.conversationId}/read`)
+                .then(() => useMessageStore.getState().fetchUnreadCount())
+                .catch(console.error);
+            }
+            
             return [...prev, msg];
           }
         }

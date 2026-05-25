@@ -16,13 +16,17 @@ export class ExperienceStrategy implements IMatchingStrategy {
       const parsedData = cv.parsedData || {};
       const candidateYears =
         cv.candidate?.totalYearsExp ?? parsedData.yearsOfExperience ?? 0;
-        
+
       let requiredYears = 0;
-      const structuredReqs = typeof job.structuredRequirements === 'string' 
-        ? JSON.parse(job.structuredRequirements) 
-        : (job.structuredRequirements || {});
-        
-      if (structuredReqs.minExperienceYears !== undefined && structuredReqs.minExperienceYears !== null) {
+      const structuredReqs =
+        typeof job.structuredRequirements === 'string'
+          ? JSON.parse(job.structuredRequirements)
+          : job.structuredRequirements || {};
+
+      if (
+        structuredReqs.minExperienceYears !== undefined &&
+        structuredReqs.minExperienceYears !== null
+      ) {
         requiredYears = Number(structuredReqs.minExperienceYears) || 0;
       } else {
         requiredYears = parseInt(job.experience) || 0;
