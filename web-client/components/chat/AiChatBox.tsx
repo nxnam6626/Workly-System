@@ -95,7 +95,16 @@ export default function AiChatBox() {
 
     const { accessToken } = useAuthStore.getState();
     const userContextMode = pathname.includes('/recruiter') || pathname.includes('/admin') ? 'RECRUITER' : 'CANDIDATE';
-    const streamUrl = `${API_BASE_URL}/ai/chat-stream?message=${encodeURIComponent(currentInput)}&context=${userContextMode}${accessToken ? `&token=${accessToken}` : ''}`;
+    
+    let jobSlug = '';
+    if (pathname.includes('/jobs/')) {
+      const parts = pathname.split('/jobs/');
+      if (parts[1]) {
+        jobSlug = parts[1].split('/')[0];
+      }
+    }
+    
+    const streamUrl = `${API_BASE_URL}/ai/chat-stream?message=${encodeURIComponent(currentInput)}&context=${userContextMode}${jobSlug ? `&jobSlug=${encodeURIComponent(jobSlug)}` : ''}${accessToken ? `&token=${accessToken}` : ''}`;
 
     const aiMessageId = (Date.now() + 1).toString();
     let aiMessageAdded = false;
@@ -181,17 +190,17 @@ export default function AiChatBox() {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05, y: -4 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="w-16 h-16 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center relative overflow-hidden group"
+            className="absolute bottom-0 right-0 w-14 h-14 bg-gradient-to-br from-[#1e60ad] via-blue-600 to-indigo-600 text-white rounded-full shadow-[0_8px_30px_rgba(30,96,173,0.3)] shadow-[#1e60ad]/40 flex items-center justify-center group ring-4 ring-[#1e60ad]/20 backdrop-blur-md transition-all duration-300 hover:shadow-[#1e60ad]/60"
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-700 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <MessageSquare className="w-8 h-8 relative z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600 to-[#1e60ad] opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+            <MessageSquare className="w-6 h-6 relative z-10 drop-shadow-md" />
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-white"
+              className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-white flex items-center justify-center z-20 shadow-sm"
             />
           </motion.button>
         )}
@@ -200,10 +209,11 @@ export default function AiChatBox() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.8, transformOrigin: 'bottom right' }}
+            initial={{ opacity: 0, y: 40, scale: 0.95, transformOrigin: 'bottom right' }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 100, scale: 0.8 }}
-            className="w-[380px] sm:w-[420px] h-[580px] bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-white/50 ring-1 ring-black/5"
+            exit={{ opacity: 0, y: 40, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+            className="absolute bottom-0 right-0 w-[380px] sm:w-[420px] h-[580px] bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-white/50 ring-1 ring-black/5"
           >
             <ChatHeader onClose={() => setIsOpen(false)} />
 

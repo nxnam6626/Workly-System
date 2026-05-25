@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
 
@@ -14,10 +18,12 @@ export class ReportsService {
     if (dto.applicationId) {
       const app = await this.prisma.application.findUnique({
         where: { applicationId: dto.applicationId },
-        include: { jobPosting: true }
+        include: { jobPosting: true },
       });
       if (!app || app.jobPosting.recruiterId !== recruiterId) {
-        throw new ForbiddenException('Bạn không có quyền báo cáo ứng viên này cho đơn ứng tuyển này.');
+        throw new ForbiddenException(
+          'Bạn không có quyền báo cáo ứng viên này cho đơn ứng tuyển này.',
+        );
       }
     }
 
@@ -33,17 +39,17 @@ export class ReportsService {
 
     // Handle consequences if reason is severe
     if (dto.reason === 'NO_SHOW' || dto.reason === 'SABOTAGE') {
-       await this.prisma.user.updateMany({
-         where: { candidate: { candidateId } },
-         data: { violations: { increment: 1 } }
-       });
+      await this.prisma.user.updateMany({
+        where: { candidate: { candidateId } },
+        data: { violations: { increment: 1 } },
+      });
     }
 
     // Real-time update for the dashboard
     this.notificationsService.emitToUser(recruiterId, 'dashboard.sync', {
       type: 'CANDIDATE_REPORTED',
       candidateId,
-      applicationId: dto.applicationId
+      applicationId: dto.applicationId,
     });
 
     return report;

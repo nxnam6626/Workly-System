@@ -4,7 +4,7 @@ import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class BackofficeService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getDashboardStats() {
     const [
@@ -56,7 +56,7 @@ export class BackofficeService {
         where: { type: TransactionType.DEPOSIT, status: 'SUCCESS' },
         _sum: { realMoney: true, amount: true },
         _count: true,
-      })
+      }),
     ]);
 
     // Doanh thu từ mua gói đăng tin/VIP
@@ -70,7 +70,7 @@ export class BackofficeService {
         where: { type: TransactionType.BUY_PACKAGE, status: 'SUCCESS' },
         _sum: { amount: true },
         _count: true,
-      })
+      }),
     ]);
 
     // Doanh thu từ đăng tin
@@ -94,7 +94,13 @@ export class BackofficeService {
     const [recentTx, recentCtx] = await Promise.all([
       this.prisma.transaction.findMany({
         where: {
-          type: { in: [TransactionType.BUY_PACKAGE, TransactionType.POST_JOB, TransactionType.OPEN_CV] },
+          type: {
+            in: [
+              TransactionType.BUY_PACKAGE,
+              TransactionType.POST_JOB,
+              TransactionType.OPEN_CV,
+            ],
+          },
           status: 'SUCCESS',
           createdAt: { gte: thirtyDaysAgo },
         },
@@ -107,10 +113,12 @@ export class BackofficeService {
           createdAt: { gte: thirtyDaysAgo },
         },
         select: { amount: true, createdAt: true },
-      })
+      }),
     ]);
 
-    const recentSpending = [...recentTx, ...recentCtx].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    const recentSpending = [...recentTx, ...recentCtx].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    );
 
     // Group by date (Spending)
     const dailyRevenue: Record<string, number> = {};
@@ -152,7 +160,8 @@ export class BackofficeService {
       }),
     );
 
-    const packageSpend = (packageAgg._sum.amount || 0) + (candidatePackageAgg._sum.amount || 0);
+    const packageSpend =
+      (packageAgg._sum.amount || 0) + (candidatePackageAgg._sum.amount || 0);
 
     const totalSpending =
       packageSpend +
@@ -160,8 +169,11 @@ export class BackofficeService {
       (openCvAgg._sum.amount || 0);
 
     return {
-      totalDepositVnd: (depositAgg._sum.realMoney || 0) + (candidateDepositAgg._sum.realMoney || 0),
-      totalDepositXu: (depositAgg._sum.amount || 0) + (candidateDepositAgg._sum.amount || 0),
+      totalDepositVnd:
+        (depositAgg._sum.realMoney || 0) +
+        (candidateDepositAgg._sum.realMoney || 0),
+      totalDepositXu:
+        (depositAgg._sum.amount || 0) + (candidateDepositAgg._sum.amount || 0),
       depositCount: depositAgg._count + candidateDepositAgg._count,
       totalSpendingRevenue: totalSpending,
       packageSpend: packageSpend,
@@ -210,7 +222,9 @@ export class BackofficeService {
       where: { user: { violations: { gt: 0 } } },
       orderBy: { user: { violations: 'desc' } },
       include: {
-        user: { select: { email: true, status: true, violations: true, userId: true } },
+        user: {
+          select: { email: true, status: true, violations: true, userId: true },
+        },
         company: { select: { companyName: true } },
       },
     });
@@ -230,7 +244,9 @@ export class BackofficeService {
       where: { user: { violations: { gt: 0 } } },
       orderBy: { user: { violations: 'desc' } },
       include: {
-        user: { select: { email: true, status: true, violations: true, userId: true } },
+        user: {
+          select: { email: true, status: true, violations: true, userId: true },
+        },
       },
     });
 
@@ -306,14 +322,14 @@ export class BackofficeService {
         take: limit,
         include: {
           wallet: {
-            include: { company: { select: { companyName: true } } }
+            include: { company: { select: { companyName: true } } },
           },
           recruiter: {
-            select: { user: { select: { email: true } }, fullName: true }
-          }
-        }
+            select: { user: { select: { email: true } }, fullName: true },
+          },
+        },
       });
-      return transactions.map(tx => ({
+      return transactions.map((tx) => ({
         transactionId: tx.transactionId,
         amount: tx.amount,
         realMoney: tx.realMoney,
@@ -321,7 +337,8 @@ export class BackofficeService {
         description: tx.description,
         createdAt: tx.createdAt,
         companyName: tx.wallet?.company?.companyName || 'N/A',
-        recruiterName: tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
+        recruiterName:
+          tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
       }));
     }
 
@@ -332,12 +349,12 @@ export class BackofficeService {
         take: limit,
         include: {
           wallet: {
-            include: { company: { select: { companyName: true } } }
+            include: { company: { select: { companyName: true } } },
           },
           recruiter: {
-            select: { user: { select: { email: true } }, fullName: true }
-          }
-        }
+            select: { user: { select: { email: true } }, fullName: true },
+          },
+        },
       }),
       this.prisma.candidateTransaction.findMany({
         where: { status: 'SUCCESS' },
@@ -345,13 +362,17 @@ export class BackofficeService {
         take: limit,
         include: {
           wallet: {
-            include: { candidate: { select: { fullName: true, user: { select: { email: true } } } } }
-          }
-        }
-      })
+            include: {
+              candidate: {
+                select: { fullName: true, user: { select: { email: true } } },
+              },
+            },
+          },
+        },
+      }),
     ]);
 
-    const mappedRecruiter = recruiterTxs.map(tx => ({
+    const mappedRecruiter = recruiterTxs.map((tx) => ({
       transactionId: tx.transactionId,
       amount: tx.amount,
       realMoney: tx.realMoney,
@@ -359,11 +380,12 @@ export class BackofficeService {
       description: tx.description,
       createdAt: tx.createdAt,
       companyName: tx.wallet?.company?.companyName || 'N/A',
-      recruiterName: tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
-      isCandidate: false
+      recruiterName:
+        tx.recruiter?.fullName || tx.recruiter?.user?.email || 'Hệ thống',
+      isCandidate: false,
     }));
 
-    const mappedCandidate = candidateTxs.map(tx => ({
+    const mappedCandidate = candidateTxs.map((tx) => ({
       transactionId: tx.transactionId,
       amount: tx.amount,
       realMoney: tx.realMoney,
@@ -372,11 +394,14 @@ export class BackofficeService {
       createdAt: tx.createdAt,
       companyName: tx.wallet?.candidate?.fullName || 'Ứng viên',
       recruiterName: tx.wallet?.candidate?.user?.email || 'Hệ thống',
-      isCandidate: true
+      isCandidate: true,
     }));
 
     return [...mappedRecruiter, ...mappedCandidate]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )
       .slice(0, limit);
   }
 }

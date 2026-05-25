@@ -3,6 +3,7 @@
 import { useAuthStore } from '@/stores/auth';
 import { SavedJobsDropdown } from './SavedJobsDropdown';
 import { NotificationsDropdown } from './NotificationsDropdown';
+import { MessagesIcon } from './MessagesIcon';
 
 export function NavIcons() {
   const { user, isAuthenticated } = useAuthStore();
@@ -14,6 +15,9 @@ export function NavIcons() {
     <div className="flex items-center gap-3">
       {/* Favorites Icon */}
       <SavedJobsDropdown />
+
+      {/* Messages Icon */}
+      <MessagesIcon />
 
       {/* Notifications Icon */}
       <NotificationsDropdown />

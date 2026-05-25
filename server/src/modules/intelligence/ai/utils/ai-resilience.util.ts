@@ -59,7 +59,9 @@ export class AiResilienceUtil {
 
         // Nếu là lỗi cuối cùng thì ném ra ngoài
         if (attempt === maxRetries) {
-          this.logger.error(`[${context}] Failed after ${maxRetries} attempts. Last error: ${error.message}`);
+          this.logger.error(
+            `[${context}] Failed after ${maxRetries} attempts. Last error: ${error.message}`,
+          );
           throw error;
         }
 
@@ -69,8 +71,10 @@ export class AiResilienceUtil {
         }
 
         const delay = baseDelayMs * Math.pow(2, attempt - 1); // 1s, 2s, 4s...
-        this.logger.warn(`[${context}] Attempt ${attempt} failed: ${error.message}. Retrying in ${delay}ms...`);
-        
+        this.logger.warn(
+          `[${context}] Attempt ${attempt} failed: ${error.message}. Retrying in ${delay}ms...`,
+        );
+
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

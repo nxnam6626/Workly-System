@@ -8,7 +8,12 @@ import { NotificationsModule } from '@/modules/communication/notifications/notif
 import { CompanyReviewsModule } from './reviews/company-reviews.module';
 
 @Module({
-  imports: [SupabaseModule, MessagesModule, NotificationsModule, CompanyReviewsModule],
+  imports: [
+    SupabaseModule,
+    MessagesModule,
+    NotificationsModule,
+    CompanyReviewsModule,
+  ],
   controllers: [CompaniesController],
   providers: [CompaniesService],
   exports: [CompaniesService],

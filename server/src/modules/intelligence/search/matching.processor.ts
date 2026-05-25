@@ -45,7 +45,9 @@ export class MatchingProcessor extends WorkerHost {
         const threshold = jobPosting.autoInviteThreshold ?? 70;
 
         // Số ứng viên phù hợp dựa THEO ĐÚNG cấu hình của user
-        const matchedCandidates = topMatches.filter((m) => m.score >= threshold);
+        const matchedCandidates = topMatches.filter(
+          (m) => m.score >= threshold,
+        );
 
         // Luôn emit realtime matchedCount để UI cập nhật không cần F5
         this.messagesGateway.server

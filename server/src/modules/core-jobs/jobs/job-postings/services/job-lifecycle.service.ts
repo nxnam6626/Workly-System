@@ -27,8 +27,14 @@ export class JobLifecycleService {
 
   private async checkPermission(job: any, userId: string) {
     if (job.recruiter?.userId === userId) return true;
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
-    if (recruiter?.companyRole === 'MASTER' && recruiter.companyId === job.companyId) return true;
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (
+      recruiter?.companyRole === 'MASTER' &&
+      recruiter.companyId === job.companyId
+    )
+      return true;
     throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
   }
 

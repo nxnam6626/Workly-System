@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -43,11 +48,14 @@ export class CandidateManagementService {
     return 'BEGINNER';
   }
 
-
   async update(candidateId: string, updateCandidateDto: any) {
-    this.logger.log(`[CandidateManagement] Cập nhật hồ sơ cho Candidate ID: ${candidateId}`);
-    this.logger.debug(`[CandidateManagement] Dữ liệu nhận được: ${JSON.stringify(updateCandidateDto)}`);
-    
+    this.logger.log(
+      `[CandidateManagement] Cập nhật hồ sơ cho Candidate ID: ${candidateId}`,
+    );
+    this.logger.debug(
+      `[CandidateManagement] Dữ liệu nhận được: ${JSON.stringify(updateCandidateDto)}`,
+    );
+
     const candidate = await this.prisma.candidate.findUnique({
       where: { candidateId },
       include: { user: true },
@@ -56,12 +64,17 @@ export class CandidateManagementService {
       throw new NotFoundException(`Candidate with ID ${candidateId} not found`);
     }
 
-    if (updateCandidateDto.isOpenToWork === true && candidate.isOpenToWork === false) {
-       const now = new Date();
-       const expiry = candidate.jobSearchExpiresAt ? new Date(candidate.jobSearchExpiresAt) : null;
-       if (!expiry || expiry <= now) {
-         throw new BadRequestException('JOB_SEARCH_EXPIRED');
-       }
+    if (
+      updateCandidateDto.isOpenToWork === true &&
+      candidate.isOpenToWork === false
+    ) {
+      const now = new Date();
+      const expiry = candidate.jobSearchExpiresAt
+        ? new Date(candidate.jobSearchExpiresAt)
+        : null;
+      if (!expiry || expiry <= now) {
+        throw new BadRequestException('JOB_SEARCH_EXPIRED');
+      }
     }
 
     const {

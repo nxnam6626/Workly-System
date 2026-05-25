@@ -66,7 +66,11 @@ export class MailService {
     }
   }
 
-  async sendInterviewRescheduleRequest(email: string, candidateName: string, dateStr: string) {
+  async sendInterviewRescheduleRequest(
+    email: string,
+    candidateName: string,
+    dateStr: string,
+  ) {
     try {
       await this.transporter.sendMail({
         from: `"Workly" <${process.env.MAIL_USER}>`,
@@ -75,7 +79,10 @@ export class MailService {
         html: `<p>Chào ${candidateName},</p><p>Nhà tuyển dụng có việc đột xuất nên không thể phỏng vấn vào ngày ${dateStr}. Bạn vui lòng truy cập hệ thống để chọn lại một lịch phỏng vấn khác nhé!</p>`,
       });
     } catch (error) {
-      console.error('[MailService] Error sending reschedule request email:', error);
+      console.error(
+        '[MailService] Error sending reschedule request email:',
+        error,
+      );
     }
   }
 
@@ -255,7 +262,7 @@ export class MailService {
         const [hours, mins] = timeStr.split(':').map(Number);
         startDateTime.setHours(hours, mins, 0, 0);
       }
-      
+
       const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // +1 hour
 
       const formatICSDate = (date: Date) => {

@@ -13,9 +13,15 @@ interface ChatMessageListProps {
 
 export function ChatMessageList({ messages, isTyping, onClose }: ChatMessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (isInitialMount.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      isInitialMount.current = false;
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }, [messages, isTyping]);
 
   return (

@@ -11,7 +11,7 @@ import { formatSalary } from "@/lib/utils";
 import { JobCard, Job } from "@/components/jobs/JobCard";
 import { JobCardSkeleton } from "@/components/jobs/JobCardSkeleton";
 
-const ITEMS_PER_PAGE = 12; // 3 columns x 4 rows
+const ITEMS_PER_PAGE = 6; // 3 columns x 4 rows
 
 export function UrgentJobsSection() {
   const sectionRef = useRef<HTMLElement>(null);

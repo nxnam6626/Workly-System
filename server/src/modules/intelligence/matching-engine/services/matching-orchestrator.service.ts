@@ -47,9 +47,9 @@ export class MatchingOrchestratorService {
 
     // 2. Lấy danh sách ứng viên (Tối ưu hóa: Chỉ lấy những ứng viên đang ACTIVE và CÓ CV chính)
     let candidates = await this.prisma.candidate.findMany({
-      where: { 
+      where: {
         user: { status: 'ACTIVE' },
-        cvs: { some: { isMain: true } }
+        cvs: { some: { isMain: true } },
       },
       include: {
         cvs: {
@@ -71,35 +71,50 @@ export class MatchingOrchestratorService {
       },
     });
 
-    const isRemote = job.jobType === 'REMOTE' || (job.locationCity || '').toLowerCase().includes('remote');
-    const jobLocation = (job.locationCity || '').toLowerCase().replace(/tp\.|thành phố|tỉnh/g, '').trim();
-    const isJobHcm = jobLocation.includes('hồ chí minh') || jobLocation.includes('hcm');
+    const isRemote =
+      job.jobType === 'REMOTE' ||
+      (job.locationCity || '').toLowerCase().includes('remote');
+    const jobLocation = (job.locationCity || '')
+      .toLowerCase()
+      .replace(/tp\.|thành phố|tỉnh/g, '')
+      .trim();
+    const isJobHcm =
+      jobLocation.includes('hồ chí minh') || jobLocation.includes('hcm');
 
-    const structuredReqs = typeof job.structuredRequirements === 'string' 
-      ? JSON.parse(job.structuredRequirements) 
-      : (job.structuredRequirements || {});
-      
-    const jobCategories = Array.isArray(structuredReqs.categories) 
+    const structuredReqs =
+      typeof job.structuredRequirements === 'string'
+        ? JSON.parse(job.structuredRequirements)
+        : job.structuredRequirements || {};
+
+    const jobCategories = Array.isArray(structuredReqs.categories)
       ? structuredReqs.categories.map((c: string) => c.toLowerCase())
       : [];
 
-    candidates = candidates.filter(candidate => {
+    candidates = candidates.filter((candidate) => {
       if (!isRemote && jobLocation) {
         const candLocRaw = (candidate.location || '').toLowerCase();
         if (!candLocRaw) return false;
-        
+
         const candLoc = candLocRaw.replace(/tp\.|thành phố|tỉnh/g, '').trim();
-        const isCandHcm = candLoc.includes('hồ chí minh') || candLoc.includes('hcm');
-        
-        const locationMatch = (isJobHcm && isCandHcm) || candLoc.includes(jobLocation) || jobLocation.includes(candLoc);
+        const isCandHcm =
+          candLoc.includes('hồ chí minh') || candLoc.includes('hcm');
+
+        const locationMatch =
+          (isJobHcm && isCandHcm) ||
+          candLoc.includes(jobLocation) ||
+          jobLocation.includes(candLoc);
         if (!locationMatch) return false;
       }
 
       if (jobCategories.length > 0) {
-        const candInds = (candidate.industries || []).map(i => i.toLowerCase());
+        const candInds = (candidate.industries || []).map((i) =>
+          i.toLowerCase(),
+        );
         if (candInds.length === 0) return false;
-        
-        const hasOverlap = candInds.some(ind => jobCategories.some(cat => cat.includes(ind) || ind.includes(cat)));
+
+        const hasOverlap = candInds.some((ind) =>
+          jobCategories.some((cat) => cat.includes(ind) || ind.includes(cat)),
+        );
         if (!hasOverlap) return false;
       }
 
@@ -109,7 +124,7 @@ export class MatchingOrchestratorService {
     const results: any[] = [];
 
     // TỐI ƯU HÓA: Chia nhỏ danh sách ứng viên (Chunking) để xử lý song song, tăng tốc độ Matching
-    const CHUNK_SIZE = 15; 
+    const CHUNK_SIZE = 15;
     const chunks: any[][] = [];
     for (let i = 0; i < candidates.length; i += CHUNK_SIZE) {
       chunks.push(candidates.slice(i, i + CHUNK_SIZE));
@@ -121,8 +136,8 @@ export class MatchingOrchestratorService {
         if (!mainCv) return null;
 
         // 3. Đảm bảo CV có Embedding
-        if (!(mainCv as any).embedding) {
-          const parsedData = (mainCv.parsedData as any) || {};
+        if (!mainCv.embedding) {
+          const parsedData = mainCv.parsedData || {};
           const text = `${parsedData.summary || ''} ${parsedData.experience || ''}`;
           const vector = await this.dataParser.getEmbedding(text);
           try {
@@ -133,7 +148,7 @@ export class MatchingOrchestratorService {
           } catch (dbErr: any) {
             this.logger.warn(`pgvector error for CV. ${dbErr.message}`);
           }
-          (mainCv as any).embedding = vector;
+          mainCv.embedding = vector;
         }
 
         // 4. Tính điểm bằng Engine mới (9 yếu tố - Đã được tối ưu chạy song song bên trong)
@@ -141,7 +156,10 @@ export class MatchingOrchestratorService {
           await this.scoringEngine.calculateFinalScore(job, mainCv);
 
         // 5. Phân tích kết quả (UX)
-        const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
+        const analysis = this.matchAnalysis.generateAnalysis(
+          breakdown,
+          details,
+        );
 
         // 6. Lưu hoặc xóa khỏi DB
         if (finalScore === 0) {
@@ -248,29 +266,42 @@ export class MatchingOrchestratorService {
 
     const candLocRaw = (candidate.location || '').toLowerCase();
     const candLoc = candLocRaw.replace(/tp\.|thành phố|tỉnh/g, '').trim();
-    const isCandHcm = candLoc.includes('hồ chí minh') || candLoc.includes('hcm');
-    const candInds = (candidate.industries || []).map(i => i.toLowerCase());
+    const isCandHcm =
+      candLoc.includes('hồ chí minh') || candLoc.includes('hcm');
+    const candInds = (candidate.industries || []).map((i) => i.toLowerCase());
 
-    const filteredJobs = activeJobs.filter(job => {
-      const isRemote = job.jobType === 'REMOTE' || (job.locationCity || '').toLowerCase().includes('remote');
-      const jobLocation = (job.locationCity || '').toLowerCase().replace(/tp\.|thành phố|tỉnh/g, '').trim();
-      const isJobHcm = jobLocation.includes('hồ chí minh') || jobLocation.includes('hcm');
+    const filteredJobs = activeJobs.filter((job) => {
+      const isRemote =
+        job.jobType === 'REMOTE' ||
+        (job.locationCity || '').toLowerCase().includes('remote');
+      const jobLocation = (job.locationCity || '')
+        .toLowerCase()
+        .replace(/tp\.|thành phố|tỉnh/g, '')
+        .trim();
+      const isJobHcm =
+        jobLocation.includes('hồ chí minh') || jobLocation.includes('hcm');
 
       if (!isRemote && jobLocation && candLoc) {
-        const locationMatch = (isJobHcm && isCandHcm) || candLoc.includes(jobLocation) || jobLocation.includes(candLoc);
+        const locationMatch =
+          (isJobHcm && isCandHcm) ||
+          candLoc.includes(jobLocation) ||
+          jobLocation.includes(candLoc);
         if (!locationMatch) return false;
       }
 
-      const structuredReqs = typeof job.structuredRequirements === 'string' 
-        ? JSON.parse(job.structuredRequirements) 
-        : (job.structuredRequirements || {});
-        
-      const jobCategories = Array.isArray(structuredReqs.categories) 
+      const structuredReqs =
+        typeof job.structuredRequirements === 'string'
+          ? JSON.parse(job.structuredRequirements)
+          : job.structuredRequirements || {};
+
+      const jobCategories = Array.isArray(structuredReqs.categories)
         ? structuredReqs.categories.map((c: string) => c.toLowerCase())
         : [];
 
       if (jobCategories.length > 0 && candInds.length > 0) {
-        const hasOverlap = candInds.some(ind => jobCategories.some(cat => cat.includes(ind) || ind.includes(cat)));
+        const hasOverlap = candInds.some((ind) =>
+          jobCategories.some((cat) => cat.includes(ind) || ind.includes(cat)),
+        );
         if (!hasOverlap) return false;
       }
 
@@ -286,7 +317,7 @@ export class MatchingOrchestratorService {
 
     for (const chunk of chunks) {
       const chunkPromises = chunk.map(async (job) => {
-        if (!(job as any).embedding) {
+        if (!job.embedding) {
           const vector = await this.dataParser.getEmbedding(
             `${job.title} ${job.requirements}`,
           );
@@ -296,13 +327,16 @@ export class MatchingOrchestratorService {
               UPDATE "JobPosting" SET "embedding" = ${vectorSql}::vector WHERE "jobPostingId" = ${job.jobPostingId}
             `;
           } catch (e) {}
-          (job as any).embedding = vector;
+          job.embedding = vector;
         }
 
         // 3. Score
         const { finalScore, breakdown, details } =
           await this.scoringEngine.calculateFinalScore(job, mainCv);
-        const analysis = this.matchAnalysis.generateAnalysis(breakdown, details);
+        const analysis = this.matchAnalysis.generateAnalysis(
+          breakdown,
+          details,
+        );
 
         if (finalScore === 0) {
           try {
@@ -341,7 +375,7 @@ export class MatchingOrchestratorService {
             details: { breakdown, details } as any,
           },
         });
-        
+
         return matchRecord;
       });
 

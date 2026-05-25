@@ -26,12 +26,16 @@ export class CandidateWalletPaymentService {
       throw new BadRequestException('Số tiền tối thiểu để nạp là 10,000 VNĐ');
 
     const wallet = await this.balanceService.getBalance(userId);
-    
-    // Ensure it is candidate
-    const candidate = await this.prisma.candidate.findUnique({ where: { userId } });
-    if (!candidate) throw new BadRequestException('Tài khoản ứng viên không tồn tại');
 
-    const orderCode = Number(String(Date.now()).slice(-6)) + Math.floor(Math.random() * 1000); // Add entropy
+    // Ensure it is candidate
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { userId },
+    });
+    if (!candidate)
+      throw new BadRequestException('Tài khoản ứng viên không tồn tại');
+
+    const orderCode =
+      Number(String(Date.now()).slice(-6)) + Math.floor(Math.random() * 1000); // Add entropy
 
     const tx = await this.prisma.candidateTransaction.create({
       data: {
@@ -52,7 +56,9 @@ export class CandidateWalletPaymentService {
       description: `Nap vi Workly Candidate`,
       cancelUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/profile?payment=CANCEL`,
       returnUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/profile?payment=SUCCESS`,
-      items: [{ name: 'Nap vi Workly Candidate', quantity: 1, price: amountVND }],
+      items: [
+        { name: 'Nap vi Workly Candidate', quantity: 1, price: amountVND },
+      ],
     };
 
     try {
@@ -71,23 +77,25 @@ export class CandidateWalletPaymentService {
         where: { transactionId: tx.transactionId },
         data: { status: 'CANCELLED' },
       });
-      throw new BadRequestException('Không thể tạo link thanh toán (PayOS error).');
+      throw new BadRequestException(
+        'Không thể tạo link thanh toán (PayOS error).',
+      );
     }
   }
 
   async verifyWebhook(body: any) {
     try {
       const webhookData = await this.payos.webhooks.verify(body);
-      
+
       // Try finding Candidate Transaction
       const transaction = await this.prisma.candidateTransaction.findUnique({
         where: { orderCode: Number(webhookData.orderCode) },
         include: {
-           wallet: {
-             include: {
-               candidate: { select: { userId: true } }
-             }
-           }
+          wallet: {
+            include: {
+              candidate: { select: { userId: true } },
+            },
+          },
         },
       });
 
@@ -121,8 +129,8 @@ export class CandidateWalletPaymentService {
 
       return { status: 'success' };
     } catch {
-       // Fail-safe for multi-handler routing
-       return { status: 'ignored_invalid_sig' };
+      // Fail-safe for multi-handler routing
+      return { status: 'ignored_invalid_sig' };
     }
   }
 }

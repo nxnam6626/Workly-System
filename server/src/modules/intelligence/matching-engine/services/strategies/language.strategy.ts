@@ -43,10 +43,15 @@ export class LanguageStrategy implements IMatchingStrategy {
       const cvLangs =
         candidateLangs.length > 0 ? candidateLangs : parsedCvLangs;
 
-      if (requiredLang.length === 0) return { 
-        score: 100,
-        details: { requiredLang: [], cvLangs, message: 'Không yêu cầu ngoại ngữ' }
-      };
+      if (requiredLang.length === 0)
+        return {
+          score: 100,
+          details: {
+            requiredLang: [],
+            cvLangs,
+            message: 'Không yêu cầu ngoại ngữ',
+          },
+        };
 
       // Tìm kiếm sự tương đồng trình độ
       let totalScore = 0;

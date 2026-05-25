@@ -26,6 +26,8 @@ interface CompanyData {
   benefits: any[];
   history: any[];
   mainIndustry: string;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 interface Completeness {
@@ -105,6 +107,8 @@ export default function CompanyProfilePage() {
         benefits: data.benefits || [],
         history: data.history || [],
         mainIndustry: data.mainIndustry || '',
+        averageRating: data.averageRating || 0,
+        reviewCount: data.reviewCount || 0,
       };
       setFormData(fetchedData);
       setInitialData(fetchedData);

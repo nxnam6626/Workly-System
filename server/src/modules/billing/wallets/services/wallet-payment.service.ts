@@ -29,8 +29,11 @@ export class WalletPaymentService {
     const amountVND = targetXu * 1000;
     const orderCode = Number(String(Date.now()).slice(-6));
 
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
-    if (!recruiter) throw new BadRequestException('Nhà tuyển dụng không tồn tại');
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter)
+      throw new BadRequestException('Nhà tuyển dụng không tồn tại');
 
     const tx = await this.prisma.transaction.create({
       data: {
@@ -124,7 +127,7 @@ export class WalletPaymentService {
         where: { orderCode: Number(webhookData.orderCode) },
         include: {
           wallet: { include: { company: true } },
-          recruiter: { include: { user: true } }
+          recruiter: { include: { user: true } },
         },
       });
 

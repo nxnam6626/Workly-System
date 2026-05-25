@@ -29,7 +29,7 @@ function JobSearchContent() {
     searchParams.get("salaryMax") ? Number(searchParams.get("salaryMax")) : undefined
   );
   const [experienceParam, setExperienceParam] = useState(searchParams.get("experience") || "");
-  const [rankParam, setRankParam] = useState(searchParams.get("rank") || "");
+  const [jobLevelParam, setJobLevelParam] = useState(searchParams.get("jobLevel") || "");
   const [educationParam, setEducationParam] = useState(searchParams.get("education") || "");
   const [companyIdParam, setCompanyIdParam] = useState(searchParams.get("companyId") || "");
   
@@ -49,7 +49,7 @@ function JobSearchContent() {
     setSalaryMinParam(searchParams.get("salaryMin") ? Number(searchParams.get("salaryMin")) : undefined);
     setSalaryMaxParam(searchParams.get("salaryMax") ? Number(searchParams.get("salaryMax")) : undefined);
     setExperienceParam(searchParams.get("experience") || "");
-    setRankParam(searchParams.get("rank") || "");
+    setJobLevelParam(searchParams.get("jobLevel") || "");
     setEducationParam(searchParams.get("education") || "");
     setCompanyIdParam(searchParams.get("companyId") || "");
     setSortBy(searchParams.get("sortBy") || "suitable");
@@ -65,7 +65,7 @@ function JobSearchContent() {
     if (salaryMinParam) params.set("salaryMin", salaryMinParam.toString());
     if (salaryMaxParam) params.set("salaryMax", salaryMaxParam.toString());
     if (experienceParam) params.set("experience", experienceParam);
-    if (rankParam) params.set("rank", rankParam);
+    if (jobLevelParam) params.set("jobLevel", jobLevelParam);
     if (educationParam) params.set("education", educationParam);
     if (companyIdParam) params.set("companyId", companyIdParam);
     if (sortBy !== "suitable") params.set("sortBy", sortBy);
@@ -75,7 +75,7 @@ function JobSearchContent() {
       router.replace(newUrl, { scroll: false });
     }
     fetchJobs(1);
-  }, [searchQuery, locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, companyIdParam, sortBy]);
+  }, [searchQuery, locationParam, industryParam, jobTypeParam, salaryMinParam, salaryMaxParam, experienceParam, jobLevelParam, educationParam, companyIdParam, sortBy]);
 
   const fetchJobs = useCallback(
     async (p = page) => {
@@ -90,7 +90,7 @@ function JobSearchContent() {
             salaryMin: salaryMinParam,
             salaryMax: salaryMaxParam,
             experience: experienceParam || undefined,
-            rank: rankParam || undefined,
+            jobLevel: jobLevelParam || undefined,
             education: educationParam || undefined,
             companyId: companyIdParam || undefined,
             sortBy: sortBy,
@@ -106,7 +106,7 @@ function JobSearchContent() {
         setLoading(false);
       }
     },
-      [searchQuery, locationParam, jobTypeParam, industryParam, salaryMinParam, salaryMaxParam, experienceParam, rankParam, educationParam, companyIdParam, page]
+      [searchQuery, locationParam, jobTypeParam, industryParam, salaryMinParam, salaryMaxParam, experienceParam, jobLevelParam, educationParam, companyIdParam, page]
   );
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -161,8 +161,8 @@ function JobSearchContent() {
         setSalaryMinParam={setSalaryMinParam}
         salaryMaxParam={salaryMaxParam}
         setSalaryMaxParam={setSalaryMaxParam}
-        rankParam={rankParam}
-        setRankParam={setRankParam}
+        jobLevelParam={jobLevelParam}
+        setJobLevelParam={setJobLevelParam}
         educationParam={educationParam}
         setEducationParam={setEducationParam}
         handleSearch={handleSearch}
@@ -261,7 +261,7 @@ function JobSearchContent() {
                     setIndustryParam("");
                     setJobTypeParam("");
                     setExperienceParam("");
-                    setRankParam("");
+                    setJobLevelParam("");
                     setEducationParam("");
                   }} 
                   className="mt-8 px-6 py-2 rounded-full border border-blue-100 text-[#1e60ad] font-bold text-sm hover:bg-blue-50 transition-colors"

@@ -34,8 +34,13 @@ export class AiController {
     @Body('message') message: string,
   ) {
     if (!message) return { message: 'Hãy nhập điều gì đó!' };
-    
-    const stream = this.aiService.generateStreamResponse(message, userId, roles, 'RECRUITER');
+
+    const stream = this.aiService.generateStreamResponse(
+      message,
+      userId,
+      roles,
+      'RECRUITER',
+    );
     let fullResponse = '';
     for await (const chunk of stream) {
       if (typeof chunk === 'string') {
@@ -47,11 +52,13 @@ export class AiController {
         }
       }
     }
-    
+
     // Remove __ACTION__ prefixes if any
     fullResponse = fullResponse.replace(/__ACTION__:.*?(\n|$)/g, '');
-    
-    return { message: fullResponse || 'Xin lỗi, tôi không thể xử lý yêu cầu lúc này.' };
+
+    return {
+      message: fullResponse || 'Xin lỗi, tôi không thể xử lý yêu cầu lúc này.',
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -61,6 +68,7 @@ export class AiController {
     @CurrentUser('roles') roles: string[],
     @Query('message') message: string,
     @Query('context') contextMode?: string,
+    @Query('jobSlug') jobSlug?: string,
   ): Observable<MessageEvent> {
     const roleList = (roles || [])
       .map((r: any) => (typeof r === 'string' ? r : r?.roleName))
@@ -71,6 +79,7 @@ export class AiController {
         userId,
         roleList,
         contextMode,
+        jobSlug,
       ),
     ).pipe(
       map(

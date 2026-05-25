@@ -82,11 +82,11 @@ export class RecruitersController {
 
   @Patch('me/interview-settings')
   @Roles(Role.RECRUITER)
-  updateInterviewSettings(
-    @Req() req: any,
-    @Body() settings: any,
-  ) {
-    return this.recruitersService.updateInterviewSettings(req.user.userId, settings);
+  updateInterviewSettings(@Req() req: any, @Body() settings: any) {
+    return this.recruitersService.updateInterviewSettings(
+      req.user.userId,
+      settings,
+    );
   }
 
   @Patch('me/profile')

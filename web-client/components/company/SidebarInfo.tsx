@@ -100,7 +100,7 @@ export function SidebarInfo({ company, isPreview }: SidebarInfoProps) {
 
       {/* Rating & Review Widgets */}
       <div className="space-y-4">
-        <RatingSummaryCard />
+        <RatingSummaryCard averageRating={(company as any).averageRating} reviewCount={(company as any).reviewCount} />
         {!isPreview && <ReviewForm />}
       </div>
     </div>
@@ -123,18 +123,20 @@ function InfoItem({ icon, label, value, isPlaceholder }: { icon: React.ReactNode
   );
 }
 
-function RatingSummaryCard() {
+function RatingSummaryCard({ averageRating = 0, reviewCount = 0 }: { averageRating?: number, reviewCount?: number }) {
+  const formattedRating = averageRating.toFixed(1);
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6 text-center relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/5 rounded-full -mr-12 -mt-12 blur-2xl" />
       <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Đánh giá chung</h3>
       <div className="flex flex-col items-center">
-        <div className="text-5xl font-black text-slate-800 leading-none">4.0</div>
+        <div className="text-5xl font-black text-slate-800 leading-none">{formattedRating}</div>
         <div className="flex items-center gap-1 my-3">
-          {[1, 2, 3, 4].map(i => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
-          <Star key={5} className="w-4 h-4 text-amber-200" />
+          {[1, 2, 3, 4, 5].map(i => (
+             <Star key={i} className={`w-4 h-4 ${i <= Math.round(averageRating) ? 'fill-amber-400 text-amber-400' : 'text-amber-200'}`} />
+          ))}
         </div>
-        <p className="text-[10px] font-bold text-slate-400 italic">Dựa trên 24 đánh giá từ nhân viên</p>
+        <p className="text-[10px] font-bold text-slate-400 italic">Dựa trên {reviewCount} đánh giá từ nhân viên</p>
       </div>
     </div>
   );

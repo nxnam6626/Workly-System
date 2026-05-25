@@ -43,12 +43,16 @@ export class ApplicationsNotificationService {
     jobTitle: string,
     candidateName: string,
     action: 'CONFIRM' | 'RESCHEDULE',
-    details?: string
+    details?: string,
   ) {
-    const title = action === 'CONFIRM' ? 'Ứng viên xác nhận phỏng vấn' : 'Ứng viên xin dời lịch phỏng vấn';
-    const message = action === 'CONFIRM' 
-      ? `Ứng viên ${candidateName} đã xác nhận tham gia phỏng vấn cho vị trí "${jobTitle}".`
-      : `Ứng viên ${candidateName} xin dời lịch phỏng vấn cho vị trí "${jobTitle}". Chi tiết: ${details}`;
+    const title =
+      action === 'CONFIRM'
+        ? 'Ứng viên xác nhận phỏng vấn'
+        : 'Ứng viên xin dời lịch phỏng vấn';
+    const message =
+      action === 'CONFIRM'
+        ? `Ứng viên ${candidateName} đã xác nhận tham gia phỏng vấn cho vị trí "${jobTitle}".`
+        : `Ứng viên ${candidateName} xin dời lịch phỏng vấn cho vị trí "${jobTitle}". Chi tiết: ${details}`;
 
     await this.notificationsService.create(
       recruiterId,
@@ -101,6 +105,42 @@ export class ApplicationsNotificationService {
       recruiterId,
       candidateId,
       msgContent,
+    );
+  }
+
+  async notifyCandidateOfFastTrack(
+    candidateUserId: string,
+    recruiterUserId: string,
+    recruiterId: string,
+    candidateId: string,
+    jobTitle: string,
+  ) {
+    const msgContent = `CHÚC MỪNG! Dựa trên phân tích AI hệ thống, hồ sơ của bạn cho vị trí "${jobTitle}" đạt điểm kỹ năng xuất sắc. \n\nHệ thống đã tự động cấp đặc quyền vượt qua vòng duyệt hồ sơ. Bạn đã được đặc cách tự chọn ngày giờ phỏng vấn phù hợp nhất với mình! \n\nVui lòng truy cập mục Việc làm đã ứng tuyển để chọn lịch phỏng vấn.`;
+
+    await this.notificationsService.create(
+      candidateUserId,
+      'Đặc Quyền Tự Chọn Lịch Phỏng Vấn',
+      msgContent,
+      'success',
+      '/profile/jobs/applied',
+    );
+
+    this.messagesGateway.server
+      .to(`user_${candidateUserId}`)
+      .emit('notification', {
+        title: 'Đặc Quyền Tự Chọn Lịch Phỏng Vấn',
+        message: msgContent,
+        type: 'success',
+        link: '/profile/jobs/applied',
+      });
+
+    // Inject message into conversation
+    await this.injectAutoChatMessage(
+      recruiterUserId,
+      recruiterId,
+      candidateId,
+      msgContent,
+      candidateUserId
     );
   }
 
@@ -217,7 +257,13 @@ export class ApplicationsNotificationService {
     }
   }
 
-  async notifySlaReminder(userId: string, jobTitle: string, candidateName: string, deadline: Date, type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW') {
+  async notifySlaReminder(
+    userId: string,
+    jobTitle: string,
+    candidateName: string,
+    deadline: Date,
+    type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW',
+  ) {
     let title = 'Nhắc nhở hạn phản hồi (SLA)';
     let message = '';
     let link = '';
@@ -236,11 +282,24 @@ export class ApplicationsNotificationService {
       link = '/profile/jobs/applied';
     }
 
-    await this.notificationsService.create(userId, title, message, 'warning', link);
-    this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'warning', link });
+    await this.notificationsService.create(
+      userId,
+      title,
+      message,
+      'warning',
+      link,
+    );
+    this.messagesGateway.server
+      .to(`user_${userId}`)
+      .emit('notification', { title, message, type: 'warning', link });
   }
 
-  async notifySlaBreach(userId: string, jobTitle: string, candidateName: string, type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW') {
+  async notifySlaBreach(
+    userId: string,
+    jobTitle: string,
+    candidateName: string,
+    type: 'RECRUITER_RESPONSE' | 'RECRUITER_RESULT' | 'CANDIDATE_INTERVIEW',
+  ) {
     let title = '⚠️ CẢNH BÁO QUÁ HẠN (SLA)';
     let message = '';
     let link = '';
@@ -257,7 +316,15 @@ export class ApplicationsNotificationService {
       link = '/profile/jobs/applied';
     }
 
-    await this.notificationsService.create(userId, title, message, 'danger', link);
-    this.messagesGateway.server.to(`user_${userId}`).emit('notification', { title, message, type: 'danger', link });
+    await this.notificationsService.create(
+      userId,
+      title,
+      message,
+      'danger',
+      link,
+    );
+    this.messagesGateway.server
+      .to(`user_${userId}`)
+      .emit('notification', { title, message, type: 'danger', link });
   }
 }

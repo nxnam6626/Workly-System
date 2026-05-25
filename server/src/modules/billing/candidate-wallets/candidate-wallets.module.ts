@@ -10,14 +10,14 @@ import { CandidateWalletPaymentService } from './services/candidate-wallet-payme
   imports: [PrismaModule, MessagesModule],
   controllers: [CandidateWalletsController],
   providers: [
-    CandidateWalletsService, 
-    CandidateWalletBalanceService, 
-    CandidateWalletPaymentService
+    CandidateWalletsService,
+    CandidateWalletBalanceService,
+    CandidateWalletPaymentService,
   ],
   exports: [
-    CandidateWalletsService, 
-    CandidateWalletBalanceService, 
-    CandidateWalletPaymentService
+    CandidateWalletsService,
+    CandidateWalletBalanceService,
+    CandidateWalletPaymentService,
   ],
 })
 export class CandidateWalletsModule {}

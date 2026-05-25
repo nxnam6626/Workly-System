@@ -12,20 +12,21 @@ import { UnlockConfirmModal } from '@/components/recruiter/UnlockConfirmModal';
 import { ApplicationDrawer } from '@/components/recruiter/ApplicationDrawer';
 
 const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  PENDING:             { label: 'Chờ duyệt',    cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  REVIEWING:           { label: 'Đang xem',      cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  INTERVIEWING:        { label: 'Phỏng vấn',    cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  PENDING: { label: 'Chờ duyệt', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  REVIEWING: { label: 'Đang xem', cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  INTERVIEWING: { label: 'Phỏng vấn', cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   INTERVIEW_CONFIRMED: { label: 'Đã chốt lịch', cls: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
-  ACCEPTED:            { label: 'Đã tuyển',     cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  REJECTED:            { label: 'Từ chối',      cls: 'bg-red-50 text-red-700 border-red-200' },
+  ACCEPTED: { label: 'Đã tuyển', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  REJECTED: { label: 'Từ chối', cls: 'bg-red-50 text-red-700 border-red-200' },
 };
 
 const TABS = [
-  { key: 'ALL',        label: 'Tất cả' },
-  { key: 'PENDING',    label: 'Chờ duyệt' },
+  { key: 'ALL', label: 'Tất cả' },
+  { key: 'PENDING', label: 'Chờ duyệt' },
   { key: 'INTERVIEWING', label: 'Phỏng vấn' },
-  { key: 'ACCEPTED',   label: 'Đã tuyển' },
-  { key: 'REJECTED',   label: 'Từ chối' },
+  { key: 'INTERVIEW_CONFIRMED', label: 'Đã chốt lịch' },
+  { key: 'ACCEPTED', label: 'Đã tuyển' },
+  { key: 'REJECTED', label: 'Từ chối' },
 ];
 
 export default function ApplicationsPage() {
@@ -50,7 +51,7 @@ export default function ApplicationsPage() {
   useEffect(() => {
     fetchAll();
     fetchWallet();
-    api.get('/subscriptions/current').then(({ data }) => setSubscription(data)).catch(() => {});
+    api.get('/subscriptions/current').then(({ data }) => setSubscription(data)).catch(() => { });
   }, [accessToken]);
 
   useEffect(() => {
@@ -120,10 +121,10 @@ export default function ApplicationsPage() {
 
   // Stats
   const stats = useMemo(() => ({
-    total:       applications.length,
-    pending:     applications.filter(a => a.appStatus === 'PENDING').length,
-    interviewing:applications.filter(a => a.appStatus === 'INTERVIEWING').length,
-    accepted:    applications.filter(a => a.appStatus === 'ACCEPTED').length,
+    total: applications.length,
+    pending: applications.filter(a => a.appStatus === 'PENDING').length,
+    interviewing: applications.filter(a => a.appStatus === 'INTERVIEW_CONFIRMED').length,
+    accepted: applications.filter(a => a.appStatus === 'ACCEPTED').length,
   }), [applications]);
 
   const toggleId = (id: string) =>
@@ -178,9 +179,8 @@ export default function ApplicationsPage() {
             <div className="flex gap-2 flex-wrap">
               {TABS.map(t => (
                 <button key={t.key} onClick={() => setTab(t.key)}
-                  className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${
-                    tab === t.key ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600 shadow-sm'
-                  }`}>
+                  className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${tab === t.key ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-white border border-slate-200 text-slate-500 hover:border-indigo-200 hover:text-indigo-600 shadow-sm'
+                    }`}>
                   {t.label}
                 </button>
               ))}

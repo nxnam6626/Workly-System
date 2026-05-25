@@ -29,7 +29,6 @@ export class CandidatesService {
     return this.profileService.updateByUserId(userId, updateCandidateDto);
   }
 
-
   remove(candidateId: string) {
     return this.profileService.remove(candidateId);
   }

@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import * as xlsx from 'xlsx';
 import { MessagesGateway } from '@/modules/communication/messages/messages.gateway';
 import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
+import { HIERARCHICAL_INDUSTRIES } from '@/modules/core-jobs/jobs/job-postings/constants/industries';
 
 const COMPLETENESS_WEIGHTS: Record<string, number> = {
   companyName: 5,
@@ -38,18 +39,41 @@ export class CompaniesService {
     private supabaseService: SupabaseService,
     private messagesGateway: MessagesGateway,
     private notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   async findAll(query: FilterCompanyDto) {
-    const { search, page = 1, limit = 10, sortBy = 'ALPHABETICAL' } = query;
+    const { search, page = 1, limit = 10, sortBy = 'ALPHABETICAL', industry } = query;
     const skip = (page - 1) * limit;
 
-    const where = search
-      ? { companyName: { contains: search, mode: 'insensitive' as const } }
-      : {};
+    const where: any = {};
+    const andClauses: any[] = [];
+
+    if (search) {
+      andClauses.push({ companyName: { contains: search, mode: 'insensitive' } });
+    }
+    if (industry) {
+      const targetCat = HIERARCHICAL_INDUSTRIES.find(
+        (c) => c.category === industry,
+      );
+      
+      if (targetCat) {
+        const industriesToMatch = [targetCat.category, ...targetCat.subCategories];
+        andClauses.push({
+          OR: industriesToMatch.map((ind) => ({
+            mainIndustry: { contains: ind, mode: 'insensitive' },
+          })),
+        });
+      } else {
+        andClauses.push({ mainIndustry: { contains: industry, mode: 'insensitive' } });
+      }
+    }
+
+    if (andClauses.length > 0) {
+      where.AND = andClauses;
+    }
 
     let orderBy: any = { companyName: 'asc' };
-    
+
     if (sortBy === 'TRENDING') {
       orderBy = { jobPostings: { _count: 'desc' } };
     } else if (sortBy === 'TYPICAL') {
@@ -85,7 +109,11 @@ export class CompaniesService {
     const company = await this.prisma.company.findUnique({
       where: { companyId: id },
       include: {
-        jobPostings: { where: { status: 'APPROVED' }, orderBy: { createdAt: 'desc' }, take: 10 },
+        jobPostings: {
+          where: { status: 'APPROVED' },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
         branches: true,
         sections: { orderBy: { displayOrder: 'asc' } },
         benefits: true,
@@ -98,13 +126,16 @@ export class CompaniesService {
     }
 
     const jobCount = await this.prisma.jobPosting.count({
-      where: { companyId: company.companyId, status: 'APPROVED' }
+      where: { companyId: company.companyId, status: 'APPROVED' },
     });
+
+    const stats = await this.getCompanyReviewStats(company.companyId);
 
     return {
       ...company,
       completeness: this.calculateCompleteness(company),
-      jobPostingsCount: jobCount
+      jobPostingsCount: jobCount,
+      ...stats,
     };
   }
 
@@ -114,7 +145,11 @@ export class CompaniesService {
       include: {
         company: {
           include: {
-            jobPostings: { where: { status: 'APPROVED' }, orderBy: { createdAt: 'desc' }, take: 10 },
+            jobPostings: {
+              where: { status: 'APPROVED' },
+              orderBy: { createdAt: 'desc' },
+              take: 10,
+            },
             branches: true,
             sections: { orderBy: { displayOrder: 'asc' } },
             benefits: true,
@@ -127,13 +162,16 @@ export class CompaniesService {
     if (!recruiter?.company) return {};
 
     const jobCount = await this.prisma.jobPosting.count({
-      where: { companyId: recruiter.company.companyId, status: 'APPROVED' }
+      where: { companyId: recruiter.company.companyId, status: 'APPROVED' },
     });
+
+    const stats = await this.getCompanyReviewStats(recruiter.company.companyId);
 
     return {
       ...recruiter.company,
       completeness: this.calculateCompleteness(recruiter.company),
-      jobPostingsCount: jobCount
+      jobPostingsCount: jobCount,
+      ...stats,
     };
   }
 
@@ -143,16 +181,24 @@ export class CompaniesService {
     });
     if (!recruiter) throw new NotFoundException('Nhà tuyển dụng không tồn tại');
 
-    if (updateData.companyName !== undefined && (!updateData.companyName || updateData.companyName.trim() === '')) {
+    if (
+      updateData.companyName !== undefined &&
+      (!updateData.companyName || updateData.companyName.trim() === '')
+    ) {
       throw new BadRequestException('Tên công ty không được để trống');
     }
-    if (updateData.address !== undefined && (!updateData.address || updateData.address.trim() === '')) {
+    if (
+      updateData.address !== undefined &&
+      (!updateData.address || updateData.address.trim() === '')
+    ) {
       throw new BadRequestException('Địa chỉ công ty không được để trống');
     }
 
     if (!recruiter.companyId) {
       if (!updateData.companyName || !updateData.address) {
-        throw new BadRequestException('Vui lòng cung cấp đầy đủ tên và địa chỉ công ty để khởi tạo');
+        throw new BadRequestException(
+          'Vui lòng cung cấp đầy đủ tên và địa chỉ công ty để khởi tạo',
+        );
       }
       return this.createNewCompany(recruiter.recruiterId, updateData);
     }
@@ -165,26 +211,35 @@ export class CompaniesService {
 
     const createPayload: any = {
       ...basicData,
-      sections: sections?.length > 0 ? {
-        create: sections.map(s => ({
-          title: s.title,
-          content: s.content,
-          type: s.type,
-          displayOrder: s.displayOrder
-        }))
-      } : undefined,
-      benefits: benefits?.length > 0 ? {
-        create: benefits.map(b => ({
-          title: b.title,
-          icon: b.icon
-        }))
-      } : undefined,
-      history: history?.length > 0 ? {
-        create: history.map(h => ({
-          year: h.year,
-          event: h.event
-        }))
-      } : undefined,
+      sections:
+        sections?.length > 0
+          ? {
+              create: sections.map((s) => ({
+                title: s.title,
+                content: s.content,
+                type: s.type,
+                displayOrder: s.displayOrder,
+              })),
+            }
+          : undefined,
+      benefits:
+        benefits?.length > 0
+          ? {
+              create: benefits.map((b) => ({
+                title: b.title,
+                icon: b.icon,
+              })),
+            }
+          : undefined,
+      history:
+        history?.length > 0
+          ? {
+              create: history.map((h) => ({
+                year: h.year,
+                event: h.event,
+              })),
+            }
+          : undefined,
     };
 
     const company = await this.prisma.company.create({ data: createPayload });
@@ -203,32 +258,32 @@ export class CompaniesService {
     if (sections) {
       updatePayload.sections = {
         deleteMany: {},
-        create: sections.map(s => ({
+        create: sections.map((s) => ({
           title: s.title,
           content: s.content,
           type: s.type,
-          displayOrder: s.displayOrder
-        }))
+          displayOrder: s.displayOrder,
+        })),
       };
     }
 
     if (benefits) {
       updatePayload.benefits = {
         deleteMany: {},
-        create: benefits.map(b => ({
+        create: benefits.map((b) => ({
           title: b.title,
-          icon: b.icon
-        }))
+          icon: b.icon,
+        })),
       };
     }
 
     if (history) {
       updatePayload.history = {
         deleteMany: {},
-        create: history.map(h => ({
+        create: history.map((h) => ({
           year: h.year,
-          event: h.event
-        }))
+          event: h.event,
+        })),
       };
     }
 
@@ -470,17 +525,27 @@ export class CompaniesService {
     const companyId = await this.getCompanyId(userId);
     return this.prisma.recruiter.findMany({
       where: { companyId },
-      include: { user: { select: { email: true, status: true, avatar: true } } },
-      orderBy: { createdAt: 'asc' }
+      include: {
+        user: { select: { email: true, status: true, avatar: true } },
+      },
+      orderBy: { createdAt: 'asc' },
     });
   }
 
-  private async notifyCompanyMembers(companyId: string, eventName: string, data?: any) {
-    const members = await this.prisma.recruiter.findMany({ where: { companyId } });
+  private async notifyCompanyMembers(
+    companyId: string,
+    eventName: string,
+    data?: any,
+  ) {
+    const members = await this.prisma.recruiter.findMany({
+      where: { companyId },
+    });
     for (const member of members) {
       if (this.messagesGateway?.server) {
         // Emit for UI update (e.g. refresh list)
-        this.messagesGateway.server.to(`user_${member.userId}`).emit(eventName, data);
+        this.messagesGateway.server
+          .to(`user_${member.userId}`)
+          .emit(eventName, data);
 
         // Create persistent notification and emit for bell icon
         if (data?.message) {
@@ -489,21 +554,30 @@ export class CompaniesService {
             'Quản lý nhân sự',
             data.message,
             'info',
-            '/recruiter/company?tab=members'
+            '/recruiter/company?tab=members',
           );
-          this.messagesGateway.server.to(`user_${member.userId}`).emit('notification', notification);
+          this.messagesGateway.server
+            .to(`user_${member.userId}`)
+            .emit('notification', notification);
         }
       }
     }
   }
 
   async addMember(userId: string, data: { fullName: string; email: string }) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
-    if (!recruiter?.companyId) throw new NotFoundException('Công ty không tồn tại');
-    if (recruiter.companyRole !== 'MASTER') throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter?.companyId)
+      throw new NotFoundException('Công ty không tồn tại');
+    if (recruiter.companyRole !== 'MASTER')
+      throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
 
-    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
-    if (existingUser) throw new BadRequestException('Email đã tồn tại trong hệ thống');
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser)
+      throw new BadRequestException('Email đã tồn tại trong hệ thống');
 
     const hashedPassword = await bcrypt.hash('123456', 10);
 
@@ -531,24 +605,32 @@ export class CompaniesService {
           userId: newUser.userId,
           fullName: data.fullName,
           companyId: recruiter.companyId,
-          companyRole: 'MEMBER'
-        }
+          companyRole: 'MEMBER',
+        },
       });
     });
 
     // Notify after transaction
-    await this.notifyCompanyMembers(recruiter.companyId, 'companyMembersUpdated', {
-      type: 'ADD',
-      message: `Thành viên mới ${data.fullName} vừa được thêm vào công ty.`
-    });
+    await this.notifyCompanyMembers(
+      recruiter.companyId,
+      'companyMembersUpdated',
+      {
+        type: 'ADD',
+        message: `Thành viên mới ${data.fullName} vừa được thêm vào công ty.`,
+      },
+    );
 
     return result;
   }
 
   async addMembersBulk(userId: string, file: Express.Multer.File) {
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId } });
-    if (!recruiter?.companyId) throw new NotFoundException('Công ty không tồn tại');
-    if (recruiter.companyRole !== 'MASTER') throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+    if (!recruiter?.companyId)
+      throw new NotFoundException('Công ty không tồn tại');
+    if (recruiter.companyRole !== 'MASTER')
+      throw new BadRequestException('Chỉ MASTER mới được tạo thành viên');
 
     let lines: any[] = [];
     try {
@@ -557,12 +639,19 @@ export class CompaniesService {
       const sheet = workbook.Sheets[sheetName];
       lines = xlsx.utils.sheet_to_json(sheet, { header: 1 });
     } catch (e) {
-      throw new BadRequestException('Không thể đọc file. Vui lòng tải lên file Excel (.xlsx, .xls) hoặc CSV hợp lệ.');
+      throw new BadRequestException(
+        'Không thể đọc file. Vui lòng tải lên file Excel (.xlsx, .xls) hoặc CSV hợp lệ.',
+      );
     }
 
-    const hasEmailColumn = lines.some(row => Array.isArray(row) && row.some(cell => String(cell).includes('@')));
+    const hasEmailColumn = lines.some(
+      (row) =>
+        Array.isArray(row) && row.some((cell) => String(cell).includes('@')),
+    );
     if (!hasEmailColumn) {
-      throw new BadRequestException('File không đúng định dạng. File cần chứa thông tin Email của nhân sự.');
+      throw new BadRequestException(
+        'File không đúng định dạng. File cần chứa thông tin Email của nhân sự.',
+      );
     }
 
     const results = { success: 0, failed: 0, errors: [] as string[] };
@@ -586,9 +675,10 @@ export class CompaniesService {
         if (!email) continue;
         if (!fullName) fullName = email.split('@')[0];
 
-
         try {
-          const existingUser = await this.prisma.user.findUnique({ where: { email } });
+          const existingUser = await this.prisma.user.findUnique({
+            where: { email },
+          });
           if (existingUser) {
             results.failed++;
             results.errors.push(`Email ${email} đã tồn tại`);
@@ -608,7 +698,12 @@ export class CompaniesService {
               data: { userId: newUser.userId, roleId: roleRecord.roleId },
             });
             await tx.recruiter.create({
-              data: { userId: newUser.userId, fullName, companyId: recruiter.companyId, companyRole: 'MEMBER' },
+              data: {
+                userId: newUser.userId,
+                fullName,
+                companyId: recruiter.companyId,
+                companyRole: 'MEMBER',
+              },
             });
           });
           results.success++;
@@ -620,29 +715,45 @@ export class CompaniesService {
     }
 
     if (results.success > 0) {
-      await this.notifyCompanyMembers(recruiter.companyId, 'companyMembersUpdated', {
-        type: 'BULK_ADD',
-        message: `Đã thêm ${results.success} thành viên vào công ty.`
-      });
+      await this.notifyCompanyMembers(
+        recruiter.companyId,
+        'companyMembersUpdated',
+        {
+          type: 'BULK_ADD',
+          message: `Đã thêm ${results.success} thành viên vào công ty.`,
+        },
+      );
     }
 
     return results;
   }
 
-  async blockMember(userId: string, targetRecruiterId: string, isBlocked: boolean) {
-    const master = await this.prisma.recruiter.findUnique({ where: { userId } });
+  async blockMember(
+    userId: string,
+    targetRecruiterId: string,
+    isBlocked: boolean,
+  ) {
+    const master = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
     if (!master?.companyId || master.companyRole !== 'MASTER') {
       throw new BadRequestException('Không có quyền thao tác');
     }
 
-    const target = await this.prisma.recruiter.findUnique({ where: { recruiterId: targetRecruiterId } });
-    if (!target || target.companyId !== master.companyId || target.companyRole === 'MASTER') {
+    const target = await this.prisma.recruiter.findUnique({
+      where: { recruiterId: targetRecruiterId },
+    });
+    if (
+      !target ||
+      target.companyId !== master.companyId ||
+      target.companyRole === 'MASTER'
+    ) {
       throw new BadRequestException('Không thể khóa tài khoản này');
     }
 
     await this.prisma.user.update({
       where: { userId: target.userId },
-      data: { status: isBlocked ? 'LOCKED' : 'ACTIVE' }
+      data: { status: isBlocked ? 'LOCKED' : 'ACTIVE' },
     });
 
     // Realtime notification for the bell icon
@@ -655,14 +766,15 @@ export class CompaniesService {
     // Force logout if blocked
     if (isBlocked) {
       this.notificationsService.emitToUser(target.userId, 'accountLocked', {
-        message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
+        message:
+          'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.',
       });
     }
 
     await this.notifyCompanyMembers(master.companyId, 'companyMembersUpdated', {
       type: isBlocked ? 'BLOCK' : 'UNBLOCK',
       message: `Tài khoản ${target.fullName} ${isBlocked ? 'đã bị khóa' : 'đã được mở khóa'}.`,
-      targetUserId: target.userId
+      targetUserId: target.userId,
     });
 
     return { success: true };
@@ -774,5 +886,27 @@ export class CompaniesService {
     });
 
     return { total, breakdown };
+  }
+
+  private async getCompanyReviewStats(companyId: string) {
+    const reviews = await this.prisma.companyReview.findMany({
+      where: { companyId, status: 'PUBLISHED' },
+      select: { ratingProcess: true, ratingInterviewer: true, ratingOffice: true },
+    });
+
+    if (reviews.length === 0) {
+      return { averageRating: 0, reviewCount: 0 };
+    }
+
+    const count = reviews.length;
+    const avgProcess = reviews.reduce((s, r) => s + r.ratingProcess, 0) / count;
+    const avgInterviewer = reviews.reduce((s, r) => s + r.ratingInterviewer, 0) / count;
+    const avgOffice = reviews.reduce((s, r) => s + r.ratingOffice, 0) / count;
+    const avgTotal = (avgProcess + avgInterviewer + avgOffice) / 3;
+
+    return {
+      averageRating: Math.round(avgTotal * 10) / 10,
+      reviewCount: count,
+    };
   }
 }

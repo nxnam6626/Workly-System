@@ -33,10 +33,15 @@ export class LocationStrategy implements IMatchingStrategy {
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
       const parsedCv = cv.parsedData || {};
-      const rawCandLocations = [cv.candidate?.location, parsedCv.location].filter(Boolean);
+      const rawCandLocations = [
+        cv.candidate?.location,
+        parsedCv.location,
+      ].filter(Boolean);
       let candLocation = '';
       if (rawCandLocations.length > 0) {
-        const cities = rawCandLocations.map(loc => this.extractCityFromAddress(loc));
+        const cities = rawCandLocations.map((loc) =>
+          this.extractCityFromAddress(loc),
+        );
         candLocation = [...new Set(cities.filter(Boolean))].join(', ');
       }
 
@@ -72,7 +77,7 @@ export class LocationStrategy implements IMatchingStrategy {
             message: 'Thiếu thông tin địa điểm, bỏ qua lọc',
             jobLocation: jobLocation || 'Không yêu cầu',
             candLocation: candLocation || 'Chưa cập nhật',
-            type: 'Không áp dụng'
+            type: 'Không áp dụng',
           },
         };
       }
@@ -129,24 +134,29 @@ export class LocationStrategy implements IMatchingStrategy {
     if (!city) return '';
     let normalized = city.toLowerCase().trim();
     normalized = normalized.replace(/^(thành phố|tp\.|tp|tỉnh)\s*/g, '').trim();
-    if (['hcm', 'hồ chí minh', 'ho chi minh'].includes(normalized)) return 'Hồ Chí Minh';
+    if (['hcm', 'hồ chí minh', 'ho chi minh'].includes(normalized))
+      return 'Hồ Chí Minh';
     if (['hn', 'hà nội', 'ha noi'].includes(normalized)) return 'Hà Nội';
     if (['đn', 'đà nẵng', 'da nang'].includes(normalized)) return 'Đà Nẵng';
-    
+
     // Capitalize each word (Unicode support)
     return normalized.replace(/(^|\s)\S/g, (l) => l.toUpperCase());
   }
 
   private extractCityFromAddress(address: string): string {
     if (!address) return '';
-    const parts = address.split(',').map(p => p.trim());
+    const parts = address.split(',').map((p) => p.trim());
     let cityPart = parts[parts.length - 1];
-    
+
     // Nếu phần cuối là "Việt Nam", lấy phần liền trước đó (Thành phố/Tỉnh)
-    if (parts.length > 1 && (cityPart.toLowerCase() === 'việt nam' || cityPart.toLowerCase() === 'vietnam')) {
+    if (
+      parts.length > 1 &&
+      (cityPart.toLowerCase() === 'việt nam' ||
+        cityPart.toLowerCase() === 'vietnam')
+    ) {
       cityPart = parts[parts.length - 2];
     }
-    
+
     return this.normalizeCity(cityPart);
   }
 }

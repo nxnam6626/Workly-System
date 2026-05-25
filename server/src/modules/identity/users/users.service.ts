@@ -39,7 +39,6 @@ export class UsersService {
     return this.userCreationService.addRoleToUser(userId, data);
   }
 
-
   async updateAvatar(userId: string, file: Express.Multer.File) {
     return this.userAvatarService.updateAvatar(userId, file);
   }
@@ -127,7 +126,6 @@ export class UsersService {
         }
       }
     });
-
 
     return this.findOne(userId);
   }

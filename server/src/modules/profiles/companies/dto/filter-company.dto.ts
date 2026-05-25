@@ -21,4 +21,8 @@ export class FilterCompanyDto {
   @IsOptional()
   @IsString()
   sortBy?: 'TYPICAL' | 'TRENDING' | 'ALPHABETICAL';
+
+  @IsOptional()
+  @IsString()
+  industry?: string;
 }

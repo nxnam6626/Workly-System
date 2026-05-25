@@ -82,7 +82,7 @@ export class FavoritesService {
           },
         },
       },
-      orderBy: { savedAt: "desc" },
+      orderBy: { savedAt: 'desc' },
     });
 
     // Extract jobPostingIds to check applications in bulk

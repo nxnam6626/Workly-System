@@ -14,8 +14,8 @@ export class WalletsService {
     return this.balanceService.getBalance(userId);
   }
 
-  async getTransactions(userId: string, skip?: number, take?: number) {
-    return this.balanceService.getTransactions(userId, skip, take);
+  async getTransactions(userId: string, skip?: number, take?: number, date?: string, search?: string) {
+    return this.balanceService.getTransactions(userId, skip, take, date, search);
   }
 
   async deduct(

@@ -96,7 +96,7 @@ Trả về:
               company_name: m.jobPosting.company.companyName,
               location: m.jobPosting.locationCity || 'Không xác định',
               salary: m.jobPosting.salaryMin
-                ? `${m.jobPosting.salaryMin} - ${m.jobPosting.salaryMax} ${m.jobPosting.currency}`
+                ? `${Math.floor(Number(m.jobPosting.salaryMin) / 1000000)} triệu - ${Math.floor(Number(m.jobPosting.salaryMax) / 1000000)} triệu ${m.jobPosting.currency}`
                 : 'Thỏa thuận',
               why_match: `Phù hợp kỹ năng: ${m.matchedSkills?.join(', ') || 'Chung'}`,
               percent: Math.round(m.score),

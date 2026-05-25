@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { WalletsService } from '@/modules/billing/wallets/wallets.service';
 import { ApplicationsNotificationService } from './applications-notification.service';
@@ -28,14 +32,21 @@ export class ApplicationStatusService {
 
     if (!existingApp) throw new NotFoundException('Application not found');
 
-    const recruiter = await this.prisma.recruiter.findUnique({ where: { userId: actionUserId } });
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId: actionUserId },
+    });
     if (!recruiter) throw new NotFoundException('Recruiter not found');
 
-    const isOwner = existingApp.jobPosting?.recruiterId === recruiter.recruiterId;
-    const isMasterOfCompany = recruiter.companyRole === 'MASTER' && recruiter.companyId === existingApp.jobPosting?.companyId;
+    const isOwner =
+      existingApp.jobPosting?.recruiterId === recruiter.recruiterId;
+    const isMasterOfCompany =
+      recruiter.companyRole === 'MASTER' &&
+      recruiter.companyId === existingApp.jobPosting?.companyId;
 
     if (!isOwner && !isMasterOfCompany) {
-      throw new ForbiddenException('Bạn không có quyền cập nhật trạng thái ứng viên này');
+      throw new ForbiddenException(
+        'Bạn không có quyền cập nhật trạng thái ứng viên này',
+      );
     }
 
     const isReschedule =
@@ -48,10 +59,15 @@ export class ApplicationStatusService {
       if (interviewDate) dataToUpdate.interviewDate = new Date(interviewDate);
       if (interviewTime) dataToUpdate.interviewTime = interviewTime;
       if (interviewLocation) dataToUpdate.interviewLocation = interviewLocation;
-      
+
       // SLA: Set expected result date and candidate response deadline
-      dataToUpdate.expectedResultAt = new Date(Date.now() + (existingApp.jobPosting?.slaInterviewDays || 5) * 24 * 60 * 60 * 1000);
-      dataToUpdate.candidateResponseAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h to respond
+      dataToUpdate.expectedResultAt = new Date(
+        Date.now() +
+          (existingApp.jobPosting?.slaInterviewDays || 5) * 24 * 60 * 60 * 1000,
+      );
+      dataToUpdate.candidateResponseAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ); // 24h to respond
       dataToUpdate.expectedResponseAt = null; // Done with initial response
     }
 
@@ -87,7 +103,12 @@ export class ApplicationStatusService {
           },
         },
         candidate: {
-          select: { userId: true, fullName: true, candidateId: true, user: { select: { email: true } } },
+          select: {
+            userId: true,
+            fullName: true,
+            candidateId: true,
+            user: { select: { email: true } },
+          },
         },
       },
     });
@@ -187,8 +208,11 @@ export class ApplicationStatusService {
     if (!application) throw new NotFoundException('Application not found');
     if (application.isUnlocked) return application;
 
-    const isOwner = application.jobPosting?.recruiterId === recruiter.recruiterId;
-    const isMasterOfCompany = recruiter.companyRole === 'MASTER' && recruiter.companyId === application.jobPosting?.companyId;
+    const isOwner =
+      application.jobPosting?.recruiterId === recruiter.recruiterId;
+    const isMasterOfCompany =
+      recruiter.companyRole === 'MASTER' &&
+      recruiter.companyId === application.jobPosting?.companyId;
 
     if (!isOwner && !isMasterOfCompany) {
       throw new ForbiddenException('Bạn không có quyền mở khóa ứng viên này');
@@ -203,7 +227,10 @@ export class ApplicationStatusService {
       where: { applicationId },
       data: {
         isUnlocked: true,
-        appStatus: application.appStatus === 'PENDING' ? 'REVIEWED' : application.appStatus,
+        appStatus:
+          application.appStatus === 'PENDING'
+            ? 'REVIEWED'
+            : application.appStatus,
       },
       include: {
         jobPosting: {
