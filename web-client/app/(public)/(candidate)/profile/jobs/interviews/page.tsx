@@ -27,6 +27,11 @@ interface Interview {
       companyName: string;
       logo: string | null;
     };
+    recruiter?: {
+      interviewSettings?: {
+        minNoticeHours: number;
+      };
+    };
   };
 }
 
