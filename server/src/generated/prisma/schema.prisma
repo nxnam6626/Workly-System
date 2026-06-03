@@ -103,18 +103,15 @@ model Candidate {
   userId             String            @unique
   birthYear          Int?
   currentSalary      String?
-  degree             String?
+  degrees            Degree[]
+  otherInfo          Json?
   desiredJob         Json?
   gender             String?
   industries         String[]          @default([])
   interests          String[]          @default([])
   isOpenToWork       Boolean           @default(false)
   languages          Json?
-<<<<<<< HEAD
-  otherInfo          Json?
-=======
   location           String?
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   softSkills         String[]          @default([])
   summary            String?
   totalYearsExp      Float?            @default(0)
@@ -127,11 +124,7 @@ model Candidate {
   candidateUnlocks   CandidateUnlock[]
   wallet             CandidateWallet?
   certifications     Certification[]
-<<<<<<< HEAD
-  degrees            Degree[]
-=======
   companyReviews     CompanyReview[]
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   conversations      Conversation[]
   experiences        Experience[]
   jobMatches         JobMatch[]

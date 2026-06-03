@@ -195,7 +195,6 @@ export class CandidateManagementService {
       gender,
       birthYear,
       currentSalary,
-      degree,
       industries,
       languages,
       softSkills,
@@ -216,7 +215,6 @@ export class CandidateManagementService {
           ...(gender !== undefined && { gender }),
           ...(birthYear !== undefined && { birthYear }),
           ...(currentSalary !== undefined && { currentSalary }),
-          ...(degree !== undefined && { degree }),
           ...(industries !== undefined && { industries }),
           ...(languages !== undefined && {
             languages: this.normalizeLanguages(languages),
@@ -467,7 +465,6 @@ export class CandidateManagementService {
             location: true,
             totalYearsExp: true,
             currentSalary: true,
-            degree: true,
             industries: true,
             languages: true,
             otherInfo: true,

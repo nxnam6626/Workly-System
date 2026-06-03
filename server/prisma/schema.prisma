@@ -103,7 +103,8 @@ model Candidate {
   userId             String            @unique
   birthYear          Int?
   currentSalary      String?
-  degree             String?
+  degrees            Degree[]
+  otherInfo          Json?
   desiredJob         Json?
   gender             String?
   industries         String[]          @default([])

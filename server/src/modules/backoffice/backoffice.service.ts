@@ -9,7 +9,7 @@ export class BackofficeService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async getDashboardStats() {
     const [
@@ -410,7 +410,6 @@ export class BackofficeService {
       .slice(0, limit);
   }
 
-<<<<<<< HEAD
   async getPendingVerifications() {
     const certifications = await this.prisma.certification.findMany({
       where: { status: 'PENDING' },
@@ -526,13 +525,13 @@ export class BackofficeService {
     );
 
     return deg;
-=======
+  }
+
   async getUserViolationLogs(userId: string) {
     // Trigger restart 3
     return this.prisma.violationLog.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-    });
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
   }
-}

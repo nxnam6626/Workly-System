@@ -171,7 +171,6 @@ export class UserDataService {
             location: true,
             totalYearsExp: true,
             currentSalary: true,
-            degree: true,
             industries: true,
             languages: true,
             otherInfo: true,
