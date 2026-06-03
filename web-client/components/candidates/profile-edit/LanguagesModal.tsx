@@ -33,7 +33,7 @@ const schema = z.object({
   languages: z.array(z.object({
     name: z.string().min(1, "Ngôn ngữ không được trống"),
     certificate: z.string().min(1, "Chứng chỉ không được trống"),
-    score: z.string().optional().default(""),
+    score: z.string(),
   })),
 });
 
