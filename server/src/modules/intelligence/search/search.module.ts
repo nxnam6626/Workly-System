@@ -31,10 +31,14 @@ import { UserEsService } from './services/user-es.service';
     {
       provide: Client,
       useFactory: () => {
-        return new Client({
+        const options: any = {
           node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
           maxRetries: 0,
-        });
+        };
+        if (process.env.ELASTICSEARCH_API_KEY) {
+          options.auth = { apiKey: process.env.ELASTICSEARCH_API_KEY };
+        }
+        return new Client(options);
       },
     },
   ],
