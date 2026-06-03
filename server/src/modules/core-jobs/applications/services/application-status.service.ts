@@ -2,10 +2,13 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { WalletsService } from '@/modules/billing/wallets/wallets.service';
 import { ApplicationsNotificationService } from './applications-notification.service';
+import { ApplicationInterviewService } from './application-interview.service';
 import { MailService } from '@/mail/mail.service';
 
 @Injectable()
@@ -15,6 +18,8 @@ export class ApplicationStatusService {
     private walletsService: WalletsService,
     private notificationService: ApplicationsNotificationService,
     private mailService: MailService,
+    @Inject(forwardRef(() => ApplicationInterviewService))
+    private interviewService: ApplicationInterviewService,
   ) {}
 
   async updateStatus(
@@ -54,11 +59,29 @@ export class ApplicationStatusService {
       existingApp?.appStatus === 'INTERVIEWING' &&
       existingApp?.interviewDate != null;
 
-    const dataToUpdate: any = { appStatus: status };
-    if (status === 'INTERVIEWING') {
-      if (interviewDate) dataToUpdate.interviewDate = new Date(interviewDate);
-      if (interviewTime) dataToUpdate.interviewTime = interviewTime;
-      if (interviewLocation) dataToUpdate.interviewLocation = interviewLocation;
+    let finalStatus = status;
+    const dataToUpdate: any = {};
+
+    if (status === 'INTERVIEWING' || status === 'INTERVIEW_CONFIRMED') {
+      if (interviewDate && interviewTime) {
+        dataToUpdate.interviewDate = new Date(interviewDate);
+        dataToUpdate.interviewTime = interviewTime;
+        if (interviewLocation) dataToUpdate.interviewLocation = interviewLocation;
+      } else {
+        // Auto-schedule using earliest available slot
+        if (existingApp.jobPostingId && recruiter.recruiterId) {
+          const slot = await this.interviewService.findAvailableInterviewSlot(
+            existingApp.jobPostingId,
+            recruiter.recruiterId
+          );
+          if (slot.date && slot.time) {
+            dataToUpdate.interviewDate = slot.date;
+            dataToUpdate.interviewTime = slot.time;
+            dataToUpdate.interviewLocation = slot.location;
+            finalStatus = 'INTERVIEW_CONFIRMED';
+          }
+        }
+      }
 
       // SLA: Set expected result date and candidate response deadline
       dataToUpdate.expectedResultAt = new Date(
@@ -70,6 +93,8 @@ export class ApplicationStatusService {
       ); // 24h to respond
       dataToUpdate.expectedResponseAt = null; // Done with initial response
     }
+
+    dataToUpdate.appStatus = finalStatus;
 
     if (status === 'ACCEPTED' || status === 'REJECTED') {
       dataToUpdate.expectedResponseAt = null;
@@ -86,6 +111,14 @@ export class ApplicationStatusService {
         where: { jobPostingId: existingApp.jobPostingId },
         data: {
           vacancies: { decrement: 1 },
+        },
+      });
+
+      // Turn off "ready to work" status for candidate
+      await this.prisma.candidate.update({
+        where: { candidateId: existingApp.candidateId },
+        data: {
+          isOpenToWork: false,
         },
       });
     }
@@ -124,11 +157,16 @@ export class ApplicationStatusService {
           candidateUserId,
           companyName,
           jobTitle,
-          status,
-          { interviewDate, interviewTime, interviewLocation, isReschedule },
+          finalStatus,
+          { 
+            interviewDate: dataToUpdate.interviewDate || interviewDate, 
+            interviewTime: dataToUpdate.interviewTime || interviewTime, 
+            interviewLocation: dataToUpdate.interviewLocation || interviewLocation, 
+            isReschedule 
+          },
         );
 
-      if (['INTERVIEWING', 'ACCEPTED', 'REJECTED'].includes(status)) {
+      if (['INTERVIEWING', 'INTERVIEW_CONFIRMED', 'ACCEPTED', 'REJECTED'].includes(finalStatus)) {
         const actionRecruiter = await this.prisma.recruiter.findUnique({
           where: { userId: actionUserId },
         });
@@ -147,7 +185,7 @@ export class ApplicationStatusService {
         }
       }
 
-      if (status === 'INTERVIEWING' && interviewDate && interviewTime) {
+      if (['INTERVIEWING', 'INTERVIEW_CONFIRMED'].includes(finalStatus) && (dataToUpdate.interviewDate || interviewDate) && (dataToUpdate.interviewTime || interviewTime)) {
         const candidateEmail = application.candidate.user?.email;
         if (candidateEmail) {
           await this.mailService.sendInterviewInviteICS(
@@ -155,9 +193,9 @@ export class ApplicationStatusService {
             application.candidate.fullName,
             companyName,
             jobTitle,
-            interviewDate,
-            interviewTime,
-            interviewLocation || 'Đang cập nhật',
+            dataToUpdate.interviewDate || interviewDate,
+            dataToUpdate.interviewTime || interviewTime,
+            dataToUpdate.interviewLocation || interviewLocation || 'Đang cập nhật',
           );
         }
       }

@@ -9,7 +9,7 @@ export class ApplicationsNotificationService {
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
     private messagesGateway: MessagesGateway,
-  ) {}
+  ) { }
 
   async notifyRecruiterOfNewApplication(application: any) {
     if (!application.jobPosting.recruiter?.userId) return;
@@ -80,11 +80,11 @@ export class ApplicationsNotificationService {
     interviewDate: Date,
   ) {
     const dateStr = interviewDate.toLocaleDateString('vi-VN');
-    const msgContent = `CHÚC MỪNG! Dựa trên phân tích AI hệ thống, hồ sơ của bạn cho vị trí "${jobTitle}" đạt điểm kỹ năng xuất sắc. \n\nHệ thống đã tự động cấp đặc quyền vượt qua vòng hồ sơ và xếp lịch Phỏng vấn đặc cách cho bạn vào lúc ${interviewTime} ngày ${dateStr}. \n\nVui lòng giữ liên lạc để phòng nhân sự phản hồi sớm nhất!`;
+    const msgContent = `CHÚC MỪNG! Dựa trên phân tích AI hệ thống, hồ sơ của bạn cho vị trí "${jobTitle}" đạt điểm kỹ năng xuất sắc. \n\nHệ thống đã tự động cấp đặc quyền vượt qua vòng hồ sơ và xếp lịch Phỏng vấn cho bạn vào lúc ${interviewTime} ngày ${dateStr}. \n\nVui lòng giữ liên lạc để phòng nhân sự phản hồi sớm nhất!`;
 
     await this.notificationsService.create(
       candidateUserId,
-      'Lịch Phỏng Vấn Đặc Cách',
+      'Lịch Phỏng Vấn',
       msgContent,
       'success',
       '/profile/jobs/interviews',
@@ -93,7 +93,7 @@ export class ApplicationsNotificationService {
     this.messagesGateway.server
       .to(`user_${candidateUserId}`)
       .emit('notification', {
-        title: 'Lịch Phỏng Vấn Đặc Cách',
+        title: 'Lịch Phỏng Vấn',
         message: msgContent,
         type: 'success',
         link: '/profile/jobs/interviews',
@@ -143,6 +143,28 @@ export class ApplicationsNotificationService {
       candidateUserId,
     );
   }
+
+  async notifyCandidateOfAutoReject(
+    candidateUserId: string,
+    companyName: string,
+    jobTitle: string,
+  ) {
+    const title = 'Kết Quả Ứng Tuyển';
+    const message = `Cảm ơn bạn đã quan tâm đến ${companyName}. Rất tiếc, AI của hệ thống đánh giá hồ sơ của bạn chưa đủ độ phù hợp với yêu cầu của vị trí "${jobTitle}". Chúc bạn may mắn lần sau.`;
+
+    await this.notificationsService.create(
+      candidateUserId,
+      title,
+      message,
+      'info',
+      '/profile/jobs/applied',
+    );
+
+    this.messagesGateway.server
+      .to(`user_${candidateUserId}`)
+      .emit('notification', { title, message, type: 'info', link: '/profile/jobs/applied' });
+  }
+
 
   async notifyCandidateOfStatusUpdate(
     candidateUserId: string,
@@ -203,6 +225,12 @@ export class ApplicationsNotificationService {
     this.messagesGateway.server
       .to(`user_${candidateUserId}`)
       .emit('notification', { title, message, type, link });
+
+    if (status === 'ACCEPTED') {
+      this.messagesGateway.server
+        .to(`user_${candidateUserId}`)
+        .emit('profileUpdated');
+    }
 
     return message;
   }

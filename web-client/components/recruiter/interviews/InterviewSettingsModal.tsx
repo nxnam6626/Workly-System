@@ -27,6 +27,8 @@ export function InterviewSettingsModal({ isOpen, onClose, onSuccess }: Interview
   const [newBlockDateTo, setNewBlockDateTo] = useState('');
   const [showWarning, setShowWarning] = useState(false);
 
+  const [branches, setBranches] = useState<any[]>([]);
+
   useEffect(() => {
     if (isOpen) {
       fetchSettings();
@@ -36,9 +38,16 @@ export function InterviewSettingsModal({ isOpen, onClose, onSuccess }: Interview
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/recruiters/me/interview-settings');
+      const [res, companyRes] = await Promise.all([
+        api.get('/recruiters/me/interview-settings'),
+        api.get('/companies/my-company').catch(() => ({ data: {} })),
+      ]);
+      
       if (res.data) {
         setSettings(res.data);
+      }
+      if (companyRes.data?.branches) {
+        setBranches(companyRes.data.branches);
       }
     } catch (error) {
       console.error(error);
@@ -174,6 +183,22 @@ export function InterviewSettingsModal({ isOpen, onClose, onSuccess }: Interview
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                   />
                   <p className="text-xs text-slate-500 mt-1">Địa điểm này sẽ được gán tự động khi ứng viên chốt lịch.</p>
+                  {branches.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-bold text-slate-600 mb-2">Chọn nhanh từ các chi nhánh công ty:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {branches.map(b => (
+                          <button
+                            key={b.branchId}
+                            onClick={() => setSettings({ ...settings, defaultLocation: b.address })}
+                            className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold hover:bg-slate-100 hover:border-slate-300 transition-all text-left"
+                          >
+                            <span className="font-bold">{b.name}</span>: {b.address}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">

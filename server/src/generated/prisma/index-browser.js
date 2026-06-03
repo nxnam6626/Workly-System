@@ -136,8 +136,8 @@ exports.Prisma.UserScalarFieldEnum = {
   providerId: 'providerId',
   isOnline: 'isOnline',
   lastActive: 'lastActive',
-  violations: 'violations',
-  accountLevel: 'accountLevel'
+  accountLevel: 'accountLevel',
+  violations: 'violations'
 };
 
 exports.Prisma.RoleScalarFieldEnum = {
@@ -173,9 +173,9 @@ exports.Prisma.JobAlertScalarFieldEnum = {
 
 exports.Prisma.AdminScalarFieldEnum = {
   adminId: 'adminId',
-  fullName: 'fullName',
   lastAction: 'lastAction',
   userId: 'userId',
+  fullName: 'fullName',
   permissions: 'permissions'
 };
 
@@ -187,21 +187,25 @@ exports.Prisma.CandidateScalarFieldEnum = {
   gpa: 'gpa',
   cvUrl: 'cvUrl',
   userId: 'userId',
-  isOpenToWork: 'isOpenToWork',
-  jobSearchExpiresAt: 'jobSearchExpiresAt',
-  location: 'location',
-  desiredJob: 'desiredJob',
-  summary: 'summary',
   birthYear: 'birthYear',
   currentSalary: 'currentSalary',
-  totalYearsExp: 'totalYearsExp',
   degree: 'degree',
+  desiredJob: 'desiredJob',
   gender: 'gender',
   industries: 'industries',
   interests: 'interests',
+  isOpenToWork: 'isOpenToWork',
   languages: 'languages',
+<<<<<<< HEAD
   otherInfo: 'otherInfo',
   softSkills: 'softSkills'
+=======
+  location: 'location',
+  softSkills: 'softSkills',
+  summary: 'summary',
+  totalYearsExp: 'totalYearsExp',
+  jobSearchExpiresAt: 'jobSearchExpiresAt'
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 };
 
 exports.Prisma.ExperienceScalarFieldEnum = {
@@ -246,8 +250,8 @@ exports.Prisma.SkillScalarFieldEnum = {
   skillId: 'skillId',
   skillName: 'skillName',
   candidateId: 'candidateId',
-  level: 'level',
-  category: 'category'
+  category: 'category',
+  level: 'level'
 };
 
 exports.Prisma.ProjectScalarFieldEnum = {
@@ -261,7 +265,6 @@ exports.Prisma.ProjectScalarFieldEnum = {
 
 exports.Prisma.RecruiterScalarFieldEnum = {
   recruiterId: 'recruiterId',
-  fullName: 'fullName',
   bio: 'bio',
   position: 'position',
   userId: 'userId',
@@ -270,11 +273,12 @@ exports.Prisma.RecruiterScalarFieldEnum = {
   aiInsightsCache: 'aiInsightsCache',
   aiInsightsCacheKey: 'aiInsightsCacheKey',
   aiInsightsCachedAt: 'aiInsightsCachedAt',
-  interviewSettings: 'interviewSettings',
+  companyRole: 'companyRole',
   createdAt: 'createdAt',
+  fullName: 'fullName',
+  interviewSettings: 'interviewSettings',
   updatedAt: 'updatedAt',
-  violationCount: 'violationCount',
-  companyRole: 'companyRole'
+  violationCount: 'violationCount'
 };
 
 exports.Prisma.TransactionScalarFieldEnum = {
@@ -304,6 +308,7 @@ exports.Prisma.CompanyScalarFieldEnum = {
   companySize: 'companySize',
   businessLicenseUrl: 'businessLicenseUrl',
   adminId: 'adminId',
+  cultureContent: 'cultureContent',
   enterpriseType: 'enterpriseType',
   internationalName: 'internationalName',
   mainIndustry: 'mainIndustry',
@@ -311,8 +316,7 @@ exports.Prisma.CompanyScalarFieldEnum = {
   shortName: 'shortName',
   slug: 'slug',
   status: 'status',
-  taxAddress: 'taxAddress',
-  cultureContent: 'cultureContent'
+  taxAddress: 'taxAddress'
 };
 
 exports.Prisma.CompanySectionScalarFieldEnum = {
@@ -358,7 +362,6 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   salaryMax: 'salaryMax',
   currency: 'currency',
   jobType: 'jobType',
-  jobLevel: 'jobLevel',
   experience: 'experience',
   vacancies: 'vacancies',
   locationCity: 'locationCity',
@@ -368,19 +371,20 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   approvedBy: 'approvedBy',
-  moderationFeedback: 'moderationFeedback',
   recruiterId: 'recruiterId',
   companyId: 'companyId',
   structuredRequirements: 'structuredRequirements',
   viewCount: 'viewCount',
-  jobTier: 'jobTier',
-  refreshedAt: 'refreshedAt',
-  pausedAt: 'pausedAt',
-  slug: 'slug',
   autoInviteMatches: 'autoInviteMatches',
-  autoRejectThreshold: 'autoRejectThreshold',
   autoInviteThreshold: 'autoInviteThreshold',
+  autoRejectThreshold: 'autoRejectThreshold',
+  jobLevel: 'jobLevel',
+  jobTier: 'jobTier',
   matchMode: 'matchMode',
+  moderationFeedback: 'moderationFeedback',
+  pausedAt: 'pausedAt',
+  refreshedAt: 'refreshedAt',
+  slug: 'slug',
   slaApplicationDays: 'slaApplicationDays',
   slaInterviewDays: 'slaInterviewDays'
 };
@@ -427,9 +431,9 @@ exports.Prisma.ApplicationScalarFieldEnum = {
   interviewTime: 'interviewTime',
   aiMatchScore: 'aiMatchScore',
   isUnlocked: 'isUnlocked',
+  candidateResponseAt: 'candidateResponseAt',
   expectedResponseAt: 'expectedResponseAt',
-  expectedResultAt: 'expectedResultAt',
-  candidateResponseAt: 'candidateResponseAt'
+  expectedResultAt: 'expectedResultAt'
 };
 
 exports.Prisma.SavedJobScalarFieldEnum = {
@@ -514,6 +518,7 @@ exports.Prisma.SupportRequestScalarFieldEnum = {
   email: 'email',
   subject: 'subject',
   message: 'message',
+  attachmentUrl: 'attachmentUrl',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -532,9 +537,9 @@ exports.Prisma.CandidateUnlockScalarFieldEnum = {
   recruiterId: 'recruiterId',
   candidateId: 'candidateId',
   jobPostingId: 'jobPostingId',
-  cvId: 'cvId',
-  creditSpent: 'creditSpent',
   unlockedAt: 'unlockedAt',
+  creditSpent: 'creditSpent',
+  cvId: 'cvId',
   companyCompanyId: 'companyCompanyId'
 };
 
@@ -547,6 +552,13 @@ exports.Prisma.CandidateReviewScalarFieldEnum = {
   content: 'content',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ViolationLogScalarFieldEnum = {
+  logId: 'logId',
+  userId: 'userId',
+  reason: 'reason',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.InterviewEvaluationScalarFieldEnum = {
@@ -587,6 +599,17 @@ exports.Prisma.CandidateReportScalarFieldEnum = {
   applicationId: 'applicationId',
   reason: 'reason',
   content: 'content',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CompanyReviewReportScalarFieldEnum = {
+  reportId: 'reportId',
+  reviewId: 'reviewId',
+  recruiterId: 'recruiterId',
+  reason: 'reason',
+  evidence: 'evidence',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -667,17 +690,6 @@ exports.JobType = exports.$Enums.JobType = {
   OTHER: 'OTHER'
 };
 
-exports.JobLevel = exports.$Enums.JobLevel = {
-  INTERN: 'INTERN',
-  STAFF: 'STAFF',
-  TEAM_LEADER: 'TEAM_LEADER',
-  DEPARTMENT_HEAD: 'DEPARTMENT_HEAD',
-  MANAGER: 'MANAGER',
-  BRANCH_MANAGER: 'BRANCH_MANAGER',
-  VICE_DIRECTOR: 'VICE_DIRECTOR',
-  DIRECTOR: 'DIRECTOR'
-};
-
 exports.JobStatus = exports.$Enums.JobStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -685,6 +697,17 @@ exports.JobStatus = exports.$Enums.JobStatus = {
   EXPIRED: 'EXPIRED',
   CLOSED: 'CLOSED',
   PAUSED: 'PAUSED'
+};
+
+exports.JobLevel = exports.$Enums.JobLevel = {
+  INTERN: 'INTERN',
+  STAFF: 'STAFF',
+  MANAGER: 'MANAGER',
+  DIRECTOR: 'DIRECTOR',
+  TEAM_LEADER: 'TEAM_LEADER',
+  DEPARTMENT_HEAD: 'DEPARTMENT_HEAD',
+  BRANCH_MANAGER: 'BRANCH_MANAGER',
+  VICE_DIRECTOR: 'VICE_DIRECTOR'
 };
 
 exports.JobTier = exports.$Enums.JobTier = {
@@ -756,9 +779,11 @@ exports.Prisma.ModelName = {
   AiQueryCache: 'AiQueryCache',
   CandidateUnlock: 'CandidateUnlock',
   CandidateReview: 'CandidateReview',
+  ViolationLog: 'ViolationLog',
   InterviewEvaluation: 'InterviewEvaluation',
   CompanyReview: 'CompanyReview',
-  CandidateReport: 'CandidateReport'
+  CandidateReport: 'CandidateReport',
+  CompanyReviewReport: 'CompanyReviewReport'
 };
 
 /**

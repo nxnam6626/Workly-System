@@ -32,6 +32,8 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
   const jobTitle = (user as any)?.candidate?.major || 'Ứng viên';
   const initial = displayName.charAt(0).toUpperCase();
 
+  const [isConfirmTurnOnModalOpen, setIsConfirmTurnOnModalOpen] = useState(false);
+
   // Đọc trạng thái mở tìm việc: ưu tiên prop truyền vào, nếu không có thì đọc từ Auth Store
   const isLookingForJob = isOpenToWork !== undefined ? isOpenToWork : (user?.candidate?.isOpenToWork ?? true);
 
@@ -70,7 +72,25 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
        return;
     }
     
-    // If turning ON, directly execute
+    // Check if turning ON and has an accepted job
+    if (newValue === true) {
+      const toastId = (await import('react-hot-toast')).default.loading("Đang kiểm tra trạng thái...");
+      try {
+        const { default: api } = await import('@/lib/api');
+        const res = await api.get('/applications/me');
+        (await import('react-hot-toast')).default.dismiss(toastId);
+        
+        const hasAccepted = res.data?.some((app: any) => app.appStatus === 'ACCEPTED');
+        if (hasAccepted) {
+          setIsConfirmTurnOnModalOpen(true);
+          return;
+        }
+      } catch (err) {
+        (await import('react-hot-toast')).default.dismiss(toastId);
+      }
+    }
+    
+    // If turning ON and no accepted jobs, directly execute
     executeToggle(newValue);
   };
 
@@ -265,6 +285,17 @@ export const ProfileSidebar = React.memo(function ProfileSidebar({
         confirmLabel="Đồng ý ẩn"
         cancelLabel="Hủy bỏ"
         type="warning"
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmTurnOnModalOpen}
+        onClose={() => setIsConfirmTurnOnModalOpen(false)}
+        onConfirm={() => executeToggle(true)}
+        title="Bật trạng thái tìm việc?"
+        message="Bạn đã được nhận vào một công việc rồi. Bạn có chắc chắn muốn bật lại trạng thái sẵn sàng tìm việc không?"
+        confirmLabel="Vẫn bật"
+        cancelLabel="Hủy bỏ"
+        type="info"
       />
 
       {/* Navigation Menu */}

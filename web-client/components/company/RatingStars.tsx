@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, StarHalf } from 'lucide-react';
 
 interface RatingStarsProps {
   rating: number;
@@ -20,18 +20,37 @@ export default function RatingStars({
     <div className="flex gap-1">
       {[...Array(maxRating)].map((_, i) => {
         const starValue = i + 1;
-        return (
-          <Star
-            key={i}
-            size={size}
-            className={`${
-              starValue <= rating 
-                ? 'fill-amber-400 text-amber-400' 
-                : 'text-slate-200 fill-slate-200'
-            } ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
-            onClick={() => interactive && onRatingChange?.(starValue)}
-          />
-        );
+        const isFull = starValue <= Math.floor(rating);
+        const isHalf = !isFull && starValue === Math.ceil(rating) && rating % 1 !== 0;
+
+        if (isFull) {
+          return (
+            <Star
+              key={i}
+              size={size}
+              className={`fill-amber-400 text-amber-400 ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+              onClick={() => interactive && onRatingChange?.(starValue)}
+            />
+          );
+        } else if (isHalf) {
+          return (
+            <StarHalf
+              key={i}
+              size={size}
+              className={`fill-amber-400 text-amber-400 ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+              onClick={() => interactive && onRatingChange?.(starValue)}
+            />
+          );
+        } else {
+          return (
+            <Star
+              key={i}
+              size={size}
+              className={`text-slate-200 fill-slate-200 ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+              onClick={() => interactive && onRatingChange?.(starValue)}
+            />
+          );
+        }
       })}
     </div>
   );

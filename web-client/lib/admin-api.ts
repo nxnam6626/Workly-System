@@ -120,6 +120,38 @@ export const adminReviewsApi = {
     api.delete(`/company-reviews/admin/${reviewId}`).then(r => r.data),
 };
 
+// ─── Company Review Reports ───────────────────────────────────────────────────
+
+export interface CompanyReviewReportDto {
+  reportId: string;
+  reviewId: string;
+  recruiterId: string;
+  reason: string;
+  evidence: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  recruiter: {
+    recruiterId: string;
+    fullName: string;
+    company: {
+      companyName: string;
+    };
+  };
+  review: {
+    content: string;
+    candidate: {
+      fullName: string;
+    };
+  };
+}
+
+export const adminReviewReportsApi = {
+  getAll: (params: { page?: number; limit?: number; status?: string }) =>
+    api.get<{ data: CompanyReviewReportDto[]; meta: any }>('/company-reviews/admin/reports/all', { params }).then(r => r.data),
+  resolve: (reportId: string, action: 'DELETE_REVIEW' | 'REJECT_REPORT') =>
+    api.patch(`/company-reviews/admin/reports/${reportId}/resolve`, { action }).then(r => r.data),
+};
+
 // ─── Crawl Logs ───────────────────────────────────────────────────────────────
 
 export const crawlLogsApi = {
@@ -448,6 +480,9 @@ export const adminDashboardApi = {
 
   getRecentTransactions: (limit?: number, companyId?: string): Promise<any[]> =>
     api.get('/admin/revenue/transactions', { params: { limit, companyId } }).then((r) => r.data),
+
+  getUserViolationLogs: (userId: string): Promise<{ logId: string; reason: string; createdAt: string }[]> =>
+    api.get(`/admin/users/${userId}/violations/logs`).then((r) => r.data),
 };
 
 // ─── Admin Support Management ──────────────────────────────────────────────────
@@ -461,6 +496,7 @@ export interface SupportRequest {
   status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
   createdAt: string;
   updatedAt: string;
+  attachmentUrl?: string;
   user?: {
     userId: string;
     email: string;
@@ -477,6 +513,9 @@ export const adminSupportApi = {
 
   updateStatus: (id: string, status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED'): Promise<SupportRequest> =>
     api.patch(`/support/${id}/status`, { status }).then((r) => r.data),
+
+  replyToRequest: (id: string, message: string): Promise<SupportRequest> =>
+    api.post(`/support/${id}/reply`, { message }).then((r) => r.data),
 };
 
 // ─── Admin Analytics AI ───────────────────────────────────────────────────────

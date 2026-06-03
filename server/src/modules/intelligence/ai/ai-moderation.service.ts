@@ -106,7 +106,7 @@ export class AiModerationService {
     if (!this.isConfigured) return { isEvasion: false, textExtracted: '' };
     try {
       const model = this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
       });
       const prompt = `Trích xuất toàn bộ văn bản (text), số điện thoại, chữ viết tay, mã QR, link ứng dụng trong bức ảnh này. Liệt kê rõ ràng tất cả.`;
 
@@ -385,5 +385,53 @@ Trả về đúng định dạng JSON: {"safe":true|false,"reason":"mô tả n�
       reason: 'AI unavailable, image allowed by default.',
       usedAI: false,
     };
+  }
+
+  async verifyPaymentReceipt(
+    buffer: Buffer,
+    mimeType: string,
+  ): Promise<{ isValid: boolean; amount: number; orderCode: number | null; transactionCode: string | null }> {
+    if (!this.isConfigured) return { isValid: false, amount: 0, orderCode: null, transactionCode: null };
+    try {
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        generationConfig: { responseMimeType: 'application/json' },
+      });
+      const prompt = `Bạn là hệ thống kiểm duyệt biên lai thanh toán chuyển khoản ngân hàng PayOS/VietQR.
+Nhiệm vụ của bạn là đọc thông tin trên ảnh biên lai (nếu có) và trả về thông tin dưới dạng JSON thuần.
+- Kiểm tra xem đây có phải là ảnh biên lai/chụp màn hình chuyển khoản thành công hoặc màn hình QR code thanh toán không? (Nếu không phải, isValid = false).
+- Trích xuất số tiền thanh toán (nếu có), loại bỏ dấu phẩy/chấm để thành số nguyên. (VD: 50.000 -> 50000).
+- CỰC KỲ QUAN TRỌNG: Tìm và trích xuất "Mã giao dịch" hoặc "Nội dung chuyển khoản". 
+  + Nếu có một dãy ký tự dạng chữ và số (ví dụ: CS93P1BU5Z1, VQRIO123), hãy gán nó vào "transactionCode".
+  + Nếu có một con số gồm đúng 6 chữ số liên tiếp (ví dụ: 123456), hãy gán nó vào "orderCode".
+  + Có thể gán cả 2 nếu tìm thấy cả 2, hoặc null nếu không tìm thấy. LƯU Ý: PayOS thường dùng mã chữ+số làm nội dung chuyển khoản!
+
+Định dạng JSON yêu cầu trả về:
+{"isValid": true|false, "amount": number, "orderCode": number|null, "transactionCode": string|null}`;
+
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: buffer.toString('base64'),
+            mimeType: mimeType,
+          },
+        },
+      ]);
+      const raw = result.response.text().replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const parsed = JSON.parse(raw);
+
+      this.logger.log(`[AiModerationService] verifyPaymentReceipt: isValid=${parsed.isValid}, amount=${parsed.amount}, orderCode=${parsed.orderCode}, transactionCode=${parsed.transactionCode}`);
+
+      return {
+        isValid: parsed.isValid === true,
+        amount: Number(parsed.amount) || 0,
+        orderCode: parsed.orderCode ? Number(parsed.orderCode) : null,
+        transactionCode: parsed.transactionCode ? String(parsed.transactionCode) : null,
+      };
+    } catch (e: any) {
+      this.logger.error('Failed to verify payment receipt: ' + e.message);
+      return { isValid: false, amount: 0, orderCode: null, transactionCode: null };
+    }
   }
 }

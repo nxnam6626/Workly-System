@@ -122,7 +122,13 @@ export default function UserDetailModal({
     setLoadingViolations(true);
     setShowViolations(true);
     try {
+<<<<<<< HEAD
       const data = await adminUsersApi.getUserViolations(user.userId);
+=======
+      // @ts-ignore
+      const { adminDashboardApi } = await import('@/lib/admin-api');
+      const data = await adminDashboardApi.getUserViolationLogs(user.userId);
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
       setViolations(data);
     } catch (e) {
       console.error(e);
@@ -305,6 +311,7 @@ export default function UserDetailModal({
           </div>
         )}
 
+<<<<<<< HEAD
         {/* Modal Content Switch */}
         {activeTab === 'verification' ? (
           /* Option B: Integrated Two-Column Verification Panel */
@@ -321,6 +328,93 @@ export default function UserDetailModal({
                     {candidate.degrees.map((deg) => {
                       const isSelected = selectedItemId === deg.degreeId && selectedItemType === 'degree';
                       return (
+=======
+            {/* Role dropdown removed per user request */}
+
+            {roles.includes('ADMIN') && user.admin && (
+              <div className="mt-5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-bold text-slate-800">Quyền hạn hệ thống</span>
+                  </div>
+                  {user.admin.permissions.includes('SUPER_ADMIN') ? (
+                    <span className="text-[10px] uppercase font-bold text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded-full">Toàn Quyền</span>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (editingPermissions && onUpdatePermissions) {
+                          onUpdatePermissions(user.userId, tempIsSupreme ? ['SUPER_ADMIN'] : tempPermissions);
+                          setEditingPermissions(false);
+                        } else {
+                          setTempPermissions(user.admin!.permissions || []);
+                          setTempIsSupreme(user.admin!.permissions.includes('SUPER_ADMIN'));
+                          setEditingPermissions(true);
+                        }
+                      }}
+                      disabled={isProcessing}
+                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
+                    >
+                      {editingPermissions ? 'Lưu quyền' : 'Chỉnh sửa'}
+                    </button>
+                  )}
+                </div>
+                
+                {user.admin.permissions.includes('SUPER_ADMIN') && !editingPermissions ? (
+                  <p className="text-xs text-slate-600">Supreme Admin - tài khoản này có đầy đủ các quyền và không bị giới hạn.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {editingPermissions && (
+                      <label className="flex items-start gap-3 cursor-pointer group pb-2 border-b border-slate-100">
+                        <div className="flex items-center h-5 mt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={tempIsSupreme}
+                            onChange={(e) => {
+                              setTempIsSupreme(e.target.checked);
+                              if (e.target.checked) setTempPermissions([]);
+                            }}
+                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+                          />
+                        </div>
+                        <div>
+                          <p className={`text-sm font-bold ${tempIsSupreme ? 'text-indigo-700' : 'text-slate-800'}`}>Toàn Quyền (Supreme Admin)</p>
+                          <p className="text-xs text-slate-500">Bật tùy chọn này để cấp toàn quyền hệ thống.</p>
+                        </div>
+                      </label>
+                    )}
+
+                    {!tempIsSupreme && [
+                      { id: 'MANAGE_USERS', label: 'Quản lý Người dùng' },
+                      { id: 'MANAGE_JOBS', label: 'Quản lý Việc làm' },
+                      { id: 'MANAGE_REVENUE', label: 'Quản lý Doanh thu' },
+                      { id: 'MANAGE_SUPPORT', label: 'Chăm sóc Khách hàng' },
+                    ].map(perm => (
+                      <label key={perm.id} className={`flex items-center gap-2.5 text-sm ${editingPermissions ? 'cursor-pointer' : 'opacity-80'}`}>
+                        <input
+                          type="checkbox"
+                          disabled={!editingPermissions || isProcessing}
+                          checked={tempPermissions.includes(perm.id)}
+                          onChange={(e) => {
+                            let newPerms = [...tempPermissions];
+                            if (e.target.checked) newPerms.push(perm.id);
+                            else newPerms = newPerms.filter(p => p !== perm.id);
+
+                            if (newPerms.length === 4) {
+                              setTempIsSupreme(true);
+                              setTempPermissions([]);
+                            } else {
+                              setTempPermissions(newPerms);
+                            }
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
+                        />
+                        <span className={tempPermissions.includes(perm.id) ? 'font-medium text-slate-800' : 'text-slate-500'}>{perm.label}</span>
+                      </label>
+                    ))}
+                    {editingPermissions && (
+                      <div className="flex justify-end mt-2">
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
                         <button
                           key={deg.degreeId}
                           onClick={() => {
@@ -424,6 +518,7 @@ export default function UserDetailModal({
                       );
                     })}
                   </div>
+<<<<<<< HEAD
                 ) : (
                   <p className="text-xs text-slate-400 italic pl-1 py-1">Chưa khai báo chứng chỉ chuyên môn.</p>
                 )}
@@ -531,6 +626,87 @@ export default function UserDetailModal({
                             </div>
                           )}
                         </div>
+=======
+
+                  {user.recruiter.recruiterWallet && (
+                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                       <div className="flex items-center gap-2 text-sm text-slate-700">
+                         <Search className="w-4 h-4 text-emerald-500" />
+                         <span className="font-medium">Lượt mở khóa CV:</span>
+                         <span className="font-bold text-emerald-600">
+                           {user.recruiter.recruiterWallet.cvUnlockQuota} lượt
+                         </span>
+                       </div>
+                     </div>
+                  )}
+
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Global Rule Violations */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Vi phạm quy tắc</p>
+            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className={`w-4 h-4 ${(user as any).violations >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
+                <span className="font-medium text-slate-700">Vi phạm gian lận:</span>
+                <span className={`font-bold ${(user as any).violations >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
+                  {(user as any).violations || 0}/3
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={loadViolations}
+                  disabled={isProcessing}
+                  className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+                >
+                  {showViolations ? 'Ẩn lịch sử' : 'Lịch sử vi phạm'}
+                </button>
+                {((user as any).violations > 0 || (user.recruiter?.violationCount ?? 0) > 0) && (
+                  <button
+                    onClick={() => {
+                      onResetViolations(user.userId);
+                      setViolations([]);
+                      setShowViolations(false);
+                    }}
+                    disabled={isProcessing}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Khôi phục
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Violations List Expanded */}
+            {showViolations && (
+              <div className="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-[250px] overflow-y-auto animate-in slide-in-from-top-2">
+                {loadingViolations ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                  </div>
+                ) : violations.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">Không tìm thấy nội dung vi phạm.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {violations.map((v, i) => (
+                      <div key={i} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-red-400 group-hover:bg-red-500 transition-colors"></div>
+                        <div className="flex justify-between items-start mb-1.5 pl-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            Lý do vi phạm:
+                          </p>
+                          <span className="text-[10px] text-slate-400 font-medium bg-slate-50 px-1.5 py-0.5 rounded">
+                            {fmt(v.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-800 font-medium pl-1 break-words">
+                          {v.reason}
+                        </p>
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
                       </div>
                     );
                   })()}

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
 import { MessagesGateway } from '@/modules/communication/messages/messages.gateway';
@@ -16,35 +16,49 @@ export class ApplicationInterviewService {
     private messagesService: MessagesService,
   ) {}
 
-  async findAvailableInterviewSlot(jobPostingId: string) {
-    const scheduleDate = new Date();
-    let daysUntilThu = (4 + 7 - scheduleDate.getDay()) % 7;
+  async findAvailableInterviewSlot(jobPostingId: string, recruiterId: string, overrideMinNoticeHours?: number) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { recruiterId },
+    });
 
-    if (daysUntilThu <= 2) {
-      daysUntilThu += 7;
-    }
+    const settings: any = (recruiter as any)?.interviewSettings || {
+      timeSlots: ['08:00', '10:00', '14:00', '16:00'],
+      blockedDates: [],
+      maxCandidatesPerSlot: 1,
+      minNoticeHours: 24,
+      maxAdvanceDays: 14,
+    };
 
-    scheduleDate.setDate(scheduleDate.getDate() + daysUntilThu);
-    scheduleDate.setHours(0, 0, 0, 0);
+    const possibleSlots: string[] = settings.timeSlots || ['08:00', '10:00', '14:00', '16:00'];
+    const blockedDates: string[] = settings.blockedDates || [];
+    const maxCandidatesPerSlot = settings.maxCandidatesPerSlot || 1;
+    const minNoticeHours = overrideMinNoticeHours !== undefined ? overrideMinNoticeHours : (settings.minNoticeHours || 24);
+    const maxAdvanceDays = settings.maxAdvanceDays || 14;
 
-    const possibleSlots = ['08:00', '10:00', '14:00', '16:00'];
-    let foundSlot = false;
-    let autoInterviewDate: Date | null = null;
-    let autoInterviewTime: string | null = null;
+    const today = new Date();
+    const earliestAllowedTime = new Date(today.getTime() + minNoticeHours * 60 * 60 * 1000);
+    const vnTimeNow = new Date(today.getTime() + 7 * 60 * 60 * 1000);
 
-    while (!foundSlot) {
-      const startOfDay = new Date(scheduleDate);
-      const endOfDay = new Date(scheduleDate);
-      endOfDay.setHours(23, 59, 59, 999);
+    for (let i = 0; i <= maxAdvanceDays; i++) {
+      const vnDate = new Date(vnTimeNow.getTime() + i * 24 * 60 * 60 * 1000);
+      const year = vnDate.getUTCFullYear();
+      const month = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+      const date = String(vnDate.getUTCDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${date}`;
+
+      if (blockedDates.includes(dateStr)) continue;
+
+      const dayOfWeek = vnDate.getUTCDay();
+      if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+      const startOfDay = new Date(Date.UTC(year, vnDate.getUTCMonth(), vnDate.getUTCDate(), -7, 0, 0, 0));
+      const endOfDay = new Date(Date.UTC(year, vnDate.getUTCMonth(), vnDate.getUTCDate(), 23 - 7, 59, 59, 999));
 
       const scheduledApps = await this.prisma.application.findMany({
         where: {
-          jobPostingId,
-          appStatus: 'INTERVIEWING',
-          interviewDate: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
+          jobPosting: { recruiterId },
+          appStatus: { in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED', 'RESCHEDULE_REQUESTED'] },
+          interviewDate: { gte: startOfDay, lte: endOfDay },
         },
         select: { interviewTime: true },
       });
@@ -58,20 +72,22 @@ export class ApplicationInterviewService {
       });
 
       for (const slot of possibleSlots) {
-        if (slotCounts[slot] < 5) {
-          autoInterviewDate = new Date(scheduleDate);
-          autoInterviewTime = slot;
-          foundSlot = true;
-          break;
-        }
-      }
+        const [hours, mins] = slot.split(':').map(Number);
+        const slotTime = new Date(Date.UTC(year, vnDate.getUTCMonth(), vnDate.getUTCDate(), hours - 7, mins, 0, 0));
 
-      if (!foundSlot) {
-        scheduleDate.setDate(scheduleDate.getDate() + 7);
+        if (slotTime < earliestAllowedTime) continue;
+
+        if (slotCounts[slot] < maxCandidatesPerSlot) {
+          return {
+            date: startOfDay,
+            time: slot,
+            location: settings.defaultLocation || 'Trao đổi qua tin nhắn',
+          };
+        }
       }
     }
 
-    return { date: autoInterviewDate, time: autoInterviewTime };
+    return { date: null, time: null, location: null };
   }
 
   async getAvailableSlots(applicationId: string) {
@@ -82,8 +98,7 @@ export class ApplicationInterviewService {
 
     if (
       !application ||
-      (application.appStatus !== 'INTERVIEWING' &&
-        application.appStatus !== 'RESCHEDULE_REQUESTED')
+      !['INTERVIEWING', 'RESCHEDULE_REQUESTED', 'INTERVIEW_CONFIRMED'].includes(application.appStatus)
     ) {
       return [];
     }
@@ -154,7 +169,7 @@ export class ApplicationInterviewService {
       const scheduledApps = await this.prisma.application.findMany({
         where: {
           jobPosting: { recruiterId: recruiter?.recruiterId },
-          appStatus: 'INTERVIEWING',
+          appStatus: { in: ['INTERVIEWING', 'INTERVIEW_CONFIRMED', 'RESCHEDULE_REQUESTED'] },
           interviewDate: { gte: startOfDay, lte: endOfDay },
         },
         select: { interviewTime: true },
@@ -220,19 +235,46 @@ export class ApplicationInterviewService {
 
     if (
       !application ||
-      (application.appStatus !== 'INTERVIEWING' &&
-        application.appStatus !== 'RESCHEDULE_REQUESTED')
+      !['INTERVIEWING', 'RESCHEDULE_REQUESTED', 'INTERVIEW_CONFIRMED'].includes(application.appStatus)
     ) {
-      throw new Error('Đơn ứng tuyển không ở trạng thái chờ phỏng vấn');
+      throw new BadRequestException('Đơn ứng tuyển không ở trạng thái chờ phỏng vấn');
     }
 
     if (application.candidate.userId !== candidateUserId) {
-      throw new Error('Bạn không có quyền thực hiện thao tác này');
+      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    }
+
+    const settings: any =
+      (application.jobPosting.recruiter as any)?.interviewSettings || {};
+    const minNoticeHours = settings.minNoticeHours || 24;
+
+    if (
+      application.appStatus === 'INTERVIEW_CONFIRMED' &&
+      application.interviewDate &&
+      application.interviewTime
+    ) {
+      const [hours, mins] = application.interviewTime.split(':').map(Number);
+      const currentInterviewTime = new Date(
+        Date.UTC(
+          application.interviewDate.getUTCFullYear(),
+          application.interviewDate.getUTCMonth(),
+          application.interviewDate.getUTCDate(),
+          hours - 7,
+          mins,
+          0,
+          0,
+        ),
+      );
+
+      const minNoticeTimeMs = Date.now() + minNoticeHours * 60 * 60 * 1000;
+      if (currentInterviewTime.getTime() < minNoticeTimeMs) {
+        throw new BadRequestException(
+          `Bạn chỉ có thể dời lịch trước khi phỏng vấn ít nhất ${minNoticeHours} tiếng.`,
+        );
+      }
     }
 
     const interviewDate = new Date(date);
-    const settings: any =
-      (application.jobPosting.recruiter as any)?.interviewSettings || {};
     const interviewLocation =
       settings.defaultLocation ||
       application.jobPosting.company?.address ||

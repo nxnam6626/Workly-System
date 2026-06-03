@@ -69,6 +69,9 @@ export class MessageAttachmentService {
             where: { userId: senderId },
             data: { violationCount: newViolations },
           });
+          await this.prisma.violationLog.create({
+            data: { userId: senderId, reason: 'Gửi tệp đính kèm chứa thông tin liên lạc trái phép' },
+          });
           exceptionToThrow = {
             error: 'ACCOUNT_LOCKED',
             message:
@@ -83,6 +86,9 @@ export class MessageAttachmentService {
           await this.prisma.recruiter.updateMany({
             where: { userId: senderId },
             data: { violationCount: newViolations },
+          });
+          await this.prisma.violationLog.create({
+            data: { userId: senderId, reason: 'Gửi tệp đính kèm chứa thông tin liên lạc trái phép' },
           });
           exceptionToThrow = {
             error: 'VIOLATION',

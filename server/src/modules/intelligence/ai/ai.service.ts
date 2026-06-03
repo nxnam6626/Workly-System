@@ -127,6 +127,13 @@ export class AiService {
     );
   }
 
+  async verifyPaymentReceipt(
+    buffer: Buffer,
+    mimeType: string,
+  ) {
+    return this.aiModerationService.verifyPaymentReceipt(buffer, mimeType);
+  }
+
   // --- Chat & RAG ---
   async generateResponse(message: string): Promise<string> {
     return this.aiChatService.generateResponse(message);

@@ -39,10 +39,21 @@ export class ReportsService {
 
     // Handle consequences if reason is severe
     if (dto.reason === 'NO_SHOW' || dto.reason === 'SABOTAGE') {
-      await this.prisma.user.updateMany({
+      const candidateUser = await this.prisma.user.findFirst({
         where: { candidate: { candidateId } },
-        data: { violations: { increment: 1 } },
       });
+      if (candidateUser) {
+        await this.prisma.user.update({
+          where: { userId: candidateUser.userId },
+          data: { violations: { increment: 1 } },
+        });
+        await this.prisma.violationLog.create({
+          data: {
+            userId: candidateUser.userId,
+            reason: dto.reason === 'NO_SHOW' ? 'Ứng viên không đến phỏng vấn không lý do' : 'Có hành vi phá hoại/thái độ không tốt',
+          },
+        });
+      }
     }
 
     // Real-time update for the dashboard
