@@ -17,11 +17,13 @@ import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "next/navigation";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
 
 export default function AdminChangePasswordPage() {
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   
   const [formData, setFormData] = useState({
     currentPassword: "",
@@ -63,6 +65,12 @@ export default function AdminChangePasswordPage() {
     
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error("Mật khẩu xác nhận không khớp!");
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(formData.newPassword)) {
+      toast.error("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).");
       return;
     }
 
@@ -157,6 +165,8 @@ export default function AdminChangePasswordPage() {
                 required
                 value={formData.newPassword}
                 onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
               />
               <button
                 type="button"
@@ -187,9 +197,7 @@ export default function AdminChangePasswordPage() {
                   transition={{ type: "spring", stiffness: 50 }}
                 />
               </div>
-              <p className="text-[10px] text-slate-400 font-medium italic">
-                Mẹo: Sử dụng ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
-              </p>
+              <PasswordRequirements password={formData.newPassword} visible={true} />
             </motion.div>
           )}
 

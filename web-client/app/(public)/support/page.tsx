@@ -14,16 +14,23 @@ export default function SupportPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    subject: prefilledSubject,
+    subject: prefilledSubject || 'Hỗ trợ nạp tiền / Lỗi giao dịch',
     message: '',
   });
+  const [file, setFile] = useState<File | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +39,18 @@ export default function SupportPage() {
     setError('');
 
     try {
-      await api.post('/support/contact', formData);
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('email', formData.email);
+      data.append('subject', formData.subject);
+      data.append('message', formData.message);
+      if (file && formData.subject === 'Hỗ trợ nạp tiền / Lỗi giao dịch') {
+        data.append('file', file);
+      }
+
+      await api.post('/support/contact', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại sau.');
@@ -93,20 +111,7 @@ export default function SupportPage() {
                 )}
 
                 <div className="space-y-5">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-slate-700">Họ và tên (Tùy chọn)</label>
-                    <div className="relative group">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-                      <input
-                        name="name"
-                        type="text"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Nguyễn Văn A"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm font-medium"
-                      />
-                    </div>
-                  </div>
+
 
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-slate-700">Email liên hệ <span className="text-red-500">*</span></label>
@@ -126,16 +131,31 @@ export default function SupportPage() {
 
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-slate-700">Chủ đề <span className="text-red-500">*</span></label>
-                    <input
+                    <select
                       name="subject"
-                      type="text"
                       required
                       value={formData.subject}
                       onChange={handleChange}
-                      placeholder="VD: Khiếu nại tài khoản bị khóa"
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm font-medium"
-                    />
+                    >
+                      <option value="Hỗ trợ nạp tiền / Lỗi giao dịch">Hỗ trợ nạp tiền / Lỗi giao dịch</option>
+                      <option value="Yêu cầu mở khóa tài khoản / Kháng cáo vi phạm">Yêu cầu mở khóa tài khoản / Kháng cáo vi phạm</option>
+                      <option value="Báo cáo lỗi hệ thống">Báo cáo lỗi hệ thống</option>
+                      <option value="Khác">Khác...</option>
+                    </select>
                   </div>
+
+                  {formData.subject === 'Hỗ trợ nạp tiền / Lỗi giao dịch' && (
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-700">Ảnh biên lai (Tùy chọn)</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all sm:text-sm font-medium"
+                      />
+                    </div>
+                  )}
 
                   <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-slate-700">Nội dung chi tiết <span className="text-red-500">*</span></label>
@@ -158,7 +178,7 @@ export default function SupportPage() {
                       className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <label htmlFor="commitment" className="text-sm text-slate-600 leading-relaxed cursor-pointer select-none">
-                      Tôi cam kết tuân thủ chính sách cộng đồng và không tái phạm các hành vi đăng tin vi phạm. 
+                      Tôi cam kết tuân thủ chính sách cộng đồng và không tái phạm các hành vi đăng tin vi phạm.
                       Tôi hiểu rằng nếu tiếp tục vi phạm, tài khoản của tôi có thể bị <span className="font-bold text-red-600">Khóa vĩnh viễn</span>.
                     </label>
                   </div>

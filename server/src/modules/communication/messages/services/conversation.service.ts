@@ -161,6 +161,9 @@ export class ConversationService {
             where: { userId: senderId },
             data: { violationCount: newViolations },
           });
+          await this.prisma.violationLog.create({
+            data: { userId: senderId, reason: 'Nhắn tin chứa thông tin liên lạc trái phép hoặc ngôn từ không phù hợp' },
+          });
           exceptionToThrow = {
             error: 'ACCOUNT_LOCKED',
             message:
@@ -175,6 +178,9 @@ export class ConversationService {
           await this.prisma.recruiter.updateMany({
             where: { userId: senderId },
             data: { violationCount: newViolations },
+          });
+          await this.prisma.violationLog.create({
+            data: { userId: senderId, reason: 'Nhắn tin chứa thông tin liên lạc trái phép hoặc ngôn từ không phù hợp' },
           });
           exceptionToThrow = {
             error: 'VIOLATION',

@@ -404,4 +404,12 @@ export class BackofficeService {
       )
       .slice(0, limit);
   }
+
+  async getUserViolationLogs(userId: string) {
+    // Trigger restart 3
+    return this.prisma.violationLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

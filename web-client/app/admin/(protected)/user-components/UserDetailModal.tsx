@@ -85,8 +85,8 @@ export default function UserDetailModal({
     setShowViolations(true);
     try {
       // @ts-ignore
-      const { adminUsersApi } = await import('@/lib/admin-api');
-      const data = await adminUsersApi.getUserViolations(user.userId);
+      const { adminDashboardApi } = await import('@/lib/admin-api');
+      const data = await adminDashboardApi.getUserViolationLogs(user.userId);
       setViolations(data);
     } catch (e) {
       console.error(e);
@@ -153,24 +153,7 @@ export default function UserDetailModal({
               ))}
             </div>
 
-            <div className="mt-4">
-              <select
-                className="text-sm border border-slate-200 w-full rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setRoleToChange(e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-                disabled={isProcessing || user.status === 'LOCKED'}
-                value=""
-              >
-                <option value="" disabled>-- Cấp quyền mới cho tài khoản --</option>
-                {!roles.includes('CANDIDATE') && <option value="CANDIDATE">Ứng viên</option>}
-                {!roles.includes('RECRUITER') && <option value="RECRUITER">Nhà tuyển dụng</option>}
-                {!roles.includes('ADMIN') && <option value="ADMIN">Quản trị viên</option>}
-              </select>
-            </div>
+            {/* Role dropdown removed per user request */}
 
             {roles.includes('ADMIN') && user.admin && (
               <div className="mt-5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
@@ -353,15 +336,15 @@ export default function UserDetailModal({
                   {(user as any).violations || 0}/3
                 </span>
               </div>
-              {((user as any).violations > 0 || (user.recruiter?.violationCount ?? 0) > 0) && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={loadViolations}
-                    disabled={isProcessing}
-                    className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
-                  >
-                    {showViolations ? 'Ẩn chi tiết' : 'Xem chi tiết'}
-                  </button>
+              <div className="flex items-center gap-2 mt-3">
+                <button
+                  onClick={loadViolations}
+                  disabled={isProcessing}
+                  className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+                >
+                  {showViolations ? 'Ẩn lịch sử' : 'Lịch sử vi phạm'}
+                </button>
+                {((user as any).violations > 0 || (user.recruiter?.violationCount ?? 0) > 0) && (
                   <button
                     onClick={() => {
                       onResetViolations(user.userId);
@@ -374,8 +357,8 @@ export default function UserDetailModal({
                     <RotateCcw className="w-3 h-3" />
                     Khôi phục
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             
             {/* Violations List Expanded */}
@@ -394,14 +377,14 @@ export default function UserDetailModal({
                         <div className="absolute top-0 left-0 w-1 h-full bg-red-400 group-hover:bg-red-500 transition-colors"></div>
                         <div className="flex justify-between items-start mb-1.5 pl-1">
                           <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            Gửi tới: <span className="text-slate-700">{v.conversationName}</span>
+                            Lý do vi phạm:
                           </p>
                           <span className="text-[10px] text-slate-400 font-medium bg-slate-50 px-1.5 py-0.5 rounded">
-                            {fmt(v.sentAt)}
+                            {fmt(v.createdAt)}
                           </span>
                         </div>
                         <p className="text-sm text-slate-800 font-medium pl-1 break-words">
-                          "{v.content}"
+                          {v.reason}
                         </p>
                       </div>
                     ))}

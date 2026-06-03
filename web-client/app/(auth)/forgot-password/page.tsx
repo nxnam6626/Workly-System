@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth";
 import { Mail, Lock, Loader2, ArrowRight, KeyRound, Key } from "lucide-react";
 import Link from "next/link";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,11 @@ export default function ForgotPasswordPage() {
 
     if (newPassword !== confirmPassword) {
       return setError("Mật khẩu xác nhận không khớp");
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return setError("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).");
     }
 
     setIsSubmitting(true);
@@ -189,11 +196,14 @@ export default function ForgotPasswordPage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
                   required
                   placeholder="Nhập mật khẩu mới của bạn"
                   className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 />
               </div>
+              <PasswordRequirements password={newPassword} visible={isPasswordFocused || newPassword.length > 0} />
             </div>
 
             <div className="space-y-2 relative group">

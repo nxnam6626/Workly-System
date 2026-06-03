@@ -39,6 +39,7 @@ const NAV_GROUPS = [
     items: [
       { label: 'Việc Làm', href: '/admin/jobs', icon: Briefcase, perm: 'MANAGE_JOBS' },
       { label: 'Đánh Giá', href: '/admin/reviews', icon: Star, perm: 'MANAGE_JOBS' },
+      { label: 'Báo Cáo Đánh Giá', href: '/admin/review-reports', icon: ShieldAlert, perm: 'MANAGE_JOBS' },
     ],
   },
   {

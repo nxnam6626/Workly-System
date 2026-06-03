@@ -7,6 +7,7 @@ import { Mail, Lock, User, Loader2, Briefcase, CheckCircle2, Sparkles, AlertCirc
 import { getDashboardByRole } from "@/lib/roleRedirect";
 import Link from "next/link";
 import Image from "next/image";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -32,6 +34,11 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
       return setError("Mật khẩu không khớp");
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return setError("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).");
     }
 
     setIsSubmitting(true);
@@ -191,11 +198,14 @@ export default function RegisterPage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setIsPasswordFocused(true)}
+                      onBlur={() => setIsPasswordFocused(false)}
                       required
                       placeholder="Mật khẩu từ 6 đến 32 ký tự"
                       className="block w-full pl-11 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors sm:text-sm"
                     />
                   </div>
+                  <PasswordRequirements password={password} visible={isPasswordFocused || password.length > 0} />
                 </div>
 
                 <div>

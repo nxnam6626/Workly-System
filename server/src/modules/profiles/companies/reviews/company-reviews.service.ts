@@ -20,37 +20,22 @@ export class CompanyReviewsService {
     dto: any,
   ) {
     // Profanity Filter
-    const BAD_WORDS = [
-      'ngu',
-      'địt',
-      'lồn',
-      'cặc',
-      'đĩ',
-      'phò',
-      'chó',
-      'dốt',
-      'mẹ mày',
-      'thằng chó',
-      'đm',
-      'vcl',
-      'đcm',
-      'vãi lồn',
-      'cc',
-      'ncc',
-      'vl',
-      'đụ',
-      'cl',
-      'đéo',
-    ];
-    const contentLower = dto.content.toLowerCase();
+    if (dto.content) {
+      const BAD_WORDS = [
+        'ngu', 'địt', 'lồn', 'cặc', 'đĩ', 'phò', 'chó', 'dốt',
+        'mẹ mày', 'thằng chó', 'đm', 'vcl', 'đcm', 'vãi lồn',
+        'cc', 'ncc', 'vl', 'đụ', 'cl', 'đéo',
+      ];
+      const contentLower = dto.content.toLowerCase();
 
-    // Check for exact word matches using regex to avoid matching substrings like "người" for "ngu"
-    for (const badWord of BAD_WORDS) {
-      const regex = new RegExp(`\\b${badWord}\\b`, 'i');
-      if (regex.test(contentLower)) {
-        throw new BadRequestException(
-          'Nội dung đánh giá chứa từ ngữ không phù hợp hoặc xúc phạm. Vui lòng chỉnh sửa lại.',
-        );
+      // Check for exact word matches using regex to avoid matching substrings like "người" for "ngu"
+      for (const badWord of BAD_WORDS) {
+        const regex = new RegExp(`\\b${badWord}\\b`, 'i');
+        if (regex.test(contentLower)) {
+          throw new BadRequestException(
+            'Nội dung đánh giá chứa từ ngữ không phù hợp hoặc xúc phạm. Vui lòng chỉnh sửa lại.',
+          );
+        }
       }
     }
 
@@ -259,5 +244,163 @@ export class CompanyReviewsService {
     return this.prisma.companyReview.delete({
       where: { reviewId },
     });
+  }
+
+  // --- Report APIs ---
+
+  async reportReview(
+    userId: string,
+    reviewId: string,
+    dto: { reason: string; evidence: string },
+  ) {
+    const recruiter = await this.prisma.recruiter.findUnique({
+      where: { userId },
+    });
+
+    if (!recruiter) {
+      throw new ForbiddenException('Chỉ Nhà tuyển dụng mới được báo cáo đánh giá.');
+    }
+
+    const review = await this.prisma.companyReview.findUnique({
+      where: { reviewId },
+    });
+
+    if (!review) {
+      throw new BadRequestException('Đánh giá không tồn tại.');
+    }
+
+    if (review.companyId !== recruiter.companyId) {
+      throw new ForbiddenException('Bạn chỉ có thể báo cáo đánh giá của công ty mình.');
+    }
+
+    // Check if already reported and pending
+    const existingReport = await this.prisma.companyReviewReport.findFirst({
+      where: {
+        reviewId,
+        recruiterId: recruiter.recruiterId,
+        status: 'PENDING',
+      },
+    });
+
+    if (existingReport) {
+      throw new BadRequestException('Bạn đã báo cáo đánh giá này và đang chờ duyệt.');
+    }
+
+    // Update review status to FLAGGED so others know it's under review
+    await this.prisma.companyReview.update({
+      where: { reviewId },
+      data: { status: 'FLAGGED' },
+    });
+
+    return this.prisma.companyReviewReport.create({
+      data: {
+        reviewId,
+        recruiterId: recruiter.recruiterId,
+        reason: dto.reason,
+        evidence: dto.evidence,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  async getReportsAdmin(page: number = 1, limit: number = 10, status?: string) {
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (status) where.status = status;
+
+    const [items, total] = await Promise.all([
+      this.prisma.companyReviewReport.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          recruiter: {
+            select: {
+              recruiterId: true,
+              fullName: true,
+              company: { select: { companyName: true } },
+            },
+          },
+          review: {
+            include: {
+              candidate: {
+                select: { fullName: true },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.companyReviewReport.count({ where }),
+    ]);
+
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async resolveReportAdmin(reportId: string, action: string) {
+    const report = await this.prisma.companyReviewReport.findUnique({
+      where: { reportId },
+      include: {
+        review: {
+          include: {
+            candidate: true
+          }
+        }
+      }
+    });
+
+    if (!report) {
+      throw new BadRequestException('Báo cáo không tồn tại.');
+    }
+
+    if (action === 'DELETE_REVIEW') {
+      // Update report status
+      await this.prisma.companyReviewReport.update({
+        where: { reportId },
+        data: { status: 'APPROVED' },
+      });
+
+      // Add +1 violation to the candidate who wrote the false review
+      if (report.review?.candidate?.userId) {
+        await this.prisma.user.update({
+          where: { userId: report.review.candidate.userId },
+          data: { violations: { increment: 1 } }
+        });
+
+        // Ghi log lỗi vi phạm
+        await this.prisma.violationLog.create({
+          data: {
+            userId: report.review.candidate.userId,
+            reason: 'Đánh giá công ty sai sự thật',
+          }
+        });
+      }
+
+      // Delete the false review
+      return this.prisma.companyReview.delete({
+        where: { reviewId: report.reviewId },
+      });
+    } else if (action === 'REJECT_REPORT') {
+      // Reject report and restore review status
+      await this.prisma.companyReview.update({
+        where: { reviewId: report.reviewId },
+        data: { status: 'PUBLISHED' },
+      });
+      return this.prisma.companyReviewReport.update({
+        where: { reportId },
+        data: { status: 'REJECTED' },
+      });
+    }
+
+    throw new BadRequestException('Hành động không hợp lệ.');
   }
 }

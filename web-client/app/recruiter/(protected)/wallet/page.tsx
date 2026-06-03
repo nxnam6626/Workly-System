@@ -61,7 +61,8 @@ function WalletContent() {
   const { user } = useAuthStore();
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [supportMessage, setSupportMessage] = useState('');
-  const [supportSubject, setSupportSubject] = useState('Hỗ trợ nạp tiền/Giao dịch Recruiter');
+  const [supportSubject, setSupportSubject] = useState('Hỗ trợ nạp tiền/Khuyến mãi');
+  const [supportFile, setSupportFile] = useState<File | null>(null);
   const [sendingSupport, setSendingSupport] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -141,15 +142,23 @@ function WalletContent() {
     }
     setSendingSupport(true);
     try {
-      await api.post('/support/contact', {
-        email: user?.email || '',
-        name: user?.recruiter?.company?.companyName || user?.name || user?.email || '',
-        subject: supportSubject,
-        message: supportMessage
+      const data = new FormData();
+      data.append('email', user?.email || '');
+      data.append('name', user?.recruiter?.company?.companyName || user?.name || user?.email || '');
+      data.append('subject', supportSubject);
+      data.append('message', supportMessage);
+      if (supportFile && supportSubject === 'Hỗ trợ nạp tiền/Khuyến mãi') {
+        data.append('file', supportFile);
+      }
+
+      await api.post('/support/contact', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
+      
       toast.success('Yêu cầu hỗ trợ đã được gửi. Chúng tôi sẽ xử lý ngay.');
       setShowSupportModal(false);
       setSupportMessage('');
+      setSupportFile(null);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Không thể gửi yêu cầu');
     } finally {
@@ -636,6 +645,24 @@ function WalletContent() {
                   required
                 ></textarea>
               </div>
+
+              {supportSubject === 'Hỗ trợ nạp tiền/Khuyến mãi' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 ml-1">Ảnh biên lai giao dịch (Tùy chọn)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setSupportFile(e.target.files[0]);
+                      }
+                    }}
+                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-sm"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1 ml-1">Tải lên ảnh chụp màn hình có chứa <b>mã giao dịch</b> để được xử lý tự động nhanh nhất.</p>
+                </div>
+              )}
+
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"

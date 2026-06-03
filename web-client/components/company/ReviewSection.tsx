@@ -91,7 +91,7 @@ export default function ReviewSection({ companyId }: ReviewSectionProps) {
             <span className="text-xl font-bold text-slate-400">/ 5</span>
           </div>
           <div className="mt-4">
-            <RatingStars rating={Math.round(stats?.avgTotal || 0)} size={24} />
+            <RatingStars rating={stats?.avgTotal || 0} size={24} />
           </div>
           <p className="text-sm font-bold text-slate-500 mt-3">{stats?.count || 0} đánh giá đã xác thực</p>
         </div>

@@ -107,6 +107,12 @@ export default function RecruiterSettingsPage() {
       toast.error('Mật khẩu xác nhận không khớp.');
       return;
     }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(passwordForm.newPassword)) {
+      toast.error("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).");
+      return;
+    }
     
     setIsChangingPassword(true);
     const toastId = toast.loading('Đang đổi mật khẩu...');

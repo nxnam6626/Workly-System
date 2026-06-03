@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Star, MessageSquare, Shield, CheckCircle2, AlertTriangle, Building2, Calendar, FileText } from "lucide-react";
+import { Star, StarHalf, MessageSquare, Shield, CheckCircle2, AlertTriangle, Building2, Calendar, FileText, Flag } from "lucide-react";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
+import ReportReviewModal from "./ReportReviewModal";
 
 interface Review {
   reviewId: string;
@@ -38,50 +39,55 @@ export default function RecruiterReviewsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthStore();
+  const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+
+  const fetchReviews = async () => {
+    try {
+      const companyId = user?.recruiter?.companyId;
+
+      if (!companyId) {
+        toast.error("Tài khoản chưa thuộc công ty nào.");
+        return;
+      }
+
+      const [reviewsRes, statsRes] = await Promise.all([
+        api.get(`/company-reviews/${companyId}`),
+        api.get(`/company-reviews/${companyId}/stats`),
+      ]);
+
+      setReviews(reviewsRes.data);
+      setStats(statsRes.data);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const companyId = user?.recruiter?.companyId;
-
-        if (!companyId) {
-          toast.error("Tài khoản chưa thuộc công ty nào.");
-          setIsLoading(false);
-          return;
-        }
-
-        const [reviewsRes, statsRes] = await Promise.all([
-          api.get(`/company-reviews/${companyId}`),
-          api.get(`/company-reviews/${companyId}/stats`),
-        ]);
-
-        setReviews(reviewsRes.data);
-        setStats(statsRes.data);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    const loadData = async () => {
+      await fetchReviews();
+      setIsLoading(false);
     };
 
     if (user) {
-      fetchData();
+      loadData();
     }
   }, [user]);
 
   const renderStars = (rating: number) => {
     return (
       <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={`w-4 h-4 ${
-              star <= Math.round(rating)
-                ? "fill-orange-400 text-orange-400"
-                : "fill-slate-100 text-slate-200"
-            }`}
-          />
-        ))}
+        {[1, 2, 3, 4, 5].map((star) => {
+          const isFull = star <= Math.floor(rating);
+          const isHalf = !isFull && star === Math.ceil(rating) && rating % 1 !== 0;
+
+          if (isFull) {
+            return <Star key={star} className="w-4 h-4 fill-orange-400 text-orange-400" />;
+          } else if (isHalf) {
+            return <StarHalf key={star} className="w-4 h-4 fill-orange-400 text-orange-400" />;
+          } else {
+            return <Star key={star} className="w-4 h-4 fill-slate-100 text-slate-200" />;
+          }
+        })}
       </div>
     );
   };
@@ -201,13 +207,27 @@ export default function RecruiterReviewsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100">
-                      <Star className="w-3.5 h-3.5 fill-orange-500" />
-                      {((review.ratingProcess + review.ratingInterviewer + review.ratingOffice) / 3).toFixed(1)}
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-xs font-bold border border-orange-100">
+                        <Star className="w-3.5 h-3.5 fill-orange-500" />
+                        {((review.ratingProcess + review.ratingInterviewer + review.ratingOffice) / 3).toFixed(1)}
+                      </div>
+                      <button
+                        onClick={() => setReportingReviewId(review.reviewId)}
+                        className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-red-500 transition-colors"
+                      >
+                        <Flag className="w-3 h-3" />
+                        Báo cáo
+                      </button>
                     </div>
                   </div>
 
-                  <p className="text-slate-700 text-sm leading-relaxed mb-4 bg-slate-50 p-4 rounded-xl">
+                  <p className="text-slate-700 text-sm leading-relaxed mb-4 bg-slate-50 p-4 rounded-xl relative">
+                    {review.status === "FLAGGED" && (
+                      <span className="absolute top-0 right-0 translate-x-2 -translate-y-2 bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-red-200">
+                        Đang bị báo cáo
+                      </span>
+                    )}
                     "{review.content}"
                   </p>
 
@@ -240,6 +260,15 @@ export default function RecruiterReviewsPage() {
           )}
         </div>
       </div>
+      
+      <ReportReviewModal
+        isOpen={!!reportingReviewId}
+        onClose={() => setReportingReviewId(null)}
+        reviewId={reportingReviewId || ""}
+        onSuccess={() => {
+          fetchReviews();
+        }}
+      />
     </div>
   );
 }

@@ -19,6 +19,18 @@ import { Roles, Role } from '@/common/decorators/roles.decorator';
 export class CompanyReviewsController {
   constructor(private readonly reviewsService: CompanyReviewsService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECRUITER)
+  @Post(':reviewId/report')
+  async reportReview(
+    @Request() req,
+    @Param('reviewId') reviewId: string,
+    @Body() dto: { reason: string; evidence: string },
+  ) {
+    const userId = req.user.userId;
+    return this.reviewsService.reportReview(userId, reviewId, dto);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post(':companyId/:applicationId')
   async create(
@@ -77,5 +89,28 @@ export class CompanyReviewsController {
   @Delete('admin/:id')
   async deleteAdmin(@Param('id') reviewId: string) {
     return this.reviewsService.deleteAdmin(reviewId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('admin/reports/all')
+  async getReportsAdmin(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('status') status?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.reviewsService.getReportsAdmin(pageNum, limitNum, status);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch('admin/reports/:reportId/resolve')
+  async resolveReportAdmin(
+    @Param('reportId') reportId: string,
+    @Body('action') action: string, // 'DELETE_REVIEW' or 'REJECT_REPORT'
+  ) {
+    return this.reviewsService.resolveReportAdmin(reportId, action);
   }
 }
