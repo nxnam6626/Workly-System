@@ -4,6 +4,11 @@ generator client {
   output          = "../src/generated/prisma"
 }
 
+generator client_default {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
 datasource db {
   provider   = "postgresql"
   extensions = [uuid_ossp(map: "uuid-ossp", schema: "extensions")]
