@@ -209,6 +209,31 @@ export default function MatchingJobsPage() {
                   </motion.div>
                 ))}
               </div>
+            ) : user?.candidate?.isOpenToWork === false ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm p-20 text-center space-y-6"
+              >
+                <div className="w-20 h-20 mx-auto rounded-2xl bg-amber-50 border-2 border-dashed border-amber-200 flex items-center justify-center text-amber-500">
+                  <BrainCircuit className="w-9 h-9" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+                    Đang tạm ẩn hồ sơ tìm việc
+                  </h3>
+                  <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
+                    Bạn đang tắt chế độ tìm việc. Vui lòng bật lại chế độ "Đang tìm việc" trong trang quản lý hồ sơ để AI gợi ý các công việc phù hợp nhất.
+                  </p>
+                </div>
+                <Link
+                  href="/profile"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg group/cta"
+                >
+                  Bật tìm việc tại Hồ sơ
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover/cta:translate-x-0.5" />
+                </Link>
+              </motion.div>
             ) : (
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}

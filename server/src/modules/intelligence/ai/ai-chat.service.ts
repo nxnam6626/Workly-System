@@ -46,7 +46,12 @@ export class AiChatService {
 
   async *processChatWithRAGStream(
     message: string,
-    context?: { userId?: string; roles?: string[]; contextMode?: string; jobSlug?: string },
+    context?: {
+      userId?: string;
+      roles?: string[];
+      contextMode?: string;
+      jobSlug?: string;
+    },
   ): AsyncGenerator<any, void, unknown> {
     const userRoles = context?.roles || [];
     const forceMode = context?.contextMode;
@@ -61,9 +66,21 @@ export class AiChatService {
     const normalizedMsg = message.trim().toLowerCase();
 
     const isPersonalQuery = [
-      'tôi', 'mình', 'em', 'của tôi', 'cv', 'hồ sơ', 'kinh nghiệm',
-      'độ phù hợp', 'công việc này', 'job này', 'tin này', 'ứng tuyển',
-      'đánh giá', 'cho t', 'của t'
+      'tôi',
+      'mình',
+      'em',
+      'của tôi',
+      'cv',
+      'hồ sơ',
+      'kinh nghiệm',
+      'độ phù hợp',
+      'công việc này',
+      'job này',
+      'tin này',
+      'ứng tuyển',
+      'đánh giá',
+      'cho t',
+      'của t',
     ].some((keyword) => normalizedMsg.includes(keyword));
 
     const shouldCache = !isPersonalQuery && !context?.jobSlug;
@@ -162,14 +179,26 @@ export class AiChatService {
       }
 
       if (context?.jobSlug) {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(context.jobSlug);
+        const isUuid =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+            context.jobSlug,
+          );
         const job = await this.prisma.jobPosting.findFirst({
-          where: isUuid ? { jobPostingId: context.jobSlug } : { slug: context.jobSlug },
-          select: { title: true, requirements: true, structuredRequirements: true, description: true }
+          where: isUuid
+            ? { jobPostingId: context.jobSlug }
+            : { slug: context.jobSlug },
+          select: {
+            title: true,
+            requirements: true,
+            structuredRequirements: true,
+            description: true,
+          },
         });
         if (job) {
           const struct = (job.structuredRequirements as any) || {};
-          const hardSkills = Array.isArray(struct.hardSkills) ? struct.hardSkills : [];
+          const hardSkills = Array.isArray(struct.hardSkills)
+            ? struct.hardSkills
+            : [];
           ragContext += `\n--- [CÔNG VIỆC ĐANG XEM HIỆN TẠI] ---\nCông việc: ${job.title}\nYêu cầu: ${job.requirements}\nKỹ năng yêu cầu: ${hardSkills.join(', ')}\nNếu ứng viên hỏi về công việc này, hãy phân tích độ phù hợp dựa trên thông tin trên.\n`;
         }
       }
@@ -200,7 +229,7 @@ export class AiChatService {
               ? `${Math.floor(Number(j.salaryMin) / 1000000)} triệu - ${Math.floor(Number(j.salaryMax) / 1000000)} triệu VND`
               : 'Thỏa thuận',
             percent: 85,
-            why_match: 'Phù hợp với từ khóa tìm kiếm của bạn'
+            why_match: 'Phù hợp với từ khóa tìm kiếm của bạn',
           }));
           ragContext += `\n--- DANH SÁCH VIỆC LÀM PHÙ HỢP (Market Data) ---\n${JSON.stringify(jobs)}\n`;
           yield { type: 'SHOW_JOB_CARDS', payload: formattedJobs };

@@ -140,7 +140,7 @@ export class ApplicationsNotificationService {
       recruiterId,
       candidateId,
       msgContent,
-      candidateUserId
+      candidateUserId,
     );
   }
 

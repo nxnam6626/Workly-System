@@ -41,7 +41,29 @@ export interface CandidateProfile {
       createdAt: string;
       parsedData: any;
     }[];
-    certifications: { certificationId: string; name: string }[];
+    certifications: {
+      certificationId: string;
+      name: string;
+      issuer?: string;
+      issueDate?: string;
+      credentialId?: string;
+      credentialUrl?: string;
+      fileUrl?: string;
+      status?: string;
+      adminFeedback?: string;
+    }[];
+    degrees: {
+      degreeId: string;
+      name: string;
+      school: string;
+      major?: string;
+      issueDate?: string;
+      fileUrl?: string;
+      status?: string;
+      issuer?: string;
+      credentialId?: string;
+      adminFeedback?: string;
+    }[];
     applications: any[];
   };
 }
@@ -63,6 +85,14 @@ export interface ProjectInput {
   description: string;
   role?: string;
   technology?: string;
+}
+
+export interface DegreeInput {
+  name: string;
+  school: string;
+  major?: string;
+  issueDate?: string;
+  credentialId?: string;
 }
 
 export interface UpdateProfileDto {
@@ -89,7 +119,14 @@ export interface UpdateProfileDto {
   softSkills?: string[];
   interests?: string[];
   otherInfo?: { header: string; content: string }[];
-  certifications?: string[];
+  certifications?: {
+    name: string;
+    organization?: string;
+    issueDate?: string;
+    credentialId?: string;
+    credentialUrl?: string;
+  }[];
+  degrees?: DegreeInput[];
 }
 
 export interface ChangePasswordDto {
@@ -142,4 +179,29 @@ export const profileApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }).then((r) => r.data);
   },
+
+  verifyCertification: (id: string, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/candidates/certifications/${id}/verify`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+
+  verifyDegree: (id: string, file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/candidates/degrees/${id}/verify`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((r) => r.data);
+  },
+
+  getPendingVerifications: (): Promise<any> =>
+    api.get('/admin/verifications/pending').then((r) => r.data),
+
+  actionCertificationVerification: (id: string, action: 'APPROVE' | 'REJECT', feedback?: string): Promise<any> =>
+    api.post(`/admin/verifications/certifications/${id}/action`, { action, feedback }).then((r) => r.data),
+
+  actionDegreeVerification: (id: string, action: 'APPROVE' | 'REJECT', feedback?: string): Promise<any> =>
+    api.post(`/admin/verifications/degrees/${id}/action`, { action, feedback }).then((r) => r.data),
 };

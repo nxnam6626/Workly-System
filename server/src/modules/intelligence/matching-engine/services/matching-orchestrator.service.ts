@@ -60,6 +60,8 @@ export class MatchingOrchestratorService {
                 experiences: true,
                 projects: true,
                 skills: true,
+                degrees: true,
+                certifications: true,
               },
             },
           },
@@ -68,6 +70,8 @@ export class MatchingOrchestratorService {
         experiences: true,
         projects: true,
         skills: true,
+        degrees: true,
+        certifications: true,
       },
     });
 
@@ -225,6 +229,8 @@ export class MatchingOrchestratorService {
                 experiences: true,
                 projects: true,
                 skills: true,
+                degrees: true,
+                certifications: true,
               },
             },
           },
@@ -233,6 +239,8 @@ export class MatchingOrchestratorService {
         skills: true,
         experiences: true,
         projects: true,
+        degrees: true,
+        certifications: true,
       },
     });
 

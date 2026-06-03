@@ -6,11 +6,40 @@ export class UserDataService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(params?: any) {
-    const { skip = 0, take = 20, role, status, search } = params ?? {};
+    const {
+      skip = 0,
+      take = 20,
+      role,
+      status,
+      search,
+      hasPendingVerification,
+    } = params ?? {};
     const where: any = {};
     if (role) where.userRoles = { some: { role: { roleName: role } } };
     if (status) where.status = status;
-    if (search) where.email = { contains: search, mode: 'insensitive' };
+    if (search) {
+      const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          search,
+        );
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { candidate: { fullName: { contains: search, mode: 'insensitive' } } },
+        { recruiter: { fullName: { contains: search, mode: 'insensitive' } } },
+        { admin: { fullName: { contains: search, mode: 'insensitive' } } },
+      ];
+      if (isUuid) {
+        where.OR.push({ userId: search });
+      }
+    }
+    if (hasPendingVerification === 'true' || hasPendingVerification === true) {
+      where.candidate = {
+        OR: [
+          { degrees: { some: { status: 'PENDING' } } },
+          { certifications: { some: { status: 'PENDING' } } },
+        ],
+      };
+    }
 
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -28,7 +57,20 @@ export class UserDataService {
           createdAt: true,
           lastLogin: true,
           userRoles: { include: { role: true } },
-          candidate: { select: { fullName: true } },
+          candidate: {
+            select: {
+              fullName: true,
+              candidateId: true,
+              degrees: {
+                where: { status: 'PENDING' },
+                select: { degreeId: true },
+              },
+              certifications: {
+                where: { status: 'PENDING' },
+                select: { certificationId: true },
+              },
+            },
+          },
           recruiter: {
             select: {
               fullName: true,
@@ -64,7 +106,12 @@ export class UserDataService {
         updatedAt: true,
         lastLogin: true,
         userRoles: { include: { role: true } },
-        candidate: true,
+        candidate: {
+          include: {
+            degrees: true,
+            certifications: true,
+          },
+        },
         recruiter: {
           include: {
             recruiterSubscription: true,
@@ -127,12 +174,14 @@ export class UserDataService {
             degree: true,
             industries: true,
             languages: true,
+            otherInfo: true,
             softSkills: true,
             interests: true,
             skills: true,
             experiences: { orderBy: { duration: 'desc' } },
             projects: true,
             certifications: true,
+            degrees: true,
             cvs: {
               select: {
                 cvId: true,

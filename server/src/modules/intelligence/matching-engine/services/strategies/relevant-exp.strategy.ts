@@ -53,12 +53,22 @@ export class RelevantExpStrategy implements IMatchingStrategy {
       }
 
       let similarity = 0;
+      let jobRequirements: string[] = [];
+      let candidateExps: string[] = [];
+      let matchingPoints: string[] = [];
+      let scoreExplanation = '';
+
       try {
-        // 2. Sử dụng AI để đánh giá độ liên quan ngữ nghĩa
-        similarity = await this.aiService.calculateSemanticSimilarity(
+        // 2. Sử dụng AI để đánh giá độ liên quan ngữ nghĩa & phân tích chi tiết
+        const aiRes = await this.aiService.analyzeRelevantExperience(
           jobDesc,
           fullCvExp,
         );
+        similarity = aiRes.similarity;
+        jobRequirements = aiRes.jobRequirements;
+        candidateExps = aiRes.candidateExps;
+        matchingPoints = aiRes.matchingPoints;
+        scoreExplanation = aiRes.scoreExplanation || '';
 
         // Boosting cho các trường hợp rất khớp (như ví dụ CSKH của khách hàng)
         if (similarity > 0.6) {
@@ -66,7 +76,7 @@ export class RelevantExpStrategy implements IMatchingStrategy {
         }
       } catch (e) {
         this.logger.warn(
-          `AI Relevant Experience similarity failed, using keyword fallback`,
+          `AI Relevant Experience similarity analysis failed, using keyword fallback`,
         );
         // Fallback: Keyword count simple logic
         const keyTerms = job.title
@@ -84,6 +94,10 @@ export class RelevantExpStrategy implements IMatchingStrategy {
         details: {
           similarity: Math.round(similarity * 100) / 100,
           cvEvidence: fullCvExp,
+          jobRequirements,
+          candidateExps,
+          matchingPoints,
+          scoreExplanation,
           message:
             'Phân tích chiều sâu giữa trách nhiệm đã làm và yêu cầu công việc',
         },

@@ -165,12 +165,63 @@ export class ScoringEngineService {
       finalSkillScore += bonus;
     }
 
+    // Option C: Chứng chỉ chuyên môn xác minh hệ số
+    const candidateCerts = cv.candidate?.certifications || [];
+    const langKeywords = [
+      'ielts',
+      'toeic',
+      'toefl',
+      'hsk',
+      'jlpt',
+      'topik',
+      'english',
+      'tiếng anh',
+      'tiếng nhật',
+      'tiếng trung',
+      'tiếng hàn',
+      'tiếng pháp',
+      'tiếng đức',
+    ];
+    const professionalCerts = candidateCerts.filter((c: any) => {
+      const nameLower = c.name.toLowerCase();
+      return !langKeywords.some((kw) => nameLower.includes(kw));
+    });
+
+    const jobText =
+      `${job.title} ${job.requirements || ''} ${job.description || ''}`.toLowerCase();
+    const jobRequiresCert = ['chứng chỉ', 'cert', 'license', 'credential'].some(
+      (kw) => jobText.includes(kw),
+    );
+
+    let skillsMultiplier = 1.0;
+    let skillVerificationStatus = 'NOT_APPLICABLE';
+
+    if (jobRequiresCert || professionalCerts.length > 0) {
+      skillsMultiplier = 0.3; // Mặc định phạt nếu có khai báo hoặc job yêu cầu nhưng chưa nộp minh chứng
+      skillVerificationStatus = 'UNVERIFIED';
+
+      if (professionalCerts.length > 0) {
+        const statuses = professionalCerts.map((c: any) => c.status);
+        if (statuses.includes('VERIFIED')) {
+          skillsMultiplier = 1.0;
+          skillVerificationStatus = 'VERIFIED';
+        } else if (statuses.includes('PENDING')) {
+          skillsMultiplier = 0.8;
+          skillVerificationStatus = 'PENDING';
+        }
+      }
+    }
+
+    finalSkillScore = finalSkillScore * skillsMultiplier;
+
     return {
       score: Math.round(finalSkillScore),
       details: {
         keywordScore: Math.round(keywordRes.score),
         semanticScore: Math.round(semanticRes.score),
         matchedSkills: keywordRes.details?.matchedSkills || [],
+        skillsMultiplier,
+        skillVerificationStatus,
       },
     };
   }

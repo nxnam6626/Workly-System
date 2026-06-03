@@ -15,6 +15,8 @@ import { ProjectsSection } from './cv-review/ProjectsSection';
 import { SummarySection } from './cv-review/SummarySection';
 import { DesiredJobSection } from './cv-review/DesiredJobSection';
 import { AdditionalInfoSection } from './cv-review/AdditionalInfoSection';
+import { CertificationsSection } from './cv-review/CertificationsSection';
+import { LOCATIONS } from '@/lib/constants';
 
 interface CvReviewFormProps {
   initialData: any;
@@ -86,8 +88,64 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
       desiredJob: {
         jobTitle: initialData?.desired_job?.jobTitle || initialData?.desiredJob?.jobTitle || '',
         expectedSalary: initialData?.desired_job?.expectedSalary || initialData?.desiredJob?.expectedSalary || '',
-        location: initialData?.desired_job?.location || initialData?.desiredJob?.location || '',
-        jobType: initialData?.desired_job?.jobType || initialData?.desiredJob?.jobType || 'FULLTIME'
+        location: (() => {
+          const rawLoc = initialData?.desired_job?.location || initialData?.desiredJob?.location;
+          if (!rawLoc) return '';
+          const cleanLoc = String(rawLoc).toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9\s]/g, "")
+            .replace(/\s+/g, ' ').trim();
+          
+          if (cleanLoc.includes('ho chi minh') || cleanLoc.includes('hcm') || cleanLoc.includes('sai gon')) {
+            return 'Hồ Chí Minh';
+          }
+          if (cleanLoc.includes('ha noi') || cleanLoc.includes('hn')) {
+            return 'Hà Nội';
+          }
+          if (cleanLoc.includes('da nang') || cleanLoc.includes('dn')) {
+            return 'Đà Nẵng';
+          }
+          if (cleanLoc.includes('hai phong') || cleanLoc.includes('hp')) {
+            return 'Hải Phòng';
+          }
+          if (cleanLoc.includes('can tho') || cleanLoc.includes('ct')) {
+            return 'Cần Thơ';
+          }
+          if (cleanLoc.includes('binh duong') || cleanLoc.includes('bd')) {
+            return 'Bình Dương';
+          }
+          if (cleanLoc.includes('dong nai') || cleanLoc.includes('dn')) {
+            return 'Đồng Nai';
+          }
+          
+          const found = LOCATIONS.find(loc => {
+            const normalizedLoc = loc.toLowerCase()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+              .replace(/[^a-z0-9\s]/g, "");
+            return cleanLoc.includes(normalizedLoc) || normalizedLoc.includes(cleanLoc);
+          });
+          
+          return found || '';
+        })(),
+        jobType: (() => {
+          const rawType = initialData?.desired_job?.jobType || initialData?.desiredJob?.jobType;
+          if (!rawType) return 'FULLTIME';
+          const t = String(rawType).toUpperCase().replace(/_/g, '').trim();
+          if (t === 'FULLTIME' || t.includes('TOÀN THỜI GIAN') || t.includes('TOANTHOIGIAN') || t === 'FULL_TIME') return 'FULLTIME';
+          if (t === 'PARTTIME' || t.includes('BÁN THỜI GIAN') || t.includes('BANTHOIGIAN') || t === 'PART_TIME') return 'PARTTIME';
+          if (t === 'REMOTE' || t.includes('TỪ XA') || t.includes('TUXA') || t.includes('LÀM VIỆC TỪ XA') || t.includes('LAMVIECTUXA')) return 'REMOTE';
+          return 'FULLTIME';
+        })(),
+        jobLevel: (() => {
+          const rawLevel = initialData?.desired_job?.jobLevel || initialData?.desiredJob?.jobLevel;
+          if (!rawLevel) return '';
+          const l = String(rawLevel).toUpperCase().replace(/_/g, '').trim();
+          if (l === 'INTERN' || l.includes('THỰC TẬP') || l.includes('THUCTAP')) return 'INTERN';
+          if (l === 'STAFF' || l.includes('NHÂN VIÊN') || l.includes('NHANVIEN') || l.includes('CHUYÊN VIÊN') || l.includes('CHUYENVIEN')) return 'STAFF';
+          if (l === 'MANAGER' || l.includes('TRƯỞNG NHÓM') || l.includes('TRUONGNHOM') || l.includes('TRƯỞNG PHÒNG') || l.includes('TRUONGPHONG') || l.includes('QUẢN LÝ') || l.includes('QUANLY')) return 'MANAGER';
+          if (l === 'DIRECTOR' || l.includes('GIÁM ĐỐC') || l.includes('GIAMDOCK') || l.includes('CẤP CAO') || l.includes('CAPCAO')) return 'DIRECTOR';
+          return '';
+        })()
       },
       totalYearsExp: initialData?.experience?.total_months ? Math.round(initialData.experience.total_months / 12) : (initialData?.totalYearsExp || 0),
       summary: initialData?.summary || '',
@@ -96,6 +154,13 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
         level: l.level || ''
       })),
       interests: initialData?.interests || [],
+      certifications: Array.isArray(initialData?.certifications)
+        ? initialData.certifications.map((c: any) => ({
+            name: typeof c === 'string' ? c : c.name || '',
+            organization: typeof c === 'string' ? '' : c.organization || c.issuer || '',
+            issueDate: typeof c === 'string' ? '' : c.issueDate || '',
+          }))
+        : [],
       otherInfo: (initialData?.other_info || []).map((o: any) => ({
         header: o.header || '',
         content: o.content || ''
@@ -245,8 +310,9 @@ export const CvReviewForm: React.FC<CvReviewFormProps> = ({ initialData, current
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.2 }}
-              className="max-w-4xl mx-auto"
+              className="max-w-4xl mx-auto space-y-6"
             >
+              <CertificationsSection />
               <AdditionalInfoSection />
             </motion.div>
           ) : null}

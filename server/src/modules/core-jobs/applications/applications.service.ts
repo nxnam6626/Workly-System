@@ -459,14 +459,17 @@ export class ApplicationsService {
       throw new NotFoundException(
         'Không tìm thấy hồ sơ ứng viên. Vui lòng hoàn tất thông tin ứng viên của bạn trước.',
       );
-      
+
     if (!candidate.isOpenToWork) {
       throw new ForbiddenException(
         'Bạn cần bật trạng thái "Đang tìm việc" để có thể ứng tuyển.',
       );
     }
-    
-    if (!candidate.jobSearchExpiresAt || candidate.jobSearchExpiresAt < new Date()) {
+
+    if (
+      !candidate.jobSearchExpiresAt ||
+      candidate.jobSearchExpiresAt < new Date()
+    ) {
       throw new ForbiddenException(
         'Tài khoản tìm việc của bạn đã hết hạn, vui lòng kích hoạt lại để ứng tuyển.',
       );
@@ -508,14 +511,17 @@ export class ApplicationsService {
       });
       return newCandidate.candidateId;
     }
-    
+
     if (!candidate.isOpenToWork) {
       throw new ForbiddenException(
         'Email này đã có tài khoản. Vui lòng đăng nhập và bật trạng thái "Đang tìm việc" để ứng tuyển.',
       );
     }
-    
-    if (!candidate.jobSearchExpiresAt || candidate.jobSearchExpiresAt < new Date()) {
+
+    if (
+      !candidate.jobSearchExpiresAt ||
+      candidate.jobSearchExpiresAt < new Date()
+    ) {
       throw new ForbiddenException(
         'Tài khoản của bạn đã hết hạn tìm việc, vui lòng đăng nhập và kích hoạt lại để ứng tuyển.',
       );

@@ -33,6 +33,13 @@ export class LanguageStrategy implements IMatchingStrategy {
     c2: 100,
     a2: 40,
     b1: 60,
+    advanced: 80,
+    intermediate: 60,
+    beginner: 40,
+    'thành thạo': 80,
+    'trung cấp': 60,
+    'cơ bản': 40,
+    'sơ cấp': 40,
   };
 
   async calculate(job: any, cv: any): Promise<MatchingResult> {
@@ -61,11 +68,53 @@ export class LanguageStrategy implements IMatchingStrategy {
         totalScore += foundLevel;
       }
 
-      const score = totalScore / requiredLang.length;
+      // Option C: Chứng chỉ ngoại ngữ hệ số xác minh
+      const candidateCerts = cv.candidate?.certifications || [];
+      const langKeywords = [
+        'ielts',
+        'toeic',
+        'toefl',
+        'hsk',
+        'jlpt',
+        'topik',
+        'english',
+        'tiếng anh',
+        'tiếng nhật',
+        'tiếng trung',
+        'tiếng hàn',
+        'tiếng pháp',
+        'tiếng đức',
+      ];
+
+      const langCerts = candidateCerts.filter((c: any) => {
+        const nameLower = c.name.toLowerCase();
+        return langKeywords.some((kw) => nameLower.includes(kw));
+      });
+
+      let langMultiplier = 0.3; // Mặc định chưa nộp minh chứng
+      let verificationStatus = 'UNVERIFIED';
+
+      if (langCerts.length > 0) {
+        const statuses = langCerts.map((c: any) => c.status);
+        if (statuses.includes('VERIFIED')) {
+          langMultiplier = 1.0;
+          verificationStatus = 'VERIFIED';
+        } else if (statuses.includes('PENDING')) {
+          langMultiplier = 0.8;
+          verificationStatus = 'PENDING';
+        }
+      }
+
+      const score = (totalScore / requiredLang.length) * langMultiplier;
 
       return {
         score,
-        details: { requiredLang, cvLangs },
+        details: {
+          requiredLang,
+          cvLangs,
+          langMultiplier,
+          verificationStatus,
+        },
       };
     } catch (error) {
       this.logger.error(`Language Match Error: ${error.message}`);
@@ -77,7 +126,7 @@ export class LanguageStrategy implements IMatchingStrategy {
     // Logic tìm kiếm trình độ tương đương trong danh sách ngoại ngữ của ứng viên
     for (const cvLang of cvLangs) {
       const cvStr =
-        `${cvLang.language} ${cvLang.level || cvLang.certificate}`.toLowerCase();
+        `${cvLang.language || cvLang.name || ''} ${cvLang.level || ''} ${cvLang.certificate || ''} ${cvLang.score || ''}`.toLowerCase();
 
       // Nếu khớp chính xác từ khóa trình độ
       for (const [key, val] of Object.entries(this.englishLevels)) {

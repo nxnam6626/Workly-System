@@ -111,6 +111,7 @@ export default function UserTable({
                 const isProcessing = processingId === u.userId;
                 const displayName = u.candidate?.fullName ?? u.recruiter?.fullName ?? u.email.split('@')[0];
                 const roles = u.userRoles.map((ur) => ur.role.roleName);
+                const pendingVerifyCount = (u.candidate?.degrees?.filter(d => d.status === 'PENDING').length || 0) + (u.candidate?.certifications?.filter(c => c.status === 'PENDING').length || 0);
 
                 return (
                   <motion.tr
@@ -119,7 +120,8 @@ export default function UserTable({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.03 }}
-                    className="group hover:bg-slate-50/80 transition-all cursor-default"
+                    className="group hover:bg-slate-50/80 hover:shadow-sm cursor-pointer transition-all"
+                    onClick={() => onQuickView(u)}
                   >
                     {/* User Info */}
                     <td className="px-8 py-4">
@@ -137,7 +139,14 @@ export default function UserTable({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className={`text-[14px] font-black tracking-tight text-slate-900 truncate group-hover:${theme.text} transition-colors`}>{displayName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-[14px] font-black tracking-tight text-slate-900 truncate group-hover:${theme.text} transition-colors`}>{displayName}</p>
+                            {pendingVerifyCount > 0 && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-[9px] font-black tracking-wide shrink-0 shadow-sm shadow-blue-50/50">
+                                ⚡ Chờ duyệt ({pendingVerifyCount})
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <Mail className="w-3 h-3 text-slate-400" />
                             <p className="text-[11px] font-medium text-slate-400 truncate max-w-[180px]">{u.email}</p>
@@ -200,7 +209,7 @@ export default function UserTable({
                     </td>
 
                     {/* Actions */}
-                    <td className="px-8 py-4 text-right">
+                    <td className="px-8 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
                         <button
                           onClick={() => onQuickView(u)}

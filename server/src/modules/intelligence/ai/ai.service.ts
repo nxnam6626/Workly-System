@@ -78,6 +78,13 @@ export class AiService {
     return this.aiMatchingService.calculateSemanticSimilarity(text1, text2);
   }
 
+  async analyzeRelevantExperience(jobDesc: string, candidateExp: string) {
+    return this.aiMatchingService.analyzeRelevantExperience(
+      jobDesc,
+      candidateExp,
+    );
+  }
+
   // --- Insights ---
   async generateRecruiterInsights(
     userId: string,

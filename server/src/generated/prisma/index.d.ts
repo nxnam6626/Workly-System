@@ -59,6 +59,11 @@ export type Experience = $Result.DefaultSelection<Prisma.$ExperiencePayload>;
 export type Certification =
   $Result.DefaultSelection<Prisma.$CertificationPayload>;
 /**
+ * Model Degree
+ *
+ */
+export type Degree = $Result.DefaultSelection<Prisma.$DegreePayload>;
+/**
  * Model Skill
  *
  */
@@ -220,6 +225,16 @@ export type CandidateReport =
  * Enums
  */
 export namespace $Enums {
+  export const VerificationStatus: {
+    UNVERIFIED: 'UNVERIFIED';
+    PENDING: 'PENDING';
+    VERIFIED: 'VERIFIED';
+    REJECTED: 'REJECTED';
+  };
+
+  export type VerificationStatus =
+    (typeof VerificationStatus)[keyof typeof VerificationStatus];
+
   export const AuthProvider: {
     LOCAL: 'LOCAL';
     GOOGLE: 'GOOGLE';
@@ -347,6 +362,10 @@ export namespace $Enums {
 
   export type EvalResult = (typeof EvalResult)[keyof typeof EvalResult];
 }
+
+export type VerificationStatus = $Enums.VerificationStatus;
+
+export const VerificationStatus: typeof $Enums.VerificationStatus;
 
 export type AuthProvider = $Enums.AuthProvider;
 
@@ -656,6 +675,16 @@ export class PrismaClient<
    * ```
    */
   get certification(): Prisma.CertificationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.degree`: Exposes CRUD operations for the **Degree** model.
+   * Example usage:
+   * ```ts
+   * // Fetch zero or more Degrees
+   * const degrees = await prisma.degree.findMany()
+   * ```
+   */
+  get degree(): Prisma.DegreeDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.skill`: Exposes CRUD operations for the **Skill** model.
@@ -1409,6 +1438,7 @@ export namespace Prisma {
     Candidate: 'Candidate';
     Experience: 'Experience';
     Certification: 'Certification';
+    Degree: 'Degree';
     Skill: 'Skill';
     Project: 'Project';
     Recruiter: 'Recruiter';
@@ -1469,6 +1499,7 @@ export namespace Prisma {
         | 'candidate'
         | 'experience'
         | 'certification'
+        | 'degree'
         | 'skill'
         | 'project'
         | 'recruiter'
@@ -2169,6 +2200,80 @@ export namespace Prisma {
             result:
               | $Utils.Optional<CertificationCountAggregateOutputType>
               | number;
+          };
+        };
+      };
+      Degree: {
+        payload: Prisma.$DegreePayload<ExtArgs>;
+        fields: Prisma.DegreeFieldRefs;
+        operations: {
+          findUnique: {
+            args: Prisma.DegreeFindUniqueArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null;
+          };
+          findUniqueOrThrow: {
+            args: Prisma.DegreeFindUniqueOrThrowArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          findFirst: {
+            args: Prisma.DegreeFindFirstArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null;
+          };
+          findFirstOrThrow: {
+            args: Prisma.DegreeFindFirstOrThrowArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          findMany: {
+            args: Prisma.DegreeFindManyArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
+          };
+          create: {
+            args: Prisma.DegreeCreateArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          createMany: {
+            args: Prisma.DegreeCreateManyArgs<ExtArgs>;
+            result: BatchPayload;
+          };
+          createManyAndReturn: {
+            args: Prisma.DegreeCreateManyAndReturnArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
+          };
+          delete: {
+            args: Prisma.DegreeDeleteArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          update: {
+            args: Prisma.DegreeUpdateArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          deleteMany: {
+            args: Prisma.DegreeDeleteManyArgs<ExtArgs>;
+            result: BatchPayload;
+          };
+          updateMany: {
+            args: Prisma.DegreeUpdateManyArgs<ExtArgs>;
+            result: BatchPayload;
+          };
+          updateManyAndReturn: {
+            args: Prisma.DegreeUpdateManyAndReturnArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
+          };
+          upsert: {
+            args: Prisma.DegreeUpsertArgs<ExtArgs>;
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
+          };
+          aggregate: {
+            args: Prisma.DegreeAggregateArgs<ExtArgs>;
+            result: $Utils.Optional<AggregateDegree>;
+          };
+          groupBy: {
+            args: Prisma.DegreeGroupByArgs<ExtArgs>;
+            result: $Utils.Optional<DegreeGroupByOutputType>[];
+          };
+          count: {
+            args: Prisma.DegreeCountArgs<ExtArgs>;
+            result: $Utils.Optional<DegreeCountAggregateOutputType> | number;
           };
         };
       };
@@ -4405,6 +4510,7 @@ export namespace Prisma {
     candidate?: CandidateOmit;
     experience?: ExperienceOmit;
     certification?: CertificationOmit;
+    degree?: DegreeOmit;
     skill?: SkillOmit;
     project?: ProjectOmit;
     recruiter?: RecruiterOmit;
@@ -4659,6 +4765,7 @@ export namespace Prisma {
     applications: number;
     cvs: number;
     certifications: number;
+    degrees: number;
     conversations: number;
     experiences: number;
     jobMatches: number;
@@ -4677,6 +4784,7 @@ export namespace Prisma {
     applications?: boolean | CandidateCountOutputTypeCountApplicationsArgs;
     cvs?: boolean | CandidateCountOutputTypeCountCvsArgs;
     certifications?: boolean | CandidateCountOutputTypeCountCertificationsArgs;
+    degrees?: boolean | CandidateCountOutputTypeCountDegreesArgs;
     conversations?: boolean | CandidateCountOutputTypeCountConversationsArgs;
     experiences?: boolean | CandidateCountOutputTypeCountExperiencesArgs;
     jobMatches?: boolean | CandidateCountOutputTypeCountJobMatchesArgs;
@@ -4731,6 +4839,15 @@ export namespace Prisma {
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = {
     where?: CertificationWhereInput;
+  };
+
+  /**
+   * CandidateCountOutputType without action
+   */
+  export type CandidateCountOutputTypeCountDegreesArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    where?: DegreeWhereInput;
   };
 
   /**
@@ -13746,6 +13863,7 @@ export namespace Prisma {
     industries: number;
     interests: number;
     languages: number;
+    otherInfo: number;
     softSkills: number;
     _all: number;
   };
@@ -13821,6 +13939,7 @@ export namespace Prisma {
     industries?: true;
     interests?: true;
     languages?: true;
+    otherInfo?: true;
     softSkills?: true;
     _all?: true;
   };
@@ -13937,6 +14056,7 @@ export namespace Prisma {
     industries: string[];
     interests: string[];
     languages: JsonValue | null;
+    otherInfo: JsonValue | null;
     softSkills: string[];
     _count: CandidateCountAggregateOutputType | null;
     _avg: CandidateAvgAggregateOutputType | null;
@@ -13982,11 +14102,13 @@ export namespace Prisma {
       industries?: boolean;
       interests?: boolean;
       languages?: boolean;
+      otherInfo?: boolean;
       softSkills?: boolean;
       applications?: boolean | Candidate$applicationsArgs<ExtArgs>;
       cvs?: boolean | Candidate$cvsArgs<ExtArgs>;
       user?: boolean | UserDefaultArgs<ExtArgs>;
       certifications?: boolean | Candidate$certificationsArgs<ExtArgs>;
+      degrees?: boolean | Candidate$degreesArgs<ExtArgs>;
       conversations?: boolean | Candidate$conversationsArgs<ExtArgs>;
       experiences?: boolean | Candidate$experiencesArgs<ExtArgs>;
       jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>;
@@ -14027,6 +14149,7 @@ export namespace Prisma {
       industries?: boolean;
       interests?: boolean;
       languages?: boolean;
+      otherInfo?: boolean;
       softSkills?: boolean;
       user?: boolean | UserDefaultArgs<ExtArgs>;
     },
@@ -14057,6 +14180,7 @@ export namespace Prisma {
       industries?: boolean;
       interests?: boolean;
       languages?: boolean;
+      otherInfo?: boolean;
       softSkills?: boolean;
       user?: boolean | UserDefaultArgs<ExtArgs>;
     },
@@ -14084,6 +14208,7 @@ export namespace Prisma {
     industries?: boolean;
     interests?: boolean;
     languages?: boolean;
+    otherInfo?: boolean;
     softSkills?: boolean;
   };
 
@@ -14110,6 +14235,7 @@ export namespace Prisma {
     | 'industries'
     | 'interests'
     | 'languages'
+    | 'otherInfo'
     | 'softSkills',
     ExtArgs['result']['candidate']
   >;
@@ -14120,6 +14246,7 @@ export namespace Prisma {
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>;
     user?: boolean | UserDefaultArgs<ExtArgs>;
     certifications?: boolean | Candidate$certificationsArgs<ExtArgs>;
+    degrees?: boolean | Candidate$degreesArgs<ExtArgs>;
     conversations?: boolean | Candidate$conversationsArgs<ExtArgs>;
     experiences?: boolean | Candidate$experiencesArgs<ExtArgs>;
     jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>;
@@ -14153,6 +14280,7 @@ export namespace Prisma {
       cvs: Prisma.$CVPayload<ExtArgs>[];
       user: Prisma.$UserPayload<ExtArgs>;
       certifications: Prisma.$CertificationPayload<ExtArgs>[];
+      degrees: Prisma.$DegreePayload<ExtArgs>[];
       conversations: Prisma.$ConversationPayload<ExtArgs>[];
       experiences: Prisma.$ExperiencePayload<ExtArgs>[];
       jobMatches: Prisma.$JobMatchPayload<ExtArgs>[];
@@ -14187,6 +14315,7 @@ export namespace Prisma {
         industries: string[];
         interests: string[];
         languages: Prisma.JsonValue | null;
+        otherInfo: Prisma.JsonValue | null;
         softSkills: string[];
       },
       ExtArgs['result']['candidate']
@@ -14785,6 +14914,17 @@ export namespace Prisma {
         >
       | Null
     >;
+    degrees<T extends Candidate$degreesArgs<ExtArgs> = {}>(
+      args?: Subset<T, Candidate$degreesArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<
+      | $Result.GetResult<
+          Prisma.$DegreePayload<ExtArgs>,
+          T,
+          'findMany',
+          GlobalOmitOptions
+        >
+      | Null
+    >;
     conversations<T extends Candidate$conversationsArgs<ExtArgs> = {}>(
       args?: Subset<T, Candidate$conversationsArgs<ExtArgs>>,
     ): Prisma.PrismaPromise<
@@ -14959,6 +15099,7 @@ export namespace Prisma {
     readonly industries: FieldRef<'Candidate', 'String[]'>;
     readonly interests: FieldRef<'Candidate', 'String[]'>;
     readonly languages: FieldRef<'Candidate', 'Json'>;
+    readonly otherInfo: FieldRef<'Candidate', 'Json'>;
     readonly softSkills: FieldRef<'Candidate', 'String[]'>;
   }
 
@@ -15479,6 +15620,32 @@ export namespace Prisma {
     take?: number;
     skip?: number;
     distinct?: CertificationScalarFieldEnum | CertificationScalarFieldEnum[];
+  };
+
+  /**
+   * Candidate.degrees
+   */
+  export type Candidate$degreesArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    where?: DegreeWhereInput;
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    cursor?: DegreeWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
   };
 
   /**
@@ -17143,18 +17310,40 @@ export namespace Prisma {
   export type CertificationMinAggregateOutputType = {
     certificationId: string | null;
     name: string | null;
+    issuer: string | null;
+    issueDate: string | null;
+    credentialId: string | null;
+    credentialUrl: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus | null;
+    adminFeedback: string | null;
     candidateId: string | null;
   };
 
   export type CertificationMaxAggregateOutputType = {
     certificationId: string | null;
     name: string | null;
+    issuer: string | null;
+    issueDate: string | null;
+    credentialId: string | null;
+    credentialUrl: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus | null;
+    adminFeedback: string | null;
     candidateId: string | null;
   };
 
   export type CertificationCountAggregateOutputType = {
     certificationId: number;
     name: number;
+    issuer: number;
+    issueDate: number;
+    credentialId: number;
+    credentialUrl: number;
+    fileUrl: number;
+    status: number;
+    adminFeedback: number;
+    aiVerification: number;
     candidateId: number;
     _all: number;
   };
@@ -17162,18 +17351,40 @@ export namespace Prisma {
   export type CertificationMinAggregateInputType = {
     certificationId?: true;
     name?: true;
+    issuer?: true;
+    issueDate?: true;
+    credentialId?: true;
+    credentialUrl?: true;
+    fileUrl?: true;
+    status?: true;
+    adminFeedback?: true;
     candidateId?: true;
   };
 
   export type CertificationMaxAggregateInputType = {
     certificationId?: true;
     name?: true;
+    issuer?: true;
+    issueDate?: true;
+    credentialId?: true;
+    credentialUrl?: true;
+    fileUrl?: true;
+    status?: true;
+    adminFeedback?: true;
     candidateId?: true;
   };
 
   export type CertificationCountAggregateInputType = {
     certificationId?: true;
     name?: true;
+    issuer?: true;
+    issueDate?: true;
+    credentialId?: true;
+    credentialUrl?: true;
+    fileUrl?: true;
+    status?: true;
+    adminFeedback?: true;
+    aiVerification?: true;
     candidateId?: true;
     _all?: true;
   };
@@ -17260,6 +17471,14 @@ export namespace Prisma {
   export type CertificationGroupByOutputType = {
     certificationId: string;
     name: string;
+    issuer: string | null;
+    issueDate: string | null;
+    credentialId: string | null;
+    credentialUrl: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus;
+    adminFeedback: string | null;
+    aiVerification: JsonValue | null;
     candidateId: string;
     _count: CertificationCountAggregateOutputType | null;
     _min: CertificationMinAggregateOutputType | null;
@@ -17286,6 +17505,14 @@ export namespace Prisma {
     {
       certificationId?: boolean;
       name?: boolean;
+      issuer?: boolean;
+      issueDate?: boolean;
+      credentialId?: boolean;
+      credentialUrl?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
       candidateId?: boolean;
       candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
     },
@@ -17298,6 +17525,14 @@ export namespace Prisma {
     {
       certificationId?: boolean;
       name?: boolean;
+      issuer?: boolean;
+      issueDate?: boolean;
+      credentialId?: boolean;
+      credentialUrl?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
       candidateId?: boolean;
       candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
     },
@@ -17310,6 +17545,14 @@ export namespace Prisma {
     {
       certificationId?: boolean;
       name?: boolean;
+      issuer?: boolean;
+      issueDate?: boolean;
+      credentialId?: boolean;
+      credentialUrl?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
       candidateId?: boolean;
       candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
     },
@@ -17319,13 +17562,31 @@ export namespace Prisma {
   export type CertificationSelectScalar = {
     certificationId?: boolean;
     name?: boolean;
+    issuer?: boolean;
+    issueDate?: boolean;
+    credentialId?: boolean;
+    credentialUrl?: boolean;
+    fileUrl?: boolean;
+    status?: boolean;
+    adminFeedback?: boolean;
+    aiVerification?: boolean;
     candidateId?: boolean;
   };
 
   export type CertificationOmit<
     ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
   > = $Extensions.GetOmit<
-    'certificationId' | 'name' | 'candidateId',
+    | 'certificationId'
+    | 'name'
+    | 'issuer'
+    | 'issueDate'
+    | 'credentialId'
+    | 'credentialUrl'
+    | 'fileUrl'
+    | 'status'
+    | 'adminFeedback'
+    | 'aiVerification'
+    | 'candidateId',
     ExtArgs['result']['certification']
   >;
   export type CertificationInclude<
@@ -17355,6 +17616,14 @@ export namespace Prisma {
       {
         certificationId: string;
         name: string;
+        issuer: string | null;
+        issueDate: string | null;
+        credentialId: string | null;
+        credentialUrl: string | null;
+        fileUrl: string | null;
+        status: $Enums.VerificationStatus;
+        adminFeedback: string | null;
+        aiVerification: Prisma.JsonValue | null;
         candidateId: string;
       },
       ExtArgs['result']['certification']
@@ -17953,6 +18222,14 @@ export namespace Prisma {
   interface CertificationFieldRefs {
     readonly certificationId: FieldRef<'Certification', 'String'>;
     readonly name: FieldRef<'Certification', 'String'>;
+    readonly issuer: FieldRef<'Certification', 'String'>;
+    readonly issueDate: FieldRef<'Certification', 'String'>;
+    readonly credentialId: FieldRef<'Certification', 'String'>;
+    readonly credentialUrl: FieldRef<'Certification', 'String'>;
+    readonly fileUrl: FieldRef<'Certification', 'String'>;
+    readonly status: FieldRef<'Certification', 'VerificationStatus'>;
+    readonly adminFeedback: FieldRef<'Certification', 'String'>;
+    readonly aiVerification: FieldRef<'Certification', 'Json'>;
     readonly candidateId: FieldRef<'Certification', 'String'>;
   }
 
@@ -18411,6 +18688,1392 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CertificationInclude<ExtArgs> | null;
+  };
+
+  /**
+   * Model Degree
+   */
+
+  export type AggregateDegree = {
+    _count: DegreeCountAggregateOutputType | null;
+    _min: DegreeMinAggregateOutputType | null;
+    _max: DegreeMaxAggregateOutputType | null;
+  };
+
+  export type DegreeMinAggregateOutputType = {
+    degreeId: string | null;
+    name: string | null;
+    school: string | null;
+    major: string | null;
+    issueDate: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus | null;
+    issuer: string | null;
+    credentialId: string | null;
+    adminFeedback: string | null;
+    candidateId: string | null;
+  };
+
+  export type DegreeMaxAggregateOutputType = {
+    degreeId: string | null;
+    name: string | null;
+    school: string | null;
+    major: string | null;
+    issueDate: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus | null;
+    issuer: string | null;
+    credentialId: string | null;
+    adminFeedback: string | null;
+    candidateId: string | null;
+  };
+
+  export type DegreeCountAggregateOutputType = {
+    degreeId: number;
+    name: number;
+    school: number;
+    major: number;
+    issueDate: number;
+    fileUrl: number;
+    status: number;
+    issuer: number;
+    credentialId: number;
+    adminFeedback: number;
+    aiVerification: number;
+    candidateId: number;
+    _all: number;
+  };
+
+  export type DegreeMinAggregateInputType = {
+    degreeId?: true;
+    name?: true;
+    school?: true;
+    major?: true;
+    issueDate?: true;
+    fileUrl?: true;
+    status?: true;
+    issuer?: true;
+    credentialId?: true;
+    adminFeedback?: true;
+    candidateId?: true;
+  };
+
+  export type DegreeMaxAggregateInputType = {
+    degreeId?: true;
+    name?: true;
+    school?: true;
+    major?: true;
+    issueDate?: true;
+    fileUrl?: true;
+    status?: true;
+    issuer?: true;
+    credentialId?: true;
+    adminFeedback?: true;
+    candidateId?: true;
+  };
+
+  export type DegreeCountAggregateInputType = {
+    degreeId?: true;
+    name?: true;
+    school?: true;
+    major?: true;
+    issueDate?: true;
+    fileUrl?: true;
+    status?: true;
+    issuer?: true;
+    credentialId?: true;
+    adminFeedback?: true;
+    aiVerification?: true;
+    candidateId?: true;
+    _all?: true;
+  };
+
+  export type DegreeAggregateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Filter which Degree to aggregate.
+     */
+    where?: DegreeWhereInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Degrees to fetch.
+     */
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: DegreeWhereUniqueInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Degrees from the position of the cursor.
+     */
+    take?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Degrees.
+     */
+    skip?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned Degrees
+     **/
+    _count?: true | DegreeCountAggregateInputType;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+     **/
+    _min?: DegreeMinAggregateInputType;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+     **/
+    _max?: DegreeMaxAggregateInputType;
+  };
+
+  export type GetDegreeAggregateType<T extends DegreeAggregateArgs> = {
+    [P in keyof T & keyof AggregateDegree]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDegree[P]>
+      : GetScalarType<T[P], AggregateDegree[P]>;
+  };
+
+  export type DegreeGroupByArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    where?: DegreeWhereInput;
+    orderBy?:
+      | DegreeOrderByWithAggregationInput
+      | DegreeOrderByWithAggregationInput[];
+    by: DegreeScalarFieldEnum[] | DegreeScalarFieldEnum;
+    having?: DegreeScalarWhereWithAggregatesInput;
+    take?: number;
+    skip?: number;
+    _count?: DegreeCountAggregateInputType | true;
+    _min?: DegreeMinAggregateInputType;
+    _max?: DegreeMaxAggregateInputType;
+  };
+
+  export type DegreeGroupByOutputType = {
+    degreeId: string;
+    name: string;
+    school: string;
+    major: string | null;
+    issueDate: string | null;
+    fileUrl: string | null;
+    status: $Enums.VerificationStatus;
+    issuer: string | null;
+    credentialId: string | null;
+    adminFeedback: string | null;
+    aiVerification: JsonValue | null;
+    candidateId: string;
+    _count: DegreeCountAggregateOutputType | null;
+    _min: DegreeMinAggregateOutputType | null;
+    _max: DegreeMaxAggregateOutputType | null;
+  };
+
+  type GetDegreeGroupByPayload<T extends DegreeGroupByArgs> =
+    Prisma.PrismaPromise<
+      Array<
+        PickEnumerable<DegreeGroupByOutputType, T['by']> & {
+          [P in keyof T & keyof DegreeGroupByOutputType]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DegreeGroupByOutputType[P]>
+            : GetScalarType<T[P], DegreeGroupByOutputType[P]>;
+        }
+      >
+    >;
+
+  export type DegreeSelect<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      degreeId?: boolean;
+      name?: boolean;
+      school?: boolean;
+      major?: boolean;
+      issueDate?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      issuer?: boolean;
+      credentialId?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
+      candidateId?: boolean;
+      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+    },
+    ExtArgs['result']['degree']
+  >;
+
+  export type DegreeSelectCreateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      degreeId?: boolean;
+      name?: boolean;
+      school?: boolean;
+      major?: boolean;
+      issueDate?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      issuer?: boolean;
+      credentialId?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
+      candidateId?: boolean;
+      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+    },
+    ExtArgs['result']['degree']
+  >;
+
+  export type DegreeSelectUpdateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      degreeId?: boolean;
+      name?: boolean;
+      school?: boolean;
+      major?: boolean;
+      issueDate?: boolean;
+      fileUrl?: boolean;
+      status?: boolean;
+      issuer?: boolean;
+      credentialId?: boolean;
+      adminFeedback?: boolean;
+      aiVerification?: boolean;
+      candidateId?: boolean;
+      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+    },
+    ExtArgs['result']['degree']
+  >;
+
+  export type DegreeSelectScalar = {
+    degreeId?: boolean;
+    name?: boolean;
+    school?: boolean;
+    major?: boolean;
+    issueDate?: boolean;
+    fileUrl?: boolean;
+    status?: boolean;
+    issuer?: boolean;
+    credentialId?: boolean;
+    adminFeedback?: boolean;
+    aiVerification?: boolean;
+    candidateId?: boolean;
+  };
+
+  export type DegreeOmit<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetOmit<
+    | 'degreeId'
+    | 'name'
+    | 'school'
+    | 'major'
+    | 'issueDate'
+    | 'fileUrl'
+    | 'status'
+    | 'issuer'
+    | 'credentialId'
+    | 'adminFeedback'
+    | 'aiVerification'
+    | 'candidateId',
+    ExtArgs['result']['degree']
+  >;
+  export type DegreeInclude<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+  };
+  export type DegreeIncludeCreateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+  };
+  export type DegreeIncludeUpdateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
+  };
+
+  export type $DegreePayload<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    name: 'Degree';
+    objects: {
+      candidate: Prisma.$CandidatePayload<ExtArgs>;
+    };
+    scalars: $Extensions.GetPayloadResult<
+      {
+        degreeId: string;
+        name: string;
+        school: string;
+        major: string | null;
+        issueDate: string | null;
+        fileUrl: string | null;
+        status: $Enums.VerificationStatus;
+        issuer: string | null;
+        credentialId: string | null;
+        adminFeedback: string | null;
+        aiVerification: Prisma.JsonValue | null;
+        candidateId: string;
+      },
+      ExtArgs['result']['degree']
+    >;
+    composites: {};
+  };
+
+  type DegreeGetPayload<
+    S extends boolean | null | undefined | DegreeDefaultArgs,
+  > = $Result.GetResult<Prisma.$DegreePayload, S>;
+
+  type DegreeCountArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = Omit<DegreeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+    select?: DegreeCountAggregateInputType | true;
+  };
+
+  export interface DegreeDelegate<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+    GlobalOmitOptions = {},
+  > {
+    [K: symbol]: {
+      types: Prisma.TypeMap<ExtArgs>['model']['Degree'];
+      meta: { name: 'Degree' };
+    };
+    /**
+     * Find zero or one Degree that matches the filter.
+     * @param {DegreeFindUniqueArgs} args - Arguments to find a Degree
+     * @example
+     * // Get one Degree
+     * const degree = await prisma.degree.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DegreeFindUniqueArgs>(
+      args: SelectSubset<T, DegreeFindUniqueArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'findUnique',
+        GlobalOmitOptions
+      > | null,
+      null,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Find one Degree that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DegreeFindUniqueOrThrowArgs} args - Arguments to find a Degree
+     * @example
+     * // Get one Degree
+     * const degree = await prisma.degree.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DegreeFindUniqueOrThrowArgs>(
+      args: SelectSubset<T, DegreeFindUniqueOrThrowArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'findUniqueOrThrow',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Find the first Degree that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeFindFirstArgs} args - Arguments to find a Degree
+     * @example
+     * // Get one Degree
+     * const degree = await prisma.degree.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DegreeFindFirstArgs>(
+      args?: SelectSubset<T, DegreeFindFirstArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'findFirst',
+        GlobalOmitOptions
+      > | null,
+      null,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Find the first Degree that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeFindFirstOrThrowArgs} args - Arguments to find a Degree
+     * @example
+     * // Get one Degree
+     * const degree = await prisma.degree.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DegreeFindFirstOrThrowArgs>(
+      args?: SelectSubset<T, DegreeFindFirstOrThrowArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'findFirstOrThrow',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Find zero or more Degrees that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Degrees
+     * const degrees = await prisma.degree.findMany()
+     *
+     * // Get first 10 Degrees
+     * const degrees = await prisma.degree.findMany({ take: 10 })
+     *
+     * // Only select the `degreeId`
+     * const degreeWithDegreeIdOnly = await prisma.degree.findMany({ select: { degreeId: true } })
+     *
+     */
+    findMany<T extends DegreeFindManyArgs>(
+      args?: SelectSubset<T, DegreeFindManyArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    >;
+
+    /**
+     * Create a Degree.
+     * @param {DegreeCreateArgs} args - Arguments to create a Degree.
+     * @example
+     * // Create one Degree
+     * const Degree = await prisma.degree.create({
+     *   data: {
+     *     // ... data to create a Degree
+     *   }
+     * })
+     *
+     */
+    create<T extends DegreeCreateArgs>(
+      args: SelectSubset<T, DegreeCreateArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'create',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Create many Degrees.
+     * @param {DegreeCreateManyArgs} args - Arguments to create many Degrees.
+     * @example
+     * // Create many Degrees
+     * const degree = await prisma.degree.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends DegreeCreateManyArgs>(
+      args?: SelectSubset<T, DegreeCreateManyArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<BatchPayload>;
+
+    /**
+     * Create many Degrees and returns the data saved in the database.
+     * @param {DegreeCreateManyAndReturnArgs} args - Arguments to create many Degrees.
+     * @example
+     * // Create many Degrees
+     * const degree = await prisma.degree.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many Degrees and only return the `degreeId`
+     * const degreeWithDegreeIdOnly = await prisma.degree.createManyAndReturn({
+     *   select: { degreeId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends DegreeCreateManyAndReturnArgs>(
+      args?: SelectSubset<T, DegreeCreateManyAndReturnArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'createManyAndReturn',
+        GlobalOmitOptions
+      >
+    >;
+
+    /**
+     * Delete a Degree.
+     * @param {DegreeDeleteArgs} args - Arguments to delete one Degree.
+     * @example
+     * // Delete one Degree
+     * const Degree = await prisma.degree.delete({
+     *   where: {
+     *     // ... filter to delete one Degree
+     *   }
+     * })
+     *
+     */
+    delete<T extends DegreeDeleteArgs>(
+      args: SelectSubset<T, DegreeDeleteArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'delete',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Update one Degree.
+     * @param {DegreeUpdateArgs} args - Arguments to update one Degree.
+     * @example
+     * // Update one Degree
+     * const degree = await prisma.degree.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends DegreeUpdateArgs>(
+      args: SelectSubset<T, DegreeUpdateArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'update',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Delete zero or more Degrees.
+     * @param {DegreeDeleteManyArgs} args - Arguments to filter Degrees to delete.
+     * @example
+     * // Delete a few Degrees
+     * const { count } = await prisma.degree.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends DegreeDeleteManyArgs>(
+      args?: SelectSubset<T, DegreeDeleteManyArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<BatchPayload>;
+
+    /**
+     * Update zero or more Degrees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Degrees
+     * const degree = await prisma.degree.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends DegreeUpdateManyArgs>(
+      args: SelectSubset<T, DegreeUpdateManyArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<BatchPayload>;
+
+    /**
+     * Update zero or more Degrees and returns the data updated in the database.
+     * @param {DegreeUpdateManyAndReturnArgs} args - Arguments to update many Degrees.
+     * @example
+     * // Update many Degrees
+     * const degree = await prisma.degree.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more Degrees and only return the `degreeId`
+     * const degreeWithDegreeIdOnly = await prisma.degree.updateManyAndReturn({
+     *   select: { degreeId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends DegreeUpdateManyAndReturnArgs>(
+      args: SelectSubset<T, DegreeUpdateManyAndReturnArgs<ExtArgs>>,
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'updateManyAndReturn',
+        GlobalOmitOptions
+      >
+    >;
+
+    /**
+     * Create or update one Degree.
+     * @param {DegreeUpsertArgs} args - Arguments to update or create a Degree.
+     * @example
+     * // Update or create a Degree
+     * const degree = await prisma.degree.upsert({
+     *   create: {
+     *     // ... data to create a Degree
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Degree we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DegreeUpsertArgs>(
+      args: SelectSubset<T, DegreeUpsertArgs<ExtArgs>>,
+    ): Prisma__DegreeClient<
+      $Result.GetResult<
+        Prisma.$DegreePayload<ExtArgs>,
+        T,
+        'upsert',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+
+    /**
+     * Count the number of Degrees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeCountArgs} args - Arguments to filter Degrees to count.
+     * @example
+     * // Count the number of Degrees
+     * const count = await prisma.degree.count({
+     *   where: {
+     *     // ... the filter for the Degrees we want to count
+     *   }
+     * })
+     **/
+    count<T extends DegreeCountArgs>(
+      args?: Subset<T, DegreeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DegreeCountAggregateOutputType>
+        : number
+    >;
+
+    /**
+     * Allows you to perform aggregations operations on a Degree.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+     **/
+    aggregate<T extends DegreeAggregateArgs>(
+      args: Subset<T, DegreeAggregateArgs>,
+    ): Prisma.PrismaPromise<GetDegreeAggregateType<T>>;
+
+    /**
+     * Group by Degree.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DegreeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+     **/
+    groupBy<
+      T extends DegreeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DegreeGroupByArgs['orderBy'] }
+        : { orderBy?: DegreeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<
+        Keys<MaybeTupleToUnion<T['orderBy']>>
+      >,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+        ? `Error: "by" must not be empty.`
+        : HavingValid extends False
+          ? {
+              [P in HavingFields]: P extends ByFields
+                ? never
+                : P extends string
+                  ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+                  : [
+                      Error,
+                      'Field ',
+                      P,
+                      ` in "having" needs to be provided in "by"`,
+                    ];
+            }[HavingFields]
+          : 'take' extends Keys<T>
+            ? 'orderBy' extends Keys<T>
+              ? ByValid extends True
+                ? {}
+                : {
+                    [P in OrderFields]: P extends ByFields
+                      ? never
+                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
+                  }[OrderFields]
+              : 'Error: If you provide "take", you also need to provide "orderBy"'
+            : 'skip' extends Keys<T>
+              ? 'orderBy' extends Keys<T>
+                ? ByValid extends True
+                  ? {}
+                  : {
+                      [P in OrderFields]: P extends ByFields
+                        ? never
+                        : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
+                    }[OrderFields]
+                : 'Error: If you provide "skip", you also need to provide "orderBy"'
+              : ByValid extends True
+                ? {}
+                : {
+                    [P in OrderFields]: P extends ByFields
+                      ? never
+                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
+                  }[OrderFields],
+    >(
+      args: SubsetIntersection<T, DegreeGroupByArgs, OrderByArg> & InputErrors,
+    ): {} extends InputErrors
+      ? GetDegreeGroupByPayload<T>
+      : Prisma.PrismaPromise<InputErrors>;
+    /**
+     * Fields of the Degree model
+     */
+    readonly fields: DegreeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Degree.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DegreeClient<
+    T,
+    Null = never,
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+    GlobalOmitOptions = {},
+  > extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: 'PrismaPromise';
+    candidate<T extends CandidateDefaultArgs<ExtArgs> = {}>(
+      args?: Subset<T, CandidateDefaultArgs<ExtArgs>>,
+    ): Prisma__CandidateClient<
+      | $Result.GetResult<
+          Prisma.$CandidatePayload<ExtArgs>,
+          T,
+          'findUniqueOrThrow',
+          GlobalOmitOptions
+        >
+      | Null,
+      Null,
+      ExtArgs,
+      GlobalOmitOptions
+    >;
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(
+      onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
+      onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+    ): $Utils.JsPromise<TResult1 | TResult2>;
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(
+      onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null,
+    ): $Utils.JsPromise<T | TResult>;
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | null): $Utils.JsPromise<T>;
+  }
+
+  /**
+   * Fields of the Degree model
+   */
+  interface DegreeFieldRefs {
+    readonly degreeId: FieldRef<'Degree', 'String'>;
+    readonly name: FieldRef<'Degree', 'String'>;
+    readonly school: FieldRef<'Degree', 'String'>;
+    readonly major: FieldRef<'Degree', 'String'>;
+    readonly issueDate: FieldRef<'Degree', 'String'>;
+    readonly fileUrl: FieldRef<'Degree', 'String'>;
+    readonly status: FieldRef<'Degree', 'VerificationStatus'>;
+    readonly issuer: FieldRef<'Degree', 'String'>;
+    readonly credentialId: FieldRef<'Degree', 'String'>;
+    readonly adminFeedback: FieldRef<'Degree', 'String'>;
+    readonly aiVerification: FieldRef<'Degree', 'Json'>;
+    readonly candidateId: FieldRef<'Degree', 'String'>;
+  }
+
+  // Custom InputTypes
+  /**
+   * Degree findUnique
+   */
+  export type DegreeFindUniqueArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter, which Degree to fetch.
+     */
+    where: DegreeWhereUniqueInput;
+  };
+
+  /**
+   * Degree findUniqueOrThrow
+   */
+  export type DegreeFindUniqueOrThrowArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter, which Degree to fetch.
+     */
+    where: DegreeWhereUniqueInput;
+  };
+
+  /**
+   * Degree findFirst
+   */
+  export type DegreeFindFirstArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter, which Degree to fetch.
+     */
+    where?: DegreeWhereInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Degrees to fetch.
+     */
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for Degrees.
+     */
+    cursor?: DegreeWhereUniqueInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Degrees from the position of the cursor.
+     */
+    take?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Degrees.
+     */
+    skip?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Degrees.
+     */
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
+  };
+
+  /**
+   * Degree findFirstOrThrow
+   */
+  export type DegreeFindFirstOrThrowArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter, which Degree to fetch.
+     */
+    where?: DegreeWhereInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Degrees to fetch.
+     */
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for Degrees.
+     */
+    cursor?: DegreeWhereUniqueInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Degrees from the position of the cursor.
+     */
+    take?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Degrees.
+     */
+    skip?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Degrees.
+     */
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
+  };
+
+  /**
+   * Degree findMany
+   */
+  export type DegreeFindManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter, which Degrees to fetch.
+     */
+    where?: DegreeWhereInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of Degrees to fetch.
+     */
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing Degrees.
+     */
+    cursor?: DegreeWhereUniqueInput;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` Degrees from the position of the cursor.
+     */
+    take?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` Degrees.
+     */
+    skip?: number;
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of Degrees.
+     */
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
+  };
+
+  /**
+   * Degree create
+   */
+  export type DegreeCreateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * The data needed to create a Degree.
+     */
+    data: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>;
+  };
+
+  /**
+   * Degree createMany
+   */
+  export type DegreeCreateManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * The data used to create many Degrees.
+     */
+    data: DegreeCreateManyInput | DegreeCreateManyInput[];
+    skipDuplicates?: boolean;
+  };
+
+  /**
+   * Degree createManyAndReturn
+   */
+  export type DegreeCreateManyAndReturnArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelectCreateManyAndReturn<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * The data used to create many Degrees.
+     */
+    data: DegreeCreateManyInput | DegreeCreateManyInput[];
+    skipDuplicates?: boolean;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeIncludeCreateManyAndReturn<ExtArgs> | null;
+  };
+
+  /**
+   * Degree update
+   */
+  export type DegreeUpdateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * The data needed to update a Degree.
+     */
+    data: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>;
+    /**
+     * Choose, which Degree to update.
+     */
+    where: DegreeWhereUniqueInput;
+  };
+
+  /**
+   * Degree updateMany
+   */
+  export type DegreeUpdateManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * The data used to update Degrees.
+     */
+    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>;
+    /**
+     * Filter which Degrees to update
+     */
+    where?: DegreeWhereInput;
+    /**
+     * Limit how many Degrees to update.
+     */
+    limit?: number;
+  };
+
+  /**
+   * Degree updateManyAndReturn
+   */
+  export type DegreeUpdateManyAndReturnArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelectUpdateManyAndReturn<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * The data used to update Degrees.
+     */
+    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>;
+    /**
+     * Filter which Degrees to update
+     */
+    where?: DegreeWhereInput;
+    /**
+     * Limit how many Degrees to update.
+     */
+    limit?: number;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeIncludeUpdateManyAndReturn<ExtArgs> | null;
+  };
+
+  /**
+   * Degree upsert
+   */
+  export type DegreeUpsertArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * The filter to search for the Degree to update in case it exists.
+     */
+    where: DegreeWhereUniqueInput;
+    /**
+     * In case the Degree found by the `where` argument doesn't exist, create a new Degree with this data.
+     */
+    create: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>;
+    /**
+     * In case the Degree was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>;
+  };
+
+  /**
+   * Degree delete
+   */
+  export type DegreeDeleteArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
+    /**
+     * Filter which Degree to delete.
+     */
+    where: DegreeWhereUniqueInput;
+  };
+
+  /**
+   * Degree deleteMany
+   */
+  export type DegreeDeleteManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Filter which Degrees to delete
+     */
+    where?: DegreeWhereInput;
+    /**
+     * Limit how many Degrees to delete.
+     */
+    limit?: number;
+  };
+
+  /**
+   * Degree without action
+   */
+  export type DegreeDefaultArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null;
   };
 
   /**
@@ -59564,6 +61227,7 @@ export namespace Prisma {
     industries: 'industries';
     interests: 'interests';
     languages: 'languages';
+    otherInfo: 'otherInfo';
     softSkills: 'softSkills';
   };
 
@@ -59585,11 +61249,37 @@ export namespace Prisma {
   export const CertificationScalarFieldEnum: {
     certificationId: 'certificationId';
     name: 'name';
+    issuer: 'issuer';
+    issueDate: 'issueDate';
+    credentialId: 'credentialId';
+    credentialUrl: 'credentialUrl';
+    fileUrl: 'fileUrl';
+    status: 'status';
+    adminFeedback: 'adminFeedback';
+    aiVerification: 'aiVerification';
     candidateId: 'candidateId';
   };
 
   export type CertificationScalarFieldEnum =
     (typeof CertificationScalarFieldEnum)[keyof typeof CertificationScalarFieldEnum];
+
+  export const DegreeScalarFieldEnum: {
+    degreeId: 'degreeId';
+    name: 'name';
+    school: 'school';
+    major: 'major';
+    issueDate: 'issueDate';
+    fileUrl: 'fileUrl';
+    status: 'status';
+    issuer: 'issuer';
+    credentialId: 'credentialId';
+    adminFeedback: 'adminFeedback';
+    aiVerification: 'aiVerification';
+    candidateId: 'candidateId';
+  };
+
+  export type DegreeScalarFieldEnum =
+    (typeof DegreeScalarFieldEnum)[keyof typeof DegreeScalarFieldEnum];
 
   export const SkillScalarFieldEnum: {
     skillId: 'skillId';
@@ -60205,6 +61895,18 @@ export namespace Prisma {
     $PrismaModel,
     'Float[]'
   >;
+
+  /**
+   * Reference to a field of type 'VerificationStatus'
+   */
+  export type EnumVerificationStatusFieldRefInput<$PrismaModel> =
+    FieldRefInputType<$PrismaModel, 'VerificationStatus'>;
+
+  /**
+   * Reference to a field of type 'VerificationStatus[]'
+   */
+  export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> =
+    FieldRefInputType<$PrismaModel, 'VerificationStatus[]'>;
 
   /**
    * Reference to a field of type 'SkillLevel'
@@ -60886,11 +62588,13 @@ export namespace Prisma {
     industries?: StringNullableListFilter<'Candidate'>;
     interests?: StringNullableListFilter<'Candidate'>;
     languages?: JsonNullableFilter<'Candidate'>;
+    otherInfo?: JsonNullableFilter<'Candidate'>;
     softSkills?: StringNullableListFilter<'Candidate'>;
     applications?: ApplicationListRelationFilter;
     cvs?: CVListRelationFilter;
     user?: XOR<UserScalarRelationFilter, UserWhereInput>;
     certifications?: CertificationListRelationFilter;
+    degrees?: DegreeListRelationFilter;
     conversations?: ConversationListRelationFilter;
     experiences?: ExperienceListRelationFilter;
     jobMatches?: JobMatchListRelationFilter;
@@ -60928,11 +62632,13 @@ export namespace Prisma {
     industries?: SortOrder;
     interests?: SortOrder;
     languages?: SortOrderInput | SortOrder;
+    otherInfo?: SortOrderInput | SortOrder;
     softSkills?: SortOrder;
     applications?: ApplicationOrderByRelationAggregateInput;
     cvs?: CVOrderByRelationAggregateInput;
     user?: UserOrderByWithRelationInput;
     certifications?: CertificationOrderByRelationAggregateInput;
+    degrees?: DegreeOrderByRelationAggregateInput;
     conversations?: ConversationOrderByRelationAggregateInput;
     experiences?: ExperienceOrderByRelationAggregateInput;
     jobMatches?: JobMatchOrderByRelationAggregateInput;
@@ -60975,11 +62681,13 @@ export namespace Prisma {
       industries?: StringNullableListFilter<'Candidate'>;
       interests?: StringNullableListFilter<'Candidate'>;
       languages?: JsonNullableFilter<'Candidate'>;
+      otherInfo?: JsonNullableFilter<'Candidate'>;
       softSkills?: StringNullableListFilter<'Candidate'>;
       applications?: ApplicationListRelationFilter;
       cvs?: CVListRelationFilter;
       user?: XOR<UserScalarRelationFilter, UserWhereInput>;
       certifications?: CertificationListRelationFilter;
+      degrees?: DegreeListRelationFilter;
       conversations?: ConversationListRelationFilter;
       experiences?: ExperienceListRelationFilter;
       jobMatches?: JobMatchListRelationFilter;
@@ -61019,6 +62727,7 @@ export namespace Prisma {
     industries?: SortOrder;
     interests?: SortOrder;
     languages?: SortOrderInput | SortOrder;
+    otherInfo?: SortOrderInput | SortOrder;
     softSkills?: SortOrder;
     _count?: CandidateCountOrderByAggregateInput;
     _avg?: CandidateAvgOrderByAggregateInput;
@@ -61068,6 +62777,7 @@ export namespace Prisma {
     industries?: StringNullableListFilter<'Candidate'>;
     interests?: StringNullableListFilter<'Candidate'>;
     languages?: JsonNullableWithAggregatesFilter<'Candidate'>;
+    otherInfo?: JsonNullableWithAggregatesFilter<'Candidate'>;
     softSkills?: StringNullableListFilter<'Candidate'>;
   };
 
@@ -61147,6 +62857,16 @@ export namespace Prisma {
     NOT?: CertificationWhereInput | CertificationWhereInput[];
     certificationId?: StringFilter<'Certification'> | string;
     name?: StringFilter<'Certification'> | string;
+    issuer?: StringNullableFilter<'Certification'> | string | null;
+    issueDate?: StringNullableFilter<'Certification'> | string | null;
+    credentialId?: StringNullableFilter<'Certification'> | string | null;
+    credentialUrl?: StringNullableFilter<'Certification'> | string | null;
+    fileUrl?: StringNullableFilter<'Certification'> | string | null;
+    status?:
+      | EnumVerificationStatusFilter<'Certification'>
+      | $Enums.VerificationStatus;
+    adminFeedback?: StringNullableFilter<'Certification'> | string | null;
+    aiVerification?: JsonNullableFilter<'Certification'>;
     candidateId?: StringFilter<'Certification'> | string;
     candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
   };
@@ -61154,6 +62874,14 @@ export namespace Prisma {
   export type CertificationOrderByWithRelationInput = {
     certificationId?: SortOrder;
     name?: SortOrder;
+    issuer?: SortOrderInput | SortOrder;
+    issueDate?: SortOrderInput | SortOrder;
+    credentialId?: SortOrderInput | SortOrder;
+    credentialUrl?: SortOrderInput | SortOrder;
+    fileUrl?: SortOrderInput | SortOrder;
+    status?: SortOrder;
+    adminFeedback?: SortOrderInput | SortOrder;
+    aiVerification?: SortOrderInput | SortOrder;
     candidateId?: SortOrder;
     candidate?: CandidateOrderByWithRelationInput;
   };
@@ -61165,6 +62893,16 @@ export namespace Prisma {
       OR?: CertificationWhereInput[];
       NOT?: CertificationWhereInput | CertificationWhereInput[];
       name?: StringFilter<'Certification'> | string;
+      issuer?: StringNullableFilter<'Certification'> | string | null;
+      issueDate?: StringNullableFilter<'Certification'> | string | null;
+      credentialId?: StringNullableFilter<'Certification'> | string | null;
+      credentialUrl?: StringNullableFilter<'Certification'> | string | null;
+      fileUrl?: StringNullableFilter<'Certification'> | string | null;
+      status?:
+        | EnumVerificationStatusFilter<'Certification'>
+        | $Enums.VerificationStatus;
+      adminFeedback?: StringNullableFilter<'Certification'> | string | null;
+      aiVerification?: JsonNullableFilter<'Certification'>;
       candidateId?: StringFilter<'Certification'> | string;
       candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
     },
@@ -61174,6 +62912,14 @@ export namespace Prisma {
   export type CertificationOrderByWithAggregationInput = {
     certificationId?: SortOrder;
     name?: SortOrder;
+    issuer?: SortOrderInput | SortOrder;
+    issueDate?: SortOrderInput | SortOrder;
+    credentialId?: SortOrderInput | SortOrder;
+    credentialUrl?: SortOrderInput | SortOrder;
+    fileUrl?: SortOrderInput | SortOrder;
+    status?: SortOrder;
+    adminFeedback?: SortOrderInput | SortOrder;
+    aiVerification?: SortOrderInput | SortOrder;
     candidateId?: SortOrder;
     _count?: CertificationCountOrderByAggregateInput;
     _max?: CertificationMaxOrderByAggregateInput;
@@ -61190,7 +62936,139 @@ export namespace Prisma {
       | CertificationScalarWhereWithAggregatesInput[];
     certificationId?: StringWithAggregatesFilter<'Certification'> | string;
     name?: StringWithAggregatesFilter<'Certification'> | string;
+    issuer?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    issueDate?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    credentialId?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    credentialUrl?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    fileUrl?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    status?:
+      | EnumVerificationStatusWithAggregatesFilter<'Certification'>
+      | $Enums.VerificationStatus;
+    adminFeedback?:
+      | StringNullableWithAggregatesFilter<'Certification'>
+      | string
+      | null;
+    aiVerification?: JsonNullableWithAggregatesFilter<'Certification'>;
     candidateId?: StringWithAggregatesFilter<'Certification'> | string;
+  };
+
+  export type DegreeWhereInput = {
+    AND?: DegreeWhereInput | DegreeWhereInput[];
+    OR?: DegreeWhereInput[];
+    NOT?: DegreeWhereInput | DegreeWhereInput[];
+    degreeId?: StringFilter<'Degree'> | string;
+    name?: StringFilter<'Degree'> | string;
+    school?: StringFilter<'Degree'> | string;
+    major?: StringNullableFilter<'Degree'> | string | null;
+    issueDate?: StringNullableFilter<'Degree'> | string | null;
+    fileUrl?: StringNullableFilter<'Degree'> | string | null;
+    status?: EnumVerificationStatusFilter<'Degree'> | $Enums.VerificationStatus;
+    issuer?: StringNullableFilter<'Degree'> | string | null;
+    credentialId?: StringNullableFilter<'Degree'> | string | null;
+    adminFeedback?: StringNullableFilter<'Degree'> | string | null;
+    aiVerification?: JsonNullableFilter<'Degree'>;
+    candidateId?: StringFilter<'Degree'> | string;
+    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
+  };
+
+  export type DegreeOrderByWithRelationInput = {
+    degreeId?: SortOrder;
+    name?: SortOrder;
+    school?: SortOrder;
+    major?: SortOrderInput | SortOrder;
+    issueDate?: SortOrderInput | SortOrder;
+    fileUrl?: SortOrderInput | SortOrder;
+    status?: SortOrder;
+    issuer?: SortOrderInput | SortOrder;
+    credentialId?: SortOrderInput | SortOrder;
+    adminFeedback?: SortOrderInput | SortOrder;
+    aiVerification?: SortOrderInput | SortOrder;
+    candidateId?: SortOrder;
+    candidate?: CandidateOrderByWithRelationInput;
+  };
+
+  export type DegreeWhereUniqueInput = Prisma.AtLeast<
+    {
+      degreeId?: string;
+      AND?: DegreeWhereInput | DegreeWhereInput[];
+      OR?: DegreeWhereInput[];
+      NOT?: DegreeWhereInput | DegreeWhereInput[];
+      name?: StringFilter<'Degree'> | string;
+      school?: StringFilter<'Degree'> | string;
+      major?: StringNullableFilter<'Degree'> | string | null;
+      issueDate?: StringNullableFilter<'Degree'> | string | null;
+      fileUrl?: StringNullableFilter<'Degree'> | string | null;
+      status?:
+        | EnumVerificationStatusFilter<'Degree'>
+        | $Enums.VerificationStatus;
+      issuer?: StringNullableFilter<'Degree'> | string | null;
+      credentialId?: StringNullableFilter<'Degree'> | string | null;
+      adminFeedback?: StringNullableFilter<'Degree'> | string | null;
+      aiVerification?: JsonNullableFilter<'Degree'>;
+      candidateId?: StringFilter<'Degree'> | string;
+      candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
+    },
+    'degreeId'
+  >;
+
+  export type DegreeOrderByWithAggregationInput = {
+    degreeId?: SortOrder;
+    name?: SortOrder;
+    school?: SortOrder;
+    major?: SortOrderInput | SortOrder;
+    issueDate?: SortOrderInput | SortOrder;
+    fileUrl?: SortOrderInput | SortOrder;
+    status?: SortOrder;
+    issuer?: SortOrderInput | SortOrder;
+    credentialId?: SortOrderInput | SortOrder;
+    adminFeedback?: SortOrderInput | SortOrder;
+    aiVerification?: SortOrderInput | SortOrder;
+    candidateId?: SortOrder;
+    _count?: DegreeCountOrderByAggregateInput;
+    _max?: DegreeMaxOrderByAggregateInput;
+    _min?: DegreeMinOrderByAggregateInput;
+  };
+
+  export type DegreeScalarWhereWithAggregatesInput = {
+    AND?:
+      | DegreeScalarWhereWithAggregatesInput
+      | DegreeScalarWhereWithAggregatesInput[];
+    OR?: DegreeScalarWhereWithAggregatesInput[];
+    NOT?:
+      | DegreeScalarWhereWithAggregatesInput
+      | DegreeScalarWhereWithAggregatesInput[];
+    degreeId?: StringWithAggregatesFilter<'Degree'> | string;
+    name?: StringWithAggregatesFilter<'Degree'> | string;
+    school?: StringWithAggregatesFilter<'Degree'> | string;
+    major?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
+    issueDate?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
+    fileUrl?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
+    status?:
+      | EnumVerificationStatusWithAggregatesFilter<'Degree'>
+      | $Enums.VerificationStatus;
+    issuer?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
+    credentialId?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
+    adminFeedback?:
+      | StringNullableWithAggregatesFilter<'Degree'>
+      | string
+      | null;
+    aiVerification?: JsonNullableWithAggregatesFilter<'Degree'>;
+    candidateId?: StringWithAggregatesFilter<'Degree'> | string;
   };
 
   export type SkillWhereInput = {
@@ -64587,11 +66465,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -64626,10 +66506,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -64667,11 +66549,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -64710,10 +66594,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -64748,6 +66634,7 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
   };
 
@@ -64775,6 +66662,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
   };
 
@@ -64803,6 +66691,7 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
   };
 
@@ -64871,41 +66760,217 @@ export namespace Prisma {
   export type CertificationCreateInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidate: CandidateCreateNestedOneWithoutCertificationsInput;
   };
 
   export type CertificationUncheckedCreateInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidateId: string;
   };
 
   export type CertificationUpdateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidate?: CandidateUpdateOneRequiredWithoutCertificationsNestedInput;
   };
 
   export type CertificationUncheckedUpdateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidateId?: StringFieldUpdateOperationsInput | string;
   };
 
   export type CertificationCreateManyInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidateId: string;
   };
 
   export type CertificationUpdateManyMutationInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type CertificationUncheckedUpdateManyInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidateId?: StringFieldUpdateOperationsInput | string;
+  };
+
+  export type DegreeCreateInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidate: CandidateCreateNestedOneWithoutDegreesInput;
+  };
+
+  export type DegreeUncheckedCreateInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidateId: string;
+  };
+
+  export type DegreeUpdateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidate?: CandidateUpdateOneRequiredWithoutDegreesNestedInput;
+  };
+
+  export type DegreeUncheckedUpdateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidateId?: StringFieldUpdateOperationsInput | string;
+  };
+
+  export type DegreeCreateManyInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+    candidateId: string;
+  };
+
+  export type DegreeUpdateManyMutationInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeUncheckedUpdateManyInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
     candidateId?: StringFieldUpdateOperationsInput | string;
   };
 
@@ -68323,6 +70388,12 @@ export namespace Prisma {
     none?: CertificationWhereInput;
   };
 
+  export type DegreeListRelationFilter = {
+    every?: DegreeWhereInput;
+    some?: DegreeWhereInput;
+    none?: DegreeWhereInput;
+  };
+
   export type ConversationListRelationFilter = {
     every?: ConversationWhereInput;
     some?: ConversationWhereInput;
@@ -68400,6 +70471,10 @@ export namespace Prisma {
     _count?: SortOrder;
   };
 
+  export type DegreeOrderByRelationAggregateInput = {
+    _count?: SortOrder;
+  };
+
   export type ConversationOrderByRelationAggregateInput = {
     _count?: SortOrder;
   };
@@ -68461,6 +70536,7 @@ export namespace Prisma {
     industries?: SortOrder;
     interests?: SortOrder;
     languages?: SortOrder;
+    otherInfo?: SortOrder;
     softSkills?: SortOrder;
   };
 
@@ -68578,21 +70654,120 @@ export namespace Prisma {
     candidateId?: SortOrder;
   };
 
+  export type EnumVerificationStatusFilter<$PrismaModel = never> = {
+    equals?:
+      | $Enums.VerificationStatus
+      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
+    in?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumVerificationStatusFilter<$PrismaModel>
+      | $Enums.VerificationStatus;
+  };
+
   export type CertificationCountOrderByAggregateInput = {
     certificationId?: SortOrder;
     name?: SortOrder;
+    issuer?: SortOrder;
+    issueDate?: SortOrder;
+    credentialId?: SortOrder;
+    credentialUrl?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    adminFeedback?: SortOrder;
+    aiVerification?: SortOrder;
     candidateId?: SortOrder;
   };
 
   export type CertificationMaxOrderByAggregateInput = {
     certificationId?: SortOrder;
     name?: SortOrder;
+    issuer?: SortOrder;
+    issueDate?: SortOrder;
+    credentialId?: SortOrder;
+    credentialUrl?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    adminFeedback?: SortOrder;
     candidateId?: SortOrder;
   };
 
   export type CertificationMinOrderByAggregateInput = {
     certificationId?: SortOrder;
     name?: SortOrder;
+    issuer?: SortOrder;
+    issueDate?: SortOrder;
+    credentialId?: SortOrder;
+    credentialUrl?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    adminFeedback?: SortOrder;
+    candidateId?: SortOrder;
+  };
+
+  export type EnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> =
+    {
+      equals?:
+        | $Enums.VerificationStatus
+        | EnumVerificationStatusFieldRefInput<$PrismaModel>;
+      in?:
+        | $Enums.VerificationStatus[]
+        | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+      notIn?:
+        | $Enums.VerificationStatus[]
+        | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+      not?:
+        | NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel>
+        | $Enums.VerificationStatus;
+      _count?: NestedIntFilter<$PrismaModel>;
+      _min?: NestedEnumVerificationStatusFilter<$PrismaModel>;
+      _max?: NestedEnumVerificationStatusFilter<$PrismaModel>;
+    };
+
+  export type DegreeCountOrderByAggregateInput = {
+    degreeId?: SortOrder;
+    name?: SortOrder;
+    school?: SortOrder;
+    major?: SortOrder;
+    issueDate?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    issuer?: SortOrder;
+    credentialId?: SortOrder;
+    adminFeedback?: SortOrder;
+    aiVerification?: SortOrder;
+    candidateId?: SortOrder;
+  };
+
+  export type DegreeMaxOrderByAggregateInput = {
+    degreeId?: SortOrder;
+    name?: SortOrder;
+    school?: SortOrder;
+    major?: SortOrder;
+    issueDate?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    issuer?: SortOrder;
+    credentialId?: SortOrder;
+    adminFeedback?: SortOrder;
+    candidateId?: SortOrder;
+  };
+
+  export type DegreeMinOrderByAggregateInput = {
+    degreeId?: SortOrder;
+    name?: SortOrder;
+    school?: SortOrder;
+    major?: SortOrder;
+    issueDate?: SortOrder;
+    fileUrl?: SortOrder;
+    status?: SortOrder;
+    issuer?: SortOrder;
+    credentialId?: SortOrder;
+    adminFeedback?: SortOrder;
     candidateId?: SortOrder;
   };
 
@@ -71411,6 +73586,21 @@ export namespace Prisma {
     connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
   };
 
+  export type DegreeCreateNestedManyWithoutCandidateInput = {
+    create?:
+      | XOR<
+          DegreeCreateWithoutCandidateInput,
+          DegreeUncheckedCreateWithoutCandidateInput
+        >
+      | DegreeCreateWithoutCandidateInput[]
+      | DegreeUncheckedCreateWithoutCandidateInput[];
+    connectOrCreate?:
+      | DegreeCreateOrConnectWithoutCandidateInput
+      | DegreeCreateOrConnectWithoutCandidateInput[];
+    createMany?: DegreeCreateManyCandidateInputEnvelope;
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+  };
+
   export type ConversationCreateNestedManyWithoutCandidateInput = {
     create?:
       | XOR<
@@ -71619,6 +73809,21 @@ export namespace Prisma {
       | CertificationCreateOrConnectWithoutCandidateInput[];
     createMany?: CertificationCreateManyCandidateInputEnvelope;
     connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
+  };
+
+  export type DegreeUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?:
+      | XOR<
+          DegreeCreateWithoutCandidateInput,
+          DegreeUncheckedCreateWithoutCandidateInput
+        >
+      | DegreeCreateWithoutCandidateInput[]
+      | DegreeUncheckedCreateWithoutCandidateInput[];
+    connectOrCreate?:
+      | DegreeCreateOrConnectWithoutCandidateInput
+      | DegreeCreateOrConnectWithoutCandidateInput[];
+    createMany?: DegreeCreateManyCandidateInputEnvelope;
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
   };
 
   export type ConversationUncheckedCreateNestedManyWithoutCandidateInput = {
@@ -71920,6 +74125,34 @@ export namespace Prisma {
     deleteMany?:
       | CertificationScalarWhereInput
       | CertificationScalarWhereInput[];
+  };
+
+  export type DegreeUpdateManyWithoutCandidateNestedInput = {
+    create?:
+      | XOR<
+          DegreeCreateWithoutCandidateInput,
+          DegreeUncheckedCreateWithoutCandidateInput
+        >
+      | DegreeCreateWithoutCandidateInput[]
+      | DegreeUncheckedCreateWithoutCandidateInput[];
+    connectOrCreate?:
+      | DegreeCreateOrConnectWithoutCandidateInput
+      | DegreeCreateOrConnectWithoutCandidateInput[];
+    upsert?:
+      | DegreeUpsertWithWhereUniqueWithoutCandidateInput
+      | DegreeUpsertWithWhereUniqueWithoutCandidateInput[];
+    createMany?: DegreeCreateManyCandidateInputEnvelope;
+    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    update?:
+      | DegreeUpdateWithWhereUniqueWithoutCandidateInput
+      | DegreeUpdateWithWhereUniqueWithoutCandidateInput[];
+    updateMany?:
+      | DegreeUpdateManyWithWhereWithoutCandidateInput
+      | DegreeUpdateManyWithWhereWithoutCandidateInput[];
+    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
   };
 
   export type ConversationUpdateManyWithoutCandidateNestedInput = {
@@ -72337,6 +74570,34 @@ export namespace Prisma {
       | CertificationScalarWhereInput[];
   };
 
+  export type DegreeUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?:
+      | XOR<
+          DegreeCreateWithoutCandidateInput,
+          DegreeUncheckedCreateWithoutCandidateInput
+        >
+      | DegreeCreateWithoutCandidateInput[]
+      | DegreeUncheckedCreateWithoutCandidateInput[];
+    connectOrCreate?:
+      | DegreeCreateOrConnectWithoutCandidateInput
+      | DegreeCreateOrConnectWithoutCandidateInput[];
+    upsert?:
+      | DegreeUpsertWithWhereUniqueWithoutCandidateInput
+      | DegreeUpsertWithWhereUniqueWithoutCandidateInput[];
+    createMany?: DegreeCreateManyCandidateInputEnvelope;
+    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
+    update?:
+      | DegreeUpdateWithWhereUniqueWithoutCandidateInput
+      | DegreeUpdateWithWhereUniqueWithoutCandidateInput[];
+    updateMany?:
+      | DegreeUpdateManyWithWhereWithoutCandidateInput
+      | DegreeUpdateManyWithWhereWithoutCandidateInput[];
+    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
+  };
+
   export type ConversationUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?:
       | XOR<
@@ -72699,6 +74960,10 @@ export namespace Prisma {
     connect?: CandidateWhereUniqueInput;
   };
 
+  export type EnumVerificationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.VerificationStatus;
+  };
+
   export type CandidateUpdateOneRequiredWithoutCertificationsNestedInput = {
     create?: XOR<
       CandidateCreateWithoutCertificationsInput,
@@ -72713,6 +74978,32 @@ export namespace Prisma {
         CandidateUpdateWithoutCertificationsInput
       >,
       CandidateUncheckedUpdateWithoutCertificationsInput
+    >;
+  };
+
+  export type CandidateCreateNestedOneWithoutDegreesInput = {
+    create?: XOR<
+      CandidateCreateWithoutDegreesInput,
+      CandidateUncheckedCreateWithoutDegreesInput
+    >;
+    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput;
+    connect?: CandidateWhereUniqueInput;
+  };
+
+  export type CandidateUpdateOneRequiredWithoutDegreesNestedInput = {
+    create?: XOR<
+      CandidateCreateWithoutDegreesInput,
+      CandidateUncheckedCreateWithoutDegreesInput
+    >;
+    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput;
+    upsert?: CandidateUpsertWithoutDegreesInput;
+    connect?: CandidateWhereUniqueInput;
+    update?: XOR<
+      XOR<
+        CandidateUpdateToOneWithWhereWithoutDegreesInput,
+        CandidateUpdateWithoutDegreesInput
+      >,
+      CandidateUncheckedUpdateWithoutDegreesInput
     >;
   };
 
@@ -77230,6 +79521,41 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>;
   };
 
+  export type NestedEnumVerificationStatusFilter<$PrismaModel = never> = {
+    equals?:
+      | $Enums.VerificationStatus
+      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
+    in?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumVerificationStatusFilter<$PrismaModel>
+      | $Enums.VerificationStatus;
+  };
+
+  export type NestedEnumVerificationStatusWithAggregatesFilter<
+    $PrismaModel = never,
+  > = {
+    equals?:
+      | $Enums.VerificationStatus
+      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
+    in?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    notIn?:
+      | $Enums.VerificationStatus[]
+      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
+    not?:
+      | NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel>
+      | $Enums.VerificationStatus;
+    _count?: NestedIntFilter<$PrismaModel>;
+    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>;
+    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>;
+  };
+
   export type NestedEnumSkillLevelFilter<$PrismaModel = never> = {
     equals?: $Enums.SkillLevel | EnumSkillLevelFieldRefInput<$PrismaModel>;
     in?: $Enums.SkillLevel[] | ListEnumSkillLevelFieldRefInput<$PrismaModel>;
@@ -77677,10 +80003,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -77714,10 +80042,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -77999,10 +80329,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -78040,10 +80372,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -79306,11 +81640,27 @@ export namespace Prisma {
   export type CertificationCreateWithoutCandidateInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type CertificationUncheckedCreateWithoutCandidateInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type CertificationCreateOrConnectWithoutCandidateInput = {
@@ -79325,6 +81675,47 @@ export namespace Prisma {
     data:
       | CertificationCreateManyCandidateInput
       | CertificationCreateManyCandidateInput[];
+    skipDuplicates?: boolean;
+  };
+
+  export type DegreeCreateWithoutCandidateInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeUncheckedCreateWithoutCandidateInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeCreateOrConnectWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput;
+    create: XOR<
+      DegreeCreateWithoutCandidateInput,
+      DegreeUncheckedCreateWithoutCandidateInput
+    >;
+  };
+
+  export type DegreeCreateManyCandidateInputEnvelope = {
+    data: DegreeCreateManyCandidateInput | DegreeCreateManyCandidateInput[];
     skipDuplicates?: boolean;
   };
 
@@ -79917,7 +82308,63 @@ export namespace Prisma {
     NOT?: CertificationScalarWhereInput | CertificationScalarWhereInput[];
     certificationId?: StringFilter<'Certification'> | string;
     name?: StringFilter<'Certification'> | string;
+    issuer?: StringNullableFilter<'Certification'> | string | null;
+    issueDate?: StringNullableFilter<'Certification'> | string | null;
+    credentialId?: StringNullableFilter<'Certification'> | string | null;
+    credentialUrl?: StringNullableFilter<'Certification'> | string | null;
+    fileUrl?: StringNullableFilter<'Certification'> | string | null;
+    status?:
+      | EnumVerificationStatusFilter<'Certification'>
+      | $Enums.VerificationStatus;
+    adminFeedback?: StringNullableFilter<'Certification'> | string | null;
+    aiVerification?: JsonNullableFilter<'Certification'>;
     candidateId?: StringFilter<'Certification'> | string;
+  };
+
+  export type DegreeUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput;
+    update: XOR<
+      DegreeUpdateWithoutCandidateInput,
+      DegreeUncheckedUpdateWithoutCandidateInput
+    >;
+    create: XOR<
+      DegreeCreateWithoutCandidateInput,
+      DegreeUncheckedCreateWithoutCandidateInput
+    >;
+  };
+
+  export type DegreeUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput;
+    data: XOR<
+      DegreeUpdateWithoutCandidateInput,
+      DegreeUncheckedUpdateWithoutCandidateInput
+    >;
+  };
+
+  export type DegreeUpdateManyWithWhereWithoutCandidateInput = {
+    where: DegreeScalarWhereInput;
+    data: XOR<
+      DegreeUpdateManyMutationInput,
+      DegreeUncheckedUpdateManyWithoutCandidateInput
+    >;
+  };
+
+  export type DegreeScalarWhereInput = {
+    AND?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
+    OR?: DegreeScalarWhereInput[];
+    NOT?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
+    degreeId?: StringFilter<'Degree'> | string;
+    name?: StringFilter<'Degree'> | string;
+    school?: StringFilter<'Degree'> | string;
+    major?: StringNullableFilter<'Degree'> | string | null;
+    issueDate?: StringNullableFilter<'Degree'> | string | null;
+    fileUrl?: StringNullableFilter<'Degree'> | string | null;
+    status?: EnumVerificationStatusFilter<'Degree'> | $Enums.VerificationStatus;
+    issuer?: StringNullableFilter<'Degree'> | string | null;
+    credentialId?: StringNullableFilter<'Degree'> | string | null;
+    adminFeedback?: StringNullableFilter<'Degree'> | string | null;
+    aiVerification?: JsonNullableFilter<'Degree'>;
+    candidateId?: StringFilter<'Degree'> | string;
   };
 
   export type ConversationUpsertWithWhereUniqueWithoutCandidateInput = {
@@ -80388,11 +82835,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
     projects?: ProjectCreateNestedManyWithoutCandidateInput;
@@ -80426,10 +82875,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
@@ -80494,11 +82945,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUpdateManyWithoutCandidateNestedInput;
@@ -80536,10 +82989,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -80572,10 +83027,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -80610,9 +83067,11 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -80678,10 +83137,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -80720,9 +83181,203 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
+    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
+    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
+    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
+    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
+    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
+    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
+    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
+    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
+    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
+  };
+
+  export type CandidateCreateWithoutDegreesInput = {
+    candidateId?: string;
+    fullName: string;
+    university?: string | null;
+    major?: string | null;
+    gpa?: number | null;
+    cvUrl?: string | null;
+    isOpenToWork?: boolean;
+    jobSearchExpiresAt?: Date | string | null;
+    location?: string | null;
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
+    summary?: string | null;
+    birthYear?: number | null;
+    currentSalary?: string | null;
+    totalYearsExp?: number | null;
+    degree?: string | null;
+    gender?: string | null;
+    industries?: CandidateCreateindustriesInput | string[];
+    interests?: CandidateCreateinterestsInput | string[];
+    languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
+    softSkills?: CandidateCreatesoftSkillsInput | string[];
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
+    cvs?: CVCreateNestedManyWithoutCandidateInput;
+    user: UserCreateNestedOneWithoutCandidateInput;
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
+    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
+    projects?: ProjectCreateNestedManyWithoutCandidateInput;
+    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
+    skills?: SkillCreateNestedManyWithoutCandidateInput;
+    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
+    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
+    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
+    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
+  };
+
+  export type CandidateUncheckedCreateWithoutDegreesInput = {
+    candidateId?: string;
+    fullName: string;
+    university?: string | null;
+    major?: string | null;
+    gpa?: number | null;
+    cvUrl?: string | null;
+    userId: string;
+    isOpenToWork?: boolean;
+    jobSearchExpiresAt?: Date | string | null;
+    location?: string | null;
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
+    summary?: string | null;
+    birthYear?: number | null;
+    currentSalary?: string | null;
+    totalYearsExp?: number | null;
+    degree?: string | null;
+    gender?: string | null;
+    industries?: CandidateCreateindustriesInput | string[];
+    interests?: CandidateCreateinterestsInput | string[];
+    languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
+    softSkills?: CandidateCreatesoftSkillsInput | string[];
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
+    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
+    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
+    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
+    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
+    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
+    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
+    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
+    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
+  };
+
+  export type CandidateCreateOrConnectWithoutDegreesInput = {
+    where: CandidateWhereUniqueInput;
+    create: XOR<
+      CandidateCreateWithoutDegreesInput,
+      CandidateUncheckedCreateWithoutDegreesInput
+    >;
+  };
+
+  export type CandidateUpsertWithoutDegreesInput = {
+    update: XOR<
+      CandidateUpdateWithoutDegreesInput,
+      CandidateUncheckedUpdateWithoutDegreesInput
+    >;
+    create: XOR<
+      CandidateCreateWithoutDegreesInput,
+      CandidateUncheckedCreateWithoutDegreesInput
+    >;
+    where?: CandidateWhereInput;
+  };
+
+  export type CandidateUpdateToOneWithWhereWithoutDegreesInput = {
+    where?: CandidateWhereInput;
+    data: XOR<
+      CandidateUpdateWithoutDegreesInput,
+      CandidateUncheckedUpdateWithoutDegreesInput
+    >;
+  };
+
+  export type CandidateUpdateWithoutDegreesInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string;
+    fullName?: StringFieldUpdateOperationsInput | string;
+    university?: NullableStringFieldUpdateOperationsInput | string | null;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
+    jobSearchExpiresAt?:
+      | NullableDateTimeFieldUpdateOperationsInput
+      | Date
+      | string
+      | null;
+    location?: NullableStringFieldUpdateOperationsInput | string | null;
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
+    summary?: NullableStringFieldUpdateOperationsInput | string | null;
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
+    degree?: NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: NullableStringFieldUpdateOperationsInput | string | null;
+    industries?: CandidateUpdateindustriesInput | string[];
+    interests?: CandidateUpdateinterestsInput | string[];
+    languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
+    softSkills?: CandidateUpdatesoftSkillsInput | string[];
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
+    cvs?: CVUpdateManyWithoutCandidateNestedInput;
+    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
+    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
+    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
+    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
+    skills?: SkillUpdateManyWithoutCandidateNestedInput;
+    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
+    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
+    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
+    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
+  };
+
+  export type CandidateUncheckedUpdateWithoutDegreesInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string;
+    fullName?: StringFieldUpdateOperationsInput | string;
+    university?: NullableStringFieldUpdateOperationsInput | string | null;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    userId?: StringFieldUpdateOperationsInput | string;
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
+    jobSearchExpiresAt?:
+      | NullableDateTimeFieldUpdateOperationsInput
+      | Date
+      | string
+      | null;
+    location?: NullableStringFieldUpdateOperationsInput | string | null;
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
+    summary?: NullableStringFieldUpdateOperationsInput | string | null;
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
+    degree?: NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: NullableStringFieldUpdateOperationsInput | string | null;
+    industries?: CandidateUpdateindustriesInput | string[];
+    interests?: CandidateUpdateinterestsInput | string[];
+    languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
+    softSkills?: CandidateUpdatesoftSkillsInput | string[];
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -80756,11 +83411,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -80794,10 +83451,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -80862,11 +83521,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -80904,10 +83565,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -80940,11 +83603,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -80978,10 +83643,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -81046,11 +83713,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -81088,10 +83757,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -84826,11 +87497,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     projects?: ProjectCreateNestedManyWithoutCandidateInput;
@@ -84864,10 +87537,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
@@ -85022,11 +87697,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUpdateManyWithoutCandidateNestedInput;
@@ -85064,10 +87741,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -85309,10 +87988,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -85347,9 +88028,11 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -85476,10 +88159,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -85518,9 +88203,11 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -85582,10 +88269,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -85620,9 +88309,11 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -85928,10 +88619,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -85970,9 +88663,11 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -86310,11 +89005,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -86348,10 +89045,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -86506,11 +89205,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -86548,10 +89249,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -86736,11 +89439,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
     projects?: ProjectCreateNestedManyWithoutCandidateInput;
@@ -86774,10 +89479,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
@@ -86939,11 +89646,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUpdateManyWithoutCandidateNestedInput;
@@ -86981,10 +89690,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -87450,11 +90161,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -87488,10 +90201,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -87595,11 +90310,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -87637,10 +90354,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -88131,11 +90850,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -88169,10 +90890,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -88517,11 +91240,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -88559,10 +91284,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -88889,11 +91616,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -88927,10 +91656,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -89053,11 +91784,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -89095,10 +91828,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -89585,11 +92320,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -89623,10 +92360,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -89841,11 +92580,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -89883,10 +92624,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -90079,11 +92822,13 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationCreateNestedManyWithoutCandidateInput;
     cvs?: CVCreateNestedManyWithoutCandidateInput;
     user: UserCreateNestedOneWithoutCandidateInput;
     certifications?: CertificationCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
@@ -90117,10 +92862,12 @@ export namespace Prisma {
     industries?: CandidateCreateindustriesInput | string[];
     interests?: CandidateCreateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateCreatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
     certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
     conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
     experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
     jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
@@ -90321,11 +93068,13 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUpdateManyWithoutCandidateNestedInput;
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
     certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
@@ -90363,10 +93112,12 @@ export namespace Prisma {
     industries?: CandidateUpdateindustriesInput | string[];
     interests?: CandidateUpdateinterestsInput | string[];
     languages?: NullableJsonNullValueInput | InputJsonValue;
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
     softSkills?: CandidateUpdatesoftSkillsInput | string[];
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
     certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
     jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
@@ -90805,6 +93556,28 @@ export namespace Prisma {
   export type CertificationCreateManyCandidateInput = {
     certificationId?: string;
     name: string;
+    issuer?: string | null;
+    issueDate?: string | null;
+    credentialId?: string | null;
+    credentialUrl?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeCreateManyCandidateInput = {
+    degreeId?: string;
+    name: string;
+    school: string;
+    major?: string | null;
+    issueDate?: string | null;
+    fileUrl?: string | null;
+    status?: $Enums.VerificationStatus;
+    issuer?: string | null;
+    credentialId?: string | null;
+    adminFeedback?: string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type ConversationCreateManyCandidateInput = {
@@ -91058,16 +93831,94 @@ export namespace Prisma {
   export type CertificationUpdateWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type CertificationUncheckedUpdateWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type CertificationUncheckedUpdateManyWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string;
     name?: StringFieldUpdateOperationsInput | string;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeUpdateWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeUncheckedUpdateWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
+  };
+
+  export type DegreeUncheckedUpdateManyWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string;
+    name?: StringFieldUpdateOperationsInput | string;
+    school?: StringFieldUpdateOperationsInput | string;
+    major?: NullableStringFieldUpdateOperationsInput | string | null;
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
+    status?:
+      | EnumVerificationStatusFieldUpdateOperationsInput
+      | $Enums.VerificationStatus;
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
   };
 
   export type ConversationUpdateWithoutCandidateInput = {

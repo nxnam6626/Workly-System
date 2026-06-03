@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth';
 import {
@@ -22,6 +22,7 @@ import {
   Star,
   Key,
   ShieldAlert,
+  CheckSquare,
 } from 'lucide-react';
 import { NotificationMenu } from '@/components/navbar/NotificationMenu';
 import { checkIsAdmin } from '@/lib/admin-auth';
@@ -46,7 +47,16 @@ const NAV_GROUPS = [
     items: [
       { label: 'Doanh Nghiệp', href: '/admin/companies', icon: Building, perm: 'MANAGE_USERS' },
       { label: 'Nhà Tuyển Dụng', href: '/admin/recruiters', icon: Briefcase, perm: 'MANAGE_USERS' },
-      { label: 'Ứng Viên', href: '/admin/candidates', icon: Users, perm: 'MANAGE_USERS' },
+      {
+        label: 'Ứng Viên',
+        href: '/admin/candidates',
+        icon: Users,
+        perm: 'MANAGE_USERS',
+        children: [
+          { label: 'Danh Sách', href: '/admin/candidates' },
+          { label: 'Xác Minh Năng Lực', href: '/admin/candidates?filter=pending_verifications' },
+        ],
+      },
       { label: 'Vi Phạm', href: '/admin/violations', icon: ShieldAlert, perm: 'MANAGE_USERS' },
     ],
   },
@@ -62,6 +72,7 @@ const NAV_GROUPS = [
 export default function ProtectedAdminConsoleLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isAuthenticated, isInitialized, isLoading, logout, user } = useAuthStore();
   
   const [collapsed, setCollapsed] = useState(false);
@@ -138,35 +149,82 @@ export default function ProtectedAdminConsoleLayout({ children }: { children: Re
                 {group.label}
               </p>
             )}
-            <div className="space-y-1">
               {group.items.map((item: any) => {
-                const active = pathname.startsWith(item.href);
                 const perms = user?.admin?.permissions || [];
                 const isSupreme = perms.includes('SUPER_ADMIN');
 
                 if (item.requireLevel1 && !isSupreme) return null;
                 if (item.perm && !isSupreme && !perms.includes(item.perm)) return null;
                 
+                const hasChildren = !!item.children;
+                 
+                 // If the item has children, it's not active at the root level if a child filter is active
+                 const isExactActive = pathname === item.href && !searchParams.get('filter');
+                 
+                 const isChildActive = hasChildren && item.children.some((child: any) => {
+                   if (child.href.includes('?filter=')) {
+                     const [path, filterQuery] = child.href.split('?filter=');
+                     return pathname === path && searchParams.get('filter') === filterQuery;
+                   }
+                   return pathname === child.href && !searchParams.get('filter');
+                 });
+                 const active = isExactActive || isChildActive;
+
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
-                      active 
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
-                    } ${collapsed ? 'justify-center' : ''}`}
-                    title={collapsed ? item.label : ''}
-                  >
-                    <item.icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`} />
-                    {!collapsed && (
-                      <span className="text-sm font-bold truncate tracking-tight">{item.label}</span>
+                  <div key={item.href} className="space-y-1">
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
+                        isExactActive
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                          : isChildActive
+                          ? 'bg-slate-800/60 text-slate-200 border border-slate-700/40 shadow-inner'
+                          : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'
+                      } ${collapsed ? 'justify-center' : ''}`}
+                      title={collapsed ? item.label : ''}
+                    >
+                      <item.icon className={`w-5 h-5 shrink-0 ${active ? 'text-white' : 'text-slate-500 group-hover:text-blue-400'}`} />
+                      {!collapsed && (
+                        <span className="text-sm font-bold truncate tracking-tight">{item.label}</span>
+                      )}
+                    </Link>
+
+                    {/* Submenu rendering */}
+                    {hasChildren && !collapsed && isChildActive && (
+                      <div className="ml-5 pl-4 border-l-2 border-slate-800 py-1.5 space-y-1.5 transition-all">
+                        {item.children.map((child: any) => {
+                          let childActive = false;
+                          if (child.href.includes('?filter=')) {
+                            const [path, filterQuery] = child.href.split('?filter=');
+                            childActive = pathname === path && searchParams.get('filter') === filterQuery;
+                          } else {
+                            childActive = pathname === child.href && !searchParams.get('filter');
+                          }
+
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                childActive
+                                  ? 'text-blue-400 bg-blue-500/5'
+                                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
+                              }`}
+                            >
+                              <span>{child.label}</span>
+                              {childActive && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50" />
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
-                  </Link>
+                  </div>
                 );
               })}
-            </div>
           </div>
         ))}
       </nav>

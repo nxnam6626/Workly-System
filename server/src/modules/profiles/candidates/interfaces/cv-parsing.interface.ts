@@ -22,7 +22,11 @@ export interface CvParsedData {
     school?: string;
     duration?: string;
   }[];
-  certifications?: string[];
+  certifications?: {
+    name: string;
+    organization?: string;
+    issueDate?: string;
+  }[];
   languages?: {
     language: string;
     level: string;

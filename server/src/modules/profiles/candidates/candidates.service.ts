@@ -74,6 +74,14 @@ export class CandidatesService {
     return this.cvService.findByHash(candidateId, fileHash);
   }
 
+  verifyCertification(userId: string, id: string, file: Express.Multer.File) {
+    return this.cvService.verifyCertification(userId, id, file);
+  }
+
+  verifyDegree(userId: string, id: string, file: Express.Multer.File) {
+    return this.cvService.verifyDegree(userId, id, file);
+  }
+
   // --- Matching Logic ---
   getRecommendedJobs(userId: string, page: number = 1, limit: number = 10) {
     return this.matchingService.getRecommendedJobs(userId, page, limit);

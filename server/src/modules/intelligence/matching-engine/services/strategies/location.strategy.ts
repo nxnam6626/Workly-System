@@ -66,6 +66,7 @@ export class LocationStrategy implements IMatchingStrategy {
             message: 'Công việc từ xa - Không giới hạn địa điểm',
             jobLocation,
             candLocation,
+            type: 'Công việc từ xa',
           },
         };
       }

@@ -19,6 +19,7 @@ export function RecommendedJobsSection() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [isOpenToWork, setIsOpenToWork] = useState(true);
   const { isAuthenticated, user } = useAuthStore();
 
   const handlePageChange = (newPage: number) => {
@@ -39,10 +40,11 @@ export function RecommendedJobsSection() {
           limit: ITEMS_PER_PAGE,
         },
       });
-      // New structure: { items: [], total: number, page: number, limit: number }
-      const { items, total } = response.data;
+      // New structure: { items: [], total: number, page: number, limit: number, isOpenToWork: boolean }
+      const { items, total, isOpenToWork } = response.data;
       setJobs(items || []);
       setTotalPages(Math.ceil(total / ITEMS_PER_PAGE) || 1);
+      setIsOpenToWork(isOpenToWork ?? true);
     } catch (error) {
       console.error("Failed to fetch recommended jobs:", error);
       setJobs([]);
@@ -56,7 +58,7 @@ export function RecommendedJobsSection() {
     fetchJobs();
   }, [isAuthenticated, page]);
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || !isOpenToWork) return null;
 
   return (
     <section ref={sectionRef} className="w-full py-8 bg-white">

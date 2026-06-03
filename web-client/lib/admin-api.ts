@@ -208,6 +208,56 @@ export const adminJobsApi = {
 export type UserStatus = 'ACTIVE' | 'LOCKED' | 'BANNED';
 export type AccountLevel = 'NORMAL' | 'PROBATION';
 
+export interface AiVerificationResult {
+  is_valid: boolean;
+  document_type_detected?: string;
+  extracted_name: string;
+  extracted_institution: string;
+  institution_type?: 'university' | 'college' | 'vocational' | 'international_org' | 'domestic_org' | 'unknown';
+  extracted_major?: string | null;
+  extracted_specialization?: string | null;
+  extracted_grade?: string | null;
+  extracted_issue_date?: string | null;
+  extracted_expiry_date?: string | null;
+  extracted_credential_id?: string | null;
+  has_official_seal?: boolean;
+  has_signature?: boolean;
+  has_security_features?: boolean;
+  image_quality?: 'clear' | 'acceptable' | 'poor';
+  name_matches: boolean;
+  confidence_score: number;
+  risk_level?: 'low' | 'medium' | 'high';
+  reason: string;
+  verification_criteria_summary?: string[];
+}
+
+export interface AdminDegree {
+  degreeId: string;
+  name: string;
+  school: string;
+  major?: string | null;
+  issueDate?: string | null;
+  fileUrl?: string | null;
+  status: string;
+  issuer?: string | null;
+  credentialId?: string | null;
+  adminFeedback?: string | null;
+  aiVerification?: AiVerificationResult | null;
+}
+
+export interface AdminCertification {
+  certificationId: string;
+  name: string;
+  issuer?: string | null;
+  issueDate?: string | null;
+  credentialId?: string | null;
+  credentialUrl?: string | null;
+  fileUrl?: string | null;
+  status: string;
+  adminFeedback?: string | null;
+  aiVerification?: AiVerificationResult | null;
+}
+
 export interface AdminUser {
   userId: string;
   email: string;
@@ -218,7 +268,13 @@ export interface AdminUser {
   createdAt: string;
   lastLogin?: string;
   userRoles: { role: { roleName: string } }[];
-  candidate?: { fullName: string; phone: string };
+  candidate?: {
+    fullName: string;
+    phone: string;
+    candidateId: string;
+    degrees?: AdminDegree[];
+    certifications?: AdminCertification[];
+  };
   recruiter?: { 
     fullName?: string;
     position?: string; 
@@ -243,6 +299,7 @@ export interface AdminUserFilters {
   role?: string;
   status?: UserStatus;
   search?: string;
+  hasPendingVerification?: string | boolean;
 }
 
 export const adminUsersApi = {

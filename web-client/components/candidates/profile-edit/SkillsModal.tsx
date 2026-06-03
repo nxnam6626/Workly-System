@@ -198,7 +198,7 @@ export function SkillsModal({ isOpen, onClose, initialData, onSuccess }: SkillsM
                 <AnimatePresence initial={false}>
                   {fields.map((field, index) => {
                     const level = skills?.[index]?.level || "INTERMEDIATE";
-                    const c = LEVEL_COLORS[level];
+                    const c = LEVEL_COLORS[level] || LEVEL_COLORS.INTERMEDIATE;
                     return (
                       <motion.div key={field.id}
                         initial={{ opacity: 0, x: 16 }}

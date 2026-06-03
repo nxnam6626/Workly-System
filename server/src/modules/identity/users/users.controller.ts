@@ -85,6 +85,7 @@ export class UsersController {
     @Query('role') role?: Role,
     @Query('status') status?: 'ACTIVE' | 'LOCKED' | 'BANNED',
     @Query('search') search?: string,
+    @Query('hasPendingVerification') hasPendingVerification?: string,
   ) {
     return this.usersService.findAll({
       skip: skip != null ? Number(skip) : undefined,
@@ -92,6 +93,7 @@ export class UsersController {
       role,
       status,
       search,
+      hasPendingVerification,
     });
   }
 

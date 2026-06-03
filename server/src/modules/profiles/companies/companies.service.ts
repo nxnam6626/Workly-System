@@ -42,29 +42,42 @@ export class CompaniesService {
   ) {}
 
   async findAll(query: FilterCompanyDto) {
-    const { search, page = 1, limit = 10, sortBy = 'ALPHABETICAL', industry } = query;
+    const {
+      search,
+      page = 1,
+      limit = 10,
+      sortBy = 'ALPHABETICAL',
+      industry,
+    } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     const andClauses: any[] = [];
 
     if (search) {
-      andClauses.push({ companyName: { contains: search, mode: 'insensitive' } });
+      andClauses.push({
+        companyName: { contains: search, mode: 'insensitive' },
+      });
     }
     if (industry) {
       const targetCat = HIERARCHICAL_INDUSTRIES.find(
         (c) => c.category === industry,
       );
-      
+
       if (targetCat) {
-        const industriesToMatch = [targetCat.category, ...targetCat.subCategories];
+        const industriesToMatch = [
+          targetCat.category,
+          ...targetCat.subCategories,
+        ];
         andClauses.push({
           OR: industriesToMatch.map((ind) => ({
             mainIndustry: { contains: ind, mode: 'insensitive' },
           })),
         });
       } else {
-        andClauses.push({ mainIndustry: { contains: industry, mode: 'insensitive' } });
+        andClauses.push({
+          mainIndustry: { contains: industry, mode: 'insensitive' },
+        });
       }
     }
 
@@ -891,7 +904,11 @@ export class CompaniesService {
   private async getCompanyReviewStats(companyId: string) {
     const reviews = await this.prisma.companyReview.findMany({
       where: { companyId, status: 'PUBLISHED' },
-      select: { ratingProcess: true, ratingInterviewer: true, ratingOffice: true },
+      select: {
+        ratingProcess: true,
+        ratingInterviewer: true,
+        ratingOffice: true,
+      },
     });
 
     if (reviews.length === 0) {
@@ -900,7 +917,8 @@ export class CompaniesService {
 
     const count = reviews.length;
     const avgProcess = reviews.reduce((s, r) => s + r.ratingProcess, 0) / count;
-    const avgInterviewer = reviews.reduce((s, r) => s + r.ratingInterviewer, 0) / count;
+    const avgInterviewer =
+      reviews.reduce((s, r) => s + r.ratingInterviewer, 0) / count;
     const avgOffice = reviews.reduce((s, r) => s + r.ratingOffice, 0) / count;
     const avgTotal = (avgProcess + avgInterviewer + avgOffice) / 3;
 

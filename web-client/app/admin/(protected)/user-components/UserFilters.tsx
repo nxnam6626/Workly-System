@@ -58,7 +58,7 @@ export default function UserFilters({ filters, setFilters, hideRoleFilter = fals
             <Search className="absolute left-4 w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
             <input
               type="text"
-              placeholder="Tìm kiếm người dùng theo email hoặc ID..."
+              placeholder="Tìm kiếm người dùng theo tên, email hoặc ID..."
               value={filters.search ?? ''}
               onChange={(e) => setFilters({ ...filters, search: e.target.value, skip: 0 })}
               className="w-full h-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-indigo-500 transition-all shadow-sm"

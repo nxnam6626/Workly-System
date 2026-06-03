@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseService } from '@/common/supabase/supabase.service';
@@ -12,6 +13,12 @@ import { extname } from 'path';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { CandidateProfileService } from './candidate-profile.service';
+import {
+  AiExtractionService,
+  DocumentVerificationResult,
+} from '@/modules/intelligence/ai/services/ai-extraction.service';
+import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
+import { syncCandidateLanguagesFromCertifications } from '@/modules/profiles/candidates/utils/language-sync';
 
 @Injectable()
 export class CandidateCvService {
@@ -22,8 +29,57 @@ export class CandidateCvService {
     private readonly supabaseService: SupabaseService,
     private readonly cvParsingService: CvParsingService,
     private readonly candidateProfileService: CandidateProfileService,
+    private readonly aiExtractionService: AiExtractionService,
+    private readonly notificationsService: NotificationsService,
     @InjectQueue('matching') private matchingQueue: Queue,
   ) {}
+
+  /**
+   * Evaluates AI result against thresholds and decides if document should be auto-rejected.
+   *
+   * Thresholds:
+   * - is_valid = false        → Not a real document (selfie, random image, unreadable)
+   * - confidence_score < 35   → Too uncertain to trust
+   * - risk_level = 'high'     → AI flags as potentially fraudulent
+   * - name_matches = false AND confidence < 60 → Clear name mismatch with enough certainty
+   */
+  private shouldAutoReject(ai: DocumentVerificationResult): boolean {
+    if (!ai.is_valid) return true;
+    if (ai.confidence_score < 35) return true;
+    if (ai.risk_level === 'high') return true;
+    if (!ai.name_matches && ai.confidence_score >= 60) return true;
+
+    // Check if the document has expired
+    if (ai.extracted_expiry_date) {
+      const expiryDate = new Date(ai.extracted_expiry_date);
+      if (!isNaN(expiryDate.getTime()) && expiryDate < new Date()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Evaluates AI result against thresholds and decides if document should be auto-approved.
+   *
+   * Thresholds:
+   * - is_valid = true         → Real document
+   * - name_matches = true     → Document matches candidate's name (case-insensitive, accent-insensitive)
+   * - risk_level = 'low'      → Minimal security concerns flagged
+   * - confidence_score >= 90 (degree) or >= 80 (certification)
+   */
+  private shouldAutoApprove(
+    ai: DocumentVerificationResult,
+    docType: 'certification' | 'degree',
+  ): boolean {
+    if (!ai.is_valid) return false;
+    if (!ai.name_matches) return false;
+    if (ai.risk_level !== 'low') return false;
+
+    const minThreshold = docType === 'degree' ? 90 : 80;
+    return ai.confidence_score >= minThreshold;
+  }
 
   async uploadCvOnly(userId: string, file: Express.Multer.File) {
     const buffer = file.buffer;
@@ -62,95 +118,119 @@ export class CandidateCvService {
   }
 
   async extractAndAnalyzeCv(userId: string, file: Express.Multer.File) {
-    this.logger.log(`[Flow] Bắt đầu quy trình bóc tách CV cho User: ${userId}`);
-    const buffer = file.buffer;
-    const mimeType = file.mimetype;
-
-    // 0. Gate 0: Chống trùng lặp hồ sơ (File Hash)
-    const fileHash = crypto.createHash('md5').update(buffer).digest('hex');
-    this.logger.log(
-      `[Duplicate Check] Computed Hash: ${fileHash} for userId: ${userId}`,
-    );
-
-    const candidate = await this.candidateProfileService.findByUserId(userId);
-    if (candidate) {
+    try {
       this.logger.log(
-        `[Duplicate Check] CandidateId: ${candidate.candidateId}. Querying DB...`,
+        `[Flow] Bắt đầu quy trình bóc tách CV cho User: ${userId}`,
       );
-      const duplicate = await this.findByHash(candidate.candidateId, fileHash);
-      if (duplicate) {
-        this.logger.warn(
-          `[Duplicate Check] FOUND MATCHING CV: ${duplicate.cvId}. THROWING EXCEPTION NOW.`,
+      const buffer = file.buffer;
+      const mimeType = file.mimetype;
+
+      // 0. Gate 0: Chống trùng lặp hồ sơ (File Hash)
+      const fileHash = crypto.createHash('md5').update(buffer).digest('hex');
+      this.logger.log(
+        `[Duplicate Check] Computed Hash: ${fileHash} for userId: ${userId}`,
+      );
+
+      const candidate = await this.candidateProfileService.findByUserId(userId);
+      if (candidate) {
+        this.logger.log(
+          `[Duplicate Check] CandidateId: ${candidate.candidateId}. Querying DB...`,
         );
-        throw new BadRequestException({
-          message:
-            'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
-          errorCode: 'DUPLICATE_CV',
-          cvId: duplicate.cvId,
-        });
+        const duplicate = await this.findByHash(
+          candidate.candidateId,
+          fileHash,
+        );
+        if (duplicate) {
+          this.logger.warn(
+            `[Duplicate Check] FOUND MATCHING CV: ${duplicate.cvId}. THROWING EXCEPTION NOW.`,
+          );
+          throw new BadRequestException({
+            message:
+              'Tài liệu này đã tồn tại trong hệ thống của bạn. Vui lòng không tải trùng lặp.',
+            errorCode: 'DUPLICATE_CV',
+            cvId: duplicate.cvId,
+          });
+        } else {
+          this.logger.log(
+            `[Duplicate Check] No duplicate found in database for hash: ${fileHash}`,
+          );
+        }
       } else {
         this.logger.log(
-          `[Duplicate Check] No duplicate found in database for hash: ${fileHash}`,
+          `[Duplicate Check] Candidate profile not found for userId: ${userId}`,
         );
       }
-    } else {
-      this.logger.log(
-        `[Duplicate Check] Candidate profile not found for userId: ${userId}`,
+
+      // 1. Gate 1: Bóc tách văn bản & Sanity Check
+      const rawText = await this.cvParsingService.extractTextLocal(
+        buffer,
+        mimeType,
       );
-    }
-
-    // 1. Gate 1: Bóc tách văn bản & Sanity Check
-    const rawText = await this.cvParsingService.extractTextLocal(
-      buffer,
-      mimeType,
-    );
-    const sanityCheck = this.cvParsingService.validateIsCv(rawText);
-    if (!sanityCheck.isValid) {
-      throw new BadRequestException(
-        sanityCheck.reason || 'Không thể bóc tách văn bản từ tệp này.',
-      );
-    }
-
-    // 2. Tạm thời tải lên Supabase để lấy FileUrl (Phục vụ hiển thị Preview nếu cần)
-    this.logger.log('[Flow] Gate 1 Pass. Lưu tạm thời hồ sơ...');
-    const cv = await this.uploadCvOnly(userId, file);
-
-    try {
-      // 3. Gate 2: AI Parsing (All-in-One)
-      this.logger.log('[Flow] Đang gọi AI xử lý (Gate 2)...');
-      const extractedData =
-        await this.cvParsingService.parseCvFromText(rawText);
-
-      if (!extractedData) {
-        throw new BadRequestException('AI không thể xử lý dữ liệu từ tệp này.');
+      const sanityCheck = this.cvParsingService.validateIsCv(rawText);
+      if (!sanityCheck.isValid) {
+        throw new BadRequestException(
+          sanityCheck.reason || 'Không thể bóc tách văn bản từ tệp này.',
+        );
       }
 
-      // 4. Gate 3: Schema Validation & Rollback
-      const schemaCheck =
-        this.cvParsingService.validateParsedData(extractedData);
-      if (!schemaCheck.isValid) {
-        this.logger.warn('[Flow] Gate 3 Fail. Dữ liệu không đạt chuẩn.');
-        await this.rollbackCvUpload(cv.cvId, cv.fileUrl);
+      // 2. Tạm thời tải lên Supabase để lấy FileUrl (Phục vụ hiển thị Preview nếu cần)
+      this.logger.log('[Flow] Gate 1 Pass. Lưu tạm thời hồ sơ...');
+      const cv = await this.uploadCvOnly(userId, file);
 
-        throw new BadRequestException({
-          message:
-            schemaCheck.errorReason || 'Hồ sơ thiếu thông tin quan trọng.',
-          missingFields: schemaCheck.missingFields,
-          error: 'CV_INCOMPLETE',
+      try {
+        // 3. Gate 2: AI Parsing (All-in-One)
+        this.logger.log('[Flow] Đang gọi AI xử lý (Gate 2)...');
+        const extractedData =
+          await this.cvParsingService.parseCvFromText(rawText);
+
+        if (!extractedData) {
+          throw new BadRequestException(
+            'AI không thể xử lý dữ liệu từ tệp này.',
+          );
+        }
+
+        // 4. Gate 3: Schema Validation & Rollback
+        const schemaCheck =
+          this.cvParsingService.validateParsedData(extractedData);
+        if (!schemaCheck.isValid) {
+          this.logger.warn('[Flow] Gate 3 Fail. Dữ liệu không đạt chuẩn.');
+          await this.rollbackCvUpload(cv.cvId, cv.fileUrl);
+
+          throw new BadRequestException({
+            message:
+              schemaCheck.errorReason || 'Hồ sơ thiếu thông tin quan trọng.',
+            missingFields: schemaCheck.missingFields,
+            error: 'CV_INCOMPLETE',
+          });
+        }
+
+        // 5. Thành công: Cập nhật DB
+        this.logger.log('✅ [Flow] Gate 3 Pass. Hoàn tất quy trình.');
+        const result = await this.updateCv(userId, cv.cvId, {
+          parsedData: extractedData,
         });
+        return result;
+      } catch (error) {
+        if (error instanceof BadRequestException) throw error;
+
+        this.logger.error('[Flow] Lỗi nghiêm trọng trong quy trình:', error);
+        return cv;
       }
-
-      // 5. Thành công: Cập nhật DB
-      this.logger.log('✅ [Flow] Gate 3 Pass. Hoàn tất quy trình.');
-      const result = await this.updateCv(userId, cv.cvId, {
-        parsedData: extractedData,
-      });
-      return result;
-    } catch (error) {
-      if (error instanceof BadRequestException) throw error;
-
-      this.logger.error('[Flow] Lỗi nghiêm trọng trong quy trình:', error);
-      return cv;
+    } catch (error: any) {
+      if (
+        error instanceof HttpException ||
+        (error.status && typeof error.status === 'number')
+      ) {
+        throw error;
+      }
+      this.logger.error(
+        `[Flow] Unhandled error during CV extraction for user ${userId}:`,
+        error,
+      );
+      throw new BadRequestException(
+        error.message ||
+          'Có lỗi xảy ra khi xử lý tệp CV của bạn. Vui lòng thử lại với tệp khác.',
+      );
     }
   }
 
@@ -400,5 +480,324 @@ export class CandidateCvService {
     }
 
     return this.prisma.cV.delete({ where: { cvId } });
+  }
+
+  async verifyCertification(
+    userId: string,
+    certificationId: string,
+    file: Express.Multer.File,
+  ) {
+    const candidate = await this.candidateProfileService.findByUserId(userId);
+    if (!candidate) throw new NotFoundException('Candidate profile not found');
+
+    const cert = await this.prisma.certification.findUnique({
+      where: { certificationId },
+    });
+    if (!cert || cert.candidateId !== candidate.candidateId) {
+      throw new NotFoundException(
+        'Certification not found or does not belong to you',
+      );
+    }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileName = `cert-${certificationId}-${uniqueSuffix}${extname(file.originalname)}`;
+    const path = `${userId}/verifications/${fileName}`;
+    const fileUrl = await this.supabaseService.uploadFile(
+      file.buffer,
+      path,
+      file.mimetype,
+    );
+
+    const updated = await this.prisma.certification.update({
+      where: { certificationId },
+      data: {
+        fileUrl,
+        status: 'PENDING',
+      },
+    });
+
+    // Run AI verification in the background asynchronously
+    this.runAsyncCertificationVerification(
+      userId,
+      certificationId,
+      file.buffer,
+      file.mimetype,
+      candidate.fullName,
+      cert,
+    );
+
+    return updated;
+  }
+
+  async verifyDegree(
+    userId: string,
+    degreeId: string,
+    file: Express.Multer.File,
+  ) {
+    const candidate = await this.candidateProfileService.findByUserId(userId);
+    if (!candidate) throw new NotFoundException('Candidate profile not found');
+
+    const deg = await this.prisma.degree.findUnique({
+      where: { degreeId },
+    });
+    if (!deg || deg.candidateId !== candidate.candidateId) {
+      throw new NotFoundException('Degree not found or does not belong to you');
+    }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileName = `degree-${degreeId}-${uniqueSuffix}${extname(file.originalname)}`;
+    const path = `${userId}/verifications/${fileName}`;
+    const fileUrl = await this.supabaseService.uploadFile(
+      file.buffer,
+      path,
+      file.mimetype,
+    );
+
+    const updated = await this.prisma.degree.update({
+      where: { degreeId },
+      data: {
+        fileUrl,
+        status: 'PENDING',
+      },
+    });
+
+    // Run AI verification in the background asynchronously
+    this.runAsyncDegreeVerification(
+      userId,
+      degreeId,
+      file.buffer,
+      file.mimetype,
+      candidate.fullName,
+      deg,
+    );
+
+    return updated;
+  }
+
+  async runAsyncCertificationVerification(
+    userId: string,
+    certificationId: string,
+    buffer: Buffer,
+    mimetype: string,
+    fullName: string,
+    cert: any,
+  ) {
+    try {
+      let aiVerification: DocumentVerificationResult | null = null;
+      try {
+        aiVerification = await this.aiExtractionService.verifyDocument(
+          buffer,
+          mimetype,
+          fullName,
+          'certification',
+        );
+      } catch (err) {
+        this.logger.error(
+          `AI Certification verification error: ${err.message}`,
+        );
+      }
+
+      // Determine status: auto-reject or auto-approve based on AI results
+      const autoReject = aiVerification
+        ? this.shouldAutoReject(aiVerification)
+        : false;
+      const autoApprove =
+        !autoReject && aiVerification
+          ? this.shouldAutoApprove(aiVerification, 'certification')
+          : false;
+      const finalStatus = autoReject
+        ? 'REJECTED'
+        : autoApprove
+          ? 'VERIFIED'
+          : 'PENDING';
+
+      let adminFeedback: string | undefined = undefined;
+      if (autoReject) {
+        const isExpired =
+          aiVerification?.extracted_expiry_date &&
+          !isNaN(new Date(aiVerification.extracted_expiry_date).getTime()) &&
+          new Date(aiVerification.extracted_expiry_date) < new Date();
+
+        if (isExpired) {
+          adminFeedback = `[AI Tự động từ chối] Tài liệu minh chứng đã hết hạn hiệu lực (hết hạn vào ngày ${new Date(aiVerification!.extracted_expiry_date!).toLocaleDateString('vi-VN')}). Vui lòng tải lên tài liệu mới.`;
+        } else {
+          adminFeedback = `[AI Tự động từ chối] ${aiVerification?.reason ?? 'Tài liệu không đạt tiêu chí xác minh.'}`;
+        }
+        this.logger.warn(
+          `[AutoReject] Certification ${certificationId} auto-rejected — score=${aiVerification?.confidence_score}, risk=${aiVerification?.risk_level}, valid=${aiVerification?.is_valid}`,
+        );
+      } else if (autoApprove) {
+        adminFeedback = `[AI Tự động duyệt] ${aiVerification?.reason ?? 'Tài liệu hợp lệ và khớp thông tin.'}`;
+        this.logger.log(
+          `[AutoApprove] Certification ${certificationId} auto-approved — score=${aiVerification?.confidence_score}, risk=${aiVerification?.risk_level}`,
+        );
+      }
+
+      await this.prisma.certification.update({
+        where: { certificationId },
+        data: {
+          status: finalStatus,
+          adminFeedback,
+          aiVerification: (aiVerification as any) || undefined,
+          ...(finalStatus === 'VERIFIED' &&
+            aiVerification?.extracted_issue_date && {
+              issueDate: aiVerification.extracted_issue_date,
+            }),
+          ...(finalStatus === 'VERIFIED' &&
+            aiVerification?.extracted_credential_id && {
+              credentialId: aiVerification.extracted_credential_id,
+            }),
+        },
+      });
+
+      if (finalStatus === 'VERIFIED') {
+        try {
+          await syncCandidateLanguagesFromCertifications(
+            cert.candidateId,
+            this.prisma,
+          );
+        } catch (err) {
+          this.logger.error(
+            `Error syncing languages from auto-approved certification: ${err.message}`,
+          );
+        }
+      }
+
+      // Notify candidate of status change
+      if (autoReject) {
+        await this.notificationsService.create(
+          userId,
+          '❌ Minh chứng chứng chỉ bị từ chối tự động',
+          `Tài liệu bạn nộp cho chứng chỉ "${cert.name}" không đạt tiêu chí xác minh. ` +
+            `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
+            `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
+          'error',
+          '/profile/certifications',
+        );
+        this.notificationsService.emitToUser(userId, 'notification', {
+          title: '❌ Minh chứng bị từ chối',
+          message: `Chứng chỉ "${cert.name}" — ${aiVerification?.reason?.slice(0, 80) ?? ''}...`,
+        });
+      } else if (autoApprove) {
+        await this.notificationsService.create(
+          userId,
+          '✅ Minh chứng chứng chỉ được duyệt tự động',
+          `Tài liệu bạn nộp cho chứng chỉ "${cert.name}" đã được hệ thống tự động xác thực thành công.`,
+          'success',
+          '/profile/certifications',
+        );
+        this.notificationsService.emitToUser(userId, 'notification', {
+          title: '✅ Minh chứng đã được duyệt',
+          message: `Chứng chỉ "${cert.name}" đã được xác thực tự động thành công.`,
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed running async certification verification: ${error.message}`,
+      );
+    }
+  }
+
+  async runAsyncDegreeVerification(
+    userId: string,
+    degreeId: string,
+    buffer: Buffer,
+    mimetype: string,
+    fullName: string,
+    deg: any,
+  ) {
+    try {
+      let aiVerification: DocumentVerificationResult | null = null;
+      try {
+        aiVerification = await this.aiExtractionService.verifyDocument(
+          buffer,
+          mimetype,
+          fullName,
+          'degree',
+        );
+      } catch (err) {
+        this.logger.error(`AI Degree verification error: ${err.message}`);
+      }
+
+      const autoReject = aiVerification
+        ? this.shouldAutoReject(aiVerification)
+        : false;
+      const autoApprove =
+        !autoReject && aiVerification
+          ? this.shouldAutoApprove(aiVerification, 'degree')
+          : false;
+      const finalStatus = autoReject
+        ? 'REJECTED'
+        : autoApprove
+          ? 'VERIFIED'
+          : 'PENDING';
+
+      let adminFeedback: string | undefined = undefined;
+      if (autoReject) {
+        adminFeedback = `[AI Tự động từ chối] ${aiVerification?.reason ?? 'Tài liệu không đạt tiêu chí xác minh.'}`;
+        this.logger.warn(
+          `[AutoReject] Degree ${degreeId} auto-rejected — score=${aiVerification?.confidence_score}, risk=${aiVerification?.risk_level}, valid=${aiVerification?.is_valid}`,
+        );
+      } else if (autoApprove) {
+        adminFeedback = `[AI Tự động duyệt] ${aiVerification?.reason ?? 'Tài liệu hợp lệ và khớp thông tin.'}`;
+        this.logger.log(
+          `[AutoApprove] Degree ${degreeId} auto-approved — score=${aiVerification?.confidence_score}, risk=${aiVerification?.risk_level}`,
+        );
+      }
+
+      await this.prisma.degree.update({
+        where: { degreeId },
+        data: {
+          status: finalStatus,
+          adminFeedback,
+          aiVerification: (aiVerification as any) || undefined,
+          ...(finalStatus === 'VERIFIED' &&
+            aiVerification?.extracted_issue_date && {
+              issueDate: aiVerification.extracted_issue_date,
+            }),
+          ...(finalStatus === 'VERIFIED' &&
+            aiVerification?.extracted_major && {
+              major: aiVerification.extracted_major,
+            }),
+          ...(finalStatus === 'VERIFIED' &&
+            aiVerification?.extracted_credential_id && {
+              credentialId: aiVerification.extracted_credential_id,
+            }),
+        },
+      });
+
+      // Notify candidate of status change
+      if (autoReject) {
+        await this.notificationsService.create(
+          userId,
+          '❌ Minh chứng bằng cấp bị từ chối tự động',
+          `Tài liệu bạn nộp cho bằng "${deg.name}" không đạt tiêu chí xác minh. ` +
+            `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
+            `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
+          'error',
+          '/profile/degrees',
+        );
+        this.notificationsService.emitToUser(userId, 'notification', {
+          title: '❌ Minh chứng bị từ chối',
+          message: `Bằng "${deg.name}" — ${aiVerification?.reason?.slice(0, 80) ?? ''}...`,
+        });
+      } else if (autoApprove) {
+        await this.notificationsService.create(
+          userId,
+          '✅ Minh chứng bằng cấp được duyệt tự động',
+          `Tài liệu bạn nộp cho bằng "${deg.name}" đã được hệ thống tự động xác thực thành công.`,
+          'success',
+          '/profile/degrees',
+        );
+        this.notificationsService.emitToUser(userId, 'notification', {
+          title: '✅ Minh chứng đã được duyệt',
+          message: `Bằng "${deg.name}" đã được xác thực tự động thành công.`,
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed running async degree verification: ${error.message}`,
+      );
+    }
   }
 }

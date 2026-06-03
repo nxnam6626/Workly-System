@@ -20,6 +20,8 @@ import { ExperienceSection as ExperienceSectionOnboarding } from "@/components/o
 import { ProjectsSection } from "@/components/onboarding/cv-review/ProjectsSection";
 import { EducationSection as EducationSectionOnboarding } from "@/components/onboarding/cv-review/EducationSection";
 import { AdditionalInfoSection } from "@/components/onboarding/cv-review/AdditionalInfoSection";
+import { CertificationsSection } from "@/components/onboarding/cv-review/CertificationsSection";
+import { LOCATIONS } from "@/lib/constants";
 
 export default function CVReviewPage() {
   const params = useParams();
@@ -100,14 +102,77 @@ export default function CVReviewPage() {
           desiredJob: {
             jobTitle: initialData.desired_job?.jobTitle || initialData.desiredJob?.jobTitle || '',
             expectedSalary: initialData.desired_job?.expectedSalary || initialData.desiredJob?.expectedSalary || '',
-            location: initialData.desired_job?.location || initialData.desiredJob?.location || '',
-            jobType: initialData.desired_job?.jobType || initialData.desiredJob?.jobType || 'FULLTIME'
+            location: (() => {
+              const rawLoc = initialData.desired_job?.location || initialData.desiredJob?.location;
+              if (!rawLoc) return '';
+              const cleanLoc = String(rawLoc).toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s]/g, "")
+                .replace(/\s+/g, ' ').trim();
+              
+              if (cleanLoc.includes('ho chi minh') || cleanLoc.includes('hcm') || cleanLoc.includes('sai gon')) {
+                return 'Hồ Chí Minh';
+              }
+              if (cleanLoc.includes('ha noi') || cleanLoc.includes('hn')) {
+                return 'Hà Nội';
+              }
+              if (cleanLoc.includes('da nang') || cleanLoc.includes('dn')) {
+                return 'Đà Nẵng';
+              }
+              if (cleanLoc.includes('hai phong') || cleanLoc.includes('hp')) {
+                return 'Hải Phòng';
+              }
+              if (cleanLoc.includes('can tho') || cleanLoc.includes('ct')) {
+                return 'Cần Thơ';
+              }
+              if (cleanLoc.includes('binh duong') || cleanLoc.includes('bd')) {
+                return 'Bình Dương';
+              }
+              if (cleanLoc.includes('dong nai') || cleanLoc.includes('dn')) {
+                return 'Đồng Nai';
+              }
+              
+              const found = LOCATIONS.find(loc => {
+                const normalizedLoc = loc.toLowerCase()
+                  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                  .replace(/[^a-z0-9\s]/g, "");
+                return cleanLoc.includes(normalizedLoc) || normalizedLoc.includes(cleanLoc);
+              });
+              
+              return found || '';
+            })(),
+            jobType: (() => {
+              const rawType = initialData.desired_job?.jobType || initialData.desiredJob?.jobType;
+              if (!rawType) return 'FULLTIME';
+              const t = String(rawType).toUpperCase().replace(/_/g, '').trim();
+              if (t === 'FULLTIME' || t.includes('TOÀN THỜI GIAN') || t.includes('TOANTHOIGIAN') || t === 'FULL_TIME') return 'FULLTIME';
+              if (t === 'PARTTIME' || t.includes('BÁN THỜI GIAN') || t.includes('BANTHOIGIAN') || t === 'PART_TIME') return 'PARTTIME';
+              if (t === 'REMOTE' || t.includes('TỪ XA') || t.includes('TUXA') || t.includes('LÀM VIỆC TỪ XA') || t.includes('LAMVIECTUXA')) return 'REMOTE';
+              return 'FULLTIME';
+            })(),
+            jobLevel: (() => {
+              const rawLevel = initialData.desired_job?.jobLevel || initialData.desiredJob?.jobLevel;
+              if (!rawLevel) return '';
+              const l = String(rawLevel).toUpperCase().replace(/_/g, '').trim();
+              if (l === 'INTERN' || l.includes('THỰC TẬP') || l.includes('THUCTAP')) return 'INTERN';
+              if (l === 'STAFF' || l.includes('NHÂN VIÊN') || l.includes('NHANVIEN') || l.includes('CHUYÊN VIÊN') || l.includes('CHUYENVIEN')) return 'STAFF';
+              if (l === 'MANAGER' || l.includes('TRƯỞNG NHÓM') || l.includes('TRUONGNHOM') || l.includes('TRƯỞNG PHÒNG') || l.includes('TRUONGPHONG') || l.includes('QUẢN LÝ') || l.includes('QUANLY')) return 'MANAGER';
+              if (l === 'DIRECTOR' || l.includes('GIÁM ĐỐC') || l.includes('GIAMDOCK') || l.includes('CẤP CAO') || l.includes('CAPCAO')) return 'DIRECTOR';
+              return '';
+            })()
           },
           languages: (initialData.languages || []).map((l: any) => ({
             language: l.language || l.name || '',
             level: l.level || ''
           })),
           interests: initialData.interests || [],
+          certifications: Array.isArray(initialData.certifications)
+            ? initialData.certifications.map((c: any) => ({
+                name: typeof c === 'string' ? c : c.name || '',
+                organization: typeof c === 'string' ? '' : c.organization || c.issuer || '',
+                issueDate: typeof c === 'string' ? '' : c.issueDate || '',
+              }))
+            : [],
           industries: (() => {
             const ind = initialData.categories || initialData.industries || [];
             return Array.isArray(ind) ? ind.join(', ') : (typeof ind === 'string' ? ind : '');
@@ -143,6 +208,12 @@ export default function CVReviewPage() {
         projects: data.projects,
         university: data.education?.[0]?.school,
         major: data.education?.[0]?.major,
+        degrees: (data.education || []).map((edu: any) => ({
+          name: edu.degree || "Cử nhân",
+          school: edu.school,
+          major: edu.major,
+          issueDate: edu.duration,
+        })),
         gpa: Number(data.gpa || 0),
         totalYearsExp: Number(data.totalYearsExp || 0),
         languages: (data.languages || []).map((l: any) => ({
@@ -150,6 +221,11 @@ export default function CVReviewPage() {
           level: l.level || "BEGINNER"
         })),
         interests: data.interests || [],
+        certifications: (data.certifications || []).map((c: any) => ({
+          name: c.name,
+          organization: c.organization || undefined,
+          issueDate: c.issueDate || undefined,
+        })),
         industries: data.industries ? data.industries.split(',').map((i: string) => i.trim()).filter(Boolean) : [],
         otherInfo: data.otherInfo || []
       });
@@ -322,6 +398,7 @@ export default function CVReviewPage() {
                   className="max-w-5xl mx-auto space-y-8"
                 >
                   <EducationSectionOnboarding />
+                  <CertificationsSection />
                   <AdditionalInfoSection />
                 </motion.div>
               )}

@@ -52,7 +52,13 @@ export class WalletBalanceService {
     };
   }
 
-  async getTransactions(userId: string, skip = 0, take = 50, date?: string, search?: string) {
+  async getTransactions(
+    userId: string,
+    skip = 0,
+    take = 50,
+    date?: string,
+    search?: string,
+  ) {
     const wallet = await this.getBalance(userId);
 
     const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -66,7 +72,7 @@ export class WalletBalanceService {
     });
 
     const whereClause: any = { walletId: wallet.walletId };
-    
+
     if (date) {
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
@@ -79,8 +85,8 @@ export class WalletBalanceService {
       whereClause.recruiter = {
         OR: [
           { fullName: { contains: search, mode: 'insensitive' } },
-          { user: { email: { contains: search, mode: 'insensitive' } } }
-        ]
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+        ],
       };
     }
 

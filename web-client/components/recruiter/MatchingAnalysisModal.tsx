@@ -8,6 +8,7 @@ import {
   Focus, GraduationCap, Zap, Languages, Info
 } from 'lucide-react';
 import { SuitabilityRadar } from './SuitabilityRadar';
+import { formatSalary } from '@/lib/utils';
 
 interface Props {
   isOpen: boolean;
@@ -167,24 +168,46 @@ const MatchingAnalysisModal: React.FC<Props> = ({
         title: 'Kinh nghiệm liên quan',
         description: 'Mức độ liên quan của kinh nghiệm làm việc với vị trí tuyển dụng.',
         pct: val('relevantExp'),
-        sections: [
-          {
-            label: 'Phân tích AI',
-            color: val('relevantExp') >= 70 ? 'emerald' : val('relevantExp') >= 40 ? 'amber' : 'rose',
-            items: relExpEvidence
-              ? [
-                  `Bằng chứng từ hồ sơ: ${relExpEvidence}`,
-                  `Độ tương đồng ngữ nghĩa: ${relExpSimilarity}%`,
-                  'Dựa trên lịch sử làm việc và các dự án thực tế',
-                ]
-              : [
-                  val('relevantExp') === 0
-                    ? 'Ứng viên chưa cập nhật thông tin kinh nghiệm làm việc hoặc dự án trong hồ sơ.'
-                    : `Điểm tương đồng: ${val('relevantExp')}%`,
-                ],
-            empty: relExpEvidence === null && val('relevantExp') === 0,
-          },
-        ],
+        scoreExplanation: d?.relevantExpDetails?.scoreExplanation || '',
+        sections: d?.relevantExpDetails?.jobRequirements && d.relevantExpDetails.jobRequirements.length > 0
+          ? [
+              {
+                label: 'Yêu cầu kinh nghiệm nên có',
+                color: 'amber',
+                items: d.relevantExpDetails.jobRequirements,
+                empty: false,
+              },
+              {
+                label: 'Kinh nghiệm liên quan ứng viên có',
+                color: 'emerald',
+                items: d.relevantExpDetails.candidateExps || [],
+                empty: (d.relevantExpDetails.candidateExps || []).length === 0,
+              },
+              {
+                label: 'Điểm phù hợp nổi bật',
+                color: 'emerald',
+                items: d.relevantExpDetails.matchingPoints || [],
+                empty: (d.relevantExpDetails.matchingPoints || []).length === 0,
+              },
+            ]
+          : [
+              {
+                label: 'Phân tích AI',
+                color: val('relevantExp') >= 70 ? 'emerald' : val('relevantExp') >= 40 ? 'amber' : 'rose',
+                items: relExpEvidence
+                  ? [
+                      `Bằng chứng từ hồ sơ: ${relExpEvidence}`,
+                      `Độ tương đồng ngữ nghĩa: ${relExpSimilarity}%`,
+                      'Dựa trên lịch sử làm việc và các dự án thực tế',
+                    ]
+                  : [
+                      val('relevantExp') === 0
+                        ? 'Ứng viên chưa cập nhật thông tin kinh nghiệm làm việc hoặc dự án trong hồ sơ.'
+                        : `Điểm tương đồng: ${val('relevantExp')}%`,
+                    ],
+                empty: relExpEvidence === null && val('relevantExp') === 0,
+              },
+            ],
       },
       location: {
         title: 'Địa điểm làm việc',
@@ -195,9 +218,10 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             label: 'So khớp địa lý',
             color: val('location') >= 80 ? 'emerald' : 'amber',
             items: [
-              `Địa điểm Công việc: ${d?.locationDetails?.jobLocation || 'Không yêu cầu'}`,
-              `Địa điểm Ứng viên: ${d?.locationDetails?.candLocation || 'Chưa cập nhật'}`,
-              `Loại khớp: ${d?.locationDetails?.type || 'Không áp dụng'}`,
+              `Địa điểm công việc đăng tuyển: ${d?.locationDetails?.jobLocation || 'Không yêu cầu'}`,
+              `Địa điểm làm việc mong muốn: ${d?.locationDetails?.candLocation || 'Chưa cập nhật'}`,
+              `Loại khớp: ${d?.locationDetails?.type || (d?.locationDetails?.message?.toLowerCase().includes('từ xa') || d?.locationDetails?.message?.toLowerCase().includes('remote') ? 'Công việc từ xa' : 'Không áp dụng')}`,
+              ...(d?.locationDetails?.message ? [`Đánh giá: ${d.locationDetails.message}`] : []),
             ],
             empty: false,
           },
@@ -212,8 +236,16 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             label: 'Phân tích tài chính',
             color: val('salary') >= 75 ? 'emerald' : 'amber',
             items: [
-              `Ngân sách tối đa: ${d?.salaryDetails?.salaryMax?.toLocaleString() || 0} VND`,
-              `Kỳ vọng ứng viên: ${d?.salaryDetails?.expectedSalary?.toLocaleString() || 0} VND`,
+              `Mức lương đăng tuyển: ${
+                d?.salaryDetails?.salaryMin !== undefined
+                  ? formatSalary(d.salaryDetails.salaryMin, d.salaryDetails.salaryMax, d.salaryDetails.currency || 'VND')
+                  : `${d?.salaryDetails?.salaryMax?.toLocaleString() || 0} VND`
+              }`,
+              `Kỳ vọng ứng viên: ${
+                d?.salaryDetails?.expectedSalary
+                  ? formatSalary(d.salaryDetails.expectedSalary, null, d.salaryDetails.currency || 'VND')
+                  : 'Chưa cập nhật'
+              }`,
               d?.salaryDetails?.isOverBudget ? '⚠️ Vượt ngân sách dự kiến' : '✓ Trong tầm ngân sách',
             ],
             empty: false,
@@ -417,7 +449,7 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                               section.color === 'rose' ? 'bg-rose-50/60 border-rose-100' :
                                 section.color === 'amber' ? 'bg-amber-50/60 border-amber-100' :
                                   'bg-slate-50 border-slate-100'}`}>
-                            {section.items.map((item, ii) => (
+                            {section.items.map((item: any, ii: number) => (
                               <motion.div
                                 key={ii}
                                 initial={{ opacity: 0, x: 8 }}
@@ -449,11 +481,15 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                           Nhận xét AI
                         </p>
                         <p>
-                          {activeDetail.pct >= 80
-                            ? `${activeDetail.title} của ứng viên rất phù hợp với yêu cầu. Đây là một điểm mạnh đáng ghi nhận.`
-                            : activeDetail.pct >= 50
-                              ? `${activeDetail.title} đạt mức chấp nhận được nhưng còn dư địa cải thiện.`
-                              : `${activeDetail.title} chưa đáp ứng tốt yêu cầu. Cần cân nhắc kỹ trước khi quyết định.`}
+                          {activeCriterion === 'relevantExp' && (activeDetail as any).scoreExplanation
+                            ? (activeDetail as any).scoreExplanation
+                            : activeCriterion === 'location' && analysis?.details?.locationDetails?.message
+                              ? analysis.details.locationDetails.message
+                              : activeDetail.pct >= 80
+                                ? `${activeDetail.title} của ứng viên rất phù hợp với yêu cầu. Đây là một điểm mạnh đáng ghi nhận.`
+                                : activeDetail.pct >= 50
+                                  ? `${activeDetail.title} đạt mức chấp nhận được nhưng còn dư địa cải thiện.`
+                                  : `${activeDetail.title} chưa đáp ứng tốt yêu cầu. Cần cân nhắc kỹ trước khi quyết định.`}
                         </p>
                       </div>
                     </motion.div>
