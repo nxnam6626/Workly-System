@@ -320,4 +320,28 @@ END:VCALENDAR`;
       console.error('[MailService] Error sending ICS email:', error);
     }
   }
+
+  async sendSupportReplyEmail(email: string, name: string, message: string) {
+    try {
+      await this.transporter.sendMail({
+        from: `"Workly Support" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: 'Phản hồi từ Bộ phận Hỗ trợ Workly',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #334155; line-height: 1.6;">
+            <p>Chào <strong>${name || 'bạn'}</strong>,</p>
+            <p>Cảm ơn bạn đã liên hệ với Bộ phận Hỗ trợ của Workly. Chúng tôi xin phản hồi yêu cầu của bạn như sau:</p>
+            <div style="background: #f1f5f9; padding: 15px 20px; border-left: 4px solid #2563eb; border-radius: 8px; margin: 20px 0; white-space: pre-wrap;">
+              ${message}
+            </div>
+            <p>Nếu bạn có thêm bất kỳ thắc mắc nào, vui lòng tạo yêu cầu hỗ trợ mới trên hệ thống.</p>
+            <p style="font-size: 14px; color: #64748b;">Trân trọng,<br>Đội ngũ Hỗ trợ Workly</p>
+          </div>
+        `,
+      });
+      console.log(`[MailService] Support reply email sent to ${email}`);
+    } catch (error) {
+      console.error('[MailService] Error sending support reply email:', error);
+    }
+  }
 }

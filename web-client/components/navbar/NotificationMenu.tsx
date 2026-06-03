@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 
 export function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
@@ -205,8 +206,99 @@ export function NotificationMenu() {
                 </div>
               )}
             </div>
+             {notifications.length > 0 && (
+                <div className="p-3 border-t border-slate-100 bg-slate-50 text-center">
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      setIsModalOpen(true);
+                    }}
+                    className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    Xem tất cả thông báo
+                  </button>
+                </div>
+             )}
             </motion.div>
            </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
+                <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-indigo-600" />
+                  Tất cả thông báo
+                </h3>
+                <div className="flex items-center gap-4">
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={markAllAsRead}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                    >
+                      Đánh dấu đã đọc tất cả
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-2">
+                {notifications.length === 0 ? (
+                  <div className="py-20 text-center text-slate-500">
+                    <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-base font-medium">Bạn không có thông báo nào.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {notifications.map((notif) => (
+                      <div 
+                        key={notif.notificationId} 
+                        onClick={() => {
+                          handleNotificationClick(notif);
+                          setIsModalOpen(false);
+                        }}
+                        className={`p-5 flex gap-4 transition-colors cursor-pointer hover:bg-slate-50 rounded-xl ${!notif.isRead ? 'bg-indigo-50/30' : ''}`}
+                      >
+                        <div className="flex-shrink-0 mt-1">
+                          {getIcon(notif.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start mb-1.5">
+                              <h4 className={`text-[15px] tracking-tight ${!notif.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                                {notif.title}
+                              </h4>
+                              <span className="text-xs font-medium text-slate-400 whitespace-nowrap ml-3">
+                                {timeAgo(notif.createdAt)}
+                              </span>
+                          </div>
+                          <p className={`text-sm leading-relaxed ${!notif.isRead ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
+                              {notif.message}
+                          </p>
+                        </div>
+                        {!notif.isRead && (
+                            <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-2 flex-shrink-0 shadow-sm"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

@@ -133,13 +133,30 @@ export class ApplicationsService {
         let autoInterviewLocation: string | null = null;
 
         const rejectThreshold = job.autoRejectThreshold ?? 40;
+        const inviteThreshold = job.autoInviteThreshold ?? 70;
+        
         if (aiMatchScore < rejectThreshold) {
           targetAppStatus = 'REJECTED';
-        } else if (job.autoInviteMatches && aiMatchScore >= 90) {
-          targetAppStatus = 'INTERVIEWING';
-          autoInterviewDate = null;
-          autoInterviewTime = null;
-          autoInterviewLocation = null;
+        } else if (job.autoInviteMatches && aiMatchScore >= inviteThreshold) {
+          if (job.recruiterId) {
+            const slot = await this.interviewService.findAvailableInterviewSlot(jobPostingId, job.recruiterId, 48);
+            if (slot.date && slot.time) {
+              targetAppStatus = 'INTERVIEW_CONFIRMED';
+              autoInterviewDate = slot.date;
+              autoInterviewTime = slot.time;
+              autoInterviewLocation = slot.location;
+            } else {
+              targetAppStatus = 'PENDING';
+              autoInterviewDate = null;
+              autoInterviewTime = null;
+              autoInterviewLocation = null;
+            }
+          } else {
+            targetAppStatus = 'PENDING';
+            autoInterviewDate = null;
+            autoInterviewTime = null;
+            autoInterviewLocation = null;
+          }
         }
 
         const application = await tx.application.create({
@@ -160,7 +177,7 @@ export class ApplicationsService {
             ),
           },
           include: {
-            jobPosting: { include: { recruiter: true } },
+            jobPosting: { include: { recruiter: true, company: true } },
             candidate: { select: { fullName: true } },
           },
         });
@@ -169,7 +186,7 @@ export class ApplicationsService {
           application,
         );
 
-        if (targetAppStatus === 'INTERVIEWING') {
+        if (targetAppStatus === 'INTERVIEWING' || targetAppStatus === 'INTERVIEW_CONFIRMED') {
           const candidateUser = await tx.candidate.findUnique({
             where: { candidateId },
             select: { userId: true },
@@ -189,16 +206,19 @@ export class ApplicationsService {
                 autoInterviewTime,
                 autoInterviewDate,
               );
-            } else {
-              // Ứng viên được đặc cách tự chọn ngày
-              await this.notificationService.notifyCandidateOfFastTrack(
-                candidateUser.userId,
-                application.jobPosting.recruiter.userId,
-                application.jobPosting.recruiterId,
-                candidateId,
-                application.jobPosting.title,
-              );
             }
+          }
+        } else if (targetAppStatus === 'REJECTED') {
+          const candidateUser = await tx.candidate.findUnique({
+            where: { candidateId },
+            select: { userId: true },
+          });
+          if (candidateUser?.userId && application.jobPosting.company?.companyName) {
+            await this.notificationService.notifyCandidateOfAutoReject(
+              candidateUser.userId,
+              application.jobPosting.company.companyName,
+              application.jobPosting.title
+            );
           }
         }
 
@@ -247,7 +267,12 @@ export class ApplicationsService {
     return this.prisma.application.findMany({
       where: { candidateId },
       include: {
-        jobPosting: { include: { company: true } },
+        jobPosting: { 
+          include: { 
+            company: true,
+            recruiter: { select: { interviewSettings: true } } 
+          } 
+        },
         companyReview: true,
       },
       orderBy: { applyDate: 'desc' },

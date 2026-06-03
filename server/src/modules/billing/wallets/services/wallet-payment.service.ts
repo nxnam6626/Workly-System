@@ -162,4 +162,13 @@ export class WalletPaymentService {
       throw new BadRequestException('Webhook signature invalid');
     }
   }
+
+  async verifyPaymentLink(orderId: number | string): Promise<any> {
+    try {
+      const paymentLinkInfo = await this.payos.paymentRequests.get(String(orderId));
+      return paymentLinkInfo; // Contains status: 'PAID' | 'PENDING' | 'CANCELLED'
+    } catch (e) {
+      return null; // Order code not found or error
+    }
+  }
 }

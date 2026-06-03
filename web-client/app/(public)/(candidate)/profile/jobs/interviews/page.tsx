@@ -1,5 +1,5 @@
 "use client";
- 
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
   CalendarDays, MapPin, Clock, Building2,
@@ -11,7 +11,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
 import { ProfilePageShell } from "@/components/candidates/ProfilePageShell";
- 
+import { RescheduleModal } from "@/components/candidates/RescheduleModal";
+
 interface Interview {
   applicationId: string;
   jobPostingId: string;
@@ -19,16 +20,21 @@ interface Interview {
   interviewTime: string;
   interviewLocation?: string;
   note?: string;
-  appStatus: "INTERVIEWING" | "ACCEPTED" | "REJECTED";
+  appStatus: "INTERVIEWING" | "INTERVIEW_CONFIRMED" | "RESCHEDULE_REQUESTED" | "ACCEPTED" | "REJECTED";
   jobPosting: {
     title: string;
     company: {
       companyName: string;
       logo: string | null;
     };
+    recruiter?: {
+      interviewSettings?: {
+        minNoticeHours: number;
+      };
+    };
   };
 }
- 
+
 
 
 const STATUS_LABEL = {
@@ -139,12 +145,12 @@ function MiniCalendar({ interviews, selectedDate, onSelectDate }: MiniCalendarPr
                 onSelectDate(isSelected ? null : key);
               }}
               className={`relative flex items-center justify-center h-8 rounded-lg text-[12px] font-semibold transition-all duration-200 cursor-pointer active:scale-95
-                ${isSelected 
-                  ? "bg-blue-600 text-white shadow-sm font-bold" 
-                  : isToday 
-                    ? "bg-slate-900 text-white" 
-                    : hasInterview 
-                      ? "text-blue-700 bg-blue-50/50 hover:bg-blue-50" 
+                ${isSelected
+                  ? "bg-blue-600 text-white shadow-sm font-bold"
+                  : isToday
+                    ? "bg-slate-900 text-white"
+                    : hasInterview
+                      ? "text-blue-700 bg-blue-50/50 hover:bg-blue-50"
                       : "text-slate-500 hover:bg-slate-50"
                 }`}
             >
@@ -165,22 +171,25 @@ export default function InterviewsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "upcoming" | "past">("all");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [rescheduleAppId, setRescheduleAppId] = useState<string | null>(null);
+
+  const fetchInterviews = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/applications/me');
+      const interviewApps = (data || []).filter((app: any) =>
+        ["INTERVIEWING", "INTERVIEW_CONFIRMED", "RESCHEDULE_REQUESTED", "ACCEPTED", "REJECTED"].includes(app.appStatus) &&
+        app.interviewDate
+      );
+      setInterviews(interviewApps);
+    } catch (error) {
+      console.error("Error fetching interviews:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchInterviews = async () => {
-      try {
-        const { data } = await api.get('/applications/me');
-        const interviewApps = (data || []).filter((app: any) =>
-          ["INTERVIEWING", "INTERVIEW_CONFIRMED", "RESCHEDULE_REQUESTED", "ACCEPTED", "REJECTED"].includes(app.appStatus) &&
-          app.interviewDate
-        );
-        setInterviews(interviewApps);
-      } catch (error) {
-        console.error("Error fetching interviews:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchInterviews();
   }, []);
 
@@ -457,16 +466,52 @@ export default function InterviewsPage() {
                           {/* Footer */}
                           <div className="mt-3 pt-2.5 border-t border-slate-50 flex items-center justify-between">
                             <div>
-                              {!isPast && inv.appStatus === "INTERVIEWING" && (
+                              {!isPast && (inv.appStatus === "INTERVIEWING" || inv.appStatus === "INTERVIEW_CONFIRMED") && (
                                 <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${daysUntil === 0 ? "bg-orange-100 text-orange-600" :
                                   daysUntil === 1 ? "bg-amber-100 text-amber-600" :
                                     "bg-blue-50 text-blue-500"
                                   }`}>
-                                  {daysUntil === 0 ? "⚡ Hôm nay!" :
+                                  {daysUntil === 0 ? "Hôm nay!" :
                                     daysUntil === 1 ? "🗓 Ngày mai" :
-                                      `📅 ${daysUntil} ngày nữa`}
+                                      `${daysUntil} ngày nữa`}
                                 </span>
                               )}
+                            </div>
+                            <div className="flex gap-2">
+                              {!isPast && (inv.appStatus === "INTERVIEWING" || inv.appStatus === "INTERVIEW_CONFIRMED") && (() => {
+                                const minNoticeHours = inv.jobPosting.recruiter?.interviewSettings?.minNoticeHours || 24;
+                                const [h, m] = inv.interviewTime ? inv.interviewTime.split(':').map(Number) : [0, 0];
+                                const currentInterviewTime = new Date(
+                                  Date.UTC(
+                                    new Date(inv.interviewDate).getUTCFullYear(),
+                                    new Date(inv.interviewDate).getUTCMonth(),
+                                    new Date(inv.interviewDate).getUTCDate(),
+                                    h - 7,
+                                    m,
+                                    0,
+                                    0
+                                  )
+                                );
+                                const minNoticeTimeMs = Date.now() + minNoticeHours * 60 * 60 * 1000;
+                                const isReschedulable = currentInterviewTime.getTime() >= minNoticeTimeMs;
+
+                                return isReschedulable ? (
+                                  <button
+                                    onClick={() => setRescheduleAppId(inv.applicationId)}
+                                    className="px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                  >
+                                    Dời lịch phỏng vấn
+                                  </button>
+                                ) : (
+                                  <button
+                                    disabled
+                                    className="px-3 py-1.5 text-xs font-bold text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed"
+                                    title={`Không thể dời lịch vì đã quá hạn báo trước (${minNoticeHours} tiếng).`}
+                                  >
+                                    Dời lịch phỏng vấn
+                                  </button>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -502,6 +547,13 @@ export default function InterviewsPage() {
           )}
         </AnimatePresence>
       )}
+
+      <RescheduleModal
+        isOpen={!!rescheduleAppId}
+        onClose={() => setRescheduleAppId(null)}
+        applicationId={rescheduleAppId!}
+        onSuccess={() => fetchInterviews()}
+      />
     </ProfilePageShell>
   );
 }

@@ -46,6 +46,11 @@ export class BackofficeController {
     return this.backofficeService.getLatestViolations();
   }
 
+  @Get('users/:userId/violations/logs')
+  getUserViolationLogs(@Param('userId') userId: string) {
+    return this.backofficeService.getUserViolationLogs(userId);
+  }
+
   @Get('companies')
   findAllCompanies(
     @Query('skip') skip?: string,

@@ -99,6 +99,18 @@ export class JobModerationService {
       data: { violationCount: newViolations },
     });
 
+    await this.prisma.user.update({
+      where: { userId: recruiter.userId },
+      data: { violations: newViolations },
+    });
+
+    await this.prisma.violationLog.create({
+      data: {
+        userId: recruiter.userId,
+        reason: 'Đăng tin tuyển dụng không hợp lệ / vi phạm chính sách',
+      },
+    });
+
     if (newViolations >= this.VIOLATION_LIMIT) {
       await this.prisma.user.update({
         where: { userId: recruiter.userId },

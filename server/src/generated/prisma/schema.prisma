@@ -1,7 +1,12 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
   output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+generator client_default {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
@@ -25,6 +30,7 @@ model User {
   providerId      String?
   isOnline        Boolean          @default(false)
   lastActive      DateTime?
+  accountLevel    AccountLevel     @default(NORMAL)
   violations      Int              @default(0)
   admin           Admin?
   candidate       Candidate?
@@ -33,7 +39,7 @@ model User {
   recruiter       Recruiter?
   supportRequests SupportRequest[]
   userRoles       UserRole[]
-  accountLevel    AccountLevel     @default(NORMAL)
+  violationLogs   ViolationLog[]
 
   @@index([status])
   @@index([createdAt])
@@ -79,9 +85,9 @@ model JobAlert {
 
 model Admin {
   adminId     String    @id @default(uuid())
-  fullName    String?   @default("Quản trị viên")
   lastAction  String?
   userId      String    @unique
+  fullName    String?   @default("Quản trị viên")
   permissions String[]  @default([])
   user        User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
   companies   Company[]
@@ -95,35 +101,35 @@ model Candidate {
   gpa                Float?
   cvUrl              String?
   userId             String            @unique
-  isOpenToWork       Boolean           @default(false)
-  jobSearchExpiresAt DateTime?
-  location           String?
-  desiredJob         Json?
-  summary            String?
   birthYear          Int?
   currentSalary      String?
-  totalYearsExp      Float?            @default(0)
   degree             String?
+  desiredJob         Json?
   gender             String?
   industries         String[]          @default([])
   interests          String[]          @default([])
+  isOpenToWork       Boolean           @default(false)
   languages          Json?
+  location           String?
   softSkills         String[]          @default([])
+  summary            String?
+  totalYearsExp      Float?            @default(0)
+  jobSearchExpiresAt DateTime?
   applications       Application[]
   cvs                CV[]
   user               User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  reports            CandidateReport[]
+  candidateReviews   CandidateReview[]
+  candidateUnlocks   CandidateUnlock[]
+  wallet             CandidateWallet?
   certifications     Certification[]
+  companyReviews     CompanyReview[]
   conversations      Conversation[]
   experiences        Experience[]
   jobMatches         JobMatch[]
   projects           Project[]
   savedJobs          SavedJob[]
   skills             Skill[]
-  candidateUnlocks   CandidateUnlock[]
-  candidateReviews   CandidateReview[]
-  companyReviews     CompanyReview[]
-  reports            CandidateReport[]
-  wallet             CandidateWallet?
 }
 
 model Experience {
@@ -147,8 +153,8 @@ model Skill {
   skillId     String     @id @default(uuid())
   skillName   String
   candidateId String
-  level       SkillLevel @default(BEGINNER)
   category    String?
+  level       SkillLevel @default(BEGINNER)
   candidate   Candidate  @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
@@ -164,7 +170,6 @@ model Project {
 
 model Recruiter {
   recruiterId           String                 @id @default(uuid())
-  fullName              String?                @default("Nhà tuyển dụng")
   bio                   String?
   position              String?
   userId                String                 @unique
@@ -173,21 +178,23 @@ model Recruiter {
   aiInsightsCache       Json?
   aiInsightsCacheKey    String?
   aiInsightsCachedAt    DateTime?
-  interviewSettings     Json?
+  companyRole           String                 @default("MASTER")
   createdAt             DateTime               @default(now())
+  fullName              String?                @default("Nhà tuyển dụng")
+  interviewSettings     Json?
   updatedAt             DateTime               @default(now()) @updatedAt
   violationCount        Int                    @default(0)
+  reports               CandidateReport[]
+  candidateReviews      CandidateReview[]
+  candidateUnlocks      CandidateUnlock[]
+  reviewReports         CompanyReviewReport[]
   conversations         Conversation[]
+  evaluations           InterviewEvaluation[]
   jobPostings           JobPosting[]
   company               Company?               @relation(fields: [companyId], references: [companyId])
   user                  User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  companyRole           String                 @default("MASTER") // MASTER, MEMBER, PENDING
   recruiterSubscription RecruiterSubscription?
-  candidateUnlocks      CandidateUnlock[]
-  candidateReviews      CandidateReview[]
-  evaluations           InterviewEvaluation[]
   transactions          Transaction[]
-  reports               CandidateReport[]
 }
 
 model Transaction {
@@ -196,13 +203,13 @@ model Transaction {
   description   String?
   createdAt     DateTime        @default(now())
   walletId      String
-  recruiterId   String? // Nguời đã thực hiện giao dịch này
+  recruiterId   String?
   orderCode     Int?            @unique
   status        String          @default("SUCCESS")
   realMoney     Float?
   type          TransactionType
+  recruiter     Recruiter?      @relation(fields: [recruiterId], references: [recruiterId])
   wallet        CompanyWallet   @relation(fields: [walletId], references: [walletId], onDelete: Cascade)
-  recruiter     Recruiter?      @relation(fields: [recruiterId], references: [recruiterId], onDelete: SetNull)
 }
 
 model Company {
@@ -219,6 +226,7 @@ model Company {
   companySize        Int?
   businessLicenseUrl String?
   adminId            String?
+  cultureContent     Json?
   enterpriseType     String?
   internationalName  String?
   mainIndustry       String?
@@ -227,17 +235,16 @@ model Company {
   slug               String?           @unique
   status             String?
   taxAddress         String?
-  admin              Admin?            @relation(fields: [adminId], references: [adminId])
-  branches           CompanyBranch[]
-  jobPostings        JobPosting[]
   candidateUnlocks   CandidateUnlock[]
-  recruiters         Recruiter[]
-  sections           CompanySection[]
+  admin              Admin?            @relation(fields: [adminId], references: [adminId])
   benefits           CompanyBenefit[]
+  branches           CompanyBranch[]
   history            CompanyHistory[]
-  cultureContent     Json?
-  wallet             CompanyWallet?
   companyReviews     CompanyReview[]
+  sections           CompanySection[]
+  wallet             CompanyWallet?
+  jobPostings        JobPosting[]
+  recruiters         Recruiter[]
 
   @@index([verifyStatus])
   @@index([companyName])
@@ -246,8 +253,8 @@ model Company {
 model CompanySection {
   id           String  @id @default(uuid())
   title        String
-  content      String  @db.Text
-  type         String  @default("GENERAL") // INTRODUCTION, HR_POLICY, ADVANCEMENT, SALARY, INSURANCE, ACTIVITIES
+  content      String
+  type         String  @default("GENERAL")
   displayOrder Int     @default(0)
   companyId    String
   company      Company @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
@@ -264,7 +271,7 @@ model CompanyBenefit {
 model CompanyHistory {
   id        String  @id @default(uuid())
   year      String
-  event     String  @db.Text
+  event     String
   companyId String
   company   Company @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
 }
@@ -291,7 +298,6 @@ model JobPosting {
   salaryMax              Decimal?           @db.Decimal(19, 0)
   currency               String?            @default("VND")
   jobType                JobType?
-  jobLevel               JobLevel?          @default(STAFF)
   experience             String?
   vacancies              Int                @default(1)
   locationCity           String?
@@ -301,29 +307,29 @@ model JobPosting {
   createdAt              DateTime           @default(now()) @db.Timestamp(6)
   updatedAt              DateTime           @updatedAt @db.Timestamp(6)
   approvedBy             String?
-  moderationFeedback     Json?
   recruiterId            String?
   companyId              String
   structuredRequirements Json?
   viewCount              Int                @default(0)
-  jobTier                JobTier            @default(BASIC)
-  refreshedAt            DateTime           @default(now()) @db.Timestamp(6)
-  pausedAt               DateTime?          @db.Timestamp(6)
-  slug                   String?            @unique
   autoInviteMatches      Boolean            @default(false)
-  autoRejectThreshold    Int?
   autoInviteThreshold    Int                @default(70)
+  autoRejectThreshold    Int?
+  jobLevel               JobLevel?          @default(STAFF)
+  jobTier                JobTier            @default(BASIC)
   matchMode              String             @default("BALANCED")
-  // embedding              Unsupported("vector")?
+  moderationFeedback     Json?
+  pausedAt               DateTime?          @db.Timestamp(6)
+  refreshedAt            DateTime           @default(now()) @db.Timestamp(6)
+  slug                   String?            @unique
+  slaApplicationDays     Int                @default(3)
+  slaInterviewDays       Int                @default(5)
   applications           Application[]
+  candidateUnlocks       CandidateUnlock[]
   jobMatches             JobMatch[]
   company                Company            @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
   recruiter              Recruiter?         @relation(fields: [recruiterId], references: [recruiterId])
-  savedJobs              SavedJob[]
   branches               JobPostingBranch[]
-  candidateUnlocks       CandidateUnlock[]
-  slaApplicationDays     Int                @default(3)
-  slaInterviewDays       Int                @default(5)
+  savedJobs              SavedJob[]
 
   @@index([status])
   @@index([companyId])
@@ -335,8 +341,8 @@ model JobPosting {
 model JobPostingBranch {
   jobPostingId String
   branchId     String
-  jobPosting   JobPosting    @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
   branch       CompanyBranch @relation(fields: [branchId], references: [branchId], onDelete: Cascade)
+  jobPosting   JobPosting    @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
 
   @@id([jobPostingId, branchId])
 }
@@ -365,7 +371,6 @@ model CV {
   candidateId      String
   fileHash         String?
   parsedData       Json?
-  // embedding        Unsupported("vector")?
   applications     Application[]
   candidate        Candidate         @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   candidateUnlocks CandidateUnlock[]
@@ -386,15 +391,15 @@ model Application {
   interviewTime       String?
   aiMatchScore        Float?
   isUnlocked          Boolean               @default(false)
-  expectedResponseAt  DateTime? // Hạn chót phản hồi hồ sơ
-  expectedResultAt    DateTime? // Hạn chót thông báo kết quả (sau PV)
-  candidateResponseAt DateTime? // Hạn chót ứng viên phản hồi lịch PV
+  candidateResponseAt DateTime?
+  expectedResponseAt  DateTime?
+  expectedResultAt    DateTime?
   candidate           Candidate             @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   cv                  CV                    @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
   jobPosting          JobPosting            @relation(fields: [jobPostingId], references: [jobPostingId], onDelete: Cascade)
-  evaluations         InterviewEvaluation[]
-  companyReview       CompanyReview?
   reports             CandidateReport[]
+  companyReview       CompanyReview?
+  evaluations         InterviewEvaluation[]
 }
 
 model SavedJob {
@@ -451,8 +456,8 @@ model CandidateWallet {
   candidateId  String                 @unique
   balance      Int                    @default(0)
   updatedAt    DateTime               @updatedAt
-  candidate    Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
   transactions CandidateTransaction[]
+  candidate    Candidate              @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
 }
 
 model CandidateTransaction {
@@ -488,16 +493,17 @@ model RecruiterSubscription {
 }
 
 model SupportRequest {
-  requestId String        @id @default(uuid())
-  name      String?
-  email     String
-  subject   String
-  message   String
-  status    SupportStatus @default(OPEN)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  userId    String?
-  user      User?         @relation(fields: [userId], references: [userId])
+  requestId     String        @id @default(uuid())
+  name          String?
+  email         String
+  subject       String
+  message       String
+  attachmentUrl String?
+  status        SupportStatus @default(OPEN)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [userId])
 }
 
 model AiQueryCache {
@@ -505,6 +511,127 @@ model AiQueryCache {
   query     String   @unique
   response  String
   createdAt DateTime @default(now())
+}
+
+model CandidateUnlock {
+  unlockId         String     @id @default(uuid())
+  recruiterId      String
+  candidateId      String
+  jobPostingId     String
+  unlockedAt       DateTime   @default(now())
+  creditSpent      Int        @default(0)
+  cvId             String
+  companyCompanyId String?
+  candidate        Candidate  @relation(fields: [candidateId], references: [candidateId])
+  company          Company?   @relation(fields: [companyCompanyId], references: [companyId])
+  cv               CV         @relation(fields: [cvId], references: [cvId])
+  jobPosting       JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
+  recruiter        Recruiter  @relation(fields: [recruiterId], references: [recruiterId])
+
+  @@unique([recruiterId, candidateId, jobPostingId])
+  @@index([recruiterId])
+}
+
+model CandidateReview {
+  reviewId     String    @id @default(uuid())
+  candidateId  String
+  recruiterId  String
+  jobPostingId String?
+  rating       Int       @default(0)
+  content      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  candidate    Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  recruiter    Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+}
+
+model ViolationLog {
+  logId     String   @id @default(uuid())
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model InterviewEvaluation {
+  evaluationId   String      @id @default(uuid())
+  applicationId  String
+  recruiterId    String
+  roundNumber    Int         @default(1)
+  roundName      String?
+  sessionDate    DateTime?
+  criteriaScores Json        @default("[]")
+  overallRating  Int         @default(0)
+  notes          String?
+  result         EvalResult  @default(PENDING)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  application    Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
+  recruiter      Recruiter   @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+
+  @@unique([applicationId, recruiterId, roundNumber])
+  @@index([applicationId])
+  @@index([recruiterId])
+  @@index([sessionDate])
+}
+
+model CompanyReview {
+  reviewId          String                @id @default(uuid())
+  companyId         String
+  candidateId       String
+  applicationId     String                @unique
+  ratingProcess     Int                   @default(0)
+  ratingInterviewer Int                   @default(0)
+  ratingOffice      Int                   @default(0)
+  content           String?
+  isAnonymous       Boolean               @default(false)
+  isVerified        Boolean               @default(true)
+  status            String                @default("PUBLISHED")
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  application       Application           @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
+  candidate         Candidate             @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  company           Company               @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  reports           CompanyReviewReport[]
+
+  @@index([companyId])
+  @@index([candidateId])
+}
+
+model CandidateReport {
+  reportId      String       @id @default(uuid())
+  recruiterId   String
+  candidateId   String
+  applicationId String?
+  reason        String
+  content       String
+  status        String       @default("PENDING")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  application   Application? @relation(fields: [applicationId], references: [applicationId])
+  candidate     Candidate    @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  recruiter     Recruiter    @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+
+  @@index([recruiterId])
+  @@index([candidateId])
+}
+
+model CompanyReviewReport {
+  reportId    String        @id @default(uuid())
+  reviewId    String
+  recruiterId String
+  reason      String
+  evidence    String
+  status      String        @default("PENDING")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  recruiter   Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  review      CompanyReview @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@index([recruiterId])
 }
 
 enum AuthProvider {
@@ -540,12 +667,12 @@ enum JobType {
 enum JobLevel {
   INTERN
   STAFF
+  MANAGER
+  DIRECTOR
   TEAM_LEADER
   DEPARTMENT_HEAD
-  MANAGER
   BRANCH_MANAGER
   VICE_DIRECTOR
-  DIRECTOR
 }
 
 enum AppStatus {
@@ -602,112 +729,4 @@ enum EvalResult {
   PENDING
   PASS
   FAIL
-}
-
-model CandidateUnlock {
-  unlockId     String   @id @default(uuid())
-  recruiterId  String
-  candidateId  String
-  jobPostingId String
-  cvId         String
-  creditSpent  Int      @default(0)
-  unlockedAt   DateTime @default(now())
-
-  recruiter        Recruiter  @relation(fields: [recruiterId], references: [recruiterId])
-  candidate        Candidate  @relation(fields: [candidateId], references: [candidateId])
-  jobPosting       JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
-  cv               CV?        @relation(fields: [cvId], references: [cvId])
-  company          Company?   @relation(fields: [companyCompanyId], references: [companyId])
-  companyCompanyId String?
-
-  @@unique([recruiterId, candidateId, jobPostingId])
-  @@index([recruiterId])
-}
-
-model CandidateReview {
-  reviewId     String   @id @default(uuid())
-  candidateId  String
-  recruiterId  String
-  jobPostingId String?
-  rating       Int      @default(0) // 1-5 stars
-  content      String   @db.Text
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  candidate Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-  recruiter Recruiter @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-  // We link to JobPosting to know which job this review was made for, but it's optional
-}
-
-// Structured evaluation per interview round - replaces string-encoded scores in CandidateReview
-model InterviewEvaluation {
-  evaluationId   String     @id @default(uuid())
-  applicationId  String
-  recruiterId    String
-  roundNumber    Int        @default(1) // 1, 2, 3... (vòng phỏng vấn)
-  roundName      String? // "Vòng kỹ thuật", "Vòng văn hóa"...
-  sessionDate    DateTime? // ngày buổi phỏng vấn
-  criteriaScores Json       @default("[]") // [{ name: "Nghiệp vụ", score: 4, maxScore: 5 }]
-  overallRating  Int        @default(0) // 1-5 sao tổng
-  notes          String?    @db.Text
-  result         EvalResult @default(PENDING)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  application Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
-  recruiter   Recruiter   @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-
-  @@unique([applicationId, recruiterId, roundNumber])
-  @@index([applicationId])
-  @@index([recruiterId])
-  @@index([sessionDate])
-}
-
-model CompanyReview {
-  reviewId      String @id @default(uuid())
-  companyId     String
-  candidateId   String
-  applicationId String @unique // One review per interview application
-
-  ratingProcess     Int @default(0) // Quy trình tuyển dụng (1-5)
-  ratingInterviewer Int @default(0) // Thái độ người phỏng vấn (1-5)
-  ratingOffice      Int @default(0) // Môi trường & Văn phòng (1-5)
-
-  content     String? @db.Text
-  isAnonymous Boolean @default(false)
-  isVerified  Boolean @default(true) // Should be true by default as we enforce it
-
-  status String @default("PUBLISHED") // PUBLISHED, HIDDEN, FLAGGED
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  company     Company     @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
-  candidate   Candidate   @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-  application Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
-
-  @@index([companyId])
-  @@index([candidateId])
-}
-
-model CandidateReport {
-  reportId      String  @id @default(uuid())
-  recruiterId   String
-  candidateId   String
-  applicationId String?
-
-  reason  String // NO_SHOW, SABOTAGE, FRAUD, OTHER
-  content String @db.Text
-
-  status String @default("PENDING") // PENDING, ACTIONED, DISMISSED
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  recruiter   Recruiter    @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
-  candidate   Candidate    @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
-  application Application? @relation(fields: [applicationId], references: [applicationId], onDelete: SetNull)
-
-  @@index([recruiterId])
-  @@index([candidateId])
 }

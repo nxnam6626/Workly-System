@@ -81,6 +81,11 @@ export function NotificationListener() {
                 <p className="mt-1.5 text-[14px] text-slate-600 leading-relaxed font-medium">
                   {msg}
                 </p>
+                <div className="mt-2">
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-semibold hover:underline inline-flex items-center gap-1">
+                    Xem Tiêu chí vi phạm
+                  </a>
+                </div>
               </div>
             </div>
             <div className="border-t border-slate-100/60 bg-slate-50/50 flex">
@@ -114,6 +119,11 @@ export function NotificationListener() {
                 <p className="mt-2 text-[15px] text-slate-300 leading-relaxed">
                   {displayMsg}
                 </p>
+                <div className="mt-3 pt-3 border-t border-red-900/50">
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-400 font-semibold hover:underline inline-flex items-center gap-1">
+                    Xem Điều khoản & Tiêu chí vi phạm
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -126,14 +136,28 @@ export function NotificationListener() {
       }, 5000);
     };
 
+    const handleProfileUpdated = async () => {
+      try {
+        const { profileApi } = await import('@/lib/profile-api');
+        const data = await profileApi.getMe();
+        if (data?.candidate) {
+          useAuthStore.getState().updateUser({ candidate: data.candidate });
+        }
+      } catch (err) {
+        console.error('Failed to update profile from socket event', err);
+      }
+    };
+
     socket.on('notification', handleNotification);
     socket.on('accountLocked', handleAccountLocked);
     socket.on('violationWarn', handleViolationWarn);
+    socket.on('profileUpdated', handleProfileUpdated);
 
     return () => {
       socket.off('notification', handleNotification);
       socket.off('accountLocked', handleAccountLocked);
       socket.off('violationWarn', handleViolationWarn);
+      socket.off('profileUpdated', handleProfileUpdated);
     };
   }, [socket, isConnected, logout, router]);
 

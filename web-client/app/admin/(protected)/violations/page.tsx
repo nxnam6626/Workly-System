@@ -8,9 +8,11 @@ import {
   Lock,
   Unlock,
   Building,
-  User,
   Clock,
+  User,
   RefreshCw,
+  X,
+  Calendar,
 } from 'lucide-react';
 import {
   adminDashboardApi,
@@ -35,12 +37,93 @@ function AccessDenied({ perm }: { perm: string }) {
   );
 }
 
+function ViolationHistoryModal({
+  isOpen,
+  onClose,
+  userId,
+  userName,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string | null;
+  userName: string;
+}) {
+  const [logs, setLogs] = useState<{ logId: string; reason: string; createdAt: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && userId) {
+      setIsLoading(true);
+      adminDashboardApi.getUserViolationLogs(userId)
+        .then(setLogs)
+        .catch((err) => console.error('Failed to fetch logs', err))
+        .finally(() => setIsLoading(false));
+    }
+  }, [isOpen, userId]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
+          <div>
+            <h3 className="text-lg font-black text-slate-900">Lịch Sử Vi Phạm</h3>
+            <p className="text-sm font-medium text-slate-500 mt-1">{userName}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-8 h-8 animate-spin text-slate-300" />
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="text-center py-10">
+              <ShieldAlert className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+              <p className="text-slate-500 font-medium text-sm">Chưa có bản ghi chi tiết</p>
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+              {logs.map((log) => (
+                <div key={log.logId} className="flex gap-4 p-4 rounded-2xl border border-rose-100 bg-rose-50/30">
+                  <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800 text-sm">{log.reason}</p>
+                    <p className="text-xs font-medium text-slate-500 mt-1.5 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {new Date(log.createdAt).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ViolationsPage() {
   const [recruiters, setRecruiters] = useState<ViolatingRecruiter[]>([]);
   const [candidates, setCandidates] = useState<ViolatingCandidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
+
+  // Modal state
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserName, setSelectedUserName] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { user } = useAuthStore();
   const perms: string[] = user?.admin?.permissions ?? [];
@@ -64,7 +147,16 @@ export default function ViolationsPage() {
   };
 
   useEffect(() => {
-    if (canAccess) fetchData();
+    if (!canAccess) return;
+    
+    fetchData();
+    
+    // Polling 5s để cập nhật realtime
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, [canAccess]);
 
   const handleToggleLock = async (userId: string, currentStatus: string, type: 'recruiter' | 'candidate') => {
@@ -160,10 +252,18 @@ export default function ViolationsPage() {
                           <p className="text-slate-500 font-medium text-[12px] mt-0.5">{v.email}</p>
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm ${v.violationCount >= 3 ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-amber-50 text-amber-700 border-amber-200/60'}`}>
+                          <button
+                            onClick={() => {
+                              setSelectedUserId(v.userId);
+                              setSelectedUserName(v.companyName);
+                              setIsModalOpen(true);
+                            }}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer ${v.violationCount >= 3 ? 'bg-rose-50 text-rose-700 border-rose-200/60 hover:bg-rose-100 hover:border-rose-300' : 'bg-amber-50 text-amber-700 border-amber-200/60 hover:bg-amber-100 hover:border-amber-300'}`}
+                            title="Xem chi tiết vi phạm"
+                          >
                             <AlertTriangle className="w-3.5 h-3.5" />
                             {v.violationCount}/3
-                          </span>
+                          </button>
                         </td>
                         <td className="px-5 py-4 text-center">
                           <span className={`inline-block px-3 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border shadow-sm ${v.status === 'LOCKED' ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'}`}>
@@ -175,8 +275,8 @@ export default function ViolationsPage() {
                             onClick={() => handleToggleLock(v.userId, v.status, 'recruiter')}
                             disabled={isActionLoading === v.userId}
                             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm disabled:opacity-50
-                              ${v.status === 'LOCKED' 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300' 
+                              ${v.status === 'LOCKED'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300'
                                 : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300'
                               }`}
                           >
@@ -244,10 +344,18 @@ export default function ViolationsPage() {
                           <p className="text-slate-500 font-medium text-[12px] mt-0.5">{c.email}</p>
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm ${c.violationCount >= 3 ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-amber-50 text-amber-700 border-amber-200/60'}`}>
+                          <button
+                            onClick={() => {
+                              setSelectedUserId(c.userId);
+                              setSelectedUserName(c.fullName);
+                              setIsModalOpen(true);
+                            }}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer ${c.violationCount >= 3 ? 'bg-rose-50 text-rose-700 border-rose-200/60 hover:bg-rose-100 hover:border-rose-300' : 'bg-amber-50 text-amber-700 border-amber-200/60 hover:bg-amber-100 hover:border-amber-300'}`}
+                            title="Xem chi tiết vi phạm"
+                          >
                             <AlertTriangle className="w-3.5 h-3.5" />
                             {c.violationCount}/3
-                          </span>
+                          </button>
                         </td>
                         <td className="px-5 py-4 text-center">
                           <span className={`inline-block px-3 py-1.5 rounded-xl text-[10px] font-black tracking-widest uppercase border shadow-sm ${c.status === 'LOCKED' ? 'bg-rose-50 text-rose-700 border-rose-200/60' : 'bg-emerald-50 text-emerald-700 border-emerald-200/60'}`}>
@@ -259,8 +367,8 @@ export default function ViolationsPage() {
                             onClick={() => handleToggleLock(c.userId, c.status, 'candidate')}
                             disabled={isActionLoading === c.userId}
                             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors shadow-sm disabled:opacity-50
-                              ${c.status === 'LOCKED' 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300' 
+                              ${c.status === 'LOCKED'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300'
                                 : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300'
                               }`}
                           >
@@ -285,6 +393,14 @@ export default function ViolationsPage() {
           </div>
         </div>
       )}
+
+      {/* Violation History Modal */}
+      <ViolationHistoryModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        userId={selectedUserId}
+        userName={selectedUserName}
+      />
     </div>
   );
 }

@@ -6,7 +6,10 @@ import {
   Get,
   Patch,
   Param,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SupportService } from './support.service';
 import { CreateSupportDto } from './dto/create-support.dto';
 import { OptionalJwtAuthGuard } from '@/common/guards/optional-jwt-auth.guard';
@@ -22,13 +25,16 @@ export class SupportController {
 
   @Post('contact')
   @UseGuards(OptionalJwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
   async contactSupport(
     @Body() createSupportDto: CreateSupportDto,
     @CurrentUser() user: CurrentUserPayload,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     const request = await this.supportService.createSupportRequest(
       createSupportDto,
       user?.userId,
+      file,
     );
     return {
       message:
@@ -52,5 +58,15 @@ export class SupportController {
     @Body('status') status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED',
   ) {
     return this.supportService.updateStatus(id, status);
+  }
+
+  @Post(':id/reply')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async replySupportRequest(
+    @Param('id') id: string,
+    @Body('message') message: string,
+  ) {
+    return this.supportService.replyToSupportRequest(id, message);
   }
 }

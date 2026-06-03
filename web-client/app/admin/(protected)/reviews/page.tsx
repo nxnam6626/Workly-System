@@ -63,14 +63,45 @@ export default function AdminReviewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.')) return;
-    try {
-      await adminReviewsApi.delete(id);
-      toast.success('Đã xóa đánh giá');
-      fetchReviews();
-    } catch (error) {
-      toast.error('Lỗi khi xóa đánh giá');
-    }
+    toast.custom(
+      (t) => (
+        <div className={`bg-white rounded-2xl border border-slate-100 shadow-xl p-4 flex flex-col gap-3 min-w-[300px] ${t.visible ? 'animate-in fade-in slide-in-from-top-2' : 'animate-out fade-out slide-out-to-top-2'}`}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-red-50 text-red-600">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Xác nhận xóa đánh giá</h3>
+              <p className="text-slate-500 text-xs mt-0.5">Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-1">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-4 py-2 bg-slate-50 text-slate-600 text-xs font-bold rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await adminReviewsApi.delete(id);
+                  toast.success('Đã xóa đánh giá');
+                  fetchReviews();
+                } catch (error) {
+                  toast.error('Lỗi khi xóa đánh giá');
+                }
+              }}
+              className="px-4 py-2 text-white text-xs font-bold rounded-xl transition-colors bg-red-600 hover:bg-red-700"
+            >
+              Xác nhận xóa
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
   };
 
   const calculateAvg = (r: CompanyReviewDto) => {

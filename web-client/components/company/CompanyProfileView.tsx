@@ -77,7 +77,11 @@ export default function CompanyProfileView({ company, isPreview = false }: Compa
 
         {/* Right Column: Sidebar (Always visible) */}
         <div className="space-y-6">
-          <SidebarInfo company={company} isPreview={isPreview} />
+          <SidebarInfo 
+            company={company} 
+            isPreview={isPreview} 
+            onReviewClick={() => setActiveTab('reviews')}
+          />
         </div>
       </section>
 

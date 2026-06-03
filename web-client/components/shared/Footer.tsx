@@ -22,8 +22,8 @@ const recruiterLinks = [
 
 const resourceLinks = [
   { label: "Trung tâm hỗ trợ", href: "/support" },
-  { label: "Điều khoản sử dụng", href: "/support" },
-  { label: "Chính sách bảo mật", href: "/support" },
+  { label: "Điều khoản sử dụng", href: "/terms" },
+  { label: "Chính sách bảo mật", href: "/privacy" },
 ];
 
 export function Footer() {
@@ -139,19 +139,6 @@ export function Footer() {
                   </li>
                 ))}
               </ul>
-
-              {/* GitHub */}
-              <div className="mt-6">
-                <a
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 text-xs font-medium transition-colors"
-                >
-                  <Github className="w-4 h-4" />
-                  Source Code
-                </a>
-              </div>
             </div>
           </div>
         </div>
