@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { RefreshCw, ShieldAlert, XCircle, UserCheck, ArrowLeft } from 'lucide-react';
 import {
   adminUsersApi,
@@ -21,9 +22,25 @@ import useSWR from 'swr';
 const PAGE_SIZE = 15;
 
 export default function CandidatesManagement() {
+  const searchParams = useSearchParams();
+  const isPendingVerificationsFilter = searchParams.get('filter') === 'pending_verifications';
+
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AdminUserFilters>({ role: 'CANDIDATE' });
+
+  useEffect(() => {
+    if (isPendingVerificationsFilter) {
+      setFilters((p) => ({ ...p, hasPendingVerification: 'true' }));
+    } else {
+      setFilters((p) => {
+        const copy = { ...p };
+        delete copy.hasPendingVerification;
+        return copy;
+      });
+    }
+    setPage(1);
+  }, [isPendingVerificationsFilter]);
 
   const swrKey = ['/admin/users/candidates', filters, page];
   const { data, isLoading, mutate } = useSWR(swrKey, () => 
@@ -250,6 +267,7 @@ export default function CandidatesManagement() {
             onUpdatePermissions={() => {}}
             onResetViolations={handleResetViolations}
             isProcessing={processingId === detailUser.userId}
+            onRefreshList={mutate}
           />
         )}
       </AnimatePresence>

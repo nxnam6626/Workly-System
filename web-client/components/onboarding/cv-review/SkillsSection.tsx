@@ -125,7 +125,7 @@ export function SkillsSection() {
               className={`w-full pl-10 pr-4 py-2.5 text-sm bg-white border rounded-xl focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-400 transition-all outline-none ${
                 duplicateMsg ? 'border-amber-300 shadow-[0_0_0_4px_rgba(252,211,77,0.15)]' : 'border-gray-200 shadow-sm'
               }`}
-              placeholder={editingIndex !== null ? "Đổi tên kỹ năng (Enter để lưu)..." : "Tên kỹ năng (VD: React, Node.js)..."}
+              placeholder={editingIndex !== null ? "Đổi tên kỹ năng (Enter để lưu)..." : "Tên kỹ năng..."}
             />
           </div>
 

@@ -17,7 +17,14 @@ export class CandidateMatchingService {
     const candidate = await this.prisma.candidate.findUnique({
       where: { userId },
     });
-    if (!candidate) return { items: [], total: 0, page, limit };
+    if (!candidate || !candidate.isOpenToWork)
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+        isOpenToWork: candidate?.isOpenToWork ?? false,
+      };
 
     const skip = (page - 1) * limit;
 
@@ -90,6 +97,7 @@ export class CandidateMatchingService {
       total,
       page: Number(page),
       limit: Number(limit),
+      isOpenToWork: candidate.isOpenToWork,
     };
   }
 }

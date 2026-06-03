@@ -13,12 +13,14 @@ import { CandidateSearchService } from './services/candidate-search.service';
 import { CandidateManagementService } from './services/candidate-management.service';
 import { CandidateInteractionService } from './services/candidate-interaction.service';
 import { BullModule } from '@nestjs/bullmq';
+import { NotificationsModule } from '@/modules/communication/notifications/notifications.module';
 
 @Module({
   imports: [
     PrismaModule,
     MatchingEngineModule,
     BullModule.registerQueue({ name: 'matching' }),
+    NotificationsModule,
   ],
   controllers: [CandidatesController],
   providers: [

@@ -154,6 +154,44 @@ export class CandidatesController {
     return this.candidatesService.toggleSave(id, userId);
   }
 
+  @Post('certifications/:id/verify')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
+  async verifyCertification(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser('userId') userId: string,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Vui lòng tải lên tài liệu minh chứng.');
+    }
+    return this.candidatesService.verifyCertification(userId, id, file);
+  }
+
+  @Post('degrees/:id/verify')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+    }),
+  )
+  async verifyDegree(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser('userId') userId: string,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Vui lòng tải lên tài liệu minh chứng.');
+    }
+    return this.candidatesService.verifyDegree(userId, id, file);
+  }
+
   @Patch('me/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CANDIDATE)

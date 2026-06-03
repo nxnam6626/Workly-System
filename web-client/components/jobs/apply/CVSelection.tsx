@@ -111,7 +111,7 @@ export const CVSelection: React.FC<CVSelectionProps> = ({
                   <p className="text-sm font-bold text-slate-800">
                     {file ? file.name : "Tải lên CV từ máy tính, chọn hoặc kéo thả"}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">Hỗ trợ định dạng .doc, .docx, pdf có kích thước dưới 5MB</p>
+                  <p className="text-xs text-slate-400 mt-1">Hỗ trợ định dạng .doc, .docx, pdf có kích thước dưới 10MB</p>
                 </div>
                 <input
                   type="file"

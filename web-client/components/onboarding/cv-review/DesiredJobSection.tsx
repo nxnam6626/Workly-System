@@ -59,31 +59,45 @@ export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-tight">Hình thức làm việc</label>
-            <select
-              {...register('desiredJob.jobType')}
-              className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none"
-            >
-              <option value="">Chọn hình thức</option>
-              <option value="FULLTIME">Toàn thời gian</option>
-              <option value="PARTTIME">Bán thời gian</option>
-              <option value="REMOTE">Làm việc từ xa</option>
-            </select>
+            <div className="relative">
+              <select
+                {...register('desiredJob.jobType')}
+                className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none pr-10"
+              >
+                <option value="">Chọn hình thức</option>
+                <option value="FULLTIME">Toàn thời gian</option>
+                <option value="PARTTIME">Bán thời gian</option>
+                <option value="REMOTE">Làm việc từ xa</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-tight">Chức vụ mong muốn</label>
-            <select
-              {...register('desiredJob.jobLevel')}
-              className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none"
-            >
-              <option value="">Chọn chức vụ</option>
-              <option value="INTERN">Thực tập sinh</option>
-              <option value="STAFF">Nhân viên/Chuyên viên</option>
-              <option value="MANAGER">Trưởng nhóm/Trưởng phòng</option>
-              <option value="DIRECTOR">Giám đốc/Cấp cao hơn</option>
-            </select>
+            <div className="relative">
+              <select
+                {...register('desiredJob.jobLevel')}
+                className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none pr-10"
+              >
+                <option value="">Chọn chức vụ</option>
+                <option value="INTERN">Thực tập sinh</option>
+                <option value="STAFF">Nhân viên/Chuyên viên</option>
+                <option value="MANAGER">Trưởng nhóm/Trưởng phòng</option>
+                <option value="DIRECTOR">Giám đốc/Cấp cao hơn</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -91,7 +105,7 @@ export function DesiredJobSection({ currentProfile }: DesiredJobSectionProps) {
             <div className="relative">
               <select
                 {...register('desiredJob.location')}
-                className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none"
+                className="w-full px-4 py-2 text-sm bg-white/60 border border-gray-200/80 rounded-xl focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 focus:bg-white transition-all outline-none appearance-none pr-10"
               >
                 <option value="">Chọn địa điểm</option>
                 {LOCATIONS.map(loc => (

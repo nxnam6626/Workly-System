@@ -24,6 +24,7 @@ interface MatchItem {
 export function MatchingSection() {
   const [items, setItems] = useState<MatchItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isOpenToWork, setIsOpenToWork] = useState(true);
   const { user, isAuthenticated } = useAuthStore();
 
   const isCandidate = user?.roles?.includes("CANDIDATE");
@@ -37,7 +38,9 @@ export function MatchingSection() {
         if (isCandidate) {
           const res = await api.get("/candidates/recommended-jobs");
           const items = res.data.items || [];
-          if (items.length > 0) {
+          const isOpen = res.data.isOpenToWork ?? true;
+          setIsOpenToWork(isOpen);
+          if (isOpen && items.length > 0) {
             const mapped: MatchItem[] = items.slice(0, 4).map((j: any) => ({
               id: j.jobPostingId,
               title: j.title,
@@ -57,7 +60,7 @@ export function MatchingSection() {
             const mapped: MatchItem[] = res.data.slice(0, 4).map((c: any) => ({
               id: c.candidateId,
               title: c.fullName,
-              subtitle: `Phù h?p cho v? trí: ${c.jobTitle}`,
+              subtitle: `Phï¿½ h?p cho v? trï¿½: ${c.jobTitle}`,
               score: c.score,
               tags: c.skills || [],
               avatar: c.avatar,
@@ -84,15 +87,15 @@ const MOCK_MATCHES: MatchItem[] = [
   {
     id: "m1",
     title: "Senior Frontend Developer",
-    subtitle: "Công Ty C? Ph?n VINHOMES",
+    subtitle: "Cï¿½ng Ty C? Ph?n VINHOMES",
     score: 98,
     tags: ["React", "TypeScript", "Next.js"],
     type: "JOB",
     raw: {
       jobPostingId: "m1",
       title: "Senior Frontend Developer",
-      company: { companyName: "Công Ty C? Ph?n VINHOMES", logo: "/logos/workly-gau-logo.png" },
-      locationCity: "Hà N?i",
+      company: { companyName: "Cï¿½ng Ty C? Ph?n VINHOMES", logo: "/logos/workly-gau-logo.png" },
+      locationCity: "Hï¿½ N?i",
       salaryMin: 30000000,
       salaryMax: 50000000,
       currency: "VND",
@@ -111,7 +114,7 @@ const MOCK_MATCHES: MatchItem[] = [
       jobPostingId: "m2",
       title: "Product Designer (UI/UX)",
       company: { companyName: "VNG Corporation", logo: "/logos/workly-gau-logo-2.png" },
-      locationCity: "H? Chí Minh",
+      locationCity: "H? Chï¿½ Minh",
       salaryMin: 20000000,
       salaryMax: 40000000,
       currency: "VND",
@@ -122,11 +125,11 @@ const MOCK_MATCHES: MatchItem[] = [
 ];
 
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || (isCandidate && !isOpenToWork)) return null;
 
-  const title = isCandidate ? "Vi?c làm Phù h?p nh?t" : "?ng viên Ti?m nang nh?t";
-  const subtitle = isCandidate ? "D?a trên k? nang trong CV c?a b?n." : "Phù h?p v?i các v? trí b?n dang tuy?n.";
-  const linkLabel = isCandidate ? "Xem t?t c? d? xu?t" : "Qu?n lý tuy?n d?ng";
+  const title = isCandidate ? "Vi?c lï¿½m Phï¿½ h?p nh?t" : "?ng viï¿½n Ti?m nang nh?t";
+  const subtitle = isCandidate ? "D?a trï¿½n k? nang trong CV c?a b?n." : "Phï¿½ h?p v?i cï¿½c v? trï¿½ b?n dang tuy?n.";
+  const linkLabel = isCandidate ? "Xem t?t c? d? xu?t" : "Qu?n lï¿½ tuy?n d?ng";
   const linkHref = isCandidate ? "/profile/jobs/matching" : "/recruiter/dashboard";
 
   return (
@@ -210,9 +213,9 @@ const MOCK_MATCHES: MatchItem[] = [
               <Search className="text-slate-300 w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-slate-800">Chua tìm th?y d? li?u phù h?p</h3>
+              <h3 className="text-xl font-bold text-slate-800">Chua tï¿½m th?y d? li?u phï¿½ h?p</h3>
               <p className="text-slate-500 max-w-sm mx-auto">
-                {isCandidate ? "Hãy d?m b?o b?n dã thi?t l?p CV m?c d?nh." : "Hãy dang thêm Job d? nh?n d? xu?t ?ng viên."}
+                {isCandidate ? "Hï¿½y d?m b?o b?n dï¿½ thi?t l?p CV m?c d?nh." : "Hï¿½y dang thï¿½m Job d? nh?n d? xu?t ?ng viï¿½n."}
               </p>
             </div>
             <Link href={isCandidate ? "/profile/cv-management" : "/recruiter/job-postings/create"} className="text-blue-600 font-bold hover:underline">

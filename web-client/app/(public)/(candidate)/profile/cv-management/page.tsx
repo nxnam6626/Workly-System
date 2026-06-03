@@ -81,8 +81,8 @@ export default function CvManagementPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Dung lượng tệp không vượt quá 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Dung lượng tệp không vượt quá 10MB.');
       return;
     }
 
@@ -301,14 +301,23 @@ export default function CvManagementPage() {
                           </div>
                         ) : (
                           <div className="flex items-center gap-2 group/title min-w-0 max-w-full">
-                            <Link
-                              href={cv.fileUrl}
-                              target="_blank"
-                              className="text-sm sm:text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors truncate"
-                              title={cv.cvTitle}
-                            >
-                              {cv.cvTitle}
-                            </Link>
+                            {cv.fileUrl ? (
+                              <Link
+                                href={cv.fileUrl}
+                                target="_blank"
+                                className="text-sm sm:text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors truncate"
+                                title={cv.cvTitle}
+                              >
+                                {cv.cvTitle}
+                              </Link>
+                            ) : (
+                              <span
+                                className="text-sm sm:text-[15px] font-bold text-slate-500 truncate"
+                                title={cv.cvTitle}
+                              >
+                                {cv.cvTitle}
+                              </span>
+                            )}
                             <button
                               onClick={() => startRename(cv.cvId, cv.cvTitle)}
                               className="opacity-0 group-hover/title:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
@@ -353,14 +362,24 @@ export default function CvManagementPage() {
                          </div>
                       )}
 
-                      <Link
-                        href={cv.fileUrl}
-                        target="_blank"
-                        className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
-                        title="Xem tài liệu"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </Link>
+                      {cv.fileUrl ? (
+                        <Link
+                          href={cv.fileUrl}
+                          target="_blank"
+                          className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm"
+                          title="Xem tài liệu"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Link>
+                      ) : (
+                        <button
+                          disabled
+                          className="w-8 h-8 flex items-center justify-center bg-slate-50 border border-slate-100 rounded-lg text-slate-300 cursor-not-allowed"
+                          title="Không có tài liệu"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                      )}
 
                       <button
                         onClick={() => handleDeleteCv(cv.cvId)}
@@ -436,7 +455,7 @@ export default function CvManagementPage() {
                       <p className="text-[13px] font-bold text-slate-700">
                         Kéo thả file vào đây hoặc <button onClick={() => fileInputRef.current?.click()} className="text-blue-600 hover:underline">Chọn file</button>
                       </p>
-                      <p className="text-[11px] text-slate-400 mt-1.5 font-medium">Chứng chỉ định dạng: PDF (Tối đa 5MB)</p>
+                      <p className="text-[11px] text-slate-400 mt-1.5 font-medium">Chứng chỉ định dạng: PDF (Tối đa 10MB)</p>
                     </div>
                   )}
                 </div>

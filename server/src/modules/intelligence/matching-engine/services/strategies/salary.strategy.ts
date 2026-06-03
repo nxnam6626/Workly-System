@@ -37,7 +37,9 @@ export class SalaryStrategy implements IMatchingStrategy {
         score,
         details: {
           expectedSalary,
+          salaryMin: Number(job.salaryMin) || 0,
           salaryMax,
+          currency: job.currency || 'VND',
           isOverBudget: expectedSalary > salaryMax,
         },
       };

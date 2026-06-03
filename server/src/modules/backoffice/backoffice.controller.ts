@@ -1,4 +1,12 @@
-import { Controller, Get, UseGuards, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Query,
+  Param,
+  Body,
+} from '@nestjs/common';
 import { BackofficeService } from '@/modules/backoffice/backoffice.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
@@ -67,5 +75,34 @@ export class BackofficeController {
   @Get('companies/:id')
   findCompanyById(@Param('id') id: string) {
     return this.backofficeService.findCompanyById(id);
+  }
+
+  @Get('verifications/pending')
+  getPendingVerifications() {
+    return this.backofficeService.getPendingVerifications();
+  }
+
+  @Post('verifications/certifications/:id/action')
+  actionCertification(
+    @Param('id') id: string,
+    @Body() body: { action: 'APPROVE' | 'REJECT'; feedback?: string },
+  ) {
+    return this.backofficeService.actionCertificationVerification(
+      id,
+      body.action,
+      body.feedback,
+    );
+  }
+
+  @Post('verifications/degrees/:id/action')
+  actionDegree(
+    @Param('id') id: string,
+    @Body() body: { action: 'APPROVE' | 'REJECT'; feedback?: string },
+  ) {
+    return this.backofficeService.actionDegreeVerification(
+      id,
+      body.action,
+      body.feedback,
+    );
   }
 }

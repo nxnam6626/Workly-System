@@ -196,11 +196,16 @@ exports.Prisma.CandidateScalarFieldEnum = {
   interests: 'interests',
   isOpenToWork: 'isOpenToWork',
   languages: 'languages',
+<<<<<<< HEAD
+  otherInfo: 'otherInfo',
+  softSkills: 'softSkills'
+=======
   location: 'location',
   softSkills: 'softSkills',
   summary: 'summary',
   totalYearsExp: 'totalYearsExp',
   jobSearchExpiresAt: 'jobSearchExpiresAt'
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 };
 
 exports.Prisma.ExperienceScalarFieldEnum = {
@@ -215,6 +220,29 @@ exports.Prisma.ExperienceScalarFieldEnum = {
 exports.Prisma.CertificationScalarFieldEnum = {
   certificationId: 'certificationId',
   name: 'name',
+  issuer: 'issuer',
+  issueDate: 'issueDate',
+  credentialId: 'credentialId',
+  credentialUrl: 'credentialUrl',
+  fileUrl: 'fileUrl',
+  status: 'status',
+  adminFeedback: 'adminFeedback',
+  aiVerification: 'aiVerification',
+  candidateId: 'candidateId'
+};
+
+exports.Prisma.DegreeScalarFieldEnum = {
+  degreeId: 'degreeId',
+  name: 'name',
+  school: 'school',
+  major: 'major',
+  issueDate: 'issueDate',
+  fileUrl: 'fileUrl',
+  status: 'status',
+  issuer: 'issuer',
+  credentialId: 'credentialId',
+  adminFeedback: 'adminFeedback',
+  aiVerification: 'aiVerification',
   candidateId: 'candidateId'
 };
 
@@ -633,6 +661,13 @@ exports.AccountLevel = exports.$Enums.AccountLevel = {
   PROBATION: 'PROBATION'
 };
 
+exports.VerificationStatus = exports.$Enums.VerificationStatus = {
+  UNVERIFIED: 'UNVERIFIED',
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+};
+
 exports.SkillLevel = exports.$Enums.SkillLevel = {
   BEGINNER: 'BEGINNER',
   INTERMEDIATE: 'INTERMEDIATE',
@@ -718,6 +753,7 @@ exports.Prisma.ModelName = {
   Candidate: 'Candidate',
   Experience: 'Experience',
   Certification: 'Certification',
+  Degree: 'Degree',
   Skill: 'Skill',
   Project: 'Project',
   Recruiter: 'Recruiter',

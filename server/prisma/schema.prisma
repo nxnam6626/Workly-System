@@ -143,10 +143,41 @@ model Experience {
 }
 
 model Certification {
-  certificationId String    @id @default(uuid())
+  certificationId String             @id @default(uuid())
   name            String
+  issuer          String?
+  issueDate       String?
+  credentialId    String?
+  credentialUrl   String?
+  fileUrl         String?
+  status          VerificationStatus @default(UNVERIFIED)
+  adminFeedback   String?
+  aiVerification  Json?
   candidateId     String
-  candidate       Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate       Candidate          @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
+
+model Degree {
+  degreeId      String             @id @default(uuid())
+  name          String
+  school        String
+  major         String?
+  issueDate     String?
+  fileUrl       String?
+  status        VerificationStatus @default(UNVERIFIED)
+  issuer        String?
+  credentialId  String?
+  adminFeedback String?
+  aiVerification Json?
+  candidateId   String
+  candidate     Candidate          @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model Skill {

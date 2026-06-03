@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
+import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
+import { syncCandidateLanguagesFromCertifications } from '@/modules/profiles/candidates/utils/language-sync';
 
 @Injectable()
 export class BackofficeService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async getDashboardStats() {
     const [
@@ -405,11 +410,129 @@ export class BackofficeService {
       .slice(0, limit);
   }
 
+<<<<<<< HEAD
+  async getPendingVerifications() {
+    const certifications = await this.prisma.certification.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        candidate: {
+          select: {
+            fullName: true,
+            cvUrl: true,
+          },
+        },
+      },
+    });
+
+    const degrees = await this.prisma.degree.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        candidate: {
+          select: {
+            fullName: true,
+            cvUrl: true,
+          },
+        },
+      },
+    });
+
+    return { certifications, degrees };
+  }
+
+  async actionCertificationVerification(
+    certificationId: string,
+    action: 'APPROVE' | 'REJECT',
+    feedback?: string,
+  ) {
+    const status = action === 'APPROVE' ? 'VERIFIED' : 'REJECTED';
+    const cert = await this.prisma.certification.update({
+      where: { certificationId },
+      data: {
+        status,
+        adminFeedback: feedback || null,
+      },
+      include: {
+        candidate: true,
+      },
+    });
+
+    if (action === 'APPROVE') {
+      try {
+        await syncCandidateLanguagesFromCertifications(
+          cert.candidateId,
+          this.prisma,
+        );
+      } catch (err) {
+        console.error(
+          `Error syncing languages from approved certification: ${err.message}`,
+        );
+      }
+    }
+
+    // Notify candidate
+    const title =
+      action === 'APPROVE'
+        ? 'Chứng chỉ đã được xác minh'
+        : 'Chứng chỉ bị từ chối xác minh';
+    const message =
+      action === 'APPROVE'
+        ? `Chứng chỉ "${cert.name}" của bạn đã được quản trị viên Workly xác minh thành công!`
+        : `Chứng chỉ "${cert.name}" của bạn đã bị từ chối xác minh. Lý do: ${feedback || 'Không có lý do chi tiết'}`;
+
+    await this.notificationsService.create(
+      cert.candidate.userId,
+      title,
+      message,
+      action === 'APPROVE' ? 'success' : 'warning',
+      '/profile',
+    );
+
+    return cert;
+  }
+
+  async actionDegreeVerification(
+    degreeId: string,
+    action: 'APPROVE' | 'REJECT',
+    feedback?: string,
+  ) {
+    const status = action === 'APPROVE' ? 'VERIFIED' : 'REJECTED';
+    const deg = await this.prisma.degree.update({
+      where: { degreeId },
+      data: {
+        status,
+        adminFeedback: feedback || null,
+      },
+      include: {
+        candidate: true,
+      },
+    });
+
+    // Notify candidate
+    const title =
+      action === 'APPROVE'
+        ? 'Bằng cấp đã được xác minh'
+        : 'Bằng cấp bị từ chối xác minh';
+    const message =
+      action === 'APPROVE'
+        ? `Bằng cấp "${deg.name} - ${deg.school}" của bạn đã được quản trị viên Workly xác minh thành công!`
+        : `Bằng cấp "${deg.name} - ${deg.school}" của bạn đã bị từ chối xác minh. Lý do: ${feedback || 'Không có lý do chi tiết'}`;
+
+    await this.notificationsService.create(
+      deg.candidate.userId,
+      title,
+      message,
+      action === 'APPROVE' ? 'success' : 'warning',
+      '/profile',
+    );
+
+    return deg;
+=======
   async getUserViolationLogs(userId: string) {
     // Trigger restart 3
     return this.prisma.violationLog.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   }
 }

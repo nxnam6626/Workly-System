@@ -27,8 +27,10 @@ ${industriesList}
 8. Vị trí & Lương mong muốn (Phân tích & Đề xuất): 
    - Nếu CV không ghi địa điểm/lương, AI PHẢI dựa vào năng lực để đề xuất (VD: "Hồ Chí Minh", "15,000,000 - 20,000,000 VND").
    - Vị trí ứng tuyển (jobTitle) phải khớp với kỹ năng mạnh nhất của ứng viên.
-9. Skill Levels: 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'.
-10. Trả về đúng JSON Schema. Bắt buộc duy nhất khối JSON.
+10. Ngoại ngữ: Chỉ trích xuất các ngôn ngữ được đề cập rõ ràng trong CV (VD: Tiếng Anh, Tiếng Trung, Tiếng Nhật...). Nếu CV không ghi thông tin về ngoại ngữ, trường "languages" PHẢI trả về mảng rỗng []. 
+    - TUYỆT ĐỐI KHÔNG tự suy diễn hoặc điền mặc định (như Tiếng Anh - INTERMEDIATE).
+    - CẤM NHẦM LẪN: Không được lấy tên trường Đại học (như Đại học Ngoại thương, Đại học Ngoại ngữ...) hoặc chuyên ngành học (như Thương mại & Tài chính quốc tế, Kinh doanh quốc tế,...) để tự điền vào phần Ngoại ngữ. Chuyên ngành và trường học thuộc về mục học vấn (education), không thuộc về ngoại ngữ (languages).
+11. Trả về đúng JSON Schema. Bắt buộc duy nhất khối JSON.
 `.trim();
 
 const CV_SCHEMA_TEXT = `
@@ -40,8 +42,8 @@ JSON Schema yêu cầu:
   "summary": "string",
   "desired_job": { "jobTitle": "string", "jobType": "string", "expectedSalary": "string", "location": "string" },
   "categories": ["string"],
-  "education": [{ "degree": "string", "major": "string", "school": "string", "duration": "string" }],
-  "certifications": ["string"],
+  "education": [{ "degree": "string (ví dụ: Cử nhân, Kỹ sư, Trung học)", "major": "string (hoặc null)", "school": "string", "duration": "string" }],
+  "certifications": [{ "name": "string", "organization": "string (tổ chức cấp, hoặc null)", "issueDate": "string (ngày/tháng/năm hoặc năm, hoặc null)" }],
   "languages": [{ "language": "string", "level": "string" }],
   "interests": ["string"],
   "skills": {
@@ -322,6 +324,51 @@ export class CvParsingService {
     const groqResult = await this.parseWithGroq(text, relevantIndustries);
     if (groqResult) {
       this.logger.log('✅ [AI Parsing] Groq đã hoàn tất bóc tách.');
+
+      // Post-processing sanitation of languages to prevent hallucinations like "Thương mại & Tài chính quốc tế" as language/level
+      if (groqResult.languages && Array.isArray(groqResult.languages)) {
+        groqResult.languages = groqResult.languages.filter((lang: any) => {
+          if (!lang || (!lang.language && !lang.name)) return false;
+
+          const languageName = String(lang.language || lang.name || '').trim();
+          const levelName = String(lang.level || '').trim();
+          const lowerLanguage = languageName.toLowerCase();
+          const lowerLevel = levelName.toLowerCase();
+
+          const isMajorOrSchool = (val: string) => {
+            const lowerVal = val.toLowerCase();
+            return (
+              lowerVal.includes('thương mại') ||
+              lowerVal.includes('tài chính') ||
+              lowerVal.includes('quốc tế') ||
+              lowerVal.includes('kinh tế') ||
+              lowerVal.includes('ngoại thương') ||
+              lowerVal.includes('quản trị') ||
+              lowerVal.includes('kỹ thuật') ||
+              lowerVal.includes('công nghệ') ||
+              lowerVal.includes('học viện') ||
+              lowerVal.includes('đại học') ||
+              lowerVal.includes('trường') ||
+              lowerVal.includes('chuyên ngành') ||
+              lowerVal.includes('đồ án') ||
+              lowerVal.includes('khoa học') ||
+              lowerVal.includes('ngành') ||
+              lowerVal.includes('học phần')
+            );
+          };
+
+          if (isMajorOrSchool(lowerLevel) || levelName.length > 35) {
+            return false;
+          }
+
+          if (isMajorOrSchool(lowerLanguage) || languageName.length > 35) {
+            return false;
+          }
+
+          return true;
+        });
+      }
+
       return groqResult;
     }
 

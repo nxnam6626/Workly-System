@@ -43,6 +43,12 @@ export const desiredJobSchema = z.object({
   location: z.string().optional(),
 });
 
+export const certificationSchema = z.object({
+  name: z.string().min(1, 'Vui lòng nhập tên chứng chỉ'),
+  organization: z.string().optional().nullable(),
+  issueDate: z.string().optional().nullable(),
+});
+
 export const formSchema = z.object({
   fullName: z.string().min(2, 'Họ tên quá ngắn'),
   email: z.string().email('Email không hợp lệ'),
@@ -58,6 +64,7 @@ export const formSchema = z.object({
   industries: z.string().optional(),
   languages: z.array(languageSchema).optional(),
   interests: z.array(z.string()).optional(),
+  certifications: z.array(certificationSchema).optional(),
   otherInfo: z.array(otherInfoSchema).optional(),
 });
 

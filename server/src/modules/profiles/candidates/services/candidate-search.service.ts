@@ -153,6 +153,10 @@ export class CandidateSearchService {
       include: {
         user: { select: { email: true, phoneNumber: true, avatar: true } },
         skills: true,
+        experiences: { orderBy: { duration: 'desc' } },
+        projects: true,
+        certifications: true,
+        degrees: true,
         cvs: {
           select: {
             cvId: true,
@@ -214,6 +218,8 @@ export class CandidateSearchService {
         user: { select: { email: true, phoneNumber: true, avatar: true } },
         skills: true,
         experiences: true,
+        certifications: true,
+        degrees: true,
         cvs: {
           select: {
             cvId: true,

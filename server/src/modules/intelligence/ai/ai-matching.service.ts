@@ -208,4 +208,93 @@ export class AiMatchingService {
       return 0.5;
     }
   }
+
+  async analyzeRelevantExperience(
+    jobDesc: string,
+    candidateExp: string,
+  ): Promise<{
+    similarity: number;
+    jobRequirements: string[];
+    candidateExps: string[];
+    matchingPoints: string[];
+    scoreExplanation: string;
+  }> {
+    if (!this.isConfigured) {
+      return {
+        similarity: 0.5,
+        jobRequirements: [],
+        candidateExps: [],
+        matchingPoints: [],
+        scoreExplanation: 'Chưa cấu hình AI, không thể phân tích chi tiết.',
+      };
+    }
+    if (!jobDesc || !candidateExp) {
+      return {
+        similarity: 0,
+        jobRequirements: [],
+        candidateExps: [],
+        matchingPoints: [],
+        scoreExplanation: 'N/A',
+      };
+    }
+
+    const prompt = `You are an expert recruitment assistant. Evaluate the semantic match between a candidate's work experience and a job's EXPERIENCE requirements.
+
+    Job Description/Requirements:
+    "${jobDesc}"
+    
+    Candidate Work Experience:
+    "${candidateExp}"
+    
+    IMPORTANT RULES:
+    - Focus ONLY on work experience, responsibilities, and domain knowledge required/demonstrated
+    - DO NOT include education degrees, language certificates (TOEIC, IELTS), or generic software skills (Excel, Word) in jobRequirements — those belong to separate evaluation criteria
+    - jobRequirements: Extract only specific WORK EXPERIENCE requirements (e.g., "2+ years in financial analysis", "experience reconciling accounts receivable", "background in B2B credit management")
+    - candidateExps: List specific experiences the candidate HAS that are relevant to this job (concrete actions and domains)
+    - matchingPoints: Explain specifically WHY the candidate's experience matches or doesn't match. Be direct about the connection (e.g., "Candidate's AR reconciliation work directly maps to job's requirement for debt tracking")
+    - scoreExplanation: In 1-2 sentences, explain what drove the similarity score — what matched well, and what was missing
+    
+    Respond in Vietnamese. Keep each bullet concise (max 15 words). Max 3 bullets each.
+    
+    Return ONLY a JSON object (no markdown, no backticks):
+    {
+      "similarity": <score between 0.0 and 1.0>,
+      "jobRequirements": ["...", "...", "..."],
+      "candidateExps": ["...", "...", "..."],
+      "matchingPoints": ["...", "...", "..."],
+      "scoreExplanation": "..."
+    }`;
+
+    try {
+      const parsed = await this.callAiWithFallback(
+        prompt,
+        'AnalyzeRelevantExperience',
+      );
+      return {
+        similarity: Number(parsed.similarity) || 0,
+        jobRequirements: Array.isArray(parsed.jobRequirements)
+          ? parsed.jobRequirements
+          : [],
+        candidateExps: Array.isArray(parsed.candidateExps)
+          ? parsed.candidateExps
+          : [],
+        matchingPoints: Array.isArray(parsed.matchingPoints)
+          ? parsed.matchingPoints
+          : [],
+        scoreExplanation:
+          typeof parsed.scoreExplanation === 'string'
+            ? parsed.scoreExplanation
+            : '',
+      };
+    } catch (e) {
+      this.logger.error('Analyze Relevant Experience Error: ' + e.message);
+      return {
+        similarity: 0.5,
+        jobRequirements: [],
+        candidateExps: [],
+        matchingPoints: [],
+        scoreExplanation: '',
+      };
+    }
+  }
 }

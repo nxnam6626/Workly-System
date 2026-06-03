@@ -9,22 +9,31 @@ import { X, Plus, Trash2, Loader2, ChevronRight, Sparkles, Globe } from "lucide-
 import toast from "react-hot-toast";
 import { profileApi, type CandidateProfile } from "@/lib/profile-api";
 
-const LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
-const LEVEL_LABELS: Record<string, string> = {
-  BEGINNER: "Cơ bản",
-  INTERMEDIATE: "Trung bình",
-  ADVANCED: "Thành thạo",
-};
-const LEVEL_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  BEGINNER: { bg: "#F3F4F6", text: "#4B5563", border: "#E5E7EB", dot: "#9CA3AF" },
-  INTERMEDIATE: { bg: "#FEF3C7", text: "#D97706", border: "#FDE68A", dot: "#F59E0B" },
-  ADVANCED: { bg: "#ECFDF5", text: "#059669", border: "#A7F3D0", dot: "#34D399" },
+const CERTIFICATES = [
+  "Tự đánh giá",
+  "TOEIC",
+  "IELTS",
+  "TOEFL",
+  "VSTEP",
+  "JLPT",
+  "HSK",
+  "TOPIK",
+  "DELF/DALF",
+  "Goethe",
+] as const;
+
+const getCertificateStyles = (cert: string) => {
+  if (!cert || cert === "Tự đánh giá") {
+    return { bg: "#F1F5F9", text: "#64748B", border: "#E2E8F0", dot: "#94A3B8" };
+  }
+  return { bg: "#ECFDF5", text: "#059669", border: "#A7F3D0", dot: "#34D399" };
 };
 
 const schema = z.object({
   languages: z.array(z.object({
     name: z.string().min(1, "Ngôn ngữ không được trống"),
-    level: z.enum(LEVELS),
+    certificate: z.string().min(1, "Chứng chỉ không được trống"),
+    score: z.string(),
   })),
 });
 
@@ -63,15 +72,19 @@ const MODAL_VARIANTS: Variants = {
 
 export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: LanguagesModalProps) {
   const [quickInput, setQuickInput] = useState("");
-  const [quickLevel, setQuickLevel] = useState<"BEGINNER" | "INTERMEDIATE" | "ADVANCED">("INTERMEDIATE");
 
   const { register, control, handleSubmit, reset, watch, formState: { isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      languages: initialData.candidate?.languages?.map((l: any) => ({
-        name: l.name,
-        level: l.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
-      })) || [],
+      languages: initialData.candidate?.languages?.map((l: any) => {
+        const rawScore = l.score || l.level || "";
+        const isLegacyLevel = ["BEGINNER", "INTERMEDIATE", "ADVANCED"].includes(rawScore);
+        return {
+          name: l.name || l.language || "",
+          certificate: l.certificate || "Tự đánh giá",
+          score: isLegacyLevel ? "" : rawScore,
+        };
+      }) || [],
     },
   });
 
@@ -80,17 +93,29 @@ export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: Lang
   useEffect(() => {
     if (isOpen) {
       reset({
-        languages: initialData.candidate?.languages?.map((l: any) => ({
-          name: l.name,
-          level: l.level as "BEGINNER" | "INTERMEDIATE" | "ADVANCED",
-        })) || [],
+        languages: initialData.candidate?.languages?.map((l: any) => {
+          const rawScore = l.score || l.level || "";
+          const isLegacyLevel = ["BEGINNER", "INTERMEDIATE", "ADVANCED"].includes(rawScore);
+          return {
+            name: l.name || l.language || "",
+            certificate: l.certificate || "Tự đánh giá",
+            score: isLegacyLevel ? "" : rawScore,
+          };
+        }) || [],
       });
     }
   }, [isOpen, initialData, reset]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      const updated = await profileApi.updateProfile({ languages: data.languages });
+      const formattedLanguages = data.languages.map((l: any) => ({
+        name: l.name,
+        language: l.name,
+        certificate: l.certificate,
+        score: l.score,
+        level: l.certificate && l.certificate !== "Tự đánh giá" ? `${l.certificate} ${l.score}` : l.score,
+      }));
+      const updated = await profileApi.updateProfile({ languages: formattedLanguages });
       toast.success("Ngoại ngữ đã được cập nhật!");
       onSuccess(updated);
       onClose();
@@ -102,7 +127,7 @@ export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: Lang
   const handleQuickAdd = () => {
     if (!quickInput.trim()) return;
     const names = quickInput.split(",").map(s => s.trim()).filter(Boolean);
-    names.forEach(name => append({ name, level: quickLevel }));
+    names.forEach(name => append({ name, certificate: "Tự đánh giá", score: "" }));
     setQuickInput("");
   };
 
@@ -163,25 +188,8 @@ export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: Lang
                   onChange={e => setQuickInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleQuickAdd())}
                   className="flex-1 bg-white border border-[#A7F3D0] rounded-xl px-4 py-2.5 text-[#111110] text-sm placeholder-[#6EE7B7] focus:outline-none focus:border-emerald-400 transition-all"
-                  placeholder="Tiếng Anh, Tiếng Nhật..."
+                  placeholder="Vd: Tiếng Anh, Tiếng Nhật, Tiếng Trung..."
                 />
-                {/* Level picker */}
-                <div className="flex rounded-xl overflow-hidden border border-[#A7F3D0] bg-white">
-                  {LEVELS.map((l, i) => {
-                    const c = LEVEL_COLORS[l];
-                    return (
-                      <button key={l} type="button" onClick={() => setQuickLevel(l)}
-                        className="px-3 py-2 text-[10px] font-bold uppercase tracking-wide transition-all"
-                        style={{
-                          background: quickLevel === l ? c.bg : "white",
-                          color: quickLevel === l ? c.text : "#6EE7B7",
-                          borderRight: i < 2 ? "1px solid #A7F3D0" : "none",
-                        }}>
-                        {LEVEL_LABELS[l][0]}
-                      </button>
-                    );
-                  })}
-                </div>
                 <button type="button" onClick={handleQuickAdd}
                   className="w-10 h-10 flex items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-100">
                   <Plus className="w-4 h-4" />
@@ -194,33 +202,42 @@ export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: Lang
               <form id="languages-form" onSubmit={handleSubmit(onSubmit)} className="px-8 py-6 space-y-2">
                 <AnimatePresence initial={false}>
                   {fields.map((field, index) => {
-                    const level = languages?.[index]?.level || "INTERMEDIATE";
-                    const c = LEVEL_COLORS[level];
+                    const cert = languages?.[index]?.certificate || "Tự đánh giá";
+                    const c = getCertificateStyles(cert);
                     return (
                       <motion.div key={field.id}
                         initial={{ opacity: 0, x: 16 }}
                         animate={{ opacity: 1, x: 0, transition: { delay: index * 0.03 } }}
                         exit={{ opacity: 0, x: -16, transition: { duration: 0.15 } }}
                         layout
-                        className="group flex items-center gap-3.5 px-4 py-3 bg-white rounded-xl border border-[#A7F3D0] hover:border-emerald-300 hover:shadow-sm transition-all"
+                        className="group flex flex-col md:flex-row items-stretch md:items-center gap-3.5 px-4 py-3 bg-white rounded-xl border border-[#A7F3D0] hover:border-emerald-300 hover:shadow-sm transition-all"
                       >
-                        {/* Color dot */}
-                        <div className="flex-shrink-0 w-2 h-2 rounded-full" style={{ backgroundColor: c.dot }} />
+                        {/* Color dot & Name input */}
+                        <div className="flex-1 flex items-center gap-3.5 min-w-0">
+                          <div className="flex-shrink-0 w-2 h-2 rounded-full" style={{ backgroundColor: c.dot }} />
+                          <input {...register(`languages.${index}.name`)}
+                            className="w-full bg-transparent text-[#111110] text-sm font-medium placeholder-[#6EE7B7] focus:outline-none min-w-0"
+                            placeholder="Tên ngoại ngữ (Vd: Tiếng Anh)" />
+                        </div>
 
-                        <input {...register(`languages.${index}.name`)}
-                          className="flex-1 bg-transparent text-[#111110] text-sm font-medium placeholder-[#6EE7B7] focus:outline-none min-w-0"
-                          placeholder="Tên ngoại ngữ (Vd: Tiếng Anh)" />
-
+                        {/* Certificate Select */}
                         <div className="flex-shrink-0">
-                          <select {...register(`languages.${index}.level`)}
-                            className="text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer transition-all"
+                          <select {...register(`languages.${index}.certificate`)}
+                            className="text-[10px] font-bold uppercase tracking-wide px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer transition-all w-full md:w-auto"
                             style={{ color: c.text, background: c.bg, borderColor: c.border }}>
-                            {LEVELS.map(l => <option key={l} value={l}>{LEVEL_LABELS[l]}</option>)}
+                            {CERTIFICATES.map(item => <option key={item} value={item}>{item}</option>)}
                           </select>
                         </div>
 
+                        {/* Score/Level input */}
+                        <div className="flex-shrink-0 w-full md:w-32">
+                          <input {...register(`languages.${index}.score`)}
+                            className="w-full text-[10px] font-bold px-2.5 py-1.5 rounded-lg border border-[#A7F3D0] focus:outline-none focus:border-emerald-400 placeholder-[#6EE7B7] transition-all"
+                            placeholder={cert === "Tự đánh giá" ? "Trình độ (tùy chọn)" : "Vd: 7.0 / 750"} />
+                        </div>
+
                         <button type="button" onClick={() => remove(index)}
-                          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-[#A7F3D0] hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100">
+                          className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-[#A7F3D0] hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 self-end md:self-auto">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </motion.div>
@@ -243,17 +260,26 @@ export function LanguagesModal({ isOpen, onClose, initialData, onSuccess }: Lang
             {/* Footer */}
             <footer className="flex-shrink-0 px-8 py-5 border-t border-[#ECFDF5] bg-white flex items-center justify-between">
               <div className="flex items-center gap-3 flex-wrap">
-                {LEVELS.map(l => {
-                  const count = languages?.filter(s => s.level === l).length || 0;
-                  if (!count) return null;
-                  const c = LEVEL_COLORS[l];
+                {(() => {
+                  const certifiedCount = languages?.filter(s => s.certificate && s.certificate !== "Tự đánh giá").length || 0;
+                  const selfCount = languages?.filter(s => !s.certificate || s.certificate === "Tự đánh giá").length || 0;
                   return (
-                    <div key={l} className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: c.bg }}>
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.dot }} />
-                      <span className="text-[10px] font-bold" style={{ color: c.text }}>{count} {LEVEL_LABELS[l]}</span>
-                    </div>
+                    <>
+                      {certifiedCount > 0 && (
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#ECFDF5] text-[#059669]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
+                          <span className="text-[10px] font-bold">{certifiedCount} Chứng chỉ</span>
+                        </div>
+                      )}
+                      {selfCount > 0 && (
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#F1F5F9] text-[#64748B]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#94A3B8]" />
+                          <span className="text-[10px] font-bold">{selfCount} Tự đánh giá</span>
+                        </div>
+                      )}
+                    </>
                   );
-                })}
+                })()}
               </div>
               <div className="flex items-center gap-4">
                 <button type="button" onClick={onClose}

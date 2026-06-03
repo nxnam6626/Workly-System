@@ -213,7 +213,7 @@ export default function RecruiterSettingsPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-slate-800">Ảnh đại diện</h3>
-                      <p className="text-sm text-slate-500 mt-1">Định dạng PNG, JPG. Kích thước tối đa 5MB.</p>
+                      <p className="text-sm text-slate-500 mt-1">Định dạng PNG, JPG. Kích thước tối đa 10MB.</p>
                       <button 
                         onClick={() => fileInputRef.current?.click()}
                         className="mt-3 text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"

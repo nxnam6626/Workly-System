@@ -57,7 +57,14 @@ export function useCvImport() {
           desiredJob: raw.desired_job || {},
           languages: raw.languages || [],
           interests: raw.interests || [],
-          otherInfo: raw.other_info || []
+          otherInfo: raw.other_info || [],
+          certifications: Array.isArray(raw.certifications)
+            ? raw.certifications.map((c: any) => ({
+                name: typeof c === 'string' ? c : c.name || '',
+                organization: typeof c === 'string' ? '' : c.organization || c.issuer || '',
+                issueDate: typeof c === 'string' ? '' : c.issueDate || '',
+              }))
+            : [],
         };
 
         setParsedData(normalized);
@@ -146,6 +153,12 @@ export function useCvImport() {
         major: data.education?.[0]?.major,
         gpa: data.gpa,
         certifications: data.certifications,
+        degrees: (data.education || []).map((edu: any) => ({
+          name: edu.degree || 'Bằng cấp',
+          school: edu.school || '',
+          major: edu.major || '',
+          issueDate: edu.duration || ''
+        })),
         languages: (data.languages || []).map((l: any) => ({
           name: l.language || l.name,
           level: l.level

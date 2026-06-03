@@ -86,13 +86,31 @@ export class EducationStrategy implements IMatchingStrategy {
       );
       if (gpa > 3.2) majorScore = Math.min(100, majorScore + 10);
 
-      const finalScore = levelScore * 0.6 + majorScore * 0.4;
+      // Option C: Bằng cấp xác minh hệ số
+      const candidateDegrees = cv.candidate?.degrees || [];
+      let eduMultiplier = 0.3; // Mặc định chưa nộp minh chứng
+      let verificationStatus = 'UNVERIFIED';
+
+      if (candidateDegrees.length > 0) {
+        const statuses = candidateDegrees.map((d: any) => d.status);
+        if (statuses.includes('VERIFIED')) {
+          eduMultiplier = 1.0;
+          verificationStatus = 'VERIFIED';
+        } else if (statuses.includes('PENDING')) {
+          eduMultiplier = 0.8;
+          verificationStatus = 'PENDING';
+        }
+      }
+
+      const finalScore = (levelScore * 0.6 + majorScore * 0.4) * eduMultiplier;
 
       return {
         score: finalScore,
         details: {
           levelScore,
           majorScore,
+          eduMultiplier,
+          verificationStatus,
           candidateDegree:
             cv.candidate?.degree ||
             parsedCv.education?.level ||

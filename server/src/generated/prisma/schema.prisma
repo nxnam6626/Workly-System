@@ -110,7 +110,11 @@ model Candidate {
   interests          String[]          @default([])
   isOpenToWork       Boolean           @default(false)
   languages          Json?
+<<<<<<< HEAD
+  otherInfo          Json?
+=======
   location           String?
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   softSkills         String[]          @default([])
   summary            String?
   totalYearsExp      Float?            @default(0)
@@ -123,7 +127,11 @@ model Candidate {
   candidateUnlocks   CandidateUnlock[]
   wallet             CandidateWallet?
   certifications     Certification[]
+<<<<<<< HEAD
+  degrees            Degree[]
+=======
   companyReviews     CompanyReview[]
+>>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   conversations      Conversation[]
   experiences        Experience[]
   jobMatches         JobMatch[]
@@ -143,10 +151,41 @@ model Experience {
 }
 
 model Certification {
-  certificationId String    @id @default(uuid())
+  certificationId String             @id @default(uuid())
   name            String
+  issuer          String?
+  issueDate       String?
+  credentialId    String?
+  credentialUrl   String?
+  fileUrl         String?
+  status          VerificationStatus @default(UNVERIFIED)
+  adminFeedback   String?
+  aiVerification  Json?
   candidateId     String
-  candidate       Candidate @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+  candidate       Candidate          @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
+
+model Degree {
+  degreeId       String             @id @default(uuid())
+  name           String
+  school         String
+  major          String?
+  issueDate      String?
+  fileUrl        String?
+  status         VerificationStatus @default(UNVERIFIED)
+  issuer         String?
+  credentialId   String?
+  adminFeedback  String?
+  aiVerification Json?
+  candidateId    String
+  candidate      Candidate          @relation(fields: [candidateId], references: [candidateId], onDelete: Cascade)
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 model Skill {
