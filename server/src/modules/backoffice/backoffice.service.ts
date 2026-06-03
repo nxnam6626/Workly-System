@@ -486,6 +486,11 @@ export class BackofficeService {
       '/profile',
     );
 
+    this.notificationsService.emitToUser(cert.candidate.userId, 'notification', {
+      title,
+      message,
+    });
+
     return cert;
   }
 
@@ -523,6 +528,11 @@ export class BackofficeService {
       action === 'APPROVE' ? 'success' : 'warning',
       '/profile',
     );
+
+    this.notificationsService.emitToUser(deg.candidate.userId, 'notification', {
+      title,
+      message,
+    });
 
     return deg;
   }

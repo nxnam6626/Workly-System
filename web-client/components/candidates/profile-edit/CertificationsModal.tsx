@@ -59,7 +59,7 @@ export function CertificationsModal({ isOpen, onClose, initialData, onSuccess }:
     defaultValues: {
       certifications: initialData.candidate?.certifications?.map((c: any) => ({
         name: c.name || "",
-        organization: c.organization || "",
+        organization: c.organization || c.issuer || "",
         issueDate: c.issueDate || "",
       })) || [],
     },
@@ -72,7 +72,7 @@ export function CertificationsModal({ isOpen, onClose, initialData, onSuccess }:
       reset({
         certifications: initialData.candidate?.certifications?.map((c: any) => ({
           name: c.name || "",
-          organization: c.organization || "",
+          organization: c.organization || c.issuer || "",
           issueDate: c.issueDate || "",
         })) || [],
       });
@@ -205,6 +205,16 @@ export function CertificationsModal({ isOpen, onClose, initialData, onSuccess }:
                       onClick={() => append({ name: "", organization: "", issueDate: "" })}
                       className="px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 transition-all">
                       + Thêm chứng chỉ đầu tiên
+                    </button>
+                  </div>
+                )}
+
+                {fields.length > 0 && (
+                  <div className="pt-2 flex justify-center">
+                    <button type="button"
+                      onClick={() => append({ name: "", organization: "", issueDate: "" })}
+                      className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold border-2 border-dashed border-violet-200 text-violet-600 hover:bg-violet-50 hover:border-violet-300 transition-all w-full justify-center">
+                      <Plus className="w-4 h-4" /> Thêm chứng chỉ khác
                     </button>
                   </div>
                 )}

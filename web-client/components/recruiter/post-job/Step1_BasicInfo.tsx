@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Search, Plus, X as CloseIcon, ChevronDown, DollarSign, Users, Briefcase, BarChart } from 'lucide-react';
+import { Sparkles, Search, Plus, X as CloseIcon, ChevronDown, DollarSign, Users, Briefcase, BarChart, Navigation, MapPin, CheckCircle2 } from 'lucide-react';
 import { JobFormData } from '@/types/job';
 
 interface Step1Props {
@@ -10,6 +10,8 @@ interface Step1Props {
   isSuggesting: boolean;
   toggleCategory: (cat: string) => void;
   allIndustries: any[];
+  branches: any[];
+  handleBranchToggle: (id: string) => void;
 }
 
 export const Step1_BasicInfo = ({
@@ -18,7 +20,9 @@ export const Step1_BasicInfo = ({
   suggestedCategories,
   isSuggesting,
   toggleCategory,
-  allIndustries
+  allIndustries,
+  branches,
+  handleBranchToggle
 }: Step1Props) => {
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [industrySearch, setIndustrySearch] = useState('');
@@ -278,6 +282,57 @@ export const Step1_BasicInfo = ({
            <p className="text-[11px] font-medium italic">Gợi ý: Để trống nếu bạn muốn hiển thị "Thỏa thuận" trên tin tuyển dụng.</p>
         </div>
       </div>
+
+      {/* ── Branch Selection ── */}
+      <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+        <div className="space-y-1 ml-1">
+          <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <Navigation className="w-5 h-5 text-indigo-500" /> Địa điểm làm việc áp dụng <span className="text-red-500">*</span>
+          </label>
+          <p className="text-xs text-slate-400 font-medium">Chọn các chi nhánh mà vị trí này sẽ làm việc tại đó.</p>
+        </div>
+
+        {branches.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {branches.map(branch => (
+              <button
+                key={branch.branchId}
+                type="button"
+                onClick={() => handleBranchToggle(branch.branchId)}
+                className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group shadow-sm ${
+                  formData.branchIds.includes(branch.branchId)
+                    ? 'border-indigo-600 bg-indigo-50/30'
+                    : 'border-slate-100 bg-white hover:border-indigo-200'
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    formData.branchIds.includes(branch.branchId) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800 tracking-tight">{branch.name}</p>
+                    <p className="text-[11px] text-slate-500 mt-1 font-medium leading-relaxed">{branch.address}</p>
+                  </div>
+                </div>
+                {formData.branchIds.includes(branch.branchId) && (
+                  <div className="absolute top-4 right-4">
+                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="p-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+            <MapPin className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Bạn chưa có thông tin chi nhánh.</p>
+            <p className="text-[10px] text-slate-400 mt-1">Vui lòng cập nhật "Hồ sơ công ty" trước khi đăng tin.</p>
+          </div>
+        )}
+      </div>
+
     </motion.div>
   );
 };

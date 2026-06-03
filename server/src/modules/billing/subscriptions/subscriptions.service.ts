@@ -78,7 +78,7 @@ export class SubscriptionsService {
       );
     }
 
-    return this.handlePremiumPost(sub!, jobTier);
+    return this.handlePremiumPost(recruiter.recruiterId, sub!, jobTier);
   }
 
   async getCurrentSubscription(userId: string) {
@@ -330,24 +330,35 @@ export class SubscriptionsService {
   }
 
   private async handlePremiumPost(
+    recruiterId: string,
     sub: RecruiterSubscription,
     jobTier: JobTier,
   ) {
     const isProfessional = jobTier === JobTier.PROFESSIONAL;
     const usedField = isProfessional ? 'usedVipPosts' : 'usedUrgentPosts';
     const maxField = isProfessional ? 'maxVipPosts' : 'maxUrgentPosts';
+    const cost = isProfessional ? 160 : 320;
 
-    if (sub[usedField] >= sub[maxField]) {
-      throw new ForbiddenException(
-        `You have used up your ${jobTier} post quota in the current plan. Please purchase more slots.`,
-      );
+    if (sub[usedField] < sub[maxField]) {
+      await this.prisma.recruiterSubscription.update({
+        where: { subscriptionId: sub.subscriptionId },
+        data: { [usedField]: { increment: 1 } },
+      });
+      return { method: 'SUBSCRIPTION_QUOTA', cost: 0 };
     }
 
-    await this.prisma.recruiterSubscription.update({
-      where: { subscriptionId: sub.subscriptionId },
-      data: { [usedField]: { increment: 1 } },
-    });
-
-    return { method: 'SUBSCRIPTION_QUOTA', cost: 0 };
+    try {
+      await this.walletsService.deduct(
+        recruiterId,
+        cost,
+        `Single payment for ${jobTier} job posting`,
+        TransactionType.POST_JOB,
+      );
+      return { method: 'WALLET_CREDIT', cost };
+    } catch {
+      throw new BadRequestException(
+        `Insufficient balance (${cost} Credits required for ${jobTier} post).`,
+      );
+    }
   }
 }

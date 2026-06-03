@@ -329,6 +329,7 @@ export class CandidateManagementService {
                     ? 'UNVERIFIED'
                     : cert.status || 'UNVERIFIED',
                 adminFeedback: existing ? existing.adminFeedback : null,
+                aiVerification: existing && existing.aiVerification ? (existing.aiVerification as any) : null,
               };
             }),
           });
@@ -377,6 +378,7 @@ export class CandidateManagementService {
                 status: existing ? existing.status : deg.status || 'UNVERIFIED',
                 issuer: deg.issuer || null,
                 adminFeedback: existing ? existing.adminFeedback : null,
+                aiVerification: existing && existing.aiVerification ? (existing.aiVerification as any) : null,
               };
             }),
           });

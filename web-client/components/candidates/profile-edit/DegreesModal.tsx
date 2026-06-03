@@ -215,6 +215,16 @@ export function DegreesModal({ isOpen, onClose, initialData, onSuccess }: Degree
                     </button>
                   </div>
                 )}
+                
+                {fields.length > 0 && (
+                  <div className="pt-2 flex justify-center">
+                    <button type="button"
+                      onClick={() => append({ name: "", school: "", major: "", issueDate: "" })}
+                      className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold border-2 border-dashed border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all w-full justify-center">
+                      <Plus className="w-4 h-4" /> Thêm bằng cấp khác
+                    </button>
+                  </div>
+                )}
                 <div className="h-2" />
               </form>
             </div>

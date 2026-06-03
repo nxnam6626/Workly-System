@@ -30,6 +30,7 @@ export interface JobFormData {
   branchIds: string[];
   hardSkills: string[];
   softSkills: string[];
+  languages: string[];
   minExperienceYears: number;
   jobLevel: string;
   jobTier: string;

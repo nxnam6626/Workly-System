@@ -28,8 +28,9 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
 
   const {
     formData, setFormData, saving, loadingData, currentStep, setCurrentStep, totalSteps,
-    hardSkillInput, setHardSkillInput, softSkillInput, setSoftSkillInput,
+    hardSkillInput, setHardSkillInput, softSkillInput, setSoftSkillInput, languageInput, setLanguageInput,
     aiModalOpen, setAiModalOpen, aiPrompt, setAiPrompt, aiGenerating,
+    confirmPayModalOpen, setConfirmPayModalOpen, executeSubmit,
     suggestedCategories, isSuggesting, allIndustries, branches, companyProfile, modResult, isChecking,
     toggleCategory, handleBranchToggle, handleChange, addSkill, removeSkill,
     handleSubmit, handleAiGenerate, handlePreCheck, handleNextStep, handlePrevStep,
@@ -78,20 +79,24 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
                   isSuggesting={isSuggesting}
                   toggleCategory={toggleCategory}
                   allIndustries={allIndustries}
+                  branches={branches}
+                  handleBranchToggle={handleBranchToggle}
                 />
               )}
               {currentStep === 2 && (
-                <Step2_JobDetails
-                  key="step2"
-                  formData={formData}
-                  handleChange={handleChange}
-                  hardSkillInput={hardSkillInput}
-                  setHardSkillInput={setHardSkillInput}
-                  softSkillInput={softSkillInput}
-                  setSoftSkillInput={setSoftSkillInput}
-                  addSkill={addSkill}
-                  removeSkill={removeSkill}
-                />
+                  <Step2_JobDetails
+                    key="step2"
+                    formData={formData}
+                    handleChange={handleChange}
+                    hardSkillInput={hardSkillInput}
+                    setHardSkillInput={setHardSkillInput}
+                    softSkillInput={softSkillInput}
+                    setSoftSkillInput={setSoftSkillInput}
+                    languageInput={languageInput}
+                    setLanguageInput={setLanguageInput}
+                    addSkill={addSkill}
+                    removeSkill={removeSkill}
+                  />
               )}
               {currentStep === 3 && (
                 <Step3_Content
@@ -108,8 +113,7 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
                   key="step4"
                   formData={formData}
                   setFormData={setFormData}
-                  branches={branches}
-                  handleBranchToggle={handleBranchToggle}
+                  handleChange={handleChange}
                   userPlan={userPlan}
                 />
               )}
@@ -171,6 +175,46 @@ export function PostJobForm({ jobId: propJobId, isDirectEdit = false }: { jobId?
           userPlan={userPlan}
         />
       )}
+
+      <AnimatePresence>
+        {confirmPayModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-orange-500" />
+              <h3 className="text-xl font-bold text-slate-800 mb-3">Tài khoản hết lượt đăng tin miễn phí</h3>
+              <p className="text-slate-600 mb-8 leading-relaxed">
+                Gói đăng ký của bạn đã hết lượt đăng tin <strong>BASIC</strong> miễn phí. Bạn sẽ bị trừ <strong className="text-orange-500">100 Credits</strong> trong ví để tiếp tục đăng tin này.
+                <br /><br />
+                Bạn có đồng ý thanh toán không?
+              </p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setConfirmPayModalOpen(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfirmPayModalOpen(false);
+                    executeSubmit();
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all hover:-translate-y-0.5"
+                >
+                  Đồng ý (100 Credits)
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

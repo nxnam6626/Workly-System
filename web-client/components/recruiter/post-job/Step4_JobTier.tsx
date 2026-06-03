@@ -2,14 +2,13 @@
 
 import React, { useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, MapPin, Crown, Zap, Shield, CheckCircle2, Navigation, Target, Scale, Globe, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, MapPin, Crown, Zap, Shield, CheckCircle2, Navigation, Target, Scale, Globe, ChevronUp, ChevronDown, Clock, Info } from 'lucide-react';
 import { JobFormData } from '@/types/job';
 
 interface Step4Props {
   formData: JobFormData;
   setFormData: React.Dispatch<React.SetStateAction<JobFormData>>;
-  branches: any[];
-  handleBranchToggle: (id: string) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   userPlan: string;
 }
 
@@ -160,8 +159,7 @@ function ThresholdSlider({
 export const Step4_JobTier = ({
   formData,
   setFormData,
-  branches,
-  handleBranchToggle,
+  handleChange,
   userPlan,
 }: Step4Props) => {
 
@@ -180,55 +178,69 @@ export const Step4_JobTier = ({
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-12 pb-6">
 
-      {/* ── Branch Selection ── */}
-      <div className="space-y-6">
-        <div className="space-y-1 ml-1">
-          <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-            <Navigation className="w-5 h-5 text-indigo-500" /> Địa điểm làm việc áp dụng <span className="text-red-500">*</span>
-          </label>
-          <p className="text-xs text-slate-400 font-medium">Chọn các chi nhánh mà vị trí này sẽ làm việc tại đó.</p>
-        </div>
+      {/* Ràng buộc thời gian (SLA) */}
+      {false && (
+        <div className="bg-slate-900 p-8 rounded-[2rem] text-white space-y-6 shadow-xl shadow-slate-200">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+               <Clock className="w-6 h-6 text-sky-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Cam kết phản hồi (SLA)</h3>
+              <p className="text-xs text-slate-400 font-medium">Tăng uy tín công ty bằng cách cam kết thời gian phản hồi</p>
+            </div>
+          </div>
 
-        {branches.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {branches.map(branch => (
-              <button
-                key={branch.branchId}
-                type="button"
-                onClick={() => handleBranchToggle(branch.branchId)}
-                className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group shadow-sm ${
-                  formData.branchIds.includes(branch.branchId)
-                    ? 'border-indigo-600 bg-indigo-50/30'
-                    : 'border-slate-100 bg-white hover:border-indigo-200'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                    formData.branchIds.includes(branch.branchId) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'
-                  }`}>
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-800 tracking-tight">{branch.name}</p>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium leading-relaxed">{branch.address}</p>
-                  </div>
-                </div>
-                {formData.branchIds.includes(branch.branchId) && (
-                  <div className="absolute top-4 right-4">
-                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                  </div>
-                )}
-              </button>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-slate-200 ml-1">Hạn phản hồi hồ sơ</label>
+                <span className="text-[10px] font-black text-sky-400 uppercase bg-sky-400/10 px-2 py-0.5 rounded-md">Sau khi ứng tuyển</span>
+              </div>
+              <div className="relative">
+                <input 
+                  type="number"
+                  name="slaApplicationDays"
+                  value={formData.slaApplicationDays}
+                  onChange={handleChange}
+                  min={1}
+                  max={30}
+                  className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-sky-500 focus:bg-white/10 transition-all font-bold text-lg"
+                />
+                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-slate-200 ml-1">Hạn thông báo kết quả</label>
+                <span className="text-[10px] font-black text-emerald-400 uppercase bg-emerald-400/10 px-2 py-0.5 rounded-md">Sau khi phỏng vấn</span>
+              </div>
+              <div className="relative">
+                <input 
+                  type="number"
+                  name="slaInterviewDays"
+                  value={formData.slaInterviewDays}
+                  onChange={handleChange}
+                  min={1}
+                  max={30}
+                  className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-emerald-500 focus:bg-white/10 transition-all font-bold text-lg"
+                />
+                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="p-10 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-            <MapPin className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Bạn chưa có thông tin chi nhánh.</p>
-            <p className="text-[10px] text-slate-400 mt-1">Vui lòng cập nhật "Hồ sơ công ty" trước khi đăng tin.</p>
+
+          <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex gap-4 items-start">
+             <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+             <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
+                 Hệ thống sẽ tự động hiển thị thời gian dự kiến phản hồi cho ứng viên. 
+               <br />
+               <span className="text-white font-bold mx-1">Lưu ý:</span> Việc quá hạn phản hồi thường xuyên có thể làm giảm điểm uy tín của công ty trên nền tảng.
+             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── Job Tier ── */}
       <div className="space-y-8 bg-slate-50/40 p-6 rounded-3xl border border-slate-100 shadow-inner">

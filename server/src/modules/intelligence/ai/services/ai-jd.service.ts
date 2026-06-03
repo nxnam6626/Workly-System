@@ -186,6 +186,7 @@ TRẢ VỀ DUY NHẤT một chuỗi JSON chuẩn xác theo cấu trúc sau (khô
   "hardSkills": ["Kỹ năng 1", "Kỹ năng 2"],
   "softSkills": ["Kỹ năng mềm 1", "Kỹ năng mềm 2"],
   "categories": ["Lĩnh vực ngành nghề 1", "Lĩnh vực ngành nghề 2 (tối đa 3 lĩnh vực)"],
+  "languages": ["Ngôn ngữ 1 (vd: Tiếng Anh IELTS 6.5)", "Ngôn ngữ 2"],
   "salaryMin": "Lương tối thiểu (chỉ ghi số nguyên, ví dụ 10000000, hoặc null)",
   "salaryMax": "Lương tối đa (chỉ ghi số nguyên, hoặc null)",
   "experience": "Yêu cầu kinh nghiệm (vd: Dưới 1 năm, 1 năm, 2 năm...)",

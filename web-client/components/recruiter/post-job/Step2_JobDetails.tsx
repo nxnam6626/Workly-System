@@ -10,8 +10,10 @@ interface Step2Props {
   setHardSkillInput: (val: string) => void;
   softSkillInput: string;
   setSoftSkillInput: (val: string) => void;
-  addSkill: (type: 'hard' | 'soft', skill: string) => void;
-  removeSkill: (type: 'hard' | 'soft', skill: string) => void;
+  languageInput: string;
+  setLanguageInput: (val: string) => void;
+  addSkill: (type: 'hard' | 'soft' | 'lang', skill: string) => void;
+  removeSkill: (type: 'hard' | 'soft' | 'lang', skill: string) => void;
 }
 
 export const Step2_JobDetails = ({
@@ -21,6 +23,8 @@ export const Step2_JobDetails = ({
   setHardSkillInput,
   softSkillInput,
   setSoftSkillInput,
+  languageInput,
+  setLanguageInput,
   addSkill,
   removeSkill
 }: Step2Props) => {
@@ -175,65 +179,60 @@ export const Step2_JobDetails = ({
         </div>
       </div>
 
-      {/* Ràng buộc thời gian (SLA) */}
-      <div className="bg-slate-900 p-8 rounded-[2rem] text-white space-y-6 shadow-xl shadow-slate-200">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
-             <Clock className="w-6 h-6 text-sky-400" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold">Cam kết phản hồi (SLA)</h3>
-            <p className="text-xs text-slate-400 font-medium">Tăng uy tín công ty bằng cách cam kết thời gian phản hồi</p>
-          </div>
+      {/* Yêu cầu ngoại ngữ */}
+      <div className="space-y-4">
+        <label className="text-sm font-bold text-slate-700 flex items-center gap-2 px-1">
+          <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg> 
+          Yêu cầu ngoại ngữ <span className="text-[10px] font-bold text-slate-400 uppercase ml-2 bg-slate-100 px-2 py-0.5 rounded-md">Tùy chọn</span>
+        </label>
+        
+        <div className="relative group">
+          <input
+            type="text"
+            value={languageInput}
+            onChange={(e) => setLanguageInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill('lang', languageInput);
+                setLanguageInput('');
+              }
+            }}
+            className="w-full h-14 pl-6 pr-20 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:bg-white focus:border-teal-500 transition-all font-semibold text-slate-700"
+            placeholder="VD: Tiếng Anh (TOEIC 600+), Tiếng Nhật N2..."
+          />
+          <button
+            type="button"
+            onClick={() => {
+              addSkill('lang', languageInput);
+              setLanguageInput('');
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-slate-800 text-white rounded-xl flex items-center justify-center hover:bg-slate-900 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-slate-200 ml-1">Hạn phản hồi hồ sơ</label>
-              <span className="text-[10px] font-black text-sky-400 uppercase bg-sky-400/10 px-2 py-0.5 rounded-md">Sau khi ứng tuyển</span>
-            </div>
-            <div className="relative">
-              <input 
-                type="number"
-                name="slaApplicationDays"
-                value={formData.slaApplicationDays}
-                onChange={handleChange}
-                min={1}
-                max={30}
-                className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-sky-500 focus:bg-white/10 transition-all font-bold text-lg"
-              />
-              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-bold text-slate-200 ml-1">Hạn thông báo kết quả</label>
-              <span className="text-[10px] font-black text-emerald-400 uppercase bg-emerald-400/10 px-2 py-0.5 rounded-md">Sau khi phỏng vấn</span>
-            </div>
-            <div className="relative">
-              <input 
-                type="number"
-                name="slaInterviewDays"
-                value={formData.slaInterviewDays}
-                onChange={handleChange}
-                min={1}
-                max={30}
-                className="w-full h-14 pl-6 pr-14 rounded-2xl bg-white/5 border border-white/10 outline-none focus:border-emerald-500 focus:bg-white/10 transition-all font-bold text-lg"
-              />
-              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm font-black text-slate-500 uppercase">Ngày</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex gap-4 items-start">
-           <Info className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
-           <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
-               Hệ thống sẽ tự động hiển thị thời gian dự kiến phản hồi cho ứng viên. 
-             <br />
-             <span className="text-white font-bold mx-1">Lưu ý:</span> Việc quá hạn phản hồi thường xuyên có thể làm giảm điểm uy tín của công ty trên nền tảng.
-           </p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {formData.languages?.map(skill => (
+            <motion.span 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              key={skill} 
+              className="px-4 py-2 bg-teal-50 text-teal-700 rounded-xl text-xs font-black uppercase flex items-center gap-3 border-2 border-teal-100"
+            >
+              {skill}
+              <button 
+                type="button" 
+                onClick={() => removeSkill('lang', skill)} 
+                className="text-teal-300 hover:text-rose-500 transition-colors"
+              >
+                <CloseIcon className="w-3.5 h-3.5" />
+              </button>
+            </motion.span>
+          ))}
         </div>
       </div>
     </motion.div>

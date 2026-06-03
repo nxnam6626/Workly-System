@@ -19,6 +19,7 @@ export const defaultForm: JobFormData = {
   branchIds: [],
   hardSkills: [],
   softSkills: [],
+  languages: [],
   minExperienceYears: 0,
   jobLevel: 'STAFF',
   jobTier: 'BASIC',
@@ -40,7 +41,9 @@ export function usePostJob(editJobId?: string | null) {
   const [loadingData, setLoadingData] = useState(!!editJobId);
   const [hardSkillInput, setHardSkillInput] = useState('');
   const [softSkillInput, setSoftSkillInput] = useState('');
+  const [languageInput, setLanguageInput] = useState('');
   const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [confirmPayModalOpen, setConfirmPayModalOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
   const [userPlan, setUserPlan] = useState<string>('FREE');
@@ -176,6 +179,7 @@ export function usePostJob(editJobId?: string | null) {
         branchIds: data.branches?.map((b: any) => b.branchId) || [],
         hardSkills: data.structuredRequirements?.hardSkills || [],
         softSkills: data.structuredRequirements?.softSkills || [],
+        languages: data.structuredRequirements?.languages || [],
         minExperienceYears: data.structuredRequirements?.minExperienceYears || 0,
         jobTier: data.jobTier || 'BASIC',
         autoInviteMatches: data.autoInviteMatches || false,
@@ -275,27 +279,19 @@ export function usePostJob(editJobId?: string | null) {
     }
   };
 
-  const addSkill = (type: 'hard' | 'soft', skill: string) => {
-    const key = type === 'hard' ? 'hardSkills' : 'softSkills';
+  const addSkill = (type: 'hard' | 'soft' | 'lang', skill: string) => {
+    const key = type === 'hard' ? 'hardSkills' : type === 'soft' ? 'softSkills' : 'languages';
     if (skill.trim() && !formData[key].includes(skill.trim())) {
       setFormData(prev => ({ ...prev, [key]: [...prev[key], skill.trim()] }));
     }
   };
 
-  const removeSkill = (type: 'hard' | 'soft', skill: string) => {
-    const key = type === 'hard' ? 'hardSkills' : 'softSkills';
+  const removeSkill = (type: 'hard' | 'soft' | 'lang', skill: string) => {
+    const key = type === 'hard' ? 'hardSkills' : type === 'soft' ? 'softSkills' : 'languages';
     setFormData(prev => ({ ...prev, [key]: prev[key].filter(s => s !== skill) }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (currentStep !== totalSteps || !accessToken) return;
-
-    if (formData.hardSkills.length === 0) {
-      toast.error('Vui lòng nhập ít nhất một kỹ năng chuyên môn!');
-      return;
-    }
-
+  const executeSubmit = async () => {
     setSaving(true);
     try {
       const VALID_JOB_TYPES = ['FULLTIME', 'PARTTIME', 'REMOTE'];
@@ -363,6 +359,42 @@ export function usePostJob(editJobId?: string | null) {
     }
   };
 
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (currentStep !== totalSteps || !accessToken) return;
+
+    if (formData.hardSkills.length === 0) {
+      toast.error('Vui lòng nhập ít nhất một kỹ năng chuyên môn!');
+      return;
+    }
+
+    if (!editJobId) {
+      let isExhausted = false;
+      const isActive = subscription ? new Date() <= new Date(subscription.expiryDate) : false;
+
+      if (formData.jobTier === 'BASIC') {
+        const used = subscription?.usedBasicPosts || 0;
+        const max = subscription?.maxBasicPosts || 0;
+        if (!isActive || used >= max) isExhausted = true;
+      } else if (formData.jobTier === 'PROFESSIONAL') {
+        const used = subscription?.usedVipPosts || 0;
+        const max = subscription?.maxVipPosts || 0;
+        if (!isActive || used >= max) isExhausted = true;
+      } else if (formData.jobTier === 'URGENT') {
+        const used = subscription?.usedUrgentPosts || 0;
+        const max = subscription?.maxUrgentPosts || 0;
+        if (!isActive || used >= max) isExhausted = true;
+      }
+
+      if (isExhausted) {
+        setConfirmPayModalOpen(true);
+        return;
+      }
+    }
+
+    await executeSubmit();
+  };
+
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim()) return toast.error('Vui lòng nhập yêu cầu.');
     setAiGenerating(true);
@@ -423,8 +455,9 @@ export function usePostJob(editJobId?: string | null) {
 
   return {
     formData, setFormData, saving, loadingData, currentStep, setCurrentStep, totalSteps,
-    hardSkillInput, setHardSkillInput, softSkillInput, setSoftSkillInput,
+    hardSkillInput, setHardSkillInput, softSkillInput, setSoftSkillInput, languageInput, setLanguageInput,
     aiModalOpen, setAiModalOpen, aiPrompt, setAiPrompt, aiGenerating,
+    confirmPayModalOpen, setConfirmPayModalOpen, executeSubmit,
     suggestedCategories, isSuggesting, allIndustries, branches, companyProfile, modResult, isChecking,
     toggleCategory, handleBranchToggle, handleChange, addSkill, removeSkill,
     handleSubmit, handleAiGenerate, handlePreCheck, handleNextStep, handlePrevStep,

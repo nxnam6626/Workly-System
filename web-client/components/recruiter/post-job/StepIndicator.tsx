@@ -14,7 +14,7 @@ export const StepIndicator = ({ currentStep, totalSteps, setCurrentStep, isDirec
     { step: 1, label: 'Cơ bản', icon: Briefcase },
     { step: 2, label: 'Kỹ năng', icon: Info },
     { step: 3, label: 'Nội dung', icon: Save },
-    { step: 4, label: 'Địa điểm', icon: Crown },
+    { step: 4, label: 'Thiết lập', icon: Crown },
     { step: 5, label: 'Preview', icon: Eye }
   ];
 
