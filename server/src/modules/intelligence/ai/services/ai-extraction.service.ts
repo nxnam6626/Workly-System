@@ -256,6 +256,7 @@ export class AiExtractionService {
     const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chứng chỉ tuyển dụng tại Việt Nam. Hãy phân tích tài liệu đính kèm theo ĐÚNG 7 tiêu chí bên dưới để xác định đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 === 7 TIÊU CHÍ XÁC MINH ===
@@ -445,6 +446,7 @@ Ví dụ: ["✅ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đ�
       const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chứng chỉ tuyển dụng tại Việt Nam. Hãy phân tích tài liệu đính kèm theo ĐÚNG 7 tiêu chí bên dưới để xác định đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 === 7 TIÊU CHÍ XÁC MINH ===
@@ -589,6 +591,7 @@ Trả về JSON thuần túy (không markdown, không có thẻ \`\`\`json). C�
       const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chuyên môn tại Việt Nam. Hãy phân tích nội dung văn bản dưới đây được trích xuất từ một tài liệu PDF để xác minh xem đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 NỘI DUNG TÀI LIỆU PDF:
