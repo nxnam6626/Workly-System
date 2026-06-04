@@ -38,10 +38,10 @@ export class LanguageStrategy implements IMatchingStrategy {
 
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
-      const requiredLang = [...(job.structuredRequirements?.languages || [])];
+      let initialRequiredLang = [...(job.structuredRequirements?.languages || [])];
       
       // 1. Trích xuất yêu cầu ẩn từ mảng kỹ năng nếu requiredLang rỗng
-      if (requiredLang.length === 0) {
+      if (initialRequiredLang.length === 0) {
         const allSkills = [
           ...(job.structuredRequirements?.hardSkills || []),
           ...(job.structuredRequirements?.softSkills || []),
@@ -55,10 +55,16 @@ export class LanguageStrategy implements IMatchingStrategy {
         for (const skill of allSkills) {
           const skillLower = typeof skill === 'string' ? skill.toLowerCase() : (skill.skillName || '').toLowerCase();
           if (langKeywords.some((kw) => skillLower.includes(kw))) {
-            requiredLang.push(typeof skill === 'string' ? skill : skill.skillName);
+            initialRequiredLang.push(typeof skill === 'string' ? skill : skill.skillName);
           }
         }
       }
+
+      // Không tính điểm đối với Tiếng Việt
+      let requiredLang = initialRequiredLang.filter(lang => {
+        const str = typeof lang === 'string' ? lang.toLowerCase() : `${lang.language || ''} ${lang.name || ''}`.toLowerCase();
+        return !str.includes('tiếng việt') && !str.includes('vietnamese');
+      });
 
       const parsedCvLangs = cv.parsedData?.languages || [];
       const candidateLangs = (cv.candidate?.languages as any[]) || [];

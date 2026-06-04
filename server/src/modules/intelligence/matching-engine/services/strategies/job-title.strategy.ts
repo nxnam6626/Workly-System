@@ -57,8 +57,34 @@ export class JobTitleStrategy implements IMatchingStrategy {
       const jobTitle = sanitize(rawJobTitle);
       const cvTitle = sanitize(rawCvTitle);
 
-      // 3. Kiểm tra khớp tập con (Substring priority)
-      if (jobTitle.includes(cvTitle) || cvTitle.includes(jobTitle)) {
+      // 3. Chuẩn hóa từ vựng và sắp xếp để so sánh không phân biệt thứ tự từ
+      const normalizeWords = (str: string) => {
+        return str
+          .replace(/\bdev\b/g, 'developer')
+          .replace(/\bsr\b/g, 'senior')
+          .replace(/\bjr\b/g, 'junior')
+          .replace(/\bqc\b/g, 'quality control')
+          .replace(/\bqa\b/g, 'quality assurance')
+          .replace(/\bba\b/g, 'business analyst')
+          .replace(/\bse\b/g, 'software engineer')
+          .replace(/\bjs\b/g, 'javascript')
+          .split(' ')
+          .filter(Boolean)
+          .sort()
+          .join(' ');
+      };
+
+      const normJob = normalizeWords(jobTitle);
+      const normCv = normalizeWords(cvTitle);
+
+      // 4. Kiểm tra khớp tập con hoặc trùng lặp từ vựng hoàn toàn
+      if (
+        jobTitle.includes(cvTitle) || 
+        cvTitle.includes(jobTitle) ||
+        normJob === normCv ||
+        normJob.includes(normCv) ||
+        normCv.includes(normJob)
+      ) {
         return {
           score: 100,
           details: {

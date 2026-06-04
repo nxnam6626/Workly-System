@@ -70,6 +70,30 @@ export class RelevantExpStrategy implements IMatchingStrategy {
         matchingPoints = aiRes.matchingPoints;
         scoreExplanation = aiRes.scoreExplanation || '';
 
+        // Boosting dựa trên chức danh (đảm bảo ít nhất 80% nếu trải nghiệm có chứa toàn bộ chức danh công việc)
+        const normalizeAndSplit = (text: string) => {
+          return text
+            .toLowerCase()
+            .replace(/\bdev\b/g, 'developer')
+            .replace(/\bsr\b/g, 'senior')
+            .replace(/\bjr\b/g, 'junior')
+            .replace(/[&/\\#,+()$~%.'":*?<>{}]/g, ' ')
+            .split(' ')
+            .filter((w) => w.length > 2);
+        };
+
+        const jWords = normalizeAndSplit(job.title || '');
+        const expLower = fullCvExp.toLowerCase().replace(/\bdev\b/g, 'developer');
+        
+        const hasDirectTitleMatch = jWords.length > 0 && jWords.every((w) => expLower.includes(w));
+        
+        if (hasDirectTitleMatch && similarity < 0.8) {
+          similarity = 0.8;
+          if (!scoreExplanation) {
+            scoreExplanation = 'Ứng viên từng làm vị trí tương đương với chức danh công việc đang tuyển.';
+          }
+        }
+
         // Boosting cho các trường hợp rất khớp (như ví dụ CSKH của khách hàng)
         if (similarity > 0.6) {
           similarity = Math.min(1, similarity + 0.25);

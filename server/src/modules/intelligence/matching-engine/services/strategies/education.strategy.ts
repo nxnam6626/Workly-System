@@ -78,6 +78,25 @@ export class EducationStrategy implements IMatchingStrategy {
 
       const reqLevel = this.getDegreeLevel(requiredDegree);
 
+      // Nếu công việc hoàn toàn không yêu cầu bằng cấp và chuyên ngành, cho điểm tối đa
+      if (reqLevel === 0 && (!requiredMajor || requiredMajor.trim() === '')) {
+        return {
+          score: 100,
+          details: {
+            levelScore: 100,
+            majorScore: 100,
+            eduMultiplier: 1.0,
+            verificationStatus: 'VERIFIED',
+            candidateDegree: highestDegreeName !== 'none' ? highestDegreeName : (parsedCv.education?.level || 'Chưa cập nhật'),
+            requiredDegree: 'Không yêu cầu',
+            university: cv.candidate?.university || parsedCv.education?.school || 'N/A',
+            major: cv.candidate?.major || parsedCv.education?.major || 'N/A',
+            gpa: parseFloat(cv.candidate?.gpa || parsedCv.education?.gpa || '0') || 0,
+            message: 'Công việc không yêu cầu bằng cấp chuyên môn'
+          }
+        };
+      }
+
       let levelScore = 0;
       if (reqLevel === 0) {
         levelScore = 100;
