@@ -220,6 +220,7 @@ export class ScoringEngineService {
         keywordScore: Math.round(keywordRes.score),
         semanticScore: Math.round(semanticRes.score),
         matchedSkills: keywordRes.details?.matchedSkills || [],
+        missingSkills: keywordRes.details?.missingSkills || [],
         skillsMultiplier,
         skillVerificationStatus,
       },

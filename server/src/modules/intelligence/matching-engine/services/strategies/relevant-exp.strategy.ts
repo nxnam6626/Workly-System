@@ -70,6 +70,12 @@ export class RelevantExpStrategy implements IMatchingStrategy {
         matchingPoints = aiRes.matchingPoints;
         scoreExplanation = aiRes.scoreExplanation || '';
 
+        // Nếu AI trả về mảng rỗng (do lỗi ngầm trong service AI không ném ra exception),
+        // ném lỗi để kích hoạt fallback logic với keyword
+        if (!jobRequirements || jobRequirements.length === 0) {
+          throw new Error('AI returned empty jobRequirements');
+        }
+
         // Boosting dựa trên chức danh (đảm bảo ít nhất 80% nếu trải nghiệm có chứa toàn bộ chức danh công việc)
         const normalizeAndSplit = (text: string) => {
           return text
@@ -106,11 +112,53 @@ export class RelevantExpStrategy implements IMatchingStrategy {
         const keyTerms = job.title
           .toLowerCase()
           .split(' ')
-          .filter((w) => w.length > 3);
-        const matchCount = keyTerms.filter((t) =>
+          .filter((w: string) => w.length > 3);
+        const matchCount = keyTerms.filter((t: string) =>
           fullCvExp.toLowerCase().includes(t),
         ).length;
         similarity = Math.min(0.8, matchCount / keyTerms.length + 0.2);
+
+        // Làm sạch title (bỏ các số như 12, hoặc ký tự thừa) để hiển thị tự nhiên hơn
+        const cleanTitle = job.title.replace(/\d+/g, '').replace(/\s*-\s*$/, '').trim();
+
+        // Tách job title thành các cụm từ (phrase) để tạo thành nhiều bullet points
+        const phrases = cleanTitle
+          .split(/[-/|&,()]/)
+          .map((p: string) => p.trim())
+          .filter((p: string) => p.length > 2);
+
+        const baseKey = phrases.length > 0 ? phrases[0] : cleanTitle;
+        const subKey = phrases.length > 1 ? phrases[1] : 'chuyên môn nghiệp vụ';
+
+        // Sinh dữ liệu dự phòng dưới dạng danh sách (bullet points) để UI hiển thị trực quan
+        jobRequirements = [
+          `Kinh nghiệm chuyên sâu vị trí ${baseKey}`,
+          `Nắm vững các nghiệp vụ về ${subKey}`,
+          `Có kinh nghiệm thực tế trong lĩnh vực ${cleanTitle}`
+        ];
+        
+        if (matchCount > 0) {
+          const matchPercent = Math.round((matchCount / keyTerms.length) * 100);
+          const matchLevel = matchPercent >= 70 ? 'phần lớn' : 'một phần';
+
+          // Các nhận xét cho ứng viên phải mang tính khái quát, an toàn, không được tự bịa (hallucinate) 
+          // ra việc ứng viên có kinh nghiệm ở baseKey/subKey nếu CV không thực sự chứa nó.
+          candidateExps = [
+            `Hồ sơ thể hiện kinh nghiệm làm việc có liên quan đến lĩnh vực ứng tuyển`,
+            `Sở hữu các kỹ năng nền tảng phù hợp với yêu cầu của vị trí`,
+            `Có sự cọ xát thực tế qua các công việc hoặc dự án trước đây`
+          ];
+          matchingPoints = [
+            `Mức độ phân tích từ khóa chuyên môn tương đồng: ${matchPercent}%`,
+            `Có sự trùng khớp về định hướng công việc và ngành nghề`,
+            `Kinh nghiệm thực tế đáp ứng ${matchLevel} yêu cầu cốt lõi của vị trí`
+          ];
+        } else {
+          candidateExps = [];
+          matchingPoints = [];
+        }
+        
+        scoreExplanation = 'Hệ thống AI hiện đang bận. Đánh giá tạm thời được nội suy dựa trên mức độ khớp từ khóa chuyên môn trong hồ sơ.';
       }
 
       return {
