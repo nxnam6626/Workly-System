@@ -323,8 +323,8 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             label: 'Khả năng ngôn ngữ',
             color: val('language') >= 70 ? 'emerald' : 'amber',
             items: [
-              `Yêu cầu: ${d?.languageDetails?.requiredLang?.length ? d.languageDetails.requiredLang.map((l: any) => `${l.language} ${l.level || ''}`).join(', ') : 'Không yêu cầu'}`,
-              `Ứng viên: ${d?.languageDetails?.cvLangs?.length ? d.languageDetails.cvLangs.map((l: any) => `${l.language || l.name} ${l.level || ''}`).join(', ') : 'Chưa cập nhật'}`,
+              `Yêu cầu: ${d?.languageDetails?.requiredLang?.length ? d.languageDetails.requiredLang.map((l: any) => typeof l === 'string' ? l : `${l.language || ''} ${l.level || ''}`).join(', ') : 'Không yêu cầu'}`,
+              `Ứng viên: ${d?.languageDetails?.cvLangs?.length ? d.languageDetails.cvLangs.map((l: any) => typeof l === 'string' ? l : `${l.language || l.name || ''} ${l.level || ''}`).join(', ') : 'Chưa cập nhật'}`,
             ],
             empty: false,
           },

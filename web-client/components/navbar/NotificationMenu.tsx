@@ -19,7 +19,7 @@ export function NotificationMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   
   const { socket, isConnected } = useSocketStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -89,11 +89,11 @@ export function NotificationMenu() {
 
   const markAsRead = async (id: string) => {
      try {
-        await api.patch(`/notifications/read/${id}`);
+        await api.patch(`/notifications/${id}/read`);
         setNotifications(prev => prev.map(n => n.notificationId === id ? { ...n, isRead: true } : n));
         setUnreadCount(prev => Math.max(0, prev - 1));
-     } catch (err) {
-        console.error('Failed to mark as read', err);
+     } catch (err: any) {
+        console.error('Failed to mark as read:', err?.message || 'Unknown error');
      }
   };
 
@@ -111,8 +111,29 @@ export function NotificationMenu() {
      if (!notif.isRead) {
         markAsRead(notif.notificationId);
      }
-     if (notif.link) {
-        router.push(notif.link);
+     
+     const isRecruiter = user?.roles?.includes('RECRUITER');
+     let link = notif.link;
+     const jobId = notif.metadata?.jobPostingId;
+     
+     // If there's a hardcoded public link but user is a recruiter, redirect to recruiter portal
+     if (isRecruiter && link && (link.includes('/jobs/') || link.match(/\/jobs\/?$/))) {
+       link = link.replace(/\/jobs\//, '/recruiter/jobs/');
+     }
+     
+     let finalLink = link || (isRecruiter && jobId ? `/recruiter/jobs/${jobId}` : (jobId ? `/jobs/${jobId}` : null));
+     
+     // Prevent navigating to undefined routes which cause 404s
+     if (finalLink && (finalLink.includes('undefined') || finalLink.includes('null') || finalLink.includes('[id]') || finalLink.includes('[jobPostingId]'))) {
+       if (jobId) {
+         finalLink = isRecruiter ? `/recruiter/jobs/${jobId}` : `/jobs/${jobId}`;
+       } else {
+         finalLink = isRecruiter ? '/recruiter/jobs' : '/jobs';
+       }
+     }
+     
+     if (finalLink) {
+        router.push(finalLink);
         setIsOpen(false);
      }
   };

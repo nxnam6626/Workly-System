@@ -58,8 +58,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         ),
         unreadCount: Math.max(0, state.unreadCount - 1),
       }));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    } catch (error: any) {
+      console.error('Error marking notification as read:', error?.message || 'Unknown error');
     }
   },
 

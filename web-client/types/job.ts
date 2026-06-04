@@ -16,6 +16,8 @@ export interface Job {
     aiFeedback?: string | string[];
     autoFixedByAI?: boolean;
   };
+  matchingStatus?: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  lastMatchedAt?: string;
 }
 export interface JobFormData {
   title: string;

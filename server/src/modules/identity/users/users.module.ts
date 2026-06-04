@@ -23,7 +23,10 @@ import { PrismaModule } from '@/prisma/prisma.module';
     MailModule,
     CompaniesModule,
     AiModule,
-    BullModule.registerQueue({ name: 'matching' }),
+    BullModule.registerQueue({
+      name: 'matching',
+      defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+    }),
     forwardRef(() => MessagesModule),
   ],
   providers: [

@@ -49,6 +49,7 @@ export class MatchingOrchestratorService {
     let candidates = await this.prisma.candidate.findMany({
       where: {
         user: { status: 'ACTIVE' },
+        isOpenToWork: true,
         cvs: { some: { isMain: true } },
       },
       include: {
@@ -244,7 +245,7 @@ export class MatchingOrchestratorService {
       },
     });
 
-    if (!candidate || !candidate.cvs[0]) return [];
+    if (!candidate || !candidate.cvs[0] || !candidate.isOpenToWork) return [];
     const mainCv = candidate.cvs[0];
 
     // 1. Embedding (Always regenerate to reflect profile updates)

@@ -228,6 +228,16 @@ export namespace $Enums {
 export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus]
 
 
+export const MatchingStatus: {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+
+export type MatchingStatus = (typeof MatchingStatus)[keyof typeof MatchingStatus]
+
+
 export const AuthProvider: {
   LOCAL: 'LOCAL',
   GOOGLE: 'GOOGLE',
@@ -371,6 +381,10 @@ export type EvalResult = (typeof EvalResult)[keyof typeof EvalResult]
 export type VerificationStatus = $Enums.VerificationStatus
 
 export const VerificationStatus: typeof $Enums.VerificationStatus
+
+export type MatchingStatus = $Enums.MatchingStatus
+
+export const MatchingStatus: typeof $Enums.MatchingStatus
 
 export type AuthProvider = $Enums.AuthProvider
 
@@ -28098,6 +28112,8 @@ export namespace Prisma {
     jobLevel: $Enums.JobLevel | null
     jobTier: $Enums.JobTier | null
     matchMode: string | null
+    matchingStatus: $Enums.MatchingStatus | null
+    lastMatchedAt: Date | null
     pausedAt: Date | null
     refreshedAt: Date | null
     slug: string | null
@@ -28133,6 +28149,8 @@ export namespace Prisma {
     jobLevel: $Enums.JobLevel | null
     jobTier: $Enums.JobTier | null
     matchMode: string | null
+    matchingStatus: $Enums.MatchingStatus | null
+    lastMatchedAt: Date | null
     pausedAt: Date | null
     refreshedAt: Date | null
     slug: string | null
@@ -28169,6 +28187,8 @@ export namespace Prisma {
     jobLevel: number
     jobTier: number
     matchMode: number
+    matchingStatus: number
+    lastMatchedAt: number
     moderationFeedback: number
     pausedAt: number
     refreshedAt: number
@@ -28231,6 +28251,8 @@ export namespace Prisma {
     jobLevel?: true
     jobTier?: true
     matchMode?: true
+    matchingStatus?: true
+    lastMatchedAt?: true
     pausedAt?: true
     refreshedAt?: true
     slug?: true
@@ -28266,6 +28288,8 @@ export namespace Prisma {
     jobLevel?: true
     jobTier?: true
     matchMode?: true
+    matchingStatus?: true
+    lastMatchedAt?: true
     pausedAt?: true
     refreshedAt?: true
     slug?: true
@@ -28302,6 +28326,8 @@ export namespace Prisma {
     jobLevel?: true
     jobTier?: true
     matchMode?: true
+    matchingStatus?: true
+    lastMatchedAt?: true
     moderationFeedback?: true
     pausedAt?: true
     refreshedAt?: true
@@ -28426,6 +28452,8 @@ export namespace Prisma {
     jobLevel: $Enums.JobLevel | null
     jobTier: $Enums.JobTier
     matchMode: string
+    matchingStatus: $Enums.MatchingStatus
+    lastMatchedAt: Date | null
     moderationFeedback: JsonValue | null
     pausedAt: Date | null
     refreshedAt: Date
@@ -28482,6 +28510,8 @@ export namespace Prisma {
     jobLevel?: boolean
     jobTier?: boolean
     matchMode?: boolean
+    matchingStatus?: boolean
+    lastMatchedAt?: boolean
     moderationFeedback?: boolean
     pausedAt?: boolean
     refreshedAt?: boolean
@@ -28527,6 +28557,8 @@ export namespace Prisma {
     jobLevel?: boolean
     jobTier?: boolean
     matchMode?: boolean
+    matchingStatus?: boolean
+    lastMatchedAt?: boolean
     moderationFeedback?: boolean
     pausedAt?: boolean
     refreshedAt?: boolean
@@ -28566,6 +28598,8 @@ export namespace Prisma {
     jobLevel?: boolean
     jobTier?: boolean
     matchMode?: boolean
+    matchingStatus?: boolean
+    lastMatchedAt?: boolean
     moderationFeedback?: boolean
     pausedAt?: boolean
     refreshedAt?: boolean
@@ -28605,6 +28639,8 @@ export namespace Prisma {
     jobLevel?: boolean
     jobTier?: boolean
     matchMode?: boolean
+    matchingStatus?: boolean
+    lastMatchedAt?: boolean
     moderationFeedback?: boolean
     pausedAt?: boolean
     refreshedAt?: boolean
@@ -28613,7 +28649,7 @@ export namespace Prisma {
     slaInterviewDays?: boolean
   }
 
-  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"jobPostingId" | "title" | "description" | "requirements" | "benefits" | "salaryMin" | "salaryMax" | "currency" | "jobType" | "experience" | "vacancies" | "locationCity" | "status" | "isVerified" | "aiReliabilityScore" | "createdAt" | "updatedAt" | "approvedBy" | "recruiterId" | "companyId" | "structuredRequirements" | "viewCount" | "autoInviteMatches" | "autoInviteThreshold" | "autoRejectThreshold" | "jobLevel" | "jobTier" | "matchMode" | "moderationFeedback" | "pausedAt" | "refreshedAt" | "slug" | "slaApplicationDays" | "slaInterviewDays", ExtArgs["result"]["jobPosting"]>
+  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"jobPostingId" | "title" | "description" | "requirements" | "benefits" | "salaryMin" | "salaryMax" | "currency" | "jobType" | "experience" | "vacancies" | "locationCity" | "status" | "isVerified" | "aiReliabilityScore" | "createdAt" | "updatedAt" | "approvedBy" | "recruiterId" | "companyId" | "structuredRequirements" | "viewCount" | "autoInviteMatches" | "autoInviteThreshold" | "autoRejectThreshold" | "jobLevel" | "jobTier" | "matchMode" | "matchingStatus" | "lastMatchedAt" | "moderationFeedback" | "pausedAt" | "refreshedAt" | "slug" | "slaApplicationDays" | "slaInterviewDays", ExtArgs["result"]["jobPosting"]>
   export type JobPostingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | JobPosting$applicationsArgs<ExtArgs>
     candidateUnlocks?: boolean | JobPosting$candidateUnlocksArgs<ExtArgs>
@@ -28673,6 +28709,8 @@ export namespace Prisma {
       jobLevel: $Enums.JobLevel | null
       jobTier: $Enums.JobTier
       matchMode: string
+      matchingStatus: $Enums.MatchingStatus
+      lastMatchedAt: Date | null
       moderationFeedback: Prisma.JsonValue | null
       pausedAt: Date | null
       refreshedAt: Date
@@ -29137,6 +29175,8 @@ export namespace Prisma {
     readonly jobLevel: FieldRef<"JobPosting", 'JobLevel'>
     readonly jobTier: FieldRef<"JobPosting", 'JobTier'>
     readonly matchMode: FieldRef<"JobPosting", 'String'>
+    readonly matchingStatus: FieldRef<"JobPosting", 'MatchingStatus'>
+    readonly lastMatchedAt: FieldRef<"JobPosting", 'DateTime'>
     readonly moderationFeedback: FieldRef<"JobPosting", 'Json'>
     readonly pausedAt: FieldRef<"JobPosting", 'DateTime'>
     readonly refreshedAt: FieldRef<"JobPosting", 'DateTime'>
@@ -52941,6 +52981,8 @@ export namespace Prisma {
     jobLevel: 'jobLevel',
     jobTier: 'jobTier',
     matchMode: 'matchMode',
+    matchingStatus: 'matchingStatus',
+    lastMatchedAt: 'lastMatchedAt',
     moderationFeedback: 'moderationFeedback',
     pausedAt: 'pausedAt',
     refreshedAt: 'refreshedAt',
@@ -53519,6 +53561,20 @@ export namespace Prisma {
    * Reference to a field of type 'JobTier[]'
    */
   export type ListEnumJobTierFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobTier[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'MatchingStatus'
+   */
+  export type EnumMatchingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MatchingStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'MatchingStatus[]'
+   */
+  export type ListEnumMatchingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MatchingStatus[]'>
     
 
 
@@ -55183,6 +55239,8 @@ export namespace Prisma {
     jobLevel?: EnumJobLevelNullableFilter<"JobPosting"> | $Enums.JobLevel | null
     jobTier?: EnumJobTierFilter<"JobPosting"> | $Enums.JobTier
     matchMode?: StringFilter<"JobPosting"> | string
+    matchingStatus?: EnumMatchingStatusFilter<"JobPosting"> | $Enums.MatchingStatus
+    lastMatchedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     moderationFeedback?: JsonNullableFilter<"JobPosting">
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     refreshedAt?: DateTimeFilter<"JobPosting"> | Date | string
@@ -55227,6 +55285,8 @@ export namespace Prisma {
     jobLevel?: SortOrderInput | SortOrder
     jobTier?: SortOrder
     matchMode?: SortOrder
+    matchingStatus?: SortOrder
+    lastMatchedAt?: SortOrderInput | SortOrder
     moderationFeedback?: SortOrderInput | SortOrder
     pausedAt?: SortOrderInput | SortOrder
     refreshedAt?: SortOrder
@@ -55275,6 +55335,8 @@ export namespace Prisma {
     jobLevel?: EnumJobLevelNullableFilter<"JobPosting"> | $Enums.JobLevel | null
     jobTier?: EnumJobTierFilter<"JobPosting"> | $Enums.JobTier
     matchMode?: StringFilter<"JobPosting"> | string
+    matchingStatus?: EnumMatchingStatusFilter<"JobPosting"> | $Enums.MatchingStatus
+    lastMatchedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     moderationFeedback?: JsonNullableFilter<"JobPosting">
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     refreshedAt?: DateTimeFilter<"JobPosting"> | Date | string
@@ -55318,6 +55380,8 @@ export namespace Prisma {
     jobLevel?: SortOrderInput | SortOrder
     jobTier?: SortOrder
     matchMode?: SortOrder
+    matchingStatus?: SortOrder
+    lastMatchedAt?: SortOrderInput | SortOrder
     moderationFeedback?: SortOrderInput | SortOrder
     pausedAt?: SortOrderInput | SortOrder
     refreshedAt?: SortOrder
@@ -55363,6 +55427,8 @@ export namespace Prisma {
     jobLevel?: EnumJobLevelNullableWithAggregatesFilter<"JobPosting"> | $Enums.JobLevel | null
     jobTier?: EnumJobTierWithAggregatesFilter<"JobPosting"> | $Enums.JobTier
     matchMode?: StringWithAggregatesFilter<"JobPosting"> | string
+    matchingStatus?: EnumMatchingStatusWithAggregatesFilter<"JobPosting"> | $Enums.MatchingStatus
+    lastMatchedAt?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
     moderationFeedback?: JsonNullableWithAggregatesFilter<"JobPosting">
     pausedAt?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
     refreshedAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
@@ -58675,6 +58741,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -58719,6 +58787,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -58759,6 +58829,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58803,6 +58875,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58845,6 +58919,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -58880,6 +58956,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -58917,6 +58995,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -62007,6 +62087,13 @@ export namespace Prisma {
     not?: NestedEnumJobTierFilter<$PrismaModel> | $Enums.JobTier
   }
 
+  export type EnumMatchingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.MatchingStatus | EnumMatchingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMatchingStatusFilter<$PrismaModel> | $Enums.MatchingStatus
+  }
+
   export type JobPostingCountOrderByAggregateInput = {
     jobPostingId?: SortOrder
     title?: SortOrder
@@ -62036,6 +62123,8 @@ export namespace Prisma {
     jobLevel?: SortOrder
     jobTier?: SortOrder
     matchMode?: SortOrder
+    matchingStatus?: SortOrder
+    lastMatchedAt?: SortOrder
     moderationFeedback?: SortOrder
     pausedAt?: SortOrder
     refreshedAt?: SortOrder
@@ -62084,6 +62173,8 @@ export namespace Prisma {
     jobLevel?: SortOrder
     jobTier?: SortOrder
     matchMode?: SortOrder
+    matchingStatus?: SortOrder
+    lastMatchedAt?: SortOrder
     pausedAt?: SortOrder
     refreshedAt?: SortOrder
     slug?: SortOrder
@@ -62119,6 +62210,8 @@ export namespace Prisma {
     jobLevel?: SortOrder
     jobTier?: SortOrder
     matchMode?: SortOrder
+    matchingStatus?: SortOrder
+    lastMatchedAt?: SortOrder
     pausedAt?: SortOrder
     refreshedAt?: SortOrder
     slug?: SortOrder
@@ -62192,6 +62285,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumJobTierFilter<$PrismaModel>
     _max?: NestedEnumJobTierFilter<$PrismaModel>
+  }
+
+  export type EnumMatchingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MatchingStatus | EnumMatchingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMatchingStatusWithAggregatesFilter<$PrismaModel> | $Enums.MatchingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMatchingStatusFilter<$PrismaModel>
+    _max?: NestedEnumMatchingStatusFilter<$PrismaModel>
   }
 
   export type CompanyBranchScalarRelationFilter = {
@@ -65515,6 +65618,10 @@ export namespace Prisma {
     set?: $Enums.JobTier
   }
 
+  export type EnumMatchingStatusFieldUpdateOperationsInput = {
+    set?: $Enums.MatchingStatus
+  }
+
   export type ApplicationUpdateManyWithoutJobPostingNestedInput = {
     create?: XOR<ApplicationCreateWithoutJobPostingInput, ApplicationUncheckedCreateWithoutJobPostingInput> | ApplicationCreateWithoutJobPostingInput[] | ApplicationUncheckedCreateWithoutJobPostingInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutJobPostingInput | ApplicationCreateOrConnectWithoutJobPostingInput[]
@@ -66965,6 +67072,13 @@ export namespace Prisma {
     not?: NestedEnumJobTierFilter<$PrismaModel> | $Enums.JobTier
   }
 
+  export type NestedEnumMatchingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.MatchingStatus | EnumMatchingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMatchingStatusFilter<$PrismaModel> | $Enums.MatchingStatus
+  }
+
   export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
@@ -67019,6 +67133,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumJobTierFilter<$PrismaModel>
     _max?: NestedEnumJobTierFilter<$PrismaModel>
+  }
+
+  export type NestedEnumMatchingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MatchingStatus | EnumMatchingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MatchingStatus[] | ListEnumMatchingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumMatchingStatusWithAggregatesFilter<$PrismaModel> | $Enums.MatchingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMatchingStatusFilter<$PrismaModel>
+    _max?: NestedEnumMatchingStatusFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -70536,6 +70660,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -70578,6 +70704,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -70978,6 +71106,8 @@ export namespace Prisma {
     jobLevel?: EnumJobLevelNullableFilter<"JobPosting"> | $Enums.JobLevel | null
     jobTier?: EnumJobTierFilter<"JobPosting"> | $Enums.JobTier
     matchMode?: StringFilter<"JobPosting"> | string
+    matchingStatus?: EnumMatchingStatusFilter<"JobPosting"> | $Enums.MatchingStatus
+    lastMatchedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     moderationFeedback?: JsonNullableFilter<"JobPosting">
     pausedAt?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
     refreshedAt?: DateTimeFilter<"JobPosting"> | Date | string
@@ -71618,6 +71748,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -71660,6 +71792,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -73183,6 +73317,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -73226,6 +73362,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -73312,6 +73450,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73355,6 +73495,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73475,6 +73617,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -73518,6 +73662,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -73660,6 +73806,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -73703,6 +73851,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74136,6 +74286,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -74179,6 +74331,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -74463,6 +74617,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74506,6 +74662,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74701,6 +74859,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -74744,6 +74904,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -74886,6 +75048,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -74929,6 +75093,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76279,6 +76445,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -76322,6 +76490,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -76633,6 +76803,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -76676,6 +76848,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79453,6 +79627,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -79694,6 +79870,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79736,6 +79914,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79777,6 +79957,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -79903,6 +80085,8 @@ export namespace Prisma {
     jobLevel?: $Enums.JobLevel | null
     jobTier?: $Enums.JobTier
     matchMode?: string
+    matchingStatus?: $Enums.MatchingStatus
+    lastMatchedAt?: Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: Date | string | null
     refreshedAt?: Date | string
@@ -80121,6 +80305,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80163,6 +80349,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -80204,6 +80392,8 @@ export namespace Prisma {
     jobLevel?: NullableEnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel | null
     jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier
     matchMode?: StringFieldUpdateOperationsInput | string
+    matchingStatus?: EnumMatchingStatusFieldUpdateOperationsInput | $Enums.MatchingStatus
+    lastMatchedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     moderationFeedback?: NullableJsonNullValueInput | InputJsonValue
     pausedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string

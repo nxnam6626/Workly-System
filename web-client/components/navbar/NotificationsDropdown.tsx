@@ -10,7 +10,30 @@ import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 export function NotificationsDropdown() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const isRecruiter = user?.roles?.includes('RECRUITER');
+
+  const getNotificationLink = (notification: any) => {
+    let link = notification.link;
+    const jobId = notification.metadata?.jobPostingId;
+    
+    // If there's a hardcoded public link but user is a recruiter, redirect to recruiter portal
+    if (isRecruiter && link && (link.includes('/jobs/') || link.match(/\/jobs\/?$/))) {
+      link = link.replace(/\/jobs\//, '/recruiter/jobs/');
+    }
+    
+    let finalLink = link || (isRecruiter && jobId ? `/recruiter/jobs/${jobId}` : `/jobs/${jobId}`);
+    
+    // Prevent navigating to undefined routes which cause 404s
+    if (finalLink && (finalLink.includes('undefined') || finalLink.includes('null') || finalLink.includes('[id]') || finalLink.includes('[jobPostingId]'))) {
+      if (jobId) {
+        return isRecruiter ? `/recruiter/jobs/${jobId}` : `/jobs/${jobId}`;
+      }
+      return isRecruiter ? '/recruiter/jobs' : '/jobs';
+    }
+    
+    return finalLink;
+  };
   const { 
     notifications, 
     unreadCount, 
@@ -151,7 +174,7 @@ export function NotificationsDropdown() {
                       {/* Link overlay for Dynamic Notifications & Job Alerts */}
                       {(notification.link || notification.metadata?.jobPostingId) && (
                         <Link 
-                          href={notification.link || `/jobs/${notification.metadata.jobPostingId}`}
+                          href={getNotificationLink(notification)}
                           className="absolute inset-0 z-10"
                           onClick={() => {
                             setIsOpen(false);

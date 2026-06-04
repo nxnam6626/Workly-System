@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const jobs = await prisma.jobPosting.findMany({take: 1}); console.log(jobs[0].matchingStatus); } main();

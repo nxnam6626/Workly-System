@@ -1,0 +1,1 @@
+const { Queue } = require('bullmq'); const q = new Queue('matching', { connection: { host: 'localhost', port: 6379 } }); async function main() { await q.add('match', { jobId: 'test-job-id' }); console.log('Added job to queue'); process.exit(0); } main();

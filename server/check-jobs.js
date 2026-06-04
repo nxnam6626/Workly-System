@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const jobs = await prisma.jobPosting.findMany({ orderBy: { createdAt: 'desc' }, take: 5, select: { title: true, matchingStatus: true, matchedCount: true, lastMatchedAt: true } }); console.log(jobs); } main().finally(() => process.exit(0));

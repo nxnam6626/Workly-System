@@ -2,7 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Eye, Edit, Users, BarChart, Bot, Sparkles,
-  RefreshCw, AlertTriangle, Clock, Lock, XCircle, CheckCircle2
+  RefreshCw, AlertTriangle, Clock, Lock, XCircle, CheckCircle2,
+  Loader2, AlertCircle
 } from 'lucide-react';
 import { Job, TabType, ActionType } from '@/types/job';
 
@@ -104,13 +105,31 @@ export const JobsTable = ({
                   </td>
                   <td className="px-6 py-6">
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                      <div
-                        className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/60 border border-indigo-100/50 rounded-xl hover:bg-indigo-100/80 transition-all cursor-default"
-                        title="Số lượng ứng viên phù hợp"
-                      >
-                        <Users className="w-3.5 h-3.5 text-indigo-600" />
-                        <span className="text-indigo-700 font-black text-xs whitespace-nowrap">{job.matchedCount} Match</span>
-                      </div>
+                      {(job.matchingStatus === 'RUNNING' || (job.matchingStatus === 'PENDING' && new Date(job.createdAt).getTime() > Date.now() - 5 * 60 * 1000)) ? (
+                        <div
+                          className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/60 border border-blue-100/50 rounded-xl hover:bg-blue-100/80 transition-all cursor-default"
+                          title="Hệ thống AI đang chạy quét ứng viên phù hợp"
+                        >
+                          <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                          <span className="text-blue-700 font-black text-xs whitespace-nowrap">Đang chạy AI</span>
+                        </div>
+                      ) : job.matchingStatus === 'FAILED' ? (
+                        <div
+                          className="flex items-center gap-2 px-3 py-1.5 bg-red-50/60 border border-red-100/50 rounded-xl hover:bg-red-100/80 transition-all cursor-default"
+                          title="Có lỗi khi chạy AI Matching, hệ thống sẽ tự động thử lại"
+                        >
+                          <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                          <span className="text-red-700 font-black text-xs whitespace-nowrap">Lỗi Matching</span>
+                        </div>
+                      ) : (
+                        <div
+                          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50/60 border border-indigo-100/50 rounded-xl hover:bg-indigo-100/80 transition-all cursor-default"
+                          title="Số lượng ứng viên phù hợp"
+                        >
+                          <Users className="w-3.5 h-3.5 text-indigo-600" />
+                          <span className="text-indigo-700 font-black text-xs whitespace-nowrap">{job.matchedCount} Match</span>
+                        </div>
+                      )}
 
                       <div
                         className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50/60 border border-emerald-100/50 rounded-xl hover:bg-emerald-100/80 transition-all cursor-default"
