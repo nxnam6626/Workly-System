@@ -74,18 +74,34 @@ export function useJobs() {
           ...prev,
           jobs: prev.jobs.map(j =>
             j.jobPostingId === payload.jobId
-              ? { ...j, matchedCount: payload.matchedCount }
+              ? { ...j, matchedCount: payload.matchedCount, matchingStatus: 'COMPLETED' }
               : j
           )
         };
       }, true);
     };
 
+    const handleJobMatchStarted = (payload: { jobId: string; status: string }) => {
+      mutate(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          jobs: prev.jobs.map(j =>
+            j.jobPostingId === payload.jobId
+              ? { ...j, matchingStatus: 'RUNNING' }
+              : j
+          )
+        };
+      }, false);
+    };
+
     socket.on('notification', handleNotification);
     socket.on('job_match_updated', handleJobMatchUpdated);
+    socket.on('job_match_started', handleJobMatchStarted);
     return () => {
       socket.off('notification', handleNotification);
       socket.off('job_match_updated', handleJobMatchUpdated);
+      socket.off('job_match_started', handleJobMatchStarted);
     };
   }, [socket]);
 

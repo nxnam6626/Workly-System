@@ -26,22 +26,53 @@ export class MatchingProcessor extends WorkerHost {
 
   async process(job: Job<any, any, string>): Promise<any> {
     const { jobId, userId } = job.data;
+    this.logger.log(`Starting matching process for job: ${jobId}`);
 
     if (jobId) {
       try {
-        const topMatches =
-          await this.matchingOrchestrator.runMatchingForJob(jobId);
-
         const jobPosting = await this.prisma.jobPosting.findUnique({
           where: { jobPostingId: jobId },
           include: { recruiter: true },
         });
 
         if (!jobPosting || !jobPosting.recruiter?.userId) {
-          return { success: true, count: topMatches.length };
+          await this.prisma.jobPosting.update({
+            where: { jobPostingId: jobId },
+            data: { matchingStatus: 'FAILED' }, // Mark failed because no recruiter
+          });
+          return { success: true, count: 0 };
         }
 
         const recruiterUserId = jobPosting.recruiter.userId;
+
+        await this.prisma.jobPosting.update({
+          where: { jobPostingId: jobId },
+          data: { matchingStatus: 'RUNNING' },
+        });
+        this.logger.log(`Updated matchingStatus to RUNNING for job: ${jobId}`);
+
+        // Emit realtime event for frontend to show "Đang chạy AI"
+        this.messagesGateway.server
+          .to(`user_${recruiterUserId}`)
+          .emit('job_match_started', {
+            jobId,
+            status: 'RUNNING'
+          });
+
+        // Artificial delay for UX: Let the user see "Đang chạy AI" for at least 3 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        const topMatches =
+          await this.matchingOrchestrator.runMatchingForJob(jobId);
+
+        if (!topMatches || topMatches.length === 0) {
+          await this.prisma.jobPosting.update({
+            where: { jobPostingId: jobId },
+            data: { matchingStatus: 'COMPLETED', lastMatchedAt: new Date() },
+          });
+          return { success: true, count: 0 };
+        }
+
         const threshold = jobPosting.autoInviteThreshold ?? 70;
 
         // Số ứng viên phù hợp dựa THEO ĐÚNG cấu hình của user
@@ -60,6 +91,10 @@ export class MatchingProcessor extends WorkerHost {
           });
 
         if (matchedCandidates.length === 0) {
+          await this.prisma.jobPosting.update({
+            where: { jobPostingId: jobId },
+            data: { matchingStatus: 'COMPLETED', lastMatchedAt: new Date() },
+          });
           return { success: true, count: topMatches.length };
         }
 
@@ -162,8 +197,20 @@ export class MatchingProcessor extends WorkerHost {
             autoInvitedCount: autoUnlockCount,
           });
 
+        await this.prisma.jobPosting.update({
+          where: { jobPostingId: jobId },
+          data: { matchingStatus: 'COMPLETED', lastMatchedAt: new Date() },
+        });
+
+        this.logger.log(`Matching completed for job: ${jobId}. Found ${topMatches.length} matches.`);
         return { success: true, count: topMatches.length };
       } catch (error: any) {
+        this.logger.error(`Matching failed for job ${jobId}: ${error.message}`, error.stack);
+        await this.prisma.jobPosting.update({
+          where: { jobPostingId: jobId },
+          data: { matchingStatus: 'FAILED' },
+        });
+
         this.logger.error(
           `[Matching] Error processing job ${jobId}: ${error.message}`,
         );

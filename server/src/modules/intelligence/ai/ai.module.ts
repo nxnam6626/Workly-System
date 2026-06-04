@@ -22,6 +22,7 @@ import { RecruiterAggregateService } from './services/recruiter-aggregate.servic
   imports: [
     BullModule.registerQueue({
       name: 'matching',
+      defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
     }),
   ],
   controllers: [AiController],

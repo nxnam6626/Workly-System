@@ -19,7 +19,10 @@ import { NotificationsModule } from '@/modules/communication/notifications/notif
   imports: [
     PrismaModule,
     MatchingEngineModule,
-    BullModule.registerQueue({ name: 'matching' }),
+    BullModule.registerQueue({
+      name: 'matching',
+      defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+    }),
     NotificationsModule,
   ],
   controllers: [CandidatesController],

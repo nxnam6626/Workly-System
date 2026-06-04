@@ -21,6 +21,7 @@ import { UserEsService } from './services/user-es.service';
     forwardRef(() => RecruitersModule),
     BullModule.registerQueue({
       name: 'matching',
+      defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
     }),
   ],
   providers: [

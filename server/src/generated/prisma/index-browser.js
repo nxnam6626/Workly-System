@@ -376,6 +376,8 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   jobLevel: 'jobLevel',
   jobTier: 'jobTier',
   matchMode: 'matchMode',
+  matchingStatus: 'matchingStatus',
+  lastMatchedAt: 'lastMatchedAt',
   moderationFeedback: 'moderationFeedback',
   pausedAt: 'pausedAt',
   refreshedAt: 'refreshedAt',
@@ -709,6 +711,13 @@ exports.JobTier = exports.$Enums.JobTier = {
   BASIC: 'BASIC',
   PROFESSIONAL: 'PROFESSIONAL',
   URGENT: 'URGENT'
+};
+
+exports.MatchingStatus = exports.$Enums.MatchingStatus = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
 };
 
 exports.AppStatus = exports.$Enums.AppStatus = {

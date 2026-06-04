@@ -38,7 +38,28 @@ export class LanguageStrategy implements IMatchingStrategy {
 
   async calculate(job: any, cv: any): Promise<MatchingResult> {
     try {
-      const requiredLang = job.structuredRequirements?.languages || [];
+      const requiredLang = [...(job.structuredRequirements?.languages || [])];
+      
+      // 1. Trích xuất yêu cầu ẩn từ mảng kỹ năng nếu requiredLang rỗng
+      if (requiredLang.length === 0) {
+        const allSkills = [
+          ...(job.structuredRequirements?.hardSkills || []),
+          ...(job.structuredRequirements?.softSkills || []),
+        ];
+        const langKeywords = [
+          'ngoại ngữ', 'tiếng anh', 'tiếng nhật', 'tiếng trung', 'tiếng hàn', 'tiếng pháp', 'tiếng đức',
+          'english', 'japanese', 'chinese', 'korean', 'french', 'german',
+          'toeic', 'ielts', 'toefl', 'hsk', 'jlpt', 'topik',
+        ];
+
+        for (const skill of allSkills) {
+          const skillLower = typeof skill === 'string' ? skill.toLowerCase() : (skill.skillName || '').toLowerCase();
+          if (langKeywords.some((kw) => skillLower.includes(kw))) {
+            requiredLang.push(typeof skill === 'string' ? skill : skill.skillName);
+          }
+        }
+      }
+
       const parsedCvLangs = cv.parsedData?.languages || [];
       const candidateLangs = (cv.candidate?.languages as any[]) || [];
       const cvLangs = candidateLangs.length > 0 ? candidateLangs : parsedCvLangs;
@@ -46,73 +67,210 @@ export class LanguageStrategy implements IMatchingStrategy {
       const candidateCerts = cv.candidate?.certifications || [];
       
       // Lọc các chứng chỉ liên quan đến ngoại ngữ
-      const langKeywords = [
+      const langCertKeywords = [
         'ielts', 'toeic', 'toefl', 'hsk', 'jlpt', 'topik', 'english',
         'tiếng anh', 'tiếng nhật', 'tiếng trung', 'tiếng hàn', 'tiếng pháp', 'tiếng đức',
       ];
 
       const langCerts = candidateCerts.filter((c: any) => {
-        const nameLower = c.name.toLowerCase();
-        return langKeywords.some((kw) => nameLower.includes(kw));
+        const nameLower = (c.name || '').toLowerCase();
+        return langCertKeywords.some((kw) => nameLower.includes(kw));
       });
 
       // Gộp chung danh sách ngoại ngữ và chứng chỉ ngoại ngữ của ứng viên
       const combinedLangsAndCerts = [...cvLangs, ...langCerts];
+      const displayLangs = this.deduplicateLangs(combinedLangsAndCerts);
 
+      // Nhóm ứng viên theo từng ngôn ngữ để tính Bonus
+      const candidateLangsMap = new Map<string, any[]>();
+      for (const item of combinedLangsAndCerts) {
+        const itemStr = `${item.language || ''} ${item.name || ''} ${item.level || ''} ${item.certificate || ''} ${item.score || ''}`.toLowerCase();
+        const targetLang = this.detectLanguage(itemStr);
+        if (!candidateLangsMap.has(targetLang)) {
+          candidateLangsMap.set(targetLang, []);
+        }
+        candidateLangsMap.get(targetLang)!.push(item);
+      }
+
+      // Xử lý trường hợp hoàn toàn không có yêu cầu ngoại ngữ
       if (requiredLang.length === 0) {
-        const displayLangs = this.deduplicateLangs(combinedLangsAndCerts);
+        let bonusScore = 0;
+        let verificationStatuses: string[] = [];
+        
+        for (const [lang, items] of candidateLangsMap.entries()) {
+          if (lang !== 'unknown_lang') {
+            const best = this.findBestScoreForLanguage(items);
+            // Thưởng 15% cho 1 ngoại ngữ max level, quy đổi theo điểm chuẩn
+            bonusScore += (best.score / 100) * 15 * best.multiplier;
+            if (best.matchedItem) {
+              verificationStatuses.push(best.matchedItem.status || 'UNVERIFIED');
+            }
+          }
+        }
+        
+        // Không yêu cầu nhưng tự có = Base 100 + Bonus
+        const finalScore = Math.min(100 + bonusScore, 120); 
+
         return {
-          score: 100,
+          score: Math.round(finalScore),
           details: {
             requiredLang: [],
             cvLangs: displayLangs,
             message: 'Không yêu cầu ngoại ngữ',
+            verificationStatus: this.aggregateVerificationStatus(verificationStatuses),
           },
         };
       }
 
-      // Tìm kiếm sự tương đồng trình độ
-      let totalScore = 0;
+      // 2. Tính Base Score cho các yêu cầu
+      let totalBaseWeighted = 0;
+      let targetLangsRequired = new Set<string>();
+      let verificationStatuses: string[] = [];
+
       for (const req of requiredLang) {
-        // req có thể là chuỗi "Tiếng Trung HSK 5" hoặc object {language: "Tiếng Trung", level: "HSK 5"}
         const reqStr = typeof req === 'string' 
           ? req.toLowerCase() 
           : `${req.language || ''} ${req.level || ''}`.toLowerCase();
           
-        const foundLevel = this.matchLevel(reqStr, combinedLangsAndCerts);
-        totalScore += foundLevel;
-      }
-
-      let langMultiplier = 0.3; // Mặc định chưa nộp minh chứng
-      let verificationStatus = 'UNVERIFIED';
-
-      if (langCerts.length > 0) {
-        const statuses = langCerts.map((c: any) => c.status);
-        if (statuses.includes('VERIFIED')) {
-          langMultiplier = 1.0;
-          verificationStatus = 'VERIFIED';
-        } else if (statuses.includes('PENDING')) {
-          langMultiplier = 0.8;
-          verificationStatus = 'PENDING';
+        const match = this.calculateLanguageMatch(reqStr, combinedLangsAndCerts);
+        targetLangsRequired.add(match.targetLang);
+        
+        totalBaseWeighted += (match.score * match.multiplier);
+        
+        if (match.matchedItem) {
+          verificationStatuses.push(match.matchedItem.status || 'UNVERIFIED');
+        } else {
+          verificationStatuses.push('MISSING');
         }
       }
 
-      const score = (totalScore / requiredLang.length) * langMultiplier;
-      const displayLangs = this.deduplicateLangs(combinedLangsAndCerts);
+      const baseScore = totalBaseWeighted / requiredLang.length;
+
+      // 3. Tính Bonus Score cho các ngoại ngữ bổ sung
+      let bonusScore = 0;
+      for (const [lang, items] of candidateLangsMap.entries()) {
+        if (lang !== 'unknown_lang' && !targetLangsRequired.has(lang)) {
+          const best = this.findBestScoreForLanguage(items);
+          // Bonus max 15% per extra language
+          bonusScore += (best.score / 100) * 15 * best.multiplier;
+          if (best.matchedItem) {
+            verificationStatuses.push(best.matchedItem.status || 'UNVERIFIED');
+          }
+        }
+      }
+
+      // 4. Áp dụng quy tắc Capping
+      let finalScore = baseScore + bonusScore;
+      if (baseScore < 100 && finalScore > 95) {
+        // Nếu điểm nền chưa đạt 100%, tổng điểm không được phép vượt quá 95%
+        // Để đảm bảo không bao giờ bằng điểm người đạt 100% yêu cầu
+        finalScore = Math.max(baseScore, 95);
+      }
 
       return {
-        score: Math.round(score),
+        score: Math.round(finalScore),
         details: {
           requiredLang,
           cvLangs: displayLangs,
-          langMultiplier,
-          verificationStatus,
+          baseScore: Math.round(baseScore),
+          bonusScore: Math.round(bonusScore),
+          verificationStatus: this.aggregateVerificationStatus(verificationStatuses),
         },
       };
     } catch (error: any) {
       this.logger.error(`Language Match Error: ${error.message}`);
       return { score: 100, details: {} };
     }
+  }
+
+  // Lấy điểm chuẩn cao nhất của 1 ngôn ngữ từ danh sách item
+  private findBestScoreForLanguage(items: any[]): { score: number; multiplier: number; matchedItem: any } {
+    let bestWeighted = -1;
+    let best = { score: 0, multiplier: 0.5, matchedItem: null };
+
+    for (const item of items) {
+      const itemStr = `${item.language || ''} ${item.name || ''} ${item.level || ''} ${item.certificate || ''} ${item.score || ''}`.toLowerCase();
+      const itemParsed = this.parseLanguageLevel(itemStr);
+      let score = this.mapToStandardScore(itemParsed);
+      if (score === 0) score = 50; // Mức cơ bản mặc định nếu có ghi tên ngoại ngữ
+
+      const multiplier = this.getVerificationMultiplier(item);
+      const weighted = score * multiplier;
+
+      if (weighted > bestWeighted) {
+        bestWeighted = weighted;
+        best = { score, multiplier, matchedItem: item };
+      }
+    }
+    return best;
+  }
+
+  private calculateLanguageMatch(reqStr: string, combinedItems: any[]): { score: number, multiplier: number, targetLang: string, matchedItem: any } {
+    const targetLang = this.detectLanguage(reqStr);
+    const reqParsed = this.parseLanguageLevel(reqStr);
+    const reqStandardScore = this.mapToStandardScore(reqParsed);
+
+    let maxWeighted = -1;
+    let bestMatch = { score: 0, multiplier: 0.5, targetLang, matchedItem: null };
+
+    for (const item of combinedItems) {
+      const itemStr = `${item.language || ''} ${item.name || ''} ${item.level || ''} ${item.certificate || ''} ${item.score || ''}`.toLowerCase();
+      const itemTargetLang = this.detectLanguage(itemStr);
+
+      if (itemTargetLang === targetLang) {
+        const itemParsed = this.parseLanguageLevel(itemStr);
+        const itemStandardScore = this.mapToStandardScore(itemParsed);
+        
+        let score = 0;
+        if (reqStandardScore === 0 || itemStandardScore >= reqStandardScore) {
+          score = 100;
+        } else {
+          score = Math.max(10, Math.round((itemStandardScore / reqStandardScore) * 100));
+        }
+
+        const multiplier = this.getVerificationMultiplier(item);
+        const weighted = score * multiplier;
+
+        if (weighted > maxWeighted) {
+          maxWeighted = weighted;
+          bestMatch = { score, multiplier, targetLang, matchedItem: item };
+        }
+      }
+    }
+    return bestMatch;
+  }
+
+  private getVerificationMultiplier(item: any): number {
+    const status = item?.status;
+    if (status === 'VERIFIED') return 1.0;
+    if (status === 'REJECTED') return 0.0;
+    // PENDING (có nộp minh chứng) hoặc UNVERIFIED (chưa nộp / tự khai báo trong CV)
+    if (status === 'PENDING' || status === 'UNVERIFIED' || !status) return 0.5;
+    return 0.5; 
+  }
+
+  private aggregateVerificationStatus(statuses: string[]): string {
+    if (statuses.length === 0 || statuses.every(s => s === 'MISSING')) return 'UNVERIFIED';
+    if (statuses.includes('VERIFIED')) return 'VERIFIED';
+    if (statuses.includes('PENDING')) return 'PENDING';
+    return 'UNVERIFIED';
+  }
+
+  private detectLanguage(itemStr: string): string {
+    const languageKeywords: Record<string, string[]> = {
+      english: ['english', 'tiếng anh', 'tieng anh', 'ielts', 'toeic', 'toefl', 'cefr', 'c1', 'c2', 'b1', 'b2'],
+      japanese: ['japanese', 'tiếng nhật', 'tieng nhat', 'jlpt', 'n1', 'n2', 'n3', 'n4', 'n5'],
+      chinese: ['chinese', 'tiếng trung', 'tieng trung', 'hsk', 'hoa ngữ'],
+      korean: ['korean', 'tiếng hàn', 'tieng han', 'topik'],
+      french: ['french', 'tiếng pháp', 'tieng phap', 'delf', 'dalf'],
+      german: ['german', 'tiếng đức', 'tieng duc', 'goethe'],
+    };
+    for (const [lang, keywords] of Object.entries(languageKeywords)) {
+      if (keywords.some(kw => itemStr.includes(kw))) {
+        return lang;
+      }
+    }
+    return 'unknown_lang';
   }
 
   private parseLanguageLevel(str: string): { type: string; value: number } {
@@ -221,63 +379,9 @@ export class LanguageStrategy implements IMatchingStrategy {
     return 0;
   }
 
-  private matchLevel(req: string, combinedItems: any[]): number {
-    const reqLower = req.toLowerCase();
-    
-    // Identify target language
-    let targetLang: string | null = null;
-    const languageKeywords: Record<string, string[]> = {
-      english: ['english', 'tiếng anh', 'tieng anh', 'ielts', 'toeic', 'toefl', 'cefr', 'c1', 'c2', 'b1', 'b2'],
-      japanese: ['japanese', 'tiếng nhật', 'tieng nhat', 'jlpt', 'n1', 'n2', 'n3', 'n4', 'n5'],
-      chinese: ['chinese', 'tiếng trung', 'tieng trung', 'hsk', 'hoa ngữ'],
-      korean: ['korean', 'tiếng hàn', 'tieng han', 'topik'],
-      french: ['french', 'tiếng pháp', 'tieng phap', 'delf', 'dalf'],
-      german: ['german', 'tiếng đức', 'tieng duc', 'goethe'],
-    };
-
-    for (const [lang, keywords] of Object.entries(languageKeywords)) {
-      if (keywords.some(kw => reqLower.includes(kw))) {
-        targetLang = lang;
-        break;
-      }
-    }
-
-    if (!targetLang) {
-      targetLang = 'english';
-    }
-
-    const reqParsed = this.parseLanguageLevel(reqLower);
-    const reqStandardScore = this.mapToStandardScore(reqParsed);
-
-    let maxScore = 0;
-
-    for (const item of combinedItems) {
-      const itemStr = `${item.language || ''} ${item.name || ''} ${item.level || ''} ${item.certificate || ''} ${item.score || ''}`.toLowerCase();
-
-      const itemKeywords = languageKeywords[targetLang] || [];
-      const isSameLanguage = itemKeywords.some(kw => itemStr.includes(kw));
-
-      if (isSameLanguage) {
-        const itemParsed = this.parseLanguageLevel(itemStr);
-        const itemStandardScore = this.mapToStandardScore(itemParsed);
-
-        if (reqStandardScore === 0) {
-          maxScore = Math.max(maxScore, 100);
-        } else if (itemStandardScore >= reqStandardScore) {
-          maxScore = Math.max(maxScore, 100);
-        } else {
-          const ratioScore = (itemStandardScore / reqStandardScore) * 100;
-          maxScore = Math.max(maxScore, Math.max(10, Math.round(ratioScore)));
-        }
-      }
-    }
-    return maxScore;
-  }
-
   private deduplicateLangs(items: any[]): any[] {
     const uniqueItems: any[] = [];
     
-    // Sắp xếp các phần tử theo độ dài chuỗi giảm dần để ưu tiên phần tử đầy đủ thông tin hơn
     const sortedItems = [...items].sort((a, b) => {
       const strA = `${a.language || a.name || ''} ${a.level || ''}`.trim();
       const strB = `${b.language || b.name || ''} ${b.level || ''}`.trim();

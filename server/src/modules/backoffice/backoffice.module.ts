@@ -7,7 +7,10 @@ import { BullModule } from '@nestjs/bullmq';
 @Module({
   imports: [
     NotificationsModule,
-    BullModule.registerQueue({ name: 'matching' }),
+    BullModule.registerQueue({
+      name: 'matching',
+      defaultJobOptions: { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+    }),
   ],
   controllers: [BackofficeController],
   providers: [BackofficeService],

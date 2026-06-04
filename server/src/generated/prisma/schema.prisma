@@ -320,6 +320,13 @@ model CompanyBranch {
   jobPostings JobPostingBranch[]
 }
 
+enum MatchingStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
 model JobPosting {
   jobPostingId           String             @id @default(uuid())
   title                  String
@@ -349,6 +356,8 @@ model JobPosting {
   jobLevel               JobLevel?          @default(STAFF)
   jobTier                JobTier            @default(BASIC)
   matchMode              String             @default("BALANCED")
+  matchingStatus         MatchingStatus     @default(PENDING)
+  lastMatchedAt          DateTime?
   moderationFeedback     Json?
   pausedAt               DateTime?          @db.Timestamp(6)
   refreshedAt            DateTime           @default(now()) @db.Timestamp(6)
@@ -556,7 +565,7 @@ model CandidateUnlock {
   companyCompanyId String?
   candidate        Candidate  @relation(fields: [candidateId], references: [candidateId])
   company          Company?   @relation(fields: [companyCompanyId], references: [companyId])
-  cv               CV         @relation(fields: [cvId], references: [cvId])
+  cv               CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
   jobPosting       JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
   recruiter        Recruiter  @relation(fields: [recruiterId], references: [recruiterId])
 

@@ -143,7 +143,7 @@ export class EvaluationsService {
 
     for (const app of applications) {
       const dateKey = app.interviewDate
-        ? new Date(app.interviewDate).toISOString().split('T')[0]
+        ? new Date(new Date(app.interviewDate).getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0]
         : 'unscheduled';
 
       if (!grouped[dateKey]) {
@@ -246,7 +246,7 @@ export class EvaluationsService {
 
     for (const app of applications) {
       const dateKey = app.interviewDate
-        ? new Date(app.interviewDate).toISOString().split('T')[0]
+        ? new Date(new Date(app.interviewDate).getTime() + 7 * 60 * 60 * 1000).toISOString().split('T')[0]
         : 'unscheduled';
 
       if (!grouped[dateKey]) {
