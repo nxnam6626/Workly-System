@@ -10,7 +10,18 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ company, isPreview }: ProfileHeaderProps) {
-  const displayAddress = company.address?.split(',').slice(-1)[0].trim() || "Toàn quốc";
+  let displayAddress = "Toàn quốc";
+  if (company.address) {
+    const parts = company.address.split(',').map(p => p.trim());
+    if (parts.length > 0) {
+      const lastPart = parts[parts.length - 1].toLowerCase();
+      if (lastPart === 'việt nam' || lastPart === 'vietnam') {
+        displayAddress = parts.length > 1 ? parts[parts.length - 2] : parts[parts.length - 1];
+      } else {
+        displayAddress = parts[parts.length - 1];
+      }
+    }
+  }
   const displayIndustry = company.mainIndustry || "Đang cập nhật";
 
   return (
