@@ -15,13 +15,12 @@ async function main() {
   const prisma = app.get(PrismaService);
   const orchestrator = app.get(MatchingOrchestratorService);
 
-  // Tìm candidate Nguyễn Ngọc Thanh theo candidateId đã biết
-  const CANDIDATE_ID = '4348f444-0cd1-43d5-a74a-6d3ee555dad4';
-
-  const candidate = await prisma.candidate.findUnique({
-    where: { candidateId: CANDIDATE_ID },
+  const candidate = await prisma.candidate.findFirst({
+    where: { fullName: { contains: 'Nguyễn Ngọc Thanh' } },
     select: { candidateId: true, userId: true, fullName: true },
   });
+
+  const CANDIDATE_ID = candidate?.candidateId;
 
   if (!candidate) {
     console.error('❌ Candidate not found with ID:', CANDIDATE_ID);
@@ -52,7 +51,7 @@ async function main() {
     });
 
     for (const m of matches) {
-      const d = m.details as any;
+      const d = (m.details as any)?.details || m.details as any;
       console.log(`\n📌 Job: ${m.jobPosting.title} | Score: ${m.score}%`);
       if (d?.relevantExpDetails) {
         console.log('  jobRequirements:', d.relevantExpDetails.jobRequirements);

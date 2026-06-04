@@ -138,24 +138,34 @@ const MatchingAnalysisModal: React.FC<Props> = ({
         pct: val('skills'),
         sections: [
           {
-            label: 'Chi tiết kỹ năng',
+            label: 'Kỹ năng yêu cầu (Tin tuyển dụng)',
+            color: 'sky',
+            items: [...matchedSkills, ...missingSkills].length > 0 ? [...matchedSkills, ...missingSkills] : ['Không yêu cầu kỹ năng cụ thể'],
+            empty: [...matchedSkills, ...missingSkills].length === 0,
+          },
+          {
+            label: 'Kỹ năng phù hợp của ứng viên',
             color: 'emerald',
+            items: [...matchedSkills, ...missingSkills].length === 0 ? ['Mặc định đạt điểm tuyệt đối do không yêu cầu'] : matchedSkills.length > 0 ? matchedSkills : ['Không có kỹ năng phù hợp'],
+            empty: matchedSkills.length === 0 && [...matchedSkills, ...missingSkills].length > 0,
+          },
+          {
+            label: 'Xác thực chứng chỉ',
+            color: d?.skillDetails?.skillVerificationStatus === 'VERIFIED' ? 'emerald' : 
+                   d?.skillDetails?.skillVerificationStatus === 'PENDING' ? 'amber' : 
+                   d?.skillDetails?.skillVerificationStatus === 'UNVERIFIED' ? 'rose' : 'sky',
             items: [
-              `Điểm Keyword: ${d?.skillDetails?.keywordScore || 0}%`,
-              `Điểm Ngữ nghĩa: ${d?.skillDetails?.semanticScore || 0}%`,
+              d?.skillDetails?.skillVerificationStatus === 'VERIFIED' ? 'Đã xác thực chứng chỉ chuyên môn (Hệ số: 1.0)' :
+              d?.skillDetails?.skillVerificationStatus === 'PENDING' ? 'Chứng chỉ đang chờ duyệt (Hệ số: 0.8)' :
+              d?.skillDetails?.skillVerificationStatus === 'UNVERIFIED' ? 'Yêu cầu có chứng chỉ nhưng chưa xác thực (Hệ số: 0.3)' :
+              'Công việc không yêu cầu chứng chỉ đặc thù (Hệ số: 1.0)'
             ],
             empty: false,
           },
           {
-            label: 'Kỹ năng phù hợp',
-            color: 'emerald',
-            items: matchedSkills.length > 0 ? matchedSkills : ['Không có dữ liệu'],
-            empty: matchedSkills.length === 0,
-          },
-          {
             label: 'Kỹ năng còn thiếu',
             color: 'rose',
-            items: missingSkills.length > 0 ? missingSkills : ['Đã đáp ứng đầy đủ yêu cầu'],
+            items: [...matchedSkills, ...missingSkills].length === 0 ? ['Không có kỹ năng nào bị thiếu'] : missingSkills.length > 0 ? missingSkills : ['Đã đáp ứng đầy đủ yêu cầu'],
             empty: missingSkills.length === 0,
           },
         ],
