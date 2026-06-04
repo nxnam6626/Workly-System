@@ -64,15 +64,15 @@ interface Props {
 }
 
 const CRITERIA_META = [
-  { key: 'location',    label: 'Địa điểm làm việc', icon: MapPin },
-  { key: 'salary',      label: 'Mức lương',          icon: CircleDollarSign },
-  { key: 'industry',    label: 'Ngành nghề',          icon: Hash },
-  { key: 'title',       label: 'Tiêu đề công việc',  icon: Briefcase },
-  { key: 'yearsExp',    label: 'Số năm kinh nghiệm', icon: Timer },
+  { key: 'location', label: 'Địa điểm làm việc', icon: MapPin },
+  { key: 'salary', label: 'Mức lương', icon: CircleDollarSign },
+  { key: 'industry', label: 'Ngành nghề', icon: Hash },
+  { key: 'title', label: 'Tiêu đề công việc', icon: Briefcase },
+  { key: 'yearsExp', label: 'Số năm kinh nghiệm', icon: Timer },
   { key: 'relevantExp', label: 'Kinh nghiệm liên quan', icon: Focus },
-  { key: 'education',   label: 'Học vấn',             icon: GraduationCap },
-  { key: 'skills',      label: 'Kỹ năng',             icon: Zap },
-  { key: 'language',    label: 'Ngoại ngữ',           icon: Languages },
+  { key: 'education', label: 'Học vấn', icon: GraduationCap },
+  { key: 'skills', label: 'Kỹ năng', icon: Zap },
+  { key: 'language', label: 'Ngoại ngữ', icon: Languages },
 ];
 
 const MatchingAnalysisModal: React.FC<Props> = ({
@@ -147,15 +147,9 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             empty: false,
           },
           {
-            label: 'Kỹ năng yêu cầu (Tin tuyển dụng)',
-            color: 'sky',
-            items: [...matchedSkills, ...missingSkills].length > 0 ? [...matchedSkills, ...missingSkills] : ['Không yêu cầu kỹ năng cụ thể'],
-            empty: [...matchedSkills, ...missingSkills].length === 0,
-          },
-          {
-            label: 'Kỹ năng phù hợp của ứng viên',
+            label: 'Kỹ năng phù hợp',
             color: 'emerald',
-            items: matchedSkills.length > 0 ? matchedSkills : ['Không có kỹ năng phù hợp'],
+            items: matchedSkills.length > 0 ? matchedSkills : ['Không có dữ liệu'],
             empty: matchedSkills.length === 0,
           },
           {
@@ -189,43 +183,43 @@ const MatchingAnalysisModal: React.FC<Props> = ({
         scoreExplanation: d?.relevantExpDetails?.scoreExplanation || '',
         sections: d?.relevantExpDetails?.jobRequirements && d.relevantExpDetails.jobRequirements.length > 0
           ? [
-              {
-                label: 'Yêu cầu kinh nghiệm nên có',
-                color: 'amber',
-                items: d.relevantExpDetails.jobRequirements,
-                empty: false,
-              },
-              {
-                label: 'Kinh nghiệm liên quan ứng viên có',
-                color: 'emerald',
-                items: d.relevantExpDetails.candidateExps || [],
-                empty: (d.relevantExpDetails.candidateExps || []).length === 0,
-              },
-              {
-                label: 'Điểm phù hợp nổi bật',
-                color: 'emerald',
-                items: d.relevantExpDetails.matchingPoints || [],
-                empty: (d.relevantExpDetails.matchingPoints || []).length === 0,
-              },
-            ]
+            {
+              label: 'Yêu cầu kinh nghiệm nên có',
+              color: 'amber',
+              items: d.relevantExpDetails.jobRequirements,
+              empty: false,
+            },
+            {
+              label: 'Kinh nghiệm liên quan ứng viên có',
+              color: 'emerald',
+              items: d.relevantExpDetails.candidateExps || [],
+              empty: (d.relevantExpDetails.candidateExps || []).length === 0,
+            },
+            {
+              label: 'Điểm phù hợp nổi bật',
+              color: 'emerald',
+              items: d.relevantExpDetails.matchingPoints || [],
+              empty: (d.relevantExpDetails.matchingPoints || []).length === 0,
+            },
+          ]
           : [
-              {
-                label: 'Phân tích AI',
-                color: val('relevantExp') >= 70 ? 'emerald' : val('relevantExp') >= 40 ? 'amber' : 'rose',
-                items: relExpEvidence
-                  ? [
-                      `Bằng chứng từ hồ sơ: ${relExpEvidence}`,
-                      `Độ tương đồng ngữ nghĩa: ${relExpSimilarity}%`,
-                      'Dựa trên lịch sử làm việc và các dự án thực tế',
-                    ]
-                  : [
-                      val('relevantExp') === 0
-                        ? 'Ứng viên chưa cập nhật thông tin kinh nghiệm làm việc hoặc dự án trong hồ sơ.'
-                        : `Điểm tương đồng: ${val('relevantExp')}%`,
-                    ],
-                empty: relExpEvidence === null && val('relevantExp') === 0,
-              },
-            ],
+            {
+              label: 'Phân tích AI',
+              color: val('relevantExp') >= 70 ? 'emerald' : val('relevantExp') >= 40 ? 'amber' : 'rose',
+              items: relExpEvidence
+                ? [
+                  `Bằng chứng từ hồ sơ: ${relExpEvidence}`,
+                  `Độ tương đồng ngữ nghĩa: ${relExpSimilarity}%`,
+                  'Dựa trên lịch sử làm việc và các dự án thực tế',
+                ]
+                : [
+                  val('relevantExp') === 0
+                    ? 'Ứng viên chưa cập nhật thông tin kinh nghiệm làm việc hoặc dự án trong hồ sơ.'
+                    : `Điểm tương đồng: ${val('relevantExp')}%`,
+                ],
+              empty: relExpEvidence === null && val('relevantExp') === 0,
+            },
+          ],
       },
       location: {
         title: 'Địa điểm làm việc',
@@ -254,15 +248,13 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             label: 'Phân tích tài chính',
             color: val('salary') >= 75 ? 'emerald' : 'amber',
             items: [
-              `Mức lương đăng tuyển: ${
-                d?.salaryDetails?.salaryMin !== undefined
-                  ? formatSalary(d.salaryDetails.salaryMin, d.salaryDetails.salaryMax, d.salaryDetails.currency || 'VND')
-                  : `${d?.salaryDetails?.salaryMax?.toLocaleString() || 0} VND`
+              `Mức lương đăng tuyển: ${d?.salaryDetails?.salaryMin !== undefined
+                ? formatSalary(d.salaryDetails.salaryMin, d.salaryDetails.salaryMax, d.salaryDetails.currency || 'VND')
+                : `${d?.salaryDetails?.salaryMax?.toLocaleString() || 0} VND`
               }`,
-              `Kỳ vọng ứng viên: ${
-                d?.salaryDetails?.expectedSalary
-                  ? formatSalary(d.salaryDetails.expectedSalary, null, d.salaryDetails.currency || 'VND')
-                  : 'Chưa cập nhật'
+              `Kỳ vọng ứng viên: ${d?.salaryDetails?.expectedSalary
+                ? formatSalary(d.salaryDetails.expectedSalary, null, d.salaryDetails.currency || 'VND')
+                : 'Chưa cập nhật'
               }`,
               d?.salaryDetails?.isOverBudget ? '⚠️ Vượt ngân sách dự kiến' : '✓ Trong tầm ngân sách',
             ],
@@ -440,7 +432,7 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                             animate={{ width: `${activeDetail.pct}%` }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             className={`h-full rounded-full ${activeDetail.pct >= 70 ? 'bg-emerald-400' :
-                                activeDetail.pct >= 40 ? 'bg-amber-400' : 'bg-rose-400'
+                              activeDetail.pct >= 40 ? 'bg-amber-400' : 'bg-rose-400'
                               }`}
                           />
                         </div>
@@ -455,12 +447,10 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                           <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest
                             ${section.color === 'emerald' ? 'text-emerald-600' :
                               section.color === 'rose' ? 'text-rose-500' :
-                                section.color === 'amber' ? 'text-amber-600' :
-                                  section.color === 'sky' ? 'text-sky-600' : 'text-slate-500'}`}>
+                                section.color === 'amber' ? 'text-amber-600' : 'text-slate-500'}`}>
                             {section.color === 'emerald' ? <CheckCircle2 size={12} /> :
                               section.color === 'rose' ? <XCircle size={12} /> :
-                                section.color === 'sky' ? <Info size={12} /> :
-                                  <AlertCircle size={12} />}
+                                <AlertCircle size={12} />}
                             {section.label}
                           </div>
 
@@ -468,8 +458,7 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                             ${section.color === 'emerald' ? 'bg-emerald-50/60 border-emerald-100' :
                               section.color === 'rose' ? 'bg-rose-50/60 border-rose-100' :
                                 section.color === 'amber' ? 'bg-amber-50/60 border-amber-100' :
-                                  section.color === 'sky' ? 'bg-sky-50/60 border-sky-100' :
-                                    'bg-slate-50 border-slate-100'}`}>
+                                  'bg-slate-50 border-slate-100'}`}>
                             {section.items.map((item: any, ii: number) => (
                               <motion.div
                                 key={ii}
@@ -481,14 +470,12 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                                 <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0
                                   ${section.color === 'emerald' ? 'bg-emerald-400' :
                                     section.color === 'rose' ? 'bg-rose-400' :
-                                      section.color === 'amber' ? 'bg-amber-400' :
-                                        section.color === 'sky' ? 'bg-sky-400' : 'bg-slate-400'}`}
+                                      section.color === 'amber' ? 'bg-amber-400' : 'bg-slate-400'}`}
                                 />
                                 <span className={`text-sm font-semibold leading-snug
                                   ${section.color === 'emerald' ? 'text-emerald-800' :
                                     section.color === 'rose' ? 'text-rose-800' :
-                                      section.color === 'amber' ? 'text-amber-800' :
-                                        section.color === 'sky' ? 'text-sky-800' : 'text-slate-700'}
+                                      section.color === 'amber' ? 'text-amber-800' : 'text-slate-700'}
                                   ${section.empty ? 'italic opacity-60' : ''}`}>
                                   {item}
                                 </span>

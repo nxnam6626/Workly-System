@@ -17,15 +17,15 @@ interface SuitabilityRadarProps {
 }
 
 const CRITERIA = [
-  { key: 'location',    label: 'Địa điểm làm việc', icon: MapPin },
-  { key: 'salary',      label: 'Mức lương',          icon: CircleDollarSign },
-  { key: 'industry',    label: 'Ngành nghề',          icon: Hash },
-  { key: 'title',       label: 'Tiêu đề công việc',  icon: Briefcase },
-  { key: 'yearsExp',    label: 'Số năm kinh nghiệm', icon: Timer },
+  { key: 'location', label: 'Địa điểm làm việc', icon: MapPin },
+  { key: 'salary', label: 'Mức lương', icon: CircleDollarSign },
+  { key: 'industry', label: 'Ngành nghề', icon: Hash },
+  { key: 'title', label: 'Tiêu đề công việc', icon: Briefcase },
+  { key: 'yearsExp', label: 'Số năm kinh nghiệm', icon: Timer },
   { key: 'relevantExp', label: 'Kinh nghiệm liên quan', icon: Focus },
-  { key: 'education',   label: 'Học vấn',             icon: GraduationCap },
-  { key: 'skills',      label: 'Kỹ năng',             icon: Zap },
-  { key: 'language',    label: 'Ngoại ngữ',           icon: Languages },
+  { key: 'education', label: 'Học vấn', icon: GraduationCap },
+  { key: 'skills', label: 'Kỹ năng', icon: Zap },
+  { key: 'language', label: 'Ngoại ngữ', icon: Languages },
 ];
 
 export const SuitabilityRadar: React.FC<SuitabilityRadarProps> = ({
@@ -56,12 +56,12 @@ export const SuitabilityRadar: React.FC<SuitabilityRadarProps> = ({
       <svg width={size} height={size} className="overflow-visible">
         <defs>
           <radialGradient id="rg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#06b6d4" stopOpacity="0.35" />
+            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.35" />
             <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.08" />
           </radialGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="b"/>
-            <feComposite in="SourceGraphic" in2="b" operator="over"/>
+            <feGaussianBlur stdDeviation="3" result="b" />
+            <feComposite in="SourceGraphic" in2="b" operator="over" />
           </filter>
         </defs>
 

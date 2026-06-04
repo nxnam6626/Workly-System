@@ -10,7 +10,7 @@ export class ScoringEngineService {
   constructor(
     private readonly strategyFactory: MatchingStrategyFactory,
     private readonly dataParser: DataParserService,
-  ) {}
+  ) { }
 
   /**
    * Tính toán điểm tổng hợp (Multi-tier Weighted Score)
@@ -145,9 +145,9 @@ export class ScoringEngineService {
     const flattenedSkills = Array.isArray(skillsObj)
       ? skillsObj.map((s) => (typeof s === 'string' ? s : s?.skillName || ''))
       : [
-          ...(skillsObj?.hard_skills || []),
-          ...(skillsObj?.soft_skills || []),
-        ].map((s) => (typeof s === 'string' ? s : s?.skillName || ''));
+        ...(skillsObj?.hard_skills || []),
+        ...(skillsObj?.soft_skills || []),
+      ].map((s) => (typeof s === 'string' ? s : s?.skillName || ''));
 
     const cvFullText = JSON.stringify(cv.parsedData || {}).toLowerCase();
 
