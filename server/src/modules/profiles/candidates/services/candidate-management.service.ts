@@ -195,7 +195,6 @@ export class CandidateManagementService {
       gender,
       birthYear,
       currentSalary,
-      degree,
       industries,
       languages,
       softSkills,
@@ -216,7 +215,6 @@ export class CandidateManagementService {
           ...(gender !== undefined && { gender }),
           ...(birthYear !== undefined && { birthYear }),
           ...(currentSalary !== undefined && { currentSalary }),
-          ...(degree !== undefined && { degree }),
           ...(industries !== undefined && { industries }),
           ...(languages !== undefined && {
             languages: this.normalizeLanguages(languages),
@@ -331,6 +329,7 @@ export class CandidateManagementService {
                     ? 'UNVERIFIED'
                     : cert.status || 'UNVERIFIED',
                 adminFeedback: existing ? existing.adminFeedback : null,
+                aiVerification: existing && existing.aiVerification ? (existing.aiVerification as any) : null,
               };
             }),
           });
@@ -379,6 +378,7 @@ export class CandidateManagementService {
                 status: existing ? existing.status : deg.status || 'UNVERIFIED',
                 issuer: deg.issuer || null,
                 adminFeedback: existing ? existing.adminFeedback : null,
+                aiVerification: existing && existing.aiVerification ? (existing.aiVerification as any) : null,
               };
             }),
           });
@@ -467,7 +467,6 @@ export class CandidateManagementService {
             location: true,
             totalYearsExp: true,
             currentSalary: true,
-            degree: true,
             industries: true,
             languages: true,
             otherInfo: true,

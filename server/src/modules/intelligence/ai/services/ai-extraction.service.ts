@@ -26,12 +26,12 @@ export interface DocumentVerificationResult {
   // Criterion 2: Issuer/institution
   extracted_institution: string;
   institution_type:
-    | 'university'
-    | 'college'
-    | 'vocational'
-    | 'international_org'
-    | 'domestic_org'
-    | 'unknown';
+  | 'university'
+  | 'college'
+  | 'vocational'
+  | 'international_org'
+  | 'domestic_org'
+  | 'unknown';
 
   // Criterion 3: Holder identity
   extracted_name: string;
@@ -123,7 +123,7 @@ export class AiExtractionService {
     // Word (.docx, .doc) — use mammoth, no vision needed
     if (
       mimeType ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       mimeType === 'application/msword'
     ) {
       try {
@@ -256,6 +256,7 @@ export class AiExtractionService {
     const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chứng chỉ tuyển dụng tại Việt Nam. Hãy phân tích tài liệu đính kèm theo ĐÚNG 7 tiêu chí bên dưới để xác định đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 === 7 TIÊU CHÍ XÁC MINH ===
@@ -278,7 +279,7 @@ Xác định tên trường/tổ chức cấp và phân loại:
 - Ví dụ: "Trần Mạnh Dũng" = "TRAN MANH DUNG" = "trần mạnh dũng"
 
 [Tiêu chí 4 - Nội dung học thuật/chuyên môn]
-- extracted_major: Ngành học chính (Công nghệ thông tin, Kinh tế...) hoặc tên chứng chỉ
+- extracted_major: Ngành học chính (Công nghệ thông tin, Kinh tế...) hoặc tên ĐẦY ĐỦ của chứng chỉ. ĐỐI VỚI CHỨNG CHỈ (như HSK, JLPT...), BẮT BUỘC PHẢI GHI KÈM CẤP ĐỘ/LEVEL. Ví dụ: "HSK Level 3" (hoặc "HSK 3"), "JLPT N2". Không được ghi chung chung là "HSK".
 - extracted_specialization: Chuyên sâu/hướng chuyên ngành nếu có, otherwise null
 - extracted_grade: Xếp loại/hạng (Xuất sắc, Giỏi, Khá, Trung bình...) hoặc null nếu không có
 - extracted_score: Điểm số trên chứng chỉ ngôn ngữ (nếu có). Ví dụ:
@@ -294,8 +295,12 @@ Xác định tên trường/tổ chức cấp và phân loại:
   * Nếu không phải chứng chỉ ngôn ngữ hoặc không có điểm/cấp bậc → null
 
 [Tiêu chí 5 - Thời hạn hiệu lực]
-- extracted_issue_date: Ngày/tháng/năm hoặc năm cấp (dạng chuỗi)
-- extracted_expiry_date: Ngày hết hạn nếu có (VD: chứng chỉ CPA, chứng chỉ lái xe...). Nếu vĩnh viễn → null
+Đọc cẩn thận ngày cấp (issue date) và ngày hết hạn (expiry date). Chú ý phân biệt rõ:
+- Ngày thi/Ngày cấp thường được ghi là "Test Date", "Date of Issue", "Examination Date".
+- Ngày hết hạn thường được ghi là "Valid Until", "Valid Thru", "Date of Expiry". LƯU Ý KỸ: Các chứng chỉ (như HSK, TOEIC) thường có ngày thi và ngày hết hạn nằm ở các cột/dòng khác nhau, tuyệt đối không lấy nhầm "Test Date" hay "Date of Birth" làm ngày hết hạn.
+- Nếu không ghi ngày hết hạn: coi là Vĩnh viễn (extracted_expiry_date: null).
+- extracted_issue_date: Ngày cấp (dạng chuỗi)
+- extracted_expiry_date: Ngày hết hạn (dạng chuỗi, hoặc null)
 
 [Tiêu chí 6 - Mã định danh]
 Mã số bằng, số hiệu văn bằng, Credential ID, Badge ID... Nếu không thấy → null.
@@ -322,8 +327,8 @@ risk_level:
 
 reason: Giải thích cụ thể bằng tiếng Việt, nêu rõ điểm đạt và không đạt.
 
-verification_criteria_summary: Mảng các chuỗi tóm tắt từng tiêu chí, dùng emoji ✅/❌/⚠️.
-Ví dụ: ["✅ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đại học", "✅ Tiêu chí 3: Tên khớp — Trần Mạnh Dũng", "⚠️ Tiêu chí 7: Không thấy dấu đỏ rõ ràng"]
+verification_criteria_summary: Mảng các chuỗi tóm tắt từng tiêu chí, dùng emoji ✗, ✓, ?. Dùng ✗ khi tiêu chí không đạt, ✓ khi tiêu chí đạt, ? khi tiêu chí không xác định được.
+Ví dụ: ["✓ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đại học", "✓ Tiêu chí 3: Tên khớp — Trần Mạnh Dũng", "✗ Tiêu chí 7: Không thấy dấu đỏ rõ ràng"]
 
 === FORMAT TRẢ VỀ (JSON THUẦN, KHÔNG MARKDOWN) ===
 {
@@ -407,7 +412,7 @@ Ví dụ: ["✅ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đ�
 
     this.logger.error(
       '[AiExtractionService] All models failed for verifyDocument: ' +
-        lastError?.message,
+      lastError?.message,
     );
     return {
       ...fallback,
@@ -416,7 +421,7 @@ Ví dụ: ["✅ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đ�
         'Lỗi trong quá trình AI phân tích tài liệu: ' +
         (lastError?.message ?? 'Unknown error'),
       verification_criteria_summary: [
-        '❌ Lỗi hệ thống — không thể phân tích tài liệu',
+        'Lỗi hệ thống — không thể phân tích tài liệu',
       ],
     };
   }
@@ -445,6 +450,7 @@ Ví dụ: ["✅ Tiêu chí 1: Tài liệu hợp lệ — phát hiện bằng đ�
       const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chứng chỉ tuyển dụng tại Việt Nam. Hãy phân tích tài liệu đính kèm theo ĐÚNG 7 tiêu chí bên dưới để xác định đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 === 7 TIÊU CHÍ XÁC MINH ===
@@ -589,6 +595,7 @@ Trả về JSON thuần túy (không markdown, không có thẻ \`\`\`json). C�
       const prompt = `
 Bạn là chuyên gia thẩm định văn bằng, chuyên môn tại Việt Nam. Hãy phân tích nội dung văn bản dưới đây được trích xuất từ một tài liệu PDF để xác minh xem đây có phải là một "${docLabel}" hợp lệ không.
 
+Ngày hôm nay là: ${new Date().toISOString().split('T')[0]} (hãy dùng thông tin này để kiểm tra xem ngày tháng trên tài liệu ở tương lai hay quá khứ).
 Tên ứng viên cần đối chiếu: "${expectedName}"
 
 NỘI DUNG TÀI LIỆU PDF:

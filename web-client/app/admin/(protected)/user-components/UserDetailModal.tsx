@@ -91,10 +91,10 @@ export default function UserDetailModal({
   const [activeTab, setActiveTab] = useState<'basic' | 'verification'>('basic');
   const [fullUser, setFullUser] = useState<AdminUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(false);
-  
+
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [selectedItemType, setSelectedItemType] = useState<'degree' | 'certification' | null>(null);
-  
+
   const [actionState, setActionState] = useState<{
     id: string;
     type: 'degree' | 'certification';
@@ -122,13 +122,7 @@ export default function UserDetailModal({
     setLoadingViolations(true);
     setShowViolations(true);
     try {
-<<<<<<< HEAD
       const data = await adminUsersApi.getUserViolations(user.userId);
-=======
-      // @ts-ignore
-      const { adminDashboardApi } = await import('@/lib/admin-api');
-      const data = await adminDashboardApi.getUserViolationLogs(user.userId);
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
       setViolations(data);
     } catch (e) {
       console.error(e);
@@ -143,16 +137,16 @@ export default function UserDetailModal({
     try {
       const data = await adminUsersApi.getOne(user.userId);
       setFullUser(data);
-      
+
       // Auto-select first pending item, or fallback to first item
       const cand = data.candidate;
       if (cand) {
         const pendingDegree = cand.degrees?.find(d => d.status === 'PENDING');
         const pendingCert = cand.certifications?.find(c => c.status === 'PENDING');
-        
+
         const firstDegree = cand.degrees?.[0];
         const firstCert = cand.certifications?.[0];
-        
+
         if (pendingDegree) {
           setSelectedItemId(pendingDegree.degreeId);
           setSelectedItemType('degree');
@@ -182,11 +176,11 @@ export default function UserDetailModal({
   }, [user.userId]);
 
   const candidate = fullUser?.candidate || user.candidate;
-  
+
   // Pending verification count for candidate
   const pendingVerificationsCount = candidate
     ? (candidate.degrees?.filter((d) => d.status === 'PENDING').length || 0) +
-      (candidate.certifications?.filter((c) => c.status === 'PENDING').length || 0)
+    (candidate.certifications?.filter((c) => c.status === 'PENDING').length || 0)
     : 0;
 
   // Selected item reference
@@ -236,12 +230,12 @@ export default function UserDetailModal({
           : 'Đã từ chối yêu cầu xác minh.',
         { id: toastId }
       );
-      
+
       setActionState(null);
-      
+
       // Reload full user data to update detail view
       await loadFullUserDetails();
-      
+
       // Refresh candidates list in parent component to update pending badges
       if (onRefreshList) onRefreshList();
     } catch (err) {
@@ -258,9 +252,8 @@ export default function UserDetailModal({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className={`relative w-full h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 transition-all ${
-          activeTab === 'verification' ? 'max-w-5xl' : 'max-w-md'
-        }`}
+        className={`relative w-full h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 transition-all ${activeTab === 'verification' ? 'max-w-5xl' : 'max-w-md'
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
@@ -285,21 +278,19 @@ export default function UserDetailModal({
           <div className="flex border-b border-slate-100 bg-slate-50 px-6">
             <button
               onClick={() => setActiveTab('basic')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-all ${
-                activeTab === 'basic'
-                  ? 'border-emerald-600 text-emerald-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-all ${activeTab === 'basic'
+                ? 'border-emerald-600 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+                }`}
             >
               Thông tin cơ bản
             </button>
             <button
               onClick={() => setActiveTab('verification')}
-              className={`px-4 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${
-                activeTab === 'verification'
-                  ? 'border-emerald-600 text-emerald-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-900'
-              }`}
+              className={`px-4 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeTab === 'verification'
+                ? 'border-emerald-600 text-emerald-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+                }`}
             >
               Xác minh minh chứng
               {pendingVerificationsCount > 0 && (
@@ -311,7 +302,6 @@ export default function UserDetailModal({
           </div>
         )}
 
-<<<<<<< HEAD
         {/* Modal Content Switch */}
         {activeTab === 'verification' ? (
           /* Option B: Integrated Two-Column Verification Panel */
@@ -328,93 +318,6 @@ export default function UserDetailModal({
                     {candidate.degrees.map((deg) => {
                       const isSelected = selectedItemId === deg.degreeId && selectedItemType === 'degree';
                       return (
-=======
-            {/* Role dropdown removed per user request */}
-
-            {roles.includes('ADMIN') && user.admin && (
-              <div className="mt-5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm font-bold text-slate-800">Quyền hạn hệ thống</span>
-                  </div>
-                  {user.admin.permissions.includes('SUPER_ADMIN') ? (
-                    <span className="text-[10px] uppercase font-bold text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded-full">Toàn Quyền</span>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        if (editingPermissions && onUpdatePermissions) {
-                          onUpdatePermissions(user.userId, tempIsSupreme ? ['SUPER_ADMIN'] : tempPermissions);
-                          setEditingPermissions(false);
-                        } else {
-                          setTempPermissions(user.admin!.permissions || []);
-                          setTempIsSupreme(user.admin!.permissions.includes('SUPER_ADMIN'));
-                          setEditingPermissions(true);
-                        }
-                      }}
-                      disabled={isProcessing}
-                      className="text-xs font-bold text-indigo-600 hover:text-indigo-700 disabled:opacity-50"
-                    >
-                      {editingPermissions ? 'Lưu quyền' : 'Chỉnh sửa'}
-                    </button>
-                  )}
-                </div>
-                
-                {user.admin.permissions.includes('SUPER_ADMIN') && !editingPermissions ? (
-                  <p className="text-xs text-slate-600">Supreme Admin - tài khoản này có đầy đủ các quyền và không bị giới hạn.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {editingPermissions && (
-                      <label className="flex items-start gap-3 cursor-pointer group pb-2 border-b border-slate-100">
-                        <div className="flex items-center h-5 mt-0.5">
-                          <input
-                            type="checkbox"
-                            checked={tempIsSupreme}
-                            onChange={(e) => {
-                              setTempIsSupreme(e.target.checked);
-                              if (e.target.checked) setTempPermissions([]);
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
-                          />
-                        </div>
-                        <div>
-                          <p className={`text-sm font-bold ${tempIsSupreme ? 'text-indigo-700' : 'text-slate-800'}`}>Toàn Quyền (Supreme Admin)</p>
-                          <p className="text-xs text-slate-500">Bật tùy chọn này để cấp toàn quyền hệ thống.</p>
-                        </div>
-                      </label>
-                    )}
-
-                    {!tempIsSupreme && [
-                      { id: 'MANAGE_USERS', label: 'Quản lý Người dùng' },
-                      { id: 'MANAGE_JOBS', label: 'Quản lý Việc làm' },
-                      { id: 'MANAGE_REVENUE', label: 'Quản lý Doanh thu' },
-                      { id: 'MANAGE_SUPPORT', label: 'Chăm sóc Khách hàng' },
-                    ].map(perm => (
-                      <label key={perm.id} className={`flex items-center gap-2.5 text-sm ${editingPermissions ? 'cursor-pointer' : 'opacity-80'}`}>
-                        <input
-                          type="checkbox"
-                          disabled={!editingPermissions || isProcessing}
-                          checked={tempPermissions.includes(perm.id)}
-                          onChange={(e) => {
-                            let newPerms = [...tempPermissions];
-                            if (e.target.checked) newPerms.push(perm.id);
-                            else newPerms = newPerms.filter(p => p !== perm.id);
-
-                            if (newPerms.length === 4) {
-                              setTempIsSupreme(true);
-                              setTempPermissions([]);
-                            } else {
-                              setTempPermissions(newPerms);
-                            }
-                          }}
-                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 disabled:opacity-50"
-                        />
-                        <span className={tempPermissions.includes(perm.id) ? 'font-medium text-slate-800' : 'text-slate-500'}>{perm.label}</span>
-                      </label>
-                    ))}
-                    {editingPermissions && (
-                      <div className="flex justify-end mt-2">
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
                         <button
                           key={deg.degreeId}
                           onClick={() => {
@@ -422,11 +325,10 @@ export default function UserDetailModal({
                             setSelectedItemType('degree');
                             setActionState(null);
                           }}
-                          className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${
-                            isSelected
-                              ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/10 shadow-sm'
-                              : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 bg-white'
-                          }`}
+                          className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${isSelected
+                            ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/10 shadow-sm'
+                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 bg-white'
+                            }`}
                         >
                           <div className={`p-1.5 rounded-xl mt-0.5 shrink-0 ${isSelected ? 'bg-emerald-100/50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                             <GraduationCap className="w-4 h-4" />
@@ -435,15 +337,14 @@ export default function UserDetailModal({
                             <p className="text-xs font-bold text-slate-800 truncate">{deg.name}</p>
                             <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">{deg.school}</p>
                             <div className="mt-2 flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${
-                                deg.status === 'VERIFIED' ? 'bg-emerald-500' :
+                              <span className={`w-1.5 h-1.5 rounded-full ${deg.status === 'VERIFIED' ? 'bg-emerald-500' :
                                 deg.status === 'PENDING' ? 'bg-amber-500 animate-pulse' :
-                                deg.status === 'REJECTED' ? 'bg-rose-500' : 'bg-slate-400'
-                              }`} />
+                                  deg.status === 'REJECTED' ? 'bg-rose-500' : 'bg-slate-400'
+                                }`} />
                               <span className="text-[10px] font-black text-slate-500 uppercase tracking-wide">
                                 {deg.status === 'VERIFIED' ? 'Đã duyệt' :
-                                 deg.status === 'PENDING' ? 'Chờ duyệt' :
-                                 deg.status === 'REJECTED' ? 'Bị từ chối' : 'Chưa xác minh'}
+                                  deg.status === 'PENDING' ? 'Chờ duyệt' :
+                                    deg.status === 'REJECTED' ? 'Bị từ chối' : 'Chưa xác minh'}
                               </span>
                             </div>
                           </div>
@@ -474,11 +375,10 @@ export default function UserDetailModal({
                             setSelectedItemType('certification');
                             setActionState(null);
                           }}
-                          className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${
-                            isSelected
-                              ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/10 shadow-sm'
-                              : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 bg-white'
-                          }`}
+                          className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${isSelected
+                            ? 'border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-500/10 shadow-sm'
+                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 bg-white'
+                            }`}
                         >
                           <div className={`p-1.5 rounded-xl mt-0.5 shrink-0 ${isSelected ? 'bg-emerald-100/50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
                             <Award className="w-4 h-4" />
@@ -494,23 +394,22 @@ export default function UserDetailModal({
                               </p>
                             )}
                             <div className="mt-2 flex items-center gap-1.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${
-                                cert.status === 'VERIFIED'
-                                  ? (expStatus.isExpired ? 'bg-amber-500' : 'bg-emerald-500')
-                                  : cert.status === 'PENDING'
+                              <span className={`w-1.5 h-1.5 rounded-full ${cert.status === 'VERIFIED'
+                                ? (expStatus.isExpired ? 'bg-amber-500' : 'bg-emerald-500')
+                                : cert.status === 'PENDING'
                                   ? 'bg-amber-500 animate-pulse'
                                   : cert.status === 'REJECTED'
-                                  ? 'bg-rose-500'
-                                  : 'bg-slate-400'
-                              }`} />
+                                    ? 'bg-rose-500'
+                                    : 'bg-slate-400'
+                                }`} />
                               <span className="text-[10px] font-black text-slate-500 uppercase tracking-wide">
                                 {cert.status === 'VERIFIED'
                                   ? (expStatus.isExpired ? 'Đã duyệt (Hết hạn)' : 'Đã duyệt')
                                   : cert.status === 'PENDING'
-                                  ? 'Chờ duyệt'
-                                  : cert.status === 'REJECTED'
-                                  ? 'Bị từ chối'
-                                  : 'Chưa xác minh'}
+                                    ? 'Chờ duyệt'
+                                    : cert.status === 'REJECTED'
+                                      ? 'Bị từ chối'
+                                      : 'Chưa xác minh'}
                               </span>
                             </div>
                           </div>
@@ -518,7 +417,6 @@ export default function UserDetailModal({
                       );
                     })}
                   </div>
-<<<<<<< HEAD
                 ) : (
                   <p className="text-xs text-slate-400 italic pl-1 py-1">Chưa khai báo chứng chỉ chuyên môn.</p>
                 )}
@@ -551,10 +449,10 @@ export default function UserDetailModal({
                     const leftBorderColor = selectedItem.status === 'VERIFIED'
                       ? (expStatus.isExpired ? 'bg-amber-500' : 'bg-emerald-500')
                       : selectedItem.status === 'PENDING'
-                      ? 'bg-amber-500'
-                      : selectedItem.status === 'REJECTED'
-                      ? 'bg-rose-500'
-                      : 'bg-slate-400';
+                        ? 'bg-amber-500'
+                        : selectedItem.status === 'REJECTED'
+                          ? 'bg-rose-500'
+                          : 'bg-slate-400';
 
                     return (
                       <div className="bg-white rounded-3xl border border-slate-150 p-5 space-y-3 shadow-sm relative overflow-hidden">
@@ -566,18 +464,17 @@ export default function UserDetailModal({
                             </span>
                             <h3 className="text-base font-black text-slate-800 mt-0.5">{selectedItem.name}</h3>
                           </div>
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                            selectedItem.status === 'VERIFIED'
-                              ? (expStatus.isExpired ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700')
-                              : selectedItem.status === 'PENDING' ? 'bg-amber-50 border-amber-200 text-amber-700'
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${selectedItem.status === 'VERIFIED'
+                            ? (expStatus.isExpired ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700')
+                            : selectedItem.status === 'PENDING' ? 'bg-amber-50 border-amber-200 text-amber-700'
                               : selectedItem.status === 'REJECTED' ? 'bg-rose-50 border-rose-200 text-rose-700'
-                              : 'bg-slate-50 border-slate-200 text-slate-500'
-                          }`}>
+                                : 'bg-slate-50 border-slate-200 text-slate-500'
+                            }`}>
                             {selectedItem.status === 'VERIFIED'
-                              ? (expStatus.isExpired ? 'Đã duyệt (Hết hạn) ⚠' : 'Đã duyệt ✓')
-                              : selectedItem.status === 'PENDING' ? 'Chờ duyệt ⚡'
-                              : selectedItem.status === 'REJECTED' ? 'Bị từ chối ✗'
-                              : 'Chưa xác minh'}
+                              ? (expStatus.isExpired ? 'Đã duyệt (Hết hạn)' : 'Đã duyệt')
+                              : selectedItem.status === 'PENDING' ? 'Chờ duyệt'
+                                : selectedItem.status === 'REJECTED' ? 'Bị từ chối'
+                                  : 'Chưa xác minh'}
                           </span>
                         </div>
 
@@ -626,87 +523,6 @@ export default function UserDetailModal({
                             </div>
                           )}
                         </div>
-=======
-
-                  {user.recruiter.recruiterWallet && (
-                     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
-                       <div className="flex items-center gap-2 text-sm text-slate-700">
-                         <Search className="w-4 h-4 text-emerald-500" />
-                         <span className="font-medium">Lượt mở khóa CV:</span>
-                         <span className="font-bold text-emerald-600">
-                           {user.recruiter.recruiterWallet.cvUnlockQuota} lượt
-                         </span>
-                       </div>
-                     </div>
-                  )}
-
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Global Rule Violations */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Vi phạm quy tắc</p>
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
-              <div className="flex items-center gap-2 text-sm">
-                <AlertTriangle className={`w-4 h-4 ${(user as any).violations >= 3 ? 'text-rose-500' : 'text-amber-500'}`} />
-                <span className="font-medium text-slate-700">Vi phạm gian lận:</span>
-                <span className={`font-bold ${(user as any).violations >= 3 ? 'text-rose-600' : 'text-amber-600'}`}>
-                  {(user as any).violations || 0}/3
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-3">
-                <button
-                  onClick={loadViolations}
-                  disabled={isProcessing}
-                  className="text-xs font-bold text-slate-600 hover:text-slate-800 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
-                >
-                  {showViolations ? 'Ẩn lịch sử' : 'Lịch sử vi phạm'}
-                </button>
-                {((user as any).violations > 0 || (user.recruiter?.violationCount ?? 0) > 0) && (
-                  <button
-                    onClick={() => {
-                      onResetViolations(user.userId);
-                      setViolations([]);
-                      setShowViolations(false);
-                    }}
-                    disabled={isProcessing}
-                    className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-50"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    Khôi phục
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            {/* Violations List Expanded */}
-            {showViolations && (
-              <div className="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-[250px] overflow-y-auto animate-in slide-in-from-top-2">
-                {loadingViolations ? (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
-                  </div>
-                ) : violations.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">Không tìm thấy nội dung vi phạm.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {violations.map((v, i) => (
-                      <div key={i} className="bg-white p-3 rounded-lg border border-red-100 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-red-400 group-hover:bg-red-500 transition-colors"></div>
-                        <div className="flex justify-between items-start mb-1.5 pl-1">
-                          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            Lý do vi phạm:
-                          </p>
-                          <span className="text-[10px] text-slate-400 font-medium bg-slate-50 px-1.5 py-0.5 rounded">
-                            {fmt(v.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-sm text-slate-800 font-medium pl-1 break-words">
-                          {v.reason}
-                        </p>
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
                       </div>
                     );
                   })()}
@@ -788,26 +604,23 @@ export default function UserDetailModal({
                           <Brain className="w-4 h-4 text-indigo-500" /> Kết quả thẩm định Gemini AI (7 tiêu chí)
                         </h4>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                            selectedItem.aiVerification.risk_level === 'low' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${selectedItem.aiVerification.risk_level === 'low' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
                             selectedItem.aiVerification.risk_level === 'high' ? 'bg-rose-50 border-rose-200 text-rose-700' :
-                            'bg-amber-50 border-amber-200 text-amber-700'
-                          }`}>
+                              'bg-amber-50 border-amber-200 text-amber-700'
+                            }`}>
                             Rủi ro: {selectedItem.aiVerification.risk_level === 'low' ? 'Thấp ✓' : selectedItem.aiVerification.risk_level === 'high' ? 'Cao ⚠' : 'Trung bình'}
                           </span>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                            selectedItem.aiVerification.confidence_score >= 80 ? 'bg-emerald-100 text-emerald-800' :
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${selectedItem.aiVerification.confidence_score >= 80 ? 'bg-emerald-100 text-emerald-800' :
                             selectedItem.aiVerification.confidence_score >= 50 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
-                          }`}>Tin cậy: {selectedItem.aiVerification.confidence_score}%</span>
+                            }`}>Tin cậy: {selectedItem.aiVerification.confidence_score}%</span>
                         </div>
                       </div>
 
                       {/* Confidence score progress bar */}
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-500 ${
-                          selectedItem.aiVerification.confidence_score >= 80 ? 'bg-emerald-500' :
+                        <div className={`h-full rounded-full transition-all duration-500 ${selectedItem.aiVerification.confidence_score >= 80 ? 'bg-emerald-500' :
                           selectedItem.aiVerification.confidence_score >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                        }`} style={{ width: `${selectedItem.aiVerification.confidence_score}%` }} />
+                          }`} style={{ width: `${selectedItem.aiVerification.confidence_score}%` }} />
                       </div>
 
                       {/* Side-by-side details */}
@@ -834,10 +647,10 @@ export default function UserDetailModal({
                                 {selectedItem.aiVerification.extracted_institution || 'N/A'}
                                 {selectedItem.aiVerification.institution_type && selectedItem.aiVerification.institution_type !== 'unknown' && (
                                   <span className="ml-1 text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full font-bold border border-blue-100">
-                                    {selectedItem.aiVerification.institution_type === 'international_org' ? '🌐 Quốc tế' :
-                                     selectedItem.aiVerification.institution_type === 'university' ? '🎓 ĐH' :
-                                     selectedItem.aiVerification.institution_type === 'college' ? '🏫 CĐ/TC' :
-                                     selectedItem.aiVerification.institution_type === 'vocational' ? '🔧 Nghề' : '🏢 Tổ chức'}
+                                    {selectedItem.aiVerification.institution_type === 'international_org' ? 'Quốc tế' :
+                                      selectedItem.aiVerification.institution_type === 'university' ? 'ĐH' :
+                                        selectedItem.aiVerification.institution_type === 'college' ? 'CĐ/TC' :
+                                          selectedItem.aiVerification.institution_type === 'vocational' ? 'Nghề' : 'Tổ chức'}
                                   </span>
                                 )}
                               </p>
@@ -858,7 +671,7 @@ export default function UserDetailModal({
 
                             {selectedItem.aiVerification.extracted_grade && (
                               <div className="p-2 rounded-xl bg-violet-50 border border-violet-100 flex justify-between items-center text-xs">
-                                <span className="font-bold text-violet-700">🏅 Kết quả xếp loại (AI):</span>
+                                <span className="font-bold text-violet-700">Kết quả xếp loại (AI):</span>
                                 <span className="font-black text-violet-800">{selectedItem.aiVerification.extracted_grade}</span>
                               </div>
                             )}
@@ -885,11 +698,10 @@ export default function UserDetailModal({
                             <div className={`flex items-center gap-1.5 p-2 rounded-xl border font-bold ${selectedItem.aiVerification.has_security_features ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-slate-50 border-slate-150 text-slate-400'}`}>
                               {selectedItem.aiVerification.has_security_features ? '✓' : '✗'} Hoa văn chống giả
                             </div>
-                            <div className={`flex items-center gap-1.5 p-2 rounded-xl border font-bold ${
-                              selectedItem.aiVerification.image_quality === 'clear' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                            <div className={`flex items-center gap-1.5 p-2 rounded-xl border font-bold ${selectedItem.aiVerification.image_quality === 'clear' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
                               selectedItem.aiVerification.image_quality === 'poor' ? 'bg-rose-50 border-rose-150 text-rose-700' :
-                              'bg-amber-50 border-amber-150 text-amber-700'
-                            }`}>
+                                'bg-amber-50 border-amber-150 text-amber-700'
+                              }`}>
                               {selectedItem.aiVerification.image_quality === 'clear' ? '✓ Ảnh rõ nét' : selectedItem.aiVerification.image_quality === 'poor' ? '✗ Ảnh quá mờ' : '⚠ Ảnh chấp nhận được'}
                             </div>
                           </div>
@@ -909,11 +721,10 @@ export default function UserDetailModal({
                       {/* AI Reason box */}
                       <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Đánh giá chung của AI</p>
-                        <div className={`p-3 rounded-2xl border font-medium leading-relaxed ${
-                          !selectedItem.aiVerification.is_valid ? 'bg-rose-50 border-rose-100 text-rose-700' :
+                        <div className={`p-3 rounded-2xl border font-medium leading-relaxed ${!selectedItem.aiVerification.is_valid ? 'bg-rose-50 border-rose-100 text-rose-700' :
                           !selectedItem.aiVerification.name_matches ? 'bg-amber-50 border-amber-100 text-amber-700' :
-                          'bg-indigo-50/30 border-indigo-100 text-indigo-750'
-                        }`}>
+                            'bg-indigo-50/30 border-indigo-100 text-indigo-750'
+                          }`}>
                           {selectedItem.aiVerification.reason || 'Không ghi nhận ý kiến từ mô hình.'}
                         </div>
                       </div>
@@ -1010,11 +821,10 @@ export default function UserDetailModal({
                             <button
                               onClick={handleActionSubmit}
                               disabled={isSubmittingAction}
-                              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition disabled:opacity-40 active:scale-95 shadow-sm ${
-                                actionState.action === 'APPROVE'
-                                  ? 'bg-emerald-600 hover:bg-emerald-700'
-                                  : 'bg-rose-600 hover:bg-rose-700'
-                              }`}
+                              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition disabled:opacity-40 active:scale-95 shadow-sm ${actionState.action === 'APPROVE'
+                                ? 'bg-emerald-600 hover:bg-emerald-700'
+                                : 'bg-rose-600 hover:bg-rose-700'
+                                }`}
                             >
                               {isSubmittingAction ? (
                                 <>
@@ -1082,24 +892,7 @@ export default function UserDetailModal({
                 ))}
               </div>
 
-              <div className="mt-4">
-                <select
-                  className="text-sm border border-slate-200 w-full rounded-lg px-3 py-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      setRoleToChange(e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
-                  disabled={isProcessing || user.status === 'LOCKED'}
-                  value=""
-                >
-                  <option value="" disabled>-- Cấp quyền mới cho tài khoản --</option>
-                  {!roles.includes('CANDIDATE') && <option value="CANDIDATE">Ứng viên</option>}
-                  {!roles.includes('RECRUITER') && <option value="RECRUITER">Nhà tuyển dụng</option>}
-                  {!roles.includes('ADMIN') && <option value="ADMIN">Quản trị viên</option>}
-                </select>
-              </div>
+
 
               {roles.includes('ADMIN') && user.admin && (
                 <div className="mt-5 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
@@ -1129,7 +922,7 @@ export default function UserDetailModal({
                       </button>
                     )}
                   </div>
-                  
+
                   {user.admin.permissions.includes('SUPER_ADMIN') && !editingPermissions ? (
                     <p className="text-xs text-slate-600">Supreme Admin - tài khoản này có đầy đủ các quyền và không bị giới hạn.</p>
                   ) : (
@@ -1305,7 +1098,7 @@ export default function UserDetailModal({
                   </div>
                 )}
               </div>
-              
+
               {/* Violations List Expanded */}
               {showViolations && (
                 <div className="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-[250px] overflow-y-auto animate-in slide-in-from-top-2">
@@ -1337,7 +1130,7 @@ export default function UserDetailModal({
                   )}
                 </div>
               )}
-              
+
               {user.recruiter && (user.recruiter.violationCount > 0) && (
                 <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50 mt-2">
                   <div className="flex items-center gap-2 text-sm">

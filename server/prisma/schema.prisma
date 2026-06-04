@@ -103,7 +103,8 @@ model Candidate {
   userId             String            @unique
   birthYear          Int?
   currentSalary      String?
-  degree             String?
+  degrees            Degree[]
+  otherInfo          Json?
   desiredJob         Json?
   gender             String?
   industries         String[]          @default([])
@@ -555,7 +556,7 @@ model CandidateUnlock {
   companyCompanyId String?
   candidate        Candidate  @relation(fields: [candidateId], references: [candidateId])
   company          Company?   @relation(fields: [companyCompanyId], references: [companyId])
-  cv               CV         @relation(fields: [cvId], references: [cvId])
+  cv               CV         @relation(fields: [cvId], references: [cvId], onDelete: Cascade)
   jobPosting       JobPosting @relation(fields: [jobPostingId], references: [jobPostingId])
   recruiter        Recruiter  @relation(fields: [recruiterId], references: [recruiterId])
 

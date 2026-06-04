@@ -83,6 +83,11 @@ export class CreateJobPostingDto {
   softSkills?: string[];
 
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  languages?: string[];
+
+  @IsOptional()
   @IsNumber()
   minExperienceYears?: number;
 

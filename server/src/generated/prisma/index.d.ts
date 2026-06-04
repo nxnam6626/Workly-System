@@ -60,9 +60,9 @@ export type Experience = $Result.DefaultSelection<Prisma.$ExperiencePayload>
 export type Certification = $Result.DefaultSelection<Prisma.$CertificationPayload>
 /**
  * Model Degree
- *
+ * 
  */
-export type Degree = $Result.DefaultSelection<Prisma.$DegreePayload>;
+export type Degree = $Result.DefaultSelection<Prisma.$DegreePayload>
 /**
  * Model Skill
  * 
@@ -219,16 +219,16 @@ export type CompanyReviewReport = $Result.DefaultSelection<Prisma.$CompanyReview
  */
 export namespace $Enums {
   export const VerificationStatus: {
-    UNVERIFIED: 'UNVERIFIED';
-    PENDING: 'PENDING';
-    VERIFIED: 'VERIFIED';
-    REJECTED: 'REJECTED';
-  };
+  UNVERIFIED: 'UNVERIFIED',
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+};
 
-  export type VerificationStatus =
-    (typeof VerificationStatus)[keyof typeof VerificationStatus];
+export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus]
 
-  export const AuthProvider: {
+
+export const AuthProvider: {
   LOCAL: 'LOCAL',
   GOOGLE: 'GOOGLE',
   LINKEDIN: 'LINKEDIN'
@@ -368,15 +368,11 @@ export type EvalResult = (typeof EvalResult)[keyof typeof EvalResult]
 
 }
 
-<<<<<<< HEAD
-export type VerificationStatus = $Enums.VerificationStatus;
+export type VerificationStatus = $Enums.VerificationStatus
 
-export const VerificationStatus: typeof $Enums.VerificationStatus;
+export const VerificationStatus: typeof $Enums.VerificationStatus
 
-export type AuthProvider = $Enums.AuthProvider;
-=======
 export type AuthProvider = $Enums.AuthProvider
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
 export const AuthProvider: typeof $Enums.AuthProvider
 
@@ -645,12 +641,12 @@ export class PrismaClient<
 
   /**
    * `prisma.degree`: Exposes CRUD operations for the **Degree** model.
-   * Example usage:
-   * ```ts
-   * // Fetch zero or more Degrees
-   * const degrees = await prisma.degree.findMany()
-   * ```
-   */
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Degrees
+    * const degrees = await prisma.degree.findMany()
+    * ```
+    */
   get degree(): Prisma.DegreeDelegate<ExtArgs, ClientOptions>;
 
   /**
@@ -1386,46 +1382,6 @@ export namespace Prisma {
 
 
   export const ModelName: {
-<<<<<<< HEAD
-    User: 'User';
-    Role: 'Role';
-    UserRole: 'UserRole';
-    Notification: 'Notification';
-    JobAlert: 'JobAlert';
-    Admin: 'Admin';
-    Candidate: 'Candidate';
-    Experience: 'Experience';
-    Certification: 'Certification';
-    Degree: 'Degree';
-    Skill: 'Skill';
-    Project: 'Project';
-    Recruiter: 'Recruiter';
-    Transaction: 'Transaction';
-    Company: 'Company';
-    CompanySection: 'CompanySection';
-    CompanyBenefit: 'CompanyBenefit';
-    CompanyHistory: 'CompanyHistory';
-    CompanyBranch: 'CompanyBranch';
-    JobPosting: 'JobPosting';
-    JobPostingBranch: 'JobPostingBranch';
-    JobMatch: 'JobMatch';
-    CV: 'CV';
-    Application: 'Application';
-    SavedJob: 'SavedJob';
-    Conversation: 'Conversation';
-    Message: 'Message';
-    CompanyWallet: 'CompanyWallet';
-    CandidateWallet: 'CandidateWallet';
-    CandidateTransaction: 'CandidateTransaction';
-    RecruiterSubscription: 'RecruiterSubscription';
-    SupportRequest: 'SupportRequest';
-    AiQueryCache: 'AiQueryCache';
-    CandidateUnlock: 'CandidateUnlock';
-    CandidateReview: 'CandidateReview';
-    InterviewEvaluation: 'InterviewEvaluation';
-    CompanyReview: 'CompanyReview';
-    CandidateReport: 'CandidateReport';
-=======
     User: 'User',
     Role: 'Role',
     UserRole: 'UserRole',
@@ -1435,6 +1391,7 @@ export namespace Prisma {
     Candidate: 'Candidate',
     Experience: 'Experience',
     Certification: 'Certification',
+    Degree: 'Degree',
     Skill: 'Skill',
     Project: 'Project',
     Recruiter: 'Recruiter',
@@ -1465,7 +1422,6 @@ export namespace Prisma {
     CompanyReview: 'CompanyReview',
     CandidateReport: 'CandidateReport',
     CompanyReviewReport: 'CompanyReviewReport'
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1481,53 +1437,9 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-<<<<<<< HEAD
-      modelProps:
-        | 'user'
-        | 'role'
-        | 'userRole'
-        | 'notification'
-        | 'jobAlert'
-        | 'admin'
-        | 'candidate'
-        | 'experience'
-        | 'certification'
-        | 'degree'
-        | 'skill'
-        | 'project'
-        | 'recruiter'
-        | 'transaction'
-        | 'company'
-        | 'companySection'
-        | 'companyBenefit'
-        | 'companyHistory'
-        | 'companyBranch'
-        | 'jobPosting'
-        | 'jobPostingBranch'
-        | 'jobMatch'
-        | 'cV'
-        | 'application'
-        | 'savedJob'
-        | 'conversation'
-        | 'message'
-        | 'companyWallet'
-        | 'candidateWallet'
-        | 'candidateTransaction'
-        | 'recruiterSubscription'
-        | 'supportRequest'
-        | 'aiQueryCache'
-        | 'candidateUnlock'
-        | 'candidateReview'
-        | 'interviewEvaluation'
-        | 'companyReview'
-        | 'candidateReport';
-      txIsolationLevel: Prisma.TransactionIsolationLevel;
-    };
-=======
-      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "experience" | "certification" | "skill" | "project" | "recruiter" | "transaction" | "company" | "companySection" | "companyBenefit" | "companyHistory" | "companyBranch" | "jobPosting" | "jobPostingBranch" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "companyWallet" | "candidateWallet" | "candidateTransaction" | "recruiterSubscription" | "supportRequest" | "aiQueryCache" | "candidateUnlock" | "candidateReview" | "violationLog" | "interviewEvaluation" | "companyReview" | "candidateReport" | "companyReviewReport"
+      modelProps: "user" | "role" | "userRole" | "notification" | "jobAlert" | "admin" | "candidate" | "experience" | "certification" | "degree" | "skill" | "project" | "recruiter" | "transaction" | "company" | "companySection" | "companyBenefit" | "companyHistory" | "companyBranch" | "jobPosting" | "jobPostingBranch" | "jobMatch" | "cV" | "application" | "savedJob" | "conversation" | "message" | "companyWallet" | "candidateWallet" | "candidateTransaction" | "recruiterSubscription" | "supportRequest" | "aiQueryCache" | "candidateUnlock" | "candidateReview" | "violationLog" | "interviewEvaluation" | "companyReview" | "candidateReport" | "companyReviewReport"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
     model: {
       User: {
         payload: Prisma.$UserPayload<ExtArgs>
@@ -2190,95 +2102,85 @@ export namespace Prisma {
             result: $Utils.Optional<CertificationGroupByOutputType>[]
           }
           count: {
-<<<<<<< HEAD
-            args: Prisma.CertificationCountArgs<ExtArgs>;
-            result:
-              | $Utils.Optional<CertificationCountAggregateOutputType>
-              | number;
-          };
-        };
-      };
-      Degree: {
-        payload: Prisma.$DegreePayload<ExtArgs>;
-        fields: Prisma.DegreeFieldRefs;
-        operations: {
-          findUnique: {
-            args: Prisma.DegreeFindUniqueArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null;
-          };
-          findUniqueOrThrow: {
-            args: Prisma.DegreeFindUniqueOrThrowArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          findFirst: {
-            args: Prisma.DegreeFindFirstArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null;
-          };
-          findFirstOrThrow: {
-            args: Prisma.DegreeFindFirstOrThrowArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          findMany: {
-            args: Prisma.DegreeFindManyArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
-          };
-          create: {
-            args: Prisma.DegreeCreateArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          createMany: {
-            args: Prisma.DegreeCreateManyArgs<ExtArgs>;
-            result: BatchPayload;
-          };
-          createManyAndReturn: {
-            args: Prisma.DegreeCreateManyAndReturnArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
-          };
-          delete: {
-            args: Prisma.DegreeDeleteArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          update: {
-            args: Prisma.DegreeUpdateArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          deleteMany: {
-            args: Prisma.DegreeDeleteManyArgs<ExtArgs>;
-            result: BatchPayload;
-          };
-          updateMany: {
-            args: Prisma.DegreeUpdateManyArgs<ExtArgs>;
-            result: BatchPayload;
-          };
-          updateManyAndReturn: {
-            args: Prisma.DegreeUpdateManyAndReturnArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[];
-          };
-          upsert: {
-            args: Prisma.DegreeUpsertArgs<ExtArgs>;
-            result: $Utils.PayloadToResult<Prisma.$DegreePayload>;
-          };
-          aggregate: {
-            args: Prisma.DegreeAggregateArgs<ExtArgs>;
-            result: $Utils.Optional<AggregateDegree>;
-          };
-          groupBy: {
-            args: Prisma.DegreeGroupByArgs<ExtArgs>;
-            result: $Utils.Optional<DegreeGroupByOutputType>[];
-          };
-          count: {
-            args: Prisma.DegreeCountArgs<ExtArgs>;
-            result: $Utils.Optional<DegreeCountAggregateOutputType> | number;
-          };
-        };
-      };
-=======
             args: Prisma.CertificationCountArgs<ExtArgs>
             result: $Utils.Optional<CertificationCountAggregateOutputType> | number
           }
         }
       }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
+      Degree: {
+        payload: Prisma.$DegreePayload<ExtArgs>
+        fields: Prisma.DegreeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DegreeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DegreeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          findFirst: {
+            args: Prisma.DegreeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DegreeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          findMany: {
+            args: Prisma.DegreeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[]
+          }
+          create: {
+            args: Prisma.DegreeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          createMany: {
+            args: Prisma.DegreeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DegreeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[]
+          }
+          delete: {
+            args: Prisma.DegreeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          update: {
+            args: Prisma.DegreeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          deleteMany: {
+            args: Prisma.DegreeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DegreeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DegreeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>[]
+          }
+          upsert: {
+            args: Prisma.DegreeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DegreePayload>
+          }
+          aggregate: {
+            args: Prisma.DegreeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDegree>
+          }
+          groupBy: {
+            args: Prisma.DegreeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DegreeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DegreeCountArgs<ExtArgs>
+            result: $Utils.Optional<DegreeCountAggregateOutputType> | number
+          }
+        }
+      }
       Skill: {
         payload: Prisma.$SkillPayload<ExtArgs>
         fields: Prisma.SkillFieldRefs
@@ -4607,47 +4509,6 @@ export namespace Prisma {
     comments?: runtime.SqlCommenterPlugin[]
   }
   export type GlobalOmitConfig = {
-<<<<<<< HEAD
-    user?: UserOmit;
-    role?: RoleOmit;
-    userRole?: UserRoleOmit;
-    notification?: NotificationOmit;
-    jobAlert?: JobAlertOmit;
-    admin?: AdminOmit;
-    candidate?: CandidateOmit;
-    experience?: ExperienceOmit;
-    certification?: CertificationOmit;
-    degree?: DegreeOmit;
-    skill?: SkillOmit;
-    project?: ProjectOmit;
-    recruiter?: RecruiterOmit;
-    transaction?: TransactionOmit;
-    company?: CompanyOmit;
-    companySection?: CompanySectionOmit;
-    companyBenefit?: CompanyBenefitOmit;
-    companyHistory?: CompanyHistoryOmit;
-    companyBranch?: CompanyBranchOmit;
-    jobPosting?: JobPostingOmit;
-    jobPostingBranch?: JobPostingBranchOmit;
-    jobMatch?: JobMatchOmit;
-    cV?: CVOmit;
-    application?: ApplicationOmit;
-    savedJob?: SavedJobOmit;
-    conversation?: ConversationOmit;
-    message?: MessageOmit;
-    companyWallet?: CompanyWalletOmit;
-    candidateWallet?: CandidateWalletOmit;
-    candidateTransaction?: CandidateTransactionOmit;
-    recruiterSubscription?: RecruiterSubscriptionOmit;
-    supportRequest?: SupportRequestOmit;
-    aiQueryCache?: AiQueryCacheOmit;
-    candidateUnlock?: CandidateUnlockOmit;
-    candidateReview?: CandidateReviewOmit;
-    interviewEvaluation?: InterviewEvaluationOmit;
-    companyReview?: CompanyReviewOmit;
-    candidateReport?: CandidateReportOmit;
-  };
-=======
     user?: UserOmit
     role?: RoleOmit
     userRole?: UserRoleOmit
@@ -4657,6 +4518,7 @@ export namespace Prisma {
     candidate?: CandidateOmit
     experience?: ExperienceOmit
     certification?: CertificationOmit
+    degree?: DegreeOmit
     skill?: SkillOmit
     project?: ProjectOmit
     recruiter?: RecruiterOmit
@@ -4688,7 +4550,6 @@ export namespace Prisma {
     candidateReport?: CandidateReportOmit
     companyReviewReport?: CompanyReviewReportOmit
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -4897,46 +4758,7 @@ export namespace Prisma {
    */
 
   export type CandidateCountOutputType = {
-<<<<<<< HEAD
-    applications: number;
-    cvs: number;
-    certifications: number;
-    degrees: number;
-    conversations: number;
-    experiences: number;
-    jobMatches: number;
-    projects: number;
-    savedJobs: number;
-    skills: number;
-    candidateUnlocks: number;
-    candidateReviews: number;
-    companyReviews: number;
-    reports: number;
-  };
-
-  export type CandidateCountOutputTypeSelect<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    applications?: boolean | CandidateCountOutputTypeCountApplicationsArgs;
-    cvs?: boolean | CandidateCountOutputTypeCountCvsArgs;
-    certifications?: boolean | CandidateCountOutputTypeCountCertificationsArgs;
-    degrees?: boolean | CandidateCountOutputTypeCountDegreesArgs;
-    conversations?: boolean | CandidateCountOutputTypeCountConversationsArgs;
-    experiences?: boolean | CandidateCountOutputTypeCountExperiencesArgs;
-    jobMatches?: boolean | CandidateCountOutputTypeCountJobMatchesArgs;
-    projects?: boolean | CandidateCountOutputTypeCountProjectsArgs;
-    savedJobs?: boolean | CandidateCountOutputTypeCountSavedJobsArgs;
-    skills?: boolean | CandidateCountOutputTypeCountSkillsArgs;
-    candidateUnlocks?:
-      | boolean
-      | CandidateCountOutputTypeCountCandidateUnlocksArgs;
-    candidateReviews?:
-      | boolean
-      | CandidateCountOutputTypeCountCandidateReviewsArgs;
-    companyReviews?: boolean | CandidateCountOutputTypeCountCompanyReviewsArgs;
-    reports?: boolean | CandidateCountOutputTypeCountReportsArgs;
-  };
-=======
+    degrees: number
     applications: number
     cvs: number
     reports: number
@@ -4953,6 +4775,7 @@ export namespace Prisma {
   }
 
   export type CandidateCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    degrees?: boolean | CandidateCountOutputTypeCountDegreesArgs
     applications?: boolean | CandidateCountOutputTypeCountApplicationsArgs
     cvs?: boolean | CandidateCountOutputTypeCountCvsArgs
     reports?: boolean | CandidateCountOutputTypeCountReportsArgs
@@ -4967,7 +4790,6 @@ export namespace Prisma {
     savedJobs?: boolean | CandidateCountOutputTypeCountSavedJobsArgs
     skills?: boolean | CandidateCountOutputTypeCountSkillsArgs
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   // Custom InputTypes
   /**
@@ -4978,6 +4800,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the CandidateCountOutputType
      */
     select?: CandidateCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CandidateCountOutputType without action
+   */
+  export type CandidateCountOutputTypeCountDegreesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DegreeWhereInput
   }
 
   /**
@@ -5004,26 +4833,9 @@ export namespace Prisma {
   /**
    * CandidateCountOutputType without action
    */
-<<<<<<< HEAD
-  export type CandidateCountOutputTypeCountDegreesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    where?: DegreeWhereInput;
-  };
-
-  /**
-   * CandidateCountOutputType without action
-   */
-  export type CandidateCountOutputTypeCountConversationsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    where?: ConversationWhereInput;
-  };
-=======
   export type CandidateCountOutputTypeCountCandidateReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CandidateReviewWhereInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   /**
    * CandidateCountOutputType without action
@@ -12407,7 +12219,6 @@ export namespace Prisma {
     userId: string | null
     birthYear: number | null
     currentSalary: string | null
-    degree: string | null
     gender: string | null
     isOpenToWork: boolean | null
     location: string | null
@@ -12426,7 +12237,6 @@ export namespace Prisma {
     userId: string | null
     birthYear: number | null
     currentSalary: string | null
-    degree: string | null
     gender: string | null
     isOpenToWork: boolean | null
     location: string | null
@@ -12436,32 +12246,6 @@ export namespace Prisma {
   }
 
   export type CandidateCountAggregateOutputType = {
-<<<<<<< HEAD
-    candidateId: number;
-    fullName: number;
-    university: number;
-    major: number;
-    gpa: number;
-    cvUrl: number;
-    userId: number;
-    isOpenToWork: number;
-    jobSearchExpiresAt: number;
-    location: number;
-    desiredJob: number;
-    summary: number;
-    birthYear: number;
-    currentSalary: number;
-    totalYearsExp: number;
-    degree: number;
-    gender: number;
-    industries: number;
-    interests: number;
-    languages: number;
-    otherInfo: number;
-    softSkills: number;
-    _all: number;
-  };
-=======
     candidateId: number
     fullName: number
     university: number
@@ -12471,7 +12255,7 @@ export namespace Prisma {
     userId: number
     birthYear: number
     currentSalary: number
-    degree: number
+    otherInfo: number
     desiredJob: number
     gender: number
     industries: number
@@ -12486,7 +12270,6 @@ export namespace Prisma {
     _all: number
   }
 
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateAvgAggregateInputType = {
     gpa?: true
@@ -12510,7 +12293,6 @@ export namespace Prisma {
     userId?: true
     birthYear?: true
     currentSalary?: true
-    degree?: true
     gender?: true
     isOpenToWork?: true
     location?: true
@@ -12529,7 +12311,6 @@ export namespace Prisma {
     userId?: true
     birthYear?: true
     currentSalary?: true
-    degree?: true
     gender?: true
     isOpenToWork?: true
     location?: true
@@ -12539,32 +12320,6 @@ export namespace Prisma {
   }
 
   export type CandidateCountAggregateInputType = {
-<<<<<<< HEAD
-    candidateId?: true;
-    fullName?: true;
-    university?: true;
-    major?: true;
-    gpa?: true;
-    cvUrl?: true;
-    userId?: true;
-    isOpenToWork?: true;
-    jobSearchExpiresAt?: true;
-    location?: true;
-    desiredJob?: true;
-    summary?: true;
-    birthYear?: true;
-    currentSalary?: true;
-    totalYearsExp?: true;
-    degree?: true;
-    gender?: true;
-    industries?: true;
-    interests?: true;
-    languages?: true;
-    otherInfo?: true;
-    softSkills?: true;
-    _all?: true;
-  };
-=======
     candidateId?: true
     fullName?: true
     university?: true
@@ -12574,7 +12329,7 @@ export namespace Prisma {
     userId?: true
     birthYear?: true
     currentSalary?: true
-    degree?: true
+    otherInfo?: true
     desiredJob?: true
     gender?: true
     industries?: true
@@ -12588,7 +12343,6 @@ export namespace Prisma {
     jobSearchExpiresAt?: true
     _all?: true
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -12677,36 +12431,6 @@ export namespace Prisma {
   }
 
   export type CandidateGroupByOutputType = {
-<<<<<<< HEAD
-    candidateId: string;
-    fullName: string;
-    university: string | null;
-    major: string | null;
-    gpa: number | null;
-    cvUrl: string | null;
-    userId: string;
-    isOpenToWork: boolean;
-    jobSearchExpiresAt: Date | null;
-    location: string | null;
-    desiredJob: JsonValue | null;
-    summary: string | null;
-    birthYear: number | null;
-    currentSalary: string | null;
-    totalYearsExp: number | null;
-    degree: string | null;
-    gender: string | null;
-    industries: string[];
-    interests: string[];
-    languages: JsonValue | null;
-    otherInfo: JsonValue | null;
-    softSkills: string[];
-    _count: CandidateCountAggregateOutputType | null;
-    _avg: CandidateAvgAggregateOutputType | null;
-    _sum: CandidateSumAggregateOutputType | null;
-    _min: CandidateMinAggregateOutputType | null;
-    _max: CandidateMaxAggregateOutputType | null;
-  };
-=======
     candidateId: string
     fullName: string
     university: string | null
@@ -12716,7 +12440,7 @@ export namespace Prisma {
     userId: string
     birthYear: number | null
     currentSalary: string | null
-    degree: string | null
+    otherInfo: JsonValue | null
     desiredJob: JsonValue | null
     gender: string | null
     industries: string[]
@@ -12734,7 +12458,6 @@ export namespace Prisma {
     _min: CandidateMinAggregateOutputType | null
     _max: CandidateMaxAggregateOutputType | null
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   type GetCandidateGroupByPayload<T extends CandidateGroupByArgs> = Prisma.PrismaPromise<
     Array<
@@ -12749,200 +12472,6 @@ export namespace Prisma {
       >
     >
 
-<<<<<<< HEAD
-  export type CandidateSelect<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      candidateId?: boolean;
-      fullName?: boolean;
-      university?: boolean;
-      major?: boolean;
-      gpa?: boolean;
-      cvUrl?: boolean;
-      userId?: boolean;
-      isOpenToWork?: boolean;
-      jobSearchExpiresAt?: boolean;
-      location?: boolean;
-      desiredJob?: boolean;
-      summary?: boolean;
-      birthYear?: boolean;
-      currentSalary?: boolean;
-      totalYearsExp?: boolean;
-      degree?: boolean;
-      gender?: boolean;
-      industries?: boolean;
-      interests?: boolean;
-      languages?: boolean;
-      otherInfo?: boolean;
-      softSkills?: boolean;
-      applications?: boolean | Candidate$applicationsArgs<ExtArgs>;
-      cvs?: boolean | Candidate$cvsArgs<ExtArgs>;
-      user?: boolean | UserDefaultArgs<ExtArgs>;
-      certifications?: boolean | Candidate$certificationsArgs<ExtArgs>;
-      degrees?: boolean | Candidate$degreesArgs<ExtArgs>;
-      conversations?: boolean | Candidate$conversationsArgs<ExtArgs>;
-      experiences?: boolean | Candidate$experiencesArgs<ExtArgs>;
-      jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>;
-      projects?: boolean | Candidate$projectsArgs<ExtArgs>;
-      savedJobs?: boolean | Candidate$savedJobsArgs<ExtArgs>;
-      skills?: boolean | Candidate$skillsArgs<ExtArgs>;
-      candidateUnlocks?: boolean | Candidate$candidateUnlocksArgs<ExtArgs>;
-      candidateReviews?: boolean | Candidate$candidateReviewsArgs<ExtArgs>;
-      companyReviews?: boolean | Candidate$companyReviewsArgs<ExtArgs>;
-      reports?: boolean | Candidate$reportsArgs<ExtArgs>;
-      wallet?: boolean | Candidate$walletArgs<ExtArgs>;
-      _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['candidate']
-  >;
-
-  export type CandidateSelectCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      candidateId?: boolean;
-      fullName?: boolean;
-      university?: boolean;
-      major?: boolean;
-      gpa?: boolean;
-      cvUrl?: boolean;
-      userId?: boolean;
-      isOpenToWork?: boolean;
-      jobSearchExpiresAt?: boolean;
-      location?: boolean;
-      desiredJob?: boolean;
-      summary?: boolean;
-      birthYear?: boolean;
-      currentSalary?: boolean;
-      totalYearsExp?: boolean;
-      degree?: boolean;
-      gender?: boolean;
-      industries?: boolean;
-      interests?: boolean;
-      languages?: boolean;
-      otherInfo?: boolean;
-      softSkills?: boolean;
-      user?: boolean | UserDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['candidate']
-  >;
-
-  export type CandidateSelectUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      candidateId?: boolean;
-      fullName?: boolean;
-      university?: boolean;
-      major?: boolean;
-      gpa?: boolean;
-      cvUrl?: boolean;
-      userId?: boolean;
-      isOpenToWork?: boolean;
-      jobSearchExpiresAt?: boolean;
-      location?: boolean;
-      desiredJob?: boolean;
-      summary?: boolean;
-      birthYear?: boolean;
-      currentSalary?: boolean;
-      totalYearsExp?: boolean;
-      degree?: boolean;
-      gender?: boolean;
-      industries?: boolean;
-      interests?: boolean;
-      languages?: boolean;
-      otherInfo?: boolean;
-      softSkills?: boolean;
-      user?: boolean | UserDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['candidate']
-  >;
-
-  export type CandidateSelectScalar = {
-    candidateId?: boolean;
-    fullName?: boolean;
-    university?: boolean;
-    major?: boolean;
-    gpa?: boolean;
-    cvUrl?: boolean;
-    userId?: boolean;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: boolean;
-    location?: boolean;
-    desiredJob?: boolean;
-    summary?: boolean;
-    birthYear?: boolean;
-    currentSalary?: boolean;
-    totalYearsExp?: boolean;
-    degree?: boolean;
-    gender?: boolean;
-    industries?: boolean;
-    interests?: boolean;
-    languages?: boolean;
-    otherInfo?: boolean;
-    softSkills?: boolean;
-  };
-
-  export type CandidateOmit<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetOmit<
-    | 'candidateId'
-    | 'fullName'
-    | 'university'
-    | 'major'
-    | 'gpa'
-    | 'cvUrl'
-    | 'userId'
-    | 'isOpenToWork'
-    | 'jobSearchExpiresAt'
-    | 'location'
-    | 'desiredJob'
-    | 'summary'
-    | 'birthYear'
-    | 'currentSalary'
-    | 'totalYearsExp'
-    | 'degree'
-    | 'gender'
-    | 'industries'
-    | 'interests'
-    | 'languages'
-    | 'otherInfo'
-    | 'softSkills',
-    ExtArgs['result']['candidate']
-  >;
-  export type CandidateInclude<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    applications?: boolean | Candidate$applicationsArgs<ExtArgs>;
-    cvs?: boolean | Candidate$cvsArgs<ExtArgs>;
-    user?: boolean | UserDefaultArgs<ExtArgs>;
-    certifications?: boolean | Candidate$certificationsArgs<ExtArgs>;
-    degrees?: boolean | Candidate$degreesArgs<ExtArgs>;
-    conversations?: boolean | Candidate$conversationsArgs<ExtArgs>;
-    experiences?: boolean | Candidate$experiencesArgs<ExtArgs>;
-    jobMatches?: boolean | Candidate$jobMatchesArgs<ExtArgs>;
-    projects?: boolean | Candidate$projectsArgs<ExtArgs>;
-    savedJobs?: boolean | Candidate$savedJobsArgs<ExtArgs>;
-    skills?: boolean | Candidate$skillsArgs<ExtArgs>;
-    candidateUnlocks?: boolean | Candidate$candidateUnlocksArgs<ExtArgs>;
-    candidateReviews?: boolean | Candidate$candidateReviewsArgs<ExtArgs>;
-    companyReviews?: boolean | Candidate$companyReviewsArgs<ExtArgs>;
-    reports?: boolean | Candidate$reportsArgs<ExtArgs>;
-    wallet?: boolean | Candidate$walletArgs<ExtArgs>;
-    _count?: boolean | CandidateCountOutputTypeDefaultArgs<ExtArgs>;
-  };
-  export type CandidateIncludeCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    user?: boolean | UserDefaultArgs<ExtArgs>;
-  };
-  export type CandidateIncludeUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    user?: boolean | UserDefaultArgs<ExtArgs>;
-  };
-=======
 
   export type CandidateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     candidateId?: boolean
@@ -12954,7 +12483,7 @@ export namespace Prisma {
     userId?: boolean
     birthYear?: boolean
     currentSalary?: boolean
-    degree?: boolean
+    otherInfo?: boolean
     desiredJob?: boolean
     gender?: boolean
     industries?: boolean
@@ -12966,6 +12495,7 @@ export namespace Prisma {
     summary?: boolean
     totalYearsExp?: boolean
     jobSearchExpiresAt?: boolean
+    degrees?: boolean | Candidate$degreesArgs<ExtArgs>
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -12994,7 +12524,7 @@ export namespace Prisma {
     userId?: boolean
     birthYear?: boolean
     currentSalary?: boolean
-    degree?: boolean
+    otherInfo?: boolean
     desiredJob?: boolean
     gender?: boolean
     industries?: boolean
@@ -13019,7 +12549,7 @@ export namespace Prisma {
     userId?: boolean
     birthYear?: boolean
     currentSalary?: boolean
-    degree?: boolean
+    otherInfo?: boolean
     desiredJob?: boolean
     gender?: boolean
     industries?: boolean
@@ -13044,7 +12574,7 @@ export namespace Prisma {
     userId?: boolean
     birthYear?: boolean
     currentSalary?: boolean
-    degree?: boolean
+    otherInfo?: boolean
     desiredJob?: boolean
     gender?: boolean
     industries?: boolean
@@ -13058,8 +12588,9 @@ export namespace Prisma {
     jobSearchExpiresAt?: boolean
   }
 
-  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "birthYear" | "currentSalary" | "degree" | "desiredJob" | "gender" | "industries" | "interests" | "isOpenToWork" | "languages" | "location" | "softSkills" | "summary" | "totalYearsExp" | "jobSearchExpiresAt", ExtArgs["result"]["candidate"]>
+  export type CandidateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candidateId" | "fullName" | "university" | "major" | "gpa" | "cvUrl" | "userId" | "birthYear" | "currentSalary" | "otherInfo" | "desiredJob" | "gender" | "industries" | "interests" | "isOpenToWork" | "languages" | "location" | "softSkills" | "summary" | "totalYearsExp" | "jobSearchExpiresAt", ExtArgs["result"]["candidate"]>
   export type CandidateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    degrees?: boolean | Candidate$degreesArgs<ExtArgs>
     applications?: boolean | Candidate$applicationsArgs<ExtArgs>
     cvs?: boolean | Candidate$cvsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -13083,59 +12614,11 @@ export namespace Prisma {
   export type CandidateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type $CandidatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Candidate"
     objects: {
-<<<<<<< HEAD
-      applications: Prisma.$ApplicationPayload<ExtArgs>[];
-      cvs: Prisma.$CVPayload<ExtArgs>[];
-      user: Prisma.$UserPayload<ExtArgs>;
-      certifications: Prisma.$CertificationPayload<ExtArgs>[];
-      degrees: Prisma.$DegreePayload<ExtArgs>[];
-      conversations: Prisma.$ConversationPayload<ExtArgs>[];
-      experiences: Prisma.$ExperiencePayload<ExtArgs>[];
-      jobMatches: Prisma.$JobMatchPayload<ExtArgs>[];
-      projects: Prisma.$ProjectPayload<ExtArgs>[];
-      savedJobs: Prisma.$SavedJobPayload<ExtArgs>[];
-      skills: Prisma.$SkillPayload<ExtArgs>[];
-      candidateUnlocks: Prisma.$CandidateUnlockPayload<ExtArgs>[];
-      candidateReviews: Prisma.$CandidateReviewPayload<ExtArgs>[];
-      companyReviews: Prisma.$CompanyReviewPayload<ExtArgs>[];
-      reports: Prisma.$CandidateReportPayload<ExtArgs>[];
-      wallet: Prisma.$CandidateWalletPayload<ExtArgs> | null;
-    };
-    scalars: $Extensions.GetPayloadResult<
-      {
-        candidateId: string;
-        fullName: string;
-        university: string | null;
-        major: string | null;
-        gpa: number | null;
-        cvUrl: string | null;
-        userId: string;
-        isOpenToWork: boolean;
-        jobSearchExpiresAt: Date | null;
-        location: string | null;
-        desiredJob: Prisma.JsonValue | null;
-        summary: string | null;
-        birthYear: number | null;
-        currentSalary: string | null;
-        totalYearsExp: number | null;
-        degree: string | null;
-        gender: string | null;
-        industries: string[];
-        interests: string[];
-        languages: Prisma.JsonValue | null;
-        otherInfo: Prisma.JsonValue | null;
-        softSkills: string[];
-      },
-      ExtArgs['result']['candidate']
-    >;
-    composites: {};
-  };
-=======
+      degrees: Prisma.$DegreePayload<ExtArgs>[]
       applications: Prisma.$ApplicationPayload<ExtArgs>[]
       cvs: Prisma.$CVPayload<ExtArgs>[]
       user: Prisma.$UserPayload<ExtArgs>
@@ -13162,7 +12645,7 @@ export namespace Prisma {
       userId: string
       birthYear: number | null
       currentSalary: string | null
-      degree: string | null
+      otherInfo: Prisma.JsonValue | null
       desiredJob: Prisma.JsonValue | null
       gender: string | null
       industries: string[]
@@ -13177,7 +12660,6 @@ export namespace Prisma {
     }, ExtArgs["result"]["candidate"]>
     composites: {}
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   type CandidateGetPayload<S extends boolean | null | undefined | CandidateDefaultArgs> = $Result.GetResult<Prisma.$CandidatePayload, S>
 
@@ -13567,198 +13049,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-<<<<<<< HEAD
-  export interface Prisma__CandidateClient<
-    T,
-    Null = never,
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-    GlobalOmitOptions = {},
-  > extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-    applications<T extends Candidate$applicationsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$applicationsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$ApplicationPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    cvs<T extends Candidate$cvsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$cvsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CVPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(
-      args?: Subset<T, UserDefaultArgs<ExtArgs>>,
-    ): Prisma__UserClient<
-      | $Result.GetResult<
-          Prisma.$UserPayload<ExtArgs>,
-          T,
-          'findUniqueOrThrow',
-          GlobalOmitOptions
-        >
-      | Null,
-      Null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
-    certifications<T extends Candidate$certificationsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$certificationsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CertificationPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    degrees<T extends Candidate$degreesArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$degreesArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$DegreePayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    conversations<T extends Candidate$conversationsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$conversationsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$ConversationPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    experiences<T extends Candidate$experiencesArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$experiencesArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$ExperiencePayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    jobMatches<T extends Candidate$jobMatchesArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$jobMatchesArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$JobMatchPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    projects<T extends Candidate$projectsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$projectsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$ProjectPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    savedJobs<T extends Candidate$savedJobsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$savedJobsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$SavedJobPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    skills<T extends Candidate$skillsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$skillsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$SkillPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    candidateUnlocks<T extends Candidate$candidateUnlocksArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$candidateUnlocksArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CandidateUnlockPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    candidateReviews<T extends Candidate$candidateReviewsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$candidateReviewsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CandidateReviewPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    companyReviews<T extends Candidate$companyReviewsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$companyReviewsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CompanyReviewPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    reports<T extends Candidate$reportsArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$reportsArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      | $Result.GetResult<
-          Prisma.$CandidateReportPayload<ExtArgs>,
-          T,
-          'findMany',
-          GlobalOmitOptions
-        >
-      | Null
-    >;
-    wallet<T extends Candidate$walletArgs<ExtArgs> = {}>(
-      args?: Subset<T, Candidate$walletArgs<ExtArgs>>,
-    ): Prisma__CandidateWalletClient<
-      $Result.GetResult<
-        Prisma.$CandidateWalletPayload<ExtArgs>,
-        T,
-        'findUniqueOrThrow',
-        GlobalOmitOptions
-      > | null,
-      null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
-=======
   export interface Prisma__CandidateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    degrees<T extends Candidate$degreesArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$degreesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     applications<T extends Candidate$applicationsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     cvs<T extends Candidate$cvsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$cvsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CVPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -13774,7 +13067,6 @@ export namespace Prisma {
     projects<T extends Candidate$projectsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     savedJobs<T extends Candidate$savedJobsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$savedJobsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     skills<T extends Candidate$skillsArgs<ExtArgs> = {}>(args?: Subset<T, Candidate$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13804,30 +13096,6 @@ export namespace Prisma {
    * Fields of the Candidate model
    */
   interface CandidateFieldRefs {
-<<<<<<< HEAD
-    readonly candidateId: FieldRef<'Candidate', 'String'>;
-    readonly fullName: FieldRef<'Candidate', 'String'>;
-    readonly university: FieldRef<'Candidate', 'String'>;
-    readonly major: FieldRef<'Candidate', 'String'>;
-    readonly gpa: FieldRef<'Candidate', 'Float'>;
-    readonly cvUrl: FieldRef<'Candidate', 'String'>;
-    readonly userId: FieldRef<'Candidate', 'String'>;
-    readonly isOpenToWork: FieldRef<'Candidate', 'Boolean'>;
-    readonly jobSearchExpiresAt: FieldRef<'Candidate', 'DateTime'>;
-    readonly location: FieldRef<'Candidate', 'String'>;
-    readonly desiredJob: FieldRef<'Candidate', 'Json'>;
-    readonly summary: FieldRef<'Candidate', 'String'>;
-    readonly birthYear: FieldRef<'Candidate', 'Int'>;
-    readonly currentSalary: FieldRef<'Candidate', 'String'>;
-    readonly totalYearsExp: FieldRef<'Candidate', 'Float'>;
-    readonly degree: FieldRef<'Candidate', 'String'>;
-    readonly gender: FieldRef<'Candidate', 'String'>;
-    readonly industries: FieldRef<'Candidate', 'String[]'>;
-    readonly interests: FieldRef<'Candidate', 'String[]'>;
-    readonly languages: FieldRef<'Candidate', 'Json'>;
-    readonly otherInfo: FieldRef<'Candidate', 'Json'>;
-    readonly softSkills: FieldRef<'Candidate', 'String[]'>;
-=======
     readonly candidateId: FieldRef<"Candidate", 'String'>
     readonly fullName: FieldRef<"Candidate", 'String'>
     readonly university: FieldRef<"Candidate", 'String'>
@@ -13837,7 +13105,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Candidate", 'String'>
     readonly birthYear: FieldRef<"Candidate", 'Int'>
     readonly currentSalary: FieldRef<"Candidate", 'String'>
-    readonly degree: FieldRef<"Candidate", 'String'>
+    readonly otherInfo: FieldRef<"Candidate", 'Json'>
     readonly desiredJob: FieldRef<"Candidate", 'Json'>
     readonly gender: FieldRef<"Candidate", 'String'>
     readonly industries: FieldRef<"Candidate", 'String[]'>
@@ -13849,7 +13117,6 @@ export namespace Prisma {
     readonly summary: FieldRef<"Candidate", 'String'>
     readonly totalYearsExp: FieldRef<"Candidate", 'Float'>
     readonly jobSearchExpiresAt: FieldRef<"Candidate", 'DateTime'>
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   }
     
 
@@ -14251,6 +13518,30 @@ export namespace Prisma {
   }
 
   /**
+   * Candidate.degrees
+   */
+  export type Candidate$degreesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Degree
+     */
+    select?: DegreeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Degree
+     */
+    omit?: DegreeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DegreeInclude<ExtArgs> | null
+    where?: DegreeWhereInput
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[]
+    cursor?: DegreeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[]
+  }
+
+  /**
    * Candidate.applications
    */
   export type Candidate$applicationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14289,324 +13580,6 @@ export namespace Prisma {
     /**
      * Choose, which related nodes to fetch as well
      */
-<<<<<<< HEAD
-    include?: CVInclude<ExtArgs> | null;
-    where?: CVWhereInput;
-    orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[];
-    cursor?: CVWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: CVScalarFieldEnum | CVScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.certifications
-   */
-  export type Candidate$certificationsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Certification
-     */
-    select?: CertificationSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Certification
-     */
-    omit?: CertificationOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CertificationInclude<ExtArgs> | null;
-    where?: CertificationWhereInput;
-    orderBy?:
-      | CertificationOrderByWithRelationInput
-      | CertificationOrderByWithRelationInput[];
-    cursor?: CertificationWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: CertificationScalarFieldEnum | CertificationScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.degrees
-   */
-  export type Candidate$degreesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Degree
-     */
-    select?: DegreeSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Degree
-     */
-    omit?: DegreeOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DegreeInclude<ExtArgs> | null;
-    where?: DegreeWhereInput;
-    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
-    cursor?: DegreeWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.conversations
-   */
-  export type Candidate$conversationsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Conversation
-     */
-    select?: ConversationSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Conversation
-     */
-    omit?: ConversationOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ConversationInclude<ExtArgs> | null;
-    where?: ConversationWhereInput;
-    orderBy?:
-      | ConversationOrderByWithRelationInput
-      | ConversationOrderByWithRelationInput[];
-    cursor?: ConversationWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: ConversationScalarFieldEnum | ConversationScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.experiences
-   */
-  export type Candidate$experiencesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Experience
-     */
-    select?: ExperienceSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Experience
-     */
-    omit?: ExperienceOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ExperienceInclude<ExtArgs> | null;
-    where?: ExperienceWhereInput;
-    orderBy?:
-      | ExperienceOrderByWithRelationInput
-      | ExperienceOrderByWithRelationInput[];
-    cursor?: ExperienceWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: ExperienceScalarFieldEnum | ExperienceScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.jobMatches
-   */
-  export type Candidate$jobMatchesArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the JobMatch
-     */
-    select?: JobMatchSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the JobMatch
-     */
-    omit?: JobMatchOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobMatchInclude<ExtArgs> | null;
-    where?: JobMatchWhereInput;
-    orderBy?:
-      | JobMatchOrderByWithRelationInput
-      | JobMatchOrderByWithRelationInput[];
-    cursor?: JobMatchWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: JobMatchScalarFieldEnum | JobMatchScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.projects
-   */
-  export type Candidate$projectsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Project
-     */
-    select?: ProjectSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Project
-     */
-    omit?: ProjectOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectInclude<ExtArgs> | null;
-    where?: ProjectWhereInput;
-    orderBy?:
-      | ProjectOrderByWithRelationInput
-      | ProjectOrderByWithRelationInput[];
-    cursor?: ProjectWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: ProjectScalarFieldEnum | ProjectScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.savedJobs
-   */
-  export type Candidate$savedJobsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the SavedJob
-     */
-    select?: SavedJobSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the SavedJob
-     */
-    omit?: SavedJobOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: SavedJobInclude<ExtArgs> | null;
-    where?: SavedJobWhereInput;
-    orderBy?:
-      | SavedJobOrderByWithRelationInput
-      | SavedJobOrderByWithRelationInput[];
-    cursor?: SavedJobWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: SavedJobScalarFieldEnum | SavedJobScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.skills
-   */
-  export type Candidate$skillsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the Skill
-     */
-    select?: SkillSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Skill
-     */
-    omit?: SkillOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: SkillInclude<ExtArgs> | null;
-    where?: SkillWhereInput;
-    orderBy?: SkillOrderByWithRelationInput | SkillOrderByWithRelationInput[];
-    cursor?: SkillWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: SkillScalarFieldEnum | SkillScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.candidateUnlocks
-   */
-  export type Candidate$candidateUnlocksArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the CandidateUnlock
-     */
-    select?: CandidateUnlockSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the CandidateUnlock
-     */
-    omit?: CandidateUnlockOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CandidateUnlockInclude<ExtArgs> | null;
-    where?: CandidateUnlockWhereInput;
-    orderBy?:
-      | CandidateUnlockOrderByWithRelationInput
-      | CandidateUnlockOrderByWithRelationInput[];
-    cursor?: CandidateUnlockWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?:
-      | CandidateUnlockScalarFieldEnum
-      | CandidateUnlockScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.candidateReviews
-   */
-  export type Candidate$candidateReviewsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the CandidateReview
-     */
-    select?: CandidateReviewSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the CandidateReview
-     */
-    omit?: CandidateReviewOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CandidateReviewInclude<ExtArgs> | null;
-    where?: CandidateReviewWhereInput;
-    orderBy?:
-      | CandidateReviewOrderByWithRelationInput
-      | CandidateReviewOrderByWithRelationInput[];
-    cursor?: CandidateReviewWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?:
-      | CandidateReviewScalarFieldEnum
-      | CandidateReviewScalarFieldEnum[];
-  };
-
-  /**
-   * Candidate.companyReviews
-   */
-  export type Candidate$companyReviewsArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    /**
-     * Select specific fields to fetch from the CompanyReview
-     */
-    select?: CompanyReviewSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the CompanyReview
-     */
-    omit?: CompanyReviewOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CompanyReviewInclude<ExtArgs> | null;
-    where?: CompanyReviewWhereInput;
-    orderBy?:
-      | CompanyReviewOrderByWithRelationInput
-      | CompanyReviewOrderByWithRelationInput[];
-    cursor?: CompanyReviewWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: CompanyReviewScalarFieldEnum | CompanyReviewScalarFieldEnum[];
-  };
-=======
     include?: CVInclude<ExtArgs> | null
     where?: CVWhereInput
     orderBy?: CVOrderByWithRelationInput | CVOrderByWithRelationInput[]
@@ -14615,7 +13588,6 @@ export namespace Prisma {
     skip?: number
     distinct?: CVScalarFieldEnum | CVScalarFieldEnum[]
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   /**
    * Candidate.reports
@@ -16006,102 +14978,42 @@ export namespace Prisma {
   }
 
   export type CertificationMinAggregateOutputType = {
-<<<<<<< HEAD
-    certificationId: string | null;
-    name: string | null;
-    issuer: string | null;
-    issueDate: string | null;
-    credentialId: string | null;
-    credentialUrl: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus | null;
-    adminFeedback: string | null;
-    candidateId: string | null;
-  };
-
-  export type CertificationMaxAggregateOutputType = {
-    certificationId: string | null;
-    name: string | null;
-    issuer: string | null;
-    issueDate: string | null;
-    credentialId: string | null;
-    credentialUrl: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus | null;
-    adminFeedback: string | null;
-    candidateId: string | null;
-  };
-
-  export type CertificationCountAggregateOutputType = {
-    certificationId: number;
-    name: number;
-    issuer: number;
-    issueDate: number;
-    credentialId: number;
-    credentialUrl: number;
-    fileUrl: number;
-    status: number;
-    adminFeedback: number;
-    aiVerification: number;
-    candidateId: number;
-    _all: number;
-  };
-
-  export type CertificationMinAggregateInputType = {
-    certificationId?: true;
-    name?: true;
-    issuer?: true;
-    issueDate?: true;
-    credentialId?: true;
-    credentialUrl?: true;
-    fileUrl?: true;
-    status?: true;
-    adminFeedback?: true;
-    candidateId?: true;
-  };
-
-  export type CertificationMaxAggregateInputType = {
-    certificationId?: true;
-    name?: true;
-    issuer?: true;
-    issueDate?: true;
-    credentialId?: true;
-    credentialUrl?: true;
-    fileUrl?: true;
-    status?: true;
-    adminFeedback?: true;
-    candidateId?: true;
-  };
-
-  export type CertificationCountAggregateInputType = {
-    certificationId?: true;
-    name?: true;
-    issuer?: true;
-    issueDate?: true;
-    credentialId?: true;
-    credentialUrl?: true;
-    fileUrl?: true;
-    status?: true;
-    adminFeedback?: true;
-    aiVerification?: true;
-    candidateId?: true;
-    _all?: true;
-  };
-=======
     certificationId: string | null
     name: string | null
+    issuer: string | null
+    issueDate: string | null
+    credentialId: string | null
+    credentialUrl: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus | null
+    adminFeedback: string | null
     candidateId: string | null
   }
 
   export type CertificationMaxAggregateOutputType = {
     certificationId: string | null
     name: string | null
+    issuer: string | null
+    issueDate: string | null
+    credentialId: string | null
+    credentialUrl: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus | null
+    adminFeedback: string | null
     candidateId: string | null
   }
 
   export type CertificationCountAggregateOutputType = {
     certificationId: number
     name: number
+    issuer: number
+    issueDate: number
+    credentialId: number
+    credentialUrl: number
+    fileUrl: number
+    status: number
+    adminFeedback: number
+    aiVerification: number
     candidateId: number
     _all: number
   }
@@ -16110,22 +15022,43 @@ export namespace Prisma {
   export type CertificationMinAggregateInputType = {
     certificationId?: true
     name?: true
+    issuer?: true
+    issueDate?: true
+    credentialId?: true
+    credentialUrl?: true
+    fileUrl?: true
+    status?: true
+    adminFeedback?: true
     candidateId?: true
   }
 
   export type CertificationMaxAggregateInputType = {
     certificationId?: true
     name?: true
+    issuer?: true
+    issueDate?: true
+    credentialId?: true
+    credentialUrl?: true
+    fileUrl?: true
+    status?: true
+    adminFeedback?: true
     candidateId?: true
   }
 
   export type CertificationCountAggregateInputType = {
     certificationId?: true
     name?: true
+    issuer?: true
+    issueDate?: true
+    credentialId?: true
+    credentialUrl?: true
+    fileUrl?: true
+    status?: true
+    adminFeedback?: true
+    aiVerification?: true
     candidateId?: true
     _all?: true
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CertificationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -16200,31 +15133,21 @@ export namespace Prisma {
   }
 
   export type CertificationGroupByOutputType = {
-<<<<<<< HEAD
-    certificationId: string;
-    name: string;
-    issuer: string | null;
-    issueDate: string | null;
-    credentialId: string | null;
-    credentialUrl: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus;
-    adminFeedback: string | null;
-    aiVerification: JsonValue | null;
-    candidateId: string;
-    _count: CertificationCountAggregateOutputType | null;
-    _min: CertificationMinAggregateOutputType | null;
-    _max: CertificationMaxAggregateOutputType | null;
-  };
-=======
     certificationId: string
     name: string
+    issuer: string | null
+    issueDate: string | null
+    credentialId: string | null
+    credentialUrl: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus
+    adminFeedback: string | null
+    aiVerification: JsonValue | null
     candidateId: string
     _count: CertificationCountAggregateOutputType | null
     _min: CertificationMinAggregateOutputType | null
     _max: CertificationMaxAggregateOutputType | null
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   type GetCertificationGroupByPayload<T extends CertificationGroupByArgs> = Prisma.PrismaPromise<
     Array<
@@ -16239,117 +15162,18 @@ export namespace Prisma {
       >
     >
 
-<<<<<<< HEAD
-  export type CertificationSelect<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      certificationId?: boolean;
-      name?: boolean;
-      issuer?: boolean;
-      issueDate?: boolean;
-      credentialId?: boolean;
-      credentialUrl?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['certification']
-  >;
-
-  export type CertificationSelectCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      certificationId?: boolean;
-      name?: boolean;
-      issuer?: boolean;
-      issueDate?: boolean;
-      credentialId?: boolean;
-      credentialUrl?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['certification']
-  >;
-
-  export type CertificationSelectUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      certificationId?: boolean;
-      name?: boolean;
-      issuer?: boolean;
-      issueDate?: boolean;
-      credentialId?: boolean;
-      credentialUrl?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['certification']
-  >;
-
-  export type CertificationSelectScalar = {
-    certificationId?: boolean;
-    name?: boolean;
-    issuer?: boolean;
-    issueDate?: boolean;
-    credentialId?: boolean;
-    credentialUrl?: boolean;
-    fileUrl?: boolean;
-    status?: boolean;
-    adminFeedback?: boolean;
-    aiVerification?: boolean;
-    candidateId?: boolean;
-  };
-
-  export type CertificationOmit<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetOmit<
-    | 'certificationId'
-    | 'name'
-    | 'issuer'
-    | 'issueDate'
-    | 'credentialId'
-    | 'credentialUrl'
-    | 'fileUrl'
-    | 'status'
-    | 'adminFeedback'
-    | 'aiVerification'
-    | 'candidateId',
-    ExtArgs['result']['certification']
-  >;
-  export type CertificationInclude<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
-  export type CertificationIncludeCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
-  export type CertificationIncludeUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
-=======
 
   export type CertificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     certificationId?: boolean
     name?: boolean
+    issuer?: boolean
+    issueDate?: boolean
+    credentialId?: boolean
+    credentialUrl?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
     candidateId?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["certification"]>
@@ -16357,6 +15181,14 @@ export namespace Prisma {
   export type CertificationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     certificationId?: boolean
     name?: boolean
+    issuer?: boolean
+    issueDate?: boolean
+    credentialId?: boolean
+    credentialUrl?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
     candidateId?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["certification"]>
@@ -16364,6 +15196,14 @@ export namespace Prisma {
   export type CertificationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     certificationId?: boolean
     name?: boolean
+    issuer?: boolean
+    issueDate?: boolean
+    credentialId?: boolean
+    credentialUrl?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
     candidateId?: boolean
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["certification"]>
@@ -16371,10 +15211,18 @@ export namespace Prisma {
   export type CertificationSelectScalar = {
     certificationId?: boolean
     name?: boolean
+    issuer?: boolean
+    issueDate?: boolean
+    credentialId?: boolean
+    credentialUrl?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
     candidateId?: boolean
   }
 
-  export type CertificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"certificationId" | "name" | "candidateId", ExtArgs["result"]["certification"]>
+  export type CertificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"certificationId" | "name" | "issuer" | "issueDate" | "credentialId" | "credentialUrl" | "fileUrl" | "status" | "adminFeedback" | "aiVerification" | "candidateId", ExtArgs["result"]["certification"]>
   export type CertificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }
@@ -16384,43 +15232,27 @@ export namespace Prisma {
   export type CertificationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     candidate?: boolean | CandidateDefaultArgs<ExtArgs>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type $CertificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Certification"
     objects: {
-<<<<<<< HEAD
-      candidate: Prisma.$CandidatePayload<ExtArgs>;
-    };
-    scalars: $Extensions.GetPayloadResult<
-      {
-        certificationId: string;
-        name: string;
-        issuer: string | null;
-        issueDate: string | null;
-        credentialId: string | null;
-        credentialUrl: string | null;
-        fileUrl: string | null;
-        status: $Enums.VerificationStatus;
-        adminFeedback: string | null;
-        aiVerification: Prisma.JsonValue | null;
-        candidateId: string;
-      },
-      ExtArgs['result']['certification']
-    >;
-    composites: {};
-  };
-=======
       candidate: Prisma.$CandidatePayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       certificationId: string
       name: string
+      issuer: string | null
+      issueDate: string | null
+      credentialId: string | null
+      credentialUrl: string | null
+      fileUrl: string | null
+      status: $Enums.VerificationStatus
+      adminFeedback: string | null
+      aiVerification: Prisma.JsonValue | null
       candidateId: string
     }, ExtArgs["result"]["certification"]>
     composites: {}
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   type CertificationGetPayload<S extends boolean | null | undefined | CertificationDefaultArgs> = $Result.GetResult<Prisma.$CertificationPayload, S>
 
@@ -16842,23 +15674,17 @@ export namespace Prisma {
    * Fields of the Certification model
    */
   interface CertificationFieldRefs {
-<<<<<<< HEAD
-    readonly certificationId: FieldRef<'Certification', 'String'>;
-    readonly name: FieldRef<'Certification', 'String'>;
-    readonly issuer: FieldRef<'Certification', 'String'>;
-    readonly issueDate: FieldRef<'Certification', 'String'>;
-    readonly credentialId: FieldRef<'Certification', 'String'>;
-    readonly credentialUrl: FieldRef<'Certification', 'String'>;
-    readonly fileUrl: FieldRef<'Certification', 'String'>;
-    readonly status: FieldRef<'Certification', 'VerificationStatus'>;
-    readonly adminFeedback: FieldRef<'Certification', 'String'>;
-    readonly aiVerification: FieldRef<'Certification', 'Json'>;
-    readonly candidateId: FieldRef<'Certification', 'String'>;
-=======
     readonly certificationId: FieldRef<"Certification", 'String'>
     readonly name: FieldRef<"Certification", 'String'>
+    readonly issuer: FieldRef<"Certification", 'String'>
+    readonly issueDate: FieldRef<"Certification", 'String'>
+    readonly credentialId: FieldRef<"Certification", 'String'>
+    readonly credentialUrl: FieldRef<"Certification", 'String'>
+    readonly fileUrl: FieldRef<"Certification", 'String'>
+    readonly status: FieldRef<"Certification", 'VerificationStatus'>
+    readonly adminFeedback: FieldRef<"Certification", 'String'>
+    readonly aiVerification: FieldRef<"Certification", 'Json'>
     readonly candidateId: FieldRef<"Certification", 'String'>
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   }
     
 
@@ -17283,361 +16109,309 @@ export namespace Prisma {
    */
 
   export type AggregateDegree = {
-    _count: DegreeCountAggregateOutputType | null;
-    _min: DegreeMinAggregateOutputType | null;
-    _max: DegreeMaxAggregateOutputType | null;
-  };
+    _count: DegreeCountAggregateOutputType | null
+    _min: DegreeMinAggregateOutputType | null
+    _max: DegreeMaxAggregateOutputType | null
+  }
 
   export type DegreeMinAggregateOutputType = {
-    degreeId: string | null;
-    name: string | null;
-    school: string | null;
-    major: string | null;
-    issueDate: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus | null;
-    issuer: string | null;
-    credentialId: string | null;
-    adminFeedback: string | null;
-    candidateId: string | null;
-  };
+    degreeId: string | null
+    name: string | null
+    school: string | null
+    major: string | null
+    issueDate: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus | null
+    issuer: string | null
+    credentialId: string | null
+    adminFeedback: string | null
+    candidateId: string | null
+  }
 
   export type DegreeMaxAggregateOutputType = {
-    degreeId: string | null;
-    name: string | null;
-    school: string | null;
-    major: string | null;
-    issueDate: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus | null;
-    issuer: string | null;
-    credentialId: string | null;
-    adminFeedback: string | null;
-    candidateId: string | null;
-  };
+    degreeId: string | null
+    name: string | null
+    school: string | null
+    major: string | null
+    issueDate: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus | null
+    issuer: string | null
+    credentialId: string | null
+    adminFeedback: string | null
+    candidateId: string | null
+  }
 
   export type DegreeCountAggregateOutputType = {
-    degreeId: number;
-    name: number;
-    school: number;
-    major: number;
-    issueDate: number;
-    fileUrl: number;
-    status: number;
-    issuer: number;
-    credentialId: number;
-    adminFeedback: number;
-    aiVerification: number;
-    candidateId: number;
-    _all: number;
-  };
+    degreeId: number
+    name: number
+    school: number
+    major: number
+    issueDate: number
+    fileUrl: number
+    status: number
+    issuer: number
+    credentialId: number
+    adminFeedback: number
+    aiVerification: number
+    candidateId: number
+    _all: number
+  }
+
 
   export type DegreeMinAggregateInputType = {
-    degreeId?: true;
-    name?: true;
-    school?: true;
-    major?: true;
-    issueDate?: true;
-    fileUrl?: true;
-    status?: true;
-    issuer?: true;
-    credentialId?: true;
-    adminFeedback?: true;
-    candidateId?: true;
-  };
+    degreeId?: true
+    name?: true
+    school?: true
+    major?: true
+    issueDate?: true
+    fileUrl?: true
+    status?: true
+    issuer?: true
+    credentialId?: true
+    adminFeedback?: true
+    candidateId?: true
+  }
 
   export type DegreeMaxAggregateInputType = {
-    degreeId?: true;
-    name?: true;
-    school?: true;
-    major?: true;
-    issueDate?: true;
-    fileUrl?: true;
-    status?: true;
-    issuer?: true;
-    credentialId?: true;
-    adminFeedback?: true;
-    candidateId?: true;
-  };
+    degreeId?: true
+    name?: true
+    school?: true
+    major?: true
+    issueDate?: true
+    fileUrl?: true
+    status?: true
+    issuer?: true
+    credentialId?: true
+    adminFeedback?: true
+    candidateId?: true
+  }
 
   export type DegreeCountAggregateInputType = {
-    degreeId?: true;
-    name?: true;
-    school?: true;
-    major?: true;
-    issueDate?: true;
-    fileUrl?: true;
-    status?: true;
-    issuer?: true;
-    credentialId?: true;
-    adminFeedback?: true;
-    aiVerification?: true;
-    candidateId?: true;
-    _all?: true;
-  };
+    degreeId?: true
+    name?: true
+    school?: true
+    major?: true
+    issueDate?: true
+    fileUrl?: true
+    status?: true
+    issuer?: true
+    credentialId?: true
+    adminFeedback?: true
+    aiVerification?: true
+    candidateId?: true
+    _all?: true
+  }
 
-  export type DegreeAggregateArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Filter which Degree to aggregate.
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
+     * 
      * Determine the order of Degrees to fetch.
      */
-    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
+     * 
      * Sets the start position
      */
-    cursor?: DegreeWhereUniqueInput;
+    cursor?: DegreeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Take `±n` Degrees from the position of the cursor.
      */
-    take?: number;
+    take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Skip the first `n` Degrees.
      */
-    skip?: number;
+    skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
+     * 
      * Count returned Degrees
-     **/
-    _count?: true | DegreeCountAggregateInputType;
+    **/
+    _count?: true | DegreeCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
+     * 
      * Select which fields to find the minimum value
-     **/
-    _min?: DegreeMinAggregateInputType;
+    **/
+    _min?: DegreeMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     *
+     * 
      * Select which fields to find the maximum value
-     **/
-    _max?: DegreeMaxAggregateInputType;
-  };
+    **/
+    _max?: DegreeMaxAggregateInputType
+  }
 
   export type GetDegreeAggregateType<T extends DegreeAggregateArgs> = {
-    [P in keyof T & keyof AggregateDegree]: P extends '_count' | 'count'
+        [P in keyof T & keyof AggregateDegree]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
         : GetScalarType<T[P], AggregateDegree[P]>
-      : GetScalarType<T[P], AggregateDegree[P]>;
-  };
+      : GetScalarType<T[P], AggregateDegree[P]>
+  }
 
-  export type DegreeGroupByArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    where?: DegreeWhereInput;
-    orderBy?:
-      | DegreeOrderByWithAggregationInput
-      | DegreeOrderByWithAggregationInput[];
-    by: DegreeScalarFieldEnum[] | DegreeScalarFieldEnum;
-    having?: DegreeScalarWhereWithAggregatesInput;
-    take?: number;
-    skip?: number;
-    _count?: DegreeCountAggregateInputType | true;
-    _min?: DegreeMinAggregateInputType;
-    _max?: DegreeMaxAggregateInputType;
-  };
+
+
+
+  export type DegreeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DegreeWhereInput
+    orderBy?: DegreeOrderByWithAggregationInput | DegreeOrderByWithAggregationInput[]
+    by: DegreeScalarFieldEnum[] | DegreeScalarFieldEnum
+    having?: DegreeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DegreeCountAggregateInputType | true
+    _min?: DegreeMinAggregateInputType
+    _max?: DegreeMaxAggregateInputType
+  }
 
   export type DegreeGroupByOutputType = {
-    degreeId: string;
-    name: string;
-    school: string;
-    major: string | null;
-    issueDate: string | null;
-    fileUrl: string | null;
-    status: $Enums.VerificationStatus;
-    issuer: string | null;
-    credentialId: string | null;
-    adminFeedback: string | null;
-    aiVerification: JsonValue | null;
-    candidateId: string;
-    _count: DegreeCountAggregateOutputType | null;
-    _min: DegreeMinAggregateOutputType | null;
-    _max: DegreeMaxAggregateOutputType | null;
-  };
+    degreeId: string
+    name: string
+    school: string
+    major: string | null
+    issueDate: string | null
+    fileUrl: string | null
+    status: $Enums.VerificationStatus
+    issuer: string | null
+    credentialId: string | null
+    adminFeedback: string | null
+    aiVerification: JsonValue | null
+    candidateId: string
+    _count: DegreeCountAggregateOutputType | null
+    _min: DegreeMinAggregateOutputType | null
+    _max: DegreeMaxAggregateOutputType | null
+  }
 
-  type GetDegreeGroupByPayload<T extends DegreeGroupByArgs> =
-    Prisma.PrismaPromise<
-      Array<
-        PickEnumerable<DegreeGroupByOutputType, T['by']> & {
-          [P in keyof T & keyof DegreeGroupByOutputType]: P extends '_count'
+  type GetDegreeGroupByPayload<T extends DegreeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DegreeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DegreeGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], DegreeGroupByOutputType[P]>
-            : GetScalarType<T[P], DegreeGroupByOutputType[P]>;
+            : GetScalarType<T[P], DegreeGroupByOutputType[P]>
         }
       >
-    >;
+    >
 
-  export type DegreeSelect<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      degreeId?: boolean;
-      name?: boolean;
-      school?: boolean;
-      major?: boolean;
-      issueDate?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      issuer?: boolean;
-      credentialId?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['degree']
-  >;
 
-  export type DegreeSelectCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      degreeId?: boolean;
-      name?: boolean;
-      school?: boolean;
-      major?: boolean;
-      issueDate?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      issuer?: boolean;
-      credentialId?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['degree']
-  >;
+  export type DegreeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    degreeId?: boolean
+    name?: boolean
+    school?: boolean
+    major?: boolean
+    issueDate?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    issuer?: boolean
+    credentialId?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
+    candidateId?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["degree"]>
 
-  export type DegreeSelectUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetSelect<
-    {
-      degreeId?: boolean;
-      name?: boolean;
-      school?: boolean;
-      major?: boolean;
-      issueDate?: boolean;
-      fileUrl?: boolean;
-      status?: boolean;
-      issuer?: boolean;
-      credentialId?: boolean;
-      adminFeedback?: boolean;
-      aiVerification?: boolean;
-      candidateId?: boolean;
-      candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-    },
-    ExtArgs['result']['degree']
-  >;
+  export type DegreeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    degreeId?: boolean
+    name?: boolean
+    school?: boolean
+    major?: boolean
+    issueDate?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    issuer?: boolean
+    credentialId?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
+    candidateId?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["degree"]>
+
+  export type DegreeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    degreeId?: boolean
+    name?: boolean
+    school?: boolean
+    major?: boolean
+    issueDate?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    issuer?: boolean
+    credentialId?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
+    candidateId?: boolean
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["degree"]>
 
   export type DegreeSelectScalar = {
-    degreeId?: boolean;
-    name?: boolean;
-    school?: boolean;
-    major?: boolean;
-    issueDate?: boolean;
-    fileUrl?: boolean;
-    status?: boolean;
-    issuer?: boolean;
-    credentialId?: boolean;
-    adminFeedback?: boolean;
-    aiVerification?: boolean;
-    candidateId?: boolean;
-  };
+    degreeId?: boolean
+    name?: boolean
+    school?: boolean
+    major?: boolean
+    issueDate?: boolean
+    fileUrl?: boolean
+    status?: boolean
+    issuer?: boolean
+    credentialId?: boolean
+    adminFeedback?: boolean
+    aiVerification?: boolean
+    candidateId?: boolean
+  }
 
-  export type DegreeOmit<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = $Extensions.GetOmit<
-    | 'degreeId'
-    | 'name'
-    | 'school'
-    | 'major'
-    | 'issueDate'
-    | 'fileUrl'
-    | 'status'
-    | 'issuer'
-    | 'credentialId'
-    | 'adminFeedback'
-    | 'aiVerification'
-    | 'candidateId',
-    ExtArgs['result']['degree']
-  >;
-  export type DegreeInclude<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
-  export type DegreeIncludeCreateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
-  export type DegreeIncludeUpdateManyAndReturn<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    candidate?: boolean | CandidateDefaultArgs<ExtArgs>;
-  };
+  export type DegreeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"degreeId" | "name" | "school" | "major" | "issueDate" | "fileUrl" | "status" | "issuer" | "credentialId" | "adminFeedback" | "aiVerification" | "candidateId", ExtArgs["result"]["degree"]>
+  export type DegreeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }
+  export type DegreeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }
+  export type DegreeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    candidate?: boolean | CandidateDefaultArgs<ExtArgs>
+  }
 
-  export type $DegreePayload<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
-    name: 'Degree';
+  export type $DegreePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Degree"
     objects: {
-      candidate: Prisma.$CandidatePayload<ExtArgs>;
-    };
-    scalars: $Extensions.GetPayloadResult<
-      {
-        degreeId: string;
-        name: string;
-        school: string;
-        major: string | null;
-        issueDate: string | null;
-        fileUrl: string | null;
-        status: $Enums.VerificationStatus;
-        issuer: string | null;
-        credentialId: string | null;
-        adminFeedback: string | null;
-        aiVerification: Prisma.JsonValue | null;
-        candidateId: string;
-      },
-      ExtArgs['result']['degree']
-    >;
-    composites: {};
-  };
+      candidate: Prisma.$CandidatePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      degreeId: string
+      name: string
+      school: string
+      major: string | null
+      issueDate: string | null
+      fileUrl: string | null
+      status: $Enums.VerificationStatus
+      issuer: string | null
+      credentialId: string | null
+      adminFeedback: string | null
+      aiVerification: Prisma.JsonValue | null
+      candidateId: string
+    }, ExtArgs["result"]["degree"]>
+    composites: {}
+  }
 
-  type DegreeGetPayload<
-    S extends boolean | null | undefined | DegreeDefaultArgs,
-  > = $Result.GetResult<Prisma.$DegreePayload, S>;
+  type DegreeGetPayload<S extends boolean | null | undefined | DegreeDefaultArgs> = $Result.GetResult<Prisma.$DegreePayload, S>
 
-  type DegreeCountArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = Omit<DegreeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-    select?: DegreeCountAggregateInputType | true;
-  };
+  type DegreeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DegreeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DegreeCountAggregateInputType | true
+    }
 
-  export interface DegreeDelegate<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-    GlobalOmitOptions = {},
-  > {
-    [K: symbol]: {
-      types: Prisma.TypeMap<ExtArgs>['model']['Degree'];
-      meta: { name: 'Degree' };
-    };
+  export interface DegreeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Degree'], meta: { name: 'Degree' } }
     /**
      * Find zero or one Degree that matches the filter.
      * @param {DegreeFindUniqueArgs} args - Arguments to find a Degree
@@ -17649,19 +16423,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends DegreeFindUniqueArgs>(
-      args: SelectSubset<T, DegreeFindUniqueArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'findUnique',
-        GlobalOmitOptions
-      > | null,
-      null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    findUnique<T extends DegreeFindUniqueArgs>(args: SelectSubset<T, DegreeFindUniqueArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Degree that matches the filter or throw an error with `error.code='P2025'`
@@ -17675,19 +16437,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends DegreeFindUniqueOrThrowArgs>(
-      args: SelectSubset<T, DegreeFindUniqueOrThrowArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'findUniqueOrThrow',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    findUniqueOrThrow<T extends DegreeFindUniqueOrThrowArgs>(args: SelectSubset<T, DegreeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Degree that matches the filter.
@@ -17702,19 +16452,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends DegreeFindFirstArgs>(
-      args?: SelectSubset<T, DegreeFindFirstArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'findFirst',
-        GlobalOmitOptions
-      > | null,
-      null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    findFirst<T extends DegreeFindFirstArgs>(args?: SelectSubset<T, DegreeFindFirstArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Degree that matches the filter or
@@ -17730,19 +16468,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends DegreeFindFirstOrThrowArgs>(
-      args?: SelectSubset<T, DegreeFindFirstOrThrowArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'findFirstOrThrow',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    findFirstOrThrow<T extends DegreeFindFirstOrThrowArgs>(args?: SelectSubset<T, DegreeFindFirstOrThrowArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Degrees that matches the filter.
@@ -17752,24 +16478,15 @@ export namespace Prisma {
      * @example
      * // Get all Degrees
      * const degrees = await prisma.degree.findMany()
-     *
+     * 
      * // Get first 10 Degrees
      * const degrees = await prisma.degree.findMany({ take: 10 })
-     *
+     * 
      * // Only select the `degreeId`
      * const degreeWithDegreeIdOnly = await prisma.degree.findMany({ select: { degreeId: true } })
-     *
+     * 
      */
-    findMany<T extends DegreeFindManyArgs>(
-      args?: SelectSubset<T, DegreeFindManyArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'findMany',
-        GlobalOmitOptions
-      >
-    >;
+    findMany<T extends DegreeFindManyArgs>(args?: SelectSubset<T, DegreeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
 
     /**
      * Create a Degree.
@@ -17781,21 +16498,9 @@ export namespace Prisma {
      *     // ... data to create a Degree
      *   }
      * })
-     *
+     * 
      */
-    create<T extends DegreeCreateArgs>(
-      args: SelectSubset<T, DegreeCreateArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'create',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    create<T extends DegreeCreateArgs>(args: SelectSubset<T, DegreeCreateArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Degrees.
@@ -17807,11 +16512,9 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     *
+     *     
      */
-    createMany<T extends DegreeCreateManyArgs>(
-      args?: SelectSubset<T, DegreeCreateManyArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<BatchPayload>;
+    createMany<T extends DegreeCreateManyArgs>(args?: SelectSubset<T, DegreeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create many Degrees and returns the data saved in the database.
@@ -17823,7 +16526,7 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     *
+     * 
      * // Create many Degrees and only return the `degreeId`
      * const degreeWithDegreeIdOnly = await prisma.degree.createManyAndReturn({
      *   select: { degreeId: true },
@@ -17833,18 +16536,9 @@ export namespace Prisma {
      * })
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     *
+     * 
      */
-    createManyAndReturn<T extends DegreeCreateManyAndReturnArgs>(
-      args?: SelectSubset<T, DegreeCreateManyAndReturnArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'createManyAndReturn',
-        GlobalOmitOptions
-      >
-    >;
+    createManyAndReturn<T extends DegreeCreateManyAndReturnArgs>(args?: SelectSubset<T, DegreeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a Degree.
@@ -17856,21 +16550,9 @@ export namespace Prisma {
      *     // ... filter to delete one Degree
      *   }
      * })
-     *
+     * 
      */
-    delete<T extends DegreeDeleteArgs>(
-      args: SelectSubset<T, DegreeDeleteArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'delete',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    delete<T extends DegreeDeleteArgs>(args: SelectSubset<T, DegreeDeleteArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Degree.
@@ -17885,21 +16567,9 @@ export namespace Prisma {
      *     // ... provide data here
      *   }
      * })
-     *
+     * 
      */
-    update<T extends DegreeUpdateArgs>(
-      args: SelectSubset<T, DegreeUpdateArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'update',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    update<T extends DegreeUpdateArgs>(args: SelectSubset<T, DegreeUpdateArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Degrees.
@@ -17911,11 +16581,9 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-     *
+     * 
      */
-    deleteMany<T extends DegreeDeleteManyArgs>(
-      args?: SelectSubset<T, DegreeDeleteManyArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<BatchPayload>;
+    deleteMany<T extends DegreeDeleteManyArgs>(args?: SelectSubset<T, DegreeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Degrees.
@@ -17932,11 +16600,9 @@ export namespace Prisma {
      *     // ... provide data here
      *   }
      * })
-     *
+     * 
      */
-    updateMany<T extends DegreeUpdateManyArgs>(
-      args: SelectSubset<T, DegreeUpdateManyArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<BatchPayload>;
+    updateMany<T extends DegreeUpdateManyArgs>(args: SelectSubset<T, DegreeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Degrees and returns the data updated in the database.
@@ -17951,7 +16617,7 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     *
+     * 
      * // Update zero or more Degrees and only return the `degreeId`
      * const degreeWithDegreeIdOnly = await prisma.degree.updateManyAndReturn({
      *   select: { degreeId: true },
@@ -17964,18 +16630,9 @@ export namespace Prisma {
      * })
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     *
+     * 
      */
-    updateManyAndReturn<T extends DegreeUpdateManyAndReturnArgs>(
-      args: SelectSubset<T, DegreeUpdateManyAndReturnArgs<ExtArgs>>,
-    ): Prisma.PrismaPromise<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'updateManyAndReturn',
-        GlobalOmitOptions
-      >
-    >;
+    updateManyAndReturn<T extends DegreeUpdateManyAndReturnArgs>(args: SelectSubset<T, DegreeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Degree.
@@ -17994,19 +16651,8 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends DegreeUpsertArgs>(
-      args: SelectSubset<T, DegreeUpsertArgs<ExtArgs>>,
-    ): Prisma__DegreeClient<
-      $Result.GetResult<
-        Prisma.$DegreePayload<ExtArgs>,
-        T,
-        'upsert',
-        GlobalOmitOptions
-      >,
-      never,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+    upsert<T extends DegreeUpsertArgs>(args: SelectSubset<T, DegreeUpsertArgs<ExtArgs>>): Prisma__DegreeClient<$Result.GetResult<Prisma.$DegreePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
 
     /**
      * Count the number of Degrees.
@@ -18020,7 +16666,7 @@ export namespace Prisma {
      *     // ... the filter for the Degrees we want to count
      *   }
      * })
-     **/
+    **/
     count<T extends DegreeCountArgs>(
       args?: Subset<T, DegreeCountArgs>,
     ): Prisma.PrismaPromise<
@@ -18029,7 +16675,7 @@ export namespace Prisma {
           ? number
           : GetScalarType<T['select'], DegreeCountAggregateOutputType>
         : number
-    >;
+    >
 
     /**
      * Allows you to perform aggregations operations on a Degree.
@@ -18054,10 +16700,8 @@ export namespace Prisma {
      *   },
      *   take: 10,
      * })
-     **/
-    aggregate<T extends DegreeAggregateArgs>(
-      args: Subset<T, DegreeAggregateArgs>,
-    ): Prisma.PrismaPromise<GetDegreeAggregateType<T>>;
+    **/
+    aggregate<T extends DegreeAggregateArgs>(args: Subset<T, DegreeAggregateArgs>): Prisma.PrismaPromise<GetDegreeAggregateType<T>>
 
     /**
      * Group by Degree.
@@ -18075,8 +16719,8 @@ export namespace Prisma {
      *     _all: true
      *   },
      * })
-     *
-     **/
+     * 
+    **/
     groupBy<
       T extends DegreeGroupByArgs,
       HasSelectOrTake extends Or<
@@ -18086,65 +16730,59 @@ export namespace Prisma {
       OrderByArg extends True extends HasSelectOrTake
         ? { orderBy: DegreeGroupByArgs['orderBy'] }
         : { orderBy?: DegreeGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<
-        Keys<MaybeTupleToUnion<T['orderBy']>>
-      >,
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
       HavingFields extends GetHavingFields<T['having']>,
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-        ? `Error: "by" must not be empty.`
-        : HavingValid extends False
-          ? {
-              [P in HavingFields]: P extends ByFields
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
                 ? never
-                : P extends string
-                  ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-                  : [
-                      Error,
-                      'Field ',
-                      P,
-                      ` in "having" needs to be provided in "by"`,
-                    ];
-            }[HavingFields]
-          : 'take' extends Keys<T>
-            ? 'orderBy' extends Keys<T>
-              ? ByValid extends True
-                ? {}
-                : {
-                    [P in OrderFields]: P extends ByFields
-                      ? never
-                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-                  }[OrderFields]
-              : 'Error: If you provide "take", you also need to provide "orderBy"'
-            : 'skip' extends Keys<T>
-              ? 'orderBy' extends Keys<T>
-                ? ByValid extends True
-                  ? {}
-                  : {
-                      [P in OrderFields]: P extends ByFields
-                        ? never
-                        : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-                    }[OrderFields]
-                : 'Error: If you provide "skip", you also need to provide "orderBy"'
-              : ByValid extends True
-                ? {}
-                : {
-                    [P in OrderFields]: P extends ByFields
-                      ? never
-                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`;
-                  }[OrderFields],
-    >(
-      args: SubsetIntersection<T, DegreeGroupByArgs, OrderByArg> & InputErrors,
-    ): {} extends InputErrors
-      ? GetDegreeGroupByPayload<T>
-      : Prisma.PrismaPromise<InputErrors>;
-    /**
-     * Fields of the Degree model
-     */
-    readonly fields: DegreeFieldRefs;
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DegreeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDegreeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Degree model
+   */
+  readonly fields: DegreeFieldRefs;
   }
 
   /**
@@ -18153,516 +16791,468 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__DegreeClient<
-    T,
-    Null = never,
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-    GlobalOmitOptions = {},
-  > extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: 'PrismaPromise';
-    candidate<T extends CandidateDefaultArgs<ExtArgs> = {}>(
-      args?: Subset<T, CandidateDefaultArgs<ExtArgs>>,
-    ): Prisma__CandidateClient<
-      | $Result.GetResult<
-          Prisma.$CandidatePayload<ExtArgs>,
-          T,
-          'findUniqueOrThrow',
-          GlobalOmitOptions
-        >
-      | Null,
-      Null,
-      ExtArgs,
-      GlobalOmitOptions
-    >;
+  export interface Prisma__DegreeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    candidate<T extends CandidateDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CandidateDefaultArgs<ExtArgs>>): Prisma__CandidateClient<$Result.GetResult<Prisma.$CandidatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(
-      onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
-      onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
-    ): $Utils.JsPromise<TResult1 | TResult2>;
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(
-      onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | null,
-    ): $Utils.JsPromise<T | TResult>;
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
      * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
      * @returns A Promise for the completion of the callback.
      */
-    finally(onfinally?: (() => void) | null): $Utils.JsPromise<T>;
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
+
+
+
 
   /**
    * Fields of the Degree model
    */
   interface DegreeFieldRefs {
-    readonly degreeId: FieldRef<'Degree', 'String'>;
-    readonly name: FieldRef<'Degree', 'String'>;
-    readonly school: FieldRef<'Degree', 'String'>;
-    readonly major: FieldRef<'Degree', 'String'>;
-    readonly issueDate: FieldRef<'Degree', 'String'>;
-    readonly fileUrl: FieldRef<'Degree', 'String'>;
-    readonly status: FieldRef<'Degree', 'VerificationStatus'>;
-    readonly issuer: FieldRef<'Degree', 'String'>;
-    readonly credentialId: FieldRef<'Degree', 'String'>;
-    readonly adminFeedback: FieldRef<'Degree', 'String'>;
-    readonly aiVerification: FieldRef<'Degree', 'Json'>;
-    readonly candidateId: FieldRef<'Degree', 'String'>;
+    readonly degreeId: FieldRef<"Degree", 'String'>
+    readonly name: FieldRef<"Degree", 'String'>
+    readonly school: FieldRef<"Degree", 'String'>
+    readonly major: FieldRef<"Degree", 'String'>
+    readonly issueDate: FieldRef<"Degree", 'String'>
+    readonly fileUrl: FieldRef<"Degree", 'String'>
+    readonly status: FieldRef<"Degree", 'VerificationStatus'>
+    readonly issuer: FieldRef<"Degree", 'String'>
+    readonly credentialId: FieldRef<"Degree", 'String'>
+    readonly adminFeedback: FieldRef<"Degree", 'String'>
+    readonly aiVerification: FieldRef<"Degree", 'Json'>
+    readonly candidateId: FieldRef<"Degree", 'String'>
   }
+    
 
   // Custom InputTypes
   /**
    * Degree findUnique
    */
-  export type DegreeFindUniqueArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter, which Degree to fetch.
      */
-    where: DegreeWhereUniqueInput;
-  };
+    where: DegreeWhereUniqueInput
+  }
 
   /**
    * Degree findUniqueOrThrow
    */
-  export type DegreeFindUniqueOrThrowArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter, which Degree to fetch.
      */
-    where: DegreeWhereUniqueInput;
-  };
+    where: DegreeWhereUniqueInput
+  }
 
   /**
    * Degree findFirst
    */
-  export type DegreeFindFirstArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter, which Degree to fetch.
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
+     * 
      * Determine the order of Degrees to fetch.
      */
-    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
+     * 
      * Sets the position for searching for Degrees.
      */
-    cursor?: DegreeWhereUniqueInput;
+    cursor?: DegreeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Take `±n` Degrees from the position of the cursor.
      */
-    take?: number;
+    take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Skip the first `n` Degrees.
      */
-    skip?: number;
+    skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
+     * 
      * Filter by unique combinations of Degrees.
      */
-    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
-  };
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[]
+  }
 
   /**
    * Degree findFirstOrThrow
    */
-  export type DegreeFindFirstOrThrowArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter, which Degree to fetch.
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
+     * 
      * Determine the order of Degrees to fetch.
      */
-    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
+     * 
      * Sets the position for searching for Degrees.
      */
-    cursor?: DegreeWhereUniqueInput;
+    cursor?: DegreeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Take `±n` Degrees from the position of the cursor.
      */
-    take?: number;
+    take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Skip the first `n` Degrees.
      */
-    skip?: number;
+    skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
+     * 
      * Filter by unique combinations of Degrees.
      */
-    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
-  };
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[]
+  }
 
   /**
    * Degree findMany
    */
-  export type DegreeFindManyArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter, which Degrees to fetch.
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     *
+     * 
      * Determine the order of Degrees to fetch.
      */
-    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[];
+    orderBy?: DegreeOrderByWithRelationInput | DegreeOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     *
+     * 
      * Sets the position for listing Degrees.
      */
-    cursor?: DegreeWhereUniqueInput;
+    cursor?: DegreeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Take `±n` Degrees from the position of the cursor.
      */
-    take?: number;
+    take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     *
+     * 
      * Skip the first `n` Degrees.
      */
-    skip?: number;
+    skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     *
+     * 
      * Filter by unique combinations of Degrees.
      */
-    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[];
-  };
+    distinct?: DegreeScalarFieldEnum | DegreeScalarFieldEnum[]
+  }
 
   /**
    * Degree create
    */
-  export type DegreeCreateArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * The data needed to create a Degree.
      */
-    data: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>;
-  };
+    data: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>
+  }
 
   /**
    * Degree createMany
    */
-  export type DegreeCreateManyArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * The data used to create many Degrees.
      */
-    data: DegreeCreateManyInput | DegreeCreateManyInput[];
-    skipDuplicates?: boolean;
-  };
+    data: DegreeCreateManyInput | DegreeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
 
   /**
    * Degree createManyAndReturn
    */
-  export type DegreeCreateManyAndReturnArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelectCreateManyAndReturn<ExtArgs> | null;
+    select?: DegreeSelectCreateManyAndReturn<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * The data used to create many Degrees.
      */
-    data: DegreeCreateManyInput | DegreeCreateManyInput[];
-    skipDuplicates?: boolean;
+    data: DegreeCreateManyInput | DegreeCreateManyInput[]
+    skipDuplicates?: boolean
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeIncludeCreateManyAndReturn<ExtArgs> | null;
-  };
+    include?: DegreeIncludeCreateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * Degree update
    */
-  export type DegreeUpdateArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * The data needed to update a Degree.
      */
-    data: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>;
+    data: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>
     /**
      * Choose, which Degree to update.
      */
-    where: DegreeWhereUniqueInput;
-  };
+    where: DegreeWhereUniqueInput
+  }
 
   /**
    * Degree updateMany
    */
-  export type DegreeUpdateManyArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * The data used to update Degrees.
      */
-    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>;
+    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>
     /**
      * Filter which Degrees to update
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * Limit how many Degrees to update.
      */
-    limit?: number;
-  };
+    limit?: number
+  }
 
   /**
    * Degree updateManyAndReturn
    */
-  export type DegreeUpdateManyAndReturnArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelectUpdateManyAndReturn<ExtArgs> | null;
+    select?: DegreeSelectUpdateManyAndReturn<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * The data used to update Degrees.
      */
-    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>;
+    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyInput>
     /**
      * Filter which Degrees to update
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * Limit how many Degrees to update.
      */
-    limit?: number;
+    limit?: number
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeIncludeUpdateManyAndReturn<ExtArgs> | null;
-  };
+    include?: DegreeIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
 
   /**
    * Degree upsert
    */
-  export type DegreeUpsertArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * The filter to search for the Degree to update in case it exists.
      */
-    where: DegreeWhereUniqueInput;
+    where: DegreeWhereUniqueInput
     /**
      * In case the Degree found by the `where` argument doesn't exist, create a new Degree with this data.
      */
-    create: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>;
+    create: XOR<DegreeCreateInput, DegreeUncheckedCreateInput>
     /**
      * In case the Degree was found with the provided `where` argument, update it with this data.
      */
-    update: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>;
-  };
+    update: XOR<DegreeUpdateInput, DegreeUncheckedUpdateInput>
+  }
 
   /**
    * Degree delete
    */
-  export type DegreeDeleteArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
+    include?: DegreeInclude<ExtArgs> | null
     /**
      * Filter which Degree to delete.
      */
-    where: DegreeWhereUniqueInput;
-  };
+    where: DegreeWhereUniqueInput
+  }
 
   /**
    * Degree deleteMany
    */
-  export type DegreeDeleteManyArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Filter which Degrees to delete
      */
-    where?: DegreeWhereInput;
+    where?: DegreeWhereInput
     /**
      * Limit how many Degrees to delete.
      */
-    limit?: number;
-  };
+    limit?: number
+  }
 
   /**
    * Degree without action
    */
-  export type DegreeDefaultArgs<
-    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
-  > = {
+  export type DegreeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Degree
      */
-    select?: DegreeSelect<ExtArgs> | null;
+    select?: DegreeSelect<ExtArgs> | null
     /**
      * Omit specific fields from the Degree
      */
-    omit?: DegreeOmit<ExtArgs> | null;
+    omit?: DegreeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: DegreeInclude<ExtArgs> | null;
-  };
+    include?: DegreeInclude<ExtArgs> | null
+  }
+
 
   /**
    * Model Skill
@@ -54116,30 +52706,6 @@ export namespace Prisma {
 
 
   export const CandidateScalarFieldEnum: {
-<<<<<<< HEAD
-    candidateId: 'candidateId';
-    fullName: 'fullName';
-    university: 'university';
-    major: 'major';
-    gpa: 'gpa';
-    cvUrl: 'cvUrl';
-    userId: 'userId';
-    isOpenToWork: 'isOpenToWork';
-    jobSearchExpiresAt: 'jobSearchExpiresAt';
-    location: 'location';
-    desiredJob: 'desiredJob';
-    summary: 'summary';
-    birthYear: 'birthYear';
-    currentSalary: 'currentSalary';
-    totalYearsExp: 'totalYearsExp';
-    degree: 'degree';
-    gender: 'gender';
-    industries: 'industries';
-    interests: 'interests';
-    languages: 'languages';
-    otherInfo: 'otherInfo';
-    softSkills: 'softSkills';
-=======
     candidateId: 'candidateId',
     fullName: 'fullName',
     university: 'university',
@@ -54149,7 +52715,7 @@ export namespace Prisma {
     userId: 'userId',
     birthYear: 'birthYear',
     currentSalary: 'currentSalary',
-    degree: 'degree',
+    otherInfo: 'otherInfo',
     desiredJob: 'desiredJob',
     gender: 'gender',
     industries: 'industries',
@@ -54161,7 +52727,6 @@ export namespace Prisma {
     summary: 'summary',
     totalYearsExp: 'totalYearsExp',
     jobSearchExpiresAt: 'jobSearchExpiresAt'
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   };
 
   export type CandidateScalarFieldEnum = (typeof CandidateScalarFieldEnum)[keyof typeof CandidateScalarFieldEnum]
@@ -54180,45 +52745,39 @@ export namespace Prisma {
 
 
   export const CertificationScalarFieldEnum: {
-<<<<<<< HEAD
-    certificationId: 'certificationId';
-    name: 'name';
-    issuer: 'issuer';
-    issueDate: 'issueDate';
-    credentialId: 'credentialId';
-    credentialUrl: 'credentialUrl';
-    fileUrl: 'fileUrl';
-    status: 'status';
-    adminFeedback: 'adminFeedback';
-    aiVerification: 'aiVerification';
-    candidateId: 'candidateId';
-=======
     certificationId: 'certificationId',
     name: 'name',
+    issuer: 'issuer',
+    issueDate: 'issueDate',
+    credentialId: 'credentialId',
+    credentialUrl: 'credentialUrl',
+    fileUrl: 'fileUrl',
+    status: 'status',
+    adminFeedback: 'adminFeedback',
+    aiVerification: 'aiVerification',
     candidateId: 'candidateId'
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
   };
 
   export type CertificationScalarFieldEnum = (typeof CertificationScalarFieldEnum)[keyof typeof CertificationScalarFieldEnum]
 
 
   export const DegreeScalarFieldEnum: {
-    degreeId: 'degreeId';
-    name: 'name';
-    school: 'school';
-    major: 'major';
-    issueDate: 'issueDate';
-    fileUrl: 'fileUrl';
-    status: 'status';
-    issuer: 'issuer';
-    credentialId: 'credentialId';
-    adminFeedback: 'adminFeedback';
-    aiVerification: 'aiVerification';
-    candidateId: 'candidateId';
+    degreeId: 'degreeId',
+    name: 'name',
+    school: 'school',
+    major: 'major',
+    issueDate: 'issueDate',
+    fileUrl: 'fileUrl',
+    status: 'status',
+    issuer: 'issuer',
+    credentialId: 'credentialId',
+    adminFeedback: 'adminFeedback',
+    aiVerification: 'aiVerification',
+    candidateId: 'candidateId'
   };
 
-  export type DegreeScalarFieldEnum =
-    (typeof DegreeScalarFieldEnum)[keyof typeof DegreeScalarFieldEnum];
+  export type DegreeScalarFieldEnum = (typeof DegreeScalarFieldEnum)[keyof typeof DegreeScalarFieldEnum]
+
 
   export const SkillScalarFieldEnum: {
     skillId: 'skillId',
@@ -54854,14 +53413,16 @@ export namespace Prisma {
   /**
    * Reference to a field of type 'VerificationStatus'
    */
-  export type EnumVerificationStatusFieldRefInput<$PrismaModel> =
-    FieldRefInputType<$PrismaModel, 'VerificationStatus'>;
+  export type EnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus'>
+    
+
 
   /**
    * Reference to a field of type 'VerificationStatus[]'
    */
-  export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> =
-    FieldRefInputType<$PrismaModel, 'VerificationStatus[]'>;
+  export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus[]'>
+    
+
 
   /**
    * Reference to a field of type 'SkillLevel'
@@ -55436,227 +53997,6 @@ export namespace Prisma {
   }
 
   export type CandidateWhereInput = {
-<<<<<<< HEAD
-    AND?: CandidateWhereInput | CandidateWhereInput[];
-    OR?: CandidateWhereInput[];
-    NOT?: CandidateWhereInput | CandidateWhereInput[];
-    candidateId?: StringFilter<'Candidate'> | string;
-    fullName?: StringFilter<'Candidate'> | string;
-    university?: StringNullableFilter<'Candidate'> | string | null;
-    major?: StringNullableFilter<'Candidate'> | string | null;
-    gpa?: FloatNullableFilter<'Candidate'> | number | null;
-    cvUrl?: StringNullableFilter<'Candidate'> | string | null;
-    userId?: StringFilter<'Candidate'> | string;
-    isOpenToWork?: BoolFilter<'Candidate'> | boolean;
-    jobSearchExpiresAt?:
-      | DateTimeNullableFilter<'Candidate'>
-      | Date
-      | string
-      | null;
-    location?: StringNullableFilter<'Candidate'> | string | null;
-    desiredJob?: JsonNullableFilter<'Candidate'>;
-    summary?: StringNullableFilter<'Candidate'> | string | null;
-    birthYear?: IntNullableFilter<'Candidate'> | number | null;
-    currentSalary?: StringNullableFilter<'Candidate'> | string | null;
-    totalYearsExp?: FloatNullableFilter<'Candidate'> | number | null;
-    degree?: StringNullableFilter<'Candidate'> | string | null;
-    gender?: StringNullableFilter<'Candidate'> | string | null;
-    industries?: StringNullableListFilter<'Candidate'>;
-    interests?: StringNullableListFilter<'Candidate'>;
-    languages?: JsonNullableFilter<'Candidate'>;
-    otherInfo?: JsonNullableFilter<'Candidate'>;
-    softSkills?: StringNullableListFilter<'Candidate'>;
-    applications?: ApplicationListRelationFilter;
-    cvs?: CVListRelationFilter;
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>;
-    certifications?: CertificationListRelationFilter;
-    degrees?: DegreeListRelationFilter;
-    conversations?: ConversationListRelationFilter;
-    experiences?: ExperienceListRelationFilter;
-    jobMatches?: JobMatchListRelationFilter;
-    projects?: ProjectListRelationFilter;
-    savedJobs?: SavedJobListRelationFilter;
-    skills?: SkillListRelationFilter;
-    candidateUnlocks?: CandidateUnlockListRelationFilter;
-    candidateReviews?: CandidateReviewListRelationFilter;
-    companyReviews?: CompanyReviewListRelationFilter;
-    reports?: CandidateReportListRelationFilter;
-    wallet?: XOR<
-      CandidateWalletNullableScalarRelationFilter,
-      CandidateWalletWhereInput
-    > | null;
-  };
-
-  export type CandidateOrderByWithRelationInput = {
-    candidateId?: SortOrder;
-    fullName?: SortOrder;
-    university?: SortOrderInput | SortOrder;
-    major?: SortOrderInput | SortOrder;
-    gpa?: SortOrderInput | SortOrder;
-    cvUrl?: SortOrderInput | SortOrder;
-    userId?: SortOrder;
-    isOpenToWork?: SortOrder;
-    jobSearchExpiresAt?: SortOrderInput | SortOrder;
-    location?: SortOrderInput | SortOrder;
-    desiredJob?: SortOrderInput | SortOrder;
-    summary?: SortOrderInput | SortOrder;
-    birthYear?: SortOrderInput | SortOrder;
-    currentSalary?: SortOrderInput | SortOrder;
-    totalYearsExp?: SortOrderInput | SortOrder;
-    degree?: SortOrderInput | SortOrder;
-    gender?: SortOrderInput | SortOrder;
-    industries?: SortOrder;
-    interests?: SortOrder;
-    languages?: SortOrderInput | SortOrder;
-    otherInfo?: SortOrderInput | SortOrder;
-    softSkills?: SortOrder;
-    applications?: ApplicationOrderByRelationAggregateInput;
-    cvs?: CVOrderByRelationAggregateInput;
-    user?: UserOrderByWithRelationInput;
-    certifications?: CertificationOrderByRelationAggregateInput;
-    degrees?: DegreeOrderByRelationAggregateInput;
-    conversations?: ConversationOrderByRelationAggregateInput;
-    experiences?: ExperienceOrderByRelationAggregateInput;
-    jobMatches?: JobMatchOrderByRelationAggregateInput;
-    projects?: ProjectOrderByRelationAggregateInput;
-    savedJobs?: SavedJobOrderByRelationAggregateInput;
-    skills?: SkillOrderByRelationAggregateInput;
-    candidateUnlocks?: CandidateUnlockOrderByRelationAggregateInput;
-    candidateReviews?: CandidateReviewOrderByRelationAggregateInput;
-    companyReviews?: CompanyReviewOrderByRelationAggregateInput;
-    reports?: CandidateReportOrderByRelationAggregateInput;
-    wallet?: CandidateWalletOrderByWithRelationInput;
-  };
-
-  export type CandidateWhereUniqueInput = Prisma.AtLeast<
-    {
-      candidateId?: string;
-      userId?: string;
-      AND?: CandidateWhereInput | CandidateWhereInput[];
-      OR?: CandidateWhereInput[];
-      NOT?: CandidateWhereInput | CandidateWhereInput[];
-      fullName?: StringFilter<'Candidate'> | string;
-      university?: StringNullableFilter<'Candidate'> | string | null;
-      major?: StringNullableFilter<'Candidate'> | string | null;
-      gpa?: FloatNullableFilter<'Candidate'> | number | null;
-      cvUrl?: StringNullableFilter<'Candidate'> | string | null;
-      isOpenToWork?: BoolFilter<'Candidate'> | boolean;
-      jobSearchExpiresAt?:
-        | DateTimeNullableFilter<'Candidate'>
-        | Date
-        | string
-        | null;
-      location?: StringNullableFilter<'Candidate'> | string | null;
-      desiredJob?: JsonNullableFilter<'Candidate'>;
-      summary?: StringNullableFilter<'Candidate'> | string | null;
-      birthYear?: IntNullableFilter<'Candidate'> | number | null;
-      currentSalary?: StringNullableFilter<'Candidate'> | string | null;
-      totalYearsExp?: FloatNullableFilter<'Candidate'> | number | null;
-      degree?: StringNullableFilter<'Candidate'> | string | null;
-      gender?: StringNullableFilter<'Candidate'> | string | null;
-      industries?: StringNullableListFilter<'Candidate'>;
-      interests?: StringNullableListFilter<'Candidate'>;
-      languages?: JsonNullableFilter<'Candidate'>;
-      otherInfo?: JsonNullableFilter<'Candidate'>;
-      softSkills?: StringNullableListFilter<'Candidate'>;
-      applications?: ApplicationListRelationFilter;
-      cvs?: CVListRelationFilter;
-      user?: XOR<UserScalarRelationFilter, UserWhereInput>;
-      certifications?: CertificationListRelationFilter;
-      degrees?: DegreeListRelationFilter;
-      conversations?: ConversationListRelationFilter;
-      experiences?: ExperienceListRelationFilter;
-      jobMatches?: JobMatchListRelationFilter;
-      projects?: ProjectListRelationFilter;
-      savedJobs?: SavedJobListRelationFilter;
-      skills?: SkillListRelationFilter;
-      candidateUnlocks?: CandidateUnlockListRelationFilter;
-      candidateReviews?: CandidateReviewListRelationFilter;
-      companyReviews?: CompanyReviewListRelationFilter;
-      reports?: CandidateReportListRelationFilter;
-      wallet?: XOR<
-        CandidateWalletNullableScalarRelationFilter,
-        CandidateWalletWhereInput
-      > | null;
-    },
-    'candidateId' | 'userId'
-  >;
-
-  export type CandidateOrderByWithAggregationInput = {
-    candidateId?: SortOrder;
-    fullName?: SortOrder;
-    university?: SortOrderInput | SortOrder;
-    major?: SortOrderInput | SortOrder;
-    gpa?: SortOrderInput | SortOrder;
-    cvUrl?: SortOrderInput | SortOrder;
-    userId?: SortOrder;
-    isOpenToWork?: SortOrder;
-    jobSearchExpiresAt?: SortOrderInput | SortOrder;
-    location?: SortOrderInput | SortOrder;
-    desiredJob?: SortOrderInput | SortOrder;
-    summary?: SortOrderInput | SortOrder;
-    birthYear?: SortOrderInput | SortOrder;
-    currentSalary?: SortOrderInput | SortOrder;
-    totalYearsExp?: SortOrderInput | SortOrder;
-    degree?: SortOrderInput | SortOrder;
-    gender?: SortOrderInput | SortOrder;
-    industries?: SortOrder;
-    interests?: SortOrder;
-    languages?: SortOrderInput | SortOrder;
-    otherInfo?: SortOrderInput | SortOrder;
-    softSkills?: SortOrder;
-    _count?: CandidateCountOrderByAggregateInput;
-    _avg?: CandidateAvgOrderByAggregateInput;
-    _max?: CandidateMaxOrderByAggregateInput;
-    _min?: CandidateMinOrderByAggregateInput;
-    _sum?: CandidateSumOrderByAggregateInput;
-  };
-
-  export type CandidateScalarWhereWithAggregatesInput = {
-    AND?:
-      | CandidateScalarWhereWithAggregatesInput
-      | CandidateScalarWhereWithAggregatesInput[];
-    OR?: CandidateScalarWhereWithAggregatesInput[];
-    NOT?:
-      | CandidateScalarWhereWithAggregatesInput
-      | CandidateScalarWhereWithAggregatesInput[];
-    candidateId?: StringWithAggregatesFilter<'Candidate'> | string;
-    fullName?: StringWithAggregatesFilter<'Candidate'> | string;
-    university?:
-      | StringNullableWithAggregatesFilter<'Candidate'>
-      | string
-      | null;
-    major?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    gpa?: FloatNullableWithAggregatesFilter<'Candidate'> | number | null;
-    cvUrl?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    userId?: StringWithAggregatesFilter<'Candidate'> | string;
-    isOpenToWork?: BoolWithAggregatesFilter<'Candidate'> | boolean;
-    jobSearchExpiresAt?:
-      | DateTimeNullableWithAggregatesFilter<'Candidate'>
-      | Date
-      | string
-      | null;
-    location?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    desiredJob?: JsonNullableWithAggregatesFilter<'Candidate'>;
-    summary?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    birthYear?: IntNullableWithAggregatesFilter<'Candidate'> | number | null;
-    currentSalary?:
-      | StringNullableWithAggregatesFilter<'Candidate'>
-      | string
-      | null;
-    totalYearsExp?:
-      | FloatNullableWithAggregatesFilter<'Candidate'>
-      | number
-      | null;
-    degree?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    gender?: StringNullableWithAggregatesFilter<'Candidate'> | string | null;
-    industries?: StringNullableListFilter<'Candidate'>;
-    interests?: StringNullableListFilter<'Candidate'>;
-    languages?: JsonNullableWithAggregatesFilter<'Candidate'>;
-    otherInfo?: JsonNullableWithAggregatesFilter<'Candidate'>;
-    softSkills?: StringNullableListFilter<'Candidate'>;
-  };
-=======
     AND?: CandidateWhereInput | CandidateWhereInput[]
     OR?: CandidateWhereInput[]
     NOT?: CandidateWhereInput | CandidateWhereInput[]
@@ -55669,7 +54009,7 @@ export namespace Prisma {
     userId?: StringFilter<"Candidate"> | string
     birthYear?: IntNullableFilter<"Candidate"> | number | null
     currentSalary?: StringNullableFilter<"Candidate"> | string | null
-    degree?: StringNullableFilter<"Candidate"> | string | null
+    otherInfo?: JsonNullableFilter<"Candidate">
     desiredJob?: JsonNullableFilter<"Candidate">
     gender?: StringNullableFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -55681,6 +54021,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Candidate"> | string | null
     totalYearsExp?: FloatNullableFilter<"Candidate"> | number | null
     jobSearchExpiresAt?: DateTimeNullableFilter<"Candidate"> | Date | string | null
+    degrees?: DegreeListRelationFilter
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -55708,7 +54049,7 @@ export namespace Prisma {
     userId?: SortOrder
     birthYear?: SortOrderInput | SortOrder
     currentSalary?: SortOrderInput | SortOrder
-    degree?: SortOrderInput | SortOrder
+    otherInfo?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     industries?: SortOrder
@@ -55720,6 +54061,7 @@ export namespace Prisma {
     summary?: SortOrderInput | SortOrder
     totalYearsExp?: SortOrderInput | SortOrder
     jobSearchExpiresAt?: SortOrderInput | SortOrder
+    degrees?: DegreeOrderByRelationAggregateInput
     applications?: ApplicationOrderByRelationAggregateInput
     cvs?: CVOrderByRelationAggregateInput
     user?: UserOrderByWithRelationInput
@@ -55750,7 +54092,7 @@ export namespace Prisma {
     cvUrl?: StringNullableFilter<"Candidate"> | string | null
     birthYear?: IntNullableFilter<"Candidate"> | number | null
     currentSalary?: StringNullableFilter<"Candidate"> | string | null
-    degree?: StringNullableFilter<"Candidate"> | string | null
+    otherInfo?: JsonNullableFilter<"Candidate">
     desiredJob?: JsonNullableFilter<"Candidate">
     gender?: StringNullableFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -55762,6 +54104,7 @@ export namespace Prisma {
     summary?: StringNullableFilter<"Candidate"> | string | null
     totalYearsExp?: FloatNullableFilter<"Candidate"> | number | null
     jobSearchExpiresAt?: DateTimeNullableFilter<"Candidate"> | Date | string | null
+    degrees?: DegreeListRelationFilter
     applications?: ApplicationListRelationFilter
     cvs?: CVListRelationFilter
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -55789,7 +54132,7 @@ export namespace Prisma {
     userId?: SortOrder
     birthYear?: SortOrderInput | SortOrder
     currentSalary?: SortOrderInput | SortOrder
-    degree?: SortOrderInput | SortOrder
+    otherInfo?: SortOrderInput | SortOrder
     desiredJob?: SortOrderInput | SortOrder
     gender?: SortOrderInput | SortOrder
     industries?: SortOrder
@@ -55821,7 +54164,7 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Candidate"> | string
     birthYear?: IntNullableWithAggregatesFilter<"Candidate"> | number | null
     currentSalary?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
-    degree?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
+    otherInfo?: JsonNullableWithAggregatesFilter<"Candidate">
     desiredJob?: JsonNullableWithAggregatesFilter<"Candidate">
     gender?: StringNullableWithAggregatesFilter<"Candidate"> | string | null
     industries?: StringNullableListFilter<"Candidate">
@@ -55834,7 +54177,6 @@ export namespace Prisma {
     totalYearsExp?: FloatNullableWithAggregatesFilter<"Candidate"> | number | null
     jobSearchExpiresAt?: DateTimeNullableWithAggregatesFilter<"Candidate"> | Date | string | null
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type ExperienceWhereInput = {
     AND?: ExperienceWhereInput | ExperienceWhereInput[]
@@ -55897,127 +54239,19 @@ export namespace Prisma {
   }
 
   export type CertificationWhereInput = {
-<<<<<<< HEAD
-    AND?: CertificationWhereInput | CertificationWhereInput[];
-    OR?: CertificationWhereInput[];
-    NOT?: CertificationWhereInput | CertificationWhereInput[];
-    certificationId?: StringFilter<'Certification'> | string;
-    name?: StringFilter<'Certification'> | string;
-    issuer?: StringNullableFilter<'Certification'> | string | null;
-    issueDate?: StringNullableFilter<'Certification'> | string | null;
-    credentialId?: StringNullableFilter<'Certification'> | string | null;
-    credentialUrl?: StringNullableFilter<'Certification'> | string | null;
-    fileUrl?: StringNullableFilter<'Certification'> | string | null;
-    status?:
-      | EnumVerificationStatusFilter<'Certification'>
-      | $Enums.VerificationStatus;
-    adminFeedback?: StringNullableFilter<'Certification'> | string | null;
-    aiVerification?: JsonNullableFilter<'Certification'>;
-    candidateId?: StringFilter<'Certification'> | string;
-    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
-  };
-
-  export type CertificationOrderByWithRelationInput = {
-    certificationId?: SortOrder;
-    name?: SortOrder;
-    issuer?: SortOrderInput | SortOrder;
-    issueDate?: SortOrderInput | SortOrder;
-    credentialId?: SortOrderInput | SortOrder;
-    credentialUrl?: SortOrderInput | SortOrder;
-    fileUrl?: SortOrderInput | SortOrder;
-    status?: SortOrder;
-    adminFeedback?: SortOrderInput | SortOrder;
-    aiVerification?: SortOrderInput | SortOrder;
-    candidateId?: SortOrder;
-    candidate?: CandidateOrderByWithRelationInput;
-  };
-
-  export type CertificationWhereUniqueInput = Prisma.AtLeast<
-    {
-      certificationId?: string;
-      AND?: CertificationWhereInput | CertificationWhereInput[];
-      OR?: CertificationWhereInput[];
-      NOT?: CertificationWhereInput | CertificationWhereInput[];
-      name?: StringFilter<'Certification'> | string;
-      issuer?: StringNullableFilter<'Certification'> | string | null;
-      issueDate?: StringNullableFilter<'Certification'> | string | null;
-      credentialId?: StringNullableFilter<'Certification'> | string | null;
-      credentialUrl?: StringNullableFilter<'Certification'> | string | null;
-      fileUrl?: StringNullableFilter<'Certification'> | string | null;
-      status?:
-        | EnumVerificationStatusFilter<'Certification'>
-        | $Enums.VerificationStatus;
-      adminFeedback?: StringNullableFilter<'Certification'> | string | null;
-      aiVerification?: JsonNullableFilter<'Certification'>;
-      candidateId?: StringFilter<'Certification'> | string;
-      candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
-    },
-    'certificationId'
-  >;
-
-  export type CertificationOrderByWithAggregationInput = {
-    certificationId?: SortOrder;
-    name?: SortOrder;
-    issuer?: SortOrderInput | SortOrder;
-    issueDate?: SortOrderInput | SortOrder;
-    credentialId?: SortOrderInput | SortOrder;
-    credentialUrl?: SortOrderInput | SortOrder;
-    fileUrl?: SortOrderInput | SortOrder;
-    status?: SortOrder;
-    adminFeedback?: SortOrderInput | SortOrder;
-    aiVerification?: SortOrderInput | SortOrder;
-    candidateId?: SortOrder;
-    _count?: CertificationCountOrderByAggregateInput;
-    _max?: CertificationMaxOrderByAggregateInput;
-    _min?: CertificationMinOrderByAggregateInput;
-  };
-
-  export type CertificationScalarWhereWithAggregatesInput = {
-    AND?:
-      | CertificationScalarWhereWithAggregatesInput
-      | CertificationScalarWhereWithAggregatesInput[];
-    OR?: CertificationScalarWhereWithAggregatesInput[];
-    NOT?:
-      | CertificationScalarWhereWithAggregatesInput
-      | CertificationScalarWhereWithAggregatesInput[];
-    certificationId?: StringWithAggregatesFilter<'Certification'> | string;
-    name?: StringWithAggregatesFilter<'Certification'> | string;
-    issuer?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    issueDate?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    credentialId?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    credentialUrl?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    fileUrl?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    status?:
-      | EnumVerificationStatusWithAggregatesFilter<'Certification'>
-      | $Enums.VerificationStatus;
-    adminFeedback?:
-      | StringNullableWithAggregatesFilter<'Certification'>
-      | string
-      | null;
-    aiVerification?: JsonNullableWithAggregatesFilter<'Certification'>;
-    candidateId?: StringWithAggregatesFilter<'Certification'> | string;
-  };
-=======
     AND?: CertificationWhereInput | CertificationWhereInput[]
     OR?: CertificationWhereInput[]
     NOT?: CertificationWhereInput | CertificationWhereInput[]
     certificationId?: StringFilter<"Certification"> | string
     name?: StringFilter<"Certification"> | string
+    issuer?: StringNullableFilter<"Certification"> | string | null
+    issueDate?: StringNullableFilter<"Certification"> | string | null
+    credentialId?: StringNullableFilter<"Certification"> | string | null
+    credentialUrl?: StringNullableFilter<"Certification"> | string | null
+    fileUrl?: StringNullableFilter<"Certification"> | string | null
+    status?: EnumVerificationStatusFilter<"Certification"> | $Enums.VerificationStatus
+    adminFeedback?: StringNullableFilter<"Certification"> | string | null
+    aiVerification?: JsonNullableFilter<"Certification">
     candidateId?: StringFilter<"Certification"> | string
     candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
   }
@@ -56025,6 +54259,14 @@ export namespace Prisma {
   export type CertificationOrderByWithRelationInput = {
     certificationId?: SortOrder
     name?: SortOrder
+    issuer?: SortOrderInput | SortOrder
+    issueDate?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    credentialUrl?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    adminFeedback?: SortOrderInput | SortOrder
+    aiVerification?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     candidate?: CandidateOrderByWithRelationInput
   }
@@ -56035,6 +54277,14 @@ export namespace Prisma {
     OR?: CertificationWhereInput[]
     NOT?: CertificationWhereInput | CertificationWhereInput[]
     name?: StringFilter<"Certification"> | string
+    issuer?: StringNullableFilter<"Certification"> | string | null
+    issueDate?: StringNullableFilter<"Certification"> | string | null
+    credentialId?: StringNullableFilter<"Certification"> | string | null
+    credentialUrl?: StringNullableFilter<"Certification"> | string | null
+    fileUrl?: StringNullableFilter<"Certification"> | string | null
+    status?: EnumVerificationStatusFilter<"Certification"> | $Enums.VerificationStatus
+    adminFeedback?: StringNullableFilter<"Certification"> | string | null
+    aiVerification?: JsonNullableFilter<"Certification">
     candidateId?: StringFilter<"Certification"> | string
     candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
   }, "certificationId">
@@ -56042,6 +54292,14 @@ export namespace Prisma {
   export type CertificationOrderByWithAggregationInput = {
     certificationId?: SortOrder
     name?: SortOrder
+    issuer?: SortOrderInput | SortOrder
+    issueDate?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    credentialUrl?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    adminFeedback?: SortOrderInput | SortOrder
+    aiVerification?: SortOrderInput | SortOrder
     candidateId?: SortOrder
     _count?: CertificationCountOrderByAggregateInput
     _max?: CertificationMaxOrderByAggregateInput
@@ -56054,113 +54312,106 @@ export namespace Prisma {
     NOT?: CertificationScalarWhereWithAggregatesInput | CertificationScalarWhereWithAggregatesInput[]
     certificationId?: StringWithAggregatesFilter<"Certification"> | string
     name?: StringWithAggregatesFilter<"Certification"> | string
+    issuer?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    issueDate?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    credentialId?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    credentialUrl?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    fileUrl?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    status?: EnumVerificationStatusWithAggregatesFilter<"Certification"> | $Enums.VerificationStatus
+    adminFeedback?: StringNullableWithAggregatesFilter<"Certification"> | string | null
+    aiVerification?: JsonNullableWithAggregatesFilter<"Certification">
     candidateId?: StringWithAggregatesFilter<"Certification"> | string
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type DegreeWhereInput = {
-    AND?: DegreeWhereInput | DegreeWhereInput[];
-    OR?: DegreeWhereInput[];
-    NOT?: DegreeWhereInput | DegreeWhereInput[];
-    degreeId?: StringFilter<'Degree'> | string;
-    name?: StringFilter<'Degree'> | string;
-    school?: StringFilter<'Degree'> | string;
-    major?: StringNullableFilter<'Degree'> | string | null;
-    issueDate?: StringNullableFilter<'Degree'> | string | null;
-    fileUrl?: StringNullableFilter<'Degree'> | string | null;
-    status?: EnumVerificationStatusFilter<'Degree'> | $Enums.VerificationStatus;
-    issuer?: StringNullableFilter<'Degree'> | string | null;
-    credentialId?: StringNullableFilter<'Degree'> | string | null;
-    adminFeedback?: StringNullableFilter<'Degree'> | string | null;
-    aiVerification?: JsonNullableFilter<'Degree'>;
-    candidateId?: StringFilter<'Degree'> | string;
-    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
-  };
+    AND?: DegreeWhereInput | DegreeWhereInput[]
+    OR?: DegreeWhereInput[]
+    NOT?: DegreeWhereInput | DegreeWhereInput[]
+    degreeId?: StringFilter<"Degree"> | string
+    name?: StringFilter<"Degree"> | string
+    school?: StringFilter<"Degree"> | string
+    major?: StringNullableFilter<"Degree"> | string | null
+    issueDate?: StringNullableFilter<"Degree"> | string | null
+    fileUrl?: StringNullableFilter<"Degree"> | string | null
+    status?: EnumVerificationStatusFilter<"Degree"> | $Enums.VerificationStatus
+    issuer?: StringNullableFilter<"Degree"> | string | null
+    credentialId?: StringNullableFilter<"Degree"> | string | null
+    adminFeedback?: StringNullableFilter<"Degree"> | string | null
+    aiVerification?: JsonNullableFilter<"Degree">
+    candidateId?: StringFilter<"Degree"> | string
+    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
+  }
 
   export type DegreeOrderByWithRelationInput = {
-    degreeId?: SortOrder;
-    name?: SortOrder;
-    school?: SortOrder;
-    major?: SortOrderInput | SortOrder;
-    issueDate?: SortOrderInput | SortOrder;
-    fileUrl?: SortOrderInput | SortOrder;
-    status?: SortOrder;
-    issuer?: SortOrderInput | SortOrder;
-    credentialId?: SortOrderInput | SortOrder;
-    adminFeedback?: SortOrderInput | SortOrder;
-    aiVerification?: SortOrderInput | SortOrder;
-    candidateId?: SortOrder;
-    candidate?: CandidateOrderByWithRelationInput;
-  };
+    degreeId?: SortOrder
+    name?: SortOrder
+    school?: SortOrder
+    major?: SortOrderInput | SortOrder
+    issueDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    issuer?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    adminFeedback?: SortOrderInput | SortOrder
+    aiVerification?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    candidate?: CandidateOrderByWithRelationInput
+  }
 
-  export type DegreeWhereUniqueInput = Prisma.AtLeast<
-    {
-      degreeId?: string;
-      AND?: DegreeWhereInput | DegreeWhereInput[];
-      OR?: DegreeWhereInput[];
-      NOT?: DegreeWhereInput | DegreeWhereInput[];
-      name?: StringFilter<'Degree'> | string;
-      school?: StringFilter<'Degree'> | string;
-      major?: StringNullableFilter<'Degree'> | string | null;
-      issueDate?: StringNullableFilter<'Degree'> | string | null;
-      fileUrl?: StringNullableFilter<'Degree'> | string | null;
-      status?:
-        | EnumVerificationStatusFilter<'Degree'>
-        | $Enums.VerificationStatus;
-      issuer?: StringNullableFilter<'Degree'> | string | null;
-      credentialId?: StringNullableFilter<'Degree'> | string | null;
-      adminFeedback?: StringNullableFilter<'Degree'> | string | null;
-      aiVerification?: JsonNullableFilter<'Degree'>;
-      candidateId?: StringFilter<'Degree'> | string;
-      candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>;
-    },
-    'degreeId'
-  >;
+  export type DegreeWhereUniqueInput = Prisma.AtLeast<{
+    degreeId?: string
+    AND?: DegreeWhereInput | DegreeWhereInput[]
+    OR?: DegreeWhereInput[]
+    NOT?: DegreeWhereInput | DegreeWhereInput[]
+    name?: StringFilter<"Degree"> | string
+    school?: StringFilter<"Degree"> | string
+    major?: StringNullableFilter<"Degree"> | string | null
+    issueDate?: StringNullableFilter<"Degree"> | string | null
+    fileUrl?: StringNullableFilter<"Degree"> | string | null
+    status?: EnumVerificationStatusFilter<"Degree"> | $Enums.VerificationStatus
+    issuer?: StringNullableFilter<"Degree"> | string | null
+    credentialId?: StringNullableFilter<"Degree"> | string | null
+    adminFeedback?: StringNullableFilter<"Degree"> | string | null
+    aiVerification?: JsonNullableFilter<"Degree">
+    candidateId?: StringFilter<"Degree"> | string
+    candidate?: XOR<CandidateScalarRelationFilter, CandidateWhereInput>
+  }, "degreeId">
 
   export type DegreeOrderByWithAggregationInput = {
-    degreeId?: SortOrder;
-    name?: SortOrder;
-    school?: SortOrder;
-    major?: SortOrderInput | SortOrder;
-    issueDate?: SortOrderInput | SortOrder;
-    fileUrl?: SortOrderInput | SortOrder;
-    status?: SortOrder;
-    issuer?: SortOrderInput | SortOrder;
-    credentialId?: SortOrderInput | SortOrder;
-    adminFeedback?: SortOrderInput | SortOrder;
-    aiVerification?: SortOrderInput | SortOrder;
-    candidateId?: SortOrder;
-    _count?: DegreeCountOrderByAggregateInput;
-    _max?: DegreeMaxOrderByAggregateInput;
-    _min?: DegreeMinOrderByAggregateInput;
-  };
+    degreeId?: SortOrder
+    name?: SortOrder
+    school?: SortOrder
+    major?: SortOrderInput | SortOrder
+    issueDate?: SortOrderInput | SortOrder
+    fileUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    issuer?: SortOrderInput | SortOrder
+    credentialId?: SortOrderInput | SortOrder
+    adminFeedback?: SortOrderInput | SortOrder
+    aiVerification?: SortOrderInput | SortOrder
+    candidateId?: SortOrder
+    _count?: DegreeCountOrderByAggregateInput
+    _max?: DegreeMaxOrderByAggregateInput
+    _min?: DegreeMinOrderByAggregateInput
+  }
 
   export type DegreeScalarWhereWithAggregatesInput = {
-    AND?:
-      | DegreeScalarWhereWithAggregatesInput
-      | DegreeScalarWhereWithAggregatesInput[];
-    OR?: DegreeScalarWhereWithAggregatesInput[];
-    NOT?:
-      | DegreeScalarWhereWithAggregatesInput
-      | DegreeScalarWhereWithAggregatesInput[];
-    degreeId?: StringWithAggregatesFilter<'Degree'> | string;
-    name?: StringWithAggregatesFilter<'Degree'> | string;
-    school?: StringWithAggregatesFilter<'Degree'> | string;
-    major?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
-    issueDate?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
-    fileUrl?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
-    status?:
-      | EnumVerificationStatusWithAggregatesFilter<'Degree'>
-      | $Enums.VerificationStatus;
-    issuer?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
-    credentialId?: StringNullableWithAggregatesFilter<'Degree'> | string | null;
-    adminFeedback?:
-      | StringNullableWithAggregatesFilter<'Degree'>
-      | string
-      | null;
-    aiVerification?: JsonNullableWithAggregatesFilter<'Degree'>;
-    candidateId?: StringWithAggregatesFilter<'Degree'> | string;
-  };
+    AND?: DegreeScalarWhereWithAggregatesInput | DegreeScalarWhereWithAggregatesInput[]
+    OR?: DegreeScalarWhereWithAggregatesInput[]
+    NOT?: DegreeScalarWhereWithAggregatesInput | DegreeScalarWhereWithAggregatesInput[]
+    degreeId?: StringWithAggregatesFilter<"Degree"> | string
+    name?: StringWithAggregatesFilter<"Degree"> | string
+    school?: StringWithAggregatesFilter<"Degree"> | string
+    major?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    issueDate?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    fileUrl?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    status?: EnumVerificationStatusWithAggregatesFilter<"Degree"> | $Enums.VerificationStatus
+    issuer?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    credentialId?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    adminFeedback?: StringNullableWithAggregatesFilter<"Degree"> | string | null
+    aiVerification?: JsonNullableWithAggregatesFilter<"Degree">
+    candidateId?: StringWithAggregatesFilter<"Degree"> | string
+  }
 
   export type SkillWhereInput = {
     AND?: SkillWhereInput | SkillWhereInput[]
@@ -59101,256 +57352,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUpdateInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateCreateManyInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-  };
-
-  export type CandidateUpdateManyMutationInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-  };
-
-  export type CandidateUncheckedUpdateManyInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -59359,7 +57360,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -59371,6 +57372,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -59398,7 +57400,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -59410,6 +57412,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -59435,7 +57438,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -59447,6 +57450,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -59474,7 +57478,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -59486,6 +57490,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -59512,7 +57517,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -59535,7 +57540,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -59559,7 +57564,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -59572,7 +57577,6 @@ export namespace Prisma {
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type ExperienceCreateInput = {
     experienceId?: string
@@ -59637,263 +57641,205 @@ export namespace Prisma {
   }
 
   export type CertificationCreateInput = {
-<<<<<<< HEAD
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidate: CandidateCreateNestedOneWithoutCertificationsInput;
-  };
-
-  export type CertificationUncheckedCreateInput = {
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId: string;
-  };
-
-  export type CertificationUpdateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidate?: CandidateUpdateOneRequiredWithoutCertificationsNestedInput;
-  };
-
-  export type CertificationUncheckedUpdateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type CertificationCreateManyInput = {
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId: string;
-  };
-
-  export type CertificationUpdateManyMutationInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationUncheckedUpdateManyInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type DegreeCreateInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidate: CandidateCreateNestedOneWithoutDegreesInput;
-  };
-
-  export type DegreeUncheckedCreateInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId: string;
-  };
-
-  export type DegreeUpdateInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidate?: CandidateUpdateOneRequiredWithoutDegreesNestedInput;
-  };
-
-  export type DegreeUncheckedUpdateInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type DegreeCreateManyInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId: string;
-  };
-
-  export type DegreeUpdateManyMutationInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeUncheckedUpdateManyInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-    candidateId?: StringFieldUpdateOperationsInput | string;
-  };
-=======
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidate: CandidateCreateNestedOneWithoutCertificationsInput
   }
 
   export type CertificationUncheckedCreateInput = {
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
   }
 
   export type CertificationUpdateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidate?: CandidateUpdateOneRequiredWithoutCertificationsNestedInput
   }
 
   export type CertificationUncheckedUpdateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CertificationCreateManyInput = {
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidateId: string
   }
 
   export type CertificationUpdateManyMutationInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CertificationUncheckedUpdateManyInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
     candidateId?: StringFieldUpdateOperationsInput | string
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
+
+  export type DegreeCreateInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidate: CandidateCreateNestedOneWithoutDegreesInput
+  }
+
+  export type DegreeUncheckedCreateInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidateId: string
+  }
+
+  export type DegreeUpdateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidate?: CandidateUpdateOneRequiredWithoutDegreesNestedInput
+  }
+
+  export type DegreeUncheckedUpdateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidateId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type DegreeCreateManyInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidateId: string
+  }
+
+  export type DegreeUpdateManyMutationInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DegreeUncheckedUpdateManyInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+    candidateId?: StringFieldUpdateOperationsInput | string
+  }
 
   export type SkillCreateInput = {
     skillId?: string
@@ -63124,6 +61070,12 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type DegreeListRelationFilter = {
+    every?: DegreeWhereInput
+    some?: DegreeWhereInput
+    none?: DegreeWhereInput
+  }
+
   export type ApplicationListRelationFilter = {
     every?: ApplicationWhereInput
     some?: ApplicationWhereInput
@@ -63131,83 +61083,10 @@ export namespace Prisma {
   }
 
   export type CVListRelationFilter = {
-<<<<<<< HEAD
-    every?: CVWhereInput;
-    some?: CVWhereInput;
-    none?: CVWhereInput;
-  };
-
-  export type CertificationListRelationFilter = {
-    every?: CertificationWhereInput;
-    some?: CertificationWhereInput;
-    none?: CertificationWhereInput;
-  };
-
-  export type DegreeListRelationFilter = {
-    every?: DegreeWhereInput;
-    some?: DegreeWhereInput;
-    none?: DegreeWhereInput;
-  };
-
-  export type ConversationListRelationFilter = {
-    every?: ConversationWhereInput;
-    some?: ConversationWhereInput;
-    none?: ConversationWhereInput;
-  };
-
-  export type ExperienceListRelationFilter = {
-    every?: ExperienceWhereInput;
-    some?: ExperienceWhereInput;
-    none?: ExperienceWhereInput;
-  };
-
-  export type JobMatchListRelationFilter = {
-    every?: JobMatchWhereInput;
-    some?: JobMatchWhereInput;
-    none?: JobMatchWhereInput;
-  };
-
-  export type ProjectListRelationFilter = {
-    every?: ProjectWhereInput;
-    some?: ProjectWhereInput;
-    none?: ProjectWhereInput;
-  };
-
-  export type SavedJobListRelationFilter = {
-    every?: SavedJobWhereInput;
-    some?: SavedJobWhereInput;
-    none?: SavedJobWhereInput;
-  };
-
-  export type SkillListRelationFilter = {
-    every?: SkillWhereInput;
-    some?: SkillWhereInput;
-    none?: SkillWhereInput;
-  };
-
-  export type CandidateUnlockListRelationFilter = {
-    every?: CandidateUnlockWhereInput;
-    some?: CandidateUnlockWhereInput;
-    none?: CandidateUnlockWhereInput;
-  };
-
-  export type CandidateReviewListRelationFilter = {
-    every?: CandidateReviewWhereInput;
-    some?: CandidateReviewWhereInput;
-    none?: CandidateReviewWhereInput;
-  };
-
-  export type CompanyReviewListRelationFilter = {
-    every?: CompanyReviewWhereInput;
-    some?: CompanyReviewWhereInput;
-    none?: CompanyReviewWhereInput;
-  };
-=======
     every?: CVWhereInput
     some?: CVWhereInput
     none?: CVWhereInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportListRelationFilter = {
     every?: CandidateReportWhereInput
@@ -63280,62 +61159,17 @@ export namespace Prisma {
     none?: SkillWhereInput
   }
 
+  export type DegreeOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ApplicationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type CVOrderByRelationAggregateInput = {
-<<<<<<< HEAD
-    _count?: SortOrder;
-  };
-
-  export type CertificationOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type DegreeOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type ConversationOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type ExperienceOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type JobMatchOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type ProjectOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type SavedJobOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type SkillOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type CandidateUnlockOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type CandidateReviewOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-
-  export type CompanyReviewOrderByRelationAggregateInput = {
-    _count?: SortOrder;
-  };
-=======
     _count?: SortOrder
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportOrderByRelationAggregateInput = {
     _count?: SortOrder
@@ -63382,31 +61216,6 @@ export namespace Prisma {
   }
 
   export type CandidateCountOrderByAggregateInput = {
-<<<<<<< HEAD
-    candidateId?: SortOrder;
-    fullName?: SortOrder;
-    university?: SortOrder;
-    major?: SortOrder;
-    gpa?: SortOrder;
-    cvUrl?: SortOrder;
-    userId?: SortOrder;
-    isOpenToWork?: SortOrder;
-    jobSearchExpiresAt?: SortOrder;
-    location?: SortOrder;
-    desiredJob?: SortOrder;
-    summary?: SortOrder;
-    birthYear?: SortOrder;
-    currentSalary?: SortOrder;
-    totalYearsExp?: SortOrder;
-    degree?: SortOrder;
-    gender?: SortOrder;
-    industries?: SortOrder;
-    interests?: SortOrder;
-    languages?: SortOrder;
-    otherInfo?: SortOrder;
-    softSkills?: SortOrder;
-  };
-=======
     candidateId?: SortOrder
     fullName?: SortOrder
     university?: SortOrder
@@ -63416,7 +61225,7 @@ export namespace Prisma {
     userId?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
-    degree?: SortOrder
+    otherInfo?: SortOrder
     desiredJob?: SortOrder
     gender?: SortOrder
     industries?: SortOrder
@@ -63429,7 +61238,6 @@ export namespace Prisma {
     totalYearsExp?: SortOrder
     jobSearchExpiresAt?: SortOrder
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateAvgOrderByAggregateInput = {
     gpa?: SortOrder
@@ -63447,7 +61255,6 @@ export namespace Prisma {
     userId?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
-    degree?: SortOrder
     gender?: SortOrder
     isOpenToWork?: SortOrder
     location?: SortOrder
@@ -63466,7 +61273,6 @@ export namespace Prisma {
     userId?: SortOrder
     birthYear?: SortOrder
     currentSalary?: SortOrder
-    degree?: SortOrder
     gender?: SortOrder
     isOpenToWork?: SortOrder
     location?: SortOrder
@@ -63546,140 +61352,104 @@ export namespace Prisma {
   }
 
   export type EnumVerificationStatusFilter<$PrismaModel = never> = {
-    equals?:
-      | $Enums.VerificationStatus
-      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
-    in?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    notIn?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    not?:
-      | NestedEnumVerificationStatusFilter<$PrismaModel>
-      | $Enums.VerificationStatus;
-  };
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusFilter<$PrismaModel> | $Enums.VerificationStatus
+  }
 
   export type CertificationCountOrderByAggregateInput = {
-<<<<<<< HEAD
-    certificationId?: SortOrder;
-    name?: SortOrder;
-    issuer?: SortOrder;
-    issueDate?: SortOrder;
-    credentialId?: SortOrder;
-    credentialUrl?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    adminFeedback?: SortOrder;
-    aiVerification?: SortOrder;
-    candidateId?: SortOrder;
-  };
+    certificationId?: SortOrder
+    name?: SortOrder
+    issuer?: SortOrder
+    issueDate?: SortOrder
+    credentialId?: SortOrder
+    credentialUrl?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    adminFeedback?: SortOrder
+    aiVerification?: SortOrder
+    candidateId?: SortOrder
+  }
 
   export type CertificationMaxOrderByAggregateInput = {
-    certificationId?: SortOrder;
-    name?: SortOrder;
-    issuer?: SortOrder;
-    issueDate?: SortOrder;
-    credentialId?: SortOrder;
-    credentialUrl?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    adminFeedback?: SortOrder;
-    candidateId?: SortOrder;
-  };
+    certificationId?: SortOrder
+    name?: SortOrder
+    issuer?: SortOrder
+    issueDate?: SortOrder
+    credentialId?: SortOrder
+    credentialUrl?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    adminFeedback?: SortOrder
+    candidateId?: SortOrder
+  }
 
   export type CertificationMinOrderByAggregateInput = {
-    certificationId?: SortOrder;
-    name?: SortOrder;
-    issuer?: SortOrder;
-    issueDate?: SortOrder;
-    credentialId?: SortOrder;
-    credentialUrl?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    adminFeedback?: SortOrder;
-    candidateId?: SortOrder;
-  };
+    certificationId?: SortOrder
+    name?: SortOrder
+    issuer?: SortOrder
+    issueDate?: SortOrder
+    credentialId?: SortOrder
+    credentialUrl?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    adminFeedback?: SortOrder
+    candidateId?: SortOrder
+  }
 
-  export type EnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> =
-    {
-      equals?:
-        | $Enums.VerificationStatus
-        | EnumVerificationStatusFieldRefInput<$PrismaModel>;
-      in?:
-        | $Enums.VerificationStatus[]
-        | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-      notIn?:
-        | $Enums.VerificationStatus[]
-        | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-      not?:
-        | NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel>
-        | $Enums.VerificationStatus;
-      _count?: NestedIntFilter<$PrismaModel>;
-      _min?: NestedEnumVerificationStatusFilter<$PrismaModel>;
-      _max?: NestedEnumVerificationStatusFilter<$PrismaModel>;
-    };
+  export type EnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.VerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>
+  }
 
   export type DegreeCountOrderByAggregateInput = {
-    degreeId?: SortOrder;
-    name?: SortOrder;
-    school?: SortOrder;
-    major?: SortOrder;
-    issueDate?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    issuer?: SortOrder;
-    credentialId?: SortOrder;
-    adminFeedback?: SortOrder;
-    aiVerification?: SortOrder;
-    candidateId?: SortOrder;
-  };
+    degreeId?: SortOrder
+    name?: SortOrder
+    school?: SortOrder
+    major?: SortOrder
+    issueDate?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    issuer?: SortOrder
+    credentialId?: SortOrder
+    adminFeedback?: SortOrder
+    aiVerification?: SortOrder
+    candidateId?: SortOrder
+  }
 
   export type DegreeMaxOrderByAggregateInput = {
-    degreeId?: SortOrder;
-    name?: SortOrder;
-    school?: SortOrder;
-    major?: SortOrder;
-    issueDate?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    issuer?: SortOrder;
-    credentialId?: SortOrder;
-    adminFeedback?: SortOrder;
-    candidateId?: SortOrder;
-  };
+    degreeId?: SortOrder
+    name?: SortOrder
+    school?: SortOrder
+    major?: SortOrder
+    issueDate?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    issuer?: SortOrder
+    credentialId?: SortOrder
+    adminFeedback?: SortOrder
+    candidateId?: SortOrder
+  }
 
   export type DegreeMinOrderByAggregateInput = {
-    degreeId?: SortOrder;
-    name?: SortOrder;
-    school?: SortOrder;
-    major?: SortOrder;
-    issueDate?: SortOrder;
-    fileUrl?: SortOrder;
-    status?: SortOrder;
-    issuer?: SortOrder;
-    credentialId?: SortOrder;
-    adminFeedback?: SortOrder;
-    candidateId?: SortOrder;
-  };
-=======
-    certificationId?: SortOrder
+    degreeId?: SortOrder
     name?: SortOrder
+    school?: SortOrder
+    major?: SortOrder
+    issueDate?: SortOrder
+    fileUrl?: SortOrder
+    status?: SortOrder
+    issuer?: SortOrder
+    credentialId?: SortOrder
+    adminFeedback?: SortOrder
     candidateId?: SortOrder
   }
-
-  export type CertificationMaxOrderByAggregateInput = {
-    certificationId?: SortOrder
-    name?: SortOrder
-    candidateId?: SortOrder
-  }
-
-  export type CertificationMinOrderByAggregateInput = {
-    certificationId?: SortOrder
-    name?: SortOrder
-    candidateId?: SortOrder
-  }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type EnumSkillLevelFilter<$PrismaModel = never> = {
     equals?: $Enums.SkillLevel | EnumSkillLevelFieldRefInput<$PrismaModel>
@@ -65973,6 +63743,13 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type DegreeCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput> | DegreeCreateWithoutCandidateInput[] | DegreeUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: DegreeCreateOrConnectWithoutCandidateInput | DegreeCreateOrConnectWithoutCandidateInput[]
+    createMany?: DegreeCreateManyCandidateInputEnvelope
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+  }
+
   export type ApplicationCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -65988,189 +63765,10 @@ export namespace Prisma {
   }
 
   export type UserCreateNestedOneWithoutCandidateInput = {
-<<<<<<< HEAD
-    create?: XOR<
-      UserCreateWithoutCandidateInput,
-      UserUncheckedCreateWithoutCandidateInput
-    >;
-    connectOrCreate?: UserCreateOrConnectWithoutCandidateInput;
-    connect?: UserWhereUniqueInput;
-  };
-
-  export type CertificationCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CertificationCreateWithoutCandidateInput,
-          CertificationUncheckedCreateWithoutCandidateInput
-        >
-      | CertificationCreateWithoutCandidateInput[]
-      | CertificationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CertificationCreateOrConnectWithoutCandidateInput
-      | CertificationCreateOrConnectWithoutCandidateInput[];
-    createMany?: CertificationCreateManyCandidateInputEnvelope;
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-  };
-
-  export type DegreeCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          DegreeCreateWithoutCandidateInput,
-          DegreeUncheckedCreateWithoutCandidateInput
-        >
-      | DegreeCreateWithoutCandidateInput[]
-      | DegreeUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | DegreeCreateOrConnectWithoutCandidateInput
-      | DegreeCreateOrConnectWithoutCandidateInput[];
-    createMany?: DegreeCreateManyCandidateInputEnvelope;
-    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-  };
-
-  export type ConversationCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ConversationCreateWithoutCandidateInput,
-          ConversationUncheckedCreateWithoutCandidateInput
-        >
-      | ConversationCreateWithoutCandidateInput[]
-      | ConversationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ConversationCreateOrConnectWithoutCandidateInput
-      | ConversationCreateOrConnectWithoutCandidateInput[];
-    createMany?: ConversationCreateManyCandidateInputEnvelope;
-    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-  };
-
-  export type ExperienceCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ExperienceCreateWithoutCandidateInput,
-          ExperienceUncheckedCreateWithoutCandidateInput
-        >
-      | ExperienceCreateWithoutCandidateInput[]
-      | ExperienceUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ExperienceCreateOrConnectWithoutCandidateInput
-      | ExperienceCreateOrConnectWithoutCandidateInput[];
-    createMany?: ExperienceCreateManyCandidateInputEnvelope;
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-  };
-
-  export type JobMatchCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          JobMatchCreateWithoutCandidateInput,
-          JobMatchUncheckedCreateWithoutCandidateInput
-        >
-      | JobMatchCreateWithoutCandidateInput[]
-      | JobMatchUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | JobMatchCreateOrConnectWithoutCandidateInput
-      | JobMatchCreateOrConnectWithoutCandidateInput[];
-    createMany?: JobMatchCreateManyCandidateInputEnvelope;
-    connect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-  };
-
-  export type ProjectCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ProjectCreateWithoutCandidateInput,
-          ProjectUncheckedCreateWithoutCandidateInput
-        >
-      | ProjectCreateWithoutCandidateInput[]
-      | ProjectUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ProjectCreateOrConnectWithoutCandidateInput
-      | ProjectCreateOrConnectWithoutCandidateInput[];
-    createMany?: ProjectCreateManyCandidateInputEnvelope;
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-  };
-
-  export type SavedJobCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          SavedJobCreateWithoutCandidateInput,
-          SavedJobUncheckedCreateWithoutCandidateInput
-        >
-      | SavedJobCreateWithoutCandidateInput[]
-      | SavedJobUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SavedJobCreateOrConnectWithoutCandidateInput
-      | SavedJobCreateOrConnectWithoutCandidateInput[];
-    createMany?: SavedJobCreateManyCandidateInputEnvelope;
-    connect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-  };
-
-  export type SkillCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          SkillCreateWithoutCandidateInput,
-          SkillUncheckedCreateWithoutCandidateInput
-        >
-      | SkillCreateWithoutCandidateInput[]
-      | SkillUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SkillCreateOrConnectWithoutCandidateInput
-      | SkillCreateOrConnectWithoutCandidateInput[];
-    createMany?: SkillCreateManyCandidateInputEnvelope;
-    connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-  };
-
-  export type CandidateUnlockCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CandidateUnlockCreateWithoutCandidateInput,
-          CandidateUnlockUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateUnlockCreateWithoutCandidateInput[]
-      | CandidateUnlockUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput[];
-    createMany?: CandidateUnlockCreateManyCandidateInputEnvelope;
-    connect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-  };
-
-  export type CandidateReviewCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CandidateReviewCreateWithoutCandidateInput,
-          CandidateReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateReviewCreateWithoutCandidateInput[]
-      | CandidateReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateReviewCreateOrConnectWithoutCandidateInput
-      | CandidateReviewCreateOrConnectWithoutCandidateInput[];
-    createMany?: CandidateReviewCreateManyCandidateInputEnvelope;
-    connect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-  };
-
-  export type CompanyReviewCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CompanyReviewCreateWithoutCandidateInput,
-          CompanyReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CompanyReviewCreateWithoutCandidateInput[]
-      | CompanyReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CompanyReviewCreateOrConnectWithoutCandidateInput
-      | CompanyReviewCreateOrConnectWithoutCandidateInput[];
-    createMany?: CompanyReviewCreateManyCandidateInputEnvelope;
-    connect?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-  };
-=======
     create?: XOR<UserCreateWithoutCandidateInput, UserUncheckedCreateWithoutCandidateInput>
     connectOrCreate?: UserCreateOrConnectWithoutCandidateInput
     connect?: UserWhereUniqueInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportCreateNestedManyWithoutCandidateInput = {
     create?: XOR<CandidateReportCreateWithoutCandidateInput, CandidateReportUncheckedCreateWithoutCandidateInput> | CandidateReportCreateWithoutCandidateInput[] | CandidateReportUncheckedCreateWithoutCandidateInput[]
@@ -66255,6 +63853,13 @@ export namespace Prisma {
     connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[]
   }
 
+  export type DegreeUncheckedCreateNestedManyWithoutCandidateInput = {
+    create?: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput> | DegreeCreateWithoutCandidateInput[] | DegreeUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: DegreeCreateOrConnectWithoutCandidateInput | DegreeCreateOrConnectWithoutCandidateInput[]
+    createMany?: DegreeCreateManyCandidateInputEnvelope
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+  }
+
   export type ApplicationUncheckedCreateNestedManyWithoutCandidateInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -66263,196 +63868,11 @@ export namespace Prisma {
   }
 
   export type CVUncheckedCreateNestedManyWithoutCandidateInput = {
-<<<<<<< HEAD
-    create?:
-      | XOR<
-          CVCreateWithoutCandidateInput,
-          CVUncheckedCreateWithoutCandidateInput
-        >
-      | CVCreateWithoutCandidateInput[]
-      | CVUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CVCreateOrConnectWithoutCandidateInput
-      | CVCreateOrConnectWithoutCandidateInput[];
-    createMany?: CVCreateManyCandidateInputEnvelope;
-    connect?: CVWhereUniqueInput | CVWhereUniqueInput[];
-  };
-
-  export type CertificationUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CertificationCreateWithoutCandidateInput,
-          CertificationUncheckedCreateWithoutCandidateInput
-        >
-      | CertificationCreateWithoutCandidateInput[]
-      | CertificationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CertificationCreateOrConnectWithoutCandidateInput
-      | CertificationCreateOrConnectWithoutCandidateInput[];
-    createMany?: CertificationCreateManyCandidateInputEnvelope;
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-  };
-
-  export type DegreeUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          DegreeCreateWithoutCandidateInput,
-          DegreeUncheckedCreateWithoutCandidateInput
-        >
-      | DegreeCreateWithoutCandidateInput[]
-      | DegreeUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | DegreeCreateOrConnectWithoutCandidateInput
-      | DegreeCreateOrConnectWithoutCandidateInput[];
-    createMany?: DegreeCreateManyCandidateInputEnvelope;
-    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-  };
-
-  export type ConversationUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ConversationCreateWithoutCandidateInput,
-          ConversationUncheckedCreateWithoutCandidateInput
-        >
-      | ConversationCreateWithoutCandidateInput[]
-      | ConversationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ConversationCreateOrConnectWithoutCandidateInput
-      | ConversationCreateOrConnectWithoutCandidateInput[];
-    createMany?: ConversationCreateManyCandidateInputEnvelope;
-    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-  };
-
-  export type ExperienceUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ExperienceCreateWithoutCandidateInput,
-          ExperienceUncheckedCreateWithoutCandidateInput
-        >
-      | ExperienceCreateWithoutCandidateInput[]
-      | ExperienceUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ExperienceCreateOrConnectWithoutCandidateInput
-      | ExperienceCreateOrConnectWithoutCandidateInput[];
-    createMany?: ExperienceCreateManyCandidateInputEnvelope;
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-  };
-
-  export type JobMatchUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          JobMatchCreateWithoutCandidateInput,
-          JobMatchUncheckedCreateWithoutCandidateInput
-        >
-      | JobMatchCreateWithoutCandidateInput[]
-      | JobMatchUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | JobMatchCreateOrConnectWithoutCandidateInput
-      | JobMatchCreateOrConnectWithoutCandidateInput[];
-    createMany?: JobMatchCreateManyCandidateInputEnvelope;
-    connect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-  };
-
-  export type ProjectUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          ProjectCreateWithoutCandidateInput,
-          ProjectUncheckedCreateWithoutCandidateInput
-        >
-      | ProjectCreateWithoutCandidateInput[]
-      | ProjectUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ProjectCreateOrConnectWithoutCandidateInput
-      | ProjectCreateOrConnectWithoutCandidateInput[];
-    createMany?: ProjectCreateManyCandidateInputEnvelope;
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-  };
-
-  export type SavedJobUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          SavedJobCreateWithoutCandidateInput,
-          SavedJobUncheckedCreateWithoutCandidateInput
-        >
-      | SavedJobCreateWithoutCandidateInput[]
-      | SavedJobUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SavedJobCreateOrConnectWithoutCandidateInput
-      | SavedJobCreateOrConnectWithoutCandidateInput[];
-    createMany?: SavedJobCreateManyCandidateInputEnvelope;
-    connect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-  };
-
-  export type SkillUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          SkillCreateWithoutCandidateInput,
-          SkillUncheckedCreateWithoutCandidateInput
-        >
-      | SkillCreateWithoutCandidateInput[]
-      | SkillUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SkillCreateOrConnectWithoutCandidateInput
-      | SkillCreateOrConnectWithoutCandidateInput[];
-    createMany?: SkillCreateManyCandidateInputEnvelope;
-    connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-  };
-
-  export type CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CandidateUnlockCreateWithoutCandidateInput,
-          CandidateUnlockUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateUnlockCreateWithoutCandidateInput[]
-      | CandidateUnlockUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput[];
-    createMany?: CandidateUnlockCreateManyCandidateInputEnvelope;
-    connect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-  };
-
-  export type CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CandidateReviewCreateWithoutCandidateInput,
-          CandidateReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateReviewCreateWithoutCandidateInput[]
-      | CandidateReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateReviewCreateOrConnectWithoutCandidateInput
-      | CandidateReviewCreateOrConnectWithoutCandidateInput[];
-    createMany?: CandidateReviewCreateManyCandidateInputEnvelope;
-    connect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-  };
-
-  export type CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput = {
-    create?:
-      | XOR<
-          CompanyReviewCreateWithoutCandidateInput,
-          CompanyReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CompanyReviewCreateWithoutCandidateInput[]
-      | CompanyReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CompanyReviewCreateOrConnectWithoutCandidateInput
-      | CompanyReviewCreateOrConnectWithoutCandidateInput[];
-    createMany?: CompanyReviewCreateManyCandidateInputEnvelope;
-    connect?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-  };
-=======
     create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
     createMany?: CVCreateManyCandidateInputEnvelope
     connect?: CVWhereUniqueInput | CVWhereUniqueInput[]
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportUncheckedCreateNestedManyWithoutCandidateInput = {
     create?: XOR<CandidateReportCreateWithoutCandidateInput, CandidateReportUncheckedCreateWithoutCandidateInput> | CandidateReportCreateWithoutCandidateInput[] | CandidateReportUncheckedCreateWithoutCandidateInput[]
@@ -66568,6 +63988,20 @@ export namespace Prisma {
     push?: string | string[]
   }
 
+  export type DegreeUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput> | DegreeCreateWithoutCandidateInput[] | DegreeUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: DegreeCreateOrConnectWithoutCandidateInput | DegreeCreateOrConnectWithoutCandidateInput[]
+    upsert?: DegreeUpsertWithWhereUniqueWithoutCandidateInput | DegreeUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: DegreeCreateManyCandidateInputEnvelope
+    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    update?: DegreeUpdateWithWhereUniqueWithoutCandidateInput | DegreeUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: DegreeUpdateManyWithWhereWithoutCandidateInput | DegreeUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[]
+  }
+
   export type ApplicationUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -66597,362 +64031,12 @@ export namespace Prisma {
   }
 
   export type UserUpdateOneRequiredWithoutCandidateNestedInput = {
-<<<<<<< HEAD
-    create?: XOR<
-      UserCreateWithoutCandidateInput,
-      UserUncheckedCreateWithoutCandidateInput
-    >;
-    connectOrCreate?: UserCreateOrConnectWithoutCandidateInput;
-    upsert?: UserUpsertWithoutCandidateInput;
-    connect?: UserWhereUniqueInput;
-    update?: XOR<
-      XOR<
-        UserUpdateToOneWithWhereWithoutCandidateInput,
-        UserUpdateWithoutCandidateInput
-      >,
-      UserUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CertificationCreateWithoutCandidateInput,
-          CertificationUncheckedCreateWithoutCandidateInput
-        >
-      | CertificationCreateWithoutCandidateInput[]
-      | CertificationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CertificationCreateOrConnectWithoutCandidateInput
-      | CertificationCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CertificationUpsertWithWhereUniqueWithoutCandidateInput
-      | CertificationUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CertificationCreateManyCandidateInputEnvelope;
-    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    disconnect?:
-      | CertificationWhereUniqueInput
-      | CertificationWhereUniqueInput[];
-    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    update?:
-      | CertificationUpdateWithWhereUniqueWithoutCandidateInput
-      | CertificationUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CertificationUpdateManyWithWhereWithoutCandidateInput
-      | CertificationUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CertificationScalarWhereInput
-      | CertificationScalarWhereInput[];
-  };
-
-  export type DegreeUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          DegreeCreateWithoutCandidateInput,
-          DegreeUncheckedCreateWithoutCandidateInput
-        >
-      | DegreeCreateWithoutCandidateInput[]
-      | DegreeUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | DegreeCreateOrConnectWithoutCandidateInput
-      | DegreeCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | DegreeUpsertWithWhereUniqueWithoutCandidateInput
-      | DegreeUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: DegreeCreateManyCandidateInputEnvelope;
-    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    update?:
-      | DegreeUpdateWithWhereUniqueWithoutCandidateInput
-      | DegreeUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | DegreeUpdateManyWithWhereWithoutCandidateInput
-      | DegreeUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
-  };
-
-  export type ConversationUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ConversationCreateWithoutCandidateInput,
-          ConversationUncheckedCreateWithoutCandidateInput
-        >
-      | ConversationCreateWithoutCandidateInput[]
-      | ConversationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ConversationCreateOrConnectWithoutCandidateInput
-      | ConversationCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ConversationUpsertWithWhereUniqueWithoutCandidateInput
-      | ConversationUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ConversationCreateManyCandidateInputEnvelope;
-    set?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    disconnect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    delete?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    update?:
-      | ConversationUpdateWithWhereUniqueWithoutCandidateInput
-      | ConversationUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ConversationUpdateManyWithWhereWithoutCandidateInput
-      | ConversationUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[];
-  };
-
-  export type ExperienceUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ExperienceCreateWithoutCandidateInput,
-          ExperienceUncheckedCreateWithoutCandidateInput
-        >
-      | ExperienceCreateWithoutCandidateInput[]
-      | ExperienceUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ExperienceCreateOrConnectWithoutCandidateInput
-      | ExperienceCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ExperienceUpsertWithWhereUniqueWithoutCandidateInput
-      | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ExperienceCreateManyCandidateInputEnvelope;
-    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    update?:
-      | ExperienceUpdateWithWhereUniqueWithoutCandidateInput
-      | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ExperienceUpdateManyWithWhereWithoutCandidateInput
-      | ExperienceUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[];
-  };
-
-  export type JobMatchUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          JobMatchCreateWithoutCandidateInput,
-          JobMatchUncheckedCreateWithoutCandidateInput
-        >
-      | JobMatchCreateWithoutCandidateInput[]
-      | JobMatchUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | JobMatchCreateOrConnectWithoutCandidateInput
-      | JobMatchCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | JobMatchUpsertWithWhereUniqueWithoutCandidateInput
-      | JobMatchUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: JobMatchCreateManyCandidateInputEnvelope;
-    set?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    disconnect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    delete?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    connect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    update?:
-      | JobMatchUpdateWithWhereUniqueWithoutCandidateInput
-      | JobMatchUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | JobMatchUpdateManyWithWhereWithoutCandidateInput
-      | JobMatchUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: JobMatchScalarWhereInput | JobMatchScalarWhereInput[];
-  };
-
-  export type ProjectUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ProjectCreateWithoutCandidateInput,
-          ProjectUncheckedCreateWithoutCandidateInput
-        >
-      | ProjectCreateWithoutCandidateInput[]
-      | ProjectUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ProjectCreateOrConnectWithoutCandidateInput
-      | ProjectCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ProjectUpsertWithWhereUniqueWithoutCandidateInput
-      | ProjectUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ProjectCreateManyCandidateInputEnvelope;
-    set?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    disconnect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    delete?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    update?:
-      | ProjectUpdateWithWhereUniqueWithoutCandidateInput
-      | ProjectUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ProjectUpdateManyWithWhereWithoutCandidateInput
-      | ProjectUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[];
-  };
-
-  export type SavedJobUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          SavedJobCreateWithoutCandidateInput,
-          SavedJobUncheckedCreateWithoutCandidateInput
-        >
-      | SavedJobCreateWithoutCandidateInput[]
-      | SavedJobUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SavedJobCreateOrConnectWithoutCandidateInput
-      | SavedJobCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | SavedJobUpsertWithWhereUniqueWithoutCandidateInput
-      | SavedJobUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: SavedJobCreateManyCandidateInputEnvelope;
-    set?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    disconnect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    delete?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    connect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    update?:
-      | SavedJobUpdateWithWhereUniqueWithoutCandidateInput
-      | SavedJobUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | SavedJobUpdateManyWithWhereWithoutCandidateInput
-      | SavedJobUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: SavedJobScalarWhereInput | SavedJobScalarWhereInput[];
-  };
-
-  export type SkillUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          SkillCreateWithoutCandidateInput,
-          SkillUncheckedCreateWithoutCandidateInput
-        >
-      | SkillCreateWithoutCandidateInput[]
-      | SkillUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SkillCreateOrConnectWithoutCandidateInput
-      | SkillCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | SkillUpsertWithWhereUniqueWithoutCandidateInput
-      | SkillUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: SkillCreateManyCandidateInputEnvelope;
-    set?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    disconnect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    delete?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    update?:
-      | SkillUpdateWithWhereUniqueWithoutCandidateInput
-      | SkillUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | SkillUpdateManyWithWhereWithoutCandidateInput
-      | SkillUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: SkillScalarWhereInput | SkillScalarWhereInput[];
-  };
-
-  export type CandidateUnlockUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CandidateUnlockCreateWithoutCandidateInput,
-          CandidateUnlockUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateUnlockCreateWithoutCandidateInput[]
-      | CandidateUnlockUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CandidateUnlockUpsertWithWhereUniqueWithoutCandidateInput
-      | CandidateUnlockUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CandidateUnlockCreateManyCandidateInputEnvelope;
-    set?: CandidateUnlockWhereUniqueInput | CandidateUnlockWhereUniqueInput[];
-    disconnect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    delete?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    connect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    update?:
-      | CandidateUnlockUpdateWithWhereUniqueWithoutCandidateInput
-      | CandidateUnlockUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CandidateUnlockUpdateManyWithWhereWithoutCandidateInput
-      | CandidateUnlockUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CandidateUnlockScalarWhereInput
-      | CandidateUnlockScalarWhereInput[];
-  };
-
-  export type CandidateReviewUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CandidateReviewCreateWithoutCandidateInput,
-          CandidateReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateReviewCreateWithoutCandidateInput[]
-      | CandidateReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateReviewCreateOrConnectWithoutCandidateInput
-      | CandidateReviewCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CandidateReviewUpsertWithWhereUniqueWithoutCandidateInput
-      | CandidateReviewUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CandidateReviewCreateManyCandidateInputEnvelope;
-    set?: CandidateReviewWhereUniqueInput | CandidateReviewWhereUniqueInput[];
-    disconnect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    delete?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    connect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    update?:
-      | CandidateReviewUpdateWithWhereUniqueWithoutCandidateInput
-      | CandidateReviewUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CandidateReviewUpdateManyWithWhereWithoutCandidateInput
-      | CandidateReviewUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CandidateReviewScalarWhereInput
-      | CandidateReviewScalarWhereInput[];
-  };
-
-  export type CompanyReviewUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CompanyReviewCreateWithoutCandidateInput,
-          CompanyReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CompanyReviewCreateWithoutCandidateInput[]
-      | CompanyReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CompanyReviewCreateOrConnectWithoutCandidateInput
-      | CompanyReviewCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CompanyReviewUpsertWithWhereUniqueWithoutCandidateInput
-      | CompanyReviewUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CompanyReviewCreateManyCandidateInputEnvelope;
-    set?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    disconnect?:
-      | CompanyReviewWhereUniqueInput
-      | CompanyReviewWhereUniqueInput[];
-    delete?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    connect?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    update?:
-      | CompanyReviewUpdateWithWhereUniqueWithoutCandidateInput
-      | CompanyReviewUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CompanyReviewUpdateManyWithWhereWithoutCandidateInput
-      | CompanyReviewUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CompanyReviewScalarWhereInput
-      | CompanyReviewScalarWhereInput[];
-  };
-=======
     create?: XOR<UserCreateWithoutCandidateInput, UserUncheckedCreateWithoutCandidateInput>
     connectOrCreate?: UserCreateOrConnectWithoutCandidateInput
     upsert?: UserUpsertWithoutCandidateInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCandidateInput, UserUpdateWithoutCandidateInput>, UserUncheckedUpdateWithoutCandidateInput>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<CandidateReportCreateWithoutCandidateInput, CandidateReportUncheckedCreateWithoutCandidateInput> | CandidateReportCreateWithoutCandidateInput[] | CandidateReportUncheckedCreateWithoutCandidateInput[]
@@ -67118,6 +64202,20 @@ export namespace Prisma {
     deleteMany?: SkillScalarWhereInput | SkillScalarWhereInput[]
   }
 
+  export type DegreeUncheckedUpdateManyWithoutCandidateNestedInput = {
+    create?: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput> | DegreeCreateWithoutCandidateInput[] | DegreeUncheckedCreateWithoutCandidateInput[]
+    connectOrCreate?: DegreeCreateOrConnectWithoutCandidateInput | DegreeCreateOrConnectWithoutCandidateInput[]
+    upsert?: DegreeUpsertWithWhereUniqueWithoutCandidateInput | DegreeUpsertWithWhereUniqueWithoutCandidateInput[]
+    createMany?: DegreeCreateManyCandidateInputEnvelope
+    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[]
+    update?: DegreeUpdateWithWhereUniqueWithoutCandidateInput | DegreeUpdateWithWhereUniqueWithoutCandidateInput[]
+    updateMany?: DegreeUpdateManyWithWhereWithoutCandidateInput | DegreeUpdateManyWithWhereWithoutCandidateInput[]
+    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[]
+  }
+
   export type ApplicationUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<ApplicationCreateWithoutCandidateInput, ApplicationUncheckedCreateWithoutCandidateInput> | ApplicationCreateWithoutCandidateInput[] | ApplicationUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: ApplicationCreateOrConnectWithoutCandidateInput | ApplicationCreateOrConnectWithoutCandidateInput[]
@@ -67133,366 +64231,6 @@ export namespace Prisma {
   }
 
   export type CVUncheckedUpdateManyWithoutCandidateNestedInput = {
-<<<<<<< HEAD
-    create?:
-      | XOR<
-          CVCreateWithoutCandidateInput,
-          CVUncheckedCreateWithoutCandidateInput
-        >
-      | CVCreateWithoutCandidateInput[]
-      | CVUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CVCreateOrConnectWithoutCandidateInput
-      | CVCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CVUpsertWithWhereUniqueWithoutCandidateInput
-      | CVUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CVCreateManyCandidateInputEnvelope;
-    set?: CVWhereUniqueInput | CVWhereUniqueInput[];
-    disconnect?: CVWhereUniqueInput | CVWhereUniqueInput[];
-    delete?: CVWhereUniqueInput | CVWhereUniqueInput[];
-    connect?: CVWhereUniqueInput | CVWhereUniqueInput[];
-    update?:
-      | CVUpdateWithWhereUniqueWithoutCandidateInput
-      | CVUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CVUpdateManyWithWhereWithoutCandidateInput
-      | CVUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: CVScalarWhereInput | CVScalarWhereInput[];
-  };
-
-  export type CertificationUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CertificationCreateWithoutCandidateInput,
-          CertificationUncheckedCreateWithoutCandidateInput
-        >
-      | CertificationCreateWithoutCandidateInput[]
-      | CertificationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CertificationCreateOrConnectWithoutCandidateInput
-      | CertificationCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CertificationUpsertWithWhereUniqueWithoutCandidateInput
-      | CertificationUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CertificationCreateManyCandidateInputEnvelope;
-    set?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    disconnect?:
-      | CertificationWhereUniqueInput
-      | CertificationWhereUniqueInput[];
-    delete?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    connect?: CertificationWhereUniqueInput | CertificationWhereUniqueInput[];
-    update?:
-      | CertificationUpdateWithWhereUniqueWithoutCandidateInput
-      | CertificationUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CertificationUpdateManyWithWhereWithoutCandidateInput
-      | CertificationUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CertificationScalarWhereInput
-      | CertificationScalarWhereInput[];
-  };
-
-  export type DegreeUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          DegreeCreateWithoutCandidateInput,
-          DegreeUncheckedCreateWithoutCandidateInput
-        >
-      | DegreeCreateWithoutCandidateInput[]
-      | DegreeUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | DegreeCreateOrConnectWithoutCandidateInput
-      | DegreeCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | DegreeUpsertWithWhereUniqueWithoutCandidateInput
-      | DegreeUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: DegreeCreateManyCandidateInputEnvelope;
-    set?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    disconnect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    delete?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    connect?: DegreeWhereUniqueInput | DegreeWhereUniqueInput[];
-    update?:
-      | DegreeUpdateWithWhereUniqueWithoutCandidateInput
-      | DegreeUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | DegreeUpdateManyWithWhereWithoutCandidateInput
-      | DegreeUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
-  };
-
-  export type ConversationUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ConversationCreateWithoutCandidateInput,
-          ConversationUncheckedCreateWithoutCandidateInput
-        >
-      | ConversationCreateWithoutCandidateInput[]
-      | ConversationUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ConversationCreateOrConnectWithoutCandidateInput
-      | ConversationCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ConversationUpsertWithWhereUniqueWithoutCandidateInput
-      | ConversationUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ConversationCreateManyCandidateInputEnvelope;
-    set?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    disconnect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    delete?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    connect?: ConversationWhereUniqueInput | ConversationWhereUniqueInput[];
-    update?:
-      | ConversationUpdateWithWhereUniqueWithoutCandidateInput
-      | ConversationUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ConversationUpdateManyWithWhereWithoutCandidateInput
-      | ConversationUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ConversationScalarWhereInput | ConversationScalarWhereInput[];
-  };
-
-  export type ExperienceUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ExperienceCreateWithoutCandidateInput,
-          ExperienceUncheckedCreateWithoutCandidateInput
-        >
-      | ExperienceCreateWithoutCandidateInput[]
-      | ExperienceUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ExperienceCreateOrConnectWithoutCandidateInput
-      | ExperienceCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ExperienceUpsertWithWhereUniqueWithoutCandidateInput
-      | ExperienceUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ExperienceCreateManyCandidateInputEnvelope;
-    set?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    disconnect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    delete?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    connect?: ExperienceWhereUniqueInput | ExperienceWhereUniqueInput[];
-    update?:
-      | ExperienceUpdateWithWhereUniqueWithoutCandidateInput
-      | ExperienceUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ExperienceUpdateManyWithWhereWithoutCandidateInput
-      | ExperienceUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[];
-  };
-
-  export type JobMatchUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          JobMatchCreateWithoutCandidateInput,
-          JobMatchUncheckedCreateWithoutCandidateInput
-        >
-      | JobMatchCreateWithoutCandidateInput[]
-      | JobMatchUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | JobMatchCreateOrConnectWithoutCandidateInput
-      | JobMatchCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | JobMatchUpsertWithWhereUniqueWithoutCandidateInput
-      | JobMatchUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: JobMatchCreateManyCandidateInputEnvelope;
-    set?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    disconnect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    delete?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    connect?: JobMatchWhereUniqueInput | JobMatchWhereUniqueInput[];
-    update?:
-      | JobMatchUpdateWithWhereUniqueWithoutCandidateInput
-      | JobMatchUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | JobMatchUpdateManyWithWhereWithoutCandidateInput
-      | JobMatchUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: JobMatchScalarWhereInput | JobMatchScalarWhereInput[];
-  };
-
-  export type ProjectUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          ProjectCreateWithoutCandidateInput,
-          ProjectUncheckedCreateWithoutCandidateInput
-        >
-      | ProjectCreateWithoutCandidateInput[]
-      | ProjectUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | ProjectCreateOrConnectWithoutCandidateInput
-      | ProjectCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | ProjectUpsertWithWhereUniqueWithoutCandidateInput
-      | ProjectUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: ProjectCreateManyCandidateInputEnvelope;
-    set?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    disconnect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    delete?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    connect?: ProjectWhereUniqueInput | ProjectWhereUniqueInput[];
-    update?:
-      | ProjectUpdateWithWhereUniqueWithoutCandidateInput
-      | ProjectUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | ProjectUpdateManyWithWhereWithoutCandidateInput
-      | ProjectUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: ProjectScalarWhereInput | ProjectScalarWhereInput[];
-  };
-
-  export type SavedJobUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          SavedJobCreateWithoutCandidateInput,
-          SavedJobUncheckedCreateWithoutCandidateInput
-        >
-      | SavedJobCreateWithoutCandidateInput[]
-      | SavedJobUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SavedJobCreateOrConnectWithoutCandidateInput
-      | SavedJobCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | SavedJobUpsertWithWhereUniqueWithoutCandidateInput
-      | SavedJobUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: SavedJobCreateManyCandidateInputEnvelope;
-    set?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    disconnect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    delete?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    connect?: SavedJobWhereUniqueInput | SavedJobWhereUniqueInput[];
-    update?:
-      | SavedJobUpdateWithWhereUniqueWithoutCandidateInput
-      | SavedJobUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | SavedJobUpdateManyWithWhereWithoutCandidateInput
-      | SavedJobUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: SavedJobScalarWhereInput | SavedJobScalarWhereInput[];
-  };
-
-  export type SkillUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          SkillCreateWithoutCandidateInput,
-          SkillUncheckedCreateWithoutCandidateInput
-        >
-      | SkillCreateWithoutCandidateInput[]
-      | SkillUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | SkillCreateOrConnectWithoutCandidateInput
-      | SkillCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | SkillUpsertWithWhereUniqueWithoutCandidateInput
-      | SkillUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: SkillCreateManyCandidateInputEnvelope;
-    set?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    disconnect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    delete?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    connect?: SkillWhereUniqueInput | SkillWhereUniqueInput[];
-    update?:
-      | SkillUpdateWithWhereUniqueWithoutCandidateInput
-      | SkillUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | SkillUpdateManyWithWhereWithoutCandidateInput
-      | SkillUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?: SkillScalarWhereInput | SkillScalarWhereInput[];
-  };
-
-  export type CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CandidateUnlockCreateWithoutCandidateInput,
-          CandidateUnlockUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateUnlockCreateWithoutCandidateInput[]
-      | CandidateUnlockUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput
-      | CandidateUnlockCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CandidateUnlockUpsertWithWhereUniqueWithoutCandidateInput
-      | CandidateUnlockUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CandidateUnlockCreateManyCandidateInputEnvelope;
-    set?: CandidateUnlockWhereUniqueInput | CandidateUnlockWhereUniqueInput[];
-    disconnect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    delete?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    connect?:
-      | CandidateUnlockWhereUniqueInput
-      | CandidateUnlockWhereUniqueInput[];
-    update?:
-      | CandidateUnlockUpdateWithWhereUniqueWithoutCandidateInput
-      | CandidateUnlockUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CandidateUnlockUpdateManyWithWhereWithoutCandidateInput
-      | CandidateUnlockUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CandidateUnlockScalarWhereInput
-      | CandidateUnlockScalarWhereInput[];
-  };
-
-  export type CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CandidateReviewCreateWithoutCandidateInput,
-          CandidateReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CandidateReviewCreateWithoutCandidateInput[]
-      | CandidateReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CandidateReviewCreateOrConnectWithoutCandidateInput
-      | CandidateReviewCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CandidateReviewUpsertWithWhereUniqueWithoutCandidateInput
-      | CandidateReviewUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CandidateReviewCreateManyCandidateInputEnvelope;
-    set?: CandidateReviewWhereUniqueInput | CandidateReviewWhereUniqueInput[];
-    disconnect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    delete?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    connect?:
-      | CandidateReviewWhereUniqueInput
-      | CandidateReviewWhereUniqueInput[];
-    update?:
-      | CandidateReviewUpdateWithWhereUniqueWithoutCandidateInput
-      | CandidateReviewUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CandidateReviewUpdateManyWithWhereWithoutCandidateInput
-      | CandidateReviewUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CandidateReviewScalarWhereInput
-      | CandidateReviewScalarWhereInput[];
-  };
-
-  export type CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput = {
-    create?:
-      | XOR<
-          CompanyReviewCreateWithoutCandidateInput,
-          CompanyReviewUncheckedCreateWithoutCandidateInput
-        >
-      | CompanyReviewCreateWithoutCandidateInput[]
-      | CompanyReviewUncheckedCreateWithoutCandidateInput[];
-    connectOrCreate?:
-      | CompanyReviewCreateOrConnectWithoutCandidateInput
-      | CompanyReviewCreateOrConnectWithoutCandidateInput[];
-    upsert?:
-      | CompanyReviewUpsertWithWhereUniqueWithoutCandidateInput
-      | CompanyReviewUpsertWithWhereUniqueWithoutCandidateInput[];
-    createMany?: CompanyReviewCreateManyCandidateInputEnvelope;
-    set?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    disconnect?:
-      | CompanyReviewWhereUniqueInput
-      | CompanyReviewWhereUniqueInput[];
-    delete?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    connect?: CompanyReviewWhereUniqueInput | CompanyReviewWhereUniqueInput[];
-    update?:
-      | CompanyReviewUpdateWithWhereUniqueWithoutCandidateInput
-      | CompanyReviewUpdateWithWhereUniqueWithoutCandidateInput[];
-    updateMany?:
-      | CompanyReviewUpdateManyWithWhereWithoutCandidateInput
-      | CompanyReviewUpdateManyWithWhereWithoutCandidateInput[];
-    deleteMany?:
-      | CompanyReviewScalarWhereInput
-      | CompanyReviewScalarWhereInput[];
-  };
-=======
     create?: XOR<CVCreateWithoutCandidateInput, CVUncheckedCreateWithoutCandidateInput> | CVCreateWithoutCandidateInput[] | CVUncheckedCreateWithoutCandidateInput[]
     connectOrCreate?: CVCreateOrConnectWithoutCandidateInput | CVCreateOrConnectWithoutCandidateInput[]
     upsert?: CVUpsertWithWhereUniqueWithoutCandidateInput | CVUpsertWithWhereUniqueWithoutCandidateInput[]
@@ -67505,7 +64243,6 @@ export namespace Prisma {
     updateMany?: CVUpdateManyWithWhereWithoutCandidateInput | CVUpdateManyWithWhereWithoutCandidateInput[]
     deleteMany?: CVScalarWhereInput | CVScalarWhereInput[]
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput = {
     create?: XOR<CandidateReportCreateWithoutCandidateInput, CandidateReportUncheckedCreateWithoutCandidateInput> | CandidateReportCreateWithoutCandidateInput[] | CandidateReportUncheckedCreateWithoutCandidateInput[]
@@ -67692,8 +64429,8 @@ export namespace Prisma {
   }
 
   export type EnumVerificationStatusFieldUpdateOperationsInput = {
-    set?: $Enums.VerificationStatus;
-  };
+    set?: $Enums.VerificationStatus
+  }
 
   export type CandidateUpdateOneRequiredWithoutCertificationsNestedInput = {
     create?: XOR<CandidateCreateWithoutCertificationsInput, CandidateUncheckedCreateWithoutCertificationsInput>
@@ -67704,30 +64441,18 @@ export namespace Prisma {
   }
 
   export type CandidateCreateNestedOneWithoutDegreesInput = {
-    create?: XOR<
-      CandidateCreateWithoutDegreesInput,
-      CandidateUncheckedCreateWithoutDegreesInput
-    >;
-    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput;
-    connect?: CandidateWhereUniqueInput;
-  };
+    create?: XOR<CandidateCreateWithoutDegreesInput, CandidateUncheckedCreateWithoutDegreesInput>
+    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput
+    connect?: CandidateWhereUniqueInput
+  }
 
   export type CandidateUpdateOneRequiredWithoutDegreesNestedInput = {
-    create?: XOR<
-      CandidateCreateWithoutDegreesInput,
-      CandidateUncheckedCreateWithoutDegreesInput
-    >;
-    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput;
-    upsert?: CandidateUpsertWithoutDegreesInput;
-    connect?: CandidateWhereUniqueInput;
-    update?: XOR<
-      XOR<
-        CandidateUpdateToOneWithWhereWithoutDegreesInput,
-        CandidateUpdateWithoutDegreesInput
-      >,
-      CandidateUncheckedUpdateWithoutDegreesInput
-    >;
-  };
+    create?: XOR<CandidateCreateWithoutDegreesInput, CandidateUncheckedCreateWithoutDegreesInput>
+    connectOrCreate?: CandidateCreateOrConnectWithoutDegreesInput
+    upsert?: CandidateUpsertWithoutDegreesInput
+    connect?: CandidateWhereUniqueInput
+    update?: XOR<XOR<CandidateUpdateToOneWithWhereWithoutDegreesInput, CandidateUpdateWithoutDegreesInput>, CandidateUncheckedUpdateWithoutDegreesInput>
+  }
 
   export type CandidateCreateNestedOneWithoutSkillsInput = {
     create?: XOR<CandidateCreateWithoutSkillsInput, CandidateUncheckedCreateWithoutSkillsInput>
@@ -70151,39 +66876,21 @@ export namespace Prisma {
   }
 
   export type NestedEnumVerificationStatusFilter<$PrismaModel = never> = {
-    equals?:
-      | $Enums.VerificationStatus
-      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
-    in?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    notIn?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    not?:
-      | NestedEnumVerificationStatusFilter<$PrismaModel>
-      | $Enums.VerificationStatus;
-  };
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusFilter<$PrismaModel> | $Enums.VerificationStatus
+  }
 
-  export type NestedEnumVerificationStatusWithAggregatesFilter<
-    $PrismaModel = never,
-  > = {
-    equals?:
-      | $Enums.VerificationStatus
-      | EnumVerificationStatusFieldRefInput<$PrismaModel>;
-    in?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    notIn?:
-      | $Enums.VerificationStatus[]
-      | ListEnumVerificationStatusFieldRefInput<$PrismaModel>;
-    not?:
-      | NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel>
-      | $Enums.VerificationStatus;
-    _count?: NestedIntFilter<$PrismaModel>;
-    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>;
-    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>;
-  };
+  export type NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.VerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>
+  }
 
   export type NestedEnumSkillLevelFilter<$PrismaModel = never> = {
     equals?: $Enums.SkillLevel | EnumSkillLevelFieldRefInput<$PrismaModel>
@@ -70443,84 +67150,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutUserInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutUserInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -70529,7 +67158,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -70541,6 +67170,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
@@ -70566,7 +67196,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -70578,6 +67208,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -70593,7 +67224,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutUserInput = {
     where: CandidateWhereUniqueInput
@@ -70828,92 +67458,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutUserInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutUserInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -70922,7 +67466,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -70934,6 +67478,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
@@ -70959,7 +67504,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -70971,6 +67516,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -70986,7 +67532,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type JobAlertUpsertWithWhereUniqueWithoutUserInput = {
     where: JobAlertWhereUniqueInput
@@ -71882,6 +68427,44 @@ export namespace Prisma {
     taxAddress?: StringNullableFilter<"Company"> | string | null
   }
 
+  export type DegreeCreateWithoutCandidateInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DegreeUncheckedCreateWithoutCandidateInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DegreeCreateOrConnectWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput
+    create: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type DegreeCreateManyCandidateInputEnvelope = {
+    data: DegreeCreateManyCandidateInput | DegreeCreateManyCandidateInput[]
+    skipDuplicates?: boolean
+  }
+
   export type ApplicationCreateWithoutCandidateInput = {
     applicationId?: string
     applyDate?: Date | string
@@ -72025,395 +68608,9 @@ export namespace Prisma {
   }
 
   export type UserCreateOrConnectWithoutCandidateInput = {
-<<<<<<< HEAD
-    where: UserWhereUniqueInput;
-    create: XOR<
-      UserCreateWithoutCandidateInput,
-      UserUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationCreateWithoutCandidateInput = {
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationUncheckedCreateWithoutCandidateInput = {
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationCreateOrConnectWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput;
-    create: XOR<
-      CertificationCreateWithoutCandidateInput,
-      CertificationUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationCreateManyCandidateInputEnvelope = {
-    data:
-      | CertificationCreateManyCandidateInput
-      | CertificationCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type DegreeCreateWithoutCandidateInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeUncheckedCreateWithoutCandidateInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeCreateOrConnectWithoutCandidateInput = {
-    where: DegreeWhereUniqueInput;
-    create: XOR<
-      DegreeCreateWithoutCandidateInput,
-      DegreeUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type DegreeCreateManyCandidateInputEnvelope = {
-    data: DegreeCreateManyCandidateInput | DegreeCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type ConversationCreateWithoutCandidateInput = {
-    conversationId?: string;
-    lastMessage?: string | null;
-    isRead?: boolean;
-    updatedAt?: Date | string;
-    userId?: string | null;
-    recruiter: RecruiterCreateNestedOneWithoutConversationsInput;
-    messages?: MessageCreateNestedManyWithoutConversationInput;
-  };
-
-  export type ConversationUncheckedCreateWithoutCandidateInput = {
-    conversationId?: string;
-    recruiterId: string;
-    lastMessage?: string | null;
-    isRead?: boolean;
-    updatedAt?: Date | string;
-    userId?: string | null;
-    messages?: MessageUncheckedCreateNestedManyWithoutConversationInput;
-  };
-
-  export type ConversationCreateOrConnectWithoutCandidateInput = {
-    where: ConversationWhereUniqueInput;
-    create: XOR<
-      ConversationCreateWithoutCandidateInput,
-      ConversationUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ConversationCreateManyCandidateInputEnvelope = {
-    data:
-      | ConversationCreateManyCandidateInput
-      | ConversationCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type ExperienceCreateWithoutCandidateInput = {
-    experienceId?: string;
-    company: string;
-    role: string;
-    duration: string;
-    description?: string | null;
-  };
-
-  export type ExperienceUncheckedCreateWithoutCandidateInput = {
-    experienceId?: string;
-    company: string;
-    role: string;
-    duration: string;
-    description?: string | null;
-  };
-
-  export type ExperienceCreateOrConnectWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput;
-    create: XOR<
-      ExperienceCreateWithoutCandidateInput,
-      ExperienceUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ExperienceCreateManyCandidateInputEnvelope = {
-    data:
-      | ExperienceCreateManyCandidateInput
-      | ExperienceCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type JobMatchCreateWithoutCandidateInput = {
-    matchId?: string;
-    score: number;
-    matchedSkills?: JobMatchCreatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    jobPosting: JobPostingCreateNestedOneWithoutJobMatchesInput;
-  };
-
-  export type JobMatchUncheckedCreateWithoutCandidateInput = {
-    matchId?: string;
-    score: number;
-    matchedSkills?: JobMatchCreatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    jobPostingId: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type JobMatchCreateOrConnectWithoutCandidateInput = {
-    where: JobMatchWhereUniqueInput;
-    create: XOR<
-      JobMatchCreateWithoutCandidateInput,
-      JobMatchUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type JobMatchCreateManyCandidateInputEnvelope = {
-    data: JobMatchCreateManyCandidateInput | JobMatchCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type ProjectCreateWithoutCandidateInput = {
-    projectId?: string;
-    projectName: string;
-    description?: string | null;
-    role?: string | null;
-    technology?: string | null;
-  };
-
-  export type ProjectUncheckedCreateWithoutCandidateInput = {
-    projectId?: string;
-    projectName: string;
-    description?: string | null;
-    role?: string | null;
-    technology?: string | null;
-  };
-
-  export type ProjectCreateOrConnectWithoutCandidateInput = {
-    where: ProjectWhereUniqueInput;
-    create: XOR<
-      ProjectCreateWithoutCandidateInput,
-      ProjectUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ProjectCreateManyCandidateInputEnvelope = {
-    data: ProjectCreateManyCandidateInput | ProjectCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type SavedJobCreateWithoutCandidateInput = {
-    savedJobId?: string;
-    savedAt?: Date | string;
-    jobPosting: JobPostingCreateNestedOneWithoutSavedJobsInput;
-  };
-
-  export type SavedJobUncheckedCreateWithoutCandidateInput = {
-    savedJobId?: string;
-    savedAt?: Date | string;
-    jobPostingId: string;
-  };
-
-  export type SavedJobCreateOrConnectWithoutCandidateInput = {
-    where: SavedJobWhereUniqueInput;
-    create: XOR<
-      SavedJobCreateWithoutCandidateInput,
-      SavedJobUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type SavedJobCreateManyCandidateInputEnvelope = {
-    data: SavedJobCreateManyCandidateInput | SavedJobCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type SkillCreateWithoutCandidateInput = {
-    skillId?: string;
-    skillName: string;
-    level?: $Enums.SkillLevel;
-    category?: string | null;
-  };
-
-  export type SkillUncheckedCreateWithoutCandidateInput = {
-    skillId?: string;
-    skillName: string;
-    level?: $Enums.SkillLevel;
-    category?: string | null;
-  };
-
-  export type SkillCreateOrConnectWithoutCandidateInput = {
-    where: SkillWhereUniqueInput;
-    create: XOR<
-      SkillCreateWithoutCandidateInput,
-      SkillUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type SkillCreateManyCandidateInputEnvelope = {
-    data: SkillCreateManyCandidateInput | SkillCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type CandidateUnlockCreateWithoutCandidateInput = {
-    unlockId?: string;
-    creditSpent?: number;
-    unlockedAt?: Date | string;
-    recruiter: RecruiterCreateNestedOneWithoutCandidateUnlocksInput;
-    jobPosting: JobPostingCreateNestedOneWithoutCandidateUnlocksInput;
-    cv?: CVCreateNestedOneWithoutCandidateUnlocksInput;
-    company?: CompanyCreateNestedOneWithoutCandidateUnlocksInput;
-  };
-
-  export type CandidateUnlockUncheckedCreateWithoutCandidateInput = {
-    unlockId?: string;
-    recruiterId: string;
-    jobPostingId: string;
-    cvId: string;
-    creditSpent?: number;
-    unlockedAt?: Date | string;
-    companyCompanyId?: string | null;
-  };
-
-  export type CandidateUnlockCreateOrConnectWithoutCandidateInput = {
-    where: CandidateUnlockWhereUniqueInput;
-    create: XOR<
-      CandidateUnlockCreateWithoutCandidateInput,
-      CandidateUnlockUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateUnlockCreateManyCandidateInputEnvelope = {
-    data:
-      | CandidateUnlockCreateManyCandidateInput
-      | CandidateUnlockCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type CandidateReviewCreateWithoutCandidateInput = {
-    reviewId?: string;
-    jobPostingId?: string | null;
-    rating?: number;
-    content: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    recruiter: RecruiterCreateNestedOneWithoutCandidateReviewsInput;
-  };
-
-  export type CandidateReviewUncheckedCreateWithoutCandidateInput = {
-    reviewId?: string;
-    recruiterId: string;
-    jobPostingId?: string | null;
-    rating?: number;
-    content: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type CandidateReviewCreateOrConnectWithoutCandidateInput = {
-    where: CandidateReviewWhereUniqueInput;
-    create: XOR<
-      CandidateReviewCreateWithoutCandidateInput,
-      CandidateReviewUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateReviewCreateManyCandidateInputEnvelope = {
-    data:
-      | CandidateReviewCreateManyCandidateInput
-      | CandidateReviewCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type CompanyReviewCreateWithoutCandidateInput = {
-    reviewId?: string;
-    ratingProcess?: number;
-    ratingInterviewer?: number;
-    ratingOffice?: number;
-    content?: string | null;
-    isAnonymous?: boolean;
-    isVerified?: boolean;
-    status?: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    company: CompanyCreateNestedOneWithoutCompanyReviewsInput;
-    application: ApplicationCreateNestedOneWithoutCompanyReviewInput;
-  };
-
-  export type CompanyReviewUncheckedCreateWithoutCandidateInput = {
-    reviewId?: string;
-    companyId: string;
-    applicationId: string;
-    ratingProcess?: number;
-    ratingInterviewer?: number;
-    ratingOffice?: number;
-    content?: string | null;
-    isAnonymous?: boolean;
-    isVerified?: boolean;
-    status?: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type CompanyReviewCreateOrConnectWithoutCandidateInput = {
-    where: CompanyReviewWhereUniqueInput;
-    create: XOR<
-      CompanyReviewCreateWithoutCandidateInput,
-      CompanyReviewUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CompanyReviewCreateManyCandidateInputEnvelope = {
-    data:
-      | CompanyReviewCreateManyCandidateInput
-      | CompanyReviewCreateManyCandidateInput[];
-    skipDuplicates?: boolean;
-  };
-=======
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutCandidateInput, UserUncheckedCreateWithoutCandidateInput>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportCreateWithoutCandidateInput = {
     reportId?: string
@@ -72529,11 +68726,27 @@ export namespace Prisma {
   export type CertificationCreateWithoutCandidateInput = {
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CertificationUncheckedCreateWithoutCandidateInput = {
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CertificationCreateOrConnectWithoutCandidateInput = {
@@ -72746,6 +68959,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type DegreeUpsertWithWhereUniqueWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput
+    update: XOR<DegreeUpdateWithoutCandidateInput, DegreeUncheckedUpdateWithoutCandidateInput>
+    create: XOR<DegreeCreateWithoutCandidateInput, DegreeUncheckedCreateWithoutCandidateInput>
+  }
+
+  export type DegreeUpdateWithWhereUniqueWithoutCandidateInput = {
+    where: DegreeWhereUniqueInput
+    data: XOR<DegreeUpdateWithoutCandidateInput, DegreeUncheckedUpdateWithoutCandidateInput>
+  }
+
+  export type DegreeUpdateManyWithWhereWithoutCandidateInput = {
+    where: DegreeScalarWhereInput
+    data: XOR<DegreeUpdateManyMutationInput, DegreeUncheckedUpdateManyWithoutCandidateInput>
+  }
+
+  export type DegreeScalarWhereInput = {
+    AND?: DegreeScalarWhereInput | DegreeScalarWhereInput[]
+    OR?: DegreeScalarWhereInput[]
+    NOT?: DegreeScalarWhereInput | DegreeScalarWhereInput[]
+    degreeId?: StringFilter<"Degree"> | string
+    name?: StringFilter<"Degree"> | string
+    school?: StringFilter<"Degree"> | string
+    major?: StringNullableFilter<"Degree"> | string | null
+    issueDate?: StringNullableFilter<"Degree"> | string | null
+    fileUrl?: StringNullableFilter<"Degree"> | string | null
+    status?: EnumVerificationStatusFilter<"Degree"> | $Enums.VerificationStatus
+    issuer?: StringNullableFilter<"Degree"> | string | null
+    credentialId?: StringNullableFilter<"Degree"> | string | null
+    adminFeedback?: StringNullableFilter<"Degree"> | string | null
+    aiVerification?: JsonNullableFilter<"Degree">
+    candidateId?: StringFilter<"Degree"> | string
+  }
+
   export type ApplicationUpsertWithWhereUniqueWithoutCandidateInput = {
     where: ApplicationWhereUniqueInput
     update: XOR<ApplicationUpdateWithoutCandidateInput, ApplicationUncheckedUpdateWithoutCandidateInput>
@@ -72854,506 +69101,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateWithoutCandidateInput = {
-<<<<<<< HEAD
-    userId?: StringFieldUpdateOperationsInput | string;
-    email?: StringFieldUpdateOperationsInput | string;
-    password?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?: EnumStatusUserFieldUpdateOperationsInput | $Enums.StatusUser;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    lastLogin?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null;
-    avatar?: NullableStringFieldUpdateOperationsInput | string | null;
-    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null;
-    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider;
-    providerId?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOnline?: BoolFieldUpdateOperationsInput | boolean;
-    lastActive?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    violations?: IntFieldUpdateOperationsInput | number;
-    accountLevel?:
-      | EnumAccountLevelFieldUpdateOperationsInput
-      | $Enums.AccountLevel;
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput;
-    jobAlerts?: JobAlertUncheckedUpdateManyWithoutUserNestedInput;
-    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput;
-    recruiter?: RecruiterUncheckedUpdateOneWithoutUserNestedInput;
-    supportRequests?: SupportRequestUncheckedUpdateManyWithoutUserNestedInput;
-    userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput;
-  };
-
-  export type CertificationUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput;
-    update: XOR<
-      CertificationUpdateWithoutCandidateInput,
-      CertificationUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      CertificationCreateWithoutCandidateInput,
-      CertificationUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: CertificationWhereUniqueInput;
-    data: XOR<
-      CertificationUpdateWithoutCandidateInput,
-      CertificationUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationUpdateManyWithWhereWithoutCandidateInput = {
-    where: CertificationScalarWhereInput;
-    data: XOR<
-      CertificationUpdateManyMutationInput,
-      CertificationUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type CertificationScalarWhereInput = {
-    AND?: CertificationScalarWhereInput | CertificationScalarWhereInput[];
-    OR?: CertificationScalarWhereInput[];
-    NOT?: CertificationScalarWhereInput | CertificationScalarWhereInput[];
-    certificationId?: StringFilter<'Certification'> | string;
-    name?: StringFilter<'Certification'> | string;
-    issuer?: StringNullableFilter<'Certification'> | string | null;
-    issueDate?: StringNullableFilter<'Certification'> | string | null;
-    credentialId?: StringNullableFilter<'Certification'> | string | null;
-    credentialUrl?: StringNullableFilter<'Certification'> | string | null;
-    fileUrl?: StringNullableFilter<'Certification'> | string | null;
-    status?:
-      | EnumVerificationStatusFilter<'Certification'>
-      | $Enums.VerificationStatus;
-    adminFeedback?: StringNullableFilter<'Certification'> | string | null;
-    aiVerification?: JsonNullableFilter<'Certification'>;
-    candidateId?: StringFilter<'Certification'> | string;
-  };
-
-  export type DegreeUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: DegreeWhereUniqueInput;
-    update: XOR<
-      DegreeUpdateWithoutCandidateInput,
-      DegreeUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      DegreeCreateWithoutCandidateInput,
-      DegreeUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type DegreeUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: DegreeWhereUniqueInput;
-    data: XOR<
-      DegreeUpdateWithoutCandidateInput,
-      DegreeUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type DegreeUpdateManyWithWhereWithoutCandidateInput = {
-    where: DegreeScalarWhereInput;
-    data: XOR<
-      DegreeUpdateManyMutationInput,
-      DegreeUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type DegreeScalarWhereInput = {
-    AND?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
-    OR?: DegreeScalarWhereInput[];
-    NOT?: DegreeScalarWhereInput | DegreeScalarWhereInput[];
-    degreeId?: StringFilter<'Degree'> | string;
-    name?: StringFilter<'Degree'> | string;
-    school?: StringFilter<'Degree'> | string;
-    major?: StringNullableFilter<'Degree'> | string | null;
-    issueDate?: StringNullableFilter<'Degree'> | string | null;
-    fileUrl?: StringNullableFilter<'Degree'> | string | null;
-    status?: EnumVerificationStatusFilter<'Degree'> | $Enums.VerificationStatus;
-    issuer?: StringNullableFilter<'Degree'> | string | null;
-    credentialId?: StringNullableFilter<'Degree'> | string | null;
-    adminFeedback?: StringNullableFilter<'Degree'> | string | null;
-    aiVerification?: JsonNullableFilter<'Degree'>;
-    candidateId?: StringFilter<'Degree'> | string;
-  };
-
-  export type ConversationUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: ConversationWhereUniqueInput;
-    update: XOR<
-      ConversationUpdateWithoutCandidateInput,
-      ConversationUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      ConversationCreateWithoutCandidateInput,
-      ConversationUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ConversationUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: ConversationWhereUniqueInput;
-    data: XOR<
-      ConversationUpdateWithoutCandidateInput,
-      ConversationUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type ConversationUpdateManyWithWhereWithoutCandidateInput = {
-    where: ConversationScalarWhereInput;
-    data: XOR<
-      ConversationUpdateManyMutationInput,
-      ConversationUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type ConversationScalarWhereInput = {
-    AND?: ConversationScalarWhereInput | ConversationScalarWhereInput[];
-    OR?: ConversationScalarWhereInput[];
-    NOT?: ConversationScalarWhereInput | ConversationScalarWhereInput[];
-    conversationId?: StringFilter<'Conversation'> | string;
-    candidateId?: StringFilter<'Conversation'> | string;
-    recruiterId?: StringFilter<'Conversation'> | string;
-    lastMessage?: StringNullableFilter<'Conversation'> | string | null;
-    isRead?: BoolFilter<'Conversation'> | boolean;
-    updatedAt?: DateTimeFilter<'Conversation'> | Date | string;
-    userId?: StringNullableFilter<'Conversation'> | string | null;
-  };
-
-  export type ExperienceUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput;
-    update: XOR<
-      ExperienceUpdateWithoutCandidateInput,
-      ExperienceUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      ExperienceCreateWithoutCandidateInput,
-      ExperienceUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ExperienceUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: ExperienceWhereUniqueInput;
-    data: XOR<
-      ExperienceUpdateWithoutCandidateInput,
-      ExperienceUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type ExperienceUpdateManyWithWhereWithoutCandidateInput = {
-    where: ExperienceScalarWhereInput;
-    data: XOR<
-      ExperienceUpdateManyMutationInput,
-      ExperienceUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type ExperienceScalarWhereInput = {
-    AND?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[];
-    OR?: ExperienceScalarWhereInput[];
-    NOT?: ExperienceScalarWhereInput | ExperienceScalarWhereInput[];
-    experienceId?: StringFilter<'Experience'> | string;
-    company?: StringFilter<'Experience'> | string;
-    role?: StringFilter<'Experience'> | string;
-    duration?: StringFilter<'Experience'> | string;
-    description?: StringNullableFilter<'Experience'> | string | null;
-    candidateId?: StringFilter<'Experience'> | string;
-  };
-
-  export type JobMatchUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: JobMatchWhereUniqueInput;
-    update: XOR<
-      JobMatchUpdateWithoutCandidateInput,
-      JobMatchUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      JobMatchCreateWithoutCandidateInput,
-      JobMatchUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type JobMatchUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: JobMatchWhereUniqueInput;
-    data: XOR<
-      JobMatchUpdateWithoutCandidateInput,
-      JobMatchUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type JobMatchUpdateManyWithWhereWithoutCandidateInput = {
-    where: JobMatchScalarWhereInput;
-    data: XOR<
-      JobMatchUpdateManyMutationInput,
-      JobMatchUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type JobMatchScalarWhereInput = {
-    AND?: JobMatchScalarWhereInput | JobMatchScalarWhereInput[];
-    OR?: JobMatchScalarWhereInput[];
-    NOT?: JobMatchScalarWhereInput | JobMatchScalarWhereInput[];
-    matchId?: StringFilter<'JobMatch'> | string;
-    score?: FloatFilter<'JobMatch'> | number;
-    matchedSkills?: StringNullableListFilter<'JobMatch'>;
-    details?: JsonNullableFilter<'JobMatch'>;
-    candidateId?: StringFilter<'JobMatch'> | string;
-    jobPostingId?: StringFilter<'JobMatch'> | string;
-    createdAt?: DateTimeFilter<'JobMatch'> | Date | string;
-    updatedAt?: DateTimeFilter<'JobMatch'> | Date | string;
-  };
-
-  export type ProjectUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: ProjectWhereUniqueInput;
-    update: XOR<
-      ProjectUpdateWithoutCandidateInput,
-      ProjectUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      ProjectCreateWithoutCandidateInput,
-      ProjectUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type ProjectUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: ProjectWhereUniqueInput;
-    data: XOR<
-      ProjectUpdateWithoutCandidateInput,
-      ProjectUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type ProjectUpdateManyWithWhereWithoutCandidateInput = {
-    where: ProjectScalarWhereInput;
-    data: XOR<
-      ProjectUpdateManyMutationInput,
-      ProjectUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type ProjectScalarWhereInput = {
-    AND?: ProjectScalarWhereInput | ProjectScalarWhereInput[];
-    OR?: ProjectScalarWhereInput[];
-    NOT?: ProjectScalarWhereInput | ProjectScalarWhereInput[];
-    projectId?: StringFilter<'Project'> | string;
-    projectName?: StringFilter<'Project'> | string;
-    description?: StringNullableFilter<'Project'> | string | null;
-    role?: StringNullableFilter<'Project'> | string | null;
-    technology?: StringNullableFilter<'Project'> | string | null;
-    candidateId?: StringFilter<'Project'> | string;
-  };
-
-  export type SavedJobUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: SavedJobWhereUniqueInput;
-    update: XOR<
-      SavedJobUpdateWithoutCandidateInput,
-      SavedJobUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      SavedJobCreateWithoutCandidateInput,
-      SavedJobUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type SavedJobUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: SavedJobWhereUniqueInput;
-    data: XOR<
-      SavedJobUpdateWithoutCandidateInput,
-      SavedJobUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type SavedJobUpdateManyWithWhereWithoutCandidateInput = {
-    where: SavedJobScalarWhereInput;
-    data: XOR<
-      SavedJobUpdateManyMutationInput,
-      SavedJobUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type SavedJobScalarWhereInput = {
-    AND?: SavedJobScalarWhereInput | SavedJobScalarWhereInput[];
-    OR?: SavedJobScalarWhereInput[];
-    NOT?: SavedJobScalarWhereInput | SavedJobScalarWhereInput[];
-    savedJobId?: StringFilter<'SavedJob'> | string;
-    savedAt?: DateTimeFilter<'SavedJob'> | Date | string;
-    candidateId?: StringFilter<'SavedJob'> | string;
-    jobPostingId?: StringFilter<'SavedJob'> | string;
-  };
-
-  export type SkillUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: SkillWhereUniqueInput;
-    update: XOR<
-      SkillUpdateWithoutCandidateInput,
-      SkillUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      SkillCreateWithoutCandidateInput,
-      SkillUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type SkillUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: SkillWhereUniqueInput;
-    data: XOR<
-      SkillUpdateWithoutCandidateInput,
-      SkillUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type SkillUpdateManyWithWhereWithoutCandidateInput = {
-    where: SkillScalarWhereInput;
-    data: XOR<
-      SkillUpdateManyMutationInput,
-      SkillUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type SkillScalarWhereInput = {
-    AND?: SkillScalarWhereInput | SkillScalarWhereInput[];
-    OR?: SkillScalarWhereInput[];
-    NOT?: SkillScalarWhereInput | SkillScalarWhereInput[];
-    skillId?: StringFilter<'Skill'> | string;
-    skillName?: StringFilter<'Skill'> | string;
-    candidateId?: StringFilter<'Skill'> | string;
-    level?: EnumSkillLevelFilter<'Skill'> | $Enums.SkillLevel;
-    category?: StringNullableFilter<'Skill'> | string | null;
-  };
-
-  export type CandidateUnlockUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: CandidateUnlockWhereUniqueInput;
-    update: XOR<
-      CandidateUnlockUpdateWithoutCandidateInput,
-      CandidateUnlockUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      CandidateUnlockCreateWithoutCandidateInput,
-      CandidateUnlockUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateUnlockUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: CandidateUnlockWhereUniqueInput;
-    data: XOR<
-      CandidateUnlockUpdateWithoutCandidateInput,
-      CandidateUnlockUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateUnlockUpdateManyWithWhereWithoutCandidateInput = {
-    where: CandidateUnlockScalarWhereInput;
-    data: XOR<
-      CandidateUnlockUpdateManyMutationInput,
-      CandidateUnlockUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateUnlockScalarWhereInput = {
-    AND?: CandidateUnlockScalarWhereInput | CandidateUnlockScalarWhereInput[];
-    OR?: CandidateUnlockScalarWhereInput[];
-    NOT?: CandidateUnlockScalarWhereInput | CandidateUnlockScalarWhereInput[];
-    unlockId?: StringFilter<'CandidateUnlock'> | string;
-    recruiterId?: StringFilter<'CandidateUnlock'> | string;
-    candidateId?: StringFilter<'CandidateUnlock'> | string;
-    jobPostingId?: StringFilter<'CandidateUnlock'> | string;
-    cvId?: StringFilter<'CandidateUnlock'> | string;
-    creditSpent?: IntFilter<'CandidateUnlock'> | number;
-    unlockedAt?: DateTimeFilter<'CandidateUnlock'> | Date | string;
-    companyCompanyId?: StringNullableFilter<'CandidateUnlock'> | string | null;
-  };
-
-  export type CandidateReviewUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: CandidateReviewWhereUniqueInput;
-    update: XOR<
-      CandidateReviewUpdateWithoutCandidateInput,
-      CandidateReviewUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      CandidateReviewCreateWithoutCandidateInput,
-      CandidateReviewUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateReviewUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: CandidateReviewWhereUniqueInput;
-    data: XOR<
-      CandidateReviewUpdateWithoutCandidateInput,
-      CandidateReviewUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateReviewUpdateManyWithWhereWithoutCandidateInput = {
-    where: CandidateReviewScalarWhereInput;
-    data: XOR<
-      CandidateReviewUpdateManyMutationInput,
-      CandidateReviewUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type CandidateReviewScalarWhereInput = {
-    AND?: CandidateReviewScalarWhereInput | CandidateReviewScalarWhereInput[];
-    OR?: CandidateReviewScalarWhereInput[];
-    NOT?: CandidateReviewScalarWhereInput | CandidateReviewScalarWhereInput[];
-    reviewId?: StringFilter<'CandidateReview'> | string;
-    candidateId?: StringFilter<'CandidateReview'> | string;
-    recruiterId?: StringFilter<'CandidateReview'> | string;
-    jobPostingId?: StringNullableFilter<'CandidateReview'> | string | null;
-    rating?: IntFilter<'CandidateReview'> | number;
-    content?: StringFilter<'CandidateReview'> | string;
-    createdAt?: DateTimeFilter<'CandidateReview'> | Date | string;
-    updatedAt?: DateTimeFilter<'CandidateReview'> | Date | string;
-  };
-
-  export type CompanyReviewUpsertWithWhereUniqueWithoutCandidateInput = {
-    where: CompanyReviewWhereUniqueInput;
-    update: XOR<
-      CompanyReviewUpdateWithoutCandidateInput,
-      CompanyReviewUncheckedUpdateWithoutCandidateInput
-    >;
-    create: XOR<
-      CompanyReviewCreateWithoutCandidateInput,
-      CompanyReviewUncheckedCreateWithoutCandidateInput
-    >;
-  };
-
-  export type CompanyReviewUpdateWithWhereUniqueWithoutCandidateInput = {
-    where: CompanyReviewWhereUniqueInput;
-    data: XOR<
-      CompanyReviewUpdateWithoutCandidateInput,
-      CompanyReviewUncheckedUpdateWithoutCandidateInput
-    >;
-  };
-
-  export type CompanyReviewUpdateManyWithWhereWithoutCandidateInput = {
-    where: CompanyReviewScalarWhereInput;
-    data: XOR<
-      CompanyReviewUpdateManyMutationInput,
-      CompanyReviewUncheckedUpdateManyWithoutCandidateInput
-    >;
-  };
-
-  export type CompanyReviewScalarWhereInput = {
-    AND?: CompanyReviewScalarWhereInput | CompanyReviewScalarWhereInput[];
-    OR?: CompanyReviewScalarWhereInput[];
-    NOT?: CompanyReviewScalarWhereInput | CompanyReviewScalarWhereInput[];
-    reviewId?: StringFilter<'CompanyReview'> | string;
-    companyId?: StringFilter<'CompanyReview'> | string;
-    candidateId?: StringFilter<'CompanyReview'> | string;
-    applicationId?: StringFilter<'CompanyReview'> | string;
-    ratingProcess?: IntFilter<'CompanyReview'> | number;
-    ratingInterviewer?: IntFilter<'CompanyReview'> | number;
-    ratingOffice?: IntFilter<'CompanyReview'> | number;
-    content?: StringNullableFilter<'CompanyReview'> | string | null;
-    isAnonymous?: BoolFilter<'CompanyReview'> | boolean;
-    isVerified?: BoolFilter<'CompanyReview'> | boolean;
-    status?: StringFilter<'CompanyReview'> | string;
-    createdAt?: DateTimeFilter<'CompanyReview'> | Date | string;
-    updatedAt?: DateTimeFilter<'CompanyReview'> | Date | string;
-  };
-=======
     userId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: NullableStringFieldUpdateOperationsInput | string | null
@@ -73379,7 +69126,6 @@ export namespace Prisma {
     userRoles?: UserRoleUncheckedUpdateManyWithoutUserNestedInput
     violationLogs?: ViolationLogUncheckedUpdateManyWithoutUserNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportUpsertWithWhereUniqueWithoutCandidateInput = {
     where: CandidateReportWhereUniqueInput
@@ -73519,6 +69265,14 @@ export namespace Prisma {
     NOT?: CertificationScalarWhereInput | CertificationScalarWhereInput[]
     certificationId?: StringFilter<"Certification"> | string
     name?: StringFilter<"Certification"> | string
+    issuer?: StringNullableFilter<"Certification"> | string | null
+    issueDate?: StringNullableFilter<"Certification"> | string | null
+    credentialId?: StringNullableFilter<"Certification"> | string | null
+    credentialUrl?: StringNullableFilter<"Certification"> | string | null
+    fileUrl?: StringNullableFilter<"Certification"> | string | null
+    status?: EnumVerificationStatusFilter<"Certification"> | $Enums.VerificationStatus
+    adminFeedback?: StringNullableFilter<"Certification"> | string | null
+    aiVerification?: JsonNullableFilter<"Certification">
     candidateId?: StringFilter<"Certification"> | string
   }
 
@@ -73726,84 +69480,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutExperiencesInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutExperiencesInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -73812,7 +69488,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -73824,6 +69500,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -73850,7 +69527,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -73862,6 +69539,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -73876,7 +69554,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutExperiencesInput = {
     where: CandidateWhereUniqueInput
@@ -73895,170 +69572,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutExperiencesInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutExperiencesInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateCreateWithoutCertificationsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutCertificationsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74067,7 +69580,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74079,6 +69592,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -74105,7 +69619,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74117,6 +69631,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -74141,7 +69656,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -74153,6 +69668,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -74179,7 +69695,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -74191,6 +69707,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -74205,7 +69722,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutCertificationsInput = {
     where: CandidateWhereUniqueInput
@@ -74224,362 +69740,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutCertificationsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutCertificationsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateCreateWithoutDegreesInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutDegreesInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateCreateOrConnectWithoutDegreesInput = {
-    where: CandidateWhereUniqueInput;
-    create: XOR<
-      CandidateCreateWithoutDegreesInput,
-      CandidateUncheckedCreateWithoutDegreesInput
-    >;
-  };
-
-  export type CandidateUpsertWithoutDegreesInput = {
-    update: XOR<
-      CandidateUpdateWithoutDegreesInput,
-      CandidateUncheckedUpdateWithoutDegreesInput
-    >;
-    create: XOR<
-      CandidateCreateWithoutDegreesInput,
-      CandidateUncheckedCreateWithoutDegreesInput
-    >;
-    where?: CandidateWhereInput;
-  };
-
-  export type CandidateUpdateToOneWithWhereWithoutDegreesInput = {
-    where?: CandidateWhereInput;
-    data: XOR<
-      CandidateUpdateWithoutDegreesInput,
-      CandidateUncheckedUpdateWithoutDegreesInput
-    >;
-  };
-
-  export type CandidateUpdateWithoutDegreesInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutDegreesInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateCreateWithoutSkillsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutSkillsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74588,7 +69748,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74600,6 +69760,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -74626,7 +69787,175 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
+    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
+    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
+    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
+    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
+    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
+    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
+    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
+    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateCreateWithoutDegreesInput = {
+    candidateId?: string
+    fullName: string
+    university?: string | null
+    major?: string | null
+    gpa?: number | null
+    cvUrl?: string | null
+    birthYear?: number | null
+    currentSalary?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    gender?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
+    isOpenToWork?: boolean
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    location?: string | null
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    summary?: string | null
+    totalYearsExp?: number | null
+    jobSearchExpiresAt?: Date | string | null
+    applications?: ApplicationCreateNestedManyWithoutCandidateInput
+    cvs?: CVCreateNestedManyWithoutCandidateInput
+    user: UserCreateNestedOneWithoutCandidateInput
+    reports?: CandidateReportCreateNestedManyWithoutCandidateInput
+    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput
+    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationCreateNestedManyWithoutCandidateInput
+    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput
+    conversations?: ConversationCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput
+    projects?: ProjectCreateNestedManyWithoutCandidateInput
+    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput
+    skills?: SkillCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateUncheckedCreateWithoutDegreesInput = {
+    candidateId?: string
+    fullName: string
+    university?: string | null
+    major?: string | null
+    gpa?: number | null
+    cvUrl?: string | null
+    userId: string
+    birthYear?: number | null
+    currentSalary?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    gender?: string | null
+    industries?: CandidateCreateindustriesInput | string[]
+    interests?: CandidateCreateinterestsInput | string[]
+    isOpenToWork?: boolean
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    location?: string | null
+    softSkills?: CandidateCreatesoftSkillsInput | string[]
+    summary?: string | null
+    totalYearsExp?: number | null
+    jobSearchExpiresAt?: Date | string | null
+    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
+    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
+    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
+    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
+    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput
+    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput
+    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput
+    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput
+    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput
+    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput
+    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput
+    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
+    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
+    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
+  }
+
+  export type CandidateCreateOrConnectWithoutDegreesInput = {
+    where: CandidateWhereUniqueInput
+    create: XOR<CandidateCreateWithoutDegreesInput, CandidateUncheckedCreateWithoutDegreesInput>
+  }
+
+  export type CandidateUpsertWithoutDegreesInput = {
+    update: XOR<CandidateUpdateWithoutDegreesInput, CandidateUncheckedUpdateWithoutDegreesInput>
+    create: XOR<CandidateCreateWithoutDegreesInput, CandidateUncheckedCreateWithoutDegreesInput>
+    where?: CandidateWhereInput
+  }
+
+  export type CandidateUpdateToOneWithWhereWithoutDegreesInput = {
+    where?: CandidateWhereInput
+    data: XOR<CandidateUpdateWithoutDegreesInput, CandidateUncheckedUpdateWithoutDegreesInput>
+  }
+
+  export type CandidateUpdateWithoutDegreesInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
+    desiredJob?: NullableJsonNullValueInput | InputJsonValue
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    industries?: CandidateUpdateindustriesInput | string[]
+    interests?: CandidateUpdateinterestsInput | string[]
+    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean
+    languages?: NullableJsonNullValueInput | InputJsonValue
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    softSkills?: CandidateUpdatesoftSkillsInput | string[]
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
+    jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applications?: ApplicationUpdateManyWithoutCandidateNestedInput
+    cvs?: CVUpdateManyWithoutCandidateNestedInput
+    user?: UserUpdateOneRequiredWithoutCandidateNestedInput
+    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
+    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput
+    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput
+    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput
+    certifications?: CertificationUpdateManyWithoutCandidateNestedInput
+    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput
+    conversations?: ConversationUpdateManyWithoutCandidateNestedInput
+    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput
+    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput
+    projects?: ProjectUpdateManyWithoutCandidateNestedInput
+    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput
+    skills?: SkillUpdateManyWithoutCandidateNestedInput
+  }
+
+  export type CandidateUncheckedUpdateWithoutDegreesInput = {
+    candidateId?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    university?: NullableStringFieldUpdateOperationsInput | string | null
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    gpa?: NullableFloatFieldUpdateOperationsInput | number | null
+    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+    birthYear?: NullableIntFieldUpdateOperationsInput | number | null
+    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74644,6 +69973,7 @@ export namespace Prisma {
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
     candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput
     wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput
+    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput
     companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput
     conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput
     experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput
@@ -74662,7 +69992,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -74674,6 +70004,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -74700,7 +70031,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -74712,6 +70043,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -74726,7 +70058,6 @@ export namespace Prisma {
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutSkillsInput = {
     where: CandidateWhereUniqueInput
@@ -74745,170 +70076,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutSkillsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutSkillsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateCreateWithoutProjectsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutProjectsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -74917,7 +70084,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74929,6 +70096,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -74955,7 +70123,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -74967,6 +70135,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -74991,7 +70160,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -75003,6 +70172,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -75029,7 +70199,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -75041,6 +70211,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -75055,7 +70226,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutProjectsInput = {
     where: CandidateWhereUniqueInput
@@ -75074,550 +70244,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutProjectsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutProjectsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type ConversationCreateWithoutRecruiterInput = {
-    conversationId?: string;
-    lastMessage?: string | null;
-    isRead?: boolean;
-    updatedAt?: Date | string;
-    userId?: string | null;
-    candidate: CandidateCreateNestedOneWithoutConversationsInput;
-    messages?: MessageCreateNestedManyWithoutConversationInput;
-  };
-
-  export type ConversationUncheckedCreateWithoutRecruiterInput = {
-    conversationId?: string;
-    candidateId: string;
-    lastMessage?: string | null;
-    isRead?: boolean;
-    updatedAt?: Date | string;
-    userId?: string | null;
-    messages?: MessageUncheckedCreateNestedManyWithoutConversationInput;
-  };
-
-  export type ConversationCreateOrConnectWithoutRecruiterInput = {
-    where: ConversationWhereUniqueInput;
-    create: XOR<
-      ConversationCreateWithoutRecruiterInput,
-      ConversationUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type ConversationCreateManyRecruiterInputEnvelope = {
-    data:
-      | ConversationCreateManyRecruiterInput
-      | ConversationCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type JobPostingCreateWithoutRecruiterInput = {
-    jobPostingId?: string;
-    title: string;
-    description?: string | null;
-    requirements?: string | null;
-    benefits?: string | null;
-    salaryMin?: Decimal | DecimalJsLike | number | string | null;
-    salaryMax?: Decimal | DecimalJsLike | number | string | null;
-    currency?: string | null;
-    jobType?: $Enums.JobType | null;
-    jobLevel?: $Enums.JobLevel | null;
-    experience?: string | null;
-    vacancies?: number;
-    locationCity?: string | null;
-    status?: $Enums.JobStatus;
-    isVerified?: boolean;
-    aiReliabilityScore?: number | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    approvedBy?: string | null;
-    moderationFeedback?: NullableJsonNullValueInput | InputJsonValue;
-    structuredRequirements?: NullableJsonNullValueInput | InputJsonValue;
-    viewCount?: number;
-    jobTier?: $Enums.JobTier;
-    refreshedAt?: Date | string;
-    pausedAt?: Date | string | null;
-    slug?: string | null;
-    autoInviteMatches?: boolean;
-    autoRejectThreshold?: number | null;
-    autoInviteThreshold?: number;
-    matchMode?: string;
-    slaApplicationDays?: number;
-    slaInterviewDays?: number;
-    applications?: ApplicationCreateNestedManyWithoutJobPostingInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutJobPostingInput;
-    company: CompanyCreateNestedOneWithoutJobPostingsInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutJobPostingInput;
-    branches?: JobPostingBranchCreateNestedManyWithoutJobPostingInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutJobPostingInput;
-  };
-
-  export type JobPostingUncheckedCreateWithoutRecruiterInput = {
-    jobPostingId?: string;
-    title: string;
-    description?: string | null;
-    requirements?: string | null;
-    benefits?: string | null;
-    salaryMin?: Decimal | DecimalJsLike | number | string | null;
-    salaryMax?: Decimal | DecimalJsLike | number | string | null;
-    currency?: string | null;
-    jobType?: $Enums.JobType | null;
-    jobLevel?: $Enums.JobLevel | null;
-    experience?: string | null;
-    vacancies?: number;
-    locationCity?: string | null;
-    status?: $Enums.JobStatus;
-    isVerified?: boolean;
-    aiReliabilityScore?: number | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    approvedBy?: string | null;
-    moderationFeedback?: NullableJsonNullValueInput | InputJsonValue;
-    companyId: string;
-    structuredRequirements?: NullableJsonNullValueInput | InputJsonValue;
-    viewCount?: number;
-    jobTier?: $Enums.JobTier;
-    refreshedAt?: Date | string;
-    pausedAt?: Date | string | null;
-    slug?: string | null;
-    autoInviteMatches?: boolean;
-    autoRejectThreshold?: number | null;
-    autoInviteThreshold?: number;
-    matchMode?: string;
-    slaApplicationDays?: number;
-    slaInterviewDays?: number;
-    applications?: ApplicationUncheckedCreateNestedManyWithoutJobPostingInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutJobPostingInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput;
-    branches?: JobPostingBranchUncheckedCreateNestedManyWithoutJobPostingInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutJobPostingInput;
-  };
-
-  export type JobPostingCreateOrConnectWithoutRecruiterInput = {
-    where: JobPostingWhereUniqueInput;
-    create: XOR<
-      JobPostingCreateWithoutRecruiterInput,
-      JobPostingUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type JobPostingCreateManyRecruiterInputEnvelope = {
-    data:
-      | JobPostingCreateManyRecruiterInput
-      | JobPostingCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type CompanyCreateWithoutRecruitersInput = {
-    companyId?: string;
-    companyName: string;
-    taxCode?: string | null;
-    isRegistered?: boolean;
-    verifyStatus?: number;
-    logo?: string | null;
-    banner?: string | null;
-    address?: string | null;
-    description?: string | null;
-    websiteUrl?: string | null;
-    companySize?: number | null;
-    businessLicenseUrl?: string | null;
-    enterpriseType?: string | null;
-    internationalName?: string | null;
-    mainIndustry?: string | null;
-    operatingDate?: string | null;
-    shortName?: string | null;
-    slug?: string | null;
-    status?: string | null;
-    taxAddress?: string | null;
-    cultureContent?: NullableJsonNullValueInput | InputJsonValue;
-    admin?: AdminCreateNestedOneWithoutCompaniesInput;
-    branches?: CompanyBranchCreateNestedManyWithoutCompanyInput;
-    jobPostings?: JobPostingCreateNestedManyWithoutCompanyInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCompanyInput;
-    sections?: CompanySectionCreateNestedManyWithoutCompanyInput;
-    benefits?: CompanyBenefitCreateNestedManyWithoutCompanyInput;
-    history?: CompanyHistoryCreateNestedManyWithoutCompanyInput;
-    wallet?: CompanyWalletCreateNestedOneWithoutCompanyInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCompanyInput;
-  };
-
-  export type CompanyUncheckedCreateWithoutRecruitersInput = {
-    companyId?: string;
-    companyName: string;
-    taxCode?: string | null;
-    isRegistered?: boolean;
-    verifyStatus?: number;
-    logo?: string | null;
-    banner?: string | null;
-    address?: string | null;
-    description?: string | null;
-    websiteUrl?: string | null;
-    companySize?: number | null;
-    businessLicenseUrl?: string | null;
-    adminId?: string | null;
-    enterpriseType?: string | null;
-    internationalName?: string | null;
-    mainIndustry?: string | null;
-    operatingDate?: string | null;
-    shortName?: string | null;
-    slug?: string | null;
-    status?: string | null;
-    taxAddress?: string | null;
-    cultureContent?: NullableJsonNullValueInput | InputJsonValue;
-    branches?: CompanyBranchUncheckedCreateNestedManyWithoutCompanyInput;
-    jobPostings?: JobPostingUncheckedCreateNestedManyWithoutCompanyInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCompanyInput;
-    sections?: CompanySectionUncheckedCreateNestedManyWithoutCompanyInput;
-    benefits?: CompanyBenefitUncheckedCreateNestedManyWithoutCompanyInput;
-    history?: CompanyHistoryUncheckedCreateNestedManyWithoutCompanyInput;
-    wallet?: CompanyWalletUncheckedCreateNestedOneWithoutCompanyInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCompanyInput;
-  };
-
-  export type CompanyCreateOrConnectWithoutRecruitersInput = {
-    where: CompanyWhereUniqueInput;
-    create: XOR<
-      CompanyCreateWithoutRecruitersInput,
-      CompanyUncheckedCreateWithoutRecruitersInput
-    >;
-  };
-
-  export type UserCreateWithoutRecruiterInput = {
-    userId?: string;
-    email: string;
-    password?: string | null;
-    status: $Enums.StatusUser;
-    createdAt?: Date | string;
-    lastLogin?: Date | string | null;
-    phoneNumber?: string | null;
-    avatar?: string | null;
-    isEmailVerified?: boolean;
-    updatedAt?: Date | string;
-    refreshToken?: string | null;
-    provider?: $Enums.AuthProvider;
-    providerId?: string | null;
-    isOnline?: boolean;
-    lastActive?: Date | string | null;
-    violations?: number;
-    accountLevel?: $Enums.AccountLevel;
-    admin?: AdminCreateNestedOneWithoutUserInput;
-    candidate?: CandidateCreateNestedOneWithoutUserInput;
-    jobAlerts?: JobAlertCreateNestedManyWithoutUserInput;
-    notifications?: NotificationCreateNestedManyWithoutUserInput;
-    supportRequests?: SupportRequestCreateNestedManyWithoutUserInput;
-    userRoles?: UserRoleCreateNestedManyWithoutUserInput;
-  };
-
-  export type UserUncheckedCreateWithoutRecruiterInput = {
-    userId?: string;
-    email: string;
-    password?: string | null;
-    status: $Enums.StatusUser;
-    createdAt?: Date | string;
-    lastLogin?: Date | string | null;
-    phoneNumber?: string | null;
-    avatar?: string | null;
-    isEmailVerified?: boolean;
-    updatedAt?: Date | string;
-    refreshToken?: string | null;
-    provider?: $Enums.AuthProvider;
-    providerId?: string | null;
-    isOnline?: boolean;
-    lastActive?: Date | string | null;
-    violations?: number;
-    accountLevel?: $Enums.AccountLevel;
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput;
-    candidate?: CandidateUncheckedCreateNestedOneWithoutUserInput;
-    jobAlerts?: JobAlertUncheckedCreateNestedManyWithoutUserInput;
-    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput;
-    supportRequests?: SupportRequestUncheckedCreateNestedManyWithoutUserInput;
-    userRoles?: UserRoleUncheckedCreateNestedManyWithoutUserInput;
-  };
-
-  export type UserCreateOrConnectWithoutRecruiterInput = {
-    where: UserWhereUniqueInput;
-    create: XOR<
-      UserCreateWithoutRecruiterInput,
-      UserUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type RecruiterSubscriptionCreateWithoutRecruiterInput = {
-    subscriptionId?: string;
-    planType: $Enums.PlanType;
-    maxBasicPosts?: number;
-    usedBasicPosts?: number;
-    maxVipPosts?: number;
-    usedVipPosts?: number;
-    maxUrgentPosts?: number;
-    usedUrgentPosts?: number;
-    expiryDate: Date | string;
-    canViewAIReport?: boolean;
-    isCancelled?: boolean;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type RecruiterSubscriptionUncheckedCreateWithoutRecruiterInput = {
-    subscriptionId?: string;
-    planType: $Enums.PlanType;
-    maxBasicPosts?: number;
-    usedBasicPosts?: number;
-    maxVipPosts?: number;
-    usedVipPosts?: number;
-    maxUrgentPosts?: number;
-    usedUrgentPosts?: number;
-    expiryDate: Date | string;
-    canViewAIReport?: boolean;
-    isCancelled?: boolean;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type RecruiterSubscriptionCreateOrConnectWithoutRecruiterInput = {
-    where: RecruiterSubscriptionWhereUniqueInput;
-    create: XOR<
-      RecruiterSubscriptionCreateWithoutRecruiterInput,
-      RecruiterSubscriptionUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type CandidateUnlockCreateWithoutRecruiterInput = {
-    unlockId?: string;
-    creditSpent?: number;
-    unlockedAt?: Date | string;
-    candidate: CandidateCreateNestedOneWithoutCandidateUnlocksInput;
-    jobPosting: JobPostingCreateNestedOneWithoutCandidateUnlocksInput;
-    cv?: CVCreateNestedOneWithoutCandidateUnlocksInput;
-    company?: CompanyCreateNestedOneWithoutCandidateUnlocksInput;
-  };
-
-  export type CandidateUnlockUncheckedCreateWithoutRecruiterInput = {
-    unlockId?: string;
-    candidateId: string;
-    jobPostingId: string;
-    cvId: string;
-    creditSpent?: number;
-    unlockedAt?: Date | string;
-    companyCompanyId?: string | null;
-  };
-
-  export type CandidateUnlockCreateOrConnectWithoutRecruiterInput = {
-    where: CandidateUnlockWhereUniqueInput;
-    create: XOR<
-      CandidateUnlockCreateWithoutRecruiterInput,
-      CandidateUnlockUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type CandidateUnlockCreateManyRecruiterInputEnvelope = {
-    data:
-      | CandidateUnlockCreateManyRecruiterInput
-      | CandidateUnlockCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type CandidateReviewCreateWithoutRecruiterInput = {
-    reviewId?: string;
-    jobPostingId?: string | null;
-    rating?: number;
-    content: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    candidate: CandidateCreateNestedOneWithoutCandidateReviewsInput;
-  };
-
-  export type CandidateReviewUncheckedCreateWithoutRecruiterInput = {
-    reviewId?: string;
-    candidateId: string;
-    jobPostingId?: string | null;
-    rating?: number;
-    content: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type CandidateReviewCreateOrConnectWithoutRecruiterInput = {
-    where: CandidateReviewWhereUniqueInput;
-    create: XOR<
-      CandidateReviewCreateWithoutRecruiterInput,
-      CandidateReviewUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type CandidateReviewCreateManyRecruiterInputEnvelope = {
-    data:
-      | CandidateReviewCreateManyRecruiterInput
-      | CandidateReviewCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type InterviewEvaluationCreateWithoutRecruiterInput = {
-    evaluationId?: string;
-    roundNumber?: number;
-    roundName?: string | null;
-    sessionDate?: Date | string | null;
-    criteriaScores?: JsonNullValueInput | InputJsonValue;
-    overallRating?: number;
-    notes?: string | null;
-    result?: $Enums.EvalResult;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    application: ApplicationCreateNestedOneWithoutEvaluationsInput;
-  };
-
-  export type InterviewEvaluationUncheckedCreateWithoutRecruiterInput = {
-    evaluationId?: string;
-    applicationId: string;
-    roundNumber?: number;
-    roundName?: string | null;
-    sessionDate?: Date | string | null;
-    criteriaScores?: JsonNullValueInput | InputJsonValue;
-    overallRating?: number;
-    notes?: string | null;
-    result?: $Enums.EvalResult;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type InterviewEvaluationCreateOrConnectWithoutRecruiterInput = {
-    where: InterviewEvaluationWhereUniqueInput;
-    create: XOR<
-      InterviewEvaluationCreateWithoutRecruiterInput,
-      InterviewEvaluationUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type InterviewEvaluationCreateManyRecruiterInputEnvelope = {
-    data:
-      | InterviewEvaluationCreateManyRecruiterInput
-      | InterviewEvaluationCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-
-  export type TransactionCreateWithoutRecruiterInput = {
-    transactionId?: string;
-    amount: number;
-    description?: string | null;
-    createdAt?: Date | string;
-    orderCode?: number | null;
-    status?: string;
-    realMoney?: number | null;
-    type: $Enums.TransactionType;
-    wallet: CompanyWalletCreateNestedOneWithoutTransactionsInput;
-  };
-
-  export type TransactionUncheckedCreateWithoutRecruiterInput = {
-    transactionId?: string;
-    amount: number;
-    description?: string | null;
-    createdAt?: Date | string;
-    walletId: string;
-    orderCode?: number | null;
-    status?: string;
-    realMoney?: number | null;
-    type: $Enums.TransactionType;
-  };
-
-  export type TransactionCreateOrConnectWithoutRecruiterInput = {
-    where: TransactionWhereUniqueInput;
-    create: XOR<
-      TransactionCreateWithoutRecruiterInput,
-      TransactionUncheckedCreateWithoutRecruiterInput
-    >;
-  };
-
-  export type TransactionCreateManyRecruiterInputEnvelope = {
-    data:
-      | TransactionCreateManyRecruiterInput
-      | TransactionCreateManyRecruiterInput[];
-    skipDuplicates?: boolean;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -75626,7 +70252,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -75638,6 +70264,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -75664,7 +70291,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -75676,6 +70303,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -75690,7 +70318,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportCreateWithoutRecruiterInput = {
     reportId?: string
@@ -78741,84 +73368,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutJobMatchesInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutJobMatchesInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -78827,7 +73376,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -78839,6 +73388,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -78865,7 +73415,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -78877,6 +73427,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -78891,7 +73442,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutJobMatchesInput = {
     where: CandidateWhereUniqueInput
@@ -78997,92 +73547,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutJobMatchesInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutJobMatchesInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79091,7 +73555,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -79103,6 +73567,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -79129,7 +73594,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -79141,6 +73606,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -79155,7 +73621,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type JobPostingUpsertWithoutJobMatchesInput = {
     update: XOR<JobPostingUpdateWithoutJobMatchesInput, JobPostingUncheckedUpdateWithoutJobMatchesInput>
@@ -79305,84 +73770,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutCvsInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutCvsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -79391,7 +73778,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -79403,6 +73790,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
@@ -79429,7 +73817,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -79441,6 +73829,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
@@ -79455,7 +73844,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutCvsInput = {
     where: CandidateWhereUniqueInput
@@ -79520,92 +73908,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutCvsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutCvsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -79614,7 +73916,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -79626,6 +73928,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
@@ -79652,7 +73955,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -79664,6 +73967,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
@@ -79678,7 +73982,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateUnlockUpsertWithWhereUniqueWithoutCvInput = {
     where: CandidateUnlockWhereUniqueInput
@@ -79697,84 +74000,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutApplicationsInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutApplicationsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -79783,7 +74008,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -79795,6 +74020,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
     reports?: CandidateReportCreateNestedManyWithoutCandidateInput
@@ -79821,7 +74047,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -79833,6 +74059,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
@@ -79847,7 +74074,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutApplicationsInput = {
     where: CandidateWhereUniqueInput
@@ -80089,92 +74315,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutApplicationsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutApplicationsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80183,7 +74323,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -80195,6 +74335,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
     reports?: CandidateReportUpdateManyWithoutCandidateNestedInput
@@ -80221,7 +74362,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -80233,6 +74374,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
@@ -80247,7 +74389,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CVUpsertWithoutApplicationsInput = {
     update: XOR<CVUpdateWithoutApplicationsInput, CVUncheckedUpdateWithoutApplicationsInput>
@@ -80453,84 +74594,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutSavedJobsInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutSavedJobsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -80539,7 +74602,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -80551,6 +74614,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -80577,7 +74641,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -80589,6 +74653,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -80603,7 +74668,6 @@ export namespace Prisma {
     projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutSavedJobsInput = {
     where: CandidateWhereUniqueInput
@@ -80709,92 +74773,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutSavedJobsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutSavedJobsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -80803,7 +74781,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -80815,6 +74793,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -80841,7 +74820,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -80853,6 +74832,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -80867,7 +74847,6 @@ export namespace Prisma {
     projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type JobPostingUpsertWithoutSavedJobsInput = {
     update: XOR<JobPostingUpdateWithoutSavedJobsInput, JobPostingUncheckedUpdateWithoutSavedJobsInput>
@@ -80963,84 +74942,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutConversationsInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutConversationsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -81049,7 +74950,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -81061,6 +74962,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -81087,7 +74989,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -81099,6 +75001,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -81113,7 +75016,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutConversationsInput = {
     where: CandidateWhereUniqueInput
@@ -81223,92 +75125,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutConversationsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutConversationsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -81317,7 +75133,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -81329,6 +75145,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -81355,7 +75172,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -81367,6 +75184,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -81381,7 +75199,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type RecruiterUpsertWithoutConversationsInput = {
     update: XOR<RecruiterUpdateWithoutConversationsInput, RecruiterUncheckedUpdateWithoutConversationsInput>
@@ -81728,104 +75545,9 @@ export namespace Prisma {
   }
 
   export type TransactionUpdateManyWithWhereWithoutWalletInput = {
-<<<<<<< HEAD
-    where: TransactionScalarWhereInput;
-    data: XOR<
-      TransactionUpdateManyMutationInput,
-      TransactionUncheckedUpdateManyWithoutWalletInput
-    >;
-  };
-
-  export type CandidateCreateWithoutWalletInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutWalletInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-  };
-
-  export type CandidateCreateOrConnectWithoutWalletInput = {
-    where: CandidateWhereUniqueInput;
-    create: XOR<
-      CandidateCreateWithoutWalletInput,
-      CandidateUncheckedCreateWithoutWalletInput
-    >;
-  };
-=======
     where: TransactionScalarWhereInput
     data: XOR<TransactionUpdateManyMutationInput, TransactionUncheckedUpdateManyWithoutWalletInput>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateTransactionCreateWithoutWalletInput = {
     transactionId?: string
@@ -81870,7 +75592,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -81882,6 +75604,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -81908,7 +75631,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -81920,6 +75643,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -81935,98 +75659,10 @@ export namespace Prisma {
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
 
-<<<<<<< HEAD
-  export type CandidateUpdateWithoutWalletInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutWalletInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-  };
-=======
   export type CandidateCreateOrConnectWithoutWalletInput = {
     where: CandidateWhereUniqueInput
     create: XOR<CandidateCreateWithoutWalletInput, CandidateUncheckedCreateWithoutWalletInput>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateTransactionUpsertWithWhereUniqueWithoutWalletInput = {
     where: CandidateTransactionWhereUniqueInput
@@ -82080,7 +75716,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -82092,6 +75728,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -82118,7 +75755,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -82130,6 +75767,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -82434,84 +76072,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutCandidateUnlocksInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutCandidateUnlocksInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -82520,7 +76080,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -82532,6 +76092,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -82558,7 +76119,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -82570,6 +76131,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -82584,7 +76146,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutCandidateUnlocksInput = {
     where: CandidateWhereUniqueInput
@@ -82847,288 +76408,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutCandidateUnlocksInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutCandidateUnlocksInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type JobPostingUpsertWithoutCandidateUnlocksInput = {
-    update: XOR<
-      JobPostingUpdateWithoutCandidateUnlocksInput,
-      JobPostingUncheckedUpdateWithoutCandidateUnlocksInput
-    >;
-    create: XOR<
-      JobPostingCreateWithoutCandidateUnlocksInput,
-      JobPostingUncheckedCreateWithoutCandidateUnlocksInput
-    >;
-    where?: JobPostingWhereInput;
-  };
-
-  export type JobPostingUpdateToOneWithWhereWithoutCandidateUnlocksInput = {
-    where?: JobPostingWhereInput;
-    data: XOR<
-      JobPostingUpdateWithoutCandidateUnlocksInput,
-      JobPostingUncheckedUpdateWithoutCandidateUnlocksInput
-    >;
-  };
-
-  export type JobPostingUpdateWithoutCandidateUnlocksInput = {
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    title?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-    requirements?: NullableStringFieldUpdateOperationsInput | string | null;
-    benefits?: NullableStringFieldUpdateOperationsInput | string | null;
-    salaryMin?:
-      | NullableDecimalFieldUpdateOperationsInput
-      | Decimal
-      | DecimalJsLike
-      | number
-      | string
-      | null;
-    salaryMax?:
-      | NullableDecimalFieldUpdateOperationsInput
-      | Decimal
-      | DecimalJsLike
-      | number
-      | string
-      | null;
-    currency?: NullableStringFieldUpdateOperationsInput | string | null;
-    jobType?:
-      | NullableEnumJobTypeFieldUpdateOperationsInput
-      | $Enums.JobType
-      | null;
-    jobLevel?:
-      | NullableEnumJobLevelFieldUpdateOperationsInput
-      | $Enums.JobLevel
-      | null;
-    experience?: NullableStringFieldUpdateOperationsInput | string | null;
-    vacancies?: IntFieldUpdateOperationsInput | number;
-    locationCity?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus;
-    isVerified?: BoolFieldUpdateOperationsInput | boolean;
-    aiReliabilityScore?:
-      | NullableFloatFieldUpdateOperationsInput
-      | number
-      | null;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null;
-    moderationFeedback?: NullableJsonNullValueInput | InputJsonValue;
-    structuredRequirements?: NullableJsonNullValueInput | InputJsonValue;
-    viewCount?: IntFieldUpdateOperationsInput | number;
-    jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier;
-    refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    pausedAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    slug?: NullableStringFieldUpdateOperationsInput | string | null;
-    autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean;
-    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null;
-    autoInviteThreshold?: IntFieldUpdateOperationsInput | number;
-    matchMode?: StringFieldUpdateOperationsInput | string;
-    slaApplicationDays?: IntFieldUpdateOperationsInput | number;
-    slaInterviewDays?: IntFieldUpdateOperationsInput | number;
-    applications?: ApplicationUpdateManyWithoutJobPostingNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutJobPostingNestedInput;
-    company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput;
-    recruiter?: RecruiterUpdateOneWithoutJobPostingsNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutJobPostingNestedInput;
-    branches?: JobPostingBranchUpdateManyWithoutJobPostingNestedInput;
-  };
-
-  export type JobPostingUncheckedUpdateWithoutCandidateUnlocksInput = {
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    title?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-    requirements?: NullableStringFieldUpdateOperationsInput | string | null;
-    benefits?: NullableStringFieldUpdateOperationsInput | string | null;
-    salaryMin?:
-      | NullableDecimalFieldUpdateOperationsInput
-      | Decimal
-      | DecimalJsLike
-      | number
-      | string
-      | null;
-    salaryMax?:
-      | NullableDecimalFieldUpdateOperationsInput
-      | Decimal
-      | DecimalJsLike
-      | number
-      | string
-      | null;
-    currency?: NullableStringFieldUpdateOperationsInput | string | null;
-    jobType?:
-      | NullableEnumJobTypeFieldUpdateOperationsInput
-      | $Enums.JobType
-      | null;
-    jobLevel?:
-      | NullableEnumJobLevelFieldUpdateOperationsInput
-      | $Enums.JobLevel
-      | null;
-    experience?: NullableStringFieldUpdateOperationsInput | string | null;
-    vacancies?: IntFieldUpdateOperationsInput | number;
-    locationCity?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus;
-    isVerified?: BoolFieldUpdateOperationsInput | boolean;
-    aiReliabilityScore?:
-      | NullableFloatFieldUpdateOperationsInput
-      | number
-      | null;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null;
-    moderationFeedback?: NullableJsonNullValueInput | InputJsonValue;
-    recruiterId?: NullableStringFieldUpdateOperationsInput | string | null;
-    companyId?: StringFieldUpdateOperationsInput | string;
-    structuredRequirements?: NullableJsonNullValueInput | InputJsonValue;
-    viewCount?: IntFieldUpdateOperationsInput | number;
-    jobTier?: EnumJobTierFieldUpdateOperationsInput | $Enums.JobTier;
-    refreshedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    pausedAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    slug?: NullableStringFieldUpdateOperationsInput | string | null;
-    autoInviteMatches?: BoolFieldUpdateOperationsInput | boolean;
-    autoRejectThreshold?: NullableIntFieldUpdateOperationsInput | number | null;
-    autoInviteThreshold?: IntFieldUpdateOperationsInput | number;
-    matchMode?: StringFieldUpdateOperationsInput | string;
-    slaApplicationDays?: IntFieldUpdateOperationsInput | number;
-    slaInterviewDays?: IntFieldUpdateOperationsInput | number;
-    applications?: ApplicationUncheckedUpdateManyWithoutJobPostingNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutJobPostingNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput;
-    branches?: JobPostingBranchUncheckedUpdateManyWithoutJobPostingNestedInput;
-  };
-
-  export type CVUpsertWithoutCandidateUnlocksInput = {
-    update: XOR<
-      CVUpdateWithoutCandidateUnlocksInput,
-      CVUncheckedUpdateWithoutCandidateUnlocksInput
-    >;
-    create: XOR<
-      CVCreateWithoutCandidateUnlocksInput,
-      CVUncheckedCreateWithoutCandidateUnlocksInput
-    >;
-    where?: CVWhereInput;
-  };
-
-  export type CVUpdateToOneWithWhereWithoutCandidateUnlocksInput = {
-    where?: CVWhereInput;
-    data: XOR<
-      CVUpdateWithoutCandidateUnlocksInput,
-      CVUncheckedUpdateWithoutCandidateUnlocksInput
-    >;
-  };
-
-  export type CVUpdateWithoutCandidateUnlocksInput = {
-    cvId?: StringFieldUpdateOperationsInput | string;
-    cvTitle?: StringFieldUpdateOperationsInput | string;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isMain?: BoolFieldUpdateOperationsInput | boolean;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    fileHash?: NullableStringFieldUpdateOperationsInput | string | null;
-    parsedData?: NullableJsonNullValueInput | InputJsonValue;
-    applications?: ApplicationUpdateManyWithoutCvNestedInput;
-    candidate?: CandidateUpdateOneRequiredWithoutCvsNestedInput;
-  };
-
-  export type CVUncheckedUpdateWithoutCandidateUnlocksInput = {
-    cvId?: StringFieldUpdateOperationsInput | string;
-    cvTitle?: StringFieldUpdateOperationsInput | string;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isMain?: BoolFieldUpdateOperationsInput | boolean;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fileHash?: NullableStringFieldUpdateOperationsInput | string | null;
-    parsedData?: NullableJsonNullValueInput | InputJsonValue;
-    applications?: ApplicationUncheckedUpdateManyWithoutCvNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83137,7 +76416,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -83149,6 +76428,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -83175,7 +76455,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -83187,6 +76467,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -83201,7 +76482,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CompanyUpsertWithoutCandidateUnlocksInput = {
     update: XOR<CompanyUpdateWithoutCandidateUnlocksInput, CompanyUncheckedUpdateWithoutCandidateUnlocksInput>
@@ -83472,84 +76752,6 @@ export namespace Prisma {
   }
 
   export type CandidateCreateWithoutCandidateReviewsInput = {
-<<<<<<< HEAD
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutCandidateReviewsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
     candidateId?: string
     fullName: string
     university?: string | null
@@ -83558,7 +76760,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -83570,6 +76772,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -83596,7 +76799,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -83608,6 +76811,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -83622,7 +76826,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput
     skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateCreateOrConnectWithoutCandidateReviewsInput = {
     where: CandidateWhereUniqueInput
@@ -83698,92 +76901,6 @@ export namespace Prisma {
   }
 
   export type CandidateUpdateWithoutCandidateReviewsInput = {
-<<<<<<< HEAD
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutCandidateReviewsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
     university?: NullableStringFieldUpdateOperationsInput | string | null
@@ -83792,7 +76909,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -83804,6 +76921,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -83830,7 +76948,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -83842,6 +76960,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -83856,7 +76975,6 @@ export namespace Prisma {
     savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput
     skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type RecruiterUpsertWithoutCandidateReviewsInput = {
     update: XOR<RecruiterUpdateWithoutCandidateReviewsInput, RecruiterUncheckedUpdateWithoutCandidateReviewsInput>
@@ -84244,198 +77362,6 @@ export namespace Prisma {
   }
 
   export type RecruiterUncheckedUpdateWithoutEvaluationsInput = {
-<<<<<<< HEAD
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    fullName?: NullableStringFieldUpdateOperationsInput | string | null;
-    bio?: NullableStringFieldUpdateOperationsInput | string | null;
-    position?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    companyId?: NullableStringFieldUpdateOperationsInput | string | null;
-    savedCandidateIds?: RecruiterUpdatesavedCandidateIdsInput | string[];
-    aiInsightsCache?: NullableJsonNullValueInput | InputJsonValue;
-    aiInsightsCacheKey?:
-      | NullableStringFieldUpdateOperationsInput
-      | string
-      | null;
-    aiInsightsCachedAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    interviewSettings?: NullableJsonNullValueInput | InputJsonValue;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    violationCount?: IntFieldUpdateOperationsInput | number;
-    companyRole?: StringFieldUpdateOperationsInput | string;
-    conversations?: ConversationUncheckedUpdateManyWithoutRecruiterNestedInput;
-    jobPostings?: JobPostingUncheckedUpdateManyWithoutRecruiterNestedInput;
-    recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutRecruiterNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutRecruiterNestedInput;
-    transactions?: TransactionUncheckedUpdateManyWithoutRecruiterNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutRecruiterNestedInput;
-  };
-
-  export type CompanyCreateWithoutCompanyReviewsInput = {
-    companyId?: string;
-    companyName: string;
-    taxCode?: string | null;
-    isRegistered?: boolean;
-    verifyStatus?: number;
-    logo?: string | null;
-    banner?: string | null;
-    address?: string | null;
-    description?: string | null;
-    websiteUrl?: string | null;
-    companySize?: number | null;
-    businessLicenseUrl?: string | null;
-    enterpriseType?: string | null;
-    internationalName?: string | null;
-    mainIndustry?: string | null;
-    operatingDate?: string | null;
-    shortName?: string | null;
-    slug?: string | null;
-    status?: string | null;
-    taxAddress?: string | null;
-    cultureContent?: NullableJsonNullValueInput | InputJsonValue;
-    admin?: AdminCreateNestedOneWithoutCompaniesInput;
-    branches?: CompanyBranchCreateNestedManyWithoutCompanyInput;
-    jobPostings?: JobPostingCreateNestedManyWithoutCompanyInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCompanyInput;
-    recruiters?: RecruiterCreateNestedManyWithoutCompanyInput;
-    sections?: CompanySectionCreateNestedManyWithoutCompanyInput;
-    benefits?: CompanyBenefitCreateNestedManyWithoutCompanyInput;
-    history?: CompanyHistoryCreateNestedManyWithoutCompanyInput;
-    wallet?: CompanyWalletCreateNestedOneWithoutCompanyInput;
-  };
-
-  export type CompanyUncheckedCreateWithoutCompanyReviewsInput = {
-    companyId?: string;
-    companyName: string;
-    taxCode?: string | null;
-    isRegistered?: boolean;
-    verifyStatus?: number;
-    logo?: string | null;
-    banner?: string | null;
-    address?: string | null;
-    description?: string | null;
-    websiteUrl?: string | null;
-    companySize?: number | null;
-    businessLicenseUrl?: string | null;
-    adminId?: string | null;
-    enterpriseType?: string | null;
-    internationalName?: string | null;
-    mainIndustry?: string | null;
-    operatingDate?: string | null;
-    shortName?: string | null;
-    slug?: string | null;
-    status?: string | null;
-    taxAddress?: string | null;
-    cultureContent?: NullableJsonNullValueInput | InputJsonValue;
-    branches?: CompanyBranchUncheckedCreateNestedManyWithoutCompanyInput;
-    jobPostings?: JobPostingUncheckedCreateNestedManyWithoutCompanyInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCompanyInput;
-    recruiters?: RecruiterUncheckedCreateNestedManyWithoutCompanyInput;
-    sections?: CompanySectionUncheckedCreateNestedManyWithoutCompanyInput;
-    benefits?: CompanyBenefitUncheckedCreateNestedManyWithoutCompanyInput;
-    history?: CompanyHistoryUncheckedCreateNestedManyWithoutCompanyInput;
-    wallet?: CompanyWalletUncheckedCreateNestedOneWithoutCompanyInput;
-  };
-
-  export type CompanyCreateOrConnectWithoutCompanyReviewsInput = {
-    where: CompanyWhereUniqueInput;
-    create: XOR<
-      CompanyCreateWithoutCompanyReviewsInput,
-      CompanyUncheckedCreateWithoutCompanyReviewsInput
-    >;
-  };
-
-  export type CandidateCreateWithoutCompanyReviewsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutCompanyReviewsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateCreateOrConnectWithoutCompanyReviewsInput = {
-    where: CandidateWhereUniqueInput;
-    create: XOR<
-      CandidateCreateWithoutCompanyReviewsInput,
-      CandidateUncheckedCreateWithoutCompanyReviewsInput
-    >;
-  };
-=======
     recruiterId?: StringFieldUpdateOperationsInput | string
     bio?: NullableStringFieldUpdateOperationsInput | string | null
     position?: NullableStringFieldUpdateOperationsInput | string | null
@@ -84460,7 +77386,6 @@ export namespace Prisma {
     recruiterSubscription?: RecruiterSubscriptionUncheckedUpdateOneWithoutRecruiterNestedInput
     transactions?: TransactionUncheckedUpdateManyWithoutRecruiterNestedInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type ApplicationCreateWithoutCompanyReviewInput = {
     applicationId?: string
@@ -84520,7 +77445,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -84532,6 +77457,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -84558,7 +77484,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -84570,6 +77496,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     reports?: CandidateReportUncheckedCreateNestedManyWithoutCandidateInput
@@ -84661,93 +77588,6 @@ export namespace Prisma {
     create: XOR<CompanyCreateWithoutCompanyReviewsInput, CompanyUncheckedCreateWithoutCompanyReviewsInput>
   }
 
-<<<<<<< HEAD
-  export type CandidateUpdateWithoutCompanyReviewsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutCompanyReviewsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
   export type CompanyReviewReportCreateWithoutReviewInput = {
     reportId?: string
     reason: string
@@ -84777,7 +77617,6 @@ export namespace Prisma {
     data: CompanyReviewReportCreateManyReviewInput | CompanyReviewReportCreateManyReviewInput[]
     skipDuplicates?: boolean
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type ApplicationUpsertWithoutCompanyReviewInput = {
     update: XOR<ApplicationUpdateWithoutCompanyReviewInput, ApplicationUncheckedUpdateWithoutCompanyReviewInput>
@@ -84854,7 +77693,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -84866,6 +77705,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -84882,85 +77722,6 @@ export namespace Prisma {
     skills?: SkillUpdateManyWithoutCandidateNestedInput
   }
 
-<<<<<<< HEAD
-  export type CandidateCreateWithoutReportsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationCreateNestedManyWithoutCandidateInput;
-    cvs?: CVCreateNestedManyWithoutCandidateInput;
-    user: UserCreateNestedOneWithoutCandidateInput;
-    certifications?: CertificationCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobCreateNestedManyWithoutCandidateInput;
-    skills?: SkillCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletCreateNestedOneWithoutCandidateInput;
-  };
-
-  export type CandidateUncheckedCreateWithoutReportsInput = {
-    candidateId?: string;
-    fullName: string;
-    university?: string | null;
-    major?: string | null;
-    gpa?: number | null;
-    cvUrl?: string | null;
-    userId: string;
-    isOpenToWork?: boolean;
-    jobSearchExpiresAt?: Date | string | null;
-    location?: string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: string | null;
-    birthYear?: number | null;
-    currentSalary?: string | null;
-    totalYearsExp?: number | null;
-    degree?: string | null;
-    gender?: string | null;
-    industries?: CandidateCreateindustriesInput | string[];
-    interests?: CandidateCreateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateCreatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput;
-    cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput;
-    certifications?: CertificationUncheckedCreateNestedManyWithoutCandidateInput;
-    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput;
-    conversations?: ConversationUncheckedCreateNestedManyWithoutCandidateInput;
-    experiences?: ExperienceUncheckedCreateNestedManyWithoutCandidateInput;
-    jobMatches?: JobMatchUncheckedCreateNestedManyWithoutCandidateInput;
-    projects?: ProjectUncheckedCreateNestedManyWithoutCandidateInput;
-    savedJobs?: SavedJobUncheckedCreateNestedManyWithoutCandidateInput;
-    skills?: SkillUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateUnlocks?: CandidateUnlockUncheckedCreateNestedManyWithoutCandidateInput;
-    candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    companyReviews?: CompanyReviewUncheckedCreateNestedManyWithoutCandidateInput;
-    wallet?: CandidateWalletUncheckedCreateNestedOneWithoutCandidateInput;
-  };
-=======
   export type CandidateUncheckedUpdateWithoutCompanyReviewsInput = {
     candidateId?: StringFieldUpdateOperationsInput | string
     fullName?: StringFieldUpdateOperationsInput | string
@@ -84971,7 +77732,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -84983,6 +77744,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     reports?: CandidateReportUncheckedUpdateManyWithoutCandidateNestedInput
@@ -85003,7 +77765,6 @@ export namespace Prisma {
     create: XOR<CompanyCreateWithoutCompanyReviewsInput, CompanyUncheckedCreateWithoutCompanyReviewsInput>
     where?: CompanyWhereInput
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CompanyUpdateToOneWithWhereWithoutCompanyReviewsInput = {
     where?: CompanyWhereInput
@@ -85150,7 +77911,7 @@ export namespace Prisma {
     cvUrl?: string | null
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -85162,6 +77923,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeCreateNestedManyWithoutCandidateInput
     applications?: ApplicationCreateNestedManyWithoutCandidateInput
     cvs?: CVCreateNestedManyWithoutCandidateInput
     user: UserCreateNestedOneWithoutCandidateInput
@@ -85188,7 +77950,7 @@ export namespace Prisma {
     userId: string
     birthYear?: number | null
     currentSalary?: string | null
-    degree?: string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: string | null
     industries?: CandidateCreateindustriesInput | string[]
@@ -85200,6 +77962,7 @@ export namespace Prisma {
     summary?: string | null
     totalYearsExp?: number | null
     jobSearchExpiresAt?: Date | string | null
+    degrees?: DegreeUncheckedCreateNestedManyWithoutCandidateInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutCandidateInput
     cvs?: CVUncheckedCreateNestedManyWithoutCandidateInput
     candidateReviews?: CandidateReviewUncheckedCreateNestedManyWithoutCandidateInput
@@ -85272,106 +78035,10 @@ export namespace Prisma {
     transactions?: TransactionUncheckedCreateNestedManyWithoutRecruiterInput
   }
 
-<<<<<<< HEAD
-  export type CandidateUpdateToOneWithWhereWithoutReportsInput = {
-    where?: CandidateWhereInput;
-    data: XOR<
-      CandidateUpdateWithoutReportsInput,
-      CandidateUncheckedUpdateWithoutReportsInput
-    >;
-  };
-
-  export type CandidateUpdateWithoutReportsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUpdateManyWithoutCandidateNestedInput;
-    user?: UserUpdateOneRequiredWithoutCandidateNestedInput;
-    certifications?: CertificationUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUpdateOneWithoutCandidateNestedInput;
-  };
-
-  export type CandidateUncheckedUpdateWithoutReportsInput = {
-    candidateId?: StringFieldUpdateOperationsInput | string;
-    fullName?: StringFieldUpdateOperationsInput | string;
-    university?: NullableStringFieldUpdateOperationsInput | string | null;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    gpa?: NullableFloatFieldUpdateOperationsInput | number | null;
-    cvUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    userId?: StringFieldUpdateOperationsInput | string;
-    isOpenToWork?: BoolFieldUpdateOperationsInput | boolean;
-    jobSearchExpiresAt?:
-      | NullableDateTimeFieldUpdateOperationsInput
-      | Date
-      | string
-      | null;
-    location?: NullableStringFieldUpdateOperationsInput | string | null;
-    desiredJob?: NullableJsonNullValueInput | InputJsonValue;
-    summary?: NullableStringFieldUpdateOperationsInput | string | null;
-    birthYear?: NullableIntFieldUpdateOperationsInput | number | null;
-    currentSalary?: NullableStringFieldUpdateOperationsInput | string | null;
-    totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null;
-    degree?: NullableStringFieldUpdateOperationsInput | string | null;
-    gender?: NullableStringFieldUpdateOperationsInput | string | null;
-    industries?: CandidateUpdateindustriesInput | string[];
-    interests?: CandidateUpdateinterestsInput | string[];
-    languages?: NullableJsonNullValueInput | InputJsonValue;
-    otherInfo?: NullableJsonNullValueInput | InputJsonValue;
-    softSkills?: CandidateUpdatesoftSkillsInput | string[];
-    applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput;
-    cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput;
-    certifications?: CertificationUncheckedUpdateManyWithoutCandidateNestedInput;
-    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput;
-    conversations?: ConversationUncheckedUpdateManyWithoutCandidateNestedInput;
-    experiences?: ExperienceUncheckedUpdateManyWithoutCandidateNestedInput;
-    jobMatches?: JobMatchUncheckedUpdateManyWithoutCandidateNestedInput;
-    projects?: ProjectUncheckedUpdateManyWithoutCandidateNestedInput;
-    savedJobs?: SavedJobUncheckedUpdateManyWithoutCandidateNestedInput;
-    skills?: SkillUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateUnlocks?: CandidateUnlockUncheckedUpdateManyWithoutCandidateNestedInput;
-    candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    companyReviews?: CompanyReviewUncheckedUpdateManyWithoutCandidateNestedInput;
-    wallet?: CandidateWalletUncheckedUpdateOneWithoutCandidateNestedInput;
-  };
-=======
   export type RecruiterCreateOrConnectWithoutReportsInput = {
     where: RecruiterWhereUniqueInput
     create: XOR<RecruiterCreateWithoutReportsInput, RecruiterUncheckedCreateWithoutReportsInput>
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type ApplicationUpsertWithoutReportsInput = {
     update: XOR<ApplicationUpdateWithoutReportsInput, ApplicationUncheckedUpdateWithoutReportsInput>
@@ -85448,7 +78115,7 @@ export namespace Prisma {
     cvUrl?: NullableStringFieldUpdateOperationsInput | string | null
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -85460,6 +78127,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUpdateManyWithoutCandidateNestedInput
     cvs?: CVUpdateManyWithoutCandidateNestedInput
     user?: UserUpdateOneRequiredWithoutCandidateNestedInput
@@ -85486,7 +78154,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     birthYear?: NullableIntFieldUpdateOperationsInput | number | null
     currentSalary?: NullableStringFieldUpdateOperationsInput | string | null
-    degree?: NullableStringFieldUpdateOperationsInput | string | null
+    otherInfo?: NullableJsonNullValueInput | InputJsonValue
     desiredJob?: NullableJsonNullValueInput | InputJsonValue
     gender?: NullableStringFieldUpdateOperationsInput | string | null
     industries?: CandidateUpdateindustriesInput | string[]
@@ -85498,6 +78166,7 @@ export namespace Prisma {
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     totalYearsExp?: NullableFloatFieldUpdateOperationsInput | number | null
     jobSearchExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    degrees?: DegreeUncheckedUpdateManyWithoutCandidateNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutCandidateNestedInput
     cvs?: CVUncheckedUpdateManyWithoutCandidateNestedInput
     candidateReviews?: CandidateReviewUncheckedUpdateManyWithoutCandidateNestedInput
@@ -86078,6 +78747,20 @@ export namespace Prisma {
     taxAddress?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type DegreeCreateManyCandidateInput = {
+    degreeId?: string
+    name: string
+    school: string
+    major?: string | null
+    issueDate?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    issuer?: string | null
+    credentialId?: string | null
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
   export type ApplicationCreateManyCandidateInput = {
     applicationId?: string
     applyDate?: Date | string
@@ -86098,126 +78781,6 @@ export namespace Prisma {
   }
 
   export type CVCreateManyCandidateInput = {
-<<<<<<< HEAD
-    cvId?: string;
-    cvTitle: string;
-    fileUrl?: string | null;
-    isMain?: boolean;
-    createdAt?: Date | string;
-    fileHash?: string | null;
-    parsedData?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationCreateManyCandidateInput = {
-    certificationId?: string;
-    name: string;
-    issuer?: string | null;
-    issueDate?: string | null;
-    credentialId?: string | null;
-    credentialUrl?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeCreateManyCandidateInput = {
-    degreeId?: string;
-    name: string;
-    school: string;
-    major?: string | null;
-    issueDate?: string | null;
-    fileUrl?: string | null;
-    status?: $Enums.VerificationStatus;
-    issuer?: string | null;
-    credentialId?: string | null;
-    adminFeedback?: string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type ConversationCreateManyCandidateInput = {
-    conversationId?: string;
-    recruiterId: string;
-    lastMessage?: string | null;
-    isRead?: boolean;
-    updatedAt?: Date | string;
-    userId?: string | null;
-  };
-
-  export type ExperienceCreateManyCandidateInput = {
-    experienceId?: string;
-    company: string;
-    role: string;
-    duration: string;
-    description?: string | null;
-  };
-
-  export type JobMatchCreateManyCandidateInput = {
-    matchId?: string;
-    score: number;
-    matchedSkills?: JobMatchCreatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    jobPostingId: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type ProjectCreateManyCandidateInput = {
-    projectId?: string;
-    projectName: string;
-    description?: string | null;
-    role?: string | null;
-    technology?: string | null;
-  };
-
-  export type SavedJobCreateManyCandidateInput = {
-    savedJobId?: string;
-    savedAt?: Date | string;
-    jobPostingId: string;
-  };
-
-  export type SkillCreateManyCandidateInput = {
-    skillId?: string;
-    skillName: string;
-    level?: $Enums.SkillLevel;
-    category?: string | null;
-  };
-
-  export type CandidateUnlockCreateManyCandidateInput = {
-    unlockId?: string;
-    recruiterId: string;
-    jobPostingId: string;
-    cvId: string;
-    creditSpent?: number;
-    unlockedAt?: Date | string;
-    companyCompanyId?: string | null;
-  };
-
-  export type CandidateReviewCreateManyCandidateInput = {
-    reviewId?: string;
-    recruiterId: string;
-    jobPostingId?: string | null;
-    rating?: number;
-    content: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-
-  export type CompanyReviewCreateManyCandidateInput = {
-    reviewId?: string;
-    companyId: string;
-    applicationId: string;
-    ratingProcess?: number;
-    ratingInterviewer?: number;
-    ratingOffice?: number;
-    content?: string | null;
-    isAnonymous?: boolean;
-    isVerified?: boolean;
-    status?: string;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-  };
-=======
     cvId?: string
     cvTitle: string
     fileUrl?: string | null
@@ -86226,7 +78789,6 @@ export namespace Prisma {
     fileHash?: string | null
     parsedData?: NullableJsonNullValueInput | InputJsonValue
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportCreateManyCandidateInput = {
     reportId?: string
@@ -86262,6 +78824,14 @@ export namespace Prisma {
   export type CertificationCreateManyCandidateInput = {
     certificationId?: string
     name: string
+    issuer?: string | null
+    issueDate?: string | null
+    credentialId?: string | null
+    credentialUrl?: string | null
+    fileUrl?: string | null
+    status?: $Enums.VerificationStatus
+    adminFeedback?: string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CompanyReviewCreateManyCandidateInput = {
@@ -86325,6 +78895,48 @@ export namespace Prisma {
     skillName: string
     category?: string | null
     level?: $Enums.SkillLevel
+  }
+
+  export type DegreeUpdateWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DegreeUncheckedUpdateWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type DegreeUncheckedUpdateManyWithoutCandidateInput = {
+    degreeId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    school?: StringFieldUpdateOperationsInput | string
+    major?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ApplicationUpdateWithoutCandidateInput = {
@@ -86415,360 +79027,6 @@ export namespace Prisma {
   }
 
   export type CVUncheckedUpdateManyWithoutCandidateInput = {
-<<<<<<< HEAD
-    cvId?: StringFieldUpdateOperationsInput | string;
-    cvTitle?: StringFieldUpdateOperationsInput | string;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    isMain?: BoolFieldUpdateOperationsInput | boolean;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    fileHash?: NullableStringFieldUpdateOperationsInput | string | null;
-    parsedData?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationUpdateWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationUncheckedUpdateWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type CertificationUncheckedUpdateManyWithoutCandidateInput = {
-    certificationId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeUpdateWithoutCandidateInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeUncheckedUpdateWithoutCandidateInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type DegreeUncheckedUpdateManyWithoutCandidateInput = {
-    degreeId?: StringFieldUpdateOperationsInput | string;
-    name?: StringFieldUpdateOperationsInput | string;
-    school?: StringFieldUpdateOperationsInput | string;
-    major?: NullableStringFieldUpdateOperationsInput | string | null;
-    issueDate?: NullableStringFieldUpdateOperationsInput | string | null;
-    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null;
-    status?:
-      | EnumVerificationStatusFieldUpdateOperationsInput
-      | $Enums.VerificationStatus;
-    issuer?: NullableStringFieldUpdateOperationsInput | string | null;
-    credentialId?: NullableStringFieldUpdateOperationsInput | string | null;
-    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null;
-    aiVerification?: NullableJsonNullValueInput | InputJsonValue;
-  };
-
-  export type ConversationUpdateWithoutCandidateInput = {
-    conversationId?: StringFieldUpdateOperationsInput | string;
-    lastMessage?: NullableStringFieldUpdateOperationsInput | string | null;
-    isRead?: BoolFieldUpdateOperationsInput | boolean;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    userId?: NullableStringFieldUpdateOperationsInput | string | null;
-    recruiter?: RecruiterUpdateOneRequiredWithoutConversationsNestedInput;
-    messages?: MessageUpdateManyWithoutConversationNestedInput;
-  };
-
-  export type ConversationUncheckedUpdateWithoutCandidateInput = {
-    conversationId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    lastMessage?: NullableStringFieldUpdateOperationsInput | string | null;
-    isRead?: BoolFieldUpdateOperationsInput | boolean;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    userId?: NullableStringFieldUpdateOperationsInput | string | null;
-    messages?: MessageUncheckedUpdateManyWithoutConversationNestedInput;
-  };
-
-  export type ConversationUncheckedUpdateManyWithoutCandidateInput = {
-    conversationId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    lastMessage?: NullableStringFieldUpdateOperationsInput | string | null;
-    isRead?: BoolFieldUpdateOperationsInput | boolean;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    userId?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type ExperienceUpdateWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string;
-    company?: StringFieldUpdateOperationsInput | string;
-    role?: StringFieldUpdateOperationsInput | string;
-    duration?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type ExperienceUncheckedUpdateWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string;
-    company?: StringFieldUpdateOperationsInput | string;
-    role?: StringFieldUpdateOperationsInput | string;
-    duration?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type ExperienceUncheckedUpdateManyWithoutCandidateInput = {
-    experienceId?: StringFieldUpdateOperationsInput | string;
-    company?: StringFieldUpdateOperationsInput | string;
-    role?: StringFieldUpdateOperationsInput | string;
-    duration?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type JobMatchUpdateWithoutCandidateInput = {
-    matchId?: StringFieldUpdateOperationsInput | string;
-    score?: FloatFieldUpdateOperationsInput | number;
-    matchedSkills?: JobMatchUpdatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    jobPosting?: JobPostingUpdateOneRequiredWithoutJobMatchesNestedInput;
-  };
-
-  export type JobMatchUncheckedUpdateWithoutCandidateInput = {
-    matchId?: StringFieldUpdateOperationsInput | string;
-    score?: FloatFieldUpdateOperationsInput | number;
-    matchedSkills?: JobMatchUpdatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-  export type JobMatchUncheckedUpdateManyWithoutCandidateInput = {
-    matchId?: StringFieldUpdateOperationsInput | string;
-    score?: FloatFieldUpdateOperationsInput | number;
-    matchedSkills?: JobMatchUpdatematchedSkillsInput | string[];
-    details?: NullableJsonNullValueInput | InputJsonValue;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-  export type ProjectUpdateWithoutCandidateInput = {
-    projectId?: StringFieldUpdateOperationsInput | string;
-    projectName?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-    role?: NullableStringFieldUpdateOperationsInput | string | null;
-    technology?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type ProjectUncheckedUpdateWithoutCandidateInput = {
-    projectId?: StringFieldUpdateOperationsInput | string;
-    projectName?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-    role?: NullableStringFieldUpdateOperationsInput | string | null;
-    technology?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type ProjectUncheckedUpdateManyWithoutCandidateInput = {
-    projectId?: StringFieldUpdateOperationsInput | string;
-    projectName?: StringFieldUpdateOperationsInput | string;
-    description?: NullableStringFieldUpdateOperationsInput | string | null;
-    role?: NullableStringFieldUpdateOperationsInput | string | null;
-    technology?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type SavedJobUpdateWithoutCandidateInput = {
-    savedJobId?: StringFieldUpdateOperationsInput | string;
-    savedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    jobPosting?: JobPostingUpdateOneRequiredWithoutSavedJobsNestedInput;
-  };
-
-  export type SavedJobUncheckedUpdateWithoutCandidateInput = {
-    savedJobId?: StringFieldUpdateOperationsInput | string;
-    savedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type SavedJobUncheckedUpdateManyWithoutCandidateInput = {
-    savedJobId?: StringFieldUpdateOperationsInput | string;
-    savedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-  };
-
-  export type SkillUpdateWithoutCandidateInput = {
-    skillId?: StringFieldUpdateOperationsInput | string;
-    skillName?: StringFieldUpdateOperationsInput | string;
-    level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel;
-    category?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type SkillUncheckedUpdateWithoutCandidateInput = {
-    skillId?: StringFieldUpdateOperationsInput | string;
-    skillName?: StringFieldUpdateOperationsInput | string;
-    level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel;
-    category?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type SkillUncheckedUpdateManyWithoutCandidateInput = {
-    skillId?: StringFieldUpdateOperationsInput | string;
-    skillName?: StringFieldUpdateOperationsInput | string;
-    level?: EnumSkillLevelFieldUpdateOperationsInput | $Enums.SkillLevel;
-    category?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type CandidateUnlockUpdateWithoutCandidateInput = {
-    unlockId?: StringFieldUpdateOperationsInput | string;
-    creditSpent?: IntFieldUpdateOperationsInput | number;
-    unlockedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    recruiter?: RecruiterUpdateOneRequiredWithoutCandidateUnlocksNestedInput;
-    jobPosting?: JobPostingUpdateOneRequiredWithoutCandidateUnlocksNestedInput;
-    cv?: CVUpdateOneWithoutCandidateUnlocksNestedInput;
-    company?: CompanyUpdateOneWithoutCandidateUnlocksNestedInput;
-  };
-
-  export type CandidateUnlockUncheckedUpdateWithoutCandidateInput = {
-    unlockId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    cvId?: StringFieldUpdateOperationsInput | string;
-    creditSpent?: IntFieldUpdateOperationsInput | number;
-    unlockedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    companyCompanyId?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type CandidateUnlockUncheckedUpdateManyWithoutCandidateInput = {
-    unlockId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    jobPostingId?: StringFieldUpdateOperationsInput | string;
-    cvId?: StringFieldUpdateOperationsInput | string;
-    creditSpent?: IntFieldUpdateOperationsInput | number;
-    unlockedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    companyCompanyId?: NullableStringFieldUpdateOperationsInput | string | null;
-  };
-
-  export type CandidateReviewUpdateWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    jobPostingId?: NullableStringFieldUpdateOperationsInput | string | null;
-    rating?: IntFieldUpdateOperationsInput | number;
-    content?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    recruiter?: RecruiterUpdateOneRequiredWithoutCandidateReviewsNestedInput;
-  };
-
-  export type CandidateReviewUncheckedUpdateWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    jobPostingId?: NullableStringFieldUpdateOperationsInput | string | null;
-    rating?: IntFieldUpdateOperationsInput | number;
-    content?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-  export type CandidateReviewUncheckedUpdateManyWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    recruiterId?: StringFieldUpdateOperationsInput | string;
-    jobPostingId?: NullableStringFieldUpdateOperationsInput | string | null;
-    rating?: IntFieldUpdateOperationsInput | number;
-    content?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-  export type CompanyReviewUpdateWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    ratingProcess?: IntFieldUpdateOperationsInput | number;
-    ratingInterviewer?: IntFieldUpdateOperationsInput | number;
-    ratingOffice?: IntFieldUpdateOperationsInput | number;
-    content?: NullableStringFieldUpdateOperationsInput | string | null;
-    isAnonymous?: BoolFieldUpdateOperationsInput | boolean;
-    isVerified?: BoolFieldUpdateOperationsInput | boolean;
-    status?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    company?: CompanyUpdateOneRequiredWithoutCompanyReviewsNestedInput;
-    application?: ApplicationUpdateOneRequiredWithoutCompanyReviewNestedInput;
-  };
-
-  export type CompanyReviewUncheckedUpdateWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    companyId?: StringFieldUpdateOperationsInput | string;
-    applicationId?: StringFieldUpdateOperationsInput | string;
-    ratingProcess?: IntFieldUpdateOperationsInput | number;
-    ratingInterviewer?: IntFieldUpdateOperationsInput | number;
-    ratingOffice?: IntFieldUpdateOperationsInput | number;
-    content?: NullableStringFieldUpdateOperationsInput | string | null;
-    isAnonymous?: BoolFieldUpdateOperationsInput | boolean;
-    isVerified?: BoolFieldUpdateOperationsInput | boolean;
-    status?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-
-  export type CompanyReviewUncheckedUpdateManyWithoutCandidateInput = {
-    reviewId?: StringFieldUpdateOperationsInput | string;
-    companyId?: StringFieldUpdateOperationsInput | string;
-    applicationId?: StringFieldUpdateOperationsInput | string;
-    ratingProcess?: IntFieldUpdateOperationsInput | number;
-    ratingInterviewer?: IntFieldUpdateOperationsInput | number;
-    ratingOffice?: IntFieldUpdateOperationsInput | number;
-    content?: NullableStringFieldUpdateOperationsInput | string | null;
-    isAnonymous?: BoolFieldUpdateOperationsInput | boolean;
-    isVerified?: BoolFieldUpdateOperationsInput | boolean;
-    status?: StringFieldUpdateOperationsInput | string;
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string;
-  };
-=======
     cvId?: StringFieldUpdateOperationsInput | string
     cvTitle?: StringFieldUpdateOperationsInput | string
     fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -86777,7 +79035,6 @@ export namespace Prisma {
     fileHash?: NullableStringFieldUpdateOperationsInput | string | null
     parsedData?: NullableJsonNullValueInput | InputJsonValue
   }
->>>>>>> 30f152d95322597dc12b3a65e4f3e74935cce583
 
   export type CandidateReportUpdateWithoutCandidateInput = {
     reportId?: StringFieldUpdateOperationsInput | string
@@ -86875,16 +79132,40 @@ export namespace Prisma {
   export type CertificationUpdateWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CertificationUncheckedUpdateWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CertificationUncheckedUpdateManyWithoutCandidateInput = {
     certificationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    issuer?: NullableStringFieldUpdateOperationsInput | string | null
+    issueDate?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialId?: NullableStringFieldUpdateOperationsInput | string | null
+    credentialUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    fileUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    adminFeedback?: NullableStringFieldUpdateOperationsInput | string | null
+    aiVerification?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type CompanyReviewUpdateWithoutCandidateInput = {

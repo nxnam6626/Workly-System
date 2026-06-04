@@ -32,7 +32,7 @@ export class CandidateCvService {
     private readonly aiExtractionService: AiExtractionService,
     private readonly notificationsService: NotificationsService,
     @InjectQueue('matching') private matchingQueue: Queue,
-  ) {}
+  ) { }
 
   /**
    * Evaluates AI result against thresholds and decides if document should be auto-rejected.
@@ -229,7 +229,7 @@ export class CandidateCvService {
       );
       throw new BadRequestException(
         error.message ||
-          'Có lỗi xảy ra khi xử lý tệp CV của bạn. Vui lòng thử lại với tệp khác.',
+        'Có lỗi xảy ra khi xử lý tệp CV của bạn. Vui lòng thử lại với tệp khác.',
       );
     }
   }
@@ -639,14 +639,18 @@ export class CandidateCvService {
           status: finalStatus,
           adminFeedback,
           aiVerification: (aiVerification as any) || undefined,
-          ...(finalStatus === 'VERIFIED' &&
-            aiVerification?.extracted_issue_date && {
-              issueDate: aiVerification.extracted_issue_date,
-            }),
-          ...(finalStatus === 'VERIFIED' &&
-            aiVerification?.extracted_credential_id && {
-              credentialId: aiVerification.extracted_credential_id,
-            }),
+          ...(aiVerification?.extracted_issue_date && {
+            issueDate: aiVerification.extracted_issue_date,
+          }),
+          ...(aiVerification?.extracted_major && {
+            name: aiVerification.extracted_major,
+          }),
+          ...(aiVerification?.extracted_credential_id && {
+            credentialId: aiVerification.extracted_credential_id,
+          }),
+          ...(aiVerification?.extracted_institution && {
+            issuer: aiVerification.extracted_institution,
+          }),
         },
       });
 
@@ -667,27 +671,27 @@ export class CandidateCvService {
       if (autoReject) {
         await this.notificationsService.create(
           userId,
-          '❌ Minh chứng chứng chỉ bị từ chối tự động',
+          'Minh chứng chứng chỉ bị từ chối tự động',
           `Tài liệu bạn nộp cho chứng chỉ "${cert.name}" không đạt tiêu chí xác minh. ` +
-            `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
-            `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
+          `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
+          `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
           'error',
           '/profile/certifications',
         );
         this.notificationsService.emitToUser(userId, 'notification', {
-          title: '❌ Minh chứng bị từ chối',
+          title: 'Minh chứng bị từ chối',
           message: `Chứng chỉ "${cert.name}" — ${aiVerification?.reason?.slice(0, 80) ?? ''}...`,
         });
       } else if (autoApprove) {
         await this.notificationsService.create(
           userId,
-          '✅ Minh chứng chứng chỉ được duyệt tự động',
+          'Minh chứng chứng chỉ được duyệt tự động',
           `Tài liệu bạn nộp cho chứng chỉ "${cert.name}" đã được hệ thống tự động xác thực thành công.`,
           'success',
           '/profile/certifications',
         );
         this.notificationsService.emitToUser(userId, 'notification', {
-          title: '✅ Minh chứng đã được duyệt',
+          title: 'Minh chứng đã được duyệt',
           message: `Chứng chỉ "${cert.name}" đã được xác thực tự động thành công.`,
         });
       }
@@ -751,18 +755,18 @@ export class CandidateCvService {
           status: finalStatus,
           adminFeedback,
           aiVerification: (aiVerification as any) || undefined,
-          ...(finalStatus === 'VERIFIED' &&
-            aiVerification?.extracted_issue_date && {
-              issueDate: aiVerification.extracted_issue_date,
-            }),
-          ...(finalStatus === 'VERIFIED' &&
-            aiVerification?.extracted_major && {
-              major: aiVerification.extracted_major,
-            }),
-          ...(finalStatus === 'VERIFIED' &&
-            aiVerification?.extracted_credential_id && {
-              credentialId: aiVerification.extracted_credential_id,
-            }),
+          ...(aiVerification?.extracted_issue_date && {
+            issueDate: aiVerification.extracted_issue_date,
+          }),
+          ...(aiVerification?.extracted_major && {
+            major: aiVerification.extracted_major,
+          }),
+          ...(aiVerification?.extracted_credential_id && {
+            credentialId: aiVerification.extracted_credential_id,
+          }),
+          ...(aiVerification?.extracted_institution && {
+            school: aiVerification.extracted_institution,
+          }),
         },
       });
 
@@ -770,27 +774,27 @@ export class CandidateCvService {
       if (autoReject) {
         await this.notificationsService.create(
           userId,
-          '❌ Minh chứng bằng cấp bị từ chối tự động',
+          'Minh chứng bằng cấp bị từ chối tự động',
           `Tài liệu bạn nộp cho bằng "${deg.name}" không đạt tiêu chí xác minh. ` +
-            `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
-            `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
+          `Lý do: ${aiVerification?.reason ?? 'Không xác định được'}. ` +
+          `Vui lòng nộp lại ảnh/PDF rõ nét, đúng văn bản gốc có dấu đỏ và chữ ký.`,
           'error',
           '/profile/degrees',
         );
         this.notificationsService.emitToUser(userId, 'notification', {
-          title: '❌ Minh chứng bị từ chối',
+          title: 'Minh chứng bị từ chối',
           message: `Bằng "${deg.name}" — ${aiVerification?.reason?.slice(0, 80) ?? ''}...`,
         });
       } else if (autoApprove) {
         await this.notificationsService.create(
           userId,
-          '✅ Minh chứng bằng cấp được duyệt tự động',
+          'Minh chứng bằng cấp được duyệt tự động',
           `Tài liệu bạn nộp cho bằng "${deg.name}" đã được hệ thống tự động xác thực thành công.`,
           'success',
           '/profile/degrees',
         );
         this.notificationsService.emitToUser(userId, 'notification', {
-          title: '✅ Minh chứng đã được duyệt',
+          title: 'Minh chứng đã được duyệt',
           message: `Bằng "${deg.name}" đã được xác thực tự động thành công.`,
         });
       }
