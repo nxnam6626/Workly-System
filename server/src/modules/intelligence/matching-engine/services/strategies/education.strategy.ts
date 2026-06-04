@@ -12,15 +12,25 @@ export class EducationStrategy implements IMatchingStrategy {
   private readonly degreeMap: Record<string, number> = {
     phd: 100,
     doctor: 100,
+    'tiến sĩ': 100,
+    'tiến sỹ': 100,
+    'dr.': 100,
     master: 85,
     'thạc sĩ': 85,
+    'thạc sỹ': 85,
     bachelor: 70,
     'đại học': 70,
+    'cử nhân': 70,
+    'kỹ sư': 70,
+    'ky su': 70,
+    engineer: 70,
+    undergraduate: 70,
     associate: 50,
     'cao đẳng': 50,
     college: 50,
     'high school': 30,
     'trung học': 30,
+    thpt: 30,
   };
 
   async calculate(job: any, cv: any): Promise<MatchingResult> {
@@ -28,21 +38,31 @@ export class EducationStrategy implements IMatchingStrategy {
       const parsedCv = cv.parsedData || {};
       const structuredJob = job.structuredRequirements || {};
 
+      // Tìm bằng cấp cao nhất trong danh sách degrees của candidate
+      const candidateDegrees = cv.candidate?.degrees || [];
+      let highestDegreeName = 'none';
+      let highestDegreeLevel = 0;
+
+      for (const d of candidateDegrees) {
+        const dName = (d.name || '').toLowerCase();
+        const dLevel = this.getDegreeLevel(dName);
+        if (dLevel > highestDegreeLevel) {
+          highestDegreeLevel = dLevel;
+          highestDegreeName = d.name;
+        }
+      }
+
       const candidateDegree = (
-        cv.candidate?.degree ||
-        parsedCv.education?.level ||
-        'none'
+        highestDegreeName !== 'none'
+          ? highestDegreeName
+          : (cv.candidate?.degree || parsedCv.education?.level || 'none')
       ).toLowerCase();
       const requiredDegree = (
         structuredJob.minEducation || 'none'
       ).toLowerCase();
 
-      const candidateMajor = (
-        cv.candidate?.major ||
-        parsedCv.education?.major ||
-        ''
-      ).toLowerCase();
-      const requiredMajor = (structuredJob.requiredMajor || '').toLowerCase();
+      const candidateMajor = cv.candidate?.major || parsedCv.education?.major || '';
+      const requiredMajor = structuredJob.requiredMajor || '';
 
       const certifications = (cv.candidate?.certifications || []).map(
         (c: any) => c.name.toLowerCase(),
@@ -69,10 +89,13 @@ export class EducationStrategy implements IMatchingStrategy {
 
       // 2. Chấm điểm chuyên ngành & GPA (40% tỷ trọng strategy)
       let majorScore = 0;
+      const normCandidateMajor = this.normalizeForMatch(candidateMajor);
+      const normRequiredMajor = this.normalizeForMatch(requiredMajor);
+
       const isMajorMatch =
-        !requiredMajor ||
-        candidateMajor.includes(requiredMajor) ||
-        requiredMajor.includes(candidateMajor);
+        !normRequiredMajor ||
+        normCandidateMajor.includes(normRequiredMajor) ||
+        normRequiredMajor.includes(normCandidateMajor);
 
       if (isMajorMatch) {
         majorScore = 100;
@@ -87,7 +110,6 @@ export class EducationStrategy implements IMatchingStrategy {
       if (gpa > 3.2) majorScore = Math.min(100, majorScore + 10);
 
       // Option C: Bằng cấp xác minh hệ số
-      const candidateDegrees = cv.candidate?.degrees || [];
       let eduMultiplier = 0.3; // Mặc định chưa nộp minh chứng
       let verificationStatus = 'UNVERIFIED';
 
@@ -112,9 +134,9 @@ export class EducationStrategy implements IMatchingStrategy {
           eduMultiplier,
           verificationStatus,
           candidateDegree:
-            cv.candidate?.degree ||
-            parsedCv.education?.level ||
-            'Chưa cập nhật',
+            highestDegreeName !== 'none'
+              ? highestDegreeName
+              : (parsedCv.education?.level || 'Chưa cập nhật'),
           requiredDegree: structuredJob.minEducation || 'Không yêu cầu',
           university:
             cv.candidate?.university || parsedCv.education?.school || 'N/A',
@@ -133,5 +155,22 @@ export class EducationStrategy implements IMatchingStrategy {
       if (degree.includes(key)) return value;
     }
     return 0;
+  }
+
+  private removeDiacritics(str: string): string {
+    return (str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd');
+  }
+
+  private normalizeForMatch(str: string): string {
+    const withoutDiacritics = this.removeDiacritics(str);
+    return withoutDiacritics
+      .toLowerCase()
+      .replace(/[-–—/\\,_+&]/g, ' ') // Replace common separators with spaces
+      .replace(/\s+/g, ' ')          // Collapse multiple spaces
+      .trim();
   }
 }

@@ -192,6 +192,16 @@ export class CandidatesController {
     return this.candidatesService.verifyDegree(userId, id, file);
   }
 
+  @Post('degrees/:id/sync')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CANDIDATE)
+  async syncDegree(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.candidatesService.syncDegree(userId, id);
+  }
+
   @Patch('me/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CANDIDATE)

@@ -10,6 +10,18 @@ import {
 import { SuitabilityRadar } from './SuitabilityRadar';
 import { formatSalary } from '@/lib/utils';
 
+const translateDegree = (degree: string): string => {
+  if (!degree) return 'Không yêu cầu';
+  const degLower = degree.toLowerCase();
+  if (degLower === 'none' || degLower === 'không yêu cầu') return 'Không yêu cầu';
+  if (degLower === 'bachelor') return 'Cử nhân';
+  if (degLower === 'master') return 'Thạc sĩ';
+  if (degLower === 'phd' || degLower === 'doctor') return 'Tiến sĩ';
+  if (degLower === 'associate') return 'Cao đẳng';
+  if (degLower === 'high school') return 'Trung học phổ thông';
+  return degree.charAt(0).toUpperCase() + degree.slice(1);
+};
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -135,9 +147,15 @@ const MatchingAnalysisModal: React.FC<Props> = ({
             empty: false,
           },
           {
-            label: 'Kỹ năng phù hợp',
+            label: 'Kỹ năng yêu cầu (Tin tuyển dụng)',
+            color: 'sky',
+            items: [...matchedSkills, ...missingSkills].length > 0 ? [...matchedSkills, ...missingSkills] : ['Không yêu cầu kỹ năng cụ thể'],
+            empty: [...matchedSkills, ...missingSkills].length === 0,
+          },
+          {
+            label: 'Kỹ năng phù hợp của ứng viên',
             color: 'emerald',
-            items: matchedSkills.length > 0 ? matchedSkills : ['Không có dữ liệu'],
+            items: matchedSkills.length > 0 ? matchedSkills : ['Không có kỹ năng phù hợp'],
             empty: matchedSkills.length === 0,
           },
           {
@@ -291,14 +309,14 @@ const MatchingAnalysisModal: React.FC<Props> = ({
         pct: val('education'),
         sections: [
           {
-            label: 'Trình độ & Chuyên ngành',
+            label: 'Yêu cầu tuyển dụng & Thực tế hồ sơ',
             color: val('education') >= 75 ? 'emerald' : 'amber',
             items: [
-              `Bằng cấp ứng viên: ${d?.educationDetails?.candidateDegree || 'N/A'}`,
-              `Trường học: ${d?.educationDetails?.university || 'N/A'}`,
-              `GPA: ${d?.educationDetails?.gpa || 0}/4.0`,
-              `Yêu cầu tối thiểu: ${d?.educationDetails?.requiredDegree || 'N/A'}`,
-              `Điểm Chuyên ngành: ${d?.educationDetails?.majorScore || 0}%`,
+              `Yêu cầu tối thiểu của tin tuyển dụng: ${translateDegree(d?.educationDetails?.requiredDegree)}`,
+              `Bằng cấp thực tế của ứng viên: ${translateDegree(d?.educationDetails?.candidateDegree)}`,
+              `Trường đại học: ${d?.educationDetails?.university || 'N/A'}`,
+              `Chuyên ngành học: ${d?.educationDetails?.major || 'N/A'}`,
+              `Điểm GPA: ${d?.educationDetails?.gpa || 0}/4.0`,
             ],
             empty: false,
           },
@@ -437,10 +455,12 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                           <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest
                             ${section.color === 'emerald' ? 'text-emerald-600' :
                               section.color === 'rose' ? 'text-rose-500' :
-                                section.color === 'amber' ? 'text-amber-600' : 'text-slate-500'}`}>
+                                section.color === 'amber' ? 'text-amber-600' :
+                                  section.color === 'sky' ? 'text-sky-600' : 'text-slate-500'}`}>
                             {section.color === 'emerald' ? <CheckCircle2 size={12} /> :
                               section.color === 'rose' ? <XCircle size={12} /> :
-                                <AlertCircle size={12} />}
+                                section.color === 'sky' ? <Info size={12} /> :
+                                  <AlertCircle size={12} />}
                             {section.label}
                           </div>
 
@@ -448,7 +468,8 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                             ${section.color === 'emerald' ? 'bg-emerald-50/60 border-emerald-100' :
                               section.color === 'rose' ? 'bg-rose-50/60 border-rose-100' :
                                 section.color === 'amber' ? 'bg-amber-50/60 border-amber-100' :
-                                  'bg-slate-50 border-slate-100'}`}>
+                                  section.color === 'sky' ? 'bg-sky-50/60 border-sky-100' :
+                                    'bg-slate-50 border-slate-100'}`}>
                             {section.items.map((item: any, ii: number) => (
                               <motion.div
                                 key={ii}
@@ -460,12 +481,14 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                                 <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0
                                   ${section.color === 'emerald' ? 'bg-emerald-400' :
                                     section.color === 'rose' ? 'bg-rose-400' :
-                                      section.color === 'amber' ? 'bg-amber-400' : 'bg-slate-400'}`}
+                                      section.color === 'amber' ? 'bg-amber-400' :
+                                        section.color === 'sky' ? 'bg-sky-400' : 'bg-slate-400'}`}
                                 />
                                 <span className={`text-sm font-semibold leading-snug
                                   ${section.color === 'emerald' ? 'text-emerald-800' :
                                     section.color === 'rose' ? 'text-rose-800' :
-                                      section.color === 'amber' ? 'text-amber-800' : 'text-slate-700'}
+                                      section.color === 'amber' ? 'text-amber-800' :
+                                        section.color === 'sky' ? 'text-sky-800' : 'text-slate-700'}
                                   ${section.empty ? 'italic opacity-60' : ''}`}>
                                   {item}
                                 </span>
@@ -485,11 +508,19 @@ const MatchingAnalysisModal: React.FC<Props> = ({
                             ? (activeDetail as any).scoreExplanation
                             : activeCriterion === 'location' && analysis?.details?.locationDetails?.message
                               ? analysis.details.locationDetails.message
-                              : activeDetail.pct >= 80
-                                ? `${activeDetail.title} của ứng viên rất phù hợp với yêu cầu. Đây là một điểm mạnh đáng ghi nhận.`
-                                : activeDetail.pct >= 50
-                                  ? `${activeDetail.title} đạt mức chấp nhận được nhưng còn dư địa cải thiện.`
-                                  : `${activeDetail.title} chưa đáp ứng tốt yêu cầu. Cần cân nhắc kỹ trước khi quyết định.`}
+                              : activeCriterion === 'education'
+                                ? (
+                                  (activeDetail?.pct ?? 0) >= 80
+                                    ? `Ứng viên đáp ứng tốt yêu cầu học vị của tin tuyển dụng (${analysis?.details?.educationDetails?.candidateDegree || 'N/A'} so với yêu cầu ${analysis?.details?.educationDetails?.requiredDegree || 'Không yêu cầu'}) và có chuyên ngành đào tạo phù hợp.`
+                                    : (activeDetail?.pct ?? 0) >= 50
+                                      ? `Trình độ học vấn của ứng viên ở mức chấp nhận được nhưng chưa khớp hoàn hảo. Trình độ hiện tại là ${analysis?.details?.educationDetails?.candidateDegree || 'Chưa cập nhật'} (yêu cầu tối thiểu là ${analysis?.details?.educationDetails?.requiredDegree || 'N/A'}) và độ phù hợp chuyên ngành đạt ${analysis?.details?.educationDetails?.majorScore || 0}%.`
+                                      : `Trình độ hoặc chuyên ngành của ứng viên chưa đáp ứng tốt yêu cầu tuyển dụng. Tin tuyển dụng yêu cầu tối thiểu là ${analysis?.details?.educationDetails?.requiredDegree || 'N/A'} nhưng ứng viên hiện tại là ${analysis?.details?.educationDetails?.candidateDegree || 'Chưa cập nhật'}.`
+                                )
+                                : activeDetail.pct >= 80
+                                  ? `${activeDetail.title} của ứng viên rất phù hợp với yêu cầu. Đây là một điểm mạnh đáng ghi nhận.`
+                                  : activeDetail.pct >= 50
+                                    ? `${activeDetail.title} đạt mức chấp nhận được nhưng còn dư địa cải thiện.`
+                                    : `${activeDetail.title} chưa đáp ứng tốt yêu cầu. Cần cân nhắc kỹ trước khi quyết định.`}
                         </p>
                       </div>
                     </motion.div>

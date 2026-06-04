@@ -667,6 +667,9 @@ export class CandidateCvService {
         }
       }
 
+      // Trigger matching engine since status changed
+      await this.matchingQueue.add('match-candidate', { userId });
+
       // Notify candidate of status change
       if (autoReject) {
         await this.notificationsService.create(
@@ -770,6 +773,64 @@ export class CandidateCvService {
         },
       });
 
+      // Automatically sync degree to candidate profile if candidate has only 1 degree
+      // or if their university/major fields are currently empty
+      try {
+        const candidate = await this.prisma.candidate.findUnique({
+          where: { candidateId: deg.candidateId },
+          include: { degrees: true },
+        });
+
+        if (
+          candidate &&
+          (candidate.degrees.length === 1 ||
+            !candidate.university ||
+            !candidate.major)
+        ) {
+          const universityToSet =
+            aiVerification?.extracted_institution || deg.school || undefined;
+          const majorToSet =
+            aiVerification?.extracted_major || deg.major || undefined;
+
+          let gpaFloat: number | undefined = undefined;
+          const gradeStr = aiVerification?.extracted_grade || '';
+          const gpaMatch =
+            gradeStr.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/) ||
+            gradeStr.match(/(\d+(?:\.\d+)?)/);
+          if (gpaMatch) {
+            const value = parseFloat(gpaMatch[1]);
+            const base = gpaMatch[2] ? parseFloat(gpaMatch[2]) : 4.0;
+            if (base === 10 || value > 4.0) {
+              if (value <= 10) {
+                gpaFloat = parseFloat(((value / base) * 4.0).toFixed(2));
+              }
+            } else if (value >= 0 && value <= 4.0) {
+              gpaFloat = value;
+            }
+          }
+
+          await this.prisma.candidate.update({
+            where: { candidateId: deg.candidateId },
+            data: {
+              ...(universityToSet && { university: universityToSet }),
+              ...(majorToSet && { major: majorToSet }),
+              ...(gpaFloat !== undefined && { gpa: gpaFloat }),
+            },
+          });
+
+          this.logger.log(
+            `[Degree Verification Sync] Auto-updated candidate profile for candidate: ${deg.candidateId}`,
+          );
+        }
+      } catch (syncErr) {
+        this.logger.error(
+          `[Degree Verification Sync] Auto-update failed: ${syncErr.message}`,
+        );
+      }
+
+      // Trigger matching engine since status changed (e.g. from PENDING to VERIFIED/REJECTED)
+      await this.matchingQueue.add('match-candidate', { userId });
+
       // Notify candidate of status change
       if (autoReject) {
         await this.notificationsService.create(
@@ -803,5 +864,104 @@ export class CandidateCvService {
         `Failed running async degree verification: ${error.message}`,
       );
     }
+  }
+
+  async syncDegreeToProfile(userId: string, degreeId: string) {
+    const candidate = await this.candidateProfileService.findByUserId(userId);
+    if (!candidate) throw new NotFoundException('Candidate not found');
+
+    const deg = await this.prisma.degree.findUnique({
+      where: { degreeId },
+    });
+    if (!deg || deg.candidateId !== candidate.candidateId) {
+      throw new NotFoundException('Degree not found or does not belong to you');
+    }
+
+    const aiVerification = deg.aiVerification as any;
+    const universityToSet = aiVerification?.extracted_institution || deg.school || undefined;
+    const majorToSet = aiVerification?.extracted_major || deg.major || undefined;
+
+    let gpaFloat: number | undefined = undefined;
+    const gradeStr = aiVerification?.extracted_grade || '';
+    const gpaMatch =
+      gradeStr.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/) ||
+      gradeStr.match(/(\d+(?:\.\d+)?)/);
+    if (gpaMatch) {
+      const value = parseFloat(gpaMatch[1]);
+      const base = gpaMatch[2] ? parseFloat(gpaMatch[2]) : 4.0;
+      if (base === 10 || value > 4.0) {
+        if (value <= 10) {
+          gpaFloat = parseFloat(((value / base) * 4.0).toFixed(2));
+        }
+      } else if (value >= 0 && value <= 4.0) {
+        gpaFloat = value;
+      }
+    }
+
+    await this.prisma.candidate.update({
+      where: { candidateId: candidate.candidateId },
+      data: {
+        ...(universityToSet && { university: universityToSet }),
+        ...(majorToSet && { major: majorToSet }),
+        ...(gpaFloat !== undefined && { gpa: gpaFloat }),
+      },
+    });
+
+    // Trigger matching engine
+    await this.matchingQueue.add('match-candidate', { userId });
+
+    return this.prisma.user.findUnique({
+      where: { userId },
+      select: {
+        userId: true,
+        email: true,
+        status: true,
+        phoneNumber: true,
+        avatar: true,
+        createdAt: true,
+        lastLogin: true,
+        provider: true,
+        userRoles: { include: { role: true } },
+        candidate: {
+          select: {
+            candidateId: true,
+            fullName: true,
+            university: true,
+            major: true,
+            gpa: true,
+            summary: true,
+            desiredJob: true,
+            isOpenToWork: true,
+            jobSearchExpiresAt: true,
+            gender: true,
+            birthYear: true,
+            location: true,
+            totalYearsExp: true,
+            currentSalary: true,
+            industries: true,
+            languages: true,
+            otherInfo: true,
+            softSkills: true,
+            interests: true,
+            skills: true,
+            experiences: { orderBy: { duration: 'desc' } },
+            projects: true,
+            certifications: true,
+            degrees: true,
+            cvs: {
+              select: {
+                cvId: true,
+                cvTitle: true,
+                fileUrl: true,
+                isMain: true,
+                createdAt: true,
+                parsedData: true,
+              },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        },
+      },
+    });
   }
 }

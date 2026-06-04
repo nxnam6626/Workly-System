@@ -74,6 +74,7 @@ export default function ProfileDashboard() {
   const [isOpenToWork, setIsOpenToWork] = useState(true);
   const [activeTab, setActiveTab] = useState("OVERVIEW");
   const [stats, setStats] = useState<DashboardStats>({ applied: 0, saved: 0, invitations: 0, interviews: 0 });
+  const [isSyncingDegree, setIsSyncingDegree] = useState(false);
 
   // Auth guard and fetch profile
   useEffect(() => {
@@ -264,6 +265,20 @@ export default function ProfileDashboard() {
 
     // Tự động chuyển hướng sang trang review để đồng bộ vào hồ sơ
     router.push(`/profile/cv-review/${cvId}`);
+  };
+
+  const handleSyncDegree = async (degreeId: string) => {
+    setIsSyncingDegree(true);
+    const toastId = toast.loading("Đang đồng bộ thông tin bằng cấp lên hồ sơ chính...");
+    try {
+      const updatedProfile = await profileApi.syncDegree(degreeId);
+      toast.success("Đồng bộ thông tin bằng cấp thành công!", { id: toastId });
+      fetchProfile(true);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Lỗi khi đồng bộ thông tin bằng cấp.", { id: toastId });
+    } finally {
+      setIsSyncingDegree(false);
+    }
   };
 
   const renderStatusBadge = (item: {
@@ -883,6 +898,17 @@ export default function ProfileDashboard() {
                                       >
                                         <Eye className="w-4 h-4" /> Xem minh chứng đã nộp
                                       </Link>
+                                    )}
+
+                                    {/* Set as main education action */}
+                                    {selectedDeg.status === "VERIFIED" && (
+                                      <button
+                                        onClick={() => handleSyncDegree(selectedDeg.degreeId)}
+                                        disabled={isSyncingDegree}
+                                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm"
+                                      >
+                                        <Sparkles className="w-4 h-4" /> Đặt làm học vấn chính
+                                      </button>
                                     )}
 
                                     {/* Re-verify or Verify action */}

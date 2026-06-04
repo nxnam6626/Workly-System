@@ -82,6 +82,10 @@ export class CandidatesService {
     return this.cvService.verifyDegree(userId, id, file);
   }
 
+  syncDegree(userId: string, degreeId: string) {
+    return this.cvService.syncDegreeToProfile(userId, degreeId);
+  }
+
   // --- Matching Logic ---
   getRecommendedJobs(userId: string, page: number = 1, limit: number = 10) {
     return this.matchingService.getRecommendedJobs(userId, page, limit);

@@ -3,12 +3,15 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { JobStatus, StatusUser, TransactionType } from '@prisma/client';
 import { NotificationsService } from '@/modules/communication/notifications/notifications.service';
 import { syncCandidateLanguagesFromCertifications } from '@/modules/profiles/candidates/utils/language-sync';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class BackofficeService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    @InjectQueue('matching') private matchingQueue: Queue,
   ) { }
 
   async getDashboardStats() {
@@ -491,6 +494,9 @@ export class BackofficeService {
       message,
     });
 
+    // Trigger matching engine
+    await this.matchingQueue.add('match-candidate', { userId: cert.candidate.userId });
+
     return cert;
   }
 
@@ -510,6 +516,55 @@ export class BackofficeService {
         candidate: true,
       },
     });
+
+    // Sync approved degree details to Candidate profile if applicable
+    if (action === 'APPROVE') {
+      try {
+        const candidate = await this.prisma.candidate.findUnique({
+          where: { candidateId: deg.candidateId },
+          include: { degrees: true },
+        });
+
+        if (
+          candidate &&
+          (candidate.degrees.length === 1 ||
+            !candidate.university ||
+            !candidate.major)
+        ) {
+          const universityToSet = deg.school || undefined;
+          const majorToSet = deg.major || undefined;
+
+          let gpaFloat: number | undefined = undefined;
+          const aiVerification = deg.aiVerification as any;
+          const gradeStr = aiVerification?.extracted_grade || '';
+          const gpaMatch =
+            gradeStr.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/) ||
+            gradeStr.match(/(\d+(?:\.\d+)?)/);
+          if (gpaMatch) {
+            const value = parseFloat(gpaMatch[1]);
+            const base = gpaMatch[2] ? parseFloat(gpaMatch[2]) : 4.0;
+            if (base === 10 || value > 4.0) {
+              if (value <= 10) {
+                gpaFloat = parseFloat(((value / base) * 4.0).toFixed(2));
+              }
+            } else if (value >= 0 && value <= 4.0) {
+              gpaFloat = value;
+            }
+          }
+
+          await this.prisma.candidate.update({
+            where: { candidateId: deg.candidateId },
+            data: {
+              ...(universityToSet && { university: universityToSet }),
+              ...(majorToSet && { major: majorToSet }),
+              ...(gpaFloat !== undefined && { gpa: gpaFloat }),
+            },
+          });
+        }
+      } catch (syncErr) {
+        console.error(`Error auto-syncing approved degree: ${syncErr.message}`);
+      }
+    }
 
     // Notify candidate
     const title =
@@ -533,6 +588,9 @@ export class BackofficeService {
       title,
       message,
     });
+
+    // Trigger matching engine
+    await this.matchingQueue.add('match-candidate', { userId: deg.candidate.userId });
 
     return deg;
   }

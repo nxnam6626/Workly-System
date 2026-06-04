@@ -45,18 +45,31 @@ export class LanguageStrategy implements IMatchingStrategy {
       
       const candidateCerts = cv.candidate?.certifications || [];
       
-      // Gộp chung danh sách ngoại ngữ và chứng chỉ của ứng viên
-      const combinedLangsAndCerts = [...cvLangs, ...candidateCerts];
+      // Lọc các chứng chỉ liên quan đến ngoại ngữ
+      const langKeywords = [
+        'ielts', 'toeic', 'toefl', 'hsk', 'jlpt', 'topik', 'english',
+        'tiếng anh', 'tiếng nhật', 'tiếng trung', 'tiếng hàn', 'tiếng pháp', 'tiếng đức',
+      ];
 
-      if (requiredLang.length === 0)
+      const langCerts = candidateCerts.filter((c: any) => {
+        const nameLower = c.name.toLowerCase();
+        return langKeywords.some((kw) => nameLower.includes(kw));
+      });
+
+      // Gộp chung danh sách ngoại ngữ và chứng chỉ ngoại ngữ của ứng viên
+      const combinedLangsAndCerts = [...cvLangs, ...langCerts];
+
+      if (requiredLang.length === 0) {
+        const displayLangs = this.deduplicateLangs(combinedLangsAndCerts);
         return {
           score: 100,
           details: {
             requiredLang: [],
-            cvLangs: combinedLangsAndCerts,
+            cvLangs: displayLangs,
             message: 'Không yêu cầu ngoại ngữ',
           },
         };
+      }
 
       // Tìm kiếm sự tương đồng trình độ
       let totalScore = 0;
@@ -69,17 +82,6 @@ export class LanguageStrategy implements IMatchingStrategy {
         const foundLevel = this.matchLevel(reqStr, combinedLangsAndCerts);
         totalScore += foundLevel;
       }
-
-      // Option C: Chứng chỉ ngoại ngữ hệ số xác minh
-      const langKeywords = [
-        'ielts', 'toeic', 'toefl', 'hsk', 'jlpt', 'topik', 'english',
-        'tiếng anh', 'tiếng nhật', 'tiếng trung', 'tiếng hàn', 'tiếng pháp', 'tiếng đức',
-      ];
-
-      const langCerts = candidateCerts.filter((c: any) => {
-        const nameLower = c.name.toLowerCase();
-        return langKeywords.some((kw) => nameLower.includes(kw));
-      });
 
       let langMultiplier = 0.3; // Mặc định chưa nộp minh chứng
       let verificationStatus = 'UNVERIFIED';
@@ -96,12 +98,13 @@ export class LanguageStrategy implements IMatchingStrategy {
       }
 
       const score = (totalScore / requiredLang.length) * langMultiplier;
+      const displayLangs = this.deduplicateLangs(combinedLangsAndCerts);
 
       return {
         score: Math.round(score),
         details: {
           requiredLang,
-          cvLangs: combinedLangsAndCerts,
+          cvLangs: displayLangs,
           langMultiplier,
           verificationStatus,
         },
@@ -112,40 +115,188 @@ export class LanguageStrategy implements IMatchingStrategy {
     }
   }
 
+  private parseLanguageLevel(str: string): { type: string; value: number } {
+    const s = str.toLowerCase();
+    
+    // 1. TOEIC
+    if (s.includes('toeic')) {
+      const match = s.match(/toeic\s*(\d+)/) || s.match(/(\d+)\s*toeic/);
+      if (match) {
+        return { type: 'toeic', value: parseInt(match[1], 10) };
+      }
+    }
+    
+    // 2. IELTS
+    if (s.includes('ielts')) {
+      const match = s.match(/ielts\s*(\d+(?:\.\d+)?)/) || s.match(/(\d+(?:\.\d+)?)\s*ielts/);
+      if (match) {
+        return { type: 'ielts', value: parseFloat(match[1]) };
+      }
+    }
+
+    // 3. TOEFL
+    if (s.includes('toefl')) {
+      const match = s.match(/toefl\s*(\d+)/) || s.match(/(\d+)\s*toefl/);
+      if (match) {
+        return { type: 'toeic', value: parseInt(match[1], 10) };
+      }
+    }
+    
+    // 4. HSK
+    if (s.includes('hsk')) {
+      const match = s.match(/hsk\s*([1-6])/) || s.match(/([1-6])\s*hsk/);
+      if (match) {
+        return { type: 'hsk', value: parseInt(match[1], 10) };
+      }
+    }
+    
+    // 5. JLPT / N1-N5
+    if (s.includes('jlpt') || /jlpt\s*n([1-5])/i.test(s) || /n([1-5])/i.test(s)) {
+      const match = s.match(/jlpt\s*n([1-5])/) || s.match(/\bn([1-5])\b/) || s.match(/n([1-5])/);
+      if (match) {
+        const level = parseInt(match[1], 10);
+        return { type: 'jlpt', value: 6 - level }; 
+      }
+    }
+    
+    // 6. TOPIK
+    if (s.includes('topik')) {
+      const match = s.match(/topik\s*([1-6])/) || s.match(/([1-6])\s*topik/);
+      if (match) {
+        return { type: 'topik', value: parseInt(match[1], 10) };
+      }
+    }
+
+    // 7. CEFR
+    const cefrMatch = s.match(/\b(c2|c1|b2|b1|a2|a1)\b/);
+    if (cefrMatch) {
+      const map: Record<string, number> = { a1: 1, a2: 2, b1: 3, b2: 4, c1: 5, c2: 6 };
+      return { type: 'general', value: map[cefrMatch[1]] };
+    }
+
+    // General terms mapping
+    if (s.includes('thành thạo') || s.includes('advanced') || s.includes('thanh thao') || s.includes('cao cấp') || s.includes('fluent')) {
+      return { type: 'general', value: 5 };
+    }
+    if (s.includes('khá') || s.includes('intermediate') || s.includes('trung cấp') || s.includes('giao tiếp')) {
+      return { type: 'general', value: 3.5 };
+    }
+    if (s.includes('cơ bản') || s.includes('beginner') || s.includes('sơ cấp') || s.includes('co ban')) {
+      return { type: 'general', value: 1.5 };
+    }
+    
+    return { type: 'unknown', value: 0 };
+  }
+
+  private mapToStandardScore(parsed: { type: string; value: number }): number {
+    const { type, value } = parsed;
+    if (type === 'toeic') {
+      if (value >= 900) return 90 + ((value - 900) / 90) * 10;
+      if (value >= 700) return 70 + ((value - 700) / 200) * 20;
+      if (value >= 500) return 50 + ((value - 500) / 200) * 20;
+      return Math.min(50, (value / 500) * 50);
+    }
+    if (type === 'ielts') {
+      if (value >= 9.0) return 100;
+      if (value >= 8.0) return 90 + ((value - 8.0) / 1.0) * 10;
+      if (value >= 5.0) return 50 + ((value - 5.0) / 3.0) * 40;
+      return Math.min(50, (value / 5.0) * 50);
+    }
+    if (type === 'hsk') {
+      const map: Record<number, number> = { 1: 25, 2: 40, 3: 55, 4: 70, 5: 85, 6: 100 };
+      return map[Math.round(value)] || 0;
+    }
+    if (type === 'jlpt') {
+      const map: Record<number, number> = { 1: 30, 2: 50, 3: 70, 4: 85, 5: 100 };
+      return map[Math.round(value)] || 0;
+    }
+    if (type === 'topik') {
+      const map: Record<number, number> = { 1: 40, 2: 52, 3: 64, 4: 76, 5: 88, 6: 100 };
+      return map[Math.round(value)] || 0;
+    }
+    if (type === 'general') {
+      const map: Record<number, number> = { 1: 30, 2: 45, 3: 60, 4: 75, 5: 90, 6: 100 };
+      return map[Math.round(value)] || 0;
+    }
+    return 0;
+  }
+
   private matchLevel(req: string, combinedItems: any[]): number {
+    const reqLower = req.toLowerCase();
+    
+    // Identify target language
+    let targetLang: string | null = null;
+    const languageKeywords: Record<string, string[]> = {
+      english: ['english', 'tiếng anh', 'tieng anh', 'ielts', 'toeic', 'toefl', 'cefr', 'c1', 'c2', 'b1', 'b2'],
+      japanese: ['japanese', 'tiếng nhật', 'tieng nhat', 'jlpt', 'n1', 'n2', 'n3', 'n4', 'n5'],
+      chinese: ['chinese', 'tiếng trung', 'tieng trung', 'hsk', 'hoa ngữ'],
+      korean: ['korean', 'tiếng hàn', 'tieng han', 'topik'],
+      french: ['french', 'tiếng pháp', 'tieng phap', 'delf', 'dalf'],
+      german: ['german', 'tiếng đức', 'tieng duc', 'goethe'],
+    };
+
+    for (const [lang, keywords] of Object.entries(languageKeywords)) {
+      if (keywords.some(kw => reqLower.includes(kw))) {
+        targetLang = lang;
+        break;
+      }
+    }
+
+    if (!targetLang) {
+      targetLang = 'english';
+    }
+
+    const reqParsed = this.parseLanguageLevel(reqLower);
+    const reqStandardScore = this.mapToStandardScore(reqParsed);
+
     let maxScore = 0;
 
     for (const item of combinedItems) {
       const itemStr = `${item.language || ''} ${item.name || ''} ${item.level || ''} ${item.certificate || ''} ${item.score || ''}`.toLowerCase();
 
-      // Kiểm tra nếu item này khớp chính xác mức độ với yêu cầu
-      for (const [key, val] of Object.entries(this.languageLevels)) {
-        if (itemStr.includes(key) && req.includes(key)) {
-          maxScore = Math.max(maxScore, 100);
-        }
-        if (
-          itemStr.includes(key) &&
-          this.languageLevels[key] >= this.getLevelFromStr(req) && 
-          this.getLevelFromStr(req) > 0
-        ) {
-          maxScore = Math.max(maxScore, 100);
-        }
-      }
+      const itemKeywords = languageKeywords[targetLang] || [];
+      const isSameLanguage = itemKeywords.some(kw => itemStr.includes(kw));
 
-      // Nếu req chỉ yêu cầu ngôn ngữ chung chung (VD: "tiếng anh"), mà ứng viên có chứng chỉ/ngôn ngữ này
-      if (this.getLevelFromStr(req) === 0 && req.length > 0) {
-         if (itemStr.includes(req)) {
-            maxScore = Math.max(maxScore, 100);
-         }
+      if (isSameLanguage) {
+        const itemParsed = this.parseLanguageLevel(itemStr);
+        const itemStandardScore = this.mapToStandardScore(itemParsed);
+
+        if (reqStandardScore === 0) {
+          maxScore = Math.max(maxScore, 100);
+        } else if (itemStandardScore >= reqStandardScore) {
+          maxScore = Math.max(maxScore, 100);
+        } else {
+          const ratioScore = (itemStandardScore / reqStandardScore) * 100;
+          maxScore = Math.max(maxScore, Math.max(10, Math.round(ratioScore)));
+        }
       }
     }
     return maxScore;
   }
 
-  private getLevelFromStr(str: string): number {
-    for (const [key, val] of Object.entries(this.languageLevels)) {
-      if (str.includes(key)) return val;
+  private deduplicateLangs(items: any[]): any[] {
+    const uniqueItems: any[] = [];
+    
+    // Sắp xếp các phần tử theo độ dài chuỗi giảm dần để ưu tiên phần tử đầy đủ thông tin hơn
+    const sortedItems = [...items].sort((a, b) => {
+      const strA = `${a.language || a.name || ''} ${a.level || ''}`.trim();
+      const strB = `${b.language || b.name || ''} ${b.level || ''}`.trim();
+      return strB.length - strA.length;
+    });
+
+    for (const item of sortedItems) {
+      const formatted = `${item.language || item.name || ''} ${item.level || ''}`.trim().toLowerCase();
+      
+      const isDuplicate = uniqueItems.some(ui => {
+        const uiFormatted = `${ui.language || ui.name || ''} ${ui.level || ''}`.trim().toLowerCase();
+        return uiFormatted.includes(formatted);
+      });
+      
+      if (!isDuplicate) {
+        uniqueItems.push(item);
+      }
     }
-    return 0;
+
+    return uniqueItems;
   }
 }

@@ -196,6 +196,9 @@ export const profileApi = {
     }).then((r) => r.data);
   },
 
+  syncDegree: (id: string): Promise<CandidateProfile> =>
+    api.post(`/candidates/degrees/${id}/sync`).then((r) => r.data),
+
   getPendingVerifications: (): Promise<any> =>
     api.get('/admin/verifications/pending').then((r) => r.data),
 
