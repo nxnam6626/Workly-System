@@ -220,7 +220,11 @@ export class CompaniesService {
   }
 
   private async createNewCompany(recruiterId: string, data: any) {
-    const { sections, benefits, history, ...basicData } = data;
+    const { 
+      sections, benefits, history, 
+      completeness, jobPostingsCount, averageRating, reviewCount, activeJobs, _count,
+      ...basicData 
+    } = data;
 
     const createPayload: any = {
       ...basicData,
@@ -264,7 +268,11 @@ export class CompaniesService {
   }
 
   private async updateExistingCompany(companyId: string, data: any) {
-    const { sections, benefits, history, ...basicData } = data;
+    const { 
+      sections, benefits, history, 
+      completeness, jobPostingsCount, averageRating, reviewCount, activeJobs, _count,
+      ...basicData 
+    } = data;
 
     const updatePayload: any = { ...basicData };
 
